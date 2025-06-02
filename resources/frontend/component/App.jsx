@@ -1,14 +1,15 @@
-import React, { Component, Suspense, lazy } from 'react';
+import React, { Component, Suspense, lazy } from "react";
 import {
     Outlet,
     RouterProvider,
     createBrowserRouter,
     Navigate,
 } from "react-router-dom";
-import { useEffect } from 'react';
-import DasboardView from "../views/Dashboard/DasboardView";
-const LoginView = lazy(() => import("./views/pages/loginViews/LoginView"))
-import CLILoader from '../../../public/Images/CLI-Logo-Loading-Screen.gif';
+import { useEffect } from "react";
+import { ContextProvider } from "../context/contextprovider";
+// import DasboardView from "../views/Dashboard/DasboardView";
+const LoginView = lazy(() => import("./views/pages/loginViews/LoginView"));
+// import CLILoader from '../../../public/Images/CLI-Logo-Loading-Screen.gif';
 import "./layout/css/font.css";
 import "./layout/css/style.css";
 import Home from "./layout/Home";
@@ -39,11 +40,18 @@ import TransactionSidebar from "./views/pages/transactionViews/TransactionSideba
 import BankStatementView from "./views/pages/transactionViews/BankStatementView";
 import AutoAssignView from "./views/pages/raiseaconcernViews/AutoAssignView";
 import UserRightsAndPermissionsView from "./views/pages/userrightsandpermissionsViews/UserRightsAndPermissionsView";
-import FallbackLoader from './FallbackLoader';
+import FallbackLoader from "./FallbackLoader";
 import PreloadWrapper from "./PreloadWrapper";
-import BannerSettingsView from './views/pages/bannersettingsViews/BannerSettingsView';
-import CrsSettingsSidebar from './layout/mainComponent/sidebars/CrsSettingsSidebar';
-import VersionLogsView from './views/pages/raiseaconcernViews/VersionLogsView';
+import BannerSettingsView from "./views/pages/bannersettingsViews/BannerSettingsView";
+import CrsSettingsSidebar from "./layout/mainComponent/sidebars/CrsSettingsSidebar";
+import VersionLogsView from "./views/pages/raiseaconcernViews/VersionLogsView";
+import AccountMasterView from "./views/pages/titlingAndRegistration/MasterListView";
+import WorkOrderView from "./views/pages/titlingAndRegistration/WorkOrderView";
+import ExecutiveDashboardView from "./views/pages/titlingAndRegistration/ExecutiveDashboardView";
+import SettingsView from "./views/pages/titlingAndRegistration/SettingsView";
+import DocumentManagementSidebar from "./layout/mainComponent/sidebars/DocumentManagementSidebar";
+import TakenOutAccountView from "./views/pages/titlingAndRegistration/TakenOutAccountView";
+
 // PrivateRoute component to check authentication
 const PrivateRoute = () => {
     const authToken = localStorage.getItem("authToken");
@@ -101,6 +109,23 @@ const App = () => {
                 <div className="flex bg-white relative h-full">
                     <div className="fixed h-full z-50">
                         <CrsSettingsSidebar />
+                        {/* <DocumentManagementSidebar /> */}
+                    </div>
+                    <div className="relative flex-1 ml-[230px] z-10">
+                        <Outlet />
+                    </div>
+                </div>
+            </>
+        );
+    };
+
+    const DocumentManagementSidebarLayout = () =>{
+        return (
+            <>
+                <div className="flex bg-white relative h-full">
+                    <div className="fixed h-full z-50">
+                        {/* <CrsSettingsSidebar /> */}
+                        <DocumentManagementSidebar />
                     </div>
                     <div className="relative flex-1 ml-[230px] z-10">
                         <Outlet />
@@ -252,9 +277,7 @@ const App = () => {
             path: "/",
             element: (
                 <Suspense fallback={<FallbackLoader />}>
-                    <PreloadWrapper resources={[
-                        "/Images/Imagebg.webp",
-                    ]}>
+                    <PreloadWrapper resources={["/Images/Imagebg.webp"]}>
                         <LoginView />
                     </PreloadWrapper>
                 </Suspense>
@@ -264,9 +287,7 @@ const App = () => {
             path: "/login",
             element: (
                 <Suspense fallback={<FallbackLoader />}>
-                    <PreloadWrapper resources={[
-                        "/Images/Imagebg.webp",
-                    ]}>
+                    <PreloadWrapper resources={["/Images/Imagebg.webp"]}>
                         <LoginView />
                     </PreloadWrapper>
                 </Suspense>
@@ -338,7 +359,36 @@ const App = () => {
                                 },
                                 {
                                     path: "versionlogs",
-                                    element: <VersionLogsView/>,
+                                    element: <VersionLogsView />,
+                                },
+                            ],
+                        },
+                        {
+                            path: "documentmanagement",
+                        },
+                        {
+                            path: "documentmanagement/titleandregistration",
+                            element: <DocumentManagementSidebarLayout />,
+                            children: [
+                                {
+                                    path: "masterlist",
+                                    element: <AccountMasterView />,
+                                },
+                                {
+                                    path: "workorders",
+                                    element: <WorkOrderView />,
+                                },
+                                {
+                                    path: "executivedashboard",
+                                    element: <ExecutiveDashboardView />,
+                                },
+                                {
+                                    path: "settings",
+                                    element: <SettingsView />,
+                                },
+                                {
+                                    path: "takenoutaccounts",
+                                    element: <TakenOutAccountView />,
                                 },
                             ],
                         },
@@ -414,7 +464,11 @@ const App = () => {
         },
     ]);
 
-    return <RouterProvider router={router} />;
+    return (
+        <ContextProvider> {/* Wrap the entire app with ContextProvider */}
+            <RouterProvider router={router} />
+        </ContextProvider>
+    );
 };
 
 export default App;

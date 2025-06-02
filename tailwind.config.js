@@ -9,6 +9,10 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        montserrat: ['Montserrat', 'sans-serif'], 
+        poppins: ['Poppins'],
+      },
       colors: {
         'custom-solidgreen': '#348017',
         'custom-lightgreen': '#70AD47',
@@ -144,11 +148,6 @@ export default {
           "100%": {
               opacity: 0
           },
-      },
-      fontFamily: {
-        montserrat: ['Montserrat', 'sans-serif'],
-        'montserrat': ['Montserrat'],
-        'poppins': ['Poppins'],
       },
       backgroundImage: {
         'gradient-custom': 'linear-gradient(to right, #348017, #067ACS)',

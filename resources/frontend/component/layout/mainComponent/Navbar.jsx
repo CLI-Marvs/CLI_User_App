@@ -1,16 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import CLILogo from "../../../../../public/Images/CLILogo.png";
-import Kent from "../../../../../public/Images/kent.png";
+// import Kent from "../../../../../public/Images/kent.png";
 import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import { Link, useLocation } from "react-router-dom";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
-import Typography from "@mui/material/Typography";
+// import Typography from "@mui/material/Typography";
 import { FaAngleRight } from "react-icons/fa";
 import Stack from "@mui/material/Stack";
-import { startsWith } from "lodash";
-import Alert from "@mui/material/Alert";
-import { MdOutlineMail } from "react-icons/md";
+// import { startsWith } from "lodash";
+// import Alert from "@mui/material/Alert";
+// import { MdOutlineMail } from "react-icons/md";
 import FeedbackModal from "./FeedbackModal";
 import Skeleton from 'react-loading-skeleton'
 import 'react-loading-skeleton/dist/skeleton.css'
@@ -72,6 +72,71 @@ const Navbar = () => {
 
             if (value.toLowerCase() === "inquirymanagement") {
                 breadcrumbLabel = "Customer Relations";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "documentmanagement") {
+                breadcrumbLabel = "Document Management";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "titleandregistration") {
+                breadcrumbLabel = "Title and Registration";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "takenoutaccounts") {
+                breadcrumbLabel = "Taken Out Accounts";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "workorders") {
+                breadcrumbLabel = "Workorders";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "executivedashboard") {
+                breadcrumbLabel = "Executive Dashboard";
                 // Non-linkable
                 return (
                     <span

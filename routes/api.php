@@ -1,20 +1,23 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-
 use App\Http\Controllers\ConcernController;
 use App\Http\Controllers\DynamicBannerController;
+use App\Http\Controllers\MasterListController;
 use App\Http\Controllers\PaymentSchemeController;
 use App\Http\Controllers\PriceBasicDetailController;
-
+use App\Http\Controllers\TakenOutAccountController;
 use App\Http\Controllers\PriceListMasterController;
+use App\Http\Controllers\TitlingRegistrationController;
 use App\Http\Controllers\PropertyMasterController;
 use App\Http\Controllers\SapController;
 use App\Http\Controllers\UnitController;
+use App\Http\Controllers\WorkOrderController;
 use App\Models\DynamicBanner;
 use App\Models\PropertyMaster;
+use App\Models\TakenOutAccount;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -23,15 +26,17 @@ Route::get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->post('/auth/logout', [AuthController::class, 'logout']);
 
-
-
 Route::post('/add-assignee', [ConcernController::class, 'assignInquiryTo']);
 Route::post('/reassign', [ConcernController::class, 'reassignInquiry']);
 
 Route::post('/resolve', [ConcernController::class, 'markAsResolve']);
 
-
-
+//for titling and registration
+Route::patch('/taken-out-accounts/add-masterlist', [TakenOutAccountController::class, 'updateAddStatus']);
+Route::get('/taken-out-accounts/get-masterlist', [TakenOutAccountController::class, 'getMasterList']);
+Route::patch('/taken-out-accounts/undo-masterlist', [TakenOutAccountController::class, 'undoMasterListStatus']);
+Route::get('/taken-out-accounts', [TakenOutAccountController::class, 'getTakenOutAccounts']);
+Route::post('/upload-taken-out-accounts', [TakenOutAccountController::class, 'uploadTakenOutAccounts']);
 /* 
 Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
 
@@ -53,7 +58,7 @@ Route::get('/inquiries-department', [ConcernController::class, 'getInquiriesPerD
 Route::get('/inquiries-channel', [ConcernController::class, 'getInquiriesPerChannel']);
 Route::get('/communication-type-property', [ConcernController::class, 'getCommunicationType']);
 
-
+//For title and registration
 Route::post('delete-concerns', [ConcernController::class, 'deleteConcern']);
 Route::post('close-concerns', [ConcernController::class, 'markAsClosed']);
 Route::post('conversation', [ConcernController::class, 'sendMessageConcerns']);
@@ -62,13 +67,36 @@ Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees'
 Route::post('/update-info', [ConcernController::class, 'updateInfo']);
 Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
+    Route::get('/work-orders/get-work-orders', [WorkOrderController::class, 'getWorkOrders']);
+     Route::post('/work-order-logs', [WorkOrderController::class, 'createWorkOrderLog']);
+//For work orders
+Route::middleware('auth:sanctum')->group(function () {
+
+    Route::apiResource('workorders', WorkOrderController::class);
+
+    Route::post('workorders/{work_order}/updates', [WorkOrderController::class, 'addUpdate']);
+    Route::post('workorders/{work_order}/documents', [WorkOrderController::class, 'uploadDocument']);
+    Route::put('workorders/{work_order}/mark-done', [WorkOrderController::class, 'markAsDone']);
+    Route::post('/work-orders/create-work-order', [WorkOrderController::class, 'createWorkOrders']);
+    Route::get('/work-orders/get-assignee', [WorkOrderController::class, 'getAssignee']);
+    Route::get('/work-orders/assignee/{id}', [WorkOrderController::class, 'getAssigneeById']);
+
+    Route::get('/work-orders/work-order-types', [WorkOrderController::class, 'getWorkOrderTypes']);
+    Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName']);
+   
+
+    Route::get('/my-workorders', [WorkOrderController::class, 'index'])->middleware('my_work_orders_filter');
+
+});
+
+// If you need public access to some data (e.g., specific work order types)
+// Route::get('work-order-types', [WorkOrderTypeController::class, 'index']); // Create a separate controller for types
 
 //* For Sap 
 
 //*Post date on sap
 Route::post('/proxy-sap', [SapController::class, 'postDateToSap']);
 Route::post('/test-api', [ConcernController::class, 'testApi']);
-
 
 //*Retrieve invoice from sap upon trigger the date
 Route::post('/posting-invoices', [SapController::class, 'retrieveInvoicesFromSap']);

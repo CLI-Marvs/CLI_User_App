@@ -130,7 +130,7 @@ class UnitController extends Controller
                 ->get();
             // Return the found units as a JSON response
             return response()->json($units);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'message' => 'Error getting the units.',
                 'error' => $e->getMessage(),

@@ -4,6 +4,7 @@ import React, {
     useContext,
     useEffect,
     useState,
+    useMemo,
 } from "react";
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
@@ -30,7 +31,6 @@ export const ContextProvider = ({ children }) => {
     const [currentPage, setCurrentPage] = useState(0);
     const [selectedOption, setSelectedOption] = useState("All");
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
-
     const [notifCurrentPage, setNotifCurrentPage] = useState(0);
     const [searchFilter, setSearchFilter] = useState({});
     const [data, setData] = useState([]);
@@ -50,15 +50,12 @@ export const ContextProvider = ({ children }) => {
     const [communicationTypeMonth, setCommunicationTypeMonth] = useState("");
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
-
     const [department, setDepartment] = useState("All");
     const [project, setProject] = useState("All");
     const [month, setMonth] = useState("All");
     const [year, setYear] = useState("");
     const [fullYear, setFullYear] = useState([]);
-
     const [activeDayButton, setActiveDayButton] = useState(null);
-
     const [departmentStatusYear, setDepartmentStatusYear] = useState("");
     const [inquiriesPerCategoryYear, setInquiriesPerCategoryYear] =
         useState("");
@@ -111,6 +108,395 @@ export const ContextProvider = ({ children }) => {
     const [endDateValue, setEndDateValue] = useState(null);
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
+    const [takenOutTableRows, setTakenOutTableRows] = useState([]);
+    const [takenOutMasterListTableRows, setTakenOutMasterListTableRows] =
+        useState([]);
+    const [masterListLoading, setMasterListLoading] = useState(false);
+    const [takenOutCurrentPage, setTakenOutCurrentPage] = useState(1);
+    const [takenOutMasterListCurrentPage, setTakenOutMasterListCurrentpage] =
+        useState(1);
+    const [takenOutSearchQuery, setTakenOutSearchQuery] = useState("");
+    const [takenOutMasterListSearchQuery, setTakenOutMasterListSearchQuery] =
+        useState("");
+    const [takenOutAppliedFilters, setTakenOutAppliedFilters] = useState({
+        contractNo: "",
+        accountName: "",
+        project: "",
+        financing: "",
+        dateFilter: "",
+        date: "",
+    });
+    const [
+        takenOutMasterListAppliedFilters,
+        setTakenOutMasterListAppliedFilters,
+    ] = useState({
+        contractNo: "",
+        accountName: "",
+        project: "",
+        financing: "",
+        dateFilter: "",
+        date: "",
+    });
+    const rowsPerPage = 5;
+    const [assignee, setAssignee] = useState([]);
+    const [accounts, setAccounts] = useState([]);
+    const [workOrderTypes, setWorkOrderTypes] = useState([]);
+    const [workOrders, setWorkOrders]= useState([]);
+
+    const fetchWorkOrders = async () => {
+        try {
+            const response = await apiService.get(
+                "/work-orders/get-work-orders"
+            );
+            setWorkOrders(response.data);
+        } catch (error) {
+            console.error("Failed to fetch work orders:", error);
+        }
+    };
+
+    const fetchWorkOrderTypes = async () => {
+        try {
+            const response = await apiService.get(
+                "/work-orders/work-order-types"
+            );
+            setWorkOrderTypes(response.data.data);
+        } catch (error) {
+            console.error("Failed to fetch work order types:", error);
+        }
+    };
+
+    const fetchAccounts = async () => {
+        try {
+            const response = await apiService.get(
+                "/taken-out-accounts/get-masterlist"
+            );
+            setAccounts(response.data);
+        } catch (error) {
+            console.error("Failed to fetch accounts:", error);
+        }
+    };
+
+    const getAssignee = async () => {
+        try {
+            const response = await apiService.get("/work-orders/get-assignee");
+            setAssignee(response.data);
+        } catch (error) {
+            console.error("Failed to fetch employees:", error);
+        }
+    };
+
+    useEffect(() => {
+        getAssignee();
+        fetchAccounts();
+        fetchWorkOrderTypes();
+        fetchWorkOrders();
+    }, []);
+
+    const fetchTakenOutAccounts = async () => {
+        setLoading(true);
+        try {
+            const response = await apiService.get("/taken-out-accounts");
+            if (response.data.data.length === 0) {
+                setLoading(false);
+                setTakenOutTableRows([]);
+            } else {
+                setTakenOutTableRows(response.data.data);
+            }
+        } catch (error) {
+            console.error("Error fetching taken-out accounts:", error);
+            setLoading(false);
+            setTakenOutTableRows([]);
+        }
+    };
+
+    const fetchMasterList = async () => {
+        setMasterListLoading(true);
+        try {
+            const response = await apiService.get(
+                "/taken-out-accounts/get-masterlist"
+            );
+            const mappedRows = response.data.map((row) => ({
+                id: row.id,
+                user: row.account_name,
+                contractNumber: row.contract_no,
+                propertyName: row.property_name,
+                unitNumber: row.unit_no,
+                finance: row.financing,
+                takeOutdate: row.take_out_date,
+                douExpiry: row.dou_expiry,
+            }));
+            setTakenOutMasterListTableRows(mappedRows);
+        } catch (error) {
+            console.error("Failed to fetch master list for context:", error);
+            setTakenOutMasterListTableRows([]);
+        } finally {
+            setMasterListLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchTakenOutAccounts();
+    }, []);
+
+    const takenOutFilteredRows = useMemo(() => {
+        if (!Array.isArray(takenOutTableRows)) return [];
+        const filters = takenOutAppliedFilters || {};
+        const contractNo = filters.contractNo || "";
+
+        return takenOutTableRows.filter((row) => {
+            const matchesSearchQuery =
+                !takenOutSearchQuery ||
+                row.account_name
+                    ?.toLowerCase()
+                    .includes(takenOutSearchQuery.toLowerCase()) ||
+                row.contract_no
+                    ?.toLowerCase()
+                    .includes(takenOutSearchQuery.toLowerCase()) ||
+                row.property_name
+                    ?.toLowerCase()
+                    .includes(takenOutSearchQuery.toLowerCase()) ||
+                row.unit_no
+                    ?.toLowerCase()
+                    .includes(takenOutSearchQuery.toLowerCase()) ||
+                row.financing
+                    ?.toLowerCase()
+                    .includes(takenOutSearchQuery.toLowerCase()) ||
+                row.take_out_date
+                    ?.toLowerCase()
+                    .includes(takenOutSearchQuery.toLowerCase()) ||
+                row.dou_expiry
+                    ?.toLowerCase()
+                    .includes(takenOutSearchQuery.toLowerCase());
+
+            const matchesContractNo =
+                !contractNo ||
+                row.contract_no
+                    ?.toLowerCase()
+                    .includes(contractNo.toLowerCase());
+
+            const matchesAccountName =
+                !filters.accountName ||
+                row.account_name
+                    ?.toLowerCase()
+                    .includes(filters.accountName.toLowerCase());
+
+            const matchesProject =
+                !filters.project ||
+                row.property_name
+                    ?.toLowerCase()
+                    .includes(filters.project.toLowerCase());
+
+            const matchesFinancing =
+                !filters.financing ||
+                row.financing?.toLowerCase().trim() ===
+                    filters.financing?.toLowerCase().trim();
+
+            const matchesDateFilter = (() => {
+                if (!filters.dateFilter || !filters.date) return true;
+
+                const dateFieldToUse =
+                    filters.dateFilter === "Takeout Date"
+                        ? row.take_out_date
+                        : row.dou_expiry;
+                if (!dateFieldToUse) return false;
+
+                const dateToCheck =
+                    takenOutAppliedFilters.dateFilter === "Takeout Date"
+                        ? new Date(row.take_out_date)
+                        : new Date(row.dou_expiry);
+
+                if (isNaN(dateToCheck)) return false;
+                try {
+                    const selectedDate = new Date(filters.date);
+                    if (isNaN(selectedDate.valueOf())) return true;
+
+                    return (
+                        dateToCheck.toDateString() ===
+                        selectedDate.toDateString()
+                    );
+                } catch (e) {
+                    return false;
+                }
+            })();
+
+            return (
+                matchesSearchQuery &&
+                matchesContractNo &&
+                matchesAccountName &&
+                matchesProject &&
+                matchesFinancing &&
+                matchesDateFilter
+            );
+        });
+    }, [takenOutTableRows, takenOutSearchQuery, takenOutAppliedFilters]);
+
+    const totalPages = useMemo(() => {
+        if (!Array.isArray(takenOutFilteredRows)) {
+            return 0;
+        }
+        return Math.ceil(takenOutFilteredRows.length / rowsPerPage);
+    }, [takenOutFilteredRows.length, rowsPerPage]);
+
+    useEffect(() => {
+        if (takenOutCurrentPage > totalPages) {
+            setTakenOutCurrentPage(totalPages > 0 ? totalPages : 1);
+        } else if (takenOutCurrentPage < 1) {
+            setTakenOutCurrentPage(1);
+        }
+    }, [totalPages, takenOutCurrentPage, setTakenOutCurrentPage]);
+
+    const safeCurrentPage =
+        Math.max(1, Math.min(takenOutCurrentPage, totalPages)) || 1;
+    const takenOutIndexOfFirstRow = (safeCurrentPage - 1) * rowsPerPage;
+    const takenOutIndexOfLastRow = safeCurrentPage * rowsPerPage;
+    const takenOutCurrentData = useMemo(() => {
+        if (!Array.isArray(takenOutFilteredRows)) {
+            return [];
+        }
+
+        const startIndex = (takenOutCurrentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+
+        return takenOutFilteredRows.slice(startIndex, endIndex);
+    }, [takenOutFilteredRows, takenOutCurrentPage, rowsPerPage]);
+
+    useEffect(() => {
+        fetchMasterList();
+    }, []);
+
+    const masterListFilteredRows = useMemo(() => {
+        if (!Array.isArray(takenOutMasterListTableRows)) return [];
+        const filters = takenOutMasterListAppliedFilters || {};
+
+        return takenOutMasterListTableRows.filter((row) => {
+            const searchQuery =
+                takenOutMasterListSearchQuery?.toLowerCase() || "";
+
+            const matchesSearchQuery =
+                !searchQuery ||
+                row.user?.toLowerCase().includes(searchQuery) ||
+                row.contractNumber?.toLowerCase().includes(searchQuery) ||
+                row.propertyName?.toLowerCase().includes(searchQuery) ||
+                row.unitNumber?.toLowerCase().includes(searchQuery) ||
+                row.finance?.toLowerCase().includes(searchQuery) ||
+                row.takeOutdate?.toLowerCase().includes(searchQuery) ||
+                row.douExpiry?.toLowerCase().includes(searchQuery);
+
+            const matchesContractNo =
+                !filters.contractNo ||
+                row.contractNumber
+                    ?.toLowerCase()
+                    .includes(filters.contractNo.toLowerCase());
+
+            const matchesAccountName =
+                !filters.accountName ||
+                row.user
+                    ?.toLowerCase()
+                    .includes(filters.accountName.toLowerCase());
+
+            const matchesProject =
+                !filters.project ||
+                row.propertyName
+                    ?.toLowerCase()
+                    .includes(filters.project.toLowerCase());
+
+            const matchesFinancing =
+                !filters.financing ||
+                row.finance?.toLowerCase().trim() ===
+                    filters.financing?.toLowerCase().trim();
+
+            const matchesDateFilter = (() => {
+                if (!filters.dateFilter || !filters.date) return true;
+
+                const dateFieldToUse =
+                    filters.dateFilter === "Takeout Date"
+                        ? row.takeOutdate
+                        : row.douExpiry;
+                if (!dateFieldToUse) return false;
+
+                try {
+                    const dateToCheck = new Date(dateFieldToUse);
+                    const selectedFilterDate = new Date(filters.date);
+
+                    if (isNaN(dateToCheck.valueOf())) return false;
+                    if (isNaN(selectedFilterDate.valueOf())) return true;
+
+                    return (
+                        dateToCheck.toDateString() ===
+                        selectedFilterDate.toDateString()
+                    );
+                } catch (e) {
+                    return false;
+                }
+            })();
+
+            return (
+                matchesSearchQuery &&
+                matchesContractNo &&
+                matchesAccountName &&
+                matchesProject &&
+                matchesFinancing &&
+                matchesDateFilter
+            );
+        });
+    }, [
+        takenOutMasterListTableRows,
+        takenOutMasterListSearchQuery,
+        takenOutMasterListAppliedFilters,
+    ]);
+
+    const masterListTotalPages = useMemo(() => {
+        if (!Array.isArray(masterListFilteredRows)) return 0;
+        return Math.ceil(masterListFilteredRows.length / rowsPerPage);
+    }, [masterListFilteredRows, rowsPerPage]);
+
+    useEffect(() => {
+        const totalP = masterListTotalPages;
+        if (takenOutMasterListCurrentPage > totalP && totalP > 0) {
+            setTakenOutMasterListCurrentpage(totalP);
+        } else if (takenOutMasterListCurrentPage < 1 && totalP >= 1) {
+            setTakenOutMasterListCurrentpage(1);
+        } else if (totalP === 0 && takenOutMasterListCurrentPage !== 1) {
+            setTakenOutMasterListCurrentpage(1);
+        }
+    }, [
+        masterListTotalPages,
+        takenOutMasterListCurrentPage,
+        setTakenOutMasterListCurrentpage,
+    ]);
+
+    const safeMasterListCurrentPage = useMemo(
+        () =>
+            Math.max(
+                1,
+                Math.min(
+                    takenOutMasterListCurrentPage,
+                    masterListTotalPages || 1
+                )
+            ),
+        [takenOutMasterListCurrentPage, masterListTotalPages]
+    );
+
+    const masterListIndexOfFirstRow = useMemo(
+        () => (safeMasterListCurrentPage - 1) * rowsPerPage,
+        [safeMasterListCurrentPage, rowsPerPage]
+    );
+    const masterListIndexOfLastRow = useMemo(
+        () => safeMasterListCurrentPage * rowsPerPage,
+        [safeMasterListCurrentPage, rowsPerPage]
+    );
+
+    const masterListCurrentData = useMemo(() => {
+        if (!Array.isArray(masterListFilteredRows)) return [];
+        return masterListFilteredRows.slice(
+            masterListIndexOfFirstRow,
+            masterListIndexOfLastRow
+        );
+    }, [
+        masterListFilteredRows,
+        masterListIndexOfFirstRow,
+        masterListIndexOfLastRow,
+    ]);
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -142,7 +528,6 @@ export const ContextProvider = ({ children }) => {
                     days: daysFilter || "",
                     status: statusFilter || "",
                     specificAssigneeCsr: specificAssigneeCsr || "",
-                    /*  has_attachments: hasAttachments, */
                 }).toString();
 
                 const response = await apiService.get(
@@ -297,7 +682,9 @@ export const ContextProvider = ({ children }) => {
             );
 
             const formattedData = filteredResult.map((item) => ({
-                name: `${item.month.toString().padStart(2, "0")}/${item.year.toString().slice(-2)}`,
+                name: `${item.month.toString().padStart(2, "0")}/${item.year
+                    .toString()
+                    .slice(-2)}`,
                 Resolved: item.resolved,
                 Unresolved: item.unresolved,
                 Closed: item.closed,
@@ -358,23 +745,26 @@ export const ContextProvider = ({ children }) => {
                     year: year,
                     startDate: startDate,
                     endDate: endDate,
-                },  
+                },
             });
-    
+
             const departments = response.data.departments;
             const unassignedData = response.data.totalUnassigned;
-    
+
             const formattedData = departments.map((item) => ({
                 name: item.department,
                 resolved: item.resolved,
                 unresolved: item.unresolved,
                 closed: item.closed,
             }));
-    
+
             let concatData = [...formattedData];
-    
+
             // Only push "Unassigned" data if it was requested explicitly
-            if (unassignedData && (department === 'Unassigned' || department === 'All')) {
+            if (
+                unassignedData &&
+                (department === "Unassigned" || department === "All")
+            ) {
                 const formattedDataUnassigned = {
                     name: "Unassigned",
                     resolved: unassignedData.total_resolved,
@@ -383,13 +773,12 @@ export const ContextProvider = ({ children }) => {
                 };
                 concatData.push(formattedDataUnassigned);
             }
-    
+
             setDataDepartment(concatData);
         } catch (error) {
             console.log("error retrieving", error);
         }
     };
-    
 
     const getCommunicationTypePerProperty = async () => {
         try {
@@ -549,7 +938,6 @@ export const ContextProvider = ({ children }) => {
             }
         }
     };
-
 
     const getCountAllConcerns = async () => {
         try {
@@ -812,7 +1200,6 @@ export const ContextProvider = ({ children }) => {
         inquiriesPerChanelYear,
     ]);
 
-
     return (
         <StateContext.Provider
             value={{
@@ -985,6 +1372,47 @@ export const ContextProvider = ({ children }) => {
                 assignedToMeActive,
                 setSpecificAssigneeCsr,
                 specificAssigneeCsr,
+                takenOutTableRows,
+                setTakenOutTableRows,
+                takenOutCurrentPage,
+                setTakenOutCurrentPage,
+                takenOutSearchQuery,
+                setTakenOutSearchQuery,
+                takenOutAppliedFilters,
+                setTakenOutAppliedFilters,
+                takenOutFilteredRows,
+                takenOutIndexOfLastRow,
+                takenOutIndexOfFirstRow,
+                takenOutCurrentData,
+                totalPages,
+                safeCurrentPage,
+                fetchTakenOutAccounts,
+                setLoading,
+                // masterList,
+                // setMasterList,
+                takenOutMasterListTableRows,
+                setTakenOutMasterListTableRows,
+                masterListLoading,
+                fetchMasterList,
+                masterListFilteredRows,
+                masterListTotalPages,
+                safeMasterListCurrentPage,
+                masterListIndexOfFirstRow,
+                masterListIndexOfLastRow,
+                masterListCurrentData,
+                takenOutMasterListCurrentPage,
+                setTakenOutMasterListCurrentpage,
+                takenOutMasterListSearchQuery,
+                setTakenOutMasterListSearchQuery,
+                takenOutMasterListAppliedFilters,
+                setTakenOutMasterListAppliedFilters,
+                assignee,
+                setAssignee,
+                accounts,
+                workOrderTypes,
+                workOrders,
+                fetchWorkOrders,
+                fetchAccounts,
             }}
         >
             {children}
