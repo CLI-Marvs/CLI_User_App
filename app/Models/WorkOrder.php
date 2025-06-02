@@ -76,4 +76,8 @@ class WorkOrder extends Model
     {
         return $this->belongsTo(Employee::class, 'assigned_to_user_id', 'id');
     }
+    public function log()
+    {
+        return $this->belongsTo(WorkOrderLog::class, 'log_id');
+    }
 }

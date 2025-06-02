@@ -36,5 +36,12 @@ class TakenOutAccount extends Model
     {
         return $this->belongsToMany(WorkOrder::class, 'work_order_account', 'account_id', 'work_order_id')->withPivot('id');
     }
+    public function logs()
+    {
+        return $this->belongsToMany(WorkOrderLog::class, 'account_log', 'account_id', 'work_order_log_id')
+            ->withTimestamps();
+    }
+
+
     protected $guarded = [];
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Http\Controllers\AccountLogController;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -21,6 +22,7 @@ class WorkOrderLog extends Model
         'log_type',
         'log_message',
         'created_by_user_id',
+        'account_ids',
     ];
 
     /**
@@ -30,7 +32,7 @@ class WorkOrderLog extends Model
      *
      * @var bool
      */
-    public $timestamps = false; // Set to true if you add an updated_a
+    public $timestamps = false;
 
     public function workOrder()
     {
@@ -45,4 +47,20 @@ class WorkOrderLog extends Model
         // If it's a standard user ID from a 'users' table
         // return $this->belongsTo(User::class, 'created_by_user_id');
     }
+    public function documents()
+    {
+        return $this->hasMany(WorkOrderDocument::class, 'log_id');
+    }
+    public function accounts()
+    {
+        return $this->belongsToMany(TakenOutAccount::class, 'account_log', 'work_order_log_id', 'account_id')
+            ->withTimestamps();
+    }
+
+    public function accountLog()
+    {
+        return $this->hasMany(AccountLog::class, 'work_order_log_id', 'id');
+    }
+
+
 }

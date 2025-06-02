@@ -26,13 +26,13 @@ class WorkOrderController extends Controller
         }
         if ($request->has('contract_no')) {
             $query->whereHas('account', function ($q) use ($request) {
-                $q->where('contract_number', 'ILIKE', '%' . $request->contract_no . '%'); // ILIKE for PostgreSQL
+                $q->where('contract_number', 'ILIKE', '%' . $request->contract_no . '%');
             });
         }
         // Add more filters as per your "Manage Work Orders" requirements
         // e.g., account_name, project, unit, financing, date_of_takeout, deadline, work_order_type_id
 
-        return response()->json($query->paginate(15)); // Paginate results
+        return response()->json($query->paginate(15));
     }
 
     public function store(Request $request)
@@ -160,35 +160,35 @@ class WorkOrderController extends Controller
         }
     }
 
-public function createWorkOrders(Request $request)
-{
-    Log::info('Received request data:', $request->all());
+    public function createWorkOrders(Request $request)
+    {
+        Log::info('Received request data:', $request->all());
 
-    $validatedData = $request->validate([
-        'work_order' => 'required|string|max:50',
-        'account_ids' => 'required|array',
-        'account_ids.*' => 'integer|exists:taken_out_accounts,id',
-        'assigned_to_user_id' => 'required|integer|exists:employee,id',
-        'work_order_type_id' => 'required|integer|exists:work_order_types,id',
-        'work_order_deadline' => 'required|date',
-    ]);
-    Log::info('Validated data:', $validatedData);
+        $validatedData = $request->validate([
+            'work_order' => 'required|string|max:50',
+            'account_ids' => 'required|array',
+            'account_ids.*' => 'integer|exists:taken_out_accounts,id',
+            'assigned_to_user_id' => 'required|integer|exists:employee,id',
+            'work_order_type_id' => 'required|integer|exists:work_order_types,id',
+            'work_order_deadline' => 'required|date',
+        ]);
+        Log::info('Validated data:', $validatedData);
 
-    $workOrder = WorkOrder::create([
-        'work_order' => $validatedData['work_order'],
-        'assigned_to_user_id' => $validatedData['assigned_to_user_id'],
-        'work_order_type_id' => $validatedData['work_order_type_id'],
-        'work_order_deadline' => $validatedData['work_order_deadline'],
-        'created_by_user_id' => auth()->id(), 
-    ]);
+        $workOrder = WorkOrder::create([
+            'work_order' => $validatedData['work_order'],
+            'assigned_to_user_id' => $validatedData['assigned_to_user_id'],
+            'work_order_type_id' => $validatedData['work_order_type_id'],
+            'work_order_deadline' => $validatedData['work_order_deadline'],
+            'created_by_user_id' => auth()->id(),
+        ]);
 
-    $workOrder->accounts()->sync($validatedData['account_ids']);
+        $workOrder->accounts()->sync($validatedData['account_ids']);
 
-    return response()->json([
-        'message' => 'Work order created successfully.',
-        'data' => $workOrder->load('accounts')
-    ], 201);
-}
+        return response()->json([
+            'message' => 'Work order created successfully.',
+            'data' => $workOrder->load('accounts')
+        ], 201);
+    }
 
 
     public function getWorkOrders(Request $request)
@@ -198,13 +198,13 @@ public function createWorkOrders(Request $request)
         $query = WorkOrder::query();
 
         $query->with([
-            'assignee:id,fullname,firstname,lastname', 
-            'workOrderType:id,type_name',              
-            'accounts:id,account_name,contract_no',   
-            'updates' => function ($query) {          
+            'assignee:id,fullname,firstname,lastname',
+            'workOrderType:id,type_name',
+            'accounts:id,account_name,contract_no',
+            'updates' => function ($query) {
                 $query->with('updatedBy:id,fullname,firstname,lastname')->orderBy('created_at', 'desc'); // And who updated them
             },
-            'documents' => function ($query) {         
+            'documents' => function ($query) {
                 $query->with('uploadedBy:id,fullname,firstname,lastname')->orderBy('created_at', 'desc'); // And who uploaded them
             }
         ]);
@@ -275,39 +275,38 @@ public function createWorkOrders(Request $request)
         return response()->json($workOrder);
     }
 
-    public function createWorkOrderLog(Request $request)
-    {
-        Log::info('Received request to create work order log:', $request->all());
+public function createWorkOrderLog(Request $request)
+{
+    Log::info('Received request to create work order log:', $request->all());
 
-        // IMPORTANT: The DDL for work_order_logs.created_by_user_id has a FOREIGN KEY
-        // to work_orders(work_order_id). This is unusual.
-        // The validation below assumes 'created_by_user_id' is an ID from the 'employee' table.
-        // If it's truly meant to be a work_order_id, adjust the validation rule.
-        // Consider changing the foreign key to reference employee(id) or users(id).
-        $validatedData = $request->validate([
-            'work_order_id' => 'required|integer|exists:work_orders,work_order_id',
-            'log_type' => 'required|string|max:50',
-            'log_message' => 'required|string',
-            'created_by_user_id' => 'required|integer|exists:employee,id', // Assumes it's an employee ID
+    $validatedData = $request->validate([
+        'work_order_id' => 'required|integer|exists:work_orders,work_order_id',
+        'log_type' => 'required|string|max:50',
+        'log_message' => 'required|string',
+        'created_by_user_id' => 'required|integer|exists:employee,id',
+        'account_ids' => 'required|array',
+        'account_ids.*' => 'exists:taken_out_accounts,id',
+    ]);
+
+    try {
+        $logEntry = WorkOrderLog::create([
+            'work_order_id' => $validatedData['work_order_id'],
+            'log_type' => $validatedData['log_type'],
+            'log_message' => $validatedData['log_message'],
+            'created_by_user_id' => $validatedData['created_by_user_id'],
         ]);
 
-        try {
-            $logEntry = WorkOrderLog::create([
-                'work_order_id' => $validatedData['work_order_id'],
-                'log_type' => $validatedData['log_type'],
-                'log_message' => $validatedData['log_message'],
-                'created_by_user_id' => $validatedData['created_by_user_id'],
-                // 'created_at' will be set by the database default
-            ]);
+        $logEntry->accounts()->sync($validatedData['account_ids']);
 
-            Log::info('Work order log created successfully:', $logEntry->toArray());
-            return response()->json(['message' => 'Log created successfully.', 'data' => $logEntry], 201);
+        Log::info('Work order log created successfully:', $logEntry->toArray());
+        return response()->json(['message' => 'Log created successfully.', 'data' => $logEntry], 201);
 
-        } catch (\Exception $e) {
-            Log::error('Error creating work order log:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-            return response()->json(['message' => 'Failed to create log.', 'error' => $e->getMessage()], 500);
-        }
+    } catch (\Exception $e) {
+        Log::error('Error creating work order log:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+        return response()->json(['message' => 'Failed to create log.', 'error' => $e->getMessage()], 500);
     }
+}
+
 
 
 }

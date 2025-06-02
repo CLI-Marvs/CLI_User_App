@@ -71,29 +71,34 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                 "/work-orders/create-work-order",
                 formData
             );
+
             console.log("response", response);
+
             if (
                 response.status === 201 ||
                 response.message === "Work order created successfully." ||
                 response.data?.message === "Work order created successfully."
             ) {
-                setWorkOrderId(response.data.data.work_order_id);
+                const newWorkOrderId = response.data.data.work_order_id;
+                setWorkOrderId(newWorkOrderId);
                 setIsModalOpen(true);
                 fetchWorkOrders();
-                const newWorkOrderId = response.data.data.work_order_id;
+
+                // Create the log entry
                 const logData = {
                     work_order_id: newWorkOrderId,
-                    log_type: "CREATION", // Or any other relevant log type
+                    log_type: selectedWorkOrderType?.type_name,
                     log_message: `Work Order #${newWorkOrderId} created.`,
-                    created_by_user_id: user.id, // Assuming user.id is the ID of the logged-in user
+                    account_ids: selectedAccounts.map((account) => account.id),
+                    created_by_user_id: user.id,
                 };
 
                 try {
-                    // Assuming you have an endpoint like '/work-order-logs' to create logs
                     const logResponse = await apiService.post(
                         "/work-order-logs",
                         logData
                     );
+
                     if (
                         logResponse.status === 201 ||
                         logResponse.data?.message ===
@@ -103,6 +108,43 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                             "Work order log created successfully:",
                             logResponse.data
                         );
+
+                        const logId = logResponse.data.data.id;
+
+                        if (selectedAccounts.length > 0) {
+                            try {
+                                const accountIds = selectedAccounts.map(
+                                    (account) => account.id
+                                );
+                                const attachResponse = await apiService.post(
+                                    "/post-account-log",
+                                    {
+                                        work_order_log_id: logId,
+                                        account_ids: accountIds,
+                                    }
+                                );
+
+                                if (
+                                    attachResponse.status === 200 ||
+                                    attachResponse.data?.message ===
+                                        "Accounts attached successfully."
+                                ) {
+                                    console.log(
+                                        "Accounts successfully linked to work order log."
+                                    );
+                                } else {
+                                    console.error(
+                                        "Failed to link accounts to log:",
+                                        attachResponse
+                                    );
+                                }
+                            } catch (attachError) {
+                                console.error(
+                                    "Error attaching accounts to log:",
+                                    attachError
+                                );
+                            }
+                        }
                     } else {
                         console.error(
                             "Error creating work order log:",
@@ -129,6 +171,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
         } catch (error) {
             console.error("Error creating work order:", error.message || error);
         }
+
         const shouldTriggerModal = true;
         return shouldTriggerModal;
     };
