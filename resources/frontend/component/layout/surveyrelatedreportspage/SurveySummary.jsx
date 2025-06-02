@@ -20,7 +20,7 @@ const SurveySummary = () => {
             .get(`/survey-summary/${surveyId}`)
             .then((response) => {
                 setSurveySummary(response.data);
-
+                console.log(response.data);
             })
             .catch((error) => {
                 console.error('Error fetching survey summary:', error);
@@ -47,27 +47,77 @@ const SurveySummary = () => {
 
 
 
+      function normalizeOptions(question) {
+        // Skip if already 5 options
+        if (question.options.length === 5) return question;
+    
+        // Only normalize questions with 10 options from 10 to 1
+        const values = question.options.map(opt => Number(opt.value)).filter(Boolean);
+        const isDescending10to1 = values.length === 10 && Math.max(...values) === 10 && Math.min(...values) === 1;
+    
+        if (!isDescending10to1) return question;
+    
+        const buckets = {
+            'Very Satisfied': [10, 9],
+            'Satisfied': [8, 7],
+            'Neutral': [6, 5],
+            'Dissatisfied': [4, 3],
+            'Very Dissatisfied': [2, 1],
+        };
+    
+        const groupedOptions = Object.entries(buckets).map(([label, values]) => {
+            const count = question.options
+                .filter(opt => values.includes(Number(opt.value)))
+                .reduce((acc, opt) => acc + (opt.count || 0), 0);
+    
+            return {
+                id: `${question.question_id}-${label}`,
+                value: label,
+                count,
+            };
+        });
+    
+        return {
+            ...question,
+            options: groupedOptions,
+        };
+    }
+    
     function groupQuestionsByOptions(questions) {
         const groups = [];
-
-        questions.forEach((question) => {
-            const optionSignature = question.options.map(opt => opt.value).join('|');
+        const ungrouped = [];
+    
+        questions.forEach((q) => {
+            // Skip and store separately if no options
+            if (!q.options || q.options.length === 0) {
+                ungrouped.push(q);
+                return;
+            }
+    
+            const normalizedQuestion = normalizeOptions(q);
+            const optionSignature = normalizedQuestion.options.map(opt => opt.value).join('|');
+    
             let existingGroup = groups.find(group => group.signature === optionSignature);
-
+    
             if (existingGroup) {
-                existingGroup.questions.push(question);
+                existingGroup.questions.push(normalizedQuestion);
             } else {
                 groups.push({
                     signature: optionSignature,
-                    questions: [question]
+                    questions: [normalizedQuestion],
                 });
             }
         });
-
-        return groups;
+    
+        return { groups, ungrouped };
     }
+    
+    
+    
 
-    const groupedTables = surveySummary?.questions ? groupQuestionsByOptions(surveySummary.questions) : [];
+    const { groups: groupedTables, ungrouped: ungroupedQuestions } = surveySummary?.questions
+    ? groupQuestionsByOptions(surveySummary.questions)
+    : { groups: [], ungrouped: [] };
 
     return (
         <div className='h-screen max-w-full bg-custom-grayFA'>
