@@ -45,19 +45,25 @@ class AccountLogController extends Controller
 
     public function getLogData(Request $request, $selectedId)
     {
-        $logData = WorkOrderLog::whereHas('accountLog', function ($query) use ($selectedId) {
-            $query->where('account_id', $selectedId);
-        })->get();
+$logData = WorkOrderLog::whereHas('accountLog', function ($query) use ($selectedId) {
+    $query->where('account_id', $selectedId);
+})->with(['createdBy', 'accountLog'])->get();
+
+$transformed = $logData->map(function ($log) {
+    return [
+        'id' => $log->id,
+        'log_type' => $log->log_type,
+        'log_message' => $log->log_message,
+        'created_at' => $log->created_at,
+        'created_by_user_id' => $log->created_by_user_id,
+        'is_new' => $log->is_new,
+        'fullname' => $log->createdBy->fullname ?? null,
+        'account_ids' => $log->accountLog->pluck('account_id')->all(),
+    ];
+});
+
+return response()->json(['log_data' => $transformed], 200);
 
 
-        if ($logData->isEmpty()) {
-            return response()->json([
-                'message' => 'Log data not found.',
-            ], 404);
-        }
-
-        return response()->json([
-            'log_data' => $logData,
-        ], 200);
     }
 }

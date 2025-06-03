@@ -36,16 +36,11 @@ class WorkOrderLog extends Model
 
     public function workOrder()
     {
-        // Assuming 'work_order_id' in work_orders is the primary key it refers to.
-        // If work_orders.work_order_id is not the primary key, adjust the second 'work_order_id'.
         return $this->belongsTo(WorkOrder::class, 'work_order_id', 'work_order_id');
     }
     public function createdBy()
     {
-        // If created_by_user_id is meant to be an employee ID
         return $this->belongsTo(Employee::class, 'created_by_user_id', 'id');
-        // If it's a standard user ID from a 'users' table
-        // return $this->belongsTo(User::class, 'created_by_user_id');
     }
     public function documents()
     {
