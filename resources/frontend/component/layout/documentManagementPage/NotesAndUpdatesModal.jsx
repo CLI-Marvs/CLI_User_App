@@ -198,14 +198,29 @@ function NotesAndUpdatesModal({
                                     </div>
 
                                     <div className="text-gray-500 text-base">
-                                        {/* Display log message or default text */}
-                                        <span>
-                                            {log.log_message ? log.log_message : "Work Order"}{" "}
-                                            {log.assigned_user_name ? "Assigned to:" : "Created by:"}{" "}
+                                        {/* Display log message */}
+                                        <span className="text-gray-800">
+                                            {log.log_message ||
+                                                "Work Order Update"}
+                                        </span>
+
+                                        {/* Display creator */}
+                                        <span className="text-gray-500 ml-2">
+                                            by{" "}
                                             <span className="text-blue-500 font-medium">
-                                                {log.assigned_user_name ? getAssigneeName(log) : getUserDisplayName(log)}
+                                                {getUserDisplayName(log)}
                                             </span>
                                         </span>
+
+                                        {/* Show assignment info if available */}
+                                        {log.assigned_user_name && (
+                                            <span className="text-gray-500 ml-2">
+                                                • Assigned to:{" "}
+                                                <span className="text-blue-500 font-medium">
+                                                    {getAssigneeName(log)}
+                                                </span>
+                                            </span>
+                                        )}
                                     </div>
 
                                     {/* Display note content if available */}
