@@ -257,7 +257,7 @@ const Sidebar = () => {
                     </Link> */}
                     <Link to="/transaction/bank-monitoring/bank-statements">
                         <ListItem
-                            className={`h-[35px] w-[210px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
+                            className={`h-[35px] w-[185px] text-sm pl-[12px] py-7 transition-all duration-300 ease-in-out 
             ${
                 location.pathname.startsWith("/transaction")
                     ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
@@ -284,7 +284,7 @@ const Sidebar = () => {
 
                     {isInvoiceOpen &&
                         location.pathname.startsWith("/transaction") && (
-                            <div className="px-[12px] py-[20px] w-[210px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+                            <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
                                 <Link to="/transaction/bank-monitoring/bank-statements">
                                     <ListItem
                                         className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
@@ -310,7 +310,7 @@ const Sidebar = () => {
                                             location.pathname.startsWith(
                                                 "/transaction/receivables"
                                             )
-                                                ? "bg-white text-custom-solidgreen font-semibold py-3"
+                                                ? "bg-white text-custom-solidgreen font-semibold py-6"
                                                 : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                                         }`}
                                         onClick={() =>
@@ -319,7 +319,7 @@ const Sidebar = () => {
                                             )
                                         }
                                     >
-                                        Online Platform Dashboard
+                                        Online Payment Dashboard
                                     </ListItem>
                                 </Link>
                                 <Link to="/transaction/settings/markup">

@@ -143,7 +143,7 @@ const TransactionCom = () => {
 
     return (
         <>
-            <div className="overflow-y-hidden px-3 space-y-2 w-full">
+            <div className="overflow-y-hidden space-y-2 w-full">
                 <TransactionSearchBar
                     fields={fields}
                     searchValues={searchValues}

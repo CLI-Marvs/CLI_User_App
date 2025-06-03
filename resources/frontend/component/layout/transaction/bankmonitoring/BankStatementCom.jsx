@@ -111,7 +111,7 @@ const BankStatementCom = () => {
 
     return (
         <>
-            <div className="overflow-y-hidden px-3 w-full">
+            <div className="overflow-y-hidden w-full">
                 <TransactionSearchBar
                     fields={fields}
                     searchValues={searchValues}

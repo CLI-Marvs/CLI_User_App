@@ -143,7 +143,7 @@ const Reports = () => {
     );
 
     return (
-        <div className="w-full h-full px-5">
+        <div className="w-full">
             <div className="bg-white w-full h-full rounded-[10px] p-5 flex justify-between items-center">
                 <div className="flex gap-3">
                     <div className="relative inline-block" ref={wrapperRef}>

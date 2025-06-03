@@ -56,7 +56,6 @@ import ErrorPage from "@/component/ErrorElement/ErrorPage";
 import MarkupSettingsView from "@/component/views/pages/transactionViews/MarkupSettingsView";
 import ReportsView from "./views/pages/transactionViews/ReportsView";
 
-
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, children }) => {
     const { hasPermission } = useStateContext();
@@ -133,8 +132,13 @@ const App = () => {
         return (
             <>
                 <div className="flex relative overflow-x-hidden min-h-screen bg-custom-grayFA">
-                    <TransactionSidebar />
-                    <Outlet />
+                    <div className="w-[210px] h-full fixed z-10">
+                        <TransactionSidebar />
+                    </div>
+
+                    <div className="ml-[200px] flex-1 overflow-y-auto">
+                        <Outlet />
+                    </div>
                 </div>
             </>
         );

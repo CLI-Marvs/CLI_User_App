@@ -24,7 +24,6 @@ const TransactionSidebar = () => {
     const currentMenu = basePath ? menuMap[basePath] : [];
 
     return (
-        <div className="bg-custom-grayFA">
             <div className="group px-3 py-5 rounded-[10px] bg-[#EFEFEF] transition-all duration-300 w-[189px] h-full space-y-3">
                 {currentMenu.map(({ name, path }) => {
                     const isActive = pathname === path;
@@ -47,7 +46,6 @@ const TransactionSidebar = () => {
                     );
                 })}
             </div>
-        </div>
     );
 };
 
