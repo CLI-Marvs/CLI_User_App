@@ -23,6 +23,10 @@ class WorkOrderLog extends Model
         'log_message',
         'created_by_user_id',
         'account_ids',
+        'assigned_user_id',
+        'note_type',
+        'is_new',
+        'account_id',
     ];
 
     /**
@@ -51,11 +55,15 @@ class WorkOrderLog extends Model
         return $this->belongsToMany(TakenOutAccount::class, 'account_log', 'work_order_log_id', 'account_id')
             ->withTimestamps();
     }
-
     public function accountLog()
     {
         return $this->hasMany(AccountLog::class, 'work_order_log_id', 'id');
     }
+    public function assignedUser()
+    {
+        return $this->belongsTo(Employee::class, 'assigned_user_id', 'id');
+    }
+
 
 
 }

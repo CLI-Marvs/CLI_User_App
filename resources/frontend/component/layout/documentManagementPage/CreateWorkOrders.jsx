@@ -84,14 +84,16 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                 setIsModalOpen(true);
                 fetchWorkOrders();
 
-                // Create the log entry
                 const logData = {
                     work_order_id: newWorkOrderId,
                     log_type: selectedWorkOrderType?.type_name,
                     log_message: `Work Order #${newWorkOrderId} created.`,
                     account_ids: selectedAccounts.map((account) => account.id),
                     created_by_user_id: user.id,
+                    assigned_user_id: selectedAssignee?.id,
                 };
+
+                console.log("logData", logData);
 
                 try {
                     const logResponse = await apiService.post(

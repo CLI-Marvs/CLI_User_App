@@ -69,6 +69,7 @@ Route::post('/update-info', [ConcernController::class, 'updateInfo']);
 Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 Route::get('/get-account-logs/{selectedId}', [AccountLogController::class, 'getLogData']);
+    Route::post('/work-order-logs', [WorkOrderController::class, 'createWorkOrderLog']);
 
 //For work orders
 Route::middleware('auth:sanctum')->group(function () {
@@ -82,7 +83,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/work-orders/get-assignee', [WorkOrderController::class, 'getAssignee']);
     Route::get('/work-orders/assignee/{id}', [WorkOrderController::class, 'getAssigneeById']);
     Route::get('/work-orders/get-work-orders', [WorkOrderController::class, 'getWorkOrders']);
-    Route::post('/work-order-logs', [WorkOrderController::class, 'createWorkOrderLog']);
+
     Route::post('/post-account-log', [AccountLogController::class, 'attachAccountsToLog']);
     Route::get('/work-orders/work-order-types', [WorkOrderController::class, 'getWorkOrderTypes']);
     Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName']);

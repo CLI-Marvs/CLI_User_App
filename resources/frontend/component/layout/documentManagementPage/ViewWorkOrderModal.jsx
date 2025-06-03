@@ -47,10 +47,14 @@ const ViewWorkOrderModal = ({ isOpen, onClose, workOrderData }) => {
     const [mounted, setMounted] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedAccountId, setSelectedAccountId] = useState(null);
+    const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
+    const [selectedAssignee, setSelectedAssignee] = useState(null);
 
     const handleRowClick = (accountId) => {
         setIsModalOpen(true);
         setSelectedAccountId(accountId);
+        setSelectedWorkOrder(workOrderData.work_order);
+        setSelectedAssignee(workOrderData.assignee);
     };
 
     useEffect(() => {
@@ -234,6 +238,8 @@ const ViewWorkOrderModal = ({ isOpen, onClose, workOrderData }) => {
                     <NotesAndUpdatesModal
                         workOrderData={workOrderData}
                         selectedAccountId={selectedAccountId}
+                        selectedWorkOrder={selectedWorkOrder}
+                        selectedAssignee={selectedAssignee}
                         onClose={() => {
                             setIsModalOpen(false);
                             setSelectedAccountId(null);

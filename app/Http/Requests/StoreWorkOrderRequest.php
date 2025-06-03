@@ -9,8 +9,6 @@ class StoreWorkOrderRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Set to true if authorization logic is not handled elsewhere
-        // or if all authenticated users can create work orders
         return true;
     }
 

@@ -5,8 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderType;
-use App\Models\WorkOrderUpdate;
-use App\Models\WorkOrderDocument;
 use App\Models\WorkOrderLog;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -29,8 +27,6 @@ class WorkOrderController extends Controller
                 $q->where('contract_number', 'ILIKE', '%' . $request->contract_no . '%');
             });
         }
-        // Add more filters as per your "Manage Work Orders" requirements
-        // e.g., account_name, project, unit, financing, date_of_takeout, deadline, work_order_type_id
 
         return response()->json($query->paginate(15));
     }
@@ -38,14 +34,14 @@ class WorkOrderController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'work_order_number' => 'required|string|max:50|unique:work_orders',
-            'account_id' => 'required|integer|exists:taken_out_accounts,id',
+            'work_order_number'   => 'required|string|max:50|unique:work_orders',
+            'account_id'          => 'required|integer|exists:taken_out_accounts,id',
             'assigned_to_user_id' => 'nullable|integer|exists:users,id',
-            'work_order_type_id' => 'required|integer|exists:work_order_types,type_id',
+            'work_order_type_id'  => 'required|integer|exists:work_order_types,type_id',
             'work_order_deadline' => 'nullable|date',
-            'status' => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Completed', 'Cancelled'])],
-            'description' => 'nullable|string',
-            'priority' => ['nullable', 'string', Rule::in(['Low', 'Medium', 'High', 'Urgent'])],
+            'status'              => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Completed', 'Cancelled'])],
+            'description'         => 'nullable|string',
+            'priority'            => ['nullable', 'string', Rule::in(['Low', 'Medium', 'High', 'Urgent'])],
         ]);
 
         $workOrder = WorkOrder::create($validatedData);
@@ -61,14 +57,14 @@ class WorkOrderController extends Controller
     public function update(Request $request, WorkOrder $workOrder)
     {
         $validatedData = $request->validate([
-            'work_order_number' => 'sometimes|required|string|max:50|unique:work_orders,work_order_number,' . $workOrder->work_order_id . ',work_order_id',
-            'account_id' => 'sometimes|required|integer|exists:taken_out_accounts,id',
+            'work_order_number'   => 'sometimes|required|string|max:50|unique:work_orders,work_order_number,' . $workOrder->work_order_id . ',work_order_id',
+            'account_id'          => 'sometimes|required|integer|exists:taken_out_accounts,id',
             'assigned_to_user_id' => 'nullable|integer|exists:users,id',
-            'work_order_type_id' => 'sometimes|required|integer|exists:work_order_types,type_id',
+            'work_order_type_id'  => 'sometimes|required|integer|exists:work_order_types,type_id',
             'work_order_deadline' => 'nullable|date',
-            'status' => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Completed', 'Cancelled'])],
-            'description' => 'nullable|string',
-            'priority' => ['nullable', 'string', Rule::in(['Low', 'Medium', 'High', 'Urgent'])],
+            'status'              => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Completed', 'Cancelled'])],
+            'description'         => 'nullable|string',
+            'priority'            => ['nullable', 'string', Rule::in(['Low', 'Medium', 'High', 'Urgent'])],
         ]);
 
         $workOrder->update($validatedData);
@@ -86,7 +82,7 @@ class WorkOrderController extends Controller
     public function addUpdate(Request $request, WorkOrder $workOrder)
     {
         $validatedData = $request->validate([
-            'update_note' => 'required|string',
+            'update_note'        => 'required|string',
             'updated_by_user_id' => 'required|integer|exists:users,id',
         ]);
 
@@ -98,7 +94,7 @@ class WorkOrderController extends Controller
     public function uploadDocument(Request $request, WorkOrder $workOrder)
     {
         $validatedData = $request->validate([
-            'file' => 'required|file|max:10240',
+            'file'                => 'required|file|max:10240',
             'uploaded_by_user_id' => 'required|integer|exists:users,id',
         ]);
 
@@ -118,8 +114,8 @@ class WorkOrderController extends Controller
             'completion_notes' => 'nullable|string',
         ]);
         $workOrder->update([
-            'status' => 'Completed',
-            'completed_at' => now(),
+            'status'           => 'Completed',
+            'completed_at'     => now(),
             'completion_notes' => $validatedData['completion_notes'],
         ]);
         return response()->json($workOrder->load(['account', 'assignedTo', 'type']));
@@ -132,14 +128,14 @@ class WorkOrderController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Work order types retrieved successfully.',
-                'data' => $workOrderTypes
+                'data'    => $workOrderTypes
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve work order types.',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage()
             ], 500);
         }
     }
@@ -165,31 +161,30 @@ class WorkOrderController extends Controller
         Log::info('Received request data:', $request->all());
 
         $validatedData = $request->validate([
-            'work_order' => 'required|string|max:50',
-            'account_ids' => 'required|array',
-            'account_ids.*' => 'integer|exists:taken_out_accounts,id',
+            'work_order'          => 'required|string|max:50',
+            'account_ids'         => 'required|array',
+            'account_ids.*'       => 'integer|exists:taken_out_accounts,id',
             'assigned_to_user_id' => 'required|integer|exists:employee,id',
-            'work_order_type_id' => 'required|integer|exists:work_order_types,id',
+            'work_order_type_id'  => 'required|integer|exists:work_order_types,id',
             'work_order_deadline' => 'required|date',
         ]);
         Log::info('Validated data:', $validatedData);
 
         $workOrder = WorkOrder::create([
-            'work_order' => $validatedData['work_order'],
+            'work_order'          => $validatedData['work_order'],
             'assigned_to_user_id' => $validatedData['assigned_to_user_id'],
-            'work_order_type_id' => $validatedData['work_order_type_id'],
+            'work_order_type_id'  => $validatedData['work_order_type_id'],
             'work_order_deadline' => $validatedData['work_order_deadline'],
-            'created_by_user_id' => auth()->id(),
+            'created_by_user_id'  => auth()->id(),
         ]);
 
         $workOrder->accounts()->sync($validatedData['account_ids']);
 
         return response()->json([
             'message' => 'Work order created successfully.',
-            'data' => $workOrder->load('accounts')
+            'data'    => $workOrder->load('accounts')
         ], 201);
     }
-
 
     public function getWorkOrders(Request $request)
     {
@@ -275,38 +270,40 @@ class WorkOrderController extends Controller
         return response()->json($workOrder);
     }
 
-public function createWorkOrderLog(Request $request)
-{
-    Log::info('Received request to create work order log:', $request->all());
+    public function createWorkOrderLog(Request $request)
+    {
+        Log::info('Received request to create work order log:', $request->all());
 
-    $validatedData = $request->validate([
-        'work_order_id' => 'required|integer|exists:work_orders,work_order_id',
-        'log_type' => 'required|string|max:50',
-        'log_message' => 'required|string',
-        'created_by_user_id' => 'required|integer|exists:employee,id',
-        'account_ids' => 'required|array',
-        'account_ids.*' => 'exists:taken_out_accounts,id',
-    ]);
-
-    try {
-        $logEntry = WorkOrderLog::create([
-            'work_order_id' => $validatedData['work_order_id'],
-            'log_type' => $validatedData['log_type'],
-            'log_message' => $validatedData['log_message'],
-            'created_by_user_id' => $validatedData['created_by_user_id'],
+        $validatedData = $request->validate([
+            'work_order_id'      => 'required|integer|exists:work_orders,work_order_id',
+            'log_type'           => 'required|string|max:50',
+            'log_message'        => 'required|string',
+            'created_by_user_id' => 'required|integer|exists:employee,id',
+            'account_ids'        => 'required|array',
+            'account_ids.*'      => 'exists:taken_out_accounts,id',
+            'assigned_user_id'   => 'nullable|integer|exists:employee,id',
         ]);
 
-        $logEntry->accounts()->sync($validatedData['account_ids']);
+        try {
 
-        Log::info('Work order log created successfully:', $logEntry->toArray());
-        return response()->json(['message' => 'Log created successfully.', 'data' => $logEntry], 201);
+            $logEntryData = [
+                'work_order_id'      => $validatedData['work_order_id'],
+                'log_type'           => $validatedData['log_type'],
+                'log_message'        => $validatedData['log_message'],
+                'created_by_user_id' => $validatedData['created_by_user_id'],
+                'assigned_user_id'   => $validatedData['assigned_user_id'] ?? null,
+            ];
 
-    } catch (\Exception $e) {
-        Log::error('Error creating work order log:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
-        return response()->json(['message' => 'Failed to create log.', 'error' => $e->getMessage()], 500);
+            $logEntry = WorkOrderLog::create($logEntryData);
+
+            $logEntry->accounts()->sync($validatedData['account_ids']);
+
+            Log::info('Work order log created successfully:', $logEntry->toArray());
+            return response()->json(['message' => 'Log created successfully.', 'data' => $logEntry], 201);
+
+        } catch (\Exception $e) {
+            Log::error('Error creating work order log:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return response()->json(['message' => 'Failed to create log.', 'error' => $e->getMessage()], 500);
+        }
     }
-}
-
-
-
 }
