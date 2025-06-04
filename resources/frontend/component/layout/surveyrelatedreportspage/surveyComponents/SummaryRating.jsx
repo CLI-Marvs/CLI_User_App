@@ -30,8 +30,13 @@ const SummaryRating = ({ ratingCounts }) => {
             </div>
 
             {/* Average Row */}
-            <div className='mt-4 text-[18px] montserrat-semibold'>
-                Average: <span className="text-[20px]">{average}</span>
+            <div className='flex flex-col mt-4 text-[18px] montserrat-semibold'>
+                <div>
+                    Total: <span className="text-[20px]">{totalCount}</span>
+                </div>
+                <div>
+                    Average: <span className="text-[20px]">{average}</span>
+                </div>
             </div>
         </div>
     );

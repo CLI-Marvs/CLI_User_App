@@ -36,6 +36,7 @@ const SummaryTable = ({ groupedTables }) => {
                                     {firstQuestion.options.map(opt => (
                                         <th key={opt.id} className="border-2 px-2 py-1 text-center">{opt.value}</th>
                                     ))}
+                                    {showAverage && <th className="border-2 px-2 py-1 text-center">Total</th>}
                                     {showAverage && <th className="border-2 px-2 py-1 text-center">Average</th>}
                                 </tr>
                             </thead>
@@ -67,6 +68,7 @@ const SummaryTable = ({ groupedTables }) => {
                                             {q.options.map(opt => (
                                                 <td key={opt.id} className="border-2 px-2 py-1 text-center">{opt.count}</td>
                                             ))}
+                                            {showAverage && <td className="border-2 px-2 py-1 text-center font-semibold">{totalCount}</td>}
                                             {showAverage && <td className="border-2 px-2 py-1 text-center font-semibold">{avg}</td>}
                                         </tr>
                                     );
