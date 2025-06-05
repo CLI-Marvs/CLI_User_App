@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\WorkOrderLog;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 
 class AccountLogController extends Controller
@@ -13,8 +14,8 @@ class AccountLogController extends Controller
     {
         $validated = $request->validate([
             'work_order_log_id' => 'required|exists:work_order_logs,id',
-            'account_ids'       => 'required|array|min:1',
-            'account_ids.*'     => 'integer|exists:taken_out_accounts,id',
+            'account_ids' => 'required|array|min:1',
+            'account_ids.*' => 'integer|exists:taken_out_accounts,id',
         ]);
 
         try {
@@ -22,7 +23,7 @@ class AccountLogController extends Controller
             $log->accounts()->sync($validated['account_ids']);
 
             Log::info("Accounts attached to log successfully", [
-                'log_id'      => $log->id,
+                'log_id' => $log->id,
                 'account_ids' => $validated['account_ids']
             ]);
 
@@ -37,41 +38,71 @@ class AccountLogController extends Controller
 
             return response()->json([
                 'message' => 'Failed to attach accounts.',
-                'error'   => $e->getMessage()
+                'error' => $e->getMessage()
             ], 500);
         }
     }
 
-public function getLogData(Request $request, $selectedId)
-{
-    $selectedWorkOrder = $request->query('log_type');
+    public function getLogData(Request $request, $selectedId)
+    {
+        $selectedWorkOrder = $request->query('log_type');
 
-    $logData = WorkOrderLog::whereHas('accountLog', function ($query) use ($selectedId) {
-        $query->where('account_id', $selectedId);
-    })
-    ->when($selectedWorkOrder, function ($query) use ($selectedWorkOrder) {
-        $query->where('log_type', $selectedWorkOrder);
-    })
-    ->with(['createdBy', 'accountLog', 'assignedUser'])
-    ->get();
+        $firstRelevantLog = WorkOrderLog::whereHas('accountLog', function ($query) use ($selectedId) {
+            $query->where('account_id', $selectedId);
+        })
+            ->when($selectedWorkOrder, function ($query) use ($selectedWorkOrder) {
+                $query->where('log_type', $selectedWorkOrder);
+            })
+            ->select('work_order_id')
+            ->first();
 
-    $transformed = $logData->map(function ($log) {
-        return [
-            'id'                   => $log->id,
-            'log_type'             => $log->log_type,
-            'log_message'          => $log->log_message,
-            'created_at'           => $log->created_at,
-            'created_by_user_id'   => $log->created_by_user_id,
-            'is_new'               => $log->is_new,
-            'fullname'             => $log->createdBy->fullname ?? null,
-            'account_ids'          => $log->accountLog->pluck('account_id')->all(),
-            'assigned_user_id'     => $log->assigned_user_id,
-            'assigned_user_name'   => optional($log->assignedUser)->fullname,
-        ];
-    });
+        if (!$firstRelevantLog) {
+            Log::info('No relevant log found for account_id and log_type to determine work_order_id', ['account_id' => $selectedId, 'log_type' => $selectedWorkOrder]);
+            return response()->json(['log_data' => []], 200);
+        }
 
-    return response()->json(['log_data' => $transformed], 200);
-}
+        $targetWorkOrderId = $firstRelevantLog->work_order_id;
+        Log::info('Target work_order_id found:', ['work_order_id' => $targetWorkOrderId]);
 
+        $logDataQuery = WorkOrderLog::where('work_order_id', $targetWorkOrderId)
+            ->when($selectedWorkOrder, function ($query) use ($selectedWorkOrder) {
+                $query->where('log_type', $selectedWorkOrder);
+            })
+            ->with([
+                'createdBy:id,fullname,firstname,lastname',
+                'assignedUser:id,fullname,firstname,lastname',
+                'documents'
+            ])
+            ->orderBy('created_at', 'desc');
+        $logs = $logDataQuery->get();
 
+        $transformed = $logs->map(function ($log) {
+            return [
+                'id' => $log->id,
+                'work_order_id' => $log->work_order_id,
+                'log_type' => $log->log_type,
+                'log_message' => $log->log_message,
+                'created_at' => $log->created_at ? Carbon::parse($log->created_at)->toIso8601String() : null,
+                'created_by_user_id' => $log->created_by_user_id,
+                'is_new' => $log->is_new,
+                'fullname' => $log->createdBy->fullname ?? ($log->createdBy ? trim($log->createdBy->firstname . ' ' . $log->createdBy->lastname) : null),
+                'account_ids' => $log->accountLog->pluck('account_id')->all(),
+                'account_id' => $log->account_id,
+                'note_type' => $log->note_type,
+                'assigned_user_id' => $log->assigned_user_id,
+                'assigned_user_name' => optional($log->assignedUser)->fullname ?? (optional($log->assignedUser) ? trim(optional($log->assignedUser)->firstname . ' ' . optional($log->assignedUser)->lastname) : null),
+                'documents' => $log->documents->map(function ($doc) {
+                    return [
+                        'document_id' => $doc->document_id,
+                        'file_name' => $doc->file_name,
+                        'file_path' => $doc->file_path,
+                        'file_type' => $doc->file_type,
+                    ];
+                }),
+            ];
+        });
+
+        Log::info('Returning log data for work_order_id', ['work_order_id' => $targetWorkOrderId, 'count' => $transformed->count()]);
+        return response()->json(['log_data' => $transformed, 'work_order_id_queried' => $targetWorkOrderId], 200);
+    }
 }

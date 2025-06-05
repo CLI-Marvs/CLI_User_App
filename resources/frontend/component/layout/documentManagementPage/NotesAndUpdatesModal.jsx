@@ -1,29 +1,28 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import DateLogo from "../../../../../public/Images/Date_range.svg";
+import AddNoteModal from "./AddNoteModal";
 
 function NotesAndUpdatesModal({
     selectedAccountId,
     onClose,
-    onAddNote,
     selectedWorkOrder,
     selectedAssignee,
+    workOrderData,
 }) {
     const [logs, setLogs] = useState([]);
-    const [accountInfo, setAccountInfo] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showAll, setShowAll] = useState(false);
-
-    console.log("ASSIGNEE: ", selectedAssignee.id);
+    const [initialLogCount] = useState(3);
+    const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
 
     useEffect(() => {
         if (selectedAccountId) {
             setLogs([]);
-            setAccountInfo(null);
             setError(null);
             fetchAccountAndLogData();
         } else {
             setLogs([]);
-            setAccountInfo(null);
             setError(null);
             setLoading(false);
         }
@@ -39,7 +38,6 @@ function NotesAndUpdatesModal({
                     selectedWorkOrder
                 )}`
             );
-
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(
@@ -50,35 +48,34 @@ function NotesAndUpdatesModal({
             }
 
             const data = await response.json();
-            console.log("API response data:", data);
             const logsArray = data.log_data || [];
 
-            setLogs(logsArray);
-            setAccountInfo(null);
+            setLogs(
+                logsArray.sort(
+                    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+                )
+            );
         } catch (err) {
             console.error("Error fetching account and log data:", err);
             setError(`Failed to load notes and updates: ${err.message}`);
             setLogs([]);
-            setAccountInfo(null);
         } finally {
             setLoading(false);
         }
     };
 
-    console.log("Fetched API response data:", logs);
+    const filteredLogs = logs.filter(log => {
+      return log.work_order_id === selectedWorkOrder &&
+             log.log_type === selectedLogType &&
+             log.account_id === selectedAccountId;
+    });
 
-    const formatDate = (dateStr) => {
-        const date = new Date(dateStr);
-        const options = {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-        };
-        return date.toLocaleDateString("en-US", options);
+    const handleAddNoteSuccess = async () => {
+        setIsAddNoteModalOpen(false);
+        await fetchAccountAndLogData();
     };
+
+    const currentUserId = workOrderData?.currentUser?.id || 1;
 
     const formatHeaderDate = (dateStr) => {
         const date = new Date(dateStr);
@@ -105,19 +102,25 @@ function NotesAndUpdatesModal({
         return `${formattedDate} | ${formattedTime}`;
     };
 
-    const getDisplayLogs = () => {
-        return logs.filter((log) => {
-            const matchesLogType = log.log_type === selectedWorkOrder;
-            const matchesAccount = log.account_ids?.includes(selectedAccountId);
-            const matchesAssignee = selectedAssignee?.id
-                ? log.assigned_user_id === selectedAssignee.id ||
-                  log.created_by_user_id === selectedAssignee.id
-                : true;
+const getDisplayLogs = () => {
+  console.log('logs:', logs);
+  console.log('selectedWorkOrder:', selectedWorkOrder);
+  console.log('selectedAccountId:', selectedAccountId);
+  console.log('selectedAssignee:', selectedAssignee);
 
-            return matchesLogType && matchesAccount && matchesAssignee;
-        });
-    };
+  return logs.filter((log) => {
+    const matchesLogType = log.log_type === selectedWorkOrder;
+    const matchesAccount = (log.note_type === "Manual Entry" && log.account_id === selectedAccountId) || (log.account_ids && log.account_ids.includes(selectedAccountId));
+    const matchesAssignee = selectedAssignee?.id
+      ? log.assigned_user_id === selectedAssignee.id ||
+        log.created_by_user_id === selectedAssignee.id
+      : true;
 
+    return matchesLogType && matchesAccount && matchesAssignee;
+  });
+};
+
+const displayedLogs = getDisplayLogs();
     const getUserDisplayName = (log) => {
         return log.fullname || log.assigned_user_name || "Unknown User";
     };
@@ -145,39 +148,38 @@ function NotesAndUpdatesModal({
     return (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
             <div
-                className="bg-white rounded-2xl w-1/2 max-w-2xl max-h-[80vh] overflow-hidden shadow-xl"
+                className="bg-white rounded-[10px] w-[449px] max-h-[90vh] overflow-y-auto shadow-xl p-[18px_25px] flex flex-col gap-[10px] relative"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
-                <div className="bg-white p-8 pb-4">
-                    <div className="flex justify-between items-start mb-6">
-                        <div>
-                            <h2 className="text-2xl font-medium text-teal-600">
-                                Notes and Updates:{" "}
-                                <span className="text-green-500 font-medium">
-                                    {selectedWorkOrder || "Details"}
-                                </span>
-                            </h2>
-                        </div>
-                        <button
-                            onClick={onClose}
-                            className="text-gray-400 hover:text-gray-600 transition-colors text-2xl font-light"
-                        >
-                            ×
-                        </button>
+                <button
+                    onClick={onClose}
+                    className="absolute top-3 right-4 text-gray-500 hover:text-gray-600 transition-colors text-2xl font-bold z-10"
+                >
+                    ×
+                </button>
+                <div className="mb-1 mt-3">
+                    {" "}
+                    <div>
+                        <h2 className="text-2xl font-semibold text-custom-bluegreen">
+                            Notes and Updates:{" "}
+                            <span className="text-custom-lightgreen font-normal">
+                                {selectedWorkOrder || "Details"}
+                            </span>
+                        </h2>
                     </div>
-                    
-                    {/* Date badge */}
-                    <div className="flex justify-end mb-4">
-                        <div className="flex items-center space-x-2 text-sm text-teal-600 bg-gray-100 px-4 py-2 rounded-lg">
+                    <div className="flex justify-end mt-2">
+                        {" "}
+                        <div className="flex w-[170px] justify-center items-center space-x-1 text-sm font-semibold text-custom-bluegreen bg-[#F7F7F7] px-3 py-2 rounded-lg border gap-2">
                             <span>{formatHeaderDate(latestLogDate)}</span>
-                            <span>📅</span>
+                            <img
+                                src={DateLogo}
+                                alt="Date"
+                                className="w-6 h-6"
+                            />
                         </div>
                     </div>
                 </div>
-
-                {/* Content */}
-                <div className="px-8 pb-4 max-h-80 overflow-y-auto">
+                <div className="flex-1 space-y-0 overflow-y-auto max-h-screen">
                     {error && (
                         <div className="text-center text-red-500 py-8">
                             <p>{error}</p>
@@ -190,40 +192,37 @@ function NotesAndUpdatesModal({
                         </div>
                     )}
                     {!error && logs.length > 0 && (
-                        <div className="space-y-8">
-                            {getDisplayLogs().map((log) => (
-                                <div key={log.id} className="space-y-2">
-                                    <div className="text-teal-600 font-medium text-lg">
+                        <div className="space-y-0">
+                            {displayedLogs.map((log) => (
+                                <div key={log.id} className="py-2 border-y-1">
+                                    <div className="text-custom-bluegreen font-semibold text-sm ">
                                         {formatDateWithTime(log.created_at)}
                                     </div>
 
-                                    <div className="text-gray-500 text-base">
-                                        {/* Display log message */}
-                                        <span className="text-gray-800">
+                                    <div className="text-[#818181] text-sm">
+                                         <div className="whitespace-pre-wrap break-words">
                                             {log.log_message ||
-                                                "Work Order Update"}
-                                        </span>
-
-                                        {/* Display creator */}
-                                        <span className="text-gray-500 ml-2">
-                                            by{" "}
-                                            <span className="text-blue-500 font-medium">
-                                                {getUserDisplayName(log)}
-                                            </span>
-                                        </span>
-
-                                        {/* Show assignment info if available */}
-                                        {log.assigned_user_name && (
-                                            <span className="text-gray-500 ml-2">
-                                                • Assigned to:{" "}
-                                                <span className="text-blue-500 font-medium">
-                                                    {getAssigneeName(log)}
+                                                "Work Order Updated"}
+                                        </div>
+                                        <div className="text-sm text-gray-500">
+                                            <span>
+                                                by{" "}
+                                                <span className="text-blue-500 font-medium break-words">
+                                                    {getUserDisplayName(log)}
                                                 </span>
                                             </span>
-                                        )}
+
+                                            {log.assigned_user_name && log.note_type !== "Manual Entry" && (
+                                                <span className="ml-2">
+                                                    • Assigned to:{" "}
+                                                    <span className="text-blue-500 font-medium">
+                                                        {getAssigneeName(log)}
+                                                    </span>
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
 
-                                    {/* Display note content if available */}
                                     {log.note_content && (
                                         <div className="text-gray-700 text-base mt-3 pl-4 border-l-2 border-gray-200">
                                             {log.note_content}
@@ -234,23 +233,19 @@ function NotesAndUpdatesModal({
                         </div>
                     )}
                 </div>
-
-                {/* Footer */}
-                <div className="px-8 py-6">
+                <div>
                     <div className="flex justify-center space-x-4">
                         {logs.length > 2 && (
                             <button
                                 onClick={() => setShowAll(!showAll)}
-                                className="text-green-600 hover:text-green-700 text-base font-medium transition-colors border border-green-600 hover:border-green-700 px-6 py-3 rounded-lg"
+                                className="text-gray-600 hover:text-gray-700 text-base font-normal transition-colors border border-gray-300 hover:border-gray-400 px-6 py-3 rounded-lg bg-white"
                             >
                                 {showAll ? "Show Less" : "See More"}
                             </button>
                         )}
                         <button
-                            onClick={() =>
-                                onAddNote && onAddNote(selectedAccountId)
-                            }
-                            className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors text-base font-medium"
+                            onClick={() => setIsAddNoteModalOpen(true)}
+                            className="bg-gradient-to-r from-[#175D5F] to-[#70AD47] text-white px-6 py-3 rounded-lg flex items-center space-x-2 transition-colors text-base font-normal hover:from-[#1A6A6C] hover:to-[#7CBF4F]"
                         >
                             <span>+</span>
                             <span>Add Note</span>
@@ -258,6 +253,18 @@ function NotesAndUpdatesModal({
                     </div>
                 </div>
             </div>
+            {isAddNoteModalOpen && (
+                <AddNoteModal
+                    isOpen={isAddNoteModalOpen}
+                    onClose={() => setIsAddNoteModalOpen(false)}
+                    onSaveSuccess={handleAddNoteSuccess}
+                    selectedAccountId={selectedAccountId}
+                    selectedAssignee={selectedAssignee}
+                    numericWorkOrderId={workOrderData?.work_order_id} 
+                    logType={selectedWorkOrder}
+                    currentUserId={currentUserId}
+                />
+            )}
         </div>
     );
 }
