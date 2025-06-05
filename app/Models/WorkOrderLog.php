@@ -48,7 +48,7 @@ class WorkOrderLog extends Model
     }
     public function documents()
     {
-        return $this->hasMany(WorkOrderDocument::class, 'log_id');
+        return $this->hasMany(WorkOrderDocument::class, 'log_id', 'id');
     }
     public function accounts()
     {

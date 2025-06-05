@@ -19,27 +19,26 @@ class WorkOrderController extends Controller
     private $gcsBucket;
     private $gcsFolderName;
 
-    // public function __construct()
-    // {
-    //     if (config('services.app_url') === 'http://localhost:8001' || config('services.app_url') === 'https://admin-dev.cebulandmasters.com') {
-    //         $this->gcsKeyJson = config('services.gcs.key_json');
-    //         $this->gcsBucket = 'super-app-storage'; 
-    //         $this->gcsFolderName = 'work_order_notes_attachments/';
-    //     } elseif (config('services.app_url') === 'https://admin-uat.cebulandmasters.com') {
-    //         $this->gcsKeyJson = config('services.gcs.key_json');
-    //         $this->gcsBucket = 'super-app-uat'; // Example bucket
-    //         $this->gcsFolderName = 'work_order_notes_attachments-uat/'; // Example folder
-    //     } elseif (config('services.app_url') === 'https://admin.cebulandmasters.com') {
-    //         $this->gcsKeyJson = config('services.gcs_prod.key_json');
-    //         $this->gcsBucket = 'concerns-bucket'; // Example bucket for prod
-    //         $this->gcsFolderName = 'work_order_notes_attachments-prod/'; // Example folder for prod
-    //     } else {
-    //         // Default or fallback GCS configuration if needed
-    //         $this->gcsKeyJson = config('services.gcs.key_json');
-    //         $this->gcsBucket = 'default-bucket';
-    //         $this->gcsFolderName = 'work_order_notes_attachments/';
-    //     }
-    // }
+    public function __construct()
+    {
+        if (config('services.app_url') === 'http://localhost:8001' || config('services.app_url') === 'https://admin-dev.cebulandmasters.com') {
+            $this->gcsKeyJson = config('services.gcs.key_json');
+            $this->gcsBucket = 'super-app-storage';
+            $this->gcsFolderName = 'documents/';
+        } elseif (config('services.app_url') === 'https://admin-uat.cebulandmasters.com') {
+            $this->gcsKeyJson = config('services.gcs.key_json');
+            $this->gcsBucket = 'super-app-uat';
+            $this->gcsFolderName = 'work_order_notes_attachments-uat/';
+        } elseif (config('services.app_url') === 'https://admin.cebulandmasters.com') {
+            $this->gcsKeyJson = config('services.gcs_prod.key_json');
+            $this->gcsBucket = 'concerns-bucket';
+            $this->gcsFolderName = 'work_order_notes_attachments-prod/';
+        } else {
+            $this->gcsKeyJson = config('services.gcs.key_json');
+            $this->gcsBucket = 'default-bucket';
+            $this->gcsFolderName = 'work_order_notes_attachments/';
+        }
+    }
 
     public function index(Request $request)
     {
@@ -111,13 +110,17 @@ class WorkOrderController extends Controller
         $validatedData = $request->validate([
             'file'                => 'required|file|max:10240',
             'uploaded_by_user_id' => 'required|integer|exists:users,id',
+            'file_title'          => 'nullable|string|max:255', 
+
         ]);
         $path = $request->file('file')->store('work_order_documents', 's3');
         $document = $workOrder->documents()->create([
             'uploaded_by_user_id' => $validatedData['uploaded_by_user_id'],
-            'file_name' => $request->file('file')->getClientOriginalName(),
-            'file_path' => \Storage::disk('s3')->url($path),
-            'file_type' => $request->file('file')->getMimeType(),
+            'file_name'           => $request->file('file')->getClientOriginalName(),
+            'file_path'           => \Storage::disk('s3')->url($path),
+            'file_type'           => $request->file('file')->getMimeType(),
+            'file_title'          => $validatedData['file_title'] ?? $request->file('file')->getClientOriginalName(), // From previous change
+            // 'account_id'       => $validatedData['account_id'] ?? null, // If passed for direct uploads
         ]);
         return response()->json($document->load('uploadedBy'), 201);
     }
@@ -199,7 +202,7 @@ class WorkOrderController extends Controller
             'workOrderType:id,type_name',
             'accounts:id,account_name,contract_no',
             'updates' => function ($query) {
-                $query->with('updatedBy:id,fullname,firstname,lastname')->orderBy('created_at', 'desc'); 
+                $query->with('updatedBy:id,fullname,firstname,lastname')->orderBy('created_at', 'desc');
             },
             'documents' => function ($query) {
                 $query->with('uploadedBy:id,fullname,firstname,lastname')->orderBy('created_at', 'desc');
@@ -301,6 +304,8 @@ class WorkOrderController extends Controller
             'created_by_user_id' => 'required|integer|exists:employee,id',
             'files'              => 'required_without:note_text|nullable|array',
             'files.*'            => 'file|max:10240',
+            'file_titles'        => 'nullable|array', // From previous change
+            'file_titles.*'      => 'nullable|string|max:255', // From previous change
             'assigned_user_id'   => 'nullable|integer|exists:employee,id',
         ]);
         if ($validator->fails()) {
@@ -327,25 +332,28 @@ class WorkOrderController extends Controller
             Log::info('Work order log entry created:', ['log_id' => $workOrderLog->id]);
             if ($request->hasFile('files')) {
                 $uploadedFilesData = $this->_uploadFilesToGCS($request->file('files'));
-                $employee = Employee::find($validatedData['created_by_user_id']);
-                $uploaderUserId = $employee->user_id_for_users_table ?? null;
-                if (!$uploaderUserId) {
-                    Log::warning('Could not determine users.id for uploader. Falling back to employee.id for work_order_documents.uploaded_by_user_id. This may cause FK issues.', ['employee_id' => $validatedData['created_by_user_id']]);      
-                     DB::rollBack();
-                     Log::error('Failed to determine uploader user.id from employee.id for work_order_documents.');
-                     return response()->json(['message' => 'Failed to save note. Could not determine uploader user ID.'], 500);
-                }
-                foreach ($uploadedFilesData as $fileData) {
+                $fileTitles = $request->input('file_titles', []); // From previous change
+
+                $uploaderUserId = $validatedData['created_by_user_id'];
+                $accountIdForDocuments = $validatedData['account_id'] ?? null;
+
+                foreach ($uploadedFilesData as $index => $fileData) {
+                    // File title logic from previous change
+                    $titleFromRequest = $fileTitles[$index] ?? null;
+                    $finalTitle = !empty(trim($titleFromRequest)) ? trim($titleFromRequest) : $fileData['original_file_name'];
+
                     $workOrderLog->documents()->create([
                         'work_order_id'       => $validatedData['work_order_id'],
-                        'uploaded_by_user_id' => $uploaderUserId, 
+                        'account_id'          => $accountIdForDocuments, // Store the account_id
+                        'uploaded_by_user_id' => $uploaderUserId,
                         'file_name'           => $fileData['original_file_name'],
                         'file_path'           => $fileData['file_link'],
                         'file_type'           => $fileData['mime_type'],
                         'log_id'              => $workOrderLog->id,
+                        'file_title'          => $finalTitle, // From previous change
                     ]);
                 }
-                Log::info('Attached documents to work order log:', ['log_id' => $workOrderLog->id, 'file_count' => count($uploadedFilesData)]);
+                Log::info('Attached documents to work order log. Uploader employee ID:', ['log_id' => $workOrderLog->id, 'uploader_employee_id' => $uploaderUserId, 'file_count' => count($uploadedFilesData)]);
             }
             DB::commit();
             return response()->json(['message' => 'Note and attachments added successfully.', 'log_id' => $workOrderLog->id], 201);
@@ -368,14 +376,14 @@ class WorkOrderController extends Controller
         foreach ($files as $file) {
             if ($file->isValid()) {
                 $originalFileName = $file->getClientOriginalName();
-                $fileName = uniqid() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $originalFileName); // Sanitize
+                $fileName = uniqid() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $originalFileName);
                 $filePath = rtrim($this->gcsFolderName, '/') . '/' . $fileName;
                 $bucket->upload(
                     fopen($file->getPathname(), 'r'),
                     ['name' => $filePath]
                 );
-                $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years')); // Or use public URL if bucket is public
-                                $uploadedFilesData[] = [
+                $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
+                $uploadedFilesData[] = [
                     'file_link'          => $fileLink,
                     'original_file_name' => $originalFileName,
                     'gcs_path'           => $filePath,

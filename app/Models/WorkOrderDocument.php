@@ -12,10 +12,13 @@ class WorkOrderDocument extends Model
     protected $primaryKey = 'document_id';
     protected $fillable = [
         'work_order_id',
+        'account_id', 
         'uploaded_by_user_id',
         'file_name',
         'file_path',
         'file_type',
+        'file_title',
+        'log_id',   
     ];
 
     public function workOrder()
@@ -25,6 +28,16 @@ class WorkOrderDocument extends Model
 
     public function uploadedBy()
     {
-        return $this->belongsTo(User::class, 'uploaded_by_user_id', 'id');
+        return $this->belongsTo(Employee::class, 'uploaded_by_user_id', 'id');
+    }
+
+    public function workOrderLog()
+    {
+        return $this->belongsTo(WorkOrderLog::class, 'log_id', 'id');
+    }
+
+    public function account()
+    {
+        return $this->belongsTo(TakenOutAccount::class, 'account_id', 'id');
     }
 }

@@ -1,5 +1,6 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect} from "react";
 import DateLogo from "../../../../../public/Images/Date_range.svg";
+import AttachmentIcon from "../../../../../public/Images/ATTCHMT.svg"; 
 import AddNoteModal from "./AddNoteModal";
 
 function NotesAndUpdatesModal({
@@ -64,10 +65,12 @@ function NotesAndUpdatesModal({
         }
     };
 
-    const filteredLogs = logs.filter(log => {
-      return log.work_order_id === selectedWorkOrder &&
-             log.log_type === selectedLogType &&
-             log.account_id === selectedAccountId;
+    const filteredLogs = logs.filter((log) => {
+        return (
+            log.work_order_id === selectedWorkOrder &&
+            log.log_type === selectedLogType &&
+            log.account_id === selectedAccountId
+        );
     });
 
     const handleAddNoteSuccess = async () => {
@@ -102,25 +105,29 @@ function NotesAndUpdatesModal({
         return `${formattedDate} | ${formattedTime}`;
     };
 
-const getDisplayLogs = () => {
-  console.log('logs:', logs);
-  console.log('selectedWorkOrder:', selectedWorkOrder);
-  console.log('selectedAccountId:', selectedAccountId);
-  console.log('selectedAssignee:', selectedAssignee);
+    const getDisplayLogs = () => {
+        console.log("logs:", logs);
+        console.log("selectedWorkOrder:", selectedWorkOrder);
+        console.log("selectedAccountId:", selectedAccountId);
+        console.log("selectedAssignee:", selectedAssignee);
 
-  return logs.filter((log) => {
-    const matchesLogType = log.log_type === selectedWorkOrder;
-    const matchesAccount = (log.note_type === "Manual Entry" && log.account_id === selectedAccountId) || (log.account_ids && log.account_ids.includes(selectedAccountId));
-    const matchesAssignee = selectedAssignee?.id
-      ? log.assigned_user_id === selectedAssignee.id ||
-        log.created_by_user_id === selectedAssignee.id
-      : true;
+        return logs.filter((log) => {
+            const matchesLogType = log.log_type === selectedWorkOrder;
+            const matchesAccount =
+                (log.note_type === "Manual Entry" &&
+                    log.account_id === selectedAccountId) ||
+                (log.account_ids &&
+                    log.account_ids.includes(selectedAccountId));
+            const matchesAssignee = selectedAssignee?.id
+                ? log.assigned_user_id === selectedAssignee.id ||
+                  log.created_by_user_id === selectedAssignee.id
+                : true;
 
-    return matchesLogType && matchesAccount && matchesAssignee;
-  });
-};
+            return matchesLogType && matchesAccount && matchesAssignee;
+        });
+    };
 
-const displayedLogs = getDisplayLogs();
+    const displayedLogs = getDisplayLogs();
     const getUserDisplayName = (log) => {
         return log.fullname || log.assigned_user_name || "Unknown User";
     };
@@ -200,7 +207,7 @@ const displayedLogs = getDisplayLogs();
                                     </div>
 
                                     <div className="text-[#818181] text-sm">
-                                         <div className="whitespace-pre-wrap break-words">
+                                        <div className="whitespace-pre-wrap break-words">
                                             {log.log_message ||
                                                 "Work Order Updated"}
                                         </div>
@@ -212,14 +219,18 @@ const displayedLogs = getDisplayLogs();
                                                 </span>
                                             </span>
 
-                                            {log.assigned_user_name && log.note_type !== "Manual Entry" && (
-                                                <span className="ml-2">
-                                                    • Assigned to:{" "}
-                                                    <span className="text-blue-500 font-medium">
-                                                        {getAssigneeName(log)}
+                                            {log.assigned_user_name &&
+                                                log.note_type !==
+                                                    "Manual Entry" && (
+                                                    <span className="ml-2">
+                                                        • Assigned to:{" "}
+                                                        <span className="text-blue-500 font-medium">
+                                                            {getAssigneeName(
+                                                                log
+                                                            )}
+                                                        </span>
                                                     </span>
-                                                </span>
-                                            )}
+                                                )}
                                         </div>
                                     </div>
 
@@ -228,6 +239,28 @@ const displayedLogs = getDisplayLogs();
                                             {log.note_content}
                                         </div>
                                     )}
+
+                                    {log.documents && log.documents.length > 0 && (
+                                        <div className="mt-2 pl-1">
+                                            <p className="text-xs font-semibold text-gray-600 mb-1">Attachments:</p>
+                                            <ul className="space-y-1">
+                                                {log.documents.map((doc) => (
+                                                    <li key={doc.document_id} className="text-xs">
+                                                        <a
+                                                            href={doc.file_path}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                            className="text-custom-bluegreen hover:text-custom-lightgreen hover:underline flex items-center"
+                                                        >
+                                                            <img src={AttachmentIcon} alt="Attachment" className="w-3 h-3 mr-1.5 opacity-70" />
+                                                            {doc.file_title || doc.file_name}
+                                                        </a>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+
                                 </div>
                             ))}
                         </div>
@@ -260,7 +293,7 @@ const displayedLogs = getDisplayLogs();
                     onSaveSuccess={handleAddNoteSuccess}
                     selectedAccountId={selectedAccountId}
                     selectedAssignee={selectedAssignee}
-                    numericWorkOrderId={workOrderData?.work_order_id} 
+                    numericWorkOrderId={workOrderData?.work_order_id}
                     logType={selectedWorkOrder}
                     currentUserId={currentUserId}
                 />

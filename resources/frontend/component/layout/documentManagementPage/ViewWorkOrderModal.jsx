@@ -182,7 +182,6 @@ const ViewWorkOrderModal = ({ isOpen, onClose, workOrderData }) => {
                         <div
                             key={account.id}
                             className="grid grid-cols-12 items-center px-4 py-3 border-t text-base font-normal text-custom-bluegreen"
-                            onClick={() => handleRowClick(account.id)}
                         >
                             <div className="col-span-4">
                                 <div>{account.account_name}</div>
