@@ -149,8 +149,6 @@ export const ContextProvider = ({ children }) => {
                 const parsedData = JSON.parse(storedData);
                 setUserAccessData(parsedData);
             } catch (error) {
-                console.error("Error parsing userAccessData from sessionStorage:", error);
-                // Optionally set a default value
                 setUserAccessData([]);
             }
         }
