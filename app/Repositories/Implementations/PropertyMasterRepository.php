@@ -304,11 +304,14 @@ class PropertyMasterRepository
     protected function filterPropertySetting($validatedData)
     {
         return $this->model
-            ->when(isset($validatedData['property_name']), function ($query) use ($validatedData) {
+            ->when(isset($validatedwData['property_name']), function ($query) use ($validatedData) {
                 return $query->whereRaw('LOWER(property_name) LIKE ?', ['%' . strtolower($validatedData['property_name']) . '%']);
             })
-            ->when(isset($validatedData['entity']), function ($query) use ($validatedData) {
-                return $query->whereRaw('LOWER(entity) LIKE ?', ['%' . strtolower($validatedData['entity']) . '%']);
+            ->when(isset($validatedData['business_entity_sap']), function ($query) use ($validatedData) {
+                return $query->whereRaw('LOWER(business_entity_sap) LIKE ?', ['%' . strtolower($validatedData['business_entity_sap']) . '%']);
+            })
+            ->when(isset($validatedData['project_category']), function ($query) use ($validatedData) {
+                return $query->whereRaw('project_category LIKE ?', ['%' . $validatedData['project_category'] . '%']);
             });
     }
 

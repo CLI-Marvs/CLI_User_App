@@ -1,8 +1,8 @@
-import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/CustomRadioGroup";
+import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/PropertyFeatureCheckbox";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import { HiPencil } from "react-icons/hi";
 
-const PropertyFeatureTableRow = ({ item, handleOpenModal, propertySettingColumns}) => {
+const PropertyFeatureTableRow = ({ item, handleOpenModal, propertySettingColumns }) => {
     return (
         <tr className="even:bg-custombg3 h-16" key={item.id}>
             <td className="px-4 py-2 montserrat-regular">
@@ -14,12 +14,15 @@ const PropertyFeatureTableRow = ({ item, handleOpenModal, propertySettingColumns
             </td>
 
             <td className="px-4 py-2 montserrat-regular">
-                {item.entity || "N/A"}
+                {item.business_entity_sap || "N/A"}
+            </td>
+            <td className="px-4 py-2 montserrat-regular">
+                {item.project_category || "N/A"}
             </td>
 
             {propertySettingColumns &&
                 propertySettingColumns
-                    .slice(3, -1)
+                    .slice(4, -1)
                     .map((featureColumn, colIndex) => {
                         const feature = item.features.find(
                             (f) => f.name === featureColumn.label

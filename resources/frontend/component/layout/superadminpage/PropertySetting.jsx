@@ -33,7 +33,18 @@ const PropertySetting = () => {
     const [selectedProperty, setSelectedProperty] = useState([]);
     const fields = [
         { name: "property_name", label: "Property Name" },
-        { name: "entity", label: "Entity" },
+        { name: "business_entity_sap", label: "Business Entity(SAP)" },
+        {
+            name: "project_category",
+            label: "Project Category",
+            type: "select",
+            defaultValue: "",
+            options: [
+                { label: "Select Project  Category", value: "" },
+                { label: "CLI", value: "CLI" },
+                { label: "JV", value: "JV" },
+            ],
+        },
     ];
 
     //Hooks
@@ -64,7 +75,8 @@ const PropertySetting = () => {
     const propertySettingColumns = [
         { label: "Property Name", width: "w-[200px]" },
         { label: "Description", width: "w-[200px]" },
-        { label: "Entity", width: "w-[120px]" },
+        { label: "Business Entity", width: "w-[120px]" },
+        { label: "Project Category", width: "w-[50px]" },
         ...(propertySettingsFeatures?.map((item) => ({
             label: item.name,
             width: "w-[100px]",
@@ -155,7 +167,7 @@ const PropertySetting = () => {
                         No data available
                     </div>
                 ) : propertySettingsFeatures?.length > 0 &&
-                  propertyFeatures?.length > 0 ? (
+                    propertyFeatures?.length > 0 ? (
                     <CustomTable
                         tableClassName="w-full min-w-[882px] px-2"
                         className="gap-4 w-full h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen mb-4 -mx-1 px-4"

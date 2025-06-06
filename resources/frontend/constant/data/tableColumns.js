@@ -19,3 +19,5 @@ export const PROPERTY_SETTING_COLUMNS = [
     { label: "Description", width: "w-[150px]" },
     { label: "Entity", width: "w-[150px]" },
 ];
+
+

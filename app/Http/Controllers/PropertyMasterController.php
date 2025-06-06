@@ -86,10 +86,10 @@ class PropertyMasterController extends Controller
             'per_page' => 'nullable|integer|min:1|max:100',
             'page' => 'nullable|integer|min:1',
             'property_name' => 'nullable|string|max:255',
-            'entity' => 'nullable|string|max:255',
-            'feature' => 'nullable|string|max:255',
+            'business_entity_sap' => 'nullable|string|max:255',
+            'project_category' => 'nullable|string|max:255',
         ]);
-
+    
         $features = $this->service->getAllPropertiesWithFeatures($validatedData);
         if (!$features['data']) {
             return response()->json([
