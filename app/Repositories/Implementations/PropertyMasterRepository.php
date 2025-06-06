@@ -4,6 +4,7 @@ namespace App\Repositories\Implementations;
 
 
 use Exception;
+use Illuminate\Support\Str;
 use App\Models\PropertyMaster;
 use Illuminate\Support\Facades\DB;
 
@@ -263,7 +264,7 @@ class PropertyMasterRepository
                     'id' => $property->id,
                     'property_name' => $property->property_name,
                     'description' => $property->description ?? null,
-                    'entity' => $property->entity ?? null,
+                    'business_entity_sap' => $property->business_entity_sap ?? null,
                     'features' => $property->features->map(function ($feature) {
                         return [
                             'id' => $feature->id,
@@ -273,6 +274,7 @@ class PropertyMasterRepository
                     }),
                     'status' => $property->status,
                     'type' => $property->type,
+                    'project_category' => $property->project_category,
                     'barangay' => $property->barangay,
                     'city' => $property->city,
                     'province' => $property->province,
@@ -327,11 +329,12 @@ class PropertyMasterRepository
         $property = $this->model->findOrFail($id);
 
         $property->update([
-            'property_name' => $data['propertyName'] ?? null,
+            'property_name' => Str::upper($data['propertyName']),
             'description' => $data['description'] ?? null,
-            'entity' => $data['entity'] ?? null,
+            'business_entity_sap' => $data['business_entity_sap'] ?? null,
             'status' => 'Draft',
             'type' => $data['type'] ?? null,
+            'project_category' => $data['project_category'] ?? null,
             'barangay' => $data['barangay'] ?? null,
             'city' => $data['city'] ?? null,
             'country' => $data['country'] ?? null,
@@ -381,11 +384,12 @@ class PropertyMasterRepository
                 : $this->parseGoogleMapLink($data['google_map_link']);
 
             $property = $this->model->create([
-                'property_name' => $data['propertyName'],
+                'property_name' => Str::upper($data['propertyName']),
                 'description' => $data['description'] ?? null,
-                'entity' => $data['entity'] ?? null,
+                'business_entity_sap' => $data['business_entity_sap'] ?? null,
                 'status' => 'Draft',
                 'type' => $data['type'] ?? null,
+                'project_category' => $data['project_category'] ?? null,
                 'barangay' => $data['barangay'] ?? null,
                 'city' => $data['city'] ?? null,
                 'country' => $data['country'] ?? null,

@@ -164,7 +164,7 @@ const PropertySetting = () => {
                         isLoading={isLoading && isFirstLoad}
                         renderRow={(item) => (
                             <PropertyFeatureTableRow
-                                key={item.property_feature_id}
+                                key={item.id}
                                 item={item}
                                 handleOpenModal={handleOpenModal}
                                 propertySettingColumns={propertySettingColumns}

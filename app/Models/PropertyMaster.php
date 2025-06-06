@@ -18,7 +18,7 @@ class PropertyMaster extends Model
     protected $fillable = [
         'property_name',
         'description',
-        'entity',
+        'business_entity_sap',
         'status',
         'google_map_link',
         'type',
@@ -29,6 +29,7 @@ class PropertyMaster extends Model
         'type',
         'latitude',
         'longitude',
+        'project_category'
     ];
 
     //Relationships

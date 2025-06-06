@@ -68,8 +68,6 @@ export const propertyMasterService = {
 
     storePropertyFeatureSettings: async (payload) => {
         try {
-            console.log("Response from storePropertyFeatureSettings:", payload);
-
             const response = await apiService.post(
                 `/property-feature-settings/properties/features`,
                 payload

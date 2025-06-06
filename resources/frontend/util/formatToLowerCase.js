@@ -1,5 +1,10 @@
+/* eslint-disable security/detect-object-injection */
 export const toLowerCaseText = (text) => {
     if (!text) return "";
+
+    // If the text ends with a space, preserve it
+    const endsWithSpace = text.endsWith(" ");
+
     // List of property that should stay uppercase
     const acronyms = ["SJMV", "LPU", "CDO", "DGT"];
 
@@ -9,21 +14,22 @@ export const toLowerCaseText = (text) => {
     };
 
     // Split text into words while preserving parentheses
-    const words = text.match(/\([^\)]+\)|[^\s]+/g) || [];
+    // eslint-disable-next-line no-useless-escape
+    const words = text.trim().match(/\([^\)]+\)|[^\s]+/g) || [];
 
     // Join words first to check for special cases
     const normalizedText = words.join(" ").toLowerCase();
 
     // Check if the full phrase matches a special case
     if (specialCases[normalizedText]) {
-        return specialCases[normalizedText];
+        return specialCases[normalizedText] + (endsWithSpace ? " " : "");
     }
 
-    return words
+    const formattedText = words
         .map((word) => {
             // Check if the word is inside parentheses
             if (word.startsWith("(") && word.endsWith(")")) {
-                const innerWord = word.slice(1, -1); // Extract text inside parentheses
+                const innerWord = word.slice(1, -1);
                 return acronyms.includes(innerWord.toUpperCase())
                     ? `(${innerWord.toUpperCase()})`
                     : `(${capitalize(innerWord)})`;
@@ -35,6 +41,9 @@ export const toLowerCaseText = (text) => {
                 : capitalize(word);
         })
         .join(" ");
+
+    // Preserve trailing space if it existed in the input
+    return formattedText + (endsWithSpace ? " " : "");
 };
 
 // Helper function to capitalize a word

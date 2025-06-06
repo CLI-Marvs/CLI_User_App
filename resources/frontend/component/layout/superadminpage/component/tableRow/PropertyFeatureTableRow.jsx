@@ -1,8 +1,8 @@
-import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/PropertyFeatureCheckbox";
+import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/CustomRadioGroup";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import { HiPencil } from "react-icons/hi";
 
-const PropertyFeatureTableRow = ({ item, handleOpenModal, propertySettingColumns }) => {
+const PropertyFeatureTableRow = ({ item, handleOpenModal, propertySettingColumns}) => {
     return (
         <tr className="even:bg-custombg3 h-16" key={item.id}>
             <td className="px-4 py-2 montserrat-regular">
