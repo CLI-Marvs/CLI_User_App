@@ -145,7 +145,14 @@ export const ContextProvider = ({ children }) => {
     useEffect(() => {
         const storedData = sessionStorage.getItem("userAccessData");
         if (storedData) {
-            setUserAccessData(JSON.parse(storedData));
+            try {
+                const parsedData = JSON.parse(storedData);
+                setUserAccessData(parsedData);
+            } catch (error) {
+                console.error("Error parsing userAccessData from sessionStorage:", error);
+                // Optionally set a default value
+                setUserAccessData([]);
+            }
         }
     }, []);
 
