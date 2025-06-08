@@ -7,6 +7,8 @@ use App\Models\BankTransaction;
 use App\Models\Invoices;
 use App\Models\MarkupSettings;
 use App\Models\PreSubmissionOnlinePayments;
+use App\Models\TransactionColumns;
+use App\Models\TransactionPresets;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -130,7 +132,6 @@ class TransactionRepository
         return $transactionData;
     }
 
-
     public function retrieveTransactions(array $data)
     {
         $startDate = $data['start_date'] ?? null;
@@ -150,21 +151,43 @@ class TransactionRepository
                 'invoices.flow_type',
                 'invoices.id as invoice_id',
             )
-            ->orderBy('transaction.created_at', 'desc')
-            ->when(!empty($data['status']), fn($q) => $q->where('transaction.status', $data['status']))
-            ->when(!empty($data['email']), fn($q) => $q->where('transaction.email', $data['email']))
-            ->when(!empty($data['destination_bank']), fn($q) => $q->where('transaction.destination_bank', $data['destination_bank']))
-            ->when(!empty($data['property_name']), fn($q) => $q->where('property_masters.property_name', $data['property_name']))
-            ->when(!empty($data['invoice_number']), fn($q) => $q->where('transaction.invoice_number', $data['invoice_number']))
-            ->when(!empty($data['transaction_number']), fn($q) => $q->where('transaction.transaction_number', $data['transaction_number']))
-            ->when(!empty($data['reference_number']), fn($q) => $q->where('transaction.reference_number', $data['reference_number']))
-            ->when($startDate && $endDate, fn($q) => $q->whereBetween('transaction.transaction_date', [$startDate, $endDate]))
-            ->when($startDate && !$endDate, fn($q) => $q->whereDate('transaction.transaction_date', $startDate))
-            ->when($endDate && !$startDate, fn($q) => $q->whereDate('transaction.transaction_date', $endDate))
-            ->paginate(20);
+            ->orderByDesc('transaction.created_at');
 
-        return $query;
+        $filters = [
+            'status'             => 'transaction.status',
+            'email'              => 'transaction.email',
+            'destination_bank'   => 'transaction.destination_bank',
+            'invoice_number'     => 'transaction.invoice_number',
+            'transaction_number' => 'transaction.transaction_number',
+            'reference_number'   => 'transaction.reference_number',
+            'transaction_type'   => 'transaction.transaction_type',
+        ];
+
+        foreach ($filters as $key => $column) {
+            if (!empty($data[$key])) {
+                $query->where($column, $data[$key]);
+            }
+        }
+
+        if (!empty($data['property_name'])) {
+            $query->whereRaw('property_name ILIKE ?', ["%{$data['property_name']}%"]);
+        }
+        if (!empty($data['payment_option'])) {
+            $query->whereRaw('payment_option ILIKE ?', ["%{$data['payment_option']}%"]);
+        }
+
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('transaction.transaction_date', [$startDate, $endDate]);
+        } elseif ($startDate) {
+            $query->whereDate('transaction.transaction_date', $startDate);
+        } elseif ($endDate) {
+            $query->whereDate('transaction.transaction_date', $endDate);
+        }
+
+        return $query->paginate(20);
     }
+
 
     public function transactionReports(array $data)
     {
@@ -176,19 +199,19 @@ class TransactionRepository
             ->selectRaw('SUM(amount + convenience_fee) as running_total')
             ->where('status', 'Succeed')
             ->when($startDate && $endDate, fn($q) => $q->whereBetween('transaction_date', [$startDate, $endDate]));
-       
+
 
         if ($paymentMethod === 'Credit/Debit Card') {
             $query = (clone $baseQuery)->where('payment_option', $paymentMethod);
             $runningTotal = $query->selectRaw('SUM(amount + convenience_fee) as running_total')->value('running_total');
-         
+
             return [
-                'total_bill' => $query->sum('amount'),
-                'total_withholding_tax' => $query->sum('withholding_tax'),
-                'total_bank_recon_amount' => $query->sum('bank_recon_amount'),
-                'total_mdr_amount' => $query->sum('mdr'),
-                'total_gtw' => $query->sum('gateway_fee'),
-                'total_net_posting' => $query->sum('net_posting_amount'),
+                'amount' => $query->sum('amount'),
+                'withholding_tax' => $query->sum('withholding_tax'),
+                'bank_recon_amount' => $query->sum('bank_recon_amount'),
+                'mdr' => $query->sum('mdr'),
+                'gateway_fee' => $query->sum('gateway_fee'),
+                'net_posting_amount' => $query->sum('net_posting_amount'),
                 'running_total' => $runningTotal ?? 0,
             ];
         }
@@ -200,14 +223,14 @@ class TransactionRepository
             $runningTotal = $query->selectRaw('SUM(amount + convenience_fee) as running_total')->value('running_total');
 
             $results[$ewalletOption] = [
-                "total_bill" => $query->sum('amount'),
-                "total_pnf" => $query->sum('paynamics_fee'),
+                "amount" => $query->sum('amount'),
+                "paynamics_fee" => $query->sum('paynamics_fee'),
                 'running_total' => $runningTotal ?? 0,
             ];
             $ewalletsRunningTotal += $runningTotal ?? 0;
         };
         $results['running_total'] = $ewalletsRunningTotal;
-        
+
         return $results;
     }
 
@@ -261,6 +284,46 @@ class TransactionRepository
     public function storeBankStatements(array $data)
     {
         $data = $this->bankStatementModel->create($data);
+        return $data;
+    }
+
+    public function storeViewAndColumns(array $data, $userId)
+    {
+        $preset = TransactionPresets::create([
+            'user_id' => $userId,
+            'sub_feature_id' => $data['subFeatureId'],
+            'name' => "hahahaha11",
+        ]);
+
+        foreach ($data['columns'] as $column) {
+            TransactionColumns::create([
+                'view_preset_id' => $preset->id,
+                'column_name' => $column['column_name'],
+            ]);
+        };
+        return $data;
+    }
+
+
+    public function getTransactionColumns(array $data, int $userId)
+    {
+
+        $data = TransactionPresets::with('columns')
+            ->where('user_id', $userId)
+            ->where('sub_feature_id', $data['subFeatureId'])
+            ->get();
+        return $data;
+    }
+
+    public function setDefaultView(array $data, int $userId)
+    {
+        TransactionPresets::where('user_id', $userId)
+            ->where('sub_feature_id', $data['subFeatureId'])
+            ->update(['is_default' => false]);
+
+        TransactionPresets::where('id', $data['presetId'])
+            ->update(['is_default' => true]);
+
         return $data;
     }
 }

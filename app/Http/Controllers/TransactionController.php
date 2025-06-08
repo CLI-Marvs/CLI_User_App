@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\TransactionExport;
 use App\Models\BankTransaction;
+use App\Models\SubFeature;
 use App\Services\CustomerMasterlistService;
 use App\Services\TransactionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TransactionController extends Controller
 {
@@ -24,33 +28,32 @@ class TransactionController extends Controller
         try {
             $data = $request->all();
             $inquiries = $this->customerService->getCustomerInquiries($data);
-            
-            return response()->json($inquiries);
 
+            return response()->json($inquiries);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
 
 
-    public function getCustomerData() {
+    public function getCustomerData()
+    {
         try {
             $customerData = $this->customerService->getCustomerData();
 
             return response()->json($customerData);
-
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
 
-    public function getCustomerDetailsByEmail(Request $request) {
+    public function getCustomerDetailsByEmail(Request $request)
+    {
         try {
-           
+
             $customerData = $this->customerService->getCustomerDetailsByEmail($request->email);
 
             return response()->json($customerData);
-
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -99,13 +102,13 @@ class TransactionController extends Controller
             $data = $request->all();
             \Log::info("from paynamics", $data);
             $response = $this->transactionService->paygateWebHook($data);
-    
+
             if (isset($response['message']) && $response['message'] === 'Transaction ID not found') {
                 return response()->json([
                     'response_message' => $response['message']
                 ], 404);
             }
-    
+
             return response()->json([
                 'response_message' => $response['message']
             ]);
@@ -116,7 +119,7 @@ class TransactionController extends Controller
             ], 500);
         }
     }
-    
+
 
     public function clearedBankStatements(Request $request)
     {
@@ -124,7 +127,7 @@ class TransactionController extends Controller
             $data = $request->all();
 
             $response = $this->transactionService->clearedBankStatements($data);
-         
+
             return response()->json([
                 'response_message' => 'Match data successfully',
                 'data' => $response
@@ -145,7 +148,7 @@ class TransactionController extends Controller
 
             $data = $request->all();
             $response = $this->transactionService->retrieveTransactions($data);
-         
+
             return response()->json([
                 'response_message' => 'Retrieve Data Successfully',
                 'data' => $response
@@ -164,13 +167,12 @@ class TransactionController extends Controller
         try {
             $data = $request->all();
             $response = $this->transactionService->updateTransactionStatus($data);
-            
+
 
             return response()->json([
                 'response_message' => 'Data Updated Successfully',
                 'data' => $response
             ]);
-            
         } catch (\Throwable $e) {
             return response()->json([
                 'message' => 'Error occurred.',
@@ -180,17 +182,16 @@ class TransactionController extends Controller
     }
 
     public function retrieveInvoices(Request $request)
-    {   
+    {
         try {
             $data = $request->all();
             $response = $this->transactionService->retrieveInvoices($data);
-            
+
 
             return response()->json([
                 'response_message' => 'Data Retrieved Successfully',
                 'data' => $response
             ]);
-            
         } catch (\Throwable $e) {
             return response()->json([
                 'message' => 'Error occurred.',
@@ -200,17 +201,16 @@ class TransactionController extends Controller
     }
 
     public function retrieveBankStatements(Request $request)
-    {   
+    {
         try {
             $data = $request->all();
             $response = $this->transactionService->retrieveBankStatements($data);
-            
+
 
             return response()->json([
                 'response_message' => 'Data Retrieved Successfully',
                 'data' => $response
             ]);
-            
         } catch (\Throwable $e) {
             return response()->json([
                 'message' => 'Error occurred.',
@@ -239,16 +239,17 @@ class TransactionController extends Controller
     }
 
 
-    public function retrieveBanks() 
+    public function retrieveBanks()
     {
         try {
-            $data = BankTransaction::distinct()
-                                   ->pluck('destination_bank')
-                                   ->values();
-            //code...
+            $query = BankTransaction::distinct()
+                ->pluck('destination_bank')
+                ->values();
+
+
             return response()->json([
                 'response_message' => 'Data retrieved successfully',
-                'data' => $data
+                'data' => $query
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -257,7 +258,7 @@ class TransactionController extends Controller
             ], 500);
         }
     }
-    
+
 
     public function transactionReports(Request $request)
     {
@@ -275,5 +276,90 @@ class TransactionController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function exportTransactions(Request $request)
+    {
+        try {
+            $data = $request->input('columns');
+
+            if (!is_array($data['columns']) || empty($data['columns'])) {
+                return response()->json([
+                    'message' => 'Error occurred.',
+                    'error' => 'Columns not provided'
+                ], 500);
+            }
+
+            return Excel::download(new TransactionExport($data), 'transactions.xlsx');
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error occurred.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function retrieveSubFeatureId(Request $request)
+    {
+        $name = $request->input('name');
+
+        try {
+            $query = SubFeature::whereRaw('name ILIKE ?', ["%{$name}%"])
+                ->first('id');
+
+            return response()->json([
+                'response_message' => 'Data retrieved successfully',
+                'data' => $query
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error occurred.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function storeViewAndColumns(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+            $data = $request->all();
+            $userId = $request->user()->id;
+            $response = $this->transactionService->storeViewAndColumns($data, $userId);
+            
+            DB::commit();
+            return response()->json([
+                'response_message' => 'Data stored successfully',
+                'data' => $response
+            ], 200);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Error occurred.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getTransactionColumns(Request $request)
+    {
+        $data = $request->all();
+        $userId = $request->user()->id;
+        $response = $this->transactionService->getTransactionColumns($data, $userId);
+        return response()->json([
+            'response_message' => 'Data stored successfully',
+            'data' => $response
+        ]);
+    }
+
+    public function setDefaultView(Request $request)
+    {
+        $data = $request->all();
+        $userId = $request->user()->id;
+        $response = $this->transactionService->setDefaultView($data, $userId);
+        return response()->json([
+            'response_message' => 'Data stored successfully',
+            'data' => $response
+        ]);
     }
 }

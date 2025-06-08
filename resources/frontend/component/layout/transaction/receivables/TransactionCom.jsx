@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useMemo, useState } from "react";
 import GlobalTable from "../GlobalTable";
 import TransactionTableCell from "./TransactionTableCell";
 import { useTransactionContext } from "@/context/Transaction/TransactionContext";
@@ -7,9 +7,125 @@ import TransactionSearchBar from "@/component/layout/transaction/TransactionSear
 import Pagination from "@/component/Pagination";
 import usePagination from "@/hooks/usePagination";
 import { usePropertyFormatter } from "@/component/layout/transaction/hooks/usePropertyFormatter";
+import SimpleViewCell from "./SimpleViewCell";
+import exportIcon from "../../../../../../public/Images/export-icon.png";
+import {
+    columnNameToFieldKey,
+    P_METHOD,
+    transactionOptions,
+} from "@/constant/data/transaction";
+import moment from "moment";
+import { useSubFeatureId, useColumns } from "../hooks/useTransactionQueries";
+import useRouteSections from "@/hooks/useRouteSections";
+import ColumnModal from "../component/ColumnModal";
 
 const TransactionCom = () => {
-    const columns = [
+    const { subSection } = useRouteSections();
+    const { data: subFeature } = useSubFeatureId(subSection);
+    const { data: views, isSuccess } = useColumns(subFeature?.id);
+
+    const { formattedPropertyNames } = usePropertyFormatter();
+    const [searchValues, setSearchValues] = useState({});
+    const {
+        transactions,
+        setTransactions,
+        banks,
+        setBanks,
+        enabled,
+        setEnabled,
+        defaultColumns,
+    } = useTransactionContext();
+    const { handlePageClick, setFilters } = usePagination(
+        transaction.transactionList,
+        transactions,
+        setTransactions
+    );
+
+    //*Simple view Cell
+    /* const simpleViewColumns = [
+        {
+            header: "Date & Time",
+            accessor: "transaction_date",
+            render: (row) => (
+                <SimpleViewCell type="transaction_date" row={row} />
+            ),
+        },
+        {
+            header: "Transaction Number",
+            accessor: "transaction_number",
+            render: (row) => (
+                <SimpleViewCell type="transaction_number" row={row} />
+            ),
+        },
+        {
+            header: "Bill Amount",
+            accessor: "amount",
+            render: (row) => <SimpleViewCell type="amount" row={row} />,
+        },
+        {
+            header: "MDR Amount",
+            accessor: "mdr",
+            render: (row) => <SimpleViewCell type="mdr" row={row} />,
+        },
+        {
+            header: "CWT",
+            accessor: "withholding_tax",
+            render: (row) => (
+                <SimpleViewCell type="withholding_tax" row={row} />
+            ),
+        },
+        {
+            header: "Bank Recon Amount",
+            accessor: "bank_recon_amount",
+            render: (row) => (
+                <SimpleViewCell type="bank_recon_amount" row={row} />
+            ),
+        },
+        {
+            header: "Gateway Fee",
+            accessor: "gateway_fee",
+            render: (row) => <SimpleViewCell type="gateway_fee" row={row} />,
+        },
+        {
+            header: "Net Posting Amount",
+            accessor: "net_posting_amount",
+            render: (row) => (
+                <SimpleViewCell type="net_posting_amount" row={row} />
+            ),
+        },
+        {
+            header: "Total Amount",
+            accessor: "total_amount",
+            render: (row) => <SimpleViewCell type="total_amount" row={row} />,
+        },
+    ]; */
+
+    const generateDynamicColumns = (defs) => {
+        if (!defs) return [];
+        return defs
+            .map((def) => {
+                const label = def.column_name;
+                const accessor = columnNameToFieldKey[label];
+
+                if (!accessor) {
+                    console.warn(`No field mapping found for column: ${label}`);
+                    return null;
+                }
+
+                return {
+                    header: label,
+                    accessor,
+                    render: (row) => (
+                        <SimpleViewCell type={accessor} row={row} />
+                    ),
+                };
+            })
+            .filter(Boolean);
+    };
+
+    const dynamicColumns = generateDynamicColumns(defaultColumns);
+
+    const baseColumns = [
         {
             header: "Date & Time",
             accessor: "transaction_date",
@@ -60,43 +176,9 @@ const TransactionCom = () => {
             ),
         },
     ];
-    const { formattedPropertyNames } = usePropertyFormatter();
-    const [searchValues, setSearchValues] = useState({});
-    const { transactions, setTransactions, banks, setBanks } =
-        useTransactionContext();
-    const { handlePageClick, setFilters } = usePagination(
-        transaction.transactionList,
-        transactions,
-        setTransactions
-    );
-
-    const retrieveBanks = async () => {
-        try {
-            const response = await transaction.retrieveBanks();
-            setBanks(response);
-        } catch (error) {
-            console.log("error", error);
-        }
-    };
-
-    useEffect(() => {
-        retrieveBanks();
-    }, []);
 
     const fields = [
         { name: "email", label: "Email" },
-        {
-            name: "destination_bank",
-            label: "Bank",
-            type: "select",
-            options: [
-                { label: "Select Banks", value: "" },
-                ...banks.map((item) => ({
-                    label: item,
-                    value: item,
-                })),
-            ],
-        },
         {
             name: "property_name",
             label: "Project Name",
@@ -109,9 +191,44 @@ const TransactionCom = () => {
                 })),
             ],
         },
-        { name: "invoice_number", label: "Invoice Number" },
+        {
+            name: "transaction_type",
+            label: "Transaction Type",
+            type: "select",
+            options: [
+                { label: "Select Transaction Type", value: "" },
+                ...transactionOptions.map((item) => ({
+                    label: item,
+                    value: item,
+                })),
+            ],
+        },
         { name: "transaction_number", label: "Transaction Number" },
-        { name: "reference_number", label: "Reference Number" },
+        {
+            name: "payment_option",
+            label: "Payment Method",
+            type: "select",
+            options: [
+                { label: "Select Payment Method", value: "" },
+                ...P_METHOD.map((item) => ({
+                    label: item,
+                    value: item,
+                })),
+            ],
+        },
+        { name: "reference_number", label: "Contract Number" },
+        {
+            name: "destination_bank",
+            label: "Bank",
+            type: "select",
+            options: [
+                { label: "Select Bank", value: "" },
+                ...banks.map((item) => ({
+                    label: item,
+                    value: item,
+                })),
+            ],
+        },
         {
             name: "status",
             label: "Status",
@@ -128,6 +245,48 @@ const TransactionCom = () => {
         { name: "date_range", type: "date_range", label: "Date" },
     ];
 
+    const columns = isSuccess
+        ? dynamicColumns.length > 0
+            ? dynamicColumns
+            : baseColumns
+        : [];
+
+    const exportToExcel = async () => {
+        try {
+            const response = await transaction.exportTransactions({
+                columns: [...dynamicColumns.map((col) => col.accessor)],
+                filter: transactions?.filters,
+            });
+
+            if (response.status !== 200) throw new Error("Export failed");
+
+            const blob = response.data;
+            const url = window.URL.createObjectURL(blob);
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "transactions.xlsx");
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error("Error exporting file:", error);
+        }
+    };
+
+    const retrieveBanks = async () => {
+        try {
+            const response = await transaction.retrieveBanks();
+            setBanks(response);
+        } catch (error) {
+            console.log("error", error);
+        }
+    };
+
+    useEffect(() => {
+        retrieveBanks();
+    }, []);
+
     const handleSearchValue = (e) => {
         const { name, value } = e.target;
         setSearchValues((prev) => ({
@@ -139,19 +298,101 @@ const TransactionCom = () => {
     const onSubmit = () => {
         setFilters(searchValues);
         setSearchValues({});
+        setTransactions((prev) => ({
+            ...prev,
+            loading: true,
+        }));
+    };
+
+    const removeFilter = (key) => {
+        const newFilters = { ...transactions?.filters };
+
+        delete newFilters[key];
+
+        if (key === "start_date") {
+            delete newFilters["end_date"];
+        }
+
+        setTransactions((prev) => ({
+            ...prev,
+            filters: newFilters,
+        }));
+    };
+
+    const formatFiltersLabel = (key, value, filters) => {
+        if (key === "start_date") {
+            const start = moment(value).format("MMMM D, YYYY");
+            const end = filters.end_date
+                ? moment(filters.end_date).format("MMMM D, YYYY")
+                : "";
+            return `Date Range: From ${start} to ${end}`;
+        }
+
+        const formattedKey = key
+            .split("_")
+            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+
+        const displayKey =
+            formattedKey === "Payment Option" ? "Payment Method" : formattedKey;
+
+        if (value === "Paymaya" || value === "GCash") {
+            return `${displayKey}: Ewallet (${value})`;
+        }
+
+        return `${displayKey}: ${value}`;
     };
 
     return (
         <>
-            <div className="overflow-y-hidden space-y-2 w-full">
-                <TransactionSearchBar
-                    fields={fields}
-                    searchValues={searchValues}
-                    setSearchValues={setSearchValues}
-                    onChangeSearch={handleSearchValue}
-                    onSubmit={onSubmit}
-                    setFilters={setFilters}
-                />
+            <div className="space-y-2 w-full">
+                <div className="flex items-center gap-4 mb-3">
+                    <TransactionSearchBar
+                        fields={fields}
+                        searchValues={searchValues}
+                        setSearchValues={setSearchValues}
+                        onChangeSearch={handleSearchValue}
+                        onSubmit={onSubmit}
+                        setFilters={setFilters}
+                    />
+                    {/* <div className="flex items-center gap-2">
+                        <ToggleSwitch
+                            enabled={enabled}
+                            setEnabled={setEnabled}
+                        />
+                        <span className="text-base">Simple View</span>
+                    </div> */}
+                    <ColumnModal subFeatureId={subFeature?.id} views={views} />
+                    <div
+                        className="flex items-center gap-2 h-[39px] w-[87px] rounded-md border-1 border-custom-solidgreen px-2 cursor-pointer text-custom-solidgreen"
+                        onClick={exportToExcel}
+                    >
+                        <img src={exportIcon} alt="export-icon" />
+                        <span className="text-sm">Export</span>
+                    </div>
+                </div>
+                <div className="flex flex-wrap px-2 gap-2">
+                    {transactions?.filters &&
+                        Object.entries(transactions?.filters)
+                            .filter(([key]) => key !== "end_date")
+                            .map(([key, value]) => (
+                                <div
+                                    className="flex items-center gap-2 text-white px-2 bg-custom-solidgreen w-auto h-[24px] rounded-[10px] text-sm"
+                                    key={key}
+                                >
+                                    <span>
+                                        {formatFiltersLabel(
+                                            key,
+                                            value,
+                                            transactions.filters
+                                        )}
+                                    </span>
+                                    <button onClick={() => removeFilter(key)}>
+                                        X
+                                    </button>
+                                </div>
+                            ))}
+                </div>
                 <GlobalTable
                     columns={columns}
                     data={transactions.data}
@@ -168,6 +409,25 @@ const TransactionCom = () => {
                 </div>
             </div>
         </>
+    );
+};
+const ToggleSwitch = ({ enabled, setEnabled }) => {
+    return (
+        <div className="flex items-center">
+            <button
+                type="button"
+                onClick={() => setEnabled(!enabled)}
+                className={`relative inline-flex h-[31px] w-[51px] items-center rounded-[100px] transition-colors duration-300 focus:outline-none ${
+                    enabled ? "bg-[#348017]" : "bg-gray-300"
+                }`}
+            >
+                <span
+                    className={`inline-block h-[27px] w-[27px] transform rounded-[100px] bg-white transition-transform duration-300 ${
+                        enabled ? "translate-x-5" : "translate-x-1"
+                    }`}
+                />
+            </button>
+        </div>
     );
 };
 
