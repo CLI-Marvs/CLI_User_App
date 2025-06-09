@@ -63,7 +63,7 @@ const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
 
                                         {surveyData.dataQASet.map((item, index) => (
                                             <div key={item.id} className="flex flex-col gap-[16px] bg-white w-[718px] rounded-[10px] pt-[18px] pb-[22px] px-[16px]">
-                                                <div >
+                                                <div>
                                                     {/* Question Section */}
                                                     <div className="w-full p-[10.9px] border-b-[0.5px] border-[#3A3A3A]">
                                                         <p className="montserrat-medium text-[18px]">

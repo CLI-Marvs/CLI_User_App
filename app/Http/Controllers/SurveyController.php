@@ -355,7 +355,7 @@ class SurveyController extends Controller
             }
 
 
-            // Sort questions by their ID
+            // Sort questions by their IDq
             usort($questionsResult, function ($a, $b) {
                 return $a['question_id'] <=> $b['question_id'];
             });
