@@ -57,6 +57,7 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
                             adjustHeight(e.target);
                         }}
                         ref={questionTextareaRef}
+                        maxLength={255}
                     />
                     <div className='flex w-full border-b border-custom-grayA5'></div>
                 </div>
