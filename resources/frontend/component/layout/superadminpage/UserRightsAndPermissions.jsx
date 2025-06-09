@@ -593,7 +593,7 @@ const UserRightsAndPermissions = () => {
                                     >
                                         <td className="flex gap-[57px] mt-[6px] h-[64px] overflow-visible px-[16px] py-[10px] bg-custom-lightestgreen text-custom-bluegreen text-sm">
                                             <div className="w-[200px] flex flex-col items-start justify-center gap-2">
-                                                <div className="w-full h-[31px] flex items-center justify-center bg-white rounded-[5px]">
+                                                <div className="w-full h-[50px] flex items-center justify-center bg-white rounded-[5px] py-1">
                                                     <p className="montserrat-regular text-custom-lightgreen text-sm text-center">
                                                         {highlightText(
                                                             employee?.firstname,
