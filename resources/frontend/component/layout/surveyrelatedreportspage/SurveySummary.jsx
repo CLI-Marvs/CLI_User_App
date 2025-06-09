@@ -75,8 +75,13 @@ const SurveySummary = () => {
                 <div className='mt-[20px] mb-[10px]'>
                     <p className='text-[24px] font-semibold'>{surveySummary?.survey_title}</p>
                 </div>
-                <SummaryRating ratingCounts={ratingCounts} />
-                <SummaryTable groupedTables={groupedTables} />
+                <div>
+                    <SummaryRating ratingCounts={ratingCounts} />
+                </div>
+                <div>
+                    <SummaryTable groupedTables={groupedTables} />
+                </div>
+                
                 {surveySummary?.questions?.map((item, index) => {
                     return (
                         <div key={index}>
