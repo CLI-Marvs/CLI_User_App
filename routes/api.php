@@ -72,6 +72,7 @@ Route::get('/get-account-logs/{selectedId}', [AccountLogController::class, 'getL
 Route::post('/work-order-logs', [WorkOrderController::class, 'createWorkOrderLog']);
 Route::post('/work-orders/notes/add', [WorkOrderController::class, 'addNoteWithAttachments']);
 Route::get('/work-orders/get-work-orders', [WorkOrderController::class, 'getWorkOrders']);
+Route::patch('/update-is-new/{id}', [AccountLogController::class, 'updateIsNewStatus']);
 //For work orders
 Route::middleware('auth:sanctum')->group(function () {
 

@@ -7,7 +7,6 @@ use App\Models\WorkOrderLog;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
-
 class AccountLogController extends Controller
 {
     public function attachAccountsToLog(Request $request)
@@ -46,34 +45,54 @@ class AccountLogController extends Controller
     public function getLogData(Request $request, $selectedId)
     {
         $selectedWorkOrder = $request->query('log_type');
+        $selectedAssignee = $request->query('assigned_user_id');
+        $requestedWorkOrderId = $request->query('work_order_id');
 
-        $firstRelevantLog = WorkOrderLog::whereHas('accountLog', function ($query) use ($selectedId) {
-            $query->where('account_id', $selectedId);
-        })
-            ->when($selectedWorkOrder, function ($query) use ($selectedWorkOrder) {
-                $query->where('log_type', $selectedWorkOrder);
+        if ($requestedWorkOrderId) {
+            $targetWorkOrderId = $requestedWorkOrderId;
+        } else {
+            $firstRelevantLog = WorkOrderLog::whereHas('accountLog', function ($query) use ($selectedId) {
+                $query->where('account_id', $selectedId);
             })
-            ->select('work_order_id')
-            ->first();
+                ->when($selectedWorkOrder, function ($query) use ($selectedWorkOrder) {
+                    $query->where('log_type', $selectedWorkOrder);
+                })
+                ->select('work_order_id')
+                ->first();
 
-        if (!$firstRelevantLog) {
-            Log::info('No relevant log found for account_id and log_type to determine work_order_id', ['account_id' => $selectedId, 'log_type' => $selectedWorkOrder]);
-            return response()->json(['log_data' => []], 200);
+            if (!$firstRelevantLog) {
+                Log::info('No relevant log found for account_id and log_type to determine work_order_id', [
+                    'account_id' => $selectedId,
+                    'log_type' => $selectedWorkOrder
+                ]);
+                return response()->json(['log_data' => []], 200);
+            }
+
+            $targetWorkOrderId = $firstRelevantLog->work_order_id;
         }
 
-        $targetWorkOrderId = $firstRelevantLog->work_order_id;
-        Log::info('Target work_order_id found:', ['work_order_id' => $targetWorkOrderId]);
+        Log::info('Target work_order_id found or provided:', ['work_order_id' => $targetWorkOrderId]);
 
         $logDataQuery = WorkOrderLog::where('work_order_id', $targetWorkOrderId)
-            ->when($selectedWorkOrder, function ($query) use ($selectedWorkOrder) {
+            ->where(function ($query) use ($selectedWorkOrder, $selectedAssignee) {
                 $query->where('log_type', $selectedWorkOrder);
+
+                if ($selectedAssignee) {
+                    $query->orWhere(function ($subQuery) use ($selectedAssignee) {
+                        $subQuery->where('note_type', 'Manual Entry')
+                            ->where('assigned_user_id', $selectedAssignee);
+                    });
+                }
             })
             ->with([
                 'createdBy:id,fullname,firstname,lastname',
                 'assignedUser:id,fullname,firstname,lastname',
-                'documents'
+                'documents',
+                'accountLog',
             ])
             ->orderBy('created_at', 'desc');
+
+
         $logs = $logDataQuery->get();
 
         $transformed = $logs->map(function ($log) {
@@ -97,13 +116,39 @@ class AccountLogController extends Controller
                         'file_name' => $doc->file_name,
                         'file_path' => $doc->file_path,
                         'file_type' => $doc->file_type,
-                        'file_title' => $doc->file_title, // Add file_title here
+                        'file_title' => $doc->file_title,
                     ];
                 }),
             ];
         });
 
-        Log::info('Returning log data for work_order_id', ['work_order_id' => $targetWorkOrderId, 'count' => $transformed->count()]);
-        return response()->json(['log_data' => $transformed, 'work_order_id_queried' => $targetWorkOrderId], 200);
+        Log::info('Returning log data for work_order_id', [
+            'work_order_id' => $targetWorkOrderId,
+            'count' => $transformed->count()
+        ]);
+
+        return response()->json([
+            'log_data' => $transformed,
+            'work_order_id_queried' => $targetWorkOrderId,
+        ], 200);
     }
+
+public function updateIsNewStatus(Request $request, $id)
+{
+    \Log::info('Incoming PATCH request', [
+        'id' => $id,
+        'body' => $request->all()
+    ]);
+
+    try {
+        $log = WorkOrderLog::findOrFail($id);
+        $log->is_new = $request->input('is_new');
+        $log->save();
+
+    } catch (\Exception $e) {
+        \Log::error('Error updating log', ['error' => $e->getMessage()]);
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+
 }

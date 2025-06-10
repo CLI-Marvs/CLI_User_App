@@ -179,8 +179,7 @@ const AddNoteModal = ({
                                     </div>
                                     <input
                                         type="text"
-                                        placeholder="Enter file title (optional, defaults to filename)"
-                                        value={fileWrapper.title}
+                                        placeholder="File Title"
                                         onChange={(e) => handleTitleChange(fileWrapper.id, e.target.value)}
                                         className="w-full p-1.5 border border-gray-300 rounded-md text-sm focus:ring-custom-lightgreen focus:border-custom-lightgreen"
                                     />

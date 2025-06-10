@@ -1,7 +1,10 @@
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import DateLogo from "../../../../../public/Images/Date_range.svg";
-import AttachmentIcon from "../../../../../public/Images/ATTCHMT.svg"; 
+import FileIcon from "../../../../../public/Images/folder_file_notes.svg";
+import ViewIcon from "../../../../../public/Images/eye_icon.svg";
+import DownloadIcon from "../../../../../public/Images/download_icon.svg";
 import AddNoteModal from "./AddNoteModal";
+import axios from "axios";
 
 function NotesAndUpdatesModal({
     selectedAccountId,
@@ -14,7 +17,7 @@ function NotesAndUpdatesModal({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showAll, setShowAll] = useState(false);
-    const [initialLogCount] = useState(3);
+    const [initialLogCount] = useState(2);
     const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
 
     useEffect(() => {
@@ -35,10 +38,11 @@ function NotesAndUpdatesModal({
 
         try {
             const response = await fetch(
-                `/api/get-account-logs/${selectedAccountId}?log_type=${encodeURIComponent(
-                    selectedWorkOrder
-                )}`
+                `/api/get-account-logs/${selectedAccountId}?log_type=${selectedWorkOrder}&work_order_id=${
+                    workOrderData.work_order_id
+                }&assigned_user_id=${selectedAssignee?.id || selectedAssignee}`
             );
+
             if (!response.ok) {
                 const errorText = await response.text();
                 throw new Error(
@@ -106,28 +110,60 @@ function NotesAndUpdatesModal({
     };
 
     const getDisplayLogs = () => {
-        console.log("logs:", logs);
-        console.log("selectedWorkOrder:", selectedWorkOrder);
-        console.log("selectedAccountId:", selectedAccountId);
-        console.log("selectedAssignee:", selectedAssignee);
-
         return logs.filter((log) => {
+            if (
+                log.is_new &&
+                log.log_type === selectedWorkOrder &&
+                ((log.note_type === "Manual Entry" &&
+                    log.account_id === selectedAccountId) ||
+                    (log.account_ids &&
+                        log.account_ids.includes(selectedAccountId))) &&
+                log.assigned_user_id === selectedAssignee.id
+            ) {
+                axios
+                    .patch(`/api/update-is-new/${log.id}`, { is_new: false })
+                    .then((response) => {
+                        console.log(response.data);
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    });
+            }
             const matchesLogType = log.log_type === selectedWorkOrder;
             const matchesAccount =
                 (log.note_type === "Manual Entry" &&
                     log.account_id === selectedAccountId) ||
                 (log.account_ids &&
                     log.account_ids.includes(selectedAccountId));
-            const matchesAssignee = selectedAssignee?.id
-                ? log.assigned_user_id === selectedAssignee.id ||
-                  log.created_by_user_id === selectedAssignee.id
-                : true;
+            const matchesAssignee =
+                log.assigned_user_id === selectedAssignee.id;
 
             return matchesLogType && matchesAccount && matchesAssignee;
         });
     };
 
+    const handleDownload = async () => {
+        try {
+            const response = await fetch(doc.file_path);
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = downloadUrl;
+            link.download = doc.file_name;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(downloadUrl);
+        } catch (error) {
+            console.error("Download failed:", error);
+        }
+    };
+
     const displayedLogs = getDisplayLogs();
+    const logsToRender = showAll
+        ? displayedLogs
+        : displayedLogs.slice(0, initialLogCount);
+
     const getUserDisplayName = (log) => {
         return log.fullname || log.assigned_user_name || "Unknown User";
     };
@@ -137,7 +173,9 @@ function NotesAndUpdatesModal({
     };
 
     const latestLogDate =
-        logs.length > 0 ? logs[0].created_at : new Date().toISOString();
+        displayedLogs.length > 0
+            ? displayedLogs[0].created_at
+            : new Date().toISOString();
 
     if (loading && !error) {
         return (
@@ -200,10 +238,15 @@ function NotesAndUpdatesModal({
                     )}
                     {!error && logs.length > 0 && (
                         <div className="space-y-0">
-                            {displayedLogs.map((log) => (
+                            {logsToRender.map((log) => (
                                 <div key={log.id} className="py-2 border-y-1">
                                     <div className="text-custom-bluegreen font-semibold text-sm ">
                                         {formatDateWithTime(log.created_at)}
+                                        {log.is_new && (
+                                            <span className="bg-custom-bluegreen text-white py-1 px-2 rounded-full text-xs ml-2">
+                                                New
+                                            </span>
+                                        )}
                                     </div>
 
                                     <div className="text-[#818181] text-sm">
@@ -240,27 +283,102 @@ function NotesAndUpdatesModal({
                                         </div>
                                     )}
 
-                                    {log.documents && log.documents.length > 0 && (
-                                        <div className="mt-2 pl-1">
-                                            <p className="text-xs font-semibold text-gray-600 mb-1">Attachments:</p>
-                                            <ul className="space-y-1">
-                                                {log.documents.map((doc) => (
-                                                    <li key={doc.document_id} className="text-xs">
-                                                        <a
-                                                            href={doc.file_path}
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                            className="text-custom-bluegreen hover:text-custom-lightgreen hover:underline flex items-center"
-                                                        >
-                                                            <img src={AttachmentIcon} alt="Attachment" className="w-3 h-3 mr-1.5 opacity-70" />
-                                                            {doc.file_title || doc.file_name}
-                                                        </a>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
+                                    {log.documents &&
+                                        log.documents.length > 0 && (
+                                            <div className="mt-0 pl-1">
+                                                <div className="space-y-3">
+                                                    {log.documents.map(
+                                                        (doc) => (
+                                                            <div
+                                                                key={
+                                                                    doc.document_id
+                                                                }
+                                                                className="flex items-center space-x-3"
+                                                            >
+                                                                <div className="w-24 flex-shrink-0">
+                                                                    <span
+                                                                        className="text-sm font-normal text-custom-solidgreen truncate block"
+                                                                        title={
+                                                                            doc.file_title ||
+                                                                            "Document"
+                                                                        }
+                                                                    >
+                                                                        {doc.file_title ||
+                                                                            "Document"}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="bg-[#D6E4D1] rounded-lg py-0 px-[10px] border w-66">
+                                                                    <div className="flex items-center justify-between">
+                                                                        <div className="flex items-center space-x-3 min-w-0 flex-1">
+                                                                            <div className=" p-2 rounded flex-shrink-0">
+                                                                                <img
+                                                                                    src={
+                                                                                        FileIcon
+                                                                                    }
+                                                                                    alt="File"
+                                                                                    className="w-[22px] h-[22px]"
+                                                                                />
+                                                                            </div>
+                                                                            <span
+                                                                                className="text-xs font-light truncate"
+                                                                                title={
+                                                                                    doc.file_name
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    doc.file_name
+                                                                                }
+                                                                            </span>
+                                                                        </div>
 
+                                                                        {/* Action Icons */}
+                                                                        <div className="flex items-center space-x-0 flex-shrink-0">
+                                                                            {/* View Icon */}
+                                                                            <button
+                                                                                onClick={() =>
+                                                                                    window.open(
+                                                                                        doc.file_path,
+                                                                                        "_blank"
+                                                                                    )
+                                                                                }
+                                                                                className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
+                                                                                title="View document"
+                                                                            >
+                                                                                <img
+                                                                                    src={
+                                                                                        ViewIcon
+                                                                                    }
+                                                                                    alt="View"
+                                                                                    className="w-6 h-6"
+                                                                                />
+                                                                            </button>
+
+                                                                            <a
+                                                                                href={
+                                                                                    doc.file_path
+                                                                                }
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
+                                                                                title="Download document"
+                                                                            >
+                                                                                <img
+                                                                                    src={
+                                                                                        DownloadIcon
+                                                                                    }
+                                                                                    alt="Download"
+                                                                                    className="w-5 h-5"
+                                                                                />
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
                                 </div>
                             ))}
                         </div>
@@ -268,7 +386,7 @@ function NotesAndUpdatesModal({
                 </div>
                 <div>
                     <div className="flex justify-center space-x-4">
-                        {logs.length > 2 && (
+                        {displayedLogs.length > initialLogCount && (
                             <button
                                 onClick={() => setShowAll(!showAll)}
                                 className="text-gray-600 hover:text-gray-700 text-base font-normal transition-colors border border-gray-300 hover:border-gray-400 px-6 py-3 rounded-lg bg-white"
