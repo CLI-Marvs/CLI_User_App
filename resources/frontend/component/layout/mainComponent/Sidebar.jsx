@@ -310,7 +310,7 @@ const Sidebar = () => {
                                             location.pathname.startsWith(
                                                 "/transaction/receivables"
                                             )
-                                                ? "bg-white text-custom-solidgreen font-semibold py-6"
+                                                ? "bg-white text-custom-solidgreen font-semibold"
                                                 : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                                         }`}
                                         onClick={() =>
@@ -319,7 +319,7 @@ const Sidebar = () => {
                                             )
                                         }
                                     >
-                                        Online Payment Dashboard
+                                        Online Payment
                                     </ListItem>
                                 </Link>
                                 <Link to="/transaction/settings/markup">

@@ -7,8 +7,8 @@ const TransactionSidebar = () => {
     const menuMap = {
         "/transaction/receivables": [
             { name: "Transactions", path: "/transaction/receivables/transactions" },
-            { name: "Invoices", path: "/transaction/receivables/invoices" },
-            { name: "Auto Posting", path: "/transaction/receivables/posting" },
+          /*   { name: "Invoices", path: "/transaction/receivables/invoices" },
+            { name: "Auto Posting", path: "/transaction/receivables/posting" }, */
             { name: "Reports", path: "/transaction/receivables/reports" },
         ],
         "/transaction/bank-monitoring": [
