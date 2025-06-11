@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import DateLogo from "../../../../../public/Images/Date_range.svg";
 import FileIcon from "../../../../../public/Images/folder_file_notes.svg";
 import ViewIcon from "../../../../../public/Images/eye_icon.svg";
@@ -17,7 +17,7 @@ function NotesAndUpdatesModal({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showAll, setShowAll] = useState(false);
-    const [initialLogCount] = useState(2);
+    const initialLogCount = 2; // Changed from useState
     const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
 
     useEffect(() => {
@@ -38,9 +38,7 @@ function NotesAndUpdatesModal({
 
         try {
             const response = await fetch(
-                `/api/get-account-logs/${selectedAccountId}?log_type=${selectedWorkOrder}&work_order_id=${
-                    workOrderData.work_order_id
-                }&assigned_user_id=${selectedAssignee?.id || selectedAssignee}`
+                `/api/get-account-logs/${selectedAccountId}?log_type=${selectedWorkOrder}&work_order_id=${workOrderData.work_order_id}`
             );
 
             if (!response.ok) {
@@ -69,30 +67,22 @@ function NotesAndUpdatesModal({
         }
     };
 
-    const filteredLogs = logs.filter((log) => {
-        return (
-            log.work_order_id === selectedWorkOrder &&
-            log.log_type === selectedLogType &&
-            log.account_id === selectedAccountId
-        );
-    });
-
     const handleAddNoteSuccess = async () => {
         setIsAddNoteModalOpen(false);
         await fetchAccountAndLogData();
     };
 
-    const currentUserId = workOrderData?.currentUser?.id || 1;
+    const currentUserId = workOrderData?.currentUser?.id || 1; // Review fallback '1'
 
-    const formatHeaderDate = (dateStr) => {
+    const formatHeaderDate = useCallback((dateStr) => {
         const date = new Date(dateStr);
         const day = date.getDate();
         const month = date.toLocaleDateString("en-US", { month: "short" });
         const year = date.getFullYear();
         return `${day}-${month}-${year}`;
-    };
+    }, []);
 
-    const formatDateWithTime = (dateStr) => {
+    const formatDateWithTime = useCallback((dateStr) => {
         const date = new Date(dateStr);
         const dateOptions = {
             year: "numeric",
@@ -107,62 +97,67 @@ function NotesAndUpdatesModal({
         const formattedDate = date.toLocaleDateString("en-US", dateOptions);
         const formattedTime = date.toLocaleTimeString("en-US", timeOptions);
         return `${formattedDate} | ${formattedTime}`;
-    };
+    }, []);
 
-    const getDisplayLogs = () => {
+    // Memoize displayedLogs to avoid re-filtering on every render if dependencies don't change
+    const displayedLogs = useMemo(() => {
         return logs.filter((log) => {
-            if (
-                log.is_new &&
-                log.log_type === selectedWorkOrder &&
-                ((log.note_type === "Manual Entry" &&
-                    log.account_id === selectedAccountId) ||
-                    (log.account_ids &&
-                        log.account_ids.includes(selectedAccountId))) &&
-                log.assigned_user_id === selectedAssignee.id
-            ) {
-                axios
-                    .patch(`/api/update-is-new/${log.id}`, { is_new: false })
-                    .then((response) => {
-                        console.log(response.data);
-                    })
-                    .catch((error) => {
-                        console.error(error);
-                    });
-            }
             const matchesLogType = log.log_type === selectedWorkOrder;
             const matchesAccount =
                 (log.note_type === "Manual Entry" &&
                     log.account_id === selectedAccountId) ||
                 (log.account_ids &&
                     log.account_ids.includes(selectedAccountId));
-            const matchesAssignee =
-                log.assigned_user_id === selectedAssignee.id;
-
-            return matchesLogType && matchesAccount && matchesAssignee;
+            return matchesLogType && matchesAccount;
         });
-    };
+    }, [logs, selectedWorkOrder, selectedAccountId]);
 
-    const handleDownload = async () => {
-        try {
-            const response = await fetch(doc.file_path);
-            const blob = await response.blob();
-            const downloadUrl = window.URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = downloadUrl;
-            link.download = doc.file_name;
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(downloadUrl);
-        } catch (error) {
-            console.error("Download failed:", error);
-        }
-    };
+    // Effect to mark displayed "new" logs as not new
+    useEffect(() => {
+        const logsToUpdate = displayedLogs.filter(
+            (log) =>
+                log.is_new &&
+                log.log_type === selectedWorkOrder && // Ensure it matches current context
+                ((log.note_type === "Manual Entry" && log.account_id === selectedAccountId) ||
+                    (log.account_ids && log.account_ids.includes(selectedAccountId))) &&
+                log.assigned_user_id === selectedAssignee?.id // Condition for update
+        );
 
-    const displayedLogs = getDisplayLogs();
-    const logsToRender = showAll
+        logsToUpdate.forEach((log) => {
+            axios
+                .patch(`/api/update-is-new/${log.id}`, { is_new: false })
+                .then((response) => {
+                    console.log(`Log ${log.id} marked as read:`, response.data);
+                    // Optionally update local state here for immediate UI feedback
+                    // setLogs(prevLogs => prevLogs.map(l => l.id === log.id ? {...l, is_new: false} : l));
+                })
+                .catch((error) => {
+                    console.error(`Error marking log ${log.id} as read:`, error);
+                    // Handle error appropriately, e.g., notify user or retry
+                });
+        });
+    }, [displayedLogs, selectedWorkOrder, selectedAccountId, selectedAssignee]); // Add selectedAssignee if its change should re-trigger
+
+    // const handleDownload = async () => {
+    //     try {
+    //         const response = await fetch(doc.file_path);
+    //         const blob = await response.blob();
+    //         const downloadUrl = window.URL.createObjectURL(blob);
+    //         const link = document.createElement("a");
+    //         link.href = downloadUrl;
+    //         link.download = doc.file_name;
+    //         document.body.appendChild(link);
+    //         link.click();
+    //         link.remove();
+    //         window.URL.revokeObjectURL(downloadUrl);
+    //     } catch (error) {
+    //         console.error("Download failed:", error);
+    //     }
+    // };
+
+    const logsToRender = useMemo(() => (showAll
         ? displayedLogs
-        : displayedLogs.slice(0, initialLogCount);
+        : displayedLogs.slice(0, initialLogCount)), [showAll, displayedLogs, initialLogCount]);
 
     const getUserDisplayName = (log) => {
         return log.fullname || log.assigned_user_name || "Unknown User";
@@ -170,6 +165,19 @@ function NotesAndUpdatesModal({
 
     const getAssigneeName = (log) => {
         return log.assigned_user_name || "Unassigned";
+    };
+
+    const getAssignmentPrefix = (logMessage) => {
+        if (!logMessage) return "• Assigned to:";
+        const lowerLogMessage = logMessage.toLowerCase();
+        if (
+            lowerLogMessage.includes("reassign") ||
+            (lowerLogMessage.includes("update") &&
+                !lowerLogMessage.includes("create"))
+        ) {
+            return "• Reassigned to:";
+        }
+        return "• Assigned to:";
     };
 
     const latestLogDate =
@@ -191,7 +199,7 @@ function NotesAndUpdatesModal({
     }
 
     return (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
             <div
                 className="bg-white rounded-[10px] w-[449px] max-h-[90vh] overflow-y-auto shadow-xl p-[18px_25px] flex flex-col gap-[10px] relative"
                 onClick={(e) => e.stopPropagation()}
@@ -243,7 +251,7 @@ function NotesAndUpdatesModal({
                                     <div className="text-custom-bluegreen font-semibold text-sm ">
                                         {formatDateWithTime(log.created_at)}
                                         {log.is_new && (
-                                            <span className="bg-custom-bluegreen text-white py-1 px-2 rounded-full text-xs ml-2">
+                                            <span className="bg-custom-lightgreen text-white py-1 px-3 rounded-[50px] text-xs ml-2">
                                                 New
                                             </span>
                                         )}
@@ -266,7 +274,9 @@ function NotesAndUpdatesModal({
                                                 log.note_type !==
                                                     "Manual Entry" && (
                                                     <span className="ml-2">
-                                                        • Assigned to:{" "}
+                                                        {getAssignmentPrefix(
+                                                            log.log_message
+                                                        )}{" "}
                                                         <span className="text-blue-500 font-medium">
                                                             {getAssigneeName(
                                                                 log
@@ -359,6 +369,7 @@ function NotesAndUpdatesModal({
                                                                                 }
                                                                                 target="_blank"
                                                                                 rel="noopener noreferrer"
+                                                                                download={doc.file_name} // Added download attribute
                                                                                 className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
                                                                                 title="Download document"
                                                                             >

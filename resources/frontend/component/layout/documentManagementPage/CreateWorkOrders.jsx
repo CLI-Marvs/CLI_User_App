@@ -72,8 +72,6 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                 formData
             );
 
-            console.log("response", response);
-
             if (
                 response.status === 201 ||
                 response.message === "Work order created successfully." ||
@@ -93,7 +91,6 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                     assigned_user_id: selectedAssignee?.id,
                 };
 
-                console.log("logData", logData);
 
                 try {
                     const logResponse = await apiService.post(
@@ -172,7 +169,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             }
         } catch (error) {
             console.error("Error creating work order:", error.message || error);
-        }
+        }      
 
         const shouldTriggerModal = true;
         return shouldTriggerModal;

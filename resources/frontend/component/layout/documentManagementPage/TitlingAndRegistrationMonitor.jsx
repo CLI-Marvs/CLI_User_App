@@ -6,7 +6,6 @@ import apiService from "../../../component/servicesApi/apiService";
 import Dropdown from "../../../../../resources/frontend/component/layout/documentManagementPage/TableMonitoringDropdown";
 import { motion, AnimatePresence } from "framer-motion";
 
-
 const PersonIcon = () => (
     <img src={Profile} alt="Person Icon" className="h-6 w-6 text-gray-600" />
 );
@@ -77,12 +76,12 @@ export default function TitlingAndRegistrationMonitor({
                     `/titling-registration/monitor/${contractNumber}`
                 );
                 const data = response.data;
-                console.log("API Response: ", data);
                 if (!Array.isArray(data)) {
                     throw new Error(
                         "Unexpected API response: expected an array in response.data"
                     );
                 }
+                console.log(data);
 
                 const transformedData = data.map((item) => ({
                     step: item.stepName,
@@ -141,169 +140,223 @@ export default function TitlingAndRegistrationMonitor({
         );
     }
 
-return (
-    <div className="bg-white w-full rounded-lg shadow-lg overflow-hidden">
-        <div className="bg-[#175D5F] text-white p-4 flex justify-center items-center relative">
-            {" "}
-            <button
-                onClick={onClose}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-sm font-semibold py-1 px-3 rounded border border-white hover:bg-white hover:text-[#175D5F] transition-colors focus:outline-none focus:ring-2 focus:ring-white"
-            >
-                &larr; Back
-            </button>
-            <h2 className="text-lg font-semibold">
-                Titling and Registration Monitoring
-            </h2>
-        </div>
-        {error && (
-            <div className="p-4 bg-red-100 text-red-700 text-center">
-                <p>
-                    <strong>Error:</strong> {error}
-                </p>
-                <p>
-                    Please use the 'Back' button and try again. If the issue
-                    persists, contact support.
-                </p>
+    return (
+        <div className="bg-white w-full rounded-lg shadow-lg overflow-hidden">
+            <div className="bg-[#175D5F] text-white p-4 flex justify-center items-center relative">
+                {" "}
+                <button
+                    onClick={onClose}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-sm font-semibold py-1 px-3 rounded border border-white hover:bg-white hover:text-[#175D5F] transition-colors focus:outline-none focus:ring-2 focus:ring-white"
+                >
+                    &larr; Back
+                </button>
+                <h2 className="text-lg font-semibold">
+                    Titling and Registration Monitoring
+                </h2>
             </div>
-        )}
+            {error && (
+                <div className="p-4 bg-red-100 text-red-700 text-center">
+                    <p>
+                        <strong>Error:</strong> {error}
+                    </p>
+                    <p>
+                        Please use the 'Back' button and try again. If the issue
+                        persists, contact support.
+                    </p>
+                </div>
+            )}
 
-<div className="h-[500px] overflow-y-auto">
-    <table className="w-full border-collapse">
-        <thead>
-            <tr className="bg-[#5B9BD5] text-white text-left">
-                <th className="p-2 text-center"> </th>
-                <th className="p-2">Work Order No.</th>
-                <th className="p-2 text-center">Assignee</th>
-                <th className="p-2 text-center">Status</th>
-                <th className="p-2 text-center">Due Date</th>
-                <th className="p-2 text-center">Notes</th>
-                <th className="p-2 text-center">Files</th>
-            </tr>
-        </thead>
-        <tbody>
-                {monitoringData.map((item, index) => {
-                    const isSelected = index === selectedRow;
+            <div className="h-[500px] overflow-y-auto">
+                <table className="w-full border-collapse">
+                    <thead>
+                        <tr className="bg-[#5B9BD5] text-white text-left">
+                            <th className="p-2 text-center"> </th>
+                            <th className="p-2">Work Order No.</th>
+                            <th className="p-2 text-center">Assignee</th>
+                            <th className="p-2 text-center">Status</th>
+                            <th className="p-2 text-center">Due Date</th>
+                            <th className="p-2 text-center">Notes</th>
+                            <th className="p-2 text-center">Files</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {monitoringData.map((item, index) => {
+                            const isSelected = index === selectedRow;
 
-                    return (
-                        <React.Fragment key={`row-${item.workOrderId || index}`}>
-                            <tr
-                                className={`hover:bg-gray-50 cursor-pointer ${
-                                    isSelected ? "bg-gray-100" : "border-b border-gray-200"
-                                }`}
-                                onClick={() => setSelectedRow(isSelected ? null : index)}
-                            >
-                                <td className="p-2 text-base text-[#175D5F] font-semibold pl-10">
-                                    {item.step}
-                                </td>
-                                <td className="p-2 text-base font-normal text-[#A5A5A5]">
-                                    {item.workOrderId}
-                                </td>
-                                <td className="p-2 text-sm text-gray-700 align-middle">
-                                    <div className="flex items-center gap-1">
-                                        {item.assignee ? (
-                                            <>
-                                                <PersonIcon className="w-4 h-4 text-gray-600" />
-                                                <span>{item.assignee.name || item.assignee}</span>
-                                            </>
-                                        ) : (
-                                            <span className="flex items-center gap-1 text-xs text-gray-500">
-                                                <PersonIcon className="w-4 h-4 text-gray-400" />
-                                                TBD
-                                            </span>
-                                        )}
-                                    </div>
-                                </td>
-                                <td className="p-2 text-center align-middle">
-                                    <span
-                                        className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                                            item.status === "Completed"
-                                                ? "bg-green-200 text-green-800"
-                                                : item.status === "In Progress"
-                                                ? "bg-blue-200 text-blue-800"
-                                                : item.status === "On Hold"
-                                                ? "bg-red-200 text-red-800"
-                                                : item.status === "Pending"
-                                                ? "bg-yellow-200 text-yellow-800"
-                                                : "bg-gray-200 text-gray-800"
+                            return (
+                                <React.Fragment
+                                    key={`row-${item.workOrderId || index}`}
+                                >
+                                    <tr
+                                        className={`hover:bg-gray-50 cursor-pointer ${
+                                            isSelected
+                                                ? "bg-gray-100"
+                                                : "border-b border-gray-200"
                                         }`}
+                                        onClick={() =>
+                                            setSelectedRow(
+                                                isSelected ? null : index
+                                            )
+                                        }
                                     >
-                                        {item.status}
-                                    </span>
-                                </td>
-                                <td className="pl-16 align-middle text-base font-normal text-gray-700">
-                                    {item.dueDate ? (
-                                        <div>
-                                            <span>{item.dueDate}</span>
-                                            <br />
-                                            {getDaysUntilDue(item.dueDate) < 0 ? (
-                                                <span className="text-red-500 text-xs">
-                                                    Overdue by {Math.abs(getDaysUntilDue(item.dueDate))} Days❗
-                                                </span>
-                                            ) : getDaysUntilDue(item.dueDate) <= 5 &&
-                                              getDaysUntilDue(item.dueDate) !== 0 ? (
-                                                <span className="text-yellow-500 text-xs">
-                                                    Due in {getDaysUntilDue(item.dueDate)} Days⚠️
-                                                </span>
-                                            ) : null}
-                                        </div>
-                                    ) : (
-                                        <span className="text-xs text-gray-500">TBD</span>
-                                    )}
-                                </td>
-                                <td className="p-2 text-center align-middle">
-                                    {item.hasNotes ? <DocumentIcon /> : "-"}
-                                </td>
-                                <td className="p-2 text-center align-middle">
-                                    {item.hasFiles ? <LinkIcon /> : "-"}
-                                </td>
-                            </tr>
-                            {isSelected && (
-                                <tr className="bg-white">
-                                    <td colSpan={7} className="p-0 border-b border-gray-200">
-                                        <motion.div
-                                            key={`dropdown-content-${index}`}
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: "auto", opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            transition={{ duration: 0.25, ease: "easeInOut" }}
-                                            style={{ overflow: "hidden" }}
-                                        >
-                                            <div className="p-4">
-                                                <Dropdown />
+                                        <td className="p-2 text-base text-[#175D5F] font-semibold pl-10">
+                                            {item.step}
+                                        </td>
+                                        <td className="p-2 text-base font-normal text-[#A5A5A5]">
+                                            {item.workOrderId}
+                                        </td>
+                                        <td className="p-2 text-sm text-gray-700 align-middle">
+                                            <div className="flex items-center gap-1">
+                                                {item.assignee ? (
+                                                    <>
+                                                        <PersonIcon className="w-4 h-4 text-gray-600" />
+                                                        <span>
+                                                            {item.assignee
+                                                                .name ||
+                                                                item.assignee}
+                                                        </span>
+                                                    </>
+                                                ) : (
+                                                    <span className="flex items-center gap-1 text-xs text-gray-500">
+                                                        <PersonIcon className="w-4 h-4 text-gray-400" />
+                                                        TBD
+                                                    </span>
+                                                )}
                                             </div>
-                                        </motion.div>
-                                    </td>
-                                </tr>
-                            )}
-                        </React.Fragment>
-                    );
-                })}
-            </tbody>
-    </table>
-</div>
+                                        </td>
+                                        <td className="p-2 text-center align-middle">
+                                            <span
+                                                className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                                                    item.status === "Completed"
+                                                        ? "bg-green-200 text-green-800"
+                                                        : item.status ===
+                                                          "In Progress"
+                                                        ? "bg-blue-200 text-blue-800"
+                                                        : item.status ===
+                                                          "On Hold"
+                                                        ? "bg-red-200 text-red-800"
+                                                        : item.status ===
+                                                          "Pending"
+                                                        ? "bg-yellow-200 text-yellow-800"
+                                                        : "bg-gray-200 text-gray-800"
+                                                }`}
+                                            >
+                                                {item.status}
+                                            </span>
+                                        </td>
+                                        <td className="pl-16 align-middle text-base font-normal text-gray-700">
+                                            {item.dueDate ? (
+                                                <div>
+                                                    <span>{item.dueDate}</span>
+                                                    <br />
+                                                    {getDaysUntilDue(
+                                                        item.dueDate
+                                                    ) < 0 ? (
+                                                        <span className="text-red-500 text-xs">
+                                                            Overdue by{" "}
+                                                            {Math.abs(
+                                                                getDaysUntilDue(
+                                                                    item.dueDate
+                                                                )
+                                                            )}{" "}
+                                                            Days❗
+                                                        </span>
+                                                    ) : getDaysUntilDue(
+                                                          item.dueDate
+                                                      ) <= 5 &&
+                                                      getDaysUntilDue(
+                                                          item.dueDate
+                                                      ) !== 0 ? (
+                                                        <span className="text-yellow-500 text-xs">
+                                                            Due in{" "}
+                                                            {getDaysUntilDue(
+                                                                item.dueDate
+                                                            )}{" "}
+                                                            Days⚠️
+                                                        </span>
+                                                    ) : null}
+                                                </div>
+                                            ) : (
+                                                <span className="text-xs text-gray-500">
+                                                    TBD
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="p-2 text-center align-middle">
+                                            {item.hasNotes ? (
+                                                <DocumentIcon />
+                                            ) : (
+                                                "-"
+                                            )}
+                                        </td>
+                                        <td className="p-2 text-center align-middle">
+                                            {item.hasFiles ? <LinkIcon /> : "-"}
+                                        </td>
+                                    </tr>
+                                    {isSelected && (
+                                        <tr className="bg-white">
+                                            <td
+                                                colSpan={7}
+                                                className="p-0 border-b border-gray-200"
+                                            >
+                                                <motion.div
+                                                    key={`dropdown-content-${index}`}
+                                                    initial={{
+                                                        height: 0,
+                                                        opacity: 0,
+                                                    }}
+                                                    animate={{
+                                                        height: "auto",
+                                                        opacity: 1,
+                                                    }}
+                                                    exit={{
+                                                        height: 0,
+                                                        opacity: 0,
+                                                    }}
+                                                    transition={{
+                                                        duration: 0.25,
+                                                        ease: "easeInOut",
+                                                    }}
+                                                    style={{
+                                                        overflow: "hidden",
+                                                    }}
+                                                >
+                                                    <div className="p-4">
+                                                        <Dropdown />
+                                                    </div>
+                                                </motion.div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </React.Fragment>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
 
-        <div className="bg-[#175D5F] text-white p-4 text-sm">
-            <div className="flex justify-between">
-                <div>
-                    <span className="font-semibold text-sm">
-                        Account Name:
-                    </span>{" "}
-                    <span className="font-normal text-sm">
-                        &nbsp;{user}
-                    </span>
-                </div>
-                <div>
-                    <span className="font-semibold text-sm">
-                        Property Details:
-                    </span>
-                    <span className="font-normal text-sm">
-                        &nbsp;&nbsp;{contractNumber}
-                        &nbsp;&nbsp;|&nbsp;&nbsp;{propertyName}
-                        &nbsp;&nbsp;|&nbsp;&nbsp;{unitNumber}
-                    </span>
+            <div className="bg-[#175D5F] text-white p-4 text-sm">
+                <div className="flex justify-between">
+                    <div>
+                        <span className="font-semibold text-sm">
+                            Account Name:
+                        </span>{" "}
+                        <span className="font-normal text-sm">
+                            &nbsp;{user}
+                        </span>
+                    </div>
+                    <div>
+                        <span className="font-semibold text-sm">
+                            Property Details:
+                        </span>
+                        <span className="font-normal text-sm">
+                            &nbsp;&nbsp;{contractNumber}
+                            &nbsp;&nbsp;|&nbsp;&nbsp;{propertyName}
+                            &nbsp;&nbsp;|&nbsp;&nbsp;{unitNumber}
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-);
+    );
 }

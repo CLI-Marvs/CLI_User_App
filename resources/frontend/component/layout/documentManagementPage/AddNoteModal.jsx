@@ -33,7 +33,7 @@ const AddNoteModal = ({
         const newFiles = Array.from(event.target.files).map(file => ({
             id: `${file.name}-${file.lastModified}-${file.size}-${Math.random().toString(36).substr(2, 9)}`,
             file: file,
-            title: file.name
+            title: ""
         }));
         const uniqueNewFiles = newFiles.filter(nf => !attachedFiles.some(af => af.id === nf.id));
         setAttachedFiles(prevFiles => [...prevFiles, ...uniqueNewFiles]);
@@ -148,18 +148,33 @@ const AddNoteModal = ({
 
                 <div>
                     <label
-                        htmlFor="fileAttachment"
+                        htmlFor="fileAttachmentInput"
                         className="block text-sm font-medium text-gray-700 mb-1"
                     >
                         Attach Files
                     </label>
-                    <input
-                        type="file"
-                        id="fileAttachment"
-                        multiple
-                        onChange={handleFileChange}
-                        className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-custom-lightgreen file:text-white hover:file:bg-custom-solidgreen"
-                    />
+                    <div className="flex items-center space-x-4">
+                        <label
+                            htmlFor="fileAttachmentInput"
+                            className="cursor-pointer py-2 px-4 rounded-full border-0 text-sm font-semibold bg-custom-lightgreen text-white hover:bg-custom-solidgreen transition-colors duration-150"
+                        >
+                            Choose Files
+                        </label>
+                        <input
+                            type="file"
+                            id="fileAttachmentInput"
+                            multiple
+                            onChange={handleFileChange}
+                            className="hidden"
+                        />
+                        <span className="text-sm text-gray-600">
+                            {attachedFiles.length === 0
+                                ? "No file chosen"
+                                : `${attachedFiles.length} file${
+                                      attachedFiles.length > 1 ? "s" : ""
+                                  } chosen`}
+                        </span>
+                    </div>
                     {attachedFiles.length > 0 && (
                         <div className="mt-3 space-y-2">
                             <p className="text-sm font-medium text-gray-700">Files to upload:</p>
@@ -180,6 +195,7 @@ const AddNoteModal = ({
                                     <input
                                         type="text"
                                         placeholder="File Title"
+                                        value={fileWrapper.title}
                                         onChange={(e) => handleTitleChange(fileWrapper.id, e.target.value)}
                                         className="w-full p-1.5 border border-gray-300 rounded-md text-sm focus:ring-custom-lightgreen focus:border-custom-lightgreen"
                                     />

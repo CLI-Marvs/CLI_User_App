@@ -1,12 +1,14 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import { FaStickyNote, FaTrashAlt, FaEdit } from "react-icons/fa";
 import Profile from "../../../../../public/Images/Profile2.svg";
 import IconNotes from "../../../../../public/Images/Icon_Notes.svg";
 import Attachment from "../../../../../public/Images/ATTCHMT.svg";
 import Trashcan from "../../../../../public/Images/delete_icon.svg";
 import Pen from "../../../../../public/Images/pen_icon.svg";
 import NotesAndUpdatesModal from "./NotesAndUpdatesModal";
+import EditWorkOrderModal from "./EditWorkOrderModal";
+import apiService from "../../../component/servicesApi/apiService";
+import AddFilesModal from "./AddFilesModal";
 
 const PersonIcon = () => (
     <img
@@ -43,18 +45,37 @@ const LinkIcon = () => (
     />
 );
 
-const ViewWorkOrderModal = ({ isOpen, onClose, workOrderData }) => {
+const ViewWorkOrderModal = ({ isOpen, onClose, workOrderData, onInitiateDelete }) => {
     const [mounted, setMounted] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isAddFilesModalOpen, setIsAddFilesModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedAccountId, setSelectedAccountId] = useState(null);
+    const [selectedAccountIdForFiles, setSelectedAccountIdForFiles] =
+        useState(null);
     const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
     const [selectedAssignee, setSelectedAssignee] = useState(null);
+    const [currentWorkOrderData, setCurrentWorkOrderData] =
+        useState(workOrderData);
 
     const handleRowClick = (accountId) => {
         setIsModalOpen(true);
         setSelectedAccountId(accountId);
         setSelectedWorkOrder(workOrderData.work_order);
         setSelectedAssignee(workOrderData.assignee);
+    };
+
+    const handleFilesIconClick = (accountId) => {
+        setSelectedAccountIdForFiles(accountId);
+        setSelectedWorkOrder(workOrderData.work_order);
+        setSelectedAssignee(workOrderData.assignee);
+        setIsAddFilesModalOpen(true);
+    };
+    const refreshWorkOrder = async () => {
+        const response = await apiService.get(
+            `/work-orders/${currentWorkOrderData.work_order_id}`
+        );
+        setCurrentWorkOrderData(response.data);
     };
 
     useEffect(() => {
@@ -162,7 +183,6 @@ const ViewWorkOrderModal = ({ isOpen, onClose, workOrderData }) => {
                     </p>
                 </div>
 
-                {/* Accounts Table */}
                 <div className="border rounded-lg overflow-hidden mb-6">
                     <div className="grid grid-cols-12 bg-gradient-to-r from-custom-lightgreen to-custom-lightblue text-white font-semibold px-4 py-2 text-base">
                         <div className="col-span-4 flex items-center">
@@ -192,47 +212,80 @@ const ViewWorkOrderModal = ({ isOpen, onClose, workOrderData }) => {
                             <div className="col-span-3 flex justify-center">
                                 <span
                                     className={`px-3 py-1 rounded-full text-xs font-normal
-                                    ${
-                                        workOrderData.status ===
-                                            "In Progress" ||
-                                        workOrderData.status === "Pending"
-                                            ? "bg-[#F5F4DC] text-custom-bluegreen text-sm font-normal"
-                                            : ""
-                                    }
-                                    ${
-                                        workOrderData.status === "Completed"
-                                            ? "bg-custom-bluegreen text-white"
-                                            : ""
-                                    }
-                                `}
+                                        ${
+                                            workOrderData.status ===
+                                                "In Progress" ||
+                                            workOrderData.status === "Pending"
+                                                ? "bg-[#F5F4DC] text-custom-bluegreen text-sm font-normal"
+                                                : ""
+                                        }
+                                        ${
+                                            workOrderData.status === "Completed"
+                                                ? "bg-custom-bluegreen text-white"
+                                                : ""
+                                        }
+                                  `}
                                 >
                                     In Progress
                                 </span>
                             </div>
                             <div className="col-span-2 flex justify-center">
-                                <button onClick={(e) => { e.stopPropagation(); handleRowClick(account.id); }}>
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleRowClick(account.id);
+                                    }}
+                                >
                                     <DocumentIcon />
                                 </button>
                             </div>
                             <div className="col-span-3 flex justify-center">
-                                <LinkIcon />
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleFilesIconClick(account.id);
+                                    }}
+                                >
+                                    <LinkIcon />
+                                </button>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* Footer buttons */}
                 <div className="flex justify-end space-x-3 mt-4">
-                    <button className="text-red-500 hover:text-red-700">
+                    <button 
+                        className="text-red-500 hover:text-red-700"
+                        onClick={() => {
+                            if (onInitiateDelete) {
+                                onInitiateDelete(currentWorkOrderData || workOrderData);
+                            }
+                        }}
+                    >
                         <DeleteIcon />
                     </button>
-                    <button className="bg-green-600 text-white gap-2 gradient-btn5 px-4 py-2 rounded-[10px] hover:bg-green-700 flex items-center">
+                    <button
+                        className="bg-green-600 text-white gap-2 gradient-btn5 px-4 py-2 rounded-[10px] hover:bg-green-700 flex items-center"
+                        onClick={() => setIsEditModalOpen(true)}
+                    >
                         <PenIcon className="mr-2" />
                         Edit
                     </button>
                 </div>
 
-                {/* Modal for Notes and Updates - rendered once, outside the loop */}
+                {isEditModalOpen && (
+                    <EditWorkOrderModal
+                        isOpen={isEditModalOpen}
+                        onClose={() => setIsEditModalOpen(false)}
+                        workOrder={workOrderData}
+                        onWorkOrderUpdated={() => {
+                            refreshWorkOrder();
+                            setIsEditModalOpen(false);
+                            onClose();
+                        }}
+                    />
+                )}
+
                 {isModalOpen && selectedAccountId && (
                     <NotesAndUpdatesModal
                         workOrderData={workOrderData}
@@ -243,6 +296,18 @@ const ViewWorkOrderModal = ({ isOpen, onClose, workOrderData }) => {
                             setIsModalOpen(false);
                             setSelectedAccountId(null);
                         }}
+                    />
+                )}
+
+                {isAddFilesModalOpen && selectedAccountIdForFiles && (
+                    <AddFilesModal
+                        selectedAccountId={selectedAccountIdForFiles}
+                        onClose={() => {
+                            setIsAddFilesModalOpen(false);
+                            setSelectedAccountIdForFiles(null);
+                        }}
+                        selectedWorkOrder={selectedWorkOrder}
+                        workOrderData={workOrderData}
                     />
                 )}
             </div>

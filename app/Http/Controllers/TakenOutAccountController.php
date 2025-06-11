@@ -89,7 +89,7 @@ class TakenOutAccountController extends Controller
                 ->update(['added_status' => false]);
 
             return response()->json([
-                'message' => 'Undo successful!',
+                'message'       => 'Undo successful!',
                 'updated_count' => $updatedCount
             ]);
 

@@ -73,6 +73,9 @@ Route::post('/work-order-logs', [WorkOrderController::class, 'createWorkOrderLog
 Route::post('/work-orders/notes/add', [WorkOrderController::class, 'addNoteWithAttachments']);
 Route::get('/work-orders/get-work-orders', [WorkOrderController::class, 'getWorkOrders']);
 Route::patch('/update-is-new/{id}', [AccountLogController::class, 'updateIsNewStatus']);
+Route::put('/work-orders/{workOrder}', [WorkOrderController::class, 'update']);
+Route::patch('/work-orders/{workOrder}/soft-delete', [WorkOrderController::class, 'softDelete'])->name('work-orders.soft-delete');
+Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName']);
 //For work orders
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -84,12 +87,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/work-orders/create-work-order', [WorkOrderController::class, 'createWorkOrders']);
     Route::get('/work-orders/get-assignee', [WorkOrderController::class, 'getAssignee']);
     Route::get('/work-orders/assignee/{id}', [WorkOrderController::class, 'getAssigneeById']);
-    
+
 
     Route::post('/post-account-log', [AccountLogController::class, 'attachAccountsToLog']);
     Route::get('/work-orders/work-order-types', [WorkOrderController::class, 'getWorkOrderTypes']);
-    Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName']);
     
+
 
 
     Route::get('/my-workorders', [WorkOrderController::class, 'index'])->middleware('my_work_orders_filter');

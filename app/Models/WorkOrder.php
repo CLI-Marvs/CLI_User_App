@@ -5,10 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class WorkOrder extends Model
 {
     use HasFactory;
+    use SoftDeletes;
+
+    protected $dates = ['deleted_at'];
 
     protected $primaryKey = 'work_order_id';
     protected $fillable = [
@@ -26,7 +30,7 @@ class WorkOrder extends Model
     ];
 
     protected $casts = [
-        'work_order_deadline' => 'date',
+        'work_order_deadline' => 'date:Y-m-d',
         'completed_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -79,5 +83,9 @@ class WorkOrder extends Model
     public function log()
     {
         return $this->belongsTo(WorkOrderLog::class, 'log_id');
+    }
+    public function logs()
+    {
+        return $this->hasMany(WorkOrderLog::class, 'work_order_id', 'work_order_id');
     }
 }

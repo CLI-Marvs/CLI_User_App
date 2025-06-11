@@ -23,6 +23,8 @@ import { useStateContext } from "../../../../context/contextprovider";
 import CreateWorkOrderModal from "../../../layout/documentManagementPage/CreateWorkOrders";
 import ViewWorkOrderModal from "../../../layout/documentManagementPage/ViewWorkOrderModal";
 import apiService from "../../../../component/servicesApi/apiService";
+import EditWorkOrderModal from "../../../layout/documentManagementPage/EditWorkOrderModal";
+import WorkOrderDeletionModal from "../../../layout/documentManagementPage/WorkOrderDeletionModal";
 
 const TABLE_HEAD = [
     { head: "Work Order Details" },
@@ -102,6 +104,13 @@ const WorkOrderView = () => {
     const toggleFilterBox = () => setIsFilterVisible((prev) => !prev);
     const [tableRowsData, setTableRowsData] = useState([]);
     const { workOrders, fetchWorkOrders } = useStateContext();
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [selectedWorkOrderForEdit, setSelectedWorkOrderForEdit] =
+        useState(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [selectedWorkOrderForDelete, setSelectedWorkOrderForDelete] =
+        useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // useEffect(() => {
     //     const fetchWorkOrders = async () => {
@@ -243,6 +252,48 @@ const WorkOrderView = () => {
         setSelectedWorkOrderForView(null);
     };
 
+    const handleSoftDeleteWorkOrder = async (workOrderId, reason) => {
+        setIsDeleting(true);
+        try {
+            await apiService.patch(`/work-orders/${workOrderId}/soft-delete`);
+            console.log(`Work order ${workOrderId} soft deleted successfully. Reason: ${reason}`);
+            fetchWorkOrders();
+        } catch (error) {
+            console.error("Failed to soft delete work order:", error);
+            alert(
+                `Failed to delete work order: ${
+                    error.message || "Please try again."
+                }`
+            );
+            throw error;
+        } finally {
+            setIsDeleting(false);
+        }
+        console.log("Delete Triggered");
+    };
+
+    const handleOpenDeleteModal = (workOrderData) => {
+        setSelectedWorkOrderForDelete(workOrderData);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleCloseDeleteModal = () => {
+        setIsDeleteModalOpen(false);
+        setSelectedWorkOrderForDelete(null);
+    };
+    const confirmDeleteHandler = async (reason) => {
+        if (selectedWorkOrderForDelete) {
+            try {
+                await handleSoftDeleteWorkOrder(
+                    selectedWorkOrderForDelete.work_order_id ||
+                        selectedWorkOrderForDelete.workOrderId,
+                    reason 
+                );
+            } catch (error) {
+                console.log("confirmDeleteHandler: Deletion API call failed. Modal will not show confirmation.");
+            }
+        }
+    };
     return (
         <div className="w-[calc(100%-20px)] mx-1 pt-1">
             <div className="relative flex items-center gap-1.5 mb-2 w-full">
@@ -409,13 +460,29 @@ const WorkOrderView = () => {
                     onCreateWorkOrder={handleCreateWorkOrder}
                 />
             )}
-            {/* View Work Order Modal */}
             <ViewWorkOrderModal
                 isOpen={isViewModalOpen}
                 onClose={handleCloseViewModal}
                 workOrderData={selectedWorkOrderForView}
+                onInitiateDelete={(dataToDelete) => {
+                    handleCloseViewModal(); 
+                    handleOpenDeleteModal(dataToDelete); 
+                }}
             />
 
+            {selectedWorkOrderForDelete && (
+                <WorkOrderDeletionModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={handleCloseDeleteModal}
+                    onSubmit={confirmDeleteHandler} 
+                    workOrderName={
+                        selectedWorkOrderForDelete.work_order ||
+                        selectedWorkOrderForDelete.workOrder
+                    } 
+                    isDeleting={isDeleting} 
+                    workOrderDetails={selectedWorkOrderForDelete} 
+                />
+            )}
             <Card className="w-full overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="table-fixed w-full text-center">
@@ -495,7 +562,6 @@ const WorkOrderView = () => {
                                         </td>
                                         <td className="p-4 border-b border-gray-300 text-center">
                                             <div className="flex items-center justify-center gap-2">
-                                                {/* View Icon */}
                                                 <button
                                                     onClick={() =>
                                                         handleOpenViewModal(row)
@@ -503,14 +569,35 @@ const WorkOrderView = () => {
                                                 >
                                                     <ViewIcon />
                                                 </button>
-
-                                                {/* Edit Icon */}
-                                                <button>
+                                                <button
+                                                    onClick={() => {
+                                                        const fullWorkOrder =
+                                                            workOrders?.data?.find(
+                                                                (wo) =>
+                                                                    wo.work_order_id ===
+                                                                    row.workOrderId
+                                                            );
+                                                        setSelectedWorkOrderForEdit(
+                                                            fullWorkOrder || row
+                                                        );
+                                                        setIsEditModalOpen(
+                                                            true
+                                                        );
+                                                    }}
+                                                >
                                                     <EditIcon />
                                                 </button>
-
-                                                {/* Delete Icon */}
-                                                <button>
+                                                <button
+                                                    onClick={() =>
+                                                        {
+                                                            const fullWorkOrder = workOrders?.data?.find(
+                                                                (wo) => wo.work_order_id === row.workOrderId
+                                                            );
+                                                            handleOpenDeleteModal(fullWorkOrder || row);
+                                                        }
+                                                    }
+                                                    disabled={isDeleting}
+                                                >
                                                     <DeleteIcon />
                                                 </button>
                                             </div>
@@ -530,6 +617,18 @@ const WorkOrderView = () => {
                         </tbody>
                     </table>
                 </div>
+
+                {isEditModalOpen && selectedWorkOrderForEdit && (
+                    <EditWorkOrderModal
+                        isOpen={isEditModalOpen}
+                        onClose={() => setIsEditModalOpen(false)}
+                        workOrder={selectedWorkOrderForEdit}
+                        onWorkOrderUpdated={() => {
+                            setIsEditModalOpen(false);
+                            fetchWorkOrders();
+                        }}
+                    />
+                )}
 
                 {/* Card Footer */}
                 <CardFooter className="flex items-center justify-end border-t border-blue-gray-50 p-4 gap-2">

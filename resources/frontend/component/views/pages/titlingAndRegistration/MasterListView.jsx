@@ -260,7 +260,7 @@ export default function PaginatedTable() {
 
     const handleCloseTitlingMonitor = () => {
         setShowTitlingMonitor(false);
-        setSelectedRowDataForMonitor(null); // Clear data when closing
+        setSelectedRowDataForMonitor(null);
     };
 
     useEffect(() => {

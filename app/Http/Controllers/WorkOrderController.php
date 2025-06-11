@@ -60,14 +60,14 @@ class WorkOrderController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'work_order_number' => 'required|string|max:50|unique:work_orders',
-            'account_id' => 'required|integer|exists:taken_out_accounts,id',
+            'work_order_number'   => 'required|string|max:50|unique:work_orders',
+            'account_id'          => 'required|integer|exists:taken_out_accounts,id',
             'assigned_to_user_id' => 'nullable|integer|exists:users,id',
-            'work_order_type_id' => 'required|integer|exists:work_order_types,type_id',
+            'work_order_type_id'  => 'required|integer|exists:work_order_types,type_id',
             'work_order_deadline' => 'nullable|date',
-            'status' => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Completed', 'Cancelled'])],
-            'description' => 'nullable|string',
-            'priority' => ['nullable', 'string', Rule::in(['Low', 'Medium', 'High', 'Urgent'])],
+            'status'              => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Completed', 'Cancelled'])],
+            'description'         => 'nullable|string',
+            'priority'            => ['nullable', 'string', Rule::in(['Low', 'Medium', 'High', 'Urgent'])],
         ]);
         $workOrder = WorkOrder::create($validatedData);
         return response()->json($workOrder->load(['account', 'assignedTo', 'type']), 201);
@@ -79,17 +79,24 @@ class WorkOrderController extends Controller
     public function update(Request $request, WorkOrder $workOrder)
     {
         $validatedData = $request->validate([
-            'work_order_number' => 'sometimes|required|string|max:50|unique:work_orders,work_order_number,' . $workOrder->work_order_id . ',work_order_id',
-            'account_id' => 'sometimes|required|integer|exists:taken_out_accounts,id',
-            'assigned_to_user_id' => 'nullable|integer|exists:users,id',
-            'work_order_type_id' => 'sometimes|required|integer|exists:work_order_types,type_id',
+            'work_order'          => 'sometimes|required|string|max:50',
+            'account_ids'         => 'sometimes|array',
+            'account_ids.*'       => 'integer|exists:taken_out_accounts,id',
+            'assigned_to_user_id' => 'nullable|integer|exists:employee,id',
+            'work_order_type_id'  => 'sometimes|required|integer|exists:work_order_types,id',
             'work_order_deadline' => 'nullable|date',
-            'status' => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Completed', 'Cancelled'])],
-            'description' => 'nullable|string',
-            'priority' => ['nullable', 'string', Rule::in(['Low', 'Medium', 'High', 'Urgent'])],
+            'status'              => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Completed', 'Cancelled'])],
+            'description'         => 'nullable|string',
+            'priority'            => ['nullable', 'string', Rule::in(['Low', 'Medium', 'High', 'Urgent'])],
         ]);
-        $workOrder->update($validatedData);
-        return response()->json($workOrder->load(['account', 'assignedTo', 'type']));
+
+        $workOrder->update(collect($validatedData)->except('account_ids')->toArray());
+
+        if (isset($validatedData['account_ids'])) {
+            $workOrder->accounts()->sync($validatedData['account_ids']);
+        }
+
+        return response()->json($workOrder->load(['accounts', 'assignedTo', 'workOrderType']));
     }
     public function destroy(WorkOrder $workOrder)
     {
@@ -99,7 +106,7 @@ class WorkOrderController extends Controller
     public function addUpdate(Request $request, WorkOrder $workOrder)
     {
         $validatedData = $request->validate([
-            'update_note' => 'required|string',
+            'update_note'        => 'required|string',
             'updated_by_user_id' => 'required|integer|exists:users,id',
         ]);
         $update = $workOrder->updates()->create($validatedData);
@@ -108,19 +115,19 @@ class WorkOrderController extends Controller
     public function uploadDocument(Request $request, WorkOrder $workOrder)
     {
         $validatedData = $request->validate([
-            'file' => 'required|file|max:10240',
+            'file'                => 'required|file|max:10240',
             'uploaded_by_user_id' => 'required|integer|exists:users,id',
-            'file_title' => 'nullable|string|max:255',
+            'file_title'          => 'nullable|string|max:255',
 
         ]);
         $path = $request->file('file')->store('work_order_documents', 's3');
         $document = $workOrder->documents()->create([
             'uploaded_by_user_id' => $validatedData['uploaded_by_user_id'],
-            'file_name' => $request->file('file')->getClientOriginalName(),
-            'file_path' => \Storage::disk('s3')->url($path),
-            'file_type' => $request->file('file')->getMimeType(),
-            'file_title' => $validatedData['file_title'] ?? $request->file('file')->getClientOriginalName(), // From previous change
-            // 'account_id'       => $validatedData['account_id'] ?? null, // If passed for direct uploads
+            'file_name'           => $request->file('file')->getClientOriginalName(),
+            'file_path'           => \Storage::disk('s3')->url($path),
+            'file_type'           => $request->file('file')->getMimeType(),
+            'file_title'          => $validatedData['file_title'] ?? $request->file('file')->getClientOriginalName(),
+            // 'account_id'       => $validatedData['account_id'] ?? null,
         ]);
         return response()->json($document->load('uploadedBy'), 201);
     }
@@ -130,8 +137,8 @@ class WorkOrderController extends Controller
             'completion_notes' => 'nullable|string',
         ]);
         $workOrder->update([
-            'status' => 'Completed',
-            'completed_at' => now(),
+            'status'           => 'Completed',
+            'completed_at'     => now(),
             'completion_notes' => $validatedData['completion_notes'],
         ]);
         return response()->json($workOrder->load(['account', 'assignedTo', 'type']));
@@ -143,14 +150,14 @@ class WorkOrderController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Work order types retrieved successfully.',
-                'data' => $workOrderTypes
+                'data'    => $workOrderTypes
             ], 200);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Failed to retrieve work order types.',
-                'error' => $e->getMessage()
+                'error'   => $e->getMessage()
             ], 500);
         }
     }
@@ -172,20 +179,20 @@ class WorkOrderController extends Controller
     {
         Log::info('Received request data:', $request->all());
         $validatedData = $request->validate([
-            'work_order' => 'required|string|max:50',
-            'account_ids' => 'required|array',
-            'account_ids.*' => 'integer|exists:taken_out_accounts,id',
+            'work_order'          => 'required|string|max:50',
+            'account_ids'         => 'required|array',
+            'account_ids.*'       => 'integer|exists:taken_out_accounts,id',
             'assigned_to_user_id' => 'required|integer|exists:employee,id',
-            'work_order_type_id' => 'required|integer|exists:work_order_types,id',
+            'work_order_type_id'  => 'required|integer|exists:work_order_types,id',
             'work_order_deadline' => 'required|date',
         ]);
         Log::info('Validated data:', $validatedData);
         $workOrder = WorkOrder::create([
-            'work_order' => $validatedData['work_order'],
+            'work_order'          => $validatedData['work_order'],
             'assigned_to_user_id' => $validatedData['assigned_to_user_id'],
-            'work_order_type_id' => $validatedData['work_order_type_id'],
+            'work_order_type_id'  => $validatedData['work_order_type_id'],
             'work_order_deadline' => $validatedData['work_order_deadline'],
-            'created_by_user_id' => auth()->id(),
+            'created_by_user_id'  => auth()->id(),
         ]);
         $workOrder->accounts()->sync($validatedData['account_ids']);
         return response()->json([
@@ -267,21 +274,21 @@ class WorkOrderController extends Controller
     {
         Log::info('Received request to create work order log:', $request->all());
         $validatedData = $request->validate([
-            'work_order_id' => 'required|integer|exists:work_orders,work_order_id',
-            'log_type' => 'required|string|max:50',
-            'log_message' => 'required|string',
+            'work_order_id'      => 'required|integer|exists:work_orders,work_order_id',
+            'log_type'           => 'required|string|max:50',
+            'log_message'        => 'required|string',
             'created_by_user_id' => 'required|integer|exists:employee,id',
-            'account_ids' => 'required|array',
-            'account_ids.*' => 'exists:taken_out_accounts,id',
-            'assigned_user_id' => 'nullable|integer|exists:employee,id',
+            'account_ids'        => 'required|array',
+            'account_ids.*'      => 'exists:taken_out_accounts,id',
+            'assigned_user_id'   => 'nullable|integer|exists:employee,id',
         ]);
         try {
             $logEntryData = [
-                'work_order_id' => $validatedData['work_order_id'],
-                'log_type' => $validatedData['log_type'],
-                'log_message' => $validatedData['log_message'],
+                'work_order_id'      => $validatedData['work_order_id'],
+                'log_type'           => $validatedData['log_type'],
+                'log_message'        => $validatedData['log_message'],
                 'created_by_user_id' => $validatedData['created_by_user_id'],
-                'assigned_user_id' => $validatedData['assigned_user_id'] ?? null,
+                'assigned_user_id'   => $validatedData['assigned_user_id'] ?? null,
             ];
             $logEntry = WorkOrderLog::create($logEntryData);
             $logEntry->accounts()->sync($validatedData['account_ids']);
@@ -296,17 +303,17 @@ class WorkOrderController extends Controller
     {
         Log::info('Received request to add note with attachments:', $request->all());
         $validator = Validator::make($request->all(), [
-            'note_text' => 'required_without:files|nullable|string|max:500',
-            'account_id' => 'nullable|integer|exists:taken_out_accounts,id',
-            'work_order_id' => 'required|integer|exists:work_orders,work_order_id',
-            'log_type' => 'required|string|max:50',
-            'note_type' => 'nullable|string|max:50',
+            'note_text'          => 'required_without:files|nullable|string|max:500',
+            'account_id'         => 'nullable|integer|exists:taken_out_accounts,id',
+            'work_order_id'      => 'required|integer|exists:work_orders,work_order_id',
+            'log_type'           => 'required|string|max:50',
+            'note_type'          => 'nullable|string|max:50',
             'created_by_user_id' => 'required|integer|exists:employee,id',
-            'files' => 'required_without:note_text|nullable|array',
-            'files.*' => 'file|max:10240',
-            'file_titles' => 'nullable|array',
-            'file_titles.*' => 'nullable|string|max:255',
-            'assigned_user_id' => 'nullable|integer|exists:employee,id',
+            'files'              => 'required_without:note_text|nullable|array',
+            'files.*'            => 'file|max:10240',
+            'file_titles'        => 'nullable|array',
+            'file_titles.*'      => 'nullable|string|max:255',
+            'assigned_user_id'   => 'nullable|integer|exists:employee,id',
         ]);
         if ($validator->fails()) {
             Log::error('Validation failed for adding note:', $validator->errors()->toArray());
@@ -320,14 +327,14 @@ class WorkOrderController extends Controller
                 $logMessage = 'Attached ' . count($validatedData['files']) . ' file(s).';
             }
             $workOrderLog = WorkOrderLog::create([
-                'work_order_id' => $validatedData['work_order_id'],
-                'log_type' => $validatedData['log_type'],
-                'log_message' => $logMessage,
+                'work_order_id'      => $validatedData['work_order_id'],
+                'log_type'           => $validatedData['log_type'],
+                'log_message'        => $logMessage,
                 'created_by_user_id' => $validatedData['created_by_user_id'],
-                'note_type' => $validatedData['note_type'] ?? null,
-                'account_id' => $validatedData['account_id'] ?? null,
-                'is_new' => true,
-                'assigned_user_id' => $validatedData['assigned_user_id'] ?? null,
+                'note_type'          => $validatedData['note_type'] ?? null,
+                'account_id'         => $validatedData['account_id'] ?? null,
+                'is_new'             => true,
+                'assigned_user_id'   => $validatedData['assigned_user_id'] ?? null,
             ]);
             Log::info('Work order log entry created:', ['log_id' => $workOrderLog->id]);
             if ($request->hasFile('files')) {
@@ -342,14 +349,14 @@ class WorkOrderController extends Controller
                     $finalTitle = !empty(trim($titleFromRequest)) ? trim($titleFromRequest) : $fileData['original_file_name'];
 
                     $workOrderLog->documents()->create([
-                        'work_order_id' => $validatedData['work_order_id'],
-                        'account_id' => $accountIdForDocuments,
+                        'work_order_id'       => $validatedData['work_order_id'],
+                        'account_id'          => $accountIdForDocuments,
                         'uploaded_by_user_id' => $uploaderUserId,
-                        'file_name' => $fileData['original_file_name'],
-                        'file_path' => $fileData['file_link'],
-                        'file_type' => $fileData['mime_type'],
-                        'log_id' => $workOrderLog->id,
-                        'file_title' => $finalTitle,
+                        'file_name'           => $fileData['original_file_name'],
+                        'file_path'           => $fileData['file_link'],
+                        'file_type'           => $fileData['mime_type'],
+                        'log_id'              => $workOrderLog->id,
+                        'file_title'          => $finalTitle,
                     ]);
                 }
                 Log::info('Attached documents to work order log. Uploader employee ID:', ['log_id' => $workOrderLog->id, 'uploader_employee_id' => $uploaderUserId, 'file_count' => count($uploadedFilesData)]);
@@ -389,13 +396,34 @@ class WorkOrderController extends Controller
                 );
                 $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
                 $uploadedFilesData[] = [
-                    'file_link' => $fileLink,
+                    'file_link'          => $fileLink,
                     'original_file_name' => $originalFileName,
-                    'gcs_path' => $filePath,
-                    'mime_type' => $file->getMimeType(),
+                    'gcs_path'           => $filePath,
+                    'mime_type'          => $file->getMimeType(),
                 ];
             }
         }
         return $uploadedFilesData;
+    }
+
+    /**
+     * Soft delete the specified work order.
+     *
+     * @param  WorkOrder $workOrder
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function softDelete(WorkOrder $workOrder): \Illuminate\Http\JsonResponse
+    {
+        $workOrderIdForLogging = $workOrder->getKey();
+        try {
+            $workOrder->delete();
+            return response()->json(['message' => 'Work order soft deleted successfully.'], 200);
+        } catch (\Exception $e) {
+            Log::error("Soft delete failed for work order ID {$workOrderIdForLogging}: " . $e->getMessage(), [
+                'exception_class' => get_class($e),
+                'exception_trace' => $e->getTraceAsString(),
+            ]);
+            return response()->json(['message' => 'Failed to soft delete work order.', 'error' => $e->getMessage(), 'exception_class' => get_class($e)], 500);
+        }
     }
 }

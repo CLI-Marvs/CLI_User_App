@@ -23,20 +23,20 @@ class TitlingRegistrationController extends Controller
             return response()->json(['message' => 'Account not found for the given contract number.'], 404);
         }
 
-        $definedSteps = WorkOrderType::orderBy('id')->pluck('type_name')->all(); // Fetches all type_name as an array
+        $definedSteps = WorkOrderType::orderBy('id')->pluck('type_name')->all();
 
         $accountWorkOrders = WorkOrder::whereHas('accounts', function ($query) use ($account) {
             $query->where('taken_out_accounts.id', $account->id);
         })
-        ->with([
-            'assignee:id,fullname,firstname,lastname',
-            'workOrderType:id,type_name'
-        ])
-        ->withCount([
-            'updates as notesCount',   
-            'documents as filesCount'  
-        ])
-        ->get();
+            ->with([
+                'assignee:id,fullname,firstname,lastname',
+                'workOrderType:id,type_name'
+            ])
+            ->withCount([
+                'logs as notesCount',
+                'documents as filesCount'
+            ])
+            ->get();
 
         $workOrdersMappedByStepName = [];
         foreach ($accountWorkOrders as $wo) {
