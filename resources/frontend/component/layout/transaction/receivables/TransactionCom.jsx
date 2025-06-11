@@ -251,6 +251,9 @@ const TransactionCom = () => {
             : baseColumns
         : [];
 
+
+    const isDynamicColumnsLoading = !isSuccess;
+
     const exportToExcel = async () => {
         try {
             const response = await transaction.exportTransactions({
@@ -397,6 +400,7 @@ const TransactionCom = () => {
                     columns={columns}
                     data={transactions.data}
                     loading={transactions.loading}
+                    columnsLoading={isDynamicColumnsLoading}
                 />
                 <div className="flex justify-end mt-4">
                     <div className="flex w-full justify-end mt-3 mb-10">

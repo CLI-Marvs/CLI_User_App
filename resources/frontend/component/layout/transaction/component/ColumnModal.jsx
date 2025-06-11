@@ -12,7 +12,9 @@ const ColumnModal = ({ subFeatureId, views }) => {
     const [hasManuallySelected, setHasManuallySelected] = useState(false);
     const [selectedView, setSelectedView] = useState(null);
     const [selectedFields, setSelectedFields] = useState({});
+    const [message, setMessage] = useState("");
     const [isView, setIsView] = useState(true);
+    const [viewName, setViewName] = useState("");
     const modalRef = useRef(null);
 
     const isSelectedView = views?.find((item) => item.id === selectedView);
@@ -30,6 +32,7 @@ const ColumnModal = ({ subFeatureId, views }) => {
                 initialFields[col.column_name] = true;
             });
             setSelectedFields(initialFields);
+            setIsView(false);
         }
     }, [renderColumns]);
 
@@ -69,6 +72,17 @@ const ColumnModal = ({ subFeatureId, views }) => {
         setHasManuallySelected(false);
     };
 
+    const messageFunc = () => {
+        const hasSelection = Object.values(selectedFields).some(
+            (value) => value === true
+        );
+        setMessage(
+            hasSelection
+                ? "Successfully created view"
+                : "Please select at least one column"
+        );
+        return hasSelection;
+    };
     const createNewView = () => {
         setSelectedView(null);
         setSelectedFields({});
@@ -77,12 +91,21 @@ const ColumnModal = ({ subFeatureId, views }) => {
     };
 
     const handleSetDefault = () => {
-        setDefaultView({ presetId: selectedView });
+        if (messageFunc()) {
+            setDefaultView({
+                presetId: selectedView,
+                selectedFields,
+                viewName,
+            });
+        }
     };
 
     const handleSaveView = () => {
         if (isView) {
-            saveView({ selectedFields });
+            saveView({
+                selectedFields,
+                viewName,
+            });
         } else {
             setDefaultColumns(renderColumns);
             setOpenColumn(false);
@@ -105,23 +128,44 @@ const ColumnModal = ({ subFeatureId, views }) => {
                     ref={modalRef}
                     className="absolute -right-1 top-10 bg-white border border-gray-300 mt-[10px] w-[640px] h-auto rounded-2xl pt-[48px] px-[32px] pb-[32px] z-50"
                 >
-                    <div className="flex justify-end items-center gap-2 mb-[48px]">
-                        <select
-                            className="border rounded px-2 py-1 text-sm"
-                            onChange={viewChange}
-                            value={selectedView || ""}
-                        >
-                            <option value="" disabled>
-                                Select a view
-                            </option>
-                            {views &&
-                                views.map((item, index) => (
-                                    <option key={index} value={item.id}>
-                                        {item.name}{" "}
-                                        {item.is_default ? "(default)" : ""}
-                                    </option>
-                                ))}
-                        </select>
+                    <div className="flex justify-center items-center mb-2">
+                        <span>{message}</span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+                        {isView && (
+                            <div className="w-full sm:w-auto flex items-center gap-2">
+                                <input
+                                    type="text"
+                                    placeholder="Save view"
+                                    onChange={(e) =>
+                                        setViewName(e.target.value)
+                                    }
+                                    value={viewName}
+                                    className="w-full sm:w-64 px-4 py-2 text-sm rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-custom-solidgreen focus:border-transparent"
+                                />
+                            </div>
+                        )}
+
+                        <div className="w-full flex justify-end items-center gap-2">
+                            <select
+                                className="w-full sm:w-48 px-4 py-2 text-sm rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-custom-solidgreen focus:border-transparent"
+                                onChange={viewChange}
+                                value={selectedView || ""}
+                            >
+                                <option value="" disabled>
+                                    {views && views.length > 0
+                                        ? "Select a view"
+                                        : "No views created yet"}
+                                </option>
+                                {views &&
+                                    views.map((item, index) => (
+                                        <option key={index} value={item.id}>
+                                            {item.name}{" "}
+                                            {item.is_default ? "(default)" : ""}
+                                        </option>
+                                    ))}
+                            </select>
+                        </div>
                     </div>
 
                     <div className="flex flex-col space-y-6 text-sm">
@@ -181,20 +225,22 @@ const ColumnModal = ({ subFeatureId, views }) => {
 
                     <div className="flex justify-between mt-3">
                         <div className="flex gap-2">
-                            <button
-                                className="font-semibold text-base text-custom-solidgreen"
-                                onClick={createNewView}
-                            >
-                                Create new view +
-                            </button>
                             {!isView && (
-                                <button
-                                    className="font-semibold text-base text-custom-solidgreen underline"
-                                    onClick={handleSetDefault}
-                                >
-                                    Set as default
-                                </button>
+                                <>
+                                    <button
+                                        className="font-semibold text-base text-custom-solidgreen"
+                                        onClick={createNewView}
+                                    >
+                                        Create new view +
+                                    </button>
+                                </>
                             )}
+                            <button
+                                className="font-semibold text-base text-custom-solidgreen underline"
+                                onClick={handleSetDefault}
+                            >
+                                Set as default
+                            </button>
                         </div>
 
                         <div className="flex justify-end gap-6">

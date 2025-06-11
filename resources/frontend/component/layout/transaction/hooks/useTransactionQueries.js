@@ -29,10 +29,11 @@ export const useSubFeatureId = (name) => {
 export const useSaveView = (subFeatureId) => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ selectedFields }) => {
+        mutationFn: ({ selectedFields, viewName }) => {
             return transaction.storeViewAndColumns({
                 subFeatureId,
                 columns: Object.keys(selectedFields).map((key) => ({ column_name: key })),
+                name: viewName,
             });
         },
         onSuccess: () => queryClient.invalidateQueries(["columns", subFeatureId]),
@@ -42,8 +43,13 @@ export const useSaveView = (subFeatureId) => {
 export const useSetDefaultView = (subFeatureId, setHasManuallySelected) => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: ({ presetId }) =>
-            transaction.setDefaultView({ subFeatureId, presetId }),
+        mutationFn: ({ presetId, selectedFields, viewName }) =>
+            transaction.setDefaultView({ 
+                subFeatureId, 
+                presetId, 
+                columns: Object.keys(selectedFields).map((key) => ({ column_name: key })),
+                name: viewName,
+             }),
         onSuccess: () => {
             queryClient.invalidateQueries(["columns", subFeatureId]);
             setHasManuallySelected?.(false);

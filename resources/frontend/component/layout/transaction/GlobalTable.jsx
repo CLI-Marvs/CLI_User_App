@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import Skeletons from "@/component/Skeletons";
 
-const GlobalTable = ({ columns, data, loading }) => {
+const GlobalTable = ({ columns, data, loading, columnsLoading }) => {
     const skeletonRows = 5;
     const tableRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -39,7 +39,7 @@ const GlobalTable = ({ columns, data, loading }) => {
             <table className="border-separate border-spacing-y-2 w-full min-w-max">
                 <thead>
                     <tr className="text-white bg-custom-lightgreen">
-                        {columns.length > 0
+                        {!columnsLoading
                             ? columns.map((col, index) => (
                                   <th
                                       key={index}
@@ -48,8 +48,7 @@ const GlobalTable = ({ columns, data, loading }) => {
                                       {col.header}
                                   </th>
                               ))
-                            : // Show placeholder skeleton headers (e.g., 4 columns)
-                              [...Array(4)].map((_, index) => (
+                            : [...Array(4)].map((_, index) => (
                                   <th
                                       key={index}
                                       className="border-r-[1px] border-[#B9B7B7] px-[10px] py-[16px] text-sm shadow-custom12 text-center"
@@ -60,7 +59,7 @@ const GlobalTable = ({ columns, data, loading }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {loading ? (
+                    {loading  || columnsLoading  ? (
                         <>
                             {[...Array(skeletonRows)].map((_, rowIndex) => (
                                 <tr

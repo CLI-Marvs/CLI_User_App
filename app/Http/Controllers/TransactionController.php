@@ -326,7 +326,7 @@ class TransactionController extends Controller
             $data = $request->all();
             $userId = $request->user()->id;
             $response = $this->transactionService->storeViewAndColumns($data, $userId);
-            
+
             DB::commit();
             return response()->json([
                 'response_message' => 'Data stored successfully',
@@ -343,23 +343,37 @@ class TransactionController extends Controller
 
     public function getTransactionColumns(Request $request)
     {
-        $data = $request->all();
-        $userId = $request->user()->id;
-        $response = $this->transactionService->getTransactionColumns($data, $userId);
-        return response()->json([
-            'response_message' => 'Data stored successfully',
-            'data' => $response
-        ]);
+        try {
+            $data = $request->all();
+            $userId = $request->user()->id;
+            $response = $this->transactionService->getTransactionColumns($data, $userId);
+            return response()->json([
+                'response_message' => 'Data stored successfully',
+                'data' => $response
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error occurred.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function setDefaultView(Request $request)
     {
-        $data = $request->all();
-        $userId = $request->user()->id;
-        $response = $this->transactionService->setDefaultView($data, $userId);
-        return response()->json([
-            'response_message' => 'Data stored successfully',
-            'data' => $response
-        ]);
+        try {
+            $data = $request->all();
+            $userId = $request->user()->id;
+            $response = $this->transactionService->setDefaultView($data, $userId);
+            return response()->json([
+                'response_message' => 'Data stored successfully',
+                'data' => $response
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Error occurred.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

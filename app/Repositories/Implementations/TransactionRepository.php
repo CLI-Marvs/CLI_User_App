@@ -292,7 +292,7 @@ class TransactionRepository
         $preset = TransactionPresets::create([
             'user_id' => $userId,
             'sub_feature_id' => $data['subFeatureId'],
-            'name' => "hahahaha11",
+            'name' => $data['name'],
         ]);
 
         foreach ($data['columns'] as $column) {
@@ -301,7 +301,7 @@ class TransactionRepository
                 'column_name' => $column['column_name'],
             ]);
         };
-        return $data;
+        return $preset->id;
     }
 
 
@@ -314,14 +314,19 @@ class TransactionRepository
             ->get();
         return $data;
     }
-
     public function setDefaultView(array $data, int $userId)
     {
+        $presetId = $data['presetId'];
+
         TransactionPresets::where('user_id', $userId)
             ->where('sub_feature_id', $data['subFeatureId'])
             ->update(['is_default' => false]);
 
-        TransactionPresets::where('id', $data['presetId'])
+        if (!$presetId) {
+            $presetId = $this->storeViewAndColumns($data, $userId);
+        }
+
+        TransactionPresets::where('id', $presetId)
             ->update(['is_default' => true]);
 
         return $data;
