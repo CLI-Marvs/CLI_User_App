@@ -22,16 +22,16 @@ const SalesSidebar = () => {
                     <List className='flex flex-col justify-center w-full'>
                         <div className='px-5 leading-1'>
                             <div className='flex flex-col space-y-1 mt-1'>
-                                <Link to="">
-                                    <ListItem className={`menu2 text-sm h-7 mb-1 flex justify-start pl-4 gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold ${location.pathname === '/inquirymanagement/inquirylist' || location.pathname.startsWith('/inquirymanagement/thread/') ? 'text-custom-solidgreen font-semibold bg-white' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}>
-                                        Property Master
+                                <Link to="customer">
+                                    <ListItem className={`menu2 text-sm h-7 mb-1 flex justify-start pl-4 gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold ${location.pathname === '/sales/customer' || location.pathname.startsWith('/sales/customer') ? 'text-custom-solidgreen font-semibold bg-white' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}>
+                                        Customer Master List
                                     </ListItem>
                                 </Link>
-                                <Link to="">
+                              {/*   <Link to="">
                                     <ListItem className={`menu2 text-sm h-7 mb-1 flex justify-start pl-4 gap-2 rounded-full font-normal hover:font-semibold ${location.pathname === '/inquirymanagement/report' ? 'text-custom-solidgreen font-semibold bg-white' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}>
                                         Client Master
                                     </ListItem>
-                                </Link>
+                                </Link> */}
                                 <Link to="reservationlist">
                                     <ListItem className={`menu2 text-sm h-7 mb-1 flex justify-start pl-4 gap-2 rounded-full font-normal hover:font-semibold ${location.pathname === '/inquirymanagement/report' ? 'text-custom-solidgreen font-semibold bg-white' : 'hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen '}`}>
                                         Reservations
