@@ -169,11 +169,12 @@
     <p style="color:#404B52; font-size: 20px;">
         Please rate your experience with us: <br>
 
-        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/1" class="emoji-button">😠</a>
-        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/2" class="emoji-button">😒</a>
-        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/3" class="emoji-button">😐</a>
-        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/4" class="emoji-button">😊</a>
         <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/5" class="emoji-button">😃</a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/4" class="emoji-button">😊</a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/3" class="emoji-button">😐</a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/2" class="emoji-button">😒</a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/1" class="emoji-button">😠</a>
+
     </p>
 
 
