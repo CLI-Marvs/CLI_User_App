@@ -39,6 +39,11 @@ Broadcast::channel('followupreply.{ticketId}', function ($data) {
 Broadcast::channel('messageidref.{ticketId}', function ($data) {
     return true;
 });
+
+Broadcast::channel('permission-update.{employeeId}', function ($data) {
+    return true;
+});
+
 // Broadcast::channel('concerns.{concernId}', function ($user, $concernId) {
 //     // Implement authorization logic here, like checking if the user has access to this concern
 //     return true; // Or use logic like Concern::find($concernId)->userHasAccess($user)
