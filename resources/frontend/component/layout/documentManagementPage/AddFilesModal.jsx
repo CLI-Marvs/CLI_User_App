@@ -5,6 +5,7 @@ import ViewIcon from "../../../../../public/Images/eye_icon.svg";
 import DownloadIcon from "../../../../../public/Images/download_icon.svg";
 import axios from "axios";
 import UploadFilesOnlyModal from "./UploadFilesOnlyModal";
+import apiService from "../../../component/servicesApi/apiService";
 
 function AddFilesModal({
     selectedAccountId,
@@ -37,20 +38,11 @@ function AddFilesModal({
         setError(null);
 
         try {
-            const response = await fetch(
-                `/api/get-account-logs/${selectedAccountId}?log_type=${selectedWorkOrder}&work_order_id=${workOrderData.work_order_id}`
+            const response = await apiService.get(
+                `/get-account-logs/${selectedAccountId}?log_type=${selectedWorkOrder}&work_order_id=${workOrderData.work_order_id}`
             );
 
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(
-                    `HTTP error! status: ${response.status} - ${
-                        errorText || response.statusText
-                    }`
-                );
-            }
-
-            const data = await response.json();
+            const data = response.data;
             console.log("ADD FILES MODAL LOG DATA:", data);
             const logsArray = data.log_data || [];
 
@@ -60,26 +52,45 @@ function AddFilesModal({
                         log.documents &&
                         log.documents.length > 0 &&
                         log.log_type === selectedWorkOrder &&
-                        (log.account_id === selectedAccountId || 
-                            (log.account_ids && log.account_ids.includes(selectedAccountId)))
+                        (log.account_id === selectedAccountId ||
+                            (log.account_ids &&
+                                log.account_ids.includes(selectedAccountId)))
                 )
                 .sort(
                     (a, b) => new Date(b.created_at) - new Date(a.created_at)
                 );
 
-            filteredLogs.forEach((log) => {
-                if (log.is_new) {
-                    axios
-                        .patch(`/api/update-is-new/${log.id}`, { is_new: false })
-                        .then((res) => console.log("Updated is_new for log:", res.data))
-                        .catch((err) => console.error("Error updating is_new:", err));
-                }
-            });
+            const updatePromises = filteredLogs
+                .filter((log) => log.is_new)
+                .map((log) =>
+                    apiService
+                        .patch(`/update-is-new/${log.id}`, { is_new: false })
+                        .then((res) =>
+                            console.log("Updated is_new for log:", res.data)
+                        )
+                        .catch((err) =>
+                            console.error("Error updating is_new:", err)
+                        )
+                );
+
+            Promise.all(updatePromises);
 
             setLogsWithFiles(filteredLogs);
         } catch (err) {
             console.error("Error fetching log data with files:", err);
-            setError(`Failed to load files: ${err.message}`);
+
+            let errorMessage = `Failed to load files: ${err.message}`;
+            if (
+                err.response &&
+                err.response.data &&
+                err.response.data.message
+            ) {
+                errorMessage = `Failed to load files: ${err.response.data.message}`;
+            } else if (err.response) {
+                errorMessage = `Failed to load files: HTTP error! status: ${err.response.status}`;
+            }
+
+            setError(errorMessage);
             setLogsWithFiles([]);
         } finally {
             setLoading(false);
@@ -129,7 +140,6 @@ function AddFilesModal({
     const logsToRender = showAll
         ? logsWithFiles
         : logsWithFiles.slice(0, initialLogCount);
-
 
     if (loading && !error) {
         return (
@@ -191,7 +201,10 @@ function AddFilesModal({
                     {!error && logsWithFiles.length > 0 && (
                         <div className="space-y-4">
                             {logsToRender.map((log) => (
-                                <div key={log.id} className="py-2 border-b border-gray-200 last:border-b-0">
+                                <div
+                                    key={log.id}
+                                    className="py-2 border-b border-gray-200 last:border-b-0"
+                                >
                                     <div className="text-custom-bluegreen font-semibold text-sm ">
                                         {formatDateWithTime(log.created_at)}
                                         {log.is_new && (
@@ -209,19 +222,34 @@ function AddFilesModal({
                                         </span>
                                     </div>
 
-                                    {log.documents && log.documents.length > 0 && (
-                                        <div className="mt-1 pl-1">
-                                            <div className="space-y-3">
-                                                {log.documents.map((doc) => (
-                                                    <div key={doc.document_id || doc.id} className="flex items-center space-x-3">
-                                                        <div className="w-24 flex-shrink-0">
-                                                            <span className="text-sm font-normal text-custom-solidgreen truncate block" title={doc.file_title || "Document"}>
-                                                                {doc.file_title || "Document"}
-                                                            </span>
-                                                        </div>
-                                                        <div className="bg-[#D6E4D1] rounded-lg py-0 px-[10px] border w-66">
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="flex items-center space-x-3 min-w-0 flex-1">
+                                    {log.documents &&
+                                        log.documents.length > 0 && (
+                                            <div className="mt-1 pl-1">
+                                                <div className="space-y-3">
+                                                    {log.documents.map(
+                                                        (doc) => (
+                                                            <div
+                                                                key={
+                                                                    doc.document_id ||
+                                                                    doc.id
+                                                                }
+                                                                className="flex items-center space-x-3"
+                                                            >
+                                                                <div className="w-24 flex-shrink-0">
+                                                                    <span
+                                                                        className="text-sm font-normal text-custom-solidgreen truncate block"
+                                                                        title={
+                                                                            doc.file_title ||
+                                                                            "Document"
+                                                                        }
+                                                                    >
+                                                                        {doc.file_title ||
+                                                                            "Document"}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="bg-[#D6E4D1] rounded-lg py-0 px-[10px] border w-66">
+                                                                    <div className="flex items-center justify-between">
+                                                                        <div className="flex items-center space-x-3 min-w-0 flex-1">
                                                                             <div className=" p-2 rounded flex-shrink-0">
                                                                                 <img
                                                                                     src={
@@ -231,25 +259,65 @@ function AddFilesModal({
                                                                                     className="w-[22px] h-[22px]"
                                                                                 />
                                                                             </div>
-                                                                    <span className="text-xs font-light truncate" title={doc.file_name}>
-                                                                        {doc.file_name}
-                                                                    </span>
-                                                                </div>
-                                                                <div className="flex items-center space-x-0 flex-shrink-0">
-                                                                    <button onClick={() => window.open(doc.file_path, "_blank")} className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors" title="View document">
-                                                                        <img src={ViewIcon} alt="View" className="w-6 h-6" />
-                                                                    </button>
-                                                                    <a href={doc.file_path} target="_blank" rel="noopener noreferrer" download={doc.file_name} className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors" title="Download document">
-                                                                        <img src={DownloadIcon} alt="Download" className="w-5 h-5" />
-                                                                    </a>
+                                                                            <span
+                                                                                className="text-xs font-light truncate"
+                                                                                title={
+                                                                                    doc.file_name
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    doc.file_name
+                                                                                }
+                                                                            </span>
+                                                                        </div>
+                                                                        <div className="flex items-center space-x-0 flex-shrink-0">
+                                                                            <button
+                                                                                onClick={() =>
+                                                                                    window.open(
+                                                                                        doc.file_path,
+                                                                                        "_blank"
+                                                                                    )
+                                                                                }
+                                                                                className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
+                                                                                title="View document"
+                                                                            >
+                                                                                <img
+                                                                                    src={
+                                                                                        ViewIcon
+                                                                                    }
+                                                                                    alt="View"
+                                                                                    className="w-6 h-6"
+                                                                                />
+                                                                            </button>
+                                                                            <a
+                                                                                href={
+                                                                                    doc.file_path
+                                                                                }
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                download={
+                                                                                    doc.file_name
+                                                                                }
+                                                                                className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
+                                                                                title="Download document"
+                                                                            >
+                                                                                <img
+                                                                                    src={
+                                                                                        DownloadIcon
+                                                                                    }
+                                                                                    alt="Download"
+                                                                                    className="w-5 h-5"
+                                                                                />
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
+                                                        )
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
                                 </div>
                             ))}
                         </div>

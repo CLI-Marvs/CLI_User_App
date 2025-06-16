@@ -32,11 +32,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CircularProgress } from "@mui/material";
 import TitlingAndRegistrationMonitor from "../../../layout/documentManagementPage/TitlingAndRegistrationMonitor";
 
-const UploadIcon = ({ onClick }) => (
+const UploadIcon = ({ onClick, className: propClassName }) => ( // Added className prop and corrected typo
     <img
         src={UploadSvg}
         alt="Upload Icon"
-        className={`size-4 $(className)`}
+        className={propClassName || 'size-4'} // Use provided className or default
         onClick={onClick}
     />
 );
@@ -196,35 +196,14 @@ export default function PaginatedTable() {
         { label: "Unfinished", value: "unfinished" },
     ];
     const {
-        setTakenOutCurrentPage,
-        takenOutSearchQuery,
-        setTakenOutSearchQuery,
-        setTakenOutFilteredRows,
-        takenOutFilteredRows,
-        takenOutAppliedFilters,
-        setTakenOutAppliedFilters,
-        takenOutTableRows,
-        setTakenOutTableRows,
-        takenOutCurrentData,
-        totalPages,
-        takenOutCurrentPage,
-        safeCurrentPage,
-        takenOutIndexOfFirstRow,
-        fetchTakenOutAccounts,
         loading,
-        setLoading,
-        takenOutMasterListTableRows,
         setTakenOutMasterListTableRows,
-        masterListLoading,
         masterListFilteredRows,
-        masterListTotalPages,
         safeMasterListCurrentPage,
         masterListIndexOfFirstRow,
-        masterListIndexOfLastRow,
         masterListCurrentData,
         takenOutMasterListCurrentPage,
         setTakenOutMasterListCurrentpage,
-        takenOutMasterListAppliedFilters,
         setTakenOutMasterListAppliedFilters,
         takenOutMasterListSearchQuery,
         setTakenOutMasterListSearchQuery,
@@ -237,23 +216,79 @@ export default function PaginatedTable() {
     const dropdownRef = useRef(null);
     const [isAddingToMasterlist, setIsAddingToMasterlist] = useState(false);
     const [isFileUploading, setIsFileUploading] = useState(false);
-    // const [isViewOpen, setIsViewOpen] = useState(false); // Assuming this was for the modal or can be removed if not used elsewhere
+    // const [isViewOpen, setIsViewOpen] = useState(false);
     const [showTitlingMonitor, setShowTitlingMonitor] = useState(false);
     const [selectedRowDataForMonitor, setSelectedRowDataForMonitor] =
         useState(null);
 
+    const fetchLocalMasterListData = async () => {
+        try {
+            const response = await apiService.get("/taken-out-accounts/get-masterlist");
+            setMasterList(response.data || []);
+        } catch (error) {
+            console.error("Failed to fetch local master list data for filtering:", error);
+            setMasterList([]); 
+            toast.error("Could not refresh filter data for master list status.");
+        }
+    };
+
     useEffect(() => {
         fetchMasterList();
-    }, []);
+        fetchLocalMasterListData(); 
+    }, []); 
+
+    const handleFileUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+            toast.error("No file selected.");
+            return;
+        }
+        setIsFileUploading(true);
+
+        try {
+            const formData = new FormData();
+            formData.append("file", file);
+            const response = await apiService.post(
+                "/upload-taken-out-accounts", 
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+
+            if (response.status === 200) {
+                toast.success("Data uploaded successfully!");
+                await fetchMasterList(); 
+                await fetchLocalMasterListData(); 
+            } else {
+                toast.error(
+                    `Failed to upload data: ${
+                        response.data?.message || "Unknown error"
+                    }`
+                );
+            }
+        } catch (error) {
+            console.error("File upload error:", error);
+            toast.error(
+                `Failed to upload data: ${error.response?.data?.message || "Unknown error"}`
+            );
+        } finally {
+            setIsFileUploading(false);
+            if (event.target) event.target.value = null;
+        }
+    };
 
     const handleOpenTitlingMonitor = (
         user,
         contractNumber,
         propertyName,
-        unitNumber
+        unitNumber,
+        accountId
     ) => {
         setShowTitlingMonitor(true);
-        const data = { user, contractNumber, propertyName, unitNumber };
+        const data = { user, contractNumber, propertyName, unitNumber, accountId };
         console.log("Opening Titling Monitor with data:", data);
         setSelectedRowDataForMonitor(data);
     };
@@ -421,57 +456,9 @@ export default function PaginatedTable() {
                 );
 
                 if (response.status === 200) {
-                    setTakenOutMasterListTableRows((prev) =>
-                        prev.map((row) =>
-                            selectedIds.includes(row.id)
-                                ? { ...row, added_status: true }
-                                : row
-                        )
-                    );
-
-                    const idsJustAdded = [...selectedIds];
                     setCheckedRows({});
-
-                    toast(
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
-                            <span className="text-sm text-white font-medium">
-                                Added to Master List
-                            </span>
-                            <div className="flex gap-4 mt-1 sm:mt-0">
-                                <span
-                                    className="text-xs text-red-400 font-semibold cursor-pointer hover:underline"
-                                    onClick={() =>
-                                        handleUndoAddToMasterList(idsJustAdded)
-                                    }
-                                    role="button"
-                                    tabIndex={0}
-                                >
-                                    Undo
-                                </span>
-                                <span
-                                    className="text-xs text-custom-lightgreen font-semibold cursor-pointer hover:underline"
-                                    onClick={() =>
-                                        navigate(
-                                            "/documentmanagement/titleandregistration/masterlist"
-                                        )
-                                    }
-                                    role="button"
-                                    tabIndex={0}
-                                >
-                                    View List
-                                </span>
-                            </div>
-                        </div>,
-                        {
-                            hideProgressBar: false,
-                            closeButton: true,
-                            position: "bottom-right",
-                            className:
-                                "bg-[#1E1E1E] text-gray-900 rounded-md shadow-lg",
-                        }
-                    );
-
                     await fetchMasterList();
+                    await fetchLocalMasterListData();
                 }
             } catch (error) {
                 toast.error("Error adding to master list");
@@ -534,12 +521,12 @@ export default function PaginatedTable() {
                 break;
             case "Finished":
                 data = data.filter((row) =>
-                    masterListContracts.has(row.contract_no)
+                    masterListContracts.has(row.contractNumber)
                 );
                 break;
             case "Unfinished":
                 data = data.filter(
-                    (row) => !masterListContracts?.has(row.contract_no)
+                    (row) => !masterListContracts?.has(row.contractNumber)
                 );
                 break;
             default:
@@ -689,14 +676,14 @@ export default function PaginatedTable() {
             date: "",
         });
         await fetchMasterList();
-
     };
 
     return (
         <>
             <div className="w-[calc(100%-20px)] mx-1">
                 {!showTitlingMonitor && (
-                    <div className="relative flex items-center gap-1.5 mb-2 w-full"> {/* Toolbar: Filter, Search, Buttons */}
+                    <div className="relative flex items-center gap-1.5 mb-2 w-full">
+                        {" "}
                         <div className="flex-shrink-0">
                             <Menu>
                                 <MenuHandler>
@@ -736,7 +723,6 @@ export default function PaginatedTable() {
                                 </MenuList>
                             </Menu>
                         </div>
-
                         <div className="relative flex-1">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -768,7 +754,9 @@ export default function PaginatedTable() {
 
                             <div className="absolute right-3 top-3 flex justify-end">
                                 <div className="cursor-pointer mr-2">
-                                    <FilterSearchIcon onClick={toggleFilterBox} />
+                                    <FilterSearchIcon
+                                        onClick={toggleFilterBox}
+                                    />
                                 </div>
                                 <button
                                     className="cursor-pointer"
@@ -783,7 +771,10 @@ export default function PaginatedTable() {
                                         width="1em"
                                         xmlns="http://www.w3.org/2000/svg"
                                     >
-                                        <path fill="none" d="M0 0h24v24H0z"></path>
+                                        <path
+                                            fill="none"
+                                            d="M0 0h24v24H0z"
+                                        ></path>
                                         <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"></path>
                                     </svg>
                                 </button>
@@ -799,7 +790,6 @@ export default function PaginatedTable() {
                                         className="absolute top-[110%] transform -translate-x-1/2 p-6 sm:p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[100%] max-w-full"
                                     >
                                         <div className="flex flex-col gap-4">
-                                            {/* ... filter input fields ... */}
                                             <div className="flex flex-col sm:flex-row">
                                                 <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
                                                     Contract No.
@@ -815,7 +805,119 @@ export default function PaginatedTable() {
                                                     className="w-full border-b outline-none text-sm px-2"
                                                 />
                                             </div>
-                                            {/* ... other filter fields ... */}
+
+                                            <div className="flex flex-col sm:flex-row">
+                                                <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
+                                                    Account Name
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={selectedAccountName}
+                                                    onChange={(e) =>
+                                                        setSelectedAccountName(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="w-full border-b outline-none text-sm px-2"
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-col sm:flex-row">
+                                                <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
+                                                    Project
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={selectedProject}
+                                                    onChange={(e) =>
+                                                        setSelectedProject(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="w-full border-b outline-none text-sm px-2"
+                                                />
+                                            </div>
+
+                                            <div className="flex flex-col sm:flex-row">
+                                                <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
+                                                    Financing
+                                                </label>
+                                                <select
+                                                    value={selectedFinancing}
+                                                    onChange={(e) =>
+                                                        setSelectedFinancing(
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="w-full border-b outline-none text-sm px-2"
+                                                >
+                                                    <option value="">
+                                                        Select Financing
+                                                    </option>
+                                                    <option value="Cash">
+                                                        Cash
+                                                    </option>
+                                                    <option value="BPI">
+                                                        BPI
+                                                    </option>
+                                                    <option value="HDMF">
+                                                        HDMF
+                                                    </option>
+                                                </select>
+                                            </div>
+
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                                <div className="flex flex-col sm:flex-row sm:items-center w-full">
+                                                    <label className="text-custom-bluegreen text-[12px] w-[114px] mb-1 sm:mb-0">
+                                                        Date Filter
+                                                    </label>
+                                                    <select
+                                                        value={
+                                                            selectedDateFilter
+                                                        }
+                                                        onChange={(e) =>
+                                                            setSelectedDateFilter(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        className="w-full border-b outline-none text-sm px-2"
+                                                    >
+                                                        <option value=""></option>
+                                                        <option value="Takeout Date">
+                                                            Takeout Date
+                                                        </option>
+                                                        <option value="DOU Expiry">
+                                                            DOU Expiry
+                                                        </option>
+                                                    </select>
+                                                </div>
+
+                                                <div className="flex flex-col sm:flex-row sm:items-center w-full">
+                                                    <label className="text-custom-bluegreen text-[12px] sm:w-auto mb-1 sm:mb-0 sm:mr-3">
+                                                        Date
+                                                    </label>
+
+                                                    <div className="relative w-full border-b outline-none">
+                                                        <DatePicker
+                                                            selected={
+                                                                selectedDate
+                                                            }
+                                                            onChange={(date) =>
+                                                                setSelectedDate(
+                                                                    date
+                                                                )
+                                                            }
+                                                            className="w-full pr-10 text-sm text-center"
+                                                            calendarClassName="custom-calendar"
+                                                        />
+                                                        <img
+                                                            src={DateLogo}
+                                                            alt="date"
+                                                            className="absolute bottom-[1px] right-2 size-5 pointer-events-none"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
                                             <div className="flex justify-end mt-4">
                                                 <button
                                                     onClick={handleApplyFilters}
@@ -829,7 +931,6 @@ export default function PaginatedTable() {
                                 )}
                             </AnimatePresence>
                         </div>
-
                         <div className="flex gap-1.5 flex-shrink-0">
                             <button
                                 onClick={handleAddToMasterList}
@@ -850,22 +951,49 @@ export default function PaginatedTable() {
                                         <span className="text-[14px] font-semibold">
                                             +
                                         </span>{" "}
-                                        Add Masterlist
+                                        Add Account
                                     </>
                                 )}
                             </button>
+
+                            <button
+                                onClick={() => {
+                                    if (!isFileUploading) {
+                                        document.getElementById("masterListFileUpload").click();
+                                    }
+                                }}
+                                className={`h-[47px] w-[130px] bg-[#067AC5] text-white text-sm rounded-[10px] flex items-center justify-center gap-1 ${isFileUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                disabled={isFileUploading}
+                            >
+                                {isFileUploading ? (
+                                    <CircularProgress size={24} color="inherit" />
+                                ) : (
+                                    <>
+                                        <UploadIcon className="w-5 h-5" />
+                                        <span className="text-[14px] font-semibold">Upload</span>
+                                    </>
+                                )}
+                            </button>
+                            <input
+                                id="masterListFileUpload" // Unique ID for the file input
+                                type="file"
+                                accept=".xlsx, .xls" // Specify accepted file types
+                                onChange={handleFileUpload}
+                                className="hidden"
+                            />
                         </div>
                     </div>
                 )}
 
                 {showTitlingMonitor && selectedRowDataForMonitor ? (
                     <TitlingAndRegistrationMonitor
-                        onClose={handleCloseTitlingMonitor} // This prop can be used by a "Back" button inside the monitor
-                        {...selectedRowDataForMonitor}
+                        onClose={handleCloseTitlingMonitor} 
+                        {...selectedRowDataForMonitor} // accountId is spread here
                     />
                 ) : (
                     <>
-                        <div className="flex flex-wrap gap-2 w-full"> {/* Active Filters Display */}
+                        <div className="flex flex-wrap gap-2 w-full">
+                            {" "}
                             {activeFilters.map((filter, index) => (
                                 <div
                                     key={index}
@@ -874,14 +1002,17 @@ export default function PaginatedTable() {
                                     <span>{filter.label}</span>
                                     <button
                                         className="ml-2 text-white hover:text-gray-700"
-                                        onClick={() => handleRemoveFilter(filter.key)}
+                                        onClick={() =>
+                                            handleRemoveFilter(filter.key)
+                                        }
                                     >
                                         ✕
                                     </button>
                                 </div>
                             ))}
                         </div>
-                        <Card className="w-full overflow-hidden"> {/* Main Table Card */}
+                        <Card className="w-full overflow-hidden">
+                            {" "}
                             <table className="w-full table-fixed text-left">
                                 <thead>
                                     <tr>
@@ -891,24 +1022,32 @@ export default function PaginatedTable() {
                                                 className="border-b bg-[#175D5F] text-white h-[60px] cursor-pointer"
                                                 onClick={() => {
                                                     const columnMap = {
-                                                        "Account Name": "account_name",
+                                                        "Account Name":
+                                                            "account_name",
                                                         "Property Details":
                                                             "contract_no",
                                                         Financing: "financing",
-                                                        "Takeout Date": "take_out_date",
-                                                        "DOU Expiry": "dou_expiry",
+                                                        "Takeout Date":
+                                                            "take_out_date",
+                                                        "DOU Expiry":
+                                                            "dou_expiry",
                                                     };
                                                     const col = columnMap[head];
                                                     if (col) {
-                                                        if (sortColumn === col) {
+                                                        if (
+                                                            sortColumn === col
+                                                        ) {
                                                             setSortDirection(
-                                                                sortDirection === "asc"
+                                                                sortDirection ===
+                                                                    "asc"
                                                                     ? "desc"
                                                                     : "asc"
                                                             );
                                                         } else {
                                                             setSortColumn(col);
-                                                            setSortDirection("asc");
+                                                            setSortDirection(
+                                                                "asc"
+                                                            );
                                                         }
                                                     }
                                                 }}
@@ -920,7 +1059,8 @@ export default function PaginatedTable() {
                                                             : "pl-4"
                                                     }`}
                                                 >
-                                                    {head === "Account Name" && (
+                                                    {head ===
+                                                        "Account Name" && (
                                                         <span className="inline-flex justify-center items-center mr-2"></span>
                                                     )}
                                                     {icon}
@@ -937,10 +1077,12 @@ export default function PaginatedTable() {
                                 </thead>
 
                                 <tbody>
-                                    {paginatedData && paginatedData.length > 0 ? (
+                                    {paginatedData &&
+                                    paginatedData.length > 0 ? (
                                         paginatedData.map(
                                             (
                                                 {
+                                                    id, // Destructure id here
                                                     user,
                                                     contractNumber,
                                                     propertyName,
@@ -953,13 +1095,15 @@ export default function PaginatedTable() {
                                             ) => {
                                                 const isLast =
                                                     index ===
-                                                    masterListCurrentData.length - 1;
+                                                    masterListCurrentData.length -
+                                                        1;
                                                 const classes = isLast
                                                     ? "p-4"
                                                     : "p-4 border-b border-gray-300";
 
                                                 const globalIndex =
-                                                    masterListIndexOfFirstRow + index;
+                                                    masterListIndexOfFirstRow +
+                                                    index;
 
                                                 const isChecked =
                                                     checkedRows[contractNumber];
@@ -978,14 +1122,18 @@ export default function PaginatedTable() {
                                                                 : "text-[#348017] text-base font-normal"
                                                         } cursor-pointer`}
                                                         onClick={() =>
-                                                            setIsChecked(!isChecked)
+                                                            setIsChecked(
+                                                                !isChecked
+                                                            )
                                                         }
                                                     >
                                                         <td className={classes}>
                                                             <div className="flex items-center gap-2">
                                                                 <span className="inline-flex w-6 h-6 justify-center items-center ml-5 mr-2">
                                                                     <img
-                                                                        src={TicketSvg}
+                                                                        src={
+                                                                            TicketSvg
+                                                                        }
                                                                         alt="Ticket Icon"
                                                                         className="size-6"
                                                                     />
@@ -1034,7 +1182,9 @@ export default function PaginatedTable() {
                                                                 <span
                                                                     className={`w-[80px] h-[30px] px-[12px] py-1 rounded-[50px] inline-block font-montserrat
                                                 ${
-                                                    financeColorClasses[finance] ||
+                                                    financeColorClasses[
+                                                        finance
+                                                    ] ||
                                                     "bg-gray-100 text-gray-700"
                                                 }
                                             `}
@@ -1066,7 +1216,7 @@ export default function PaginatedTable() {
                                     ) : loading ? (
                                         <tr>
                                             <td
-                                                colSpan={TABLE_HEAD.length} // Use TABLE_HEAD.length for colspan
+                                                colSpan={TABLE_HEAD.length}
                                                 className="p-4 text-center text-gray-500"
                                             >
                                                 <CircularProgress />
@@ -1075,7 +1225,7 @@ export default function PaginatedTable() {
                                     ) : (
                                         <tr>
                                             <td
-                                                colSpan={TABLE_HEAD.length} // Use TABLE_HEAD.length for colspan
+                                                colSpan={TABLE_HEAD.length}
                                                 className="p-4 text-center text-gray-500"
                                             >
                                                 No records found
@@ -1084,8 +1234,8 @@ export default function PaginatedTable() {
                                     )}
                                 </tbody>
                             </table>
-                            {/* Modal rendering removed from here */}
-                            <CardFooter className="flex items-center justify-end border-t border-blue-gray-50 p-4 gap-2"> {/* Pagination */}
+                            <CardFooter className="flex items-center justify-end border-t border-blue-gray-50 p-4 gap-2">
+                                {" "}
                                 <ReactPaginate
                                     previousLabel={
                                         <MdKeyboardArrowLeft className="text-[#404B52]" />

@@ -47,7 +47,7 @@ class TakenOutAccountsImport implements ToModel, WithHeadingRow
 
           $mappedRow['take_out_date'] = $this->convertDate($row['takeout_date'] ?? null);
           $mappedRow['dou_expiry'] = $this->convertDate($row['dou_expiry'] ?? null);
-
+          $mappedRow['added_status'] = true;
           $unexpectedFields = array_diff_key($row, array_flip(array_keys($mapping)));
           if (!empty($unexpectedFields)) {
                \Log::info('Unexpected fields in row:', $unexpectedFields);

@@ -3,7 +3,6 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConcernController;
 use App\Http\Controllers\DynamicBannerController;
-use App\Http\Controllers\MasterListController;
 use App\Http\Controllers\PaymentSchemeController;
 use App\Http\Controllers\PriceBasicDetailController;
 use App\Http\Controllers\TakenOutAccountController;
@@ -16,7 +15,6 @@ use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\AccountLogController;
 use App\Models\DynamicBanner;
 use App\Models\PropertyMaster;
-use App\Models\TakenOutAccount;
 use Illuminate\Http\Request;
 
 
@@ -31,13 +29,6 @@ Route::post('/add-assignee', [ConcernController::class, 'assignInquiryTo']);
 Route::post('/reassign', [ConcernController::class, 'reassignInquiry']);
 
 Route::post('/resolve', [ConcernController::class, 'markAsResolve']);
-
-//for titling and registration
-Route::patch('/taken-out-accounts/add-masterlist', [TakenOutAccountController::class, 'updateAddStatus']);
-Route::get('/taken-out-accounts/get-masterlist', [TakenOutAccountController::class, 'getMasterList']);
-Route::patch('/taken-out-accounts/undo-masterlist', [TakenOutAccountController::class, 'undoMasterListStatus']);
-Route::get('/taken-out-accounts', [TakenOutAccountController::class, 'getTakenOutAccounts']);
-Route::post('/upload-taken-out-accounts', [TakenOutAccountController::class, 'uploadTakenOutAccounts']);
 /* 
 Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
 
@@ -68,35 +59,33 @@ Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees'
 Route::post('/update-info', [ConcernController::class, 'updateInfo']);
 Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
-Route::get('/get-account-logs/{selectedId}', [AccountLogController::class, 'getLogData']);
-Route::post('/work-order-logs', [WorkOrderController::class, 'createWorkOrderLog']);
-Route::post('/work-orders/notes/add', [WorkOrderController::class, 'addNoteWithAttachments']);
-Route::get('/work-orders/get-work-orders', [WorkOrderController::class, 'getWorkOrders']);
-Route::patch('/update-is-new/{id}', [AccountLogController::class, 'updateIsNewStatus']);
-Route::put('/work-orders/{workOrder}', [WorkOrderController::class, 'update']);
-Route::patch('/work-orders/{workOrder}/soft-delete', [WorkOrderController::class, 'softDelete'])->name('work-orders.soft-delete');
-Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName']);
-//For work orders
+
 Route::middleware('auth:sanctum')->group(function () {
-
-    Route::apiResource('workorders', WorkOrderController::class);
-
-    Route::post('workorders/{work_order}/updates', [WorkOrderController::class, 'addUpdate']);
-    Route::post('workorders/{work_order}/documents', [WorkOrderController::class, 'uploadDocument']);
-    Route::put('workorders/{work_order}/mark-done', [WorkOrderController::class, 'markAsDone']);
+    // for work orders
+    Route::post('/work-orders/{work_order}/updates', [WorkOrderController::class, 'addUpdate']);
+    Route::post('/work-orders/{work_order}/documents', [WorkOrderController::class, 'uploadDocument']);
+    Route::put('/work-orders/{work_order}/mark-done', [WorkOrderController::class, 'markAsDone']);
     Route::post('/work-orders/create-work-order', [WorkOrderController::class, 'createWorkOrders']);
     Route::get('/work-orders/get-assignee', [WorkOrderController::class, 'getAssignee']);
     Route::get('/work-orders/assignee/{id}', [WorkOrderController::class, 'getAssigneeById']);
-
-
     Route::post('/post-account-log', [AccountLogController::class, 'attachAccountsToLog']);
     Route::get('/work-orders/work-order-types', [WorkOrderController::class, 'getWorkOrderTypes']);
-    
-
-
-
+    Route::post('/work-order-logs', [WorkOrderController::class, 'createWorkOrderLog']);
+    Route::post('/work-orders/notes/add', [WorkOrderController::class, 'addNoteWithAttachments']);
+    Route::get('/work-orders/get-work-orders', [WorkOrderController::class, 'getWorkOrders']);
+    Route::put('/work-orders/{workOrder}', [WorkOrderController::class, 'update']);
+    Route::patch('/work-orders/{workOrder}/soft-delete', [WorkOrderController::class, 'softDelete'])->name('work-orders.soft-delete');
     Route::get('/my-workorders', [WorkOrderController::class, 'index'])->middleware('my_work_orders_filter');
-
+    // for titling and registration
+    Route::patch('/taken-out-accounts/add-masterlist', [TakenOutAccountController::class, 'updateAddStatus']);
+    Route::get('/taken-out-accounts/get-masterlist', [TakenOutAccountController::class, 'getMasterList']);
+    Route::patch('/taken-out-accounts/undo-masterlist', [TakenOutAccountController::class, 'undoMasterListStatus']);
+    Route::get('/taken-out-accounts', [TakenOutAccountController::class, 'getTakenOutAccounts']);
+    Route::post('/upload-taken-out-accounts', [TakenOutAccountController::class, 'uploadTakenOutAccounts']);
+    Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName']);
+    // for account logs
+    Route::get('/get-account-logs/{selectedId}', [AccountLogController::class, 'getLogData']);
+    Route::patch('/update-is-new/{id}', [AccountLogController::class, 'updateIsNewStatus']);
 });
 
 // If you need public access to some data (e.g., specific work order types)

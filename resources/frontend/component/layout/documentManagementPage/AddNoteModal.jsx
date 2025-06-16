@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { useStateContext } from "../../../../../resources/frontend/context/contextprovider";
+import apiService from "../../../component/servicesApi/apiService";
 
 const AddNoteModal = ({
     isOpen,
@@ -13,7 +14,7 @@ const AddNoteModal = ({
     currentUserId,
 }) => {
     const [noteText, setNoteText] = useState("");
-    const [attachedFiles, setAttachedFiles] = useState([]); 
+    const [attachedFiles, setAttachedFiles] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState(null);
     const { user } = useStateContext();
@@ -30,23 +31,29 @@ const AddNoteModal = ({
     if (!isOpen) return null;
 
     const handleFileChange = (event) => {
-        const newFiles = Array.from(event.target.files).map(file => ({
-            id: `${file.name}-${file.lastModified}-${file.size}-${Math.random().toString(36).substr(2, 9)}`,
+        const newFiles = Array.from(event.target.files).map((file) => ({
+            id: `${file.name}-${file.lastModified}-${file.size}-${Math.random()
+                .toString(36)
+                .substr(2, 9)}`,
             file: file,
-            title: ""
+            title: "",
         }));
-        const uniqueNewFiles = newFiles.filter(nf => !attachedFiles.some(af => af.id === nf.id));
-        setAttachedFiles(prevFiles => [...prevFiles, ...uniqueNewFiles]);
+        const uniqueNewFiles = newFiles.filter(
+            (nf) => !attachedFiles.some((af) => af.id === nf.id)
+        );
+        setAttachedFiles((prevFiles) => [...prevFiles, ...uniqueNewFiles]);
         event.target.value = null;
     };
 
     const handleTitleChange = (id, newTitle) => {
-        setAttachedFiles(prevFiles =>
-            prevFiles.map(f => (f.id === id ? { ...f, title: newTitle } : f))
+        setAttachedFiles((prevFiles) =>
+            prevFiles.map((f) => (f.id === id ? { ...f, title: newTitle } : f))
         );
     };
     const handleRemoveFile = (idToRemove) => {
-        setAttachedFiles(prevFiles => prevFiles.filter(f => f.id !== idToRemove));
+        setAttachedFiles((prevFiles) =>
+            prevFiles.filter((f) => f.id !== idToRemove)
+        );
     };
 
     const handleSave = async () => {
@@ -67,6 +74,7 @@ const AddNoteModal = ({
         formData.append("work_order_id", numericWorkOrderId);
         formData.append("log_type", logType);
         formData.append("note_type", "Manual Entry");
+
         if (user.id) {
             formData.append("created_by_user_id", user.id);
         }
@@ -80,23 +88,38 @@ const AddNoteModal = ({
         });
 
         try {
-            const response = await fetch(`/api/work-orders/notes/add`, {
-                method: "POST",
-                body: formData,
-            });
+            const response = await apiService.post(
+                "/work-orders/notes/add",
+                formData,
+                {
+                    headers: {
+                        "Content-Type": undefined,
+                    },
+                }
+            );
 
-            if (!response.ok) {
-                const errData = await response
-                    .json()
-                    .catch(() => ({ message: "An unknown error occurred." }));
+            if (response.data && response.data.success === false) {
                 throw new Error(
-                    errData.message || `HTTP error! status: ${response.status}`
+                    response.data.message || "Failed to save note."
                 );
             }
+
             onSaveSuccess();
         } catch (err) {
             console.error("Failed to save note:", err);
-            setError(err.message || "Failed to save note. Please try again.");
+
+            let errorMessage = "Failed to save note. Please try again.";
+            if (
+                err.response &&
+                err.response.data &&
+                err.response.data.message
+            ) {
+                errorMessage = err.response.data.message;
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+
+            setError(errorMessage);
         } finally {
             setIsSaving(false);
         }
@@ -177,15 +200,29 @@ const AddNoteModal = ({
                     </div>
                     {attachedFiles.length > 0 && (
                         <div className="mt-3 space-y-2">
-                            <p className="text-sm font-medium text-gray-700">Files to upload:</p>
+                            <p className="text-sm font-medium text-gray-700">
+                                Files to upload:
+                            </p>
                             {attachedFiles.map((fileWrapper) => (
-                                <div key={fileWrapper.id} className="p-2 border border-gray-200 rounded-md bg-gray-50">
+                                <div
+                                    key={fileWrapper.id}
+                                    className="p-2 border border-gray-200 rounded-md bg-gray-50"
+                                >
                                     <div className="flex justify-between items-center mb-1">
-                                        <p className="text-sm text-gray-700 truncate" title={fileWrapper.file.name}>
-                                            {fileWrapper.file.name} ({ (fileWrapper.file.size / 1024).toFixed(2) } KB)
+                                        <p
+                                            className="text-sm text-gray-700 truncate"
+                                            title={fileWrapper.file.name}
+                                        >
+                                            {fileWrapper.file.name} (
+                                            {(
+                                                fileWrapper.file.size / 1024
+                                            ).toFixed(2)}{" "}
+                                            KB)
                                         </p>
                                         <button
-                                            onClick={() => handleRemoveFile(fileWrapper.id)}
+                                            onClick={() =>
+                                                handleRemoveFile(fileWrapper.id)
+                                            }
                                             className="text-xs text-red-500 hover:text-red-700 font-medium"
                                             type="button"
                                         >
@@ -196,7 +233,12 @@ const AddNoteModal = ({
                                         type="text"
                                         placeholder="File Title"
                                         value={fileWrapper.title}
-                                        onChange={(e) => handleTitleChange(fileWrapper.id, e.target.value)}
+                                        onChange={(e) =>
+                                            handleTitleChange(
+                                                fileWrapper.id,
+                                                e.target.value
+                                            )
+                                        }
                                         className="w-full p-1.5 border border-gray-300 rounded-md text-sm focus:ring-custom-lightgreen focus:border-custom-lightgreen"
                                     />
                                 </div>

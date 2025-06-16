@@ -4,7 +4,7 @@ import FileIcon from "../../../../../public/Images/folder_file_notes.svg";
 import ViewIcon from "../../../../../public/Images/eye_icon.svg";
 import DownloadIcon from "../../../../../public/Images/download_icon.svg";
 import AddNoteModal from "./AddNoteModal";
-import axios from "axios";
+import apiService from "../../../component/servicesApi/apiService";
 
 function NotesAndUpdatesModal({
     selectedAccountId,
@@ -17,7 +17,7 @@ function NotesAndUpdatesModal({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [showAll, setShowAll] = useState(false);
-    const initialLogCount = 2; // Changed from useState
+    const initialLogCount = 2;
     const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
 
     useEffect(() => {
@@ -37,20 +37,10 @@ function NotesAndUpdatesModal({
         setError(null);
 
         try {
-            const response = await fetch(
-                `/api/get-account-logs/${selectedAccountId}?log_type=${selectedWorkOrder}&work_order_id=${workOrderData.work_order_id}`
+            const response = await apiService.get(
+                `/get-account-logs/${selectedAccountId}?log_type=${selectedWorkOrder}&work_order_id=${workOrderData.work_order_id}`
             );
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(
-                    `HTTP error! status: ${response.status} - ${
-                        errorText || response.statusText
-                    }`
-                );
-            }
-
-            const data = await response.json();
+            const data = response.data;
             const logsArray = data.log_data || [];
 
             setLogs(
@@ -60,7 +50,18 @@ function NotesAndUpdatesModal({
             );
         } catch (err) {
             console.error("Error fetching account and log data:", err);
-            setError(`Failed to load notes and updates: ${err.message}`);
+            let errorMessage = `Failed to load notes and updates: ${err.message}`;
+            if (
+                err.response &&
+                err.response.data &&
+                err.response.data.message
+            ) {
+                errorMessage = `Failed to load notes and updates: ${err.response.data.message}`;
+            } else if (err.response) {
+                errorMessage = `Failed to load notes and updates: HTTP error! status: ${err.response.status}`;
+            }
+
+            setError(errorMessage);
             setLogs([]);
         } finally {
             setLoading(false);
@@ -72,7 +73,7 @@ function NotesAndUpdatesModal({
         await fetchAccountAndLogData();
     };
 
-    const currentUserId = workOrderData?.currentUser?.id || 1; // Review fallback '1'
+    const currentUserId = workOrderData?.currentUser?.id || 1;
 
     const formatHeaderDate = useCallback((dateStr) => {
         const date = new Date(dateStr);
@@ -99,7 +100,6 @@ function NotesAndUpdatesModal({
         return `${formattedDate} | ${formattedTime}`;
     }, []);
 
-    // Memoize displayedLogs to avoid re-filtering on every render if dependencies don't change
     const displayedLogs = useMemo(() => {
         return logs.filter((log) => {
             const matchesLogType = log.log_type === selectedWorkOrder;
@@ -112,31 +112,32 @@ function NotesAndUpdatesModal({
         });
     }, [logs, selectedWorkOrder, selectedAccountId]);
 
-    // Effect to mark displayed "new" logs as not new
     useEffect(() => {
         const logsToUpdate = displayedLogs.filter(
             (log) =>
                 log.is_new &&
-                log.log_type === selectedWorkOrder && // Ensure it matches current context
-                ((log.note_type === "Manual Entry" && log.account_id === selectedAccountId) ||
-                    (log.account_ids && log.account_ids.includes(selectedAccountId))) &&
-                log.assigned_user_id === selectedAssignee?.id // Condition for update
+                log.log_type === selectedWorkOrder &&
+                ((log.note_type === "Manual Entry" &&
+                    log.account_id === selectedAccountId) ||
+                    (log.account_ids &&
+                        log.account_ids.includes(selectedAccountId))) &&
+                log.assigned_user_id === selectedAssignee?.id
         );
 
         logsToUpdate.forEach((log) => {
-            axios
-                .patch(`/api/update-is-new/${log.id}`, { is_new: false })
+            apiService
+                .patch(`/update-is-new/${log.id}`, { is_new: false })
                 .then((response) => {
                     console.log(`Log ${log.id} marked as read:`, response.data);
-                    // Optionally update local state here for immediate UI feedback
-                    // setLogs(prevLogs => prevLogs.map(l => l.id === log.id ? {...l, is_new: false} : l));
                 })
                 .catch((error) => {
-                    console.error(`Error marking log ${log.id} as read:`, error);
-                    // Handle error appropriately, e.g., notify user or retry
+                    console.error(
+                        `Error marking log ${log.id} as read:`,
+                        error
+                    );
                 });
         });
-    }, [displayedLogs, selectedWorkOrder, selectedAccountId, selectedAssignee]); // Add selectedAssignee if its change should re-trigger
+    }, [displayedLogs, selectedWorkOrder, selectedAccountId, selectedAssignee]);
 
     // const handleDownload = async () => {
     //     try {
@@ -155,9 +156,11 @@ function NotesAndUpdatesModal({
     //     }
     // };
 
-    const logsToRender = useMemo(() => (showAll
-        ? displayedLogs
-        : displayedLogs.slice(0, initialLogCount)), [showAll, displayedLogs, initialLogCount]);
+    const logsToRender = useMemo(
+        () =>
+            showAll ? displayedLogs : displayedLogs.slice(0, initialLogCount),
+        [showAll, displayedLogs, initialLogCount]
+    );
 
     const getUserDisplayName = (log) => {
         return log.fullname || log.assigned_user_name || "Unknown User";
@@ -341,9 +344,7 @@ function NotesAndUpdatesModal({
                                                                             </span>
                                                                         </div>
 
-                                                                        {/* Action Icons */}
                                                                         <div className="flex items-center space-x-0 flex-shrink-0">
-                                                                            {/* View Icon */}
                                                                             <button
                                                                                 onClick={() =>
                                                                                     window.open(
@@ -369,7 +370,9 @@ function NotesAndUpdatesModal({
                                                                                 }
                                                                                 target="_blank"
                                                                                 rel="noopener noreferrer"
-                                                                                download={doc.file_name} // Added download attribute
+                                                                                download={
+                                                                                    doc.file_name
+                                                                                }
                                                                                 className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
                                                                                 title="Download document"
                                                                             >

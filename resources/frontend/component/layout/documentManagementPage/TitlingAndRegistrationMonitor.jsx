@@ -4,7 +4,8 @@ import IconNotes from "../../../../../public/Images/Icon_Notes.svg";
 import Attachment from "../../../../../public/Images/ATTCHMT.svg";
 import apiService from "../../../component/servicesApi/apiService";
 import Dropdown from "../../../../../resources/frontend/component/layout/documentManagementPage/TableMonitoringDropdown";
-import { motion, AnimatePresence } from "framer-motion";
+import TitlingStepNotesModal from "./TitlingStepNotesModal"; // Import the new modal
+import { motion } from "framer-motion";
 
 const PersonIcon = () => (
     <img src={Profile} alt="Person Icon" className="h-6 w-6 text-gray-600" />
@@ -52,6 +53,10 @@ export default function TitlingAndRegistrationMonitor({
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedRow, setSelectedRow] = useState(null);
+    // State for the new Titling Step Notes Modal
+    const [isTitlingStepNotesModalOpen, setIsTitlingStepNotesModalOpen] = useState(false);
+    const [selectedItemForTitlingNotes, setSelectedItemForTitlingNotes] = useState(null);
+
 
     const TITLING_PROCESS_STEPS = [
         "Docketing",
@@ -81,7 +86,6 @@ export default function TitlingAndRegistrationMonitor({
                         "Unexpected API response: expected an array in response.data"
                     );
                 }
-                console.log(data);
 
                 const transformedData = data.map((item) => ({
                     step: item.stepName,
@@ -131,6 +135,17 @@ export default function TitlingAndRegistrationMonitor({
             );
         }
     }, [contractNumber]);
+
+    const handleOpenTitlingStepNotesModal = (item) => {
+        setSelectedItemForTitlingNotes(item);
+        setIsTitlingStepNotesModalOpen(true);
+    };
+
+    const handleCloseTitlingStepNotesModal = () => {
+        setIsTitlingStepNotesModalOpen(false);
+        setSelectedItemForTitlingNotes(null);
+    };
+
 
     if (isLoading) {
         return (
@@ -284,7 +299,14 @@ export default function TitlingAndRegistrationMonitor({
                                         </td>
                                         <td className="p-2 text-center align-middle">
                                             {item.hasNotes ? (
-                                                <DocumentIcon />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleOpenTitlingStepNotesModal(item)}
+                                                    className="bg-transparent border-none p-0 m-0 cursor-pointer hover:opacity-75 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded"
+                                                    aria-label={`View notes for step ${item.step}`}
+                                                >
+                                                    <DocumentIcon />
+                                                </button>
                                             ) : (
                                                 "-"
                                             )}
@@ -334,6 +356,17 @@ export default function TitlingAndRegistrationMonitor({
                     </tbody>
                 </table>
             </div>
+
+            {isTitlingStepNotesModalOpen && selectedItemForTitlingNotes && (
+                <TitlingStepNotesModal
+                    isOpen={isTitlingStepNotesModalOpen}
+                    onClose={handleCloseTitlingStepNotesModal}
+                    contractNumber={contractNumber} // Account identifier
+                    workOrderId={selectedItemForTitlingNotes.workOrderId}
+                    stepName={selectedItemForTitlingNotes.step}
+                    // title prop can be customized if needed, or rely on default in modal
+                />
+            )}
 
             <div className="bg-[#175D5F] text-white p-4 text-sm">
                 <div className="flex justify-between">
