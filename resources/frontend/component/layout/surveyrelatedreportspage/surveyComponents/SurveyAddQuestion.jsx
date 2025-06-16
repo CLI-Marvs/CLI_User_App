@@ -5,36 +5,48 @@ import { MdContentCopy } from "react-icons/md";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { SurveyRadioOption } from './SurveyRadioOption';
 import { add } from 'lodash';
+import SurveyDeleteModal from './SurveyDeleteModal';
 
 const adjustHeight = (element) => {
-    element.style.height = "auto"; 
-    element.style.height = `${element.scrollHeight}px`; 
+    element.style.height = "auto";
+    element.style.height = `${element.scrollHeight}px`;
 };
 
 export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete, addOption, deleteOption, updateQuestionText, updateOptionText, updateIsRequired }) => {
 
+    const modalRef = useRef(null);
 
     const questionTextareaRef = useRef(null);
     const dropdownRef = useRef(null);
 
+    const handleDeleteModal = () => { 
+        if (modalRef.current) {
+            modalRef.current.showModal();
+        }
+    };
+
+    const handleDelete = () => {
+        onDelete(); 
+    };
+
     useEffect(() => {
-      if (questionTextareaRef.current) {
-        adjustHeight(questionTextareaRef.current);
-      }
+        if (questionTextareaRef.current) {
+            adjustHeight(questionTextareaRef.current);
+        }
     }, [data.question]);
 
     useEffect(() => {
         function handleClickOutside(event) {
-          if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-            setIsOpen(false);
-          }
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
         }
-    
+
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
-          document.removeEventListener("mousedown", handleClickOutside);
+            document.removeEventListener("mousedown", handleClickOutside);
         };
-      }, []);
+    }, []);
 
     const [selectedOption, setSelectedOption] = useState("Multiple choice");
     const [isOpen, setIsOpen] = useState(false);
@@ -44,7 +56,7 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
     ];
 
     return (
-        <div>
+        <div className='relative'>
             <div className='relative flex flex-col w-full bg-white rounded-[10px] gap-[15px] p-[15px]'>
                 <div className='flex flex-col'>
                     <textarea
@@ -57,10 +69,11 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
                             adjustHeight(e.target);
                         }}
                         ref={questionTextareaRef}
+                        maxLength={255}
                     />
                     <div className='flex w-full border-b border-custom-grayA5'></div>
                 </div>
-                <div ref={dropdownRef}  className="relative w-[238px] z-20">
+                <div ref={dropdownRef} className="relative w-[238px] z-20">
                     {/* Selected Option */}
                     <div
                         className="flex items-center justify-between w-full h-[35px] border-[0.5px] px-[10px] rounded-[6px] cursor-pointer bg-white"
@@ -115,7 +128,7 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
                     <div className='flex gap-[10px]'>
                         <FaRegTrashAlt
                             className='size-[20px] cursor-pointer text-red-500 hover:text-red-600'
-                            onClick={onDelete}
+                            onClick={handleDeleteModal}
                         />
                     </div>
                     <div className='border-r-[0.5px] border-custom-grayA5 h-full '></div>
@@ -131,7 +144,7 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
                                         checked={data.required}
                                         onChange={() => {
                                             updateIsRequired(sectionIndex, questionIndex, !data.required);
-                                          }}
+                                        }}
                                     />
                                     <div className="w-10 h-4 bg-gray-400 rounded-full shadow-inner peer-checked:bg-custom-lightestgreen transition"></div>
                                     <div className="dot absolute w-6 h-6 bg-white border-[1px] rounded-full shadow -left-1 -top-1 transition peer-checked:translate-x-6 peer-checked:bg-custom-solidgreen"></div>
@@ -140,6 +153,9 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
                         </div>
                     </div>
                 </div>
+            </div>
+            <div>
+                <SurveyDeleteModal modalRef={modalRef} handleDelete={handleDelete} />
             </div>
         </div>
     )
