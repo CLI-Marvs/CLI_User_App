@@ -7,6 +7,7 @@ import SummaryLine from './surveyComponents/SummaryLine';
 import SummaryRating from './surveyComponents/SummaryRating';
 import SummaryTable from './surveyComponents/SummaryTable';
 import SummaryTextboxTable from './surveyComponents/SummaryTextboxTable';
+import SummaryVerticalBar from './surveyComponents/SummaryVerticalBar';
 const SurveySummary = () => {
 
     const { id } = useParams();
@@ -91,9 +92,14 @@ const SurveySummary = () => {
                             {item?.input_type === "textbox" && (
                                <SummaryTextboxTable question={item} />
                             )}
+                            {item?.input_type === "checkboxes" && (
+                                <SummaryVerticalBar question={item} />
+                            )}
+                            
                         </div>
                     );
                 })}
+               
             </div>
         </div>
     )
