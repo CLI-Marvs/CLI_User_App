@@ -6,6 +6,7 @@ import apiService from '../../servicesApi/apiService';
 import SummaryLine from './surveyComponents/SummaryLine';
 import SummaryRating from './surveyComponents/SummaryRating';
 import SummaryTable from './surveyComponents/SummaryTable';
+import SummaryTextboxTable from './surveyComponents/SummaryTextboxTable';
 const SurveySummary = () => {
 
     const { id } = useParams();
@@ -86,6 +87,9 @@ const SurveySummary = () => {
                                 ) : (
                                     <SummaryBar question={item} />
                                 )
+                            )}
+                            {item?.input_type === "textbox" && (
+                               <SummaryTextboxTable question={item} />
                             )}
                         </div>
                     );
