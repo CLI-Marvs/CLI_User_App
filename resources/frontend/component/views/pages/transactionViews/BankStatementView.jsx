@@ -1,5 +1,5 @@
+import BankStatementCom from '@/component/layout/transaction/bankmonitoring/BankStatementCom'
 import React from 'react'
-import BankStatementCom from '../../../layout/transaction/BankStatementCom'
 
 const BankStatementView = () => {
   return (

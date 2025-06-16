@@ -1,10 +1,10 @@
 import { CircularProgress } from '@mui/material'
 import React from 'react'
 
-const Spinner = () => {
+const Spinner = ({className}) => {
   return (
     <div>
-      <CircularProgress />
+      <CircularProgress className='spinnerSize' />
     </div>
   )
 }

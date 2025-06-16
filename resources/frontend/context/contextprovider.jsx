@@ -7,7 +7,8 @@ import React, {
 } from "react";
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
-import { get, set } from "lodash";
+import { set } from "lodash";
+import { json } from "react-router-dom";
 
 const StateContext = createContext({
     user: null,
@@ -29,6 +30,7 @@ export const ContextProvider = ({ children }) => {
     const [specificAssigneeCsr, setSpecificAssigneeCsr] = useState("");
     const [currentPage, setCurrentPage] = useState(0);
     const [selectedOption, setSelectedOption] = useState("All");
+    const [assignedToMeActive, setAssignedToMeActive] = useState(false);
 
     const [notifCurrentPage, setNotifCurrentPage] = useState(0);
     const [searchFilter, setSearchFilter] = useState({});
@@ -50,6 +52,9 @@ export const ContextProvider = ({ children }) => {
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
     const [categories, setCategories] = useState([]);
+
+    const [currentPageCustomer, setCurrentPageCustomer] = useState(0);
+    const [totalPagesCustomer, setTotalPagesCustomer] = useState(0);
     const [department, setDepartment] = useState("All");
     const [project, setProject] = useState("All");
     const [month, setMonth] = useState("All");
@@ -99,8 +104,11 @@ export const ContextProvider = ({ children }) => {
     const [navBarData, setNavBarData] = useState([]);
     const [isUserTypeChange, setIsUserTypeChange] = useState(false);
     const [countAllConcerns, setCountAllConcerns] = useState({});
+    const [userAccessData, setUserAccessData] = useState([]); //Holds the user and department access data
+    const [permissions, setPermissions] = useState({});
     const [searchSummary, setSearchSummary] = useState("");
     const [resultSearchActive, setResultSearchActive] = useState(false);
+    const [daysActive, setDaysActive] = useState(false);
     const [departmentValue, setDepartmentValue] = useState("All");
     const [projectValue, setProjectValue] = useState("All");
     const [yearValue, setYearValue] = useState(new Date().getFullYear());
@@ -110,6 +118,11 @@ export const ContextProvider = ({ children }) => {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [survey_title, setSurveyTitle] = useState("");
+
+    const [customerData, setCustomerData] = useState([]);
+    const [customerDetails, setCustomerDetails] = useState([]);
+    const [messageData, setMessageData] = useState([]);
+    const [isTotalPages, setIsTotalPages] = useState(false);
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -129,6 +142,51 @@ export const ContextProvider = ({ children }) => {
         } else {
             localStorage.removeItem("authToken");
         }
+    };
+    // Load from sessionStorage on initial load
+    useEffect(() => {
+        const storedData = sessionStorage.getItem("userAccessData");
+        if (storedData) {
+            try {
+                const parsedData = JSON.parse(storedData);
+                setUserAccessData(parsedData);
+            } catch (error) {
+                setUserAccessData([]);
+            }
+        }
+    }, []);
+
+    useEffect(() => {
+        if (userAccessData) {
+            const allPermissions = {};
+
+            userAccessData.employeePermissions?.forEach((perm) => {
+                allPermissions[perm.name] = perm.pivot;
+            });
+
+            userAccessData.departmentPermissions?.forEach((perm) => {
+                allPermissions[perm.name] = perm.pivot;
+            });
+
+            setPermissions(allPermissions);
+        }
+    }, [userAccessData]);
+
+    // Check if the user has permission to read
+    const hasPermission = (permissionName) => {
+        return permissions[permissionName]?.can_read || false;
+    };
+
+    //Check if the user has permission to write
+    const canWrite = (permissionName) => {
+        const inquiryPermissions =
+            userAccessData?.employeePermissions?.find(
+                (perm) => perm.name === permissionName
+            ) ||
+            userAccessData?.departmentPermissions?.find(
+                (perm) => perm.name === permissionName
+            );
+        return inquiryPermissions?.pivot?.can_write || false;
     };
 
     const getAllConcerns = async () => {
@@ -168,7 +226,7 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getBankName = async () => {
-        /* if (token) {
+        /*  if (token) {
             try {
                 const response = await apiService.get("get-transaction-bank");
                 setBankList(response.data);
@@ -179,9 +237,8 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getTransactions = async () => {
-       /*  try {
+        /*  try {
             const searchParams = new URLSearchParams({
-                
                 page: currentPageTransaction + 1,
                 bank_name: bankNames ? bankNames : null,
             }).toString();
@@ -196,18 +253,18 @@ export const ContextProvider = ({ children }) => {
     };
 
     const getMatches = async () => {
-        if (token) {
+        /*  if (token) {
             try {
                 const response = await apiService.get("get-matches");
                 setMatchesData(response.data);
             } catch (error) {
                 console.log("error uploading data", error);
             }
-        }
+        } */
     };
 
     const getInvoices = async () => {
-        try {
+        /* try {
             const searchParams = new URLSearchParams({
                 dueDate: filterDueDate ? filterDueDate : null,
                 page: currentPageInvoices,
@@ -219,7 +276,7 @@ export const ContextProvider = ({ children }) => {
             setInvoicesPageCount(response.data.last_page);
         } catch (error) {
             console.log("error", error);
-        }
+        } */
     };
 
     const fetchCategory = async () => {
@@ -280,7 +337,7 @@ export const ContextProvider = ({ children }) => {
     const getPropertyNames = async () => {
         if (token) {
             try {
-                const response = await apiService.get("property-name");
+                const response = await apiService.get("properties/names");
                 setPropertyNamesList(response.data);
             } catch (error) {
                 console.log("Error retrieving data", error);
@@ -310,7 +367,9 @@ export const ContextProvider = ({ children }) => {
             );
 
             const formattedData = filteredResult.map((item) => ({
-                name: `${item.month.toString().padStart(2, "0")}/${item.year.toString().slice(-2)}`,
+                name: `${item.month.toString().padStart(2, "0")}/${item.year
+                    .toString()
+                    .slice(-2)}`,
                 Resolved: item.resolved,
                 Unresolved: item.unresolved,
                 Closed: item.closed,
@@ -371,23 +430,26 @@ export const ContextProvider = ({ children }) => {
                     year: year,
                     startDate: startDate,
                     endDate: endDate,
-                },  
+                },
             });
-    
+
             const departments = response.data.departments;
             const unassignedData = response.data.totalUnassigned;
-    
+
             const formattedData = departments.map((item) => ({
                 name: item.department,
                 resolved: item.resolved,
                 unresolved: item.unresolved,
                 closed: item.closed,
             }));
-    
+
             let concatData = [...formattedData];
-    
+
             // Only push "Unassigned" data if it was requested explicitly
-            if (unassignedData && (department === 'Unassigned' || department === 'All')) {
+            if (
+                unassignedData &&
+                (department === "Unassigned" || department === "All")
+            ) {
                 const formattedDataUnassigned = {
                     name: "Unassigned",
                     resolved: unassignedData.total_resolved,
@@ -396,13 +458,12 @@ export const ContextProvider = ({ children }) => {
                 };
                 concatData.push(formattedDataUnassigned);
             }
-    
+
             setDataDepartment(concatData);
         } catch (error) {
             console.log("error retrieving", error);
         }
     };
-    
 
     const getCommunicationTypePerProperty = async () => {
         try {
@@ -563,7 +624,6 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-
     const getCountAllConcerns = async () => {
         try {
             const response = await apiService.get("get-count-all-concerns");
@@ -616,87 +676,87 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    const getPricingMasterLists = useCallback(async () => {
-        if (token) {
-            try {
-                setIsLoading(true);
-                const response = await apiService.get(
-                    "get-pricing-master-lists"
-                );
-                setPricingMasterLists(response.data);
-            } catch (error) {
-                console.error("Error fetching pricing master lists:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    }, []); //get all pricing master lists data
+    // const    = useCallback(async () => {
+    //     if (token) {
+    //         try {
+    //             setIsLoading(true);
+    //             const response = await apiService.get(
+    //                 "get-pricing-master-lists"
+    //             );
+    //             setPricingMasterLists(response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching pricing master lists:", error);
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     }
+    // }, []);
 
-    const getPaymentSchemes = useCallback(async () => {
-        if (token) {
-            try {
-                const response = await apiService.get("get-payment-schemes");
+    // const getPaymentSchemes = useCallback(async () => {
+    //     if (token) {
+    //         try {
+    //             const response = await apiService.get("get-payment-schemes");
 
-                setPaymentSchemes(response.data);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        }
-    }, []); //get all payment schemes
-    const getPropertyFloors = useCallback(async (towerPhaseId) => {
-        // Check if property floors have already been fetched
-        if (!propertyFloors[towerPhaseId] && towerPhaseId && token) {
-            try {
-                setIsLoading(true);
-                const response = await apiService.get(
-                    `property-floors/${towerPhaseId}`
-                );
-                return response.data; // Return the data
-                // Merge the new floors data with existing propertyFloors
-                // setPropertyFloors((prev) => ({
-                //     ...prev,
-                //     [towerPhaseId]: response.data, // Store floors based on towerPhaseId
-                // }));
-            } catch (error) {
-                console.error("Error fetching property floors:", error);
-                return null;
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    }, []); //get property floors
+    //             setPaymentSchemes(response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching data:", error);
+    //         }
+    //     }
+    // }, []);
+    // const getPropertyFloors = useCallback(async (towerPhaseId) => {
 
-    const getPropertyUnits = async (towerPhaseId, selectedFloor) => {
-        if (token || selectedFloor || towerPhaseId) {
-            try {
-                setIsLoading(true);
-                const response = await apiService.post("property-units", {
-                    towerPhaseId,
-                    selectedFloor,
-                });
-                setPropertyUnits(response.data);
-            } catch (error) {
-                console.error("Error fetching property units:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-    }; //get property units
+    //     if (!propertyFloors[towerPhaseId] && towerPhaseId && token) {
+    //         try {
+    //             setIsLoading(true);
+    //             const response = await apiService.get(
+    //                 `property-floors/${towerPhaseId}`
+    //             );
+    //             return response.data; // Return the data
+    //             // Merge the new floors data with existing propertyFloors
+    //             // setPropertyFloors((prev) => ({
+    //             //     ...prev,
+    //             //     [towerPhaseId]: response.data, // Store floors based on towerPhaseId
+    //             // }));
+    //         } catch (error) {
+    //             console.error("Error fetching property floors:", error);
+    //             return null;
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     }
+    // }, []); //get property floors
 
-    const getPropertyMaster = async (id) => {
-        if (token) {
-            try {
-                setIsLoading(true);
-                const response = await apiService.get(
-                    `get-property-master/${id}`
-                );
+    // const getPropertyUnits = async (towerPhaseId, selectedFloor) => {
+    //     if (token || selectedFloor || towerPhaseId) {
+    //         try {
+    //             setIsLoading(true);
+    //             const response = await apiService.post("property-units", {
+    //                 towerPhaseId,
+    //                 selectedFloor,
+    //             });
+    //             setPropertyUnits(response.data);
+    //         } catch (error) {
+    //             console.error("Error fetching property units:", error);
+    //         } finally {
+    //             setIsLoading(false);
+    //         }
+    //     }
+    // }; //get property units
 
-                return response.data;
-            } catch (e) {
-                console.error("Error fetching propertymaster data:", error);
-            }
-        }
-    };
+    // const getPropertyMaster = async (id) => {
+    //     // if (token) {
+    //     //     try {
+    //     //         setIsLoading(true);
+    //     //         const response = await apiService.get(
+    //     //             `get-property-master/${id}`
+    //     //         );
+
+    //     //         return response.data;
+    //     //     } catch (e) {
+    //     //         console.error("Error fetching propertymaster data:", error);
+    //     //     }
+    //     // }
+    // };
 
     const getBannerData = async () => {
         try {
@@ -716,7 +776,7 @@ export const ContextProvider = ({ children }) => {
     // }, [towerPhaseId, selectedFloor]);
 
     // useEffect(() => {
-    //     getPricingMasterLists();
+    //       ();
     //     getPaymentSchemes();
     // }, []);
 
@@ -765,6 +825,7 @@ export const ContextProvider = ({ children }) => {
     useEffect(() => {
         getBankName();
         getTransactions();
+        // getUserAccessData();
     }, [currentPageTransaction, bankNames]);
 
     useEffect(() => {
@@ -772,8 +833,8 @@ export const ContextProvider = ({ children }) => {
     }, [currentPageInvoices, filterDueDate]);
 
     /*  useEffect(() => {
-        getNotifications();
-    }, [notifCurrentPage, notifStatus, token]); */
+         getNotifications();
+     }, [notifCurrentPage, notifStatus, token]); */
 
     useEffect(() => {
         if (ticketId) {
@@ -805,6 +866,7 @@ export const ContextProvider = ({ children }) => {
                 await fetchCategory();
                 await getCommunicationTypePerProperty();
                 await getInquiriesPerChannel();
+
                 await getFullYear();
             } catch (error) {
                 console.error("Error fetching data:", error);
@@ -818,6 +880,8 @@ export const ContextProvider = ({ children }) => {
         month,
         project,
         year,
+        startDate,
+        endDate,
         departmentStatusYear,
         inquiriesPerCategoryYear,
         inquiriesPerPropertyYear,
@@ -826,7 +890,6 @@ export const ContextProvider = ({ children }) => {
         inquiriesPerChannelMonth,
         inquiriesPerChanelYear,
     ]);
-
 
     return (
         <StateContext.Provider
@@ -890,8 +953,6 @@ export const ContextProvider = ({ children }) => {
                 searchFilter,
                 statusFilter,
                 specificInquiry,
-                setSpecificAssigneeCsr,
-                specificAssigneeCsr,
                 getCount,
                 department,
                 setDepartment,
@@ -902,10 +963,9 @@ export const ContextProvider = ({ children }) => {
                 fetchDataReport,
                 dataSet,
                 pricingMasterLists,
-                getPricingMasterLists,
+
                 paymentSchemes,
-                getPaymentSchemes,
-                getPropertyFloors,
+
                 setPropertyId,
                 propertyFloors,
                 propertyId,
@@ -915,7 +975,6 @@ export const ContextProvider = ({ children }) => {
                 setSelectedFloor,
                 propertyUnit,
                 setPropertyUnits,
-                getPropertyUnits,
                 towerPhaseId,
                 setTowerPhaseId,
                 isLoading,
@@ -924,7 +983,6 @@ export const ContextProvider = ({ children }) => {
                 setConcernMessages,
                 concernId,
                 setConcernId,
-                getPropertyMaster,
                 getConcernMessages,
                 setAssigneesPersonnel,
                 assigneesPersonnel,
@@ -970,6 +1028,22 @@ export const ContextProvider = ({ children }) => {
                 getNavBarData,
                 setIsUserTypeChange,
                 isUserTypeChange,
+                userAccessData,
+                setUserAccessData,
+                hasPermission,
+                setCustomerData,
+                customerData,
+                setCustomerDetails,
+                customerDetails,
+                setMessageData,
+                messageData,
+                currentPageCustomer,
+                setCurrentPageCustomer,
+                totalPagesCustomer,
+                setTotalPagesCustomer,
+                isTotalPages,
+                setIsTotalPages,
+
                 selectedOption,
                 setSelectedOption,
                 setActiveDayButton,
@@ -978,6 +1052,8 @@ export const ContextProvider = ({ children }) => {
                 setSearchSummary,
                 resultSearchActive,
                 setResultSearchActive,
+                daysActive,
+                setDaysActive,
                 setDepartmentValue,
                 departmentValue,
                 setProjectValue,
@@ -995,6 +1071,11 @@ export const ContextProvider = ({ children }) => {
                 endDate,
                 setEndDate,
                 categories,
+                setAssignedToMeActive,
+                assignedToMeActive,
+                setSpecificAssigneeCsr,
+                specificAssigneeCsr,
+                canWrite,
             }}
         >
             {children}
