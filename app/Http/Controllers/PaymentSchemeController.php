@@ -2,50 +2,77 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\JsonResponse;
 use App\Http\Controllers\Controller;
-use App\Models\PaymentScheme;
-use Illuminate\Http\Request;
+use App\Services\PaymentSchemeService;
+use Dotenv\Exception\ValidationException;
+use App\Http\Requests\IndexPriceListRequest;
+use App\Http\Requests\StorePaymentSchemeRequest;
 
 class PaymentSchemeController extends Controller
 {
-    /* insert payment scheme */
-    public function storePaymentScheme(Request $request)
+
+    protected $service;
+
+    public function __construct(PaymentSchemeService $service)
+    {
+        $this->service = $service;
+    }
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function index(IndexPriceListRequest $request)
+    {
+        $validatedData = $request->validated();
+
+        $paymentSchemeDataResponse = $this->service->index($validatedData);
+      
+        return response()->json([
+            'data' => $paymentSchemeDataResponse['data'],
+            'pagination' => $paymentSchemeDataResponse['pagination']
+        ]);
+    }
+
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     */
+    public function store(StorePaymentSchemeRequest $request): JsonResponse
     {
         try {
-            //from request
-            $status = $request->input('status');
-            $paymentSchemeName = $request->input('paymentScheme');
-            $description = $request->input('details_message');
-            $spot = $request->input('spot');
-            $downPaymentInstallment = $request->input('dpInstallment');
-            $numberMonthsDownPayment = $request->input('noMonthsDP');
-            $bankFinancing = $request->input('bankFinancing');
-            $discount = $request->input('discount');
 
-            $paymentScheme = new PaymentScheme();
-            $paymentScheme->status = $status;
-            $paymentScheme->payment_scheme_name = $paymentSchemeName;
-            $paymentScheme->description = $description;
-            $paymentScheme->spot = $spot;
-            $paymentScheme->downpayment_installment = $downPaymentInstallment;
-            $paymentScheme->number_months_downpayment = $numberMonthsDownPayment;
-            $paymentScheme->bank_financing = $bankFinancing;
-            $paymentScheme->discount = $discount;
-            $paymentScheme->save();
-            return response()->json(['message' => 'Payment scheme created successfully'], 201);
+            $paymentScheme = $this->service->store($request->validated());
+            return response()->json([
+                'message' => 'Payment scheme created successfully',
+                'data' => $paymentScheme,
+            ], 201);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $e->errors(),
+            ], 422);
         } catch (\Exception $e) {
-            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+            return response()->json([
+                'error' => $e->getMessage(),
+                'message' => 'Failed to payment scheme',
+            ], 500);
         }
     }
 
-    /* get all payment scheme */
-    public function getAllPaymentSchemes(Request $request)
-    {
-        try {
-            $paymentSchemes = PaymentScheme::orderBy('created_at', 'desc')->get();
-            return response()->json($paymentSchemes);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-        }
-    }
+
+    /**
+     *  Retrieve all payment schemes
+     */
+    // public function getAllPaymentSchemes()
+    // {
+    //     try {
+    //         $paymentSchemes = PaymentScheme::orderBy('created_at', 'desc')->get();
+    //         return response()->json($paymentSchemes);
+    //     } catch (\Exception $e) {
+    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+    //     }
+    // }
 }
