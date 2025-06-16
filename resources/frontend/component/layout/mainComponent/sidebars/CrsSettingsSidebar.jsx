@@ -21,7 +21,7 @@ const CrsSettingsSidebar = () => {
     return (
         <>
             <div className='bg-custom-grayFA'>
-                <Card className='flex min-w-[189px] h-screen pt-3 rounded-[10px] bg-[#EFEFEF]'>
+                <Card className='relative flex min-w-[189px] h-screen pt-3 rounded-[10px] bg-[#EFEFEF] z-20'>
                     <List className='flex flex-col justify-center w-full'>
                         <div className='px-5 leading-1'> 
                             <div className='flex flex-col space-y-1 mt-1'>
