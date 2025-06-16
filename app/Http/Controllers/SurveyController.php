@@ -272,7 +272,7 @@ class SurveyController extends Controller
     public function getSurveyStats($survey_list_id)
     {
         try {
-            // Get the survey title
+            // 1. Get the survey title
             $survey = DB::table('surveys_list')
                 ->where('id', $survey_list_id)
                 ->select('survey_title')
@@ -282,95 +282,261 @@ class SurveyController extends Controller
                 return response()->json(['error' => 'Survey not found'], 404);
             }
 
-            // Get valid options for all questions in the survey
-            $validOptions = DB::table('survey_options')
-                ->whereIn('question_id', function ($query) use ($survey_list_id) {
-                    // Join survey_questions with survey_forms to get the survey_id
-                    $query->select('survey_questions.id')
-                        ->from('survey_questions')
-                        ->join('survey_forms', 'survey_questions.form_id', '=', 'survey_forms.id')
-                        ->where('survey_forms.survey_id', $survey_list_id);  // Use survey_id from survey_forms
-                })
-                ->pluck('text', 'id')
-                ->toArray(); // Convert to an array for easy access
-
-            // Get the questions for this survey
+            // 2. Get all survey questions with input_type
             $questions = DB::table('survey_questions')
                 ->join('survey_forms', 'survey_questions.form_id', '=', 'survey_forms.id')
-                ->where('survey_forms.survey_id', $survey_list_id)  // Join to filter by survey_id
-                ->select('survey_questions.id', 'survey_questions.question')
+                ->where('survey_forms.survey_id', $survey_list_id)
+                ->select('survey_questions.id', 'survey_questions.question', 'survey_questions.input_type')
                 ->get();
 
             $questionsResult = [];
 
-            // Process each question
             foreach ($questions as $question) {
-                // Get options for this specific question
-                $options = DB::table('survey_options')
-                    ->where('question_id', $question->id)
-                    ->pluck('text', 'id')
-                    ->toArray();
+                $inputType = $question->input_type;
 
-                // Initialize option counts with zero responses (for this question's options only)
-                $optionCounts = [];
-                foreach ($options as $optionId => $optionText) {
-                    $optionCounts[$optionId] = [
-                        'id' => $optionId,
-                        'value' => $optionText,
-                        'count' => 0
-                    ];
-                }
+                if ($inputType === 'multiple-choice') {
+                    // 1. Get options for the question
+                    $options = DB::table('survey_options')
+                        ->where('question_id', $question->id)
+                        ->pluck('text', 'id')
+                        ->toArray();
 
-                // Get all answers for this question
-                $answers = DB::table('survey_answers')
-                    ->where('survey_list_id', $survey_list_id)
-                    ->where('question_id', $question->id)
-                    ->select('answer_value', 'option_id')
-                    ->get();
+                    $optionCounts = [];
+                    foreach ($options as $optionId => $text) {
+                        $optionCounts[$optionId] = [
+                            'id' => $optionId,
+                            'value' => $text,
+                            'count' => 0
+                        ];
+                    }
 
-                $totalResponses = $answers->count();
+                    // 2. Count normal answers using option_id
+                    $standardAnswers = DB::table('survey_answers')
+                        ->where('survey_list_id', $survey_list_id)
+                        ->where('question_id', $question->id)
+                        ->whereNotNull('option_id')
+                        ->select('option_id')
+                        ->get();
 
-                // Count the selected options
-                foreach ($answers as $answer) {
-                    $decoded = json_decode($answer->answer_value, true);
-                    $values = is_array($decoded) ? $decoded : [$decoded];
+                    $totalResponses = $standardAnswers->count();
 
-                    foreach ($values as $v) {
-                        $optionId = $answer->option_id ?? null;
-
+                    foreach ($standardAnswers as $answer) {
+                        $optionId = $answer->option_id;
                         if ($optionId && isset($optionCounts[$optionId])) {
                             $optionCounts[$optionId]['count']++;
                         }
                     }
+
+                    // 3. Handle imported answers (match by ticket_id + question text + survey_title)
+                    $importedTicketIds = DB::table('experience_ratings')
+                        ->where('survey_title', $survey->survey_title)
+                        ->pluck('ticket_id') // e.g. ["Ticket#2500000861"]
+                        ->map(function ($ticketId) {
+                            return preg_replace('/\D/', '', $ticketId); // remove non-numeric, get "2500000861"
+                        })
+                        ->toArray();
+
+                    if (!empty($importedTicketIds)) {
+                        $importedAnswers = DB::table('survey_answers')
+                            ->whereIn('ticket_id', $importedTicketIds)
+                            ->where('question', $question->question)
+                            ->whereNotNull('answer_value')
+                            ->select('answer_value')
+                            ->get();
+
+                        $totalResponses += $importedAnswers->count();
+
+                        foreach ($importedAnswers as $answer) {
+                            $raw = $answer->answer_value;
+
+                            // handle both single and multiple comma-separated values
+                            $values = array_map('trim', explode(',', $raw));
+
+                            foreach ($values as $value) {
+                                foreach ($optionCounts as $optionId => &$option) {
+                                    if (strcasecmp($option['value'], $value) === 0) {
+                                        $option['count']++;
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // 4. Final result
+                    $questionsResult[] = [
+                        'question_id' => $question->id,
+                        'question' => $question->question,
+                        'input_type' => $inputType,
+                        'total_responses' => $totalResponses,
+                        'options' => array_values($optionCounts),
+                    ];
+                } elseif ($inputType === 'checkboxes') {
+                    // 1. Get all options for this question
+                    $options = DB::table('survey_options')
+                        ->where('question_id', $question->id)
+                        ->pluck('text', 'id')
+                        ->toArray();
+
+                    $optionCounts = [];
+                    foreach ($options as $optionId => $text) {
+                        $optionCounts[$optionId] = [
+                            'id' => $optionId,
+                            'value' => $text,
+                            'count' => 0
+                        ];
+                    }
+
+                    // 2. Count standard answers (option_id exists)
+                    $standardAnswers = DB::table('survey_answers')
+                        ->where('survey_list_id', $survey_list_id)
+                        ->where('question_id', $question->id)
+                        ->whereNotNull('option_id')
+                        ->select('option_id')
+                        ->get();
+
+                    $totalResponses = $standardAnswers->count();
+
+                    foreach ($standardAnswers as $answer) {
+                        $optionId = $answer->option_id;
+                        if ($optionId && isset($optionCounts[$optionId])) {
+                            $optionCounts[$optionId]['count']++;
+                        }
+                    }
+
+                    // 3. Get imported ticket IDs based on matching survey_title
+                    $importedTicketIds = DB::table('experience_ratings')
+                        ->where('survey_title', $survey->survey_title)
+                        ->pluck('ticket_id')
+                        ->map(function ($ticketId) {
+                            return preg_replace('/\D/', '', $ticketId);
+                        })
+                        ->toArray();
+
+                    // 4. Count imported answers using string matching
+                    if (!empty($importedTicketIds)) {
+                        $importedAnswers = DB::table('survey_answers')
+                            ->whereIn('ticket_id', $importedTicketIds)
+                            ->where('question', $question->question)
+                            ->whereNotNull('answer_value')
+                            ->select('answer_value')
+                            ->get();
+
+                        $totalResponses += $importedAnswers->count();
+
+                        foreach ($importedAnswers as $answer) {
+                            $rawAnswer = trim($answer->answer_value);
+
+                            // Safely loop through options and match each one against the full answer_value
+                            foreach ($optionCounts as $optionId => &$option) {
+                                // Match if option exists as a complete value in the answer (case-insensitive, trimmed)
+                                $pattern = '/(^|,\s*)' . preg_quote($option['value'], '/') . '(\s*,|$)/i';
+
+                                if (preg_match($pattern, $rawAnswer)) {
+                                    $option['count']++;
+                                }
+                            }
+                        }
+                    }
+
+                    // 5. Store final result
+                    $questionsResult[] = [
+                        'question_id' => $question->id,
+                        'question' => $question->question,
+                        'input_type' => $inputType,
+                        'total_responses' => $totalResponses,
+                        'options' => array_values($optionCounts),
+                    ];
+                } else {
+                    $formattedAnswers = [];
+                    $totalResponses = 0;
+
+                    // ✅ 1. Get standard answers (question_id + survey_list_id)
+                    $standardAnswers = DB::table('survey_answers')
+                        ->where('survey_list_id', $survey_list_id)
+                        ->where('question_id', $question->id)
+                        ->whereNotNull('answer_value')
+                        ->get();
+
+                    $formattedAnswers = [];
+                    foreach ($standardAnswers as $a) {
+                        $email = DB::table('experience_ratings')
+                            ->where('id', $a->experience_rating_id) // ✅ join via foreign key
+                            ->value('email');
+
+                        $ticketId = DB::table('experience_ratings')
+                            ->where('id', $a->experience_rating_id)
+                            ->value('ticket_id');
+
+                        $formattedAnswers[] = [
+                            'ticket_id' => $ticketId,
+                            'email' => $email,
+                            'answer_value' => $a->answer_value,
+                        ];
+                    }
+
+
+                    $totalResponses += $standardAnswers->count();
+
+                    // ✅ 2. Get imported answers (no question_id, no survey_list_id)
+                    $importedTicketIds = DB::table('experience_ratings')
+                        ->where('survey_title', $survey->survey_title)
+                        ->pluck('ticket_id', 'ticket_id')
+                        ->mapWithKeys(function ($ticketId) {
+                            return [preg_replace('/\D/', '', $ticketId) => $ticketId];
+                        })
+                        ->toArray(); // [numeric_ticket_id => original_ticket_id]
+
+                    if (!empty($importedTicketIds)) {
+                        $importedAnswers = DB::table('survey_answers')
+                            ->whereIn('ticket_id', array_keys($importedTicketIds))
+                            ->where('question', $question->question)
+                            ->whereNotNull('answer_value')
+                            ->select('ticket_id', 'answer_value')
+                            ->get();
+
+                        foreach ($importedAnswers as $a) {
+                            $numericTicketId = $a->ticket_id;
+                            $originalTicketId = $importedTicketIds[$numericTicketId] ?? null;
+
+                            $email = DB::table('experience_ratings')
+                                ->where('ticket_id', $originalTicketId)
+                                ->value('email');
+
+                            $formattedAnswers[] = [
+                                'ticket_id' => $originalTicketId,
+                                'email' => $email,
+                                'answer_value' => $a->answer_value,
+                            ];
+                        }
+
+                        $totalResponses += $importedAnswers->count();
+                    }
+
+                    // ✅ Final result
+                    $questionsResult[] = [
+                        'question_id' => $question->id,
+                        'question' => $question->question,
+                        'input_type' => $inputType,
+                        'total_responses' => $totalResponses,
+                        'answers' => $formattedAnswers,
+                    ];
                 }
-
-                ksort($optionCounts, SORT_NUMERIC);
-
-                $questionsResult[] = [
-                    'question_id' => $question->id,
-                    'question' => $question->question,
-                    'total_responses' => $totalResponses,
-                    'options' => array_values($optionCounts),
-                ];
             }
 
+            // 5. Sort and return
+            usort($questionsResult, fn($a, $b) => $a['question_id'] <=> $b['question_id']);
 
-            // Sort questions by their IDq
-            usort($questionsResult, function ($a, $b) {
-                return $a['question_id'] <=> $b['question_id'];
-            });
-
-            // Final output
-            $result = [
+            return response()->json([
                 'survey_title' => $survey->survey_title,
                 'questions' => $questionsResult,
-            ];
-
-            return response()->json($result);
+            ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
+
+
+
 
     public function countRatings($id)
     {
@@ -467,31 +633,31 @@ class SurveyController extends Controller
     }
 
     public function getSurveysWithRatingBreakdown()
-{
-    $surveys = Survey_list::select('id', 'survey_title', 'survey_link')->get();
+    {
+        $surveys = Survey_list::select('id', 'survey_title', 'survey_link')->get();
 
-    $result = $surveys->map(function ($survey) {
-        // Fetch counts of each rating (1-5) for this survey_link
-        $ratingCounts = ExperienceRating::where('survey_link', $survey->survey_link)
-            ->select('rating', DB::raw('COUNT(*) as total'))
-            ->groupBy('rating')
-            ->pluck('total', 'rating'); // [rating => count]
+        $result = $surveys->map(function ($survey) {
+            // Fetch counts of each rating (1-5) for this survey_link
+            $ratingCounts = ExperienceRating::where('survey_link', $survey->survey_link)
+                ->select('rating', DB::raw('COUNT(*) as total'))
+                ->groupBy('rating')
+                ->pluck('total', 'rating'); // [rating => count]
 
-        // Ensure all ratings from 1 to 5 are included, default to 0 if missing
-        $fullRatingCounts = [];
-        for ($i = 1; $i <= 5; $i++) {
-            $fullRatingCounts[$i] = $ratingCounts->get($i, 0);
-        }
+            // Ensure all ratings from 1 to 5 are included, default to 0 if missing
+            $fullRatingCounts = [];
+            for ($i = 1; $i <= 5; $i++) {
+                $fullRatingCounts[$i] = $ratingCounts->get($i, 0);
+            }
 
-        return [
-            'id' => $survey->id,
-            'survey_title' => $survey->survey_title,
-            'ratings' => $fullRatingCounts, // e.g., [1 => 3, 2 => 0, 3 => 5, 4 => 2, 5 => 8]
-        ];
-    });
+            return [
+                'id' => $survey->id,
+                'survey_title' => $survey->survey_title,
+                'ratings' => $fullRatingCounts, // e.g., [1 => 3, 2 => 0, 3 => 5, 4 => 2, 5 => 8]
+            ];
+        });
 
-    return response()->json([
-        'data' => $result
-    ]);
-}
+        return response()->json([
+            'data' => $result
+        ]);
+    }
 }

@@ -78,7 +78,7 @@ const SurveyMainReport = () => {
                                         <BarChart
                                             layout="vertical"
                                             data={surveysRespondents}
-                                            margin={{ top: 20, right: 40, left: 0, bottom: 20 }}
+                                            margin={{ top: 20, right: 80, left: 0, bottom: 20 }}
                                             barCategoryGap={gapHeight}
                                         >
                                             <XAxis type="number" hide />

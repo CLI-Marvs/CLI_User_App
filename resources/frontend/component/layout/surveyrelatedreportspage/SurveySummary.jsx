@@ -31,43 +31,43 @@ const SurveySummary = () => {
 
     useEffect(() => {
         const fetchRatingCounts = async () => {
-          try {
-            
-            const response = await apiService.get(`/experience-ratings/count/${surveyId}`);
-            setRatingCounts(response.data.data);
-          } catch (error) {
-            console.error('Error fetching rating counts:', error);
-          }
-        };
-      
-        if (id) {
-          fetchRatingCounts();
-        }
-      }, [id]);
+            try {
 
-
-
-    function groupQuestionsByOptions(questions) {
-        const groups = [];
-
-        questions.forEach((question) => {
-            const optionSignature = question.options.map(opt => opt.value).join('|');
-            let existingGroup = groups.find(group => group.signature === optionSignature);
-
-            if (existingGroup) {
-                existingGroup.questions.push(question);
-            } else {
-                groups.push({
-                    signature: optionSignature,
-                    questions: [question]
-                });
+                const response = await apiService.get(`/experience-ratings/count/${surveyId}`);
+                setRatingCounts(response.data.data);
+            } catch (error) {
+                console.error('Error fetching rating counts:', error);
             }
-        });
+        };
 
-        return groups;
-    }
+        if (id) {
+            fetchRatingCounts();
+        }
+    }, [id]);
 
-    const groupedTables = surveySummary?.questions ? groupQuestionsByOptions(surveySummary.questions) : [];
+
+
+    /*  function groupQuestionsByOptions(questions) {
+         const groups = [];
+ 
+         questions.forEach((question) => {
+             const optionSignature = question.options.map(opt => opt.value).join('|');
+             let existingGroup = groups.find(group => group.signature === optionSignature);
+ 
+             if (existingGroup) {
+                 existingGroup.questions.push(question);
+             } else {
+                 groups.push({
+                     signature: optionSignature,
+                     questions: [question]
+                 });
+             }
+         });
+ 
+         return groups;
+     } */
+
+    /* const groupedTables = surveySummary?.questions ? groupQuestionsByOptions(surveySummary.questions) : []; */
 
     return (
         <div className='h-screen max-w-full bg-custom-grayFA'>
@@ -76,14 +76,16 @@ const SurveySummary = () => {
                     <p className='text-[24px] font-semibold'>{surveySummary?.survey_title}</p>
                 </div>
                 <SummaryRating ratingCounts={ratingCounts} />
-                <SummaryTable groupedTables={groupedTables} />
+                {/*  <SummaryTable groupedTables={groupedTables} /> */}
                 {surveySummary?.questions?.map((item, index) => {
                     return (
                         <div key={index}>
-                            {item?.options?.length > 5 ? (
-                                <SummaryLine question={item} />
-                            ) : (
-                                <SummaryBar question={item} />
+                            {item?.input_type === "multiple-choice" && (
+                                item?.options?.length > 5 ? (
+                                    <SummaryLine question={item} />
+                                ) : (
+                                    <SummaryBar question={item} />
+                                )
                             )}
                         </div>
                     );
