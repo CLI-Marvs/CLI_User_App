@@ -949,7 +949,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 {/*Unit/Lot */}
                                 {(details.buyer_old_data.unit_number !== details.buyer_updated_data.unit_number) && (
                                     <p className="text-sm text-custom-bluegreen">
-                                        Unit No:
+                                        Unit/Lot Number:
                                         {details.buyer_old_data.unit_number && details.buyer_old_data.unit_number !== details.buyer_updated_data.unit_number ? (
                                             <>
                                                 <span className="text-custom-grayA5">{" "}From{" "}{"{"}</span>
