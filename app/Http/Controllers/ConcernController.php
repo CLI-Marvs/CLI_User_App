@@ -1925,7 +1925,19 @@ class ConcernController extends Controller
 
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
             
-            SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'resolve', $modifiedTicketId);
+            if (
+                isset($selectedSurveyType['surveyName']) && 
+                strtolower($selectedSurveyType['surveyName']) !== 'n/a'
+            ) {
+                SendSurveyLinkEmailJob::dispatch(
+                    $buyerEmail,
+                    $request->buyer_name,
+                    $selectedSurveyType,
+                    'resolve',
+                    $modifiedTicketId
+                );
+            }
+            
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -2251,8 +2263,6 @@ class ConcernController extends Controller
 
 
     /**
-     * 
-     * git status
      * Get Inquiries per channel data
      */
     public function getInquiriesPerChannel(Request $request)
