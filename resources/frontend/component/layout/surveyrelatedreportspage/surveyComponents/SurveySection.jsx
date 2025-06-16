@@ -10,8 +10,8 @@ import SurveyReview from '../SurveyReview';
 
 
 const adjustHeight = (element) => {
-    element.style.height = "auto"; 
-    element.style.height = `${element.scrollHeight}px`; 
+    element.style.height = "auto";
+    element.style.height = `${element.scrollHeight}px`;
 };
 
 export const SurveySection = (
@@ -36,11 +36,18 @@ export const SurveySection = (
     const titleRef = useRef(null);
     const descriptionRef = useRef(null);
     const consentRef = useRef(null);
+    const lastQuestionRef = useRef(null);
 
     useEffect(() => {
-    if (titleRef.current) adjustHeight(titleRef.current);
-    if (descriptionRef.current) adjustHeight(descriptionRef.current);
-    if (consentRef.current) adjustHeight(consentRef.current);
+        if (lastQuestionRef.current) {
+            lastQuestionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }, [data.dataQASet.length]);
+
+    useEffect(() => {
+        if (titleRef.current) adjustHeight(titleRef.current);
+        if (descriptionRef.current) adjustHeight(descriptionRef.current);
+        if (consentRef.current) adjustHeight(consentRef.current);
     }, [data.title, data.description, data.consentDescription]);
 
     const handleOpenReview = () => {
@@ -62,7 +69,7 @@ export const SurveySection = (
         e.target.style.height = e.target.scrollHeight + "px";
     };
 
-    
+
 
     return (
         <>
@@ -83,7 +90,7 @@ export const SurveySection = (
                             }}
                             onChange={(e) => updateTitle(e.target.value, sectionIndex)}
                             onKeyDown={(e) => {
-                                if (e.key === "Enter") e.preventDefault(); 
+                                if (e.key === "Enter") e.preventDefault();
                             }}
                             ref={titleRef}
                         />
@@ -96,8 +103,8 @@ export const SurveySection = (
                             maxLength={1000}
                             placeholder="Description"
                             onInput={(e) => {
-                                e.target.style.height = "auto"; 
-                                e.target.style.height = `${e.target.scrollHeight}px`; 
+                                e.target.style.height = "auto";
+                                e.target.style.height = `${e.target.scrollHeight}px`;
                             }}
                             onChange={(e) => updateDescription(e.target.value, sectionIndex)}
                             ref={descriptionRef}
@@ -121,21 +128,40 @@ export const SurveySection = (
                     className={`w-full rounded-[10px] bg-custom-lightestgreen p-[10px] flex flex-col gap-[10px] ${data?.dataQASet?.length === 0 && "hidden"
                         }`}
                 >
-                    {data?.dataQASet?.map((item, questionIndex) => (
-                        <SurveyAddQuestion
-                            key={item.id}
-                            data={item}
-                            sectionIndex={sectionIndex}
-                            questionIndex={questionIndex}
-                            onDelete={() => deleteQuestion(sectionIndex, questionIndex)}
-                            addOption={() => addOption(sectionIndex, questionIndex)}
-                            deleteOption={deleteOption}
-                            updateQuestionText={updateQuestionText}
-                            updateOptionText={updateOptionText}
-                            updateIsRequired={updateIsRequired}
-                        />
-                    ))}
+                    {data?.dataQASet?.map((item, questionIndex) => {
+                        const isLast = questionIndex === data.dataQASet.length - 1;
+
+                        return (
+                            <div
+                                key={item.id}
+                                ref={isLast ? lastQuestionRef : null}
+                            >
+                                <SurveyAddQuestion
+                                    data={item}
+                                    sectionIndex={sectionIndex}
+                                    questionIndex={questionIndex}
+                                    onDelete={() => deleteQuestion(sectionIndex, questionIndex)}
+                                    addOption={() => addOption(sectionIndex, questionIndex)}
+                                    deleteOption={deleteOption}
+                                    updateQuestionText={updateQuestionText}
+                                    updateOptionText={updateOptionText}
+                                    updateIsRequired={updateIsRequired}
+                                />
+                            </div>
+                        );
+                    })}
                 </div>
+                {data?.dataQASet?.length > 2 && (
+                    <div className='w-full border-custom-grayA5 my-[20px]'>
+                        <button
+                            onClick={() => addQuestion(sectionIndex)}
+                            className='w-[163px] h-[56px] border-[0.5px] border-custom-grayA5 rounded-[10px] p-[10px] flex justify-center items-center gap-[7px] hover:shadow-custom'
+                        >
+                            <IoMdAddCircleOutline className='size-[32px]' />
+                            <p className='text-[#3A3A3A] text-[16px]'>Add Question</p>
+                        </button>
+                    </div>
+                )}
                 <div className='w-full border-b-1 border-custom-grayA5 my-[20px]' />
                 <div className='w-full rounded-[10px] bg-custom-lightestgreen p-[10px] flex flex-col'>
                     <div className="flex flex-col gap-4 bg-white w-full rounded-[10px] pt-[18px] pb-[22px] px-[16px] border-2">
@@ -150,7 +176,7 @@ export const SurveySection = (
                                 onFocus={(e) => {
                                     if (data.consentTitle === "Declaration and Consent") {
                                         updateConsent("consentTitle", "", sectionIndex);
-                                      }
+                                    }
                                 }}
                                 onBlur={(e) => {
                                     if (!e.target.value) updateConsent("Declaration and Consent", sectionIndex);
@@ -167,7 +193,7 @@ export const SurveySection = (
                                 value="checkbox"
                                 disabled={true}
                             />
-                             <textarea
+                            <textarea
                                 className="w-full min-h-[72px] resize-none overflow-y-auto leading-tight text-[16px] p-[6px]"
                                 rows="1"
                                 value={data.consentDescription}

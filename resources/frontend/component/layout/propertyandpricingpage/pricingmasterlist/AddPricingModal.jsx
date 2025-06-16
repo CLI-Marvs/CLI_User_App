@@ -2,16 +2,22 @@ import React, { useRef, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import apiService from "../../../servicesApi/apiService";
 import { useNavigate } from "react-router-dom";
+
+
 const formDataState = {
     propertyName: "",
     type: "",
     towerPhase: "",
 };
+
+
 const AddPricingModal = ({ modalRef }) => {
-    //State
+    //States
     const [formData, setFormData] = useState(formDataState);
     const navigate = useNavigate();
-    //event handler
+
+
+    //Event Handler
     const handleChange = (e) => {
         const { name, value } = e.target;
 
@@ -20,6 +26,8 @@ const AddPricingModal = ({ modalRef }) => {
             [name]: value,
         }));
     };
+
+    
     const handleSubmit = async (e, status) => {
         e.preventDefault();
         const form = new FormData();

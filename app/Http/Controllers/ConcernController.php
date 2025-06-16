@@ -2021,7 +2021,7 @@ class ConcernController extends Controller
     {
         $user = $request->user();
 
-        $employees = Employee::select('firstname', 'employee_email', 'department', 'lastname')->get();
+        $employees = Employee::select('id','firstname', 'employee_email', 'department', 'lastname')->get();
         return response()->json($employees);
     }
 
