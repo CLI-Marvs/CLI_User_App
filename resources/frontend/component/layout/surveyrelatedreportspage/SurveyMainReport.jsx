@@ -77,9 +77,9 @@ const SurveyMainReport = () => {
 
     return (
         <div className='h-screen max-w-full bg-custom-grayFA'>
-            <div className='flex flex-col p-[30px]'>
+            <div className='flex flex-col p-[30px] gap-[20px]'>
                 <div>
-                    <div className='w-full h-[600px]'>
+                    <div className='w-full h-auto'>
                         <div>
                             <div className="flex flex-col gap-[16px] pt-[18px] px-[16px]">
                                 <div className="p-[10.9px] border-b-[0.5px] border-[#3A3A3A]">
