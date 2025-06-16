@@ -304,7 +304,7 @@ class PropertyMasterRepository
     protected function filterPropertySetting($validatedData)
     {
         return $this->model
-            ->when(isset($validatedwData['property_name']), function ($query) use ($validatedData) {
+            ->when(isset($validatedData['property_name']), function ($query) use ($validatedData) {
                 return $query->whereRaw('LOWER(property_name) LIKE ?', ['%' . strtolower($validatedData['property_name']) . '%']);
             })
             ->when(isset($validatedData['business_entity_sap']), function ($query) use ($validatedData) {

@@ -369,42 +369,44 @@ const Sidebar = () => {
                   </ListItem>
                 </Link>
 
-                <Link to="/transaction/receivables/transactions">
-                  <ListItem
-                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
-                      "/transaction/receivables"
-                    )
-                        ? "bg-white text-custom-solidgreen font-semibold py-6"
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                      }`}
-                    onClick={() =>
-                      handleItemTransactionClick(
-                        "/transaction/receivables/transactions"
-                      )
-                    }
-                  >
-                    Online Payment Dashboard
-                  </ListItem>
-                </Link>
-                <Link to="/transaction/settings/markup">
-                  <ListItem
-                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
-                      "/transaction/settings"
-                    )
-                        ? "bg-white text-custom-solidgreen font-semibold"
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                      }`}
-                    onClick={() =>
-                      handleItemTransactionClick(
-                        "/transaction/settings/markup"
-                      )
-                    }
-                  >
-                    Settings
-                  </ListItem>
-                </Link>
-              </div>
-            )}
+                                <Link to="/transaction/receivables/transactions">
+                                    <ListItem
+                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                            location.pathname.startsWith(
+                                                "/transaction/receivables"
+                                            )
+                                                ? "bg-white text-custom-solidgreen font-semibold"
+                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                        }`}
+                                        onClick={() =>
+                                            handleItemTransactionClick(
+                                                "/transaction/receivables/transactions"
+                                            )
+                                        }
+                                    >
+                                        Online Payment
+                                    </ListItem>
+                                </Link>
+                                <Link to="/transaction/settings/markup">
+                                    <ListItem
+                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                            location.pathname.startsWith(
+                                                "/transaction/settings"
+                                            )
+                                                ? "bg-white text-custom-solidgreen font-semibold"
+                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                        }`}
+                                        onClick={() =>
+                                            handleItemTransactionClick(
+                                                "/transaction/settings/markup"
+                                            )
+                                        }
+                                    >
+                                        Settings
+                                    </ListItem>
+                                </Link>
+                            </div>
+                        )}
 
           {/* <Link to="/sales/customer">
                         <ListItem
