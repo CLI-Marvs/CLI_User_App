@@ -19,6 +19,7 @@ import InquiryListView from "./views/pages/raiseaconcernViews/InquiryListView";
 import InquiryThreadView from "./views/pages/raiseaconcernViews/InquiryThreadView";
 import CallBackView from "./views/pages/callback/CallBackView";
 import ReportViews from "./views/pages/raiseaconcernViews/ReportViews";
+import WalkinView from '@/component/views/pages/walkinEmojiViews/WalkinView';
 import PropertyAndPricingLayout from "./views/layout/PropertyAndPricingLayout";
 import PricingMasterListView from "./views/pages/PropertyAndPricingViews/PricingMasterListView";
 import WorkFlowNotificationView from "./views/pages/PropertyAndPricingViews/WorkFlowNotificationView";
@@ -261,6 +262,10 @@ const App = () => {
                                 {
                                     path: "report",
                                     element: <ReportViews />,
+                                },
+                                {
+                                    path: "walk-in",
+                                    element: <WalkinView />,
                                 },
                                 {
                                     path: "autoassign",

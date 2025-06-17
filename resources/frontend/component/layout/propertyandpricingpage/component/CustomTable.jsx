@@ -9,19 +9,33 @@ const CustomTable = ({
     renderRow,
     className,
     tableSkeleton = 140,
-    tableClassName = "w-full"
+    tableClassName = "w-full",
+    textAlign,
 }) => {
     return (
         <div className={tableClassName}>
             <table className="w-full border-collapse">
-                <CustomTableHeader columns={columns} className={className} />
+                <CustomTableHeader
+                    columns={columns}
+                    className={className}
+                    textAlign={textAlign}
+                />
                 <tbody className="">
                     {isLoading ? (
                         <tr>
                             <td className="w-full mt-1">
-                                <Skeleton height={tableSkeleton} className="my-1" />
-                                <Skeleton height={tableSkeleton} className="my-1" />
-                                <Skeleton height={tableSkeleton} className="my-1" />
+                                <Skeleton
+                                    height={tableSkeleton}
+                                    className="my-1"
+                                />
+                                <Skeleton
+                                    height={tableSkeleton}
+                                    className="my-1"
+                                />
+                                <Skeleton
+                                    height={tableSkeleton}
+                                    className="my-1"
+                                />
                             </td>
                         </tr>
                     ) : data && data.length > 0 ? (
