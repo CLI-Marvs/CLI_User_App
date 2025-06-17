@@ -18,8 +18,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { toast } from "react-toastify";
-import { showToast } from "../../../util/toastUtil"
-import Alert from "../mainComponent/Alert";
+import { showToast } from "../../../util/toastUtil";
+import Alert from "../../Alert";
 import AddInfoModal from "./AddInfoModal";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
 import InquiryFormModal from "./InquiryFormModal";
@@ -27,8 +27,8 @@ import ThreadInquiryFormModal from "./ThreadInquiryFormModal";
 import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
 import { ALLOWED_DEPARTMENT } from "../../../constant/data/allowedDepartment";
 
-import Skeleton from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const InquiryThread = () => {
     const [attachedFiles, setAttachedFiles] = useState([]);
@@ -52,7 +52,7 @@ const InquiryThread = () => {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { propertyNamesList } = useStateContext();
     const [endDate, setEndDate] = useState(null);
-    
+
     /*   const [dataConcern, setDataConcern] = useState({}); */
     const {
         messages,
@@ -88,7 +88,6 @@ const InquiryThread = () => {
     const handleDateChange = (date) => {
         setStartDate(date);
     };
-
 
     // Function to normalize names
     //const normalizeEmail = (email) => email.trim().toLowerCase();
@@ -127,9 +126,9 @@ const InquiryThread = () => {
         "07": "July",
         "08": "August",
         "09": "September",
-        "10": "October",
-        "11": "November",
-        "12": "December",
+        10: "October",
+        11: "November",
+        12: "December",
     };
 
     /*  const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
@@ -142,7 +141,6 @@ const InquiryThread = () => {
         const files = Array.from(event.target.files);
         setAttachedFiles((prevFiles) => [...prevFiles, ...files]);
         event.target.value = "";
-
     };
 
     const formatFunc = (name) => {
@@ -155,35 +153,38 @@ const InquiryThread = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                .filter((item) => !item.toLowerCase().includes("phase"))
-                .map((item) => {
-                    let formattedItem = formatFunc(item);
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => {
+                      let formattedItem = formatFunc(item);
 
-                    // Capitalize each word in the string
-                    formattedItem = formattedItem
-                        .split(" ")
-                        .map((word) => {
-                            // Check for specific words that need to be fully capitalized
-                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                return word.toUpperCase();
-                            }
-                            // Capitalize the first letter of all other words
-                            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                        })
-                        .join(" ");
+                      // Capitalize each word in the string
+                      formattedItem = formattedItem
+                          .split(" ")
+                          .map((word) => {
+                              // Check for specific words that need to be fully capitalized
+                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                  return word.toUpperCase();
+                              }
+                              // Capitalize the first letter of all other words
+                              return (
+                                  word.charAt(0).toUpperCase() +
+                                  word.slice(1).toLowerCase()
+                              );
+                          })
+                          .join(" ");
 
-                    // Replace specific names if needed
-                    if (formattedItem === "Casamira South") {
-                        formattedItem = "Casa Mira South";
-                    }
+                      // Replace specific names if needed
+                      if (formattedItem === "Casamira South") {
+                          formattedItem = "Casa Mira South";
+                      }
 
-                    return formattedItem;
-                })
-                .sort((a, b) => {
-                    if (a === "N/A") return -1;
-                    if (b === "N/A") return 1;
-                    return a.localeCompare(b);
-                })
+                      return formattedItem;
+                  })
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
 
@@ -218,7 +219,6 @@ const InquiryThread = () => {
             modalRef2.current.showModal();
         }
     };
-
 
     const handleOpenResolveModal = () => {
         if (resolveModalRef.current) {
@@ -275,12 +275,10 @@ const InquiryThread = () => {
             setHasAttachments(false);
             navigate("/inquirymanagement/inquirylist");
         } catch (error) {
-            console.log(error)
+            console.log(error);
         } finally {
             setIsSearchLoading(false);
-
         }
-
     };
 
     const formatChatMessage = (message) => {
@@ -293,7 +291,6 @@ const InquiryThread = () => {
             ));
         }
     };
-
 
     const submitMessage = async () => {
         setLoading(true);
@@ -316,9 +313,12 @@ const InquiryThread = () => {
 
             // Show toast for invalid extensions if any are found
             if (invalidExtensions.length > 0) {
-                showToast(`.${invalidExtensions.join(
-                    ", ."
-                )} file type(s) are not allowed.`, "warning");
+                showToast(
+                    `.${invalidExtensions.join(
+                        ", ."
+                    )} file type(s) are not allowed.`,
+                    "warning"
+                );
 
                 setLoading(false);
                 return;
@@ -326,7 +326,10 @@ const InquiryThread = () => {
 
             // Show toast for oversized files if any are found
             if (oversizedFiles.length > 0) {
-                showToast("File is too large. Maximum size is 100MB.", "warning");
+                showToast(
+                    "File is too large. Maximum size is 100MB.",
+                    "warning"
+                );
                 setLoading(false);
                 return;
             }
@@ -362,7 +365,6 @@ const InquiryThread = () => {
                     "Content-Type": "multipart/form-data",
                 },
             });
-
 
             setAttachedFiles([]);
             setLoading(false);
@@ -448,8 +450,8 @@ const InquiryThread = () => {
 
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
-            .flat()
-            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              .flat()
+              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
     const getLatestMessageFromBuyer = combineThreadMessages.find(
         (item) => item.buyer_email
@@ -581,518 +583,545 @@ const InquiryThread = () => {
                                 />
                             </svg>
                         </div>
-                       {isFilterVisible && (
-                                                   <div
-                                                       ref={filterBoxRef}
-                                                       className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[604px]"
-                                                   >
-                                                       <div className="flex flex-col gap-2">
-                                                           <div className="flex">
-                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                                                   {" "}
-                                                                   Name
-                                                               </label>
-                                                               <input
-                                                                   type="text"
-                                                                   value={name}
-                                                                   onChange={(e) =>
-                                                                       setName(e.target.value)
-                                                                   }
-                                                                   className="w-full  border-b-1 outline-none text-sm px-[8px]"
-                                                               />
-                                                           </div>
-                                                           <div className="flex relative">
-                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                                                   {" "}
-                                                                   Category
-                                                               </label>
-                       
-                                                               <div className="flex bg-red-900 justify-start w-full relative">
-                                                                   <label
-                                                                       htmlFor=""
-                                                                       className="w-full border-b-2"
-                                                                   >
-                                                                       {""}
-                                                                   </label>
-                                                                   <select
-                                                                       className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                                       value={category}
-                                                                       onChange={(e) =>
-                                                                           setCategory(e.target.value)
-                                                                       }
-                                                                   >
-                                                                       <option value=" ">
-                                                                           Select Category
-                                                                       </option>
-                                                                       <option value="Reservation Documents">
-                                                                           Reservation Documents
-                                                                       </option>
-                                                                       <option value="Payment Issues">
-                                                                           Payment Issues
-                                                                       </option>
-                                                                       <option value="SOA/ Buyer's Ledger">
-                                                                           SOA/ Buyer's Ledger
-                                                                       </option>
-                                                                       <option value="Turn Over Status">
-                                                                           Turn Over Status
-                                                                       </option>
-                                                                       <option value="Unit Status">
-                                                                           Unit Status
-                                                                       </option>
-                                                                       <option value="Loan Application">
-                                                                           Loan Application
-                                                                       </option>
-                                                                       <option value="Title and Other Registration Documents">
-                                                                           Title and Other Registration
-                                                                           Documents
-                                                                       </option>
-                                                                       <option value="Commissions">
-                                                                           Commissions
-                                                                       </option>
-                                                                       <option value="Other Concerns">
-                                                                           Other Concerns
-                                                                       </option>
-                                                                   </select>
-                                                               </div>
-                       
-                                                               <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                                   <IoIosArrowDown />
-                                                               </span>
-                                                           </div>
-                                                           <div className="flex relative">
-                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                                                   {" "}
-                                                                   Type
-                                                               </label>
-                                                               <div className="flex bg-red-900 justify-start w-full relative">
-                                                                   <label
-                                                                       htmlFor=""
-                                                                       className="w-full border-b-2"
-                                                                   >
-                                                                       {""}
-                                                                   </label>
-                                                                   <select
-                                                                       className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                                       value={type}
-                                                                       onChange={(e) =>
-                                                                           setType(e.target.value)
-                                                                       }
-                                                                   >
-                                                                       <option value="">
-                                                                           Select Type
-                                                                       </option>
-                                                                       <option value="Complaint">
-                                                                           Complaint
-                                                                       </option>
-                                                                       <option value="Request">
-                                                                           Request
-                                                                       </option>
-                                                                       <option value="Inquiry">
-                                                                           Inquiry
-                                                                       </option>
-                                                                       <option value="Suggestion or Recommendation">
-                                                                           Suggestion or Recommendation
-                                                                       </option>
-                                                                       <option value="No Type">
-                                                                           No Type
-                                                                       </option>
-                                                                   </select>
-                                                               </div>
-                       
-                                                               <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                                   <IoIosArrowDown />
-                                                               </span>
-                                                           </div>
-                                                           <div className="flex relative">
-                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                                                   {" "}
-                                                                   Status
-                                                               </label>
-                                                               <div className="flex bg-red-900 justify-start w-full relative">
-                                                                   <label
-                                                                       htmlFor=""
-                                                                       className="w-full border-b-2"
-                                                                   >
-                                                                       {""}
-                                                                   </label>
-                                                                   <select
-                                                                       className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                                       value={status}
-                                                                       onChange={(e) =>
-                                                                           setStatus(e.target.value)
-                                                                       }
-                                                                   >
-                                                                       <option value=" ">
-                                                                           Select Status
-                                                                       </option>
-                                                                       <option value="Resolved">
-                                                                           Resolved
-                                                                       </option>
-                                                                       <option value="unresolved">
-                                                                           Unresolved
-                                                                       </option>
-                                                                       <option value="Closed">
-                                                                           Closed
-                                                                       </option>
-                                                                   </select>
-                                                               </div>
-                       
-                                                               <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                                   <IoIosArrowDown />
-                                                               </span>
-                                                           </div>
-                       
-                                                           <div className="flex relative">
-                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                                                   {" "}
-                                                                   Channel
-                                                               </label>
-                                                               <div className="flex bg-red-900 justify-start w-full relative">
-                                                                   <label
-                                                                       htmlFor=""
-                                                                       className="w-full border-b-2"
-                                                                   >
-                                                                       {""}
-                                                                   </label>
-                                                                   <select
-                                                                       className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                                       value={channels}
-                                                                       onChange={(e) =>
-                                                                           setChannels(e.target.value)
-                                                                       }
-                                                                   >
-                                                                       <option value="">
-                                                                           {" "}
-                                                                           Select Channel
-                                                                       </option>
-                                                                       <option value="Email">
-                                                                           Email
-                                                                       </option>
-                                                                       <option value="Call">
-                                                                           Call
-                                                                       </option>
-                                                                       <option value="Walk in">
-                                                                           Walk-in
-                                                                       </option>
-                                                                       <option value="Website">
-                                                                           Website
-                                                                       </option>
-                                                                       <option value="Social media">
-                                                                           Social Media
-                                                                       </option>
-                                                                       <option value="Branch Tablet">
-                                                                           Branch Table
-                                                                       </option>
-                                                                       <option value="Internal Endorsement">
-                                                                           Internal Endorsement
-                                                                       </option>
-                                                                       <option value="No Channel">
-                                                                           No Channel
-                                                                       </option>
-                                                                   </select>
-                                                               </div>
-                       
-                                                               <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                                   <IoIosArrowDown />
-                                                               </span>
-                                                           </div>
-                                                           <div className="flex relative">
-                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                                                   {" "}
-                                                                   Department
-                                                               </label>
-                                                               <div className="flex bg-red-900 justify-start w-full relative">
-                                                                   <label
-                                                                       htmlFor=""
-                                                                       className="w-full border-b-2"
-                                                                   >
-                                                                       {""}
-                                                                   </label>
-                                                                   <select
-                                                                       className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                                       value={departments}
-                                                                       onChange={(e) =>
-                                                                           setDepartments(
-                                                                               e.target.value
-                                                                           )
-                                                                       }
-                                                                   >
-                                                                       <option value="">
-                                                                           {" "}
-                                                                           Select Department
-                                                                       </option>
-                                                                       {[
-                                                                           ...new Set(
-                                                                               allEmployees
-                                                                                   .map(
-                                                                                       (item) =>
-                                                                                           item.department
-                                                                                   )
-                                                                                   .filter(
-                                                                                       (department) =>
-                                                                                           department !==
-                                                                                           null &&
-                                                                                           department !==
-                                                                                           undefined &&
-                                                                                           department !==
-                                                                                           "NULL"
-                                                                                   )
-                                                                           ),
-                                                                       ]
-                                                                           .sort((a, b) =>
-                                                                               a.localeCompare(b)
-                                                                           )
-                                                                           .map(
-                                                                               (department, index) => (
-                                                                                   <option
-                                                                                       key={index}
-                                                                                       value={
-                                                                                           department
-                                                                                       }
-                                                                                   >
-                                                                                       {department}
-                                                                                   </option>
-                                                                               )
-                                                                           )}
-                                                                       <option value="Unassigned">
-                                                                       {" "}
-                                                                       Unassigned
-                                                                       </option>
-                                                                   </select>
-                                                               </div>
-                                                               <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                                   <IoIosArrowDown />
-                                                               </span>
-                                                           </div>
-                                                           <div className="flex relative">
-                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                                                   {" "}
-                                                                   Property
-                                                               </label>
-                                                               <div className="fle justify-start w-full relative">
-                                                                   <label
-                                                                       htmlFor=""
-                                                                       className="w-full border-b-2"
-                                                                   >
-                                                                       {""}
-                                                                   </label>
-                                                                   <select
-                                                                       className="w-full border-b-1 outline-none appearance-none text-sm px-[8px]"
-                                                                       onChange={handleSelectProperty}
-                                                                       value={selectedProperty}
-                                                                   >
-                                                                       <option value="">
-                                                                           Select Property
-                                                                       </option>
-                                                                       {formattedPropertyNames.map(
-                                                                           (item, index) => {
-                                                                               return (
-                                                                                   <option
-                                                                                       key={index}
-                                                                                       value={item}
-                                                                                   >
-                                                                                       {item}
-                                                                                   </option>
-                                                                               );
-                                                                           }
-                                                                       )}
-                                                                   </select>
-                                                               </div>
-                                                               <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                                   <IoIosArrowDown />
-                                                               </span>
-                                                           </div>
-                                                           <div className="flex">
-                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                                                   {" "}
-                                                                   Email
-                                                               </label>
-                                                               <input
-                                                                   type="text"
-                                                                   value={email}
-                                                                   onChange={(e) =>
-                                                                       setEmail(e.target.value)
-                                                                   }
-                                                                   className="w-full  border-b-1 outline-none text-sm px-[8px]"
-                                                               />
-                                                           </div>
-                                                           <div className="flex">
-                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                                                   {" "}
-                                                                   Ticket
-                                                               </label>
-                                                               <input
-                                                                   type="text"
-                                                                   value={ticket}
-                                                                   onChange={(e) =>
-                                                                       setTicket(e.target.value)
-                                                                   }
-                                                                   className="w-full  border-b-1 outline-none text-sm px-[8px]"
-                                                               />
-                                                           </div>
-                                                           <div className="flex gap-3">
-                                                               <div className="flex">
-                                                                   <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
-                                                                       Date
-                                                                   </label>
-                                                                   <div className="flex gap-[15px]">
-                                                                       <div className="flex">
-                                                                           <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-max pr-[10px]">
-                                                                               From
-                                                                           </label>
-                                                                           <div className="relative">
-                                                                               <DatePicker
-                                                                                   selected={startDate}
-                                                                                   onChange={(date) => {
-                                                                                       setStartDate(date);
-                                                                                       setSelectedYear("");
-                                                                                       setSelectedMonth("");
-                                                                                   }}
-                                                                                   onFocus={() => {
-                                                                                       setSelectedYear("");
-                                                                                       setSelectedMonth("");
-                                                                                   }}
-                                                                                   className="border-b-1 outline-none w-[180px] text-sm px-[8px]"
-                                                                                   calendarClassName="custom-calendar"
-                                                                                   
-                                                                               />
-                       
-                                                                               <img
-                                                                                   src={DateLogo}
-                                                                                   alt="date"
-                                                                                   className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
-                                                                               />
-                                                                           </div>
-                                                                       </div>
-                                                                       <div className="flex">
-                                                                           <label className="flex justify-end items-end text-custom-bluegreen text-[12px] w-max px-[10px]">
-                                                                               To
-                                                                           </label>
-                                                                           <div className="relative">
-                                                                               <DatePicker
-                                                                                   selected={endDate}
-                                                                                   onChange={(date) => {
-                                                                                       setEndDate(date);
-                                                                                       setSelectedYear("");
-                                                                                       setSelectedMonth("");
-                                                                                   }}
-                                                                                   onFocus={() => {
-                                                                                       setSelectedYear("");
-                                                                                       setSelectedMonth("");
-                                                                                   }}
-                                                                                   className="border-b-1 outline-none w-full text-sm px-[8px]"
-                                                                                   calendarClassName="custom-calendar"
-                                                                                   minDate={startDate}
-                                                                               />
-                       
-                                                                               <img
-                                                                                   src={DateLogo}
-                                                                                   alt="date"
-                                                                                   className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
-                                                                               />
-                                                                           </div>
-                                                                       </div>
-                                                                   </div>
-                                                               </div>
-                                                           </div>
-                                                           <div className="flex gap-3">
-                                                               <div className="flex">
-                                                                   <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
-                                                                       Year
-                                                                   </label>
-                                                                   <div className="relative w-[146px]">
-                                                                       <select
-                                                                           className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                                           value={selectedYear}
-                                                                           onChange={(e) => {
-                                                                               setSelectedYear(e.target.value);
-                                                                               setStartDate(null);
-                                                                               setEndDate(null);
-                                                                           }}
-                                                                       >
-                                                                           <option value="">
-                                                                               {" "}
-                                                                               Select Year
-                                                                           </option>
-                                                                           {fullYear &&
-                                                                               fullYear.map(
-                                                                                   (item, index) => (
-                                                                                       <option
-                                                                                           key={index}
-                                                                                           value={
-                                                                                               item.year
-                                                                                           }
-                                                                                       >
-                                                                                           {" "}
-                                                                                           {item.year}
-                                                                                       </option>
-                                                                                   )
-                                                                               )}
-                                                                       </select>
-                                                                       <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                                           <IoIosArrowDown />
-                                                                       </span>
-                                                                   </div>
-                                                               </div>
-                                                               <div className="flex relative ">
-                                                                   <label className="flex justify-start items-end text-custom-bluegreen text-[12px] px-[15px]">
-                                                                       {" "}
-                                                                       Month
-                                                                   </label>
-                                                                   <select
-                                                                       className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
-                                                                       onChange={(e) => {
-                                                                           setSelectedMonth(e.target.value);
-                                                                           setStartDate(null);
-                                                                           setEndDate(null);
-                                                                       }}
-                                                                       value={selectedMonth}
-                                                                   >
-                                                                       <option value="">
-                                                                           {" "}
-                                                                           Select Month
-                                                                       </option>
-                                                                       {Object.entries(monthNames)
-                                                                           .sort(
-                                                                               ([keyA], [keyB]) =>
-                                                                                   keyA - keyB
-                                                                           )
-                                                                           .map(([key, name]) => (
-                                                                               <option
-                                                                                   key={key}
-                                                                                   value={key}
-                                                                               >
-                                                                                   {name}
-                                                                               </option>
-                                                                           ))}
-                                                                   </select>
-                                                                   <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                                       <IoIosArrowDown />
-                                                                   </span>
-                                                               </div>
-                                                           </div>
-                                                           <div className="mt-5 flex gap-5">
-                                                               <input
-                                                                   type="checkbox"
-                                                                   checked={hasAttachments}
-                                                                   onChange={handleCheckboxChange}
-                                                               />
-                                                               <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                                                   {" "}
-                                                                   Has Attachments
-                                                               </label>
-                                                           </div>
-                                                           <div className="mt-3 flex justify-end">
-                                                               <button
-                                                                   className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
-                                                                   onClick={handleSearch}
-                                                               >
-                                                                   Search
-                                                               </button>
-                                                           </div>
-                                                       </div>
-                                                   </div>
-                                               )}
+                        {isFilterVisible && (
+                            <div
+                                ref={filterBoxRef}
+                                className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[604px]"
+                            >
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Name
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={name}
+                                            onChange={(e) =>
+                                                setName(e.target.value)
+                                            }
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
+                                        />
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Category
+                                        </label>
+
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={category}
+                                                onChange={(e) =>
+                                                    setCategory(e.target.value)
+                                                }
+                                            >
+                                                <option value=" ">
+                                                    Select Category
+                                                </option>
+                                                <option value="Reservation Documents">
+                                                    Reservation Documents
+                                                </option>
+                                                <option value="Payment Issues">
+                                                    Payment Issues
+                                                </option>
+                                                <option value="SOA/ Buyer's Ledger">
+                                                    SOA/ Buyer's Ledger
+                                                </option>
+                                                <option value="Turn Over Status">
+                                                    Turn Over Status
+                                                </option>
+                                                <option value="Unit Status">
+                                                    Unit Status
+                                                </option>
+                                                <option value="Loan Application">
+                                                    Loan Application
+                                                </option>
+                                                <option value="Title and Other Registration Documents">
+                                                    Title and Other Registration
+                                                    Documents
+                                                </option>
+                                                <option value="Commissions">
+                                                    Commissions
+                                                </option>
+                                                <option value="Other Concerns">
+                                                    Other Concerns
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Type
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={type}
+                                                onChange={(e) =>
+                                                    setType(e.target.value)
+                                                }
+                                            >
+                                                <option value="">
+                                                    Select Type
+                                                </option>
+                                                <option value="Complaint">
+                                                    Complaint
+                                                </option>
+                                                <option value="Request">
+                                                    Request
+                                                </option>
+                                                <option value="Inquiry">
+                                                    Inquiry
+                                                </option>
+                                                <option value="Suggestion or Recommendation">
+                                                    Suggestion or Recommendation
+                                                </option>
+                                                <option value="No Type">
+                                                    No Type
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Status
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={status}
+                                                onChange={(e) =>
+                                                    setStatus(e.target.value)
+                                                }
+                                            >
+                                                <option value=" ">
+                                                    Select Status
+                                                </option>
+                                                <option value="Resolved">
+                                                    Resolved
+                                                </option>
+                                                <option value="unresolved">
+                                                    Unresolved
+                                                </option>
+                                                <option value="Closed">
+                                                    Closed
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Channel
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={channels}
+                                                onChange={(e) =>
+                                                    setChannels(e.target.value)
+                                                }
+                                            >
+                                                <option value="">
+                                                    {" "}
+                                                    Select Channel
+                                                </option>
+                                                <option value="Email">
+                                                    Email
+                                                </option>
+                                                <option value="Call">
+                                                    Call
+                                                </option>
+                                                <option value="Walk in">
+                                                    Walk-in
+                                                </option>
+                                                <option value="Website">
+                                                    Website
+                                                </option>
+                                                <option value="Social media">
+                                                    Social Media
+                                                </option>
+                                                <option value="Branch Tablet">
+                                                    Branch Table
+                                                </option>
+                                                <option value="Internal Endorsement">
+                                                    Internal Endorsement
+                                                </option>
+                                                <option value="No Channel">
+                                                    No Channel
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Department
+                                        </label>
+                                        <div className="flex bg-red-900 justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                value={departments}
+                                                onChange={(e) =>
+                                                    setDepartments(
+                                                        e.target.value
+                                                    )
+                                                }
+                                            >
+                                                <option value="">
+                                                    {" "}
+                                                    Select Department
+                                                </option>
+                                                {[
+                                                    ...new Set(
+                                                        allEmployees
+                                                            .map(
+                                                                (item) =>
+                                                                    item.department
+                                                            )
+                                                            .filter(
+                                                                (department) =>
+                                                                    department !==
+                                                                        null &&
+                                                                    department !==
+                                                                        undefined &&
+                                                                    department !==
+                                                                        "NULL"
+                                                            )
+                                                    ),
+                                                ]
+                                                    .sort((a, b) =>
+                                                        a.localeCompare(b)
+                                                    )
+                                                    .map(
+                                                        (department, index) => (
+                                                            <option
+                                                                key={index}
+                                                                value={
+                                                                    department
+                                                                }
+                                                            >
+                                                                {department}
+                                                            </option>
+                                                        )
+                                                    )}
+                                                <option value="Unassigned">
+                                                    {" "}
+                                                    Unassigned
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Property
+                                        </label>
+                                        <div className="fle justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                onChange={handleSelectProperty}
+                                                value={selectedProperty}
+                                            >
+                                                <option value="">
+                                                    Select Property
+                                                </option>
+                                                {formattedPropertyNames.map(
+                                                    (item, index) => {
+                                                        return (
+                                                            <option
+                                                                key={index}
+                                                                value={item}
+                                                            >
+                                                                {item}
+                                                            </option>
+                                                        );
+                                                    }
+                                                )}
+                                            </select>
+                                        </div>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Email
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={email}
+                                            onChange={(e) =>
+                                                setEmail(e.target.value)
+                                            }
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
+                                        />
+                                    </div>
+                                    <div className="flex">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Ticket
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={ticket}
+                                            onChange={(e) =>
+                                                setTicket(e.target.value)
+                                            }
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
+                                        />
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <div className="flex">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
+                                                Date
+                                            </label>
+                                            <div className="flex gap-[15px]">
+                                                <div className="flex">
+                                                    <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-max pr-[10px]">
+                                                        From
+                                                    </label>
+                                                    <div className="relative">
+                                                        <DatePicker
+                                                            selected={startDate}
+                                                            onChange={(
+                                                                date
+                                                            ) => {
+                                                                setStartDate(
+                                                                    date
+                                                                );
+                                                                setSelectedYear(
+                                                                    ""
+                                                                );
+                                                                setSelectedMonth(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                            onFocus={() => {
+                                                                setSelectedYear(
+                                                                    ""
+                                                                );
+                                                                setSelectedMonth(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                            className="border-b-1 outline-none w-[180px] text-sm px-[8px]"
+                                                            calendarClassName="custom-calendar"
+                                                        />
+
+                                                        <img
+                                                            src={DateLogo}
+                                                            alt="date"
+                                                            className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex">
+                                                    <label className="flex justify-end items-end text-custom-bluegreen text-[12px] w-max px-[10px]">
+                                                        To
+                                                    </label>
+                                                    <div className="relative">
+                                                        <DatePicker
+                                                            selected={endDate}
+                                                            onChange={(
+                                                                date
+                                                            ) => {
+                                                                setEndDate(
+                                                                    date
+                                                                );
+                                                                setSelectedYear(
+                                                                    ""
+                                                                );
+                                                                setSelectedMonth(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                            onFocus={() => {
+                                                                setSelectedYear(
+                                                                    ""
+                                                                );
+                                                                setSelectedMonth(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                            className="border-b-1 outline-none w-full text-sm px-[8px]"
+                                                            calendarClassName="custom-calendar"
+                                                            minDate={startDate}
+                                                        />
+
+                                                        <img
+                                                            src={DateLogo}
+                                                            alt="date"
+                                                            className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <div className="flex">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
+                                                Year
+                                            </label>
+                                            <div className="relative w-[146px]">
+                                                <select
+                                                    className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
+                                                    value={selectedYear}
+                                                    onChange={(e) => {
+                                                        setSelectedYear(
+                                                            e.target.value
+                                                        );
+                                                        setStartDate(null);
+                                                        setEndDate(null);
+                                                    }}
+                                                >
+                                                    <option value="">
+                                                        {" "}
+                                                        Select Year
+                                                    </option>
+                                                    {fullYear &&
+                                                        fullYear.map(
+                                                            (item, index) => (
+                                                                <option
+                                                                    key={index}
+                                                                    value={
+                                                                        item.year
+                                                                    }
+                                                                >
+                                                                    {" "}
+                                                                    {item.year}
+                                                                </option>
+                                                            )
+                                                        )}
+                                                </select>
+                                                <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                    <IoIosArrowDown />
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="flex relative ">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] px-[15px]">
+                                                {" "}
+                                                Month
+                                            </label>
+                                            <select
+                                                className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                onChange={(e) => {
+                                                    setSelectedMonth(
+                                                        e.target.value
+                                                    );
+                                                    setStartDate(null);
+                                                    setEndDate(null);
+                                                }}
+                                                value={selectedMonth}
+                                            >
+                                                <option value="">
+                                                    {" "}
+                                                    Select Month
+                                                </option>
+                                                {Object.entries(monthNames)
+                                                    .sort(
+                                                        ([keyA], [keyB]) =>
+                                                            keyA - keyB
+                                                    )
+                                                    .map(([key, name]) => (
+                                                        <option
+                                                            key={key}
+                                                            value={key}
+                                                        >
+                                                            {name}
+                                                        </option>
+                                                    ))}
+                                            </select>
+                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                                <IoIosArrowDown />
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="mt-5 flex gap-5">
+                                        <input
+                                            type="checkbox"
+                                            checked={hasAttachments}
+                                            onChange={handleCheckboxChange}
+                                        />
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Has Attachments
+                                        </label>
+                                    </div>
+                                    <div className="mt-3 flex justify-end">
+                                        <button
+                                            className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
+                                            onClick={handleSearch}
+                                        >
+                                            Search
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                     </div>
                     <div className="p-[16px] shrink-0 bg-white rounded-[10px] shadow-custom7 flex flex-col flex-grow min-h-screen">
                         {" "}
@@ -1124,8 +1153,10 @@ const InquiryThread = () => {
                         <div className="p-[10px]">
                             {/* Container for chat input and attached files */}
                             {/* IF userLoggedInDepartment is in  ALLOWED_DEPARTMENTS then render/show the textarea for reply */}
-                            {dataConcern?.status === "unresolved" && ALLOWED_DEPARTMENT.includes(userLoggedInDepartment)
-                                && (
+                            {dataConcern?.status === "unresolved" &&
+                                ALLOWED_DEPARTMENT.includes(
+                                    userLoggedInDepartment
+                                ) && (
                                     <div className="relative">
                                         <div className="gradient-btn2 rounded-[12px] p-[2px] relative ">
                                             <div className="bg-white p-[10px] rounded-[10px]">
@@ -1152,12 +1183,12 @@ const InquiryThread = () => {
                                                                     );
                                                                 const truncatedName =
                                                                     baseName.length >
-                                                                        30
+                                                                    30
                                                                         ? baseName.slice(
-                                                                            0,
-                                                                            30
-                                                                        ) +
-                                                                        "..."
+                                                                              0,
+                                                                              30
+                                                                          ) +
+                                                                          "..."
                                                                         : baseName;
                                                                 return (
                                                                     <div
@@ -1243,11 +1274,12 @@ const InquiryThread = () => {
                                                                 loading
                                                             }
                                                             className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${loading ||
-                                                                    !chatMessage.trim()
-                                                                    ? "bg-gray-400 cursor-not-allowed"
-                                                                    : "gradient-background3 hover:shadow-custom4"
-                                                                } 
+                                                        ${
+                                                            loading ||
+                                                            !chatMessage.trim()
+                                                                ? "bg-gray-400 cursor-not-allowed"
+                                                                : "gradient-background3 hover:shadow-custom4"
+                                                        } 
                                                     `}
                                                         >
                                                             {loading ? (
@@ -1346,64 +1378,64 @@ const InquiryThread = () => {
                                                                 </div>
                                                                 {attachedFiles.length >
                                                                     0 && (
-                                                                        <div className="mb-2 ">
-                                                                            {attachedFiles.map(
-                                                                                (
-                                                                                    file,
-                                                                                    index
-                                                                                ) => {
-                                                                                    const fileName =
-                                                                                        file.name;
-                                                                                    const fileExtension =
-                                                                                        fileName.slice(
-                                                                                            fileName.lastIndexOf(
-                                                                                                "."
-                                                                                            )
-                                                                                        );
-                                                                                    const baseName =
-                                                                                        fileName.slice(
-                                                                                            0,
-                                                                                            fileName.lastIndexOf(
-                                                                                                "."
-                                                                                            )
-                                                                                        );
-                                                                                    const truncatedName =
-                                                                                        baseName.length >
-                                                                                            30
-                                                                                            ? baseName.slice(
-                                                                                                0,
-                                                                                                30
-                                                                                            ) +
-                                                                                            "..."
-                                                                                            : baseName;
-                                                                                    return (
-                                                                                        <div
-                                                                                            key={
-                                                                                                index
-                                                                                            }
-                                                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                                                        >
-                                                                                            <span className="text-sm text-gray-700">
-                                                                                                {truncatedName +
-                                                                                                    fileExtension}
-                                                                                            </span>
-                                                                                            <button
-                                                                                                type="button"
-                                                                                                onClick={() =>
-                                                                                                    removeFile(
-                                                                                                        file.name
-                                                                                                    )
-                                                                                                }
-                                                                                                className="text-red-500"
-                                                                                            >
-                                                                                                Remove
-                                                                                            </button>
-                                                                                        </div>
+                                                                    <div className="mb-2 ">
+                                                                        {attachedFiles.map(
+                                                                            (
+                                                                                file,
+                                                                                index
+                                                                            ) => {
+                                                                                const fileName =
+                                                                                    file.name;
+                                                                                const fileExtension =
+                                                                                    fileName.slice(
+                                                                                        fileName.lastIndexOf(
+                                                                                            "."
+                                                                                        )
                                                                                     );
-                                                                                }
-                                                                            )}
-                                                                        </div>
-                                                                    )}
+                                                                                const baseName =
+                                                                                    fileName.slice(
+                                                                                        0,
+                                                                                        fileName.lastIndexOf(
+                                                                                            "."
+                                                                                        )
+                                                                                    );
+                                                                                const truncatedName =
+                                                                                    baseName.length >
+                                                                                    30
+                                                                                        ? baseName.slice(
+                                                                                              0,
+                                                                                              30
+                                                                                          ) +
+                                                                                          "..."
+                                                                                        : baseName;
+                                                                                return (
+                                                                                    <div
+                                                                                        key={
+                                                                                            index
+                                                                                        }
+                                                                                        className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
+                                                                                    >
+                                                                                        <span className="text-sm text-gray-700">
+                                                                                            {truncatedName +
+                                                                                                fileExtension}
+                                                                                        </span>
+                                                                                        <button
+                                                                                            type="button"
+                                                                                            onClick={() =>
+                                                                                                removeFile(
+                                                                                                    file.name
+                                                                                                )
+                                                                                            }
+                                                                                            className="text-red-500"
+                                                                                        >
+                                                                                            Remove
+                                                                                        </button>
+                                                                                    </div>
+                                                                                );
+                                                                            }
+                                                                        )}
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     )}
@@ -1415,16 +1447,21 @@ const InquiryThread = () => {
                                                 Note: This message will be sent
                                                 to{" "}
                                                 <span className="font-semibold">
-                                                    {/* capitalizeWords() */
-                                                        `${dataConcern?.buyer_firstname ||
-                                                        ""
-                                                        } ${dataConcern?.buyer_middlename ||
-                                                        ""
-                                                        } ${dataConcern?.buyer_lastname ||
-                                                        ""
+                                                    {
+                                                        /* capitalizeWords() */
+                                                        `${
+                                                            dataConcern?.buyer_firstname ||
+                                                            ""
+                                                        } ${
+                                                            dataConcern?.buyer_middlename ||
+                                                            ""
+                                                        } ${
+                                                            dataConcern?.buyer_lastname ||
+                                                            ""
                                                         }`
                                                     }{" "}
-                                                    {/* capitalizeWords() */
+                                                    {
+                                                        /* capitalizeWords() */
                                                         dataConcern?.suffix_name
                                                     }
                                                 </span>
@@ -1436,26 +1473,30 @@ const InquiryThread = () => {
                                 )}
 
                             {/*Render if the logged in user department is not CRS or other critical departments*/}
-                            {!ALLOWED_DEPARTMENT.includes(userLoggedInDepartment) && (
-                                    <div className="relative py-2">
-                                        <div className="text-[11px] text-[#B54D4D]">
-                                            <p>
-                                                <span className="font-semibold">
-                                                    Note: Only CRS, Turnovers, Accounts Management, Sales, and Registration & Documentation teams can reply
-                                                    directly to inquiries, use the
-                                                    comment section for internal
-                                                    communication.
-                                                </span>
-                                            </p>
-                                        </div>
+                            {!ALLOWED_DEPARTMENT.includes(
+                                userLoggedInDepartment
+                            ) && (
+                                <div className="relative py-2">
+                                    <div className="text-[11px] text-[#B54D4D]">
+                                        <p>
+                                            <span className="font-semibold">
+                                                Note: Only CRS, Turnovers,
+                                                Accounts Management, Sales, and
+                                                Registration & Documentation
+                                                teams can reply directly to
+                                                inquiries, use the comment
+                                                section for internal
+                                                communication.
+                                            </span>
+                                        </p>
                                     </div>
-                                )}
-
+                                </div>
+                            )}
 
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                             <div className="w-full flex justify-end gap-[13px] items-center">
-                  
-                                {(dataConcern?.status === "Resolved" || dataConcern?.status === "Closed") && (
+                                {(dataConcern?.status === "Resolved" ||
+                                    dataConcern?.status === "Closed") && (
                                     <span
                                         className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
                                         onClick={handleOpenAddInfoModal}
@@ -1495,21 +1536,17 @@ const InquiryThread = () => {
                                         userLoggedInEmail
                                     ) && (
                                         <div
-                                            onClick={
-                                                handleOpenCloseModal
-                                            }
+                                            onClick={handleOpenCloseModal}
                                             className="flex justify-start w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
                                         >
                                             Mark as closed
                                         </div>
                                     )
                                 )}
-
-
                             </div>
                             <div className="">
                                 <div className="">
-                                    {combineThreadMessages.length > 0 ?
+                                    {combineThreadMessages.length > 0 ? (
                                         combineThreadMessages.map(
                                             (item, index) =>
                                                 item.buyer_email ? (
@@ -1526,17 +1563,30 @@ const InquiryThread = () => {
                                                         key={index}
                                                     />
                                                 )
-                                        ) : (
-                                            <div className="flex flex-col gap-[20px] py-[20px] px-[30px]">
-                                                {[...Array(5)].map((_, idx) => (
-                                                    <div className="flex flex-col gap-[10px]" key={idx}>
-                                                        <Skeleton height={20} width="80%" />
-                                                        <Skeleton height={20} width="80%" />
-                                                        <Skeleton height={50} width="100%" />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        )}
+                                        )
+                                    ) : (
+                                        <div className="flex flex-col gap-[20px] py-[20px] px-[30px]">
+                                            {[...Array(5)].map((_, idx) => (
+                                                <div
+                                                    className="flex flex-col gap-[10px]"
+                                                    key={idx}
+                                                >
+                                                    <Skeleton
+                                                        height={20}
+                                                        width="80%"
+                                                    />
+                                                    <Skeleton
+                                                        height={20}
+                                                        width="80%"
+                                                    />
+                                                    <Skeleton
+                                                        height={50}
+                                                        width="100%"
+                                                    />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                             {/* <div className="mt-2 mb-3 relative">

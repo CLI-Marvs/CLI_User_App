@@ -1924,7 +1924,7 @@ class ConcernController extends Controller
             $this->inquiryResolveLogs($request, 'resolve');
 
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
-
+            
             SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'resolve', $modifiedTicketId);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -2009,7 +2009,7 @@ class ConcernController extends Controller
     {
         $user = $request->user();
 
-        $employees = Employee::select('firstname', 'employee_email', 'department', 'lastname')->get();
+        $employees = Employee::select('id','firstname', 'employee_email', 'department', 'lastname')->get();
         return response()->json($employees);
     }
 
@@ -2776,7 +2776,6 @@ class ConcernController extends Controller
                         $messagesRef->buyer_email = $buyer['buyer_email'];
                         $messagesRef->attachment = json_encode($fileLinks);
                         $messagesRef->created_at = Carbon::parse(now())->setTimezone('Asia/Manila');
-                        $messagesRef->buyer_firstname = $existingTicket->buyer_name;
                         $messagesRef->buyer_name = $existingTicket->buyer_name;
                         $messagesRef->save();
                     }

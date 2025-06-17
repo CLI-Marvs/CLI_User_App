@@ -2,163 +2,189 @@
 
 namespace App\Http\Controllers;
 
-use Log;
 use Exception;
-use App\Models\Unit;
-use App\Exports\ExcelExport;
-use App\Imports\ExcelImport;
-use App\Jobs\ImportUnitsJob;
 use Illuminate\Http\Request;
-use PhpParser\Node\Stmt\TryCatch;
+use App\Services\UnitService;
 use App\Http\Controllers\Controller;
-use Maatwebsite\Excel\Facades\Excel;
-use Google\Cloud\Storage\StorageClient;
+use App\Http\Requests\StoreUnitRequest;
+use App\Http\Requests\UpdateStoreRequest;
+use App\Rules\MaliciousDetectionRule;
+use App\Services\FileScanService;
 
 class UnitController extends Controller
 {
     protected $uploadedFile;
+    protected $service;
+    protected $scannerService;
 
+    public function __construct(UnitService $service, FileScanService $fileScanService)
+    {
+        $this->service = $service;
+        $this->scannerService = $fileScanService;
+    }
 
     /**
-     * Upload the units from excel file
+     * Store a newly created resource in storage from the Excel file.
+     *
+     * @param StoreUnitRequest $request The validated request containing unit data.
+     * @return \Illuminate\Http\JsonResponse A JSON response indicating success or failure.
      */
-    public function uploadUnits(Request $request)
+    public function store(StoreUnitRequest $request)
     {
-        // Get from request body
-        $file = $request->file('file');
-        $headers = $request->input('headers');
-        $propertyId = $request->input('propertyId');
-        $towerPhaseId = $request->input('towerPhaseId');
-        if ($file && $headers) {
-            try {
-                // Validate the file input
-                $request->validate([
-                    'file' => 'required|mimes:xlsx,xls,csv|max:5120',
-                ]);
+        $validatedData = $request->validated();
+        $validatedData['excel_id'] = $validatedData['excel_id'] ?? null;
+        $excelDataRows = $validatedData['excelDataRows'];
 
-                // Extract the rowHeader values
-                $decodedHeaders = array_map(function ($header) {
-                    return json_decode($header, true); // Decode each JSON string into an array
-                }, $headers);
-                $actualHeaders = array_column($decodedHeaders, 'rowHeader');
+        //Each row has all columns (including `null` values)
+        $normalizedRows = array_map(function ($row) {
+            return array_replace(array_fill(0, 8, null), $row);
+        }, $excelDataRows);
 
-                $import = new ExcelImport($actualHeaders, $propertyId, $towerPhaseId);
-                Excel::import($import, $file);
-
-                return response()->json([
-                    'message' => 'File uploaded successfully and data returned.',
-                ], 200);
-            } catch (\Exception $e) {
-                return response()->json([
-                    'message' => 'Error uploading file.',
-                    'error' => $e->getMessage(),
-                ], 500);
-            }
+        // Update the validated data
+        $validatedData['excelDataRows'] = $normalizedRows;
+        try {
+            $result = $this->service->storeUnitFromExcel($validatedData);
+            return response()->json([
+                'message' => $result['message'],
+                'excel_id' => $result['excel_id'],
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $e->getMessage(),
+            ], 422);
         }
     }
 
-
-    //Upload the excel file to google cloud
-    public function uploadToGCS($files)
-    {
-        $fileLinks = []; // Ensure $files is an array, even if a single file is passed
-        if (!is_array($files)) {
-            $files = [$files];
-        }
-
-        if ($files) {
-            $keyJson = config('services.gcs.key_json');  //Access from services.php
-            $keyArray = json_decode($keyJson, true); // Decode the JSON string to an array
-            $storage = new StorageClient([
-                'keyFile' => $keyArray
-            ]);
-            $bucket = $storage->bucket('super-app-storage');
-            foreach ($files as $file) {
-                $fileName = uniqid() . '.' . $file->getClientOriginalExtension();
-                $filePath = 'units/' . $fileName;
-
-                $bucket->upload(
-                    fopen($file->getPathname(), 'r'),
-                    ['name' => $filePath]
-                );
-
-                $fileLink = $bucket->object($filePath)->signedUrl(new \DateTime('+10 years'));
-
-                $fileLinks[] = $fileLink;
-            }
-        }
-        return $fileLinks;
-    }
+    /*
+     * Custom functions
+     */
 
     /**
      * Returns the count of distinct floors for a given tower phase.
      *
      * @param int $towerPhaseId The ID of the tower phase.
+     * @param string $excelId The ID of the Excel file.
      * @return \Illuminate\Http\JsonResponse A JSON response containing the count of distinct floors and the floors themselves.
      */
-    public function countFloors(int $towerPhaseId)
+    public function countFloors(int $towerPhaseId, string $excelId)
     {
-        // Retrieve distinct floors for the given tower phase
-        $distinctFloors = Unit::where('tower_phase_id', $towerPhaseId)
-            ->distinct('floor')
-            ->pluck('floor');
-
-        //Count the number of distinct floors
-        $count = $distinctFloors->count();
+        $distinctFloors = $this->service->countFloor($towerPhaseId, $excelId);
         return response()->json([
-            'count' => $count,
-            'floors' => $distinctFloors,
-        ], 200);
+            'data' => $distinctFloors,
+        ]);
     }
 
     /**
-     * Retrieve units for a specific tower phase and floor.
+     * Get existing units for a specific tower phase.
      *
-     * @param Request $request The incoming HTTP request
-     * @return \Illuminate\Http\JsonResponse JSON response containing units or error message
+     * @param int $towerPhaseId The ID of the tower phase.
+     * @param string $excelId The ID of the Excel file.
+     * @param int $priceListMasterId The ID of the price list master.
+     * @return \Illuminate\Http\JsonResponse A JSON response containing the existing units.
      */
-    public function getUnits(Request $request)
+    public function getUnits(int $towerPhaseId, string $excelId, int $priceListMasterId)
     {
-        // Extract towerPhaseId and selectedFloor from the request body
-        $towerPhaseId = $request->input('towerPhaseId');
-        $selectedFloor = $request->input('selectedFloor');
+        $existingUnitsResponse = $this->service->getUnits($towerPhaseId, $excelId, $priceListMasterId);
 
+        return response()->json([
+            'data' => $existingUnitsResponse,
+        ]);
+    }
+
+    /**
+     * Add a new unit from the system/admin page.
+     *
+     * @param StoreUnitRequest $request The validated request containing unit details.
+     * @return \Illuminate\Http\JsonResponse A JSON response indicating success or failure.
+     */
+    public function storeUnit(StoreUnitRequest $request)
+    {
         try {
-            // Query the database for units matching the specified towerPhaseId and selectedFloor
-            $units = Unit::where('tower_phase_id', $towerPhaseId)
-                ->where('floor', $selectedFloor)
-                ->get();
-            // Return the found units as a JSON response
-            return response()->json($units);
-        } catch (Exception $e) {
+            $validatedData = $request->validated();
+            $result = $this->service->storeUnitDetails($validatedData);
+
             return response()->json([
-                'message' => 'Error getting the units.',
-                'error' => $e->getMessage(),
-            ], 500);
+                'message' => $result['message'],
+                'data' => $result['data'],
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $e->getMessage(),
+            ], 422);
         }
     }
 
-    //Add new units
-    public function addUnits(Request $request)
+    /**
+     * Save the computed unit pricing data.
+     *
+     * @param UpdateStoreRequest $request The validated request containing pricing data.
+     * @return \Illuminate\Http\JsonResponse A JSON response indicating success or failure.
+     */
+    public function saveComputedUnitPricingData(UpdateStoreRequest $request)
     {
-        // $towerPhaseId = $request->input('towerPhaseId');
-        // $selectedFloor = $request->input('selectedFloor');
-        // $units = $request->input('units');
-        // try {
-        //     // Loop through the units array and create a new Unit model for each item
-        //     foreach ($units as $unit) {
-        //         $unitModel = new Unit();
-        //         $unitModel->tower_phase_id = $towerPhaseId;
-        //         $unitModel->floor = $selectedFloor;
-        //         $unitModel->unit = $unit;
-        //         $unitModel->save();
+        try {
+            $validatedData = $request->validated();
+            $result = $this->service->saveComputedUnitPricingData($validatedData);
 
-        //     }
-        // } catch (\Exception $e) {
-        //     return response()->json([
-        //         'message' => 'Error getting the units.',
-        //         'error' => $e->getMessage(),
-        //     ], 500);
-        // }
+            return response()->json([
+                'message' => $result['message'],
+            ], 201);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $e->getMessage(),
+            ], 422);
+        }
+    }
+
+    /**
+     * Scan an uploaded file for malware.
+     *
+     * @param Request $request The request containing the uploaded file.
+     * @return \Illuminate\Http\JsonResponse A JSON response indicating whether the file is safe or malicious.
+     */
+    public function scanFile(Request $request)
+    {
+        try {
+            // Validate the file and scan it for malware
+            $request->validate([
+                'file' => ['required', 'file', 'max:5120'],
+            ]);
+            $file = $request->file('file');
+            
+            // Scan file before processing
+            $scanResults = $this->scannerService->scan($file);
+
+            if (!$scanResults['safe']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Malicious content detected in excel file',
+                    'threats' => $scanResults['threats']
+                ], 400);
+            }
+
+            // File is safe, proceed with normal upload process
+            // $path = $file->store('uploads');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'File uploaded successfully',
+                // 'path' => $path
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Handle validation errors (e.g., malicious file detected)
+            return response()->json([
+                'error' => 'Validation failed',
+                'messages' => $e->errors()['file'][0] ?? 'Invalid file',
+            ], 422);
+        } catch (Exception $e) {
+            // Handle unexpected errors
+            return response()->json([
+                'error' => 'An unexpected error occurred',
+                'messages' => $e->getMessage(),
+            ], 500);
+        }
     }
 }

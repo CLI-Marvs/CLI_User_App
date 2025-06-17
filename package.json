@@ -6,27 +6,42 @@
         "build": "vite build"
     },
     "devDependencies": {
+        "@eslint/js": "^9.23.0",
         "@vitejs/plugin-react": "^4.3.1",
         "autoprefixer": "^10.4.20",
         "axios": "^1.6.4",
+        "eslint": "^9.23.0",
+        "eslint-plugin-security": "^3.0.1",
         "laravel-echo": "^1.16.1",
         "laravel-vite-plugin": "^1.0",
         "postcss": "^8.4.40",
         "pusher-js": "^8.4.0-rc2",
         "tailwindcss": "^3.4.7",
-        "vite": "^5.0"
+        "vite": "^6.2.3"
     },
     "dependencies": {
         "@emotion/react": "^11.13.3",
         "@emotion/styled": "^11.13.0",
+        "@material-tailwind/react": "^2.1.9",
+        "@mescius/spread-sheets": "^18.0.3",
+        "@mescius/spread-sheets-charts": "^18.0.3",
+        "@mescius/spread-sheets-io": "^18.0.3",
+        "@mescius/spread-sheets-react": "^18.0.3",
+        "@mescius/spread-sheets-shapes": "^18.0.3",
         "@heroicons/react": "^2.2.0",
-        "@material-tailwind/react": "^2.1.10",
         "@mui/material": "^6.0.0",
+        "@react-google-maps/api": "^2.20.6",
+        "@tanstack/react-query": "^5.77.2",
+        "date-fns": "^4.1.0",
+        "exceljs": "^4.4.0",
+        "file-saver": "^2.0.5",
         "@mui/x-data-grid": "^8.1.0",
         "js-cookie": "^3.0.5",
         "lodash": "^4.17.21",
         "moment": "^2.30.1",
         "react": "^18.3.1",
+        "react-countup": "^6.5.3",
+        "react-date-range": "^2.0.1",
         "react-datepicker": "^7.3.0",
         "react-dom": "^18.3.1",
         "react-google-recaptcha": "^3.1.0",
@@ -35,8 +50,10 @@
         "react-paginate": "^8.2.0",
         "react-phone-input-2": "^2.15.1",
         "react-router-dom": "^6.26.0",
+        "react-spreadsheet": "^0.9.5",
         "react-toastify": "^10.0.6",
         "recharts": "^2.15.1",
-        "xlsx": "^0.18.5"
+        "scheduler": "^0.25.0",
+        "xlsx": "https://cdn.sheetjs.com/xlsx-latest/xlsx-latest.tgz"
     }
 }

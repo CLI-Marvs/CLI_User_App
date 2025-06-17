@@ -8,7 +8,7 @@ const EWallet = () => {
 
     return (
         <div className="w-full max-w-md mx-auto">
-            <div className={` transition-all duration-300`}>
+            <div className={` `}>
                 <button
                     onClick={() => setIsOpen(!isOpen)}
                     className={`flex justify-between items-center h-[45px] w-full border-b bg-white pl-[11px]`}

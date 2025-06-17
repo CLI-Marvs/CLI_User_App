@@ -1,29 +1,40 @@
 import React, { useRef, useEffect, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
-import apiService from "../../../../servicesApi/apiService";
-import { useStateContext } from "../../../../../context/contextprovider";
 import CircularProgress from "@mui/material/CircularProgress";
+import { useUnit } from "@/context/PropertyPricing/UnitContext";
+import { showToast } from "@/util/toastUtil";
+import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
+import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 
 const UploadUnitDetailsModal = ({
+    excelDataRows,
     uploadUnitModalRef,
     fileName,
     selectedExcelHeader,
-    fileSelected,
     handleFileChange,
+    onClose,
+    expectedHeaders,
+    ...props
 }) => {
-    
     //State
     const [formData, setFormData] = useState({});
-    const [loading, setLoading] = useState(false); 
     const newFileInputRef = useRef();
     const {
-        setTowerPhaseId,
+        uploadUnits,
         towerPhaseId,
-        propertyId,
-        setPropertyFloors,
+        isUploadingUnits,
+        fetchFloorCount,
+        excelId,
+        setFloors,
+        setUnits,
+        setExcelId,
         setFloorPremiumsAccordionOpen,
-        getPropertyFloors,
-    } = useStateContext();
+        setIsUploadingUnits,
+    } = useUnit();
+    const { setPricingData } = usePricing();
+    const { priceListMasterId } = usePriceListMaster();
+    const { propertyMasterId } = useProperty();
 
     //Hooks
     useEffect(() => {
@@ -37,100 +48,125 @@ const UploadUnitDetailsModal = ({
             }, {});
             setFormData(initialFormData);
         }
-    }, [selectedExcelHeader]); //Initialize formData once selectedExcelHeader is available
+    }, [selectedExcelHeader]);
 
     //Event hander
+    // Handle change in column selection
     const handleColumnChange = (newColumnIndex, rowHeader) => {
-        // console.log("newColumnIndex", newColumnIndex);
         setFormData((prevFormData) => ({
             ...prevFormData,
             [rowHeader]: {
                 ...prevFormData[rowHeader],
-                columnIndex: parseInt(newColumnIndex), // Update columnIndex for the selected rowHeader
+                columnIndex: parseInt(newColumnIndex),
             },
         }));
-    }; // Handle change in column selection
+    };
 
+    //Handle submit units from excel file
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!fileSelected || !propertyId || !towerPhaseId) {
-            alert(
-                "Please ensure a file is selected and all fields are filled."
-            );
-            return;
-        }
+
+        // Prevent multiple submissions while upload is in progress
+        if (isUploadingUnits) return;
+        setIsUploadingUnits(true);
+
         try {
-            setLoading(true);
-            const submittedHeader = Object.values(formData);
-            const form = new FormData();
-            submittedHeader.forEach((header) => {
-                form.append("headers[]", JSON.stringify(header)); // Convert each header object to a JSON string rowHeader
-            });
-            // Append the file if necessary
-            form.append("file", fileSelected);
-            form.append("towerPhaseId", towerPhaseId);
-            form.append("propertyId", propertyId);
+            const excelIdToSend = excelId || null;
 
-            const response = await apiService.post("upload-units", form, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
-
-            //setTowerPhaseId(towerPhaseId);
-            if (towerPhaseId) {
-                console.log(
-                    "towerPhaseId UploadUnitDetailsModal",
-                    towerPhaseId
-                );
-
-                // Fetch floors immediately after successful upload to reflect the floor premium
-                const floorsResponse = await getPropertyFloors(towerPhaseId);
-                // Update propertyFloors in the context
-                setPropertyFloors((prev) => ({
+            // Clear old data only if a new file is uploaded
+            if (excelIdToSend) {
+                setUnits([]);
+                setPricingData((prev) => ({
                     ...prev,
-                    [towerPhaseId]: floorsResponse,
+                    floorPremiums: {},
+                    additionalPremiums: [],
+                    reviewedByEmployees: [],
+                    approvedByEmployees: [],
                 }));
             }
-            alert(response.data.message);
-            if (uploadUnitModalRef.current) {
-                uploadUnitModalRef.current.close();
-            }
-            setFloorPremiumsAccordionOpen(true);
-        } catch (error) {
-            console.log("error uploading excel", error);
-        } finally {
-            setLoading(false);
-        }
-    }; //Handle submit units from excel file
 
-    const replaceFile = async (event) => {
+            const payload = {
+                selectedExcelHeader: selectedExcelHeader,
+                excelDataRows: excelDataRows,
+                tower_phase_id: towerPhaseId,
+                property_masters_id: propertyMasterId,
+                price_list_master_id: priceListMasterId,
+                excel_id: excelIdToSend,
+                expectedHeaders: expectedHeaders,
+            };
+            const response = await uploadUnits(payload);
+
+            // Handle successful response
+            if (response?.success === true) {
+                // Reset floors and fetch new floor data based on the uploaded Excel
+                setFloors([]);
+
+                const floors = await fetchFloorCount(
+                    towerPhaseId,
+                    response?.excelId,
+                    true
+                );
+                setFloors(floors);
+
+                // Show success message and update UI
+                showToast("Units uploaded successfully", "success");
+
+                props.setAccordionStates((prev) => ({
+                    ...prev,
+                    floorPremium: true,
+                }));
+
+                // Close the modal if reference exists
+                if (uploadUnitModalRef.current) {
+                    uploadUnitModalRef.current.close();
+                }
+            } else {
+                showToast(
+                    response?.message || "Failed to upload units",
+                    "error"
+                );
+                setIsUploadingUnits(false);
+            }
+        } catch (error) {
+            console.error("Error uploading Excel:", error);
+            showToast("An error occurred while uploading units", "error");
+            setIsUploadingUnits(false);
+        }
+    };
+
+    //Handle in replacing the file
+    const onChangeReplaceFile = async (event) => {
         // Trigger the `handleFileChange` function received from BasicPricing
         await handleFileChange(event);
-    }; //Handle in replacing the file
+    };
+
+    //Handle close the unit upload modal
+    const handleCloseUnitModal = () => {
+        onClose();
+    };
 
     return (
         <dialog
-            className="modal w-[474px] rounded-lg backdrop:bg-black/50"
+            className="modal w-[474px] rounded-lg backdrop:bg-black/50 backdrop-blur-md z-50 fixed inset-0"
             ref={uploadUnitModalRef}
         >
-            <div className=" px-14 mb-5 rounded-[10px]">
+            <div className=" px-14 mb-5 rounded-[10px] relative z-40">
                 <div className="">
-                    <form
+                    <div
                         method="dialog"
                         className="pt-2 flex justify-end -mr-[50px]"
                     >
-                        <button className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA3 text-custom-bluegreen hover:bg-custom-grayFA">
+                        <button
+                            className="flex justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA3 text-custom-bluegreen hover:bg-custom-grayFA"
+                            onClick={handleCloseUnitModal}
+                        >
                             ✕
                         </button>
-                    </form>
+                    </div>
                 </div>
-                <div className="flex justify-between items-center bg-custom-grayFA h-[54px] px-[15px] mb-3">
+                <div className="flex justify-between items-center bg-custom-grayFA h-[54px]  mb-3 px-1">
                     <div>
-                        <p className="underline text-blue-500 cursor-pointer">
-                            {fileName} -TowerId- {towerPhaseId}- PropertyId-{" "}
-                            {propertyId}
-                        </p>
+                        <p className="underline text-blue-500 ">{fileName}</p>
                     </div>
                     <div>
                         <label
@@ -145,7 +181,7 @@ const UploadUnitDetailsModal = ({
                             <input
                                 type="file"
                                 className="hidden"
-                                onChange={replaceFile}
+                                onChange={onChangeReplaceFile}
                             />
                         </label>
                     </div>
@@ -206,144 +242,17 @@ const UploadUnitDetailsModal = ({
                                 </div>
                             );
                         })}
-
-                    {/* <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Room Number</span>
-                        <div  className="relative w-full">
-                            <select name="roomNumber" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Unit</span>
-                        <div  className="relative w-full">
-                            <select name="unit" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Type</span>
-                        <div  className="relative w-full">
-                            <select name="type" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Floor Area</span>
-                        <div  className="relative w-full">
-                            <select name="floorArea" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Balcony Area</span>
-                        <div  className="relative w-full">
-                            <select name="balconyArea" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Garden Area</span>
-                        <div  className="relative w-full">
-                            <select name="gardenArea" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div>
-                    <div className="flex items-center border border-custom-grayF1 rounded-md overflow-hidden">
-                        <span className="text-custom-gray81 bg-custom-grayFA flex items-center w-[450px] h-[31px] -mr-3 pl-3 text-sm">Total Area</span>
-                        <div  className="relative w-full">
-                            <select name="totalArea" className="appearance-none w-full px-4 h-[31px] bg-white  focus:outline-none border-0">
-                                <option value="column1">Column 1</option>
-                                <option value="column2">Column 2</option>
-                                <option value="column3">Column 3</option>
-                                <option value="column4">Column 4</option>
-                                <option value="column5">Column 5</option>
-                                <option value="column6">Column 6</option>
-                                <option value="column7">Column 7</option>
-                                <option value="column8">Column 8</option>
-                            </select>
-                            <span  className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-custom-grayFA pointer-events-none">
-                                <IoMdArrowDropdown className='text-custom-gray81' />
-                            </span>
-                        </div>
-                    </div> */}
                 </div>
                 <div className="flex justify-center mt-4 mb-8">
                     {selectedExcelHeader && selectedExcelHeader.length > 0 ? (
                         <button
                             className={`w-[177px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4  ${
-                                loading ? "cursor-not-allowed" : ""
+                                isUploadingUnits ? "cursor-not-allowed" : ""
                             }`}
                             type="submit"
                             onClick={handleSubmit}
                         >
-                            {loading ? (
+                            {isUploadingUnits ? (
                                 <CircularProgress className="spinnerSize" />
                             ) : (
                                 <>Confirm and Upload</>

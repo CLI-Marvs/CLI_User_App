@@ -48,10 +48,11 @@ class DirectEmailResponse extends Mailable
     {
         if (str_contains($this->messageId, '@icloud.com') || str_contains($this->messageId, '@yahoo.com')) {
             return new Headers(
-                messageId: "<" . $this->messageId . ">",
+                messageId: $this->messageId,
                 references: [$this->messageId],
                 text: [
                     'In-Reply-To' => $this->messageId,
+                    'References' => $this->messageId,
                     'X-Custom-Header' => 'Custom Value',
                 ]
             );

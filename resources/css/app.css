@@ -1,28 +1,3 @@
 @tailwind base;
 @tailwind components;
-@tailwind utilities;
-
-/* Default progress bar color */
-.Toastify__progress-bar {
-  background: #00f604 !important; /* Tailwind sky-400, for example */
-}
-
-/* Success toast progress bar */
-.Toastify__toast--success .Toastify__progress-bar {
-  background: #22c55e !important; /* Tailwind green-500 */
-}
-
-/* Error toast progress bar */
-.Toastify__toast--error .Toastify__progress-bar {
-  background: #d80505 !important; /* Tailwind red-500 */
-}
-
-/* Info toast progress bar */
-.Toastify__toast--info .Toastify__progress-bar {
-  background: #0ea5e9 !important; /* Tailwind blue-500 */
-}
-
-/* Warning toast progress bar */
-.Toastify__toast--warning .Toastify__progress-bar {
-  background: #facc15 !important; /* Tailwind yellow-400 */
-}
+@tailwind utilities;    

@@ -1,123 +1,157 @@
 .bg-left-side {
-  background-image: url('/Images/Imagebg.webp');
-  background-size: cover;
-  background-position: center;
-  position: relative; 
+    background-image: url("/Images/Imagebg.webp");
+    background-size: cover;
+    background-position: center;
+    position: relative;
 }
 
 .bg-left-side::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, 1));
-  pointer-events: none; 
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 50%,
+        rgba(255, 255, 255, 1)
+    );
+    pointer-events: none;
 }
 
+.gradient-btn {
+    background: linear-gradient(to right, #348017, #175d5f);
+}
 
-  .gradient-btn {
-    background: linear-gradient(to right, #348017, #175D5F);
-  }
+.gradient-btn2 {
+    background: linear-gradient(to right, #175d5f, #348017);
+}
 
-  .gradient-btn2 {
-    background: linear-gradient(to right,#175D5F , #348017);
-  }
+.gradient-btn3 {
+    background: linear-gradient(to right, #70ad47, #175d5f);
+}
 
-  .gradient-btn3 {
-    background: linear-gradient(to right,#70AD47 , #175D5F);
-  }
+.gradient-btn4 {
+    background: linear-gradient(to right, #1a73e8, #70ad47);
+}
 
-  .gradient-btn4 {
-    background: linear-gradient(to right,#1A73E8 , #70AD47);
-  }
+.gradient-btn5 {
+    background: linear-gradient(to right, #175d5f, #348017, #70ad47);
+}
 
-  .gradient-btn5 {
-    background: linear-gradient(to right,#175D5f,#348017, #70AD47);
-  }
-  
-  .gradient-btn2hover {
-    background: linear-gradient(to right,#175D5f,#348017, #70AD47);
-  }
+.gradient-btn2hover {
+    background: linear-gradient(to right, #175d5f, #348017, #70ad47);
+}
 
-  .gradient-btn2hover:hover{
+.gradient-btn2hover:hover {
     background: #d6e4d1;
-  }
-  .bglightgreen-btn{
-    background:#70AD47;
-    color:white;
-  }
-
-  .gradient-border {
-    border: 4px solid black; 
-    border-image: linear-gradient(to right, #348017, #175D5F) 1; 
-    padding: 10px; 
-    background-color: white; 
-    border-radius: 10px;
-    display: inline-block; 
-  }
-
-  .gradient-border2 {
-    border: 4px solid black; 
-    border-image: linear-gradient(to right,#175D5F ,  #348017) 1; 
-    padding: 10px; 
-    background-color: white; 
-    border-radius: 10px;
-    display: inline-block; 
-  }
-
-  .gradient-background1 {
-    background: linear-gradient(to right, #70AD47 5%, #5B9BD5 130%);
-  }
-
-  .gradient-background2 {
-    background: linear-gradient(to right, #F7F7F7, #D6E4D1);
-  }
-
-  .gradient-background3 {
-    background: linear-gradient(to right, #175D5F 17%, #348017 70%, #70AD47 96%);
+}
+.bglightgreen-btn {
+    background: #70ad47;
+    color: white;
 }
 
 .gradient-border {
-  background: radial-gradient(circle at 100% 100%, #ffffff 0, #ffffff 11px, transparent 11px) 0% 0%/13px 13px no-repeat,
-  radial-gradient(circle at 0 100%, #ffffff 0, #ffffff 11px, transparent 11px) 100% 0%/13px 13px no-repeat,
-  radial-gradient(circle at 100% 0, #ffffff 0, #ffffff 11px, transparent 11px) 0% 100%/13px 13px no-repeat,
-  radial-gradient(circle at 0 0, #ffffff 0, #ffffff 11px, transparent 11px) 100% 100%/13px 13px no-repeat,
-  linear-gradient(#ffffff, #ffffff) 50% 50%/calc(100% - 4px) calc(100% - 26px) no-repeat,
-  linear-gradient(#ffffff, #ffffff) 50% 50%/calc(100% - 26px) calc(100% - 4px) no-repeat,
-  linear-gradient(90deg, #3628b6 0%, #3fe50c 100%);
-border-radius: 13px;
-padding: 9px;
-box-sizing: border-box;
+    border: 4px solid black;
+    border-image: linear-gradient(to right, #348017, #175d5f) 1;
+    padding: 10px;
+    background-color: white;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.gradient-border2 {
+    border: 4px solid black;
+    border-image: linear-gradient(to right, #175d5f, #348017) 1;
+    padding: 10px;
+    background-color: white;
+    border-radius: 10px;
+    display: inline-block;
+}
+
+.gradient-background1 {
+    background: linear-gradient(to right, #70ad47 5%, #5b9bd5 130%);
+}
+
+.gradient-background2 {
+    background: linear-gradient(to right, #f7f7f7, #d6e4d1);
+}
+
+.gradient-background3 {
+    background: linear-gradient(
+        to right,
+        #175d5f 17%,
+        #348017 70%,
+        #70ad47 96%
+    );
+}
+
+.gradient-border {
+    background: radial-gradient(
+                circle at 100% 100%,
+                #ffffff 0,
+                #ffffff 11px,
+                transparent 11px
+            )
+            0% 0%/13px 13px no-repeat,
+        radial-gradient(
+                circle at 0 100%,
+                #ffffff 0,
+                #ffffff 11px,
+                transparent 11px
+            )
+            100% 0%/13px 13px no-repeat,
+        radial-gradient(
+                circle at 100% 0,
+                #ffffff 0,
+                #ffffff 11px,
+                transparent 11px
+            )
+            0% 100%/13px 13px no-repeat,
+        radial-gradient(
+                circle at 0 0,
+                #ffffff 0,
+                #ffffff 11px,
+                transparent 11px
+            )
+            100% 100%/13px 13px no-repeat,
+        linear-gradient(#ffffff, #ffffff) 50% 50% / calc(100% - 4px)
+            calc(100% - 26px) no-repeat,
+        linear-gradient(#ffffff, #ffffff) 50% 50% / calc(100% - 26px)
+            calc(100% - 4px) no-repeat,
+        linear-gradient(90deg, #3628b6 0%, #3fe50c 100%);
+    border-radius: 13px;
+    padding: 9px;
+    box-sizing: border-box;
 }
 
 .gradient-text {
-  background: linear-gradient(to right, #175D5F, #a3e635); 
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+    background: linear-gradient(to right, #175d5f, #a3e635);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 
 .file-input {
-  display: none;
+    display: none;
 }
 
 .layout-container {
-  overflow: hidden;
+    overflow: hidden;
 }
 
 .property-layout-container {
-  overflow-y: hidden;
+    overflow-y: hidden;
 }
-.spinnerSize{
-  width: 24px !important;
-  height: 24px !important;
+.spinnerSize {
+    width: 24px !important;
+    height: 24px !important;
 }
 
-.spinnerSize2{
-  width: 30px !important;
-  height: 30px !important;
+.spinnerSize2 {
+    width: 30px !important;
+    height: 30px !important;
 }
 
 input[type="number"]::-webkit-outer-spin-button,
@@ -127,128 +161,376 @@ input[type="number"]::-webkit-inner-spin-button {
 }
 
 .input-floating-label {
-  display: block;
-  width: 100%;
-  appearance: none;
-  
-  background-color: white;
-  padding: 1rem 0.625rem 0.625rem 0.625rem; 
-  font-size: 0.875rem; 
-  color: #175D5f; 
-  outline: none;
-  font-family: "Montserrat", sans-serif;
-  font-weight: 500;
-  font-style: normal;
+    display: block;
+    width: 100%;
+    appearance: none;
+
+    background-color: white;
+    padding: 1rem 0.625rem 0.625rem 0.625rem;
+    font-size: 0.875rem;
+    color: #175d5f;
+    outline: none;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-style: normal;
 }
 
 .input-floating-label:focus {
-  color: #175D5f; 
-  outline: none;
-  box-shadow: none; /* focus:ring-0 */
-  font-size: 0.875rem; 
-  font-family: "Montserrat", sans-serif;
-  font-weight: 500;
-  font-style: normal;
-  
+    color: #175d5f;
+    outline: none;
+    box-shadow: none; /* focus:ring-0 */
+    font-size: 0.875rem;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-style: normal;
 }
 
 .label-floating {
-  position: absolute;
-  left: 0.625rem; /* 2.5 in Tailwind */
-  top: 1rem; /* adjusted for initial position */
-  color: #175D5F; /* gray-500 */
-  transition: all 0.3s ease-in-out;
-  font-family: "Montserrat", sans-serif;
-  font-weight: 500;
-  font-style: normal;
+    position: absolute;
+    left: 0.625rem; /* 2.5 in Tailwind */
+    top: 1rem; /* adjusted for initial position */
+    color: #175d5f; /* gray-500 */
+    transition: all 0.3s ease-in-out;
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-style: normal;
 }
 
 .input-floating-label:focus + .label-floating,
 .input-floating-label:not(:placeholder-shown) + .label-floating {
-  top: 0.2rem; /* 2 in Tailwind */ 
-  font-size: 0.7rem; /* text-sm */
-  color: #6b7280; /* blue-600 */
-  font-family: "Montserrat", sans-serif;
-  font-weight: 500;
-  font-style: normal;
+    top: 0.2rem; /* 2 in Tailwind */
+    font-size: 0.7rem; /* text-sm */
+    color: #6b7280; /* blue-600 */
+    font-family: "Montserrat", sans-serif;
+    font-weight: 500;
+    font-style: normal;
 }
 
 .custom-border {
-  border-top: 1px solid black;
-  border-bottom: 1px solid black;
-  border-left: 1px solid transparent;
-  border-right: 1px solid transparent;
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
 }
 
 .input-floating-label:focus + .label-floating-custom-login,
 .input-floating-label:not(:placeholder-shown) + .label-floating-custom-login {
-  top: 0.3rem; /* 2 in Tailwind */ 
-  font-size: 0.7rem; /* text-sm */
-  color: #6b7280; /* blue-600 */
+    top: 0.3rem; /* 2 in Tailwind */
+    font-size: 0.7rem; /* text-sm */
+    color: #6b7280; /* blue-600 */
 }
 
-.label-floating-custom-login{
-position: absolute;
-left: 0.825rem; /* 2.5 in Tailwind */
-top: .8rem; /* adjusted for initial position */
-color: #6B7280; 
-transition: all 0.3s ease-in-out;
+.label-floating-custom-login {
+    position: absolute;
+    left: 0.825rem; /* 2.5 in Tailwind */
+    top: 0.8rem; /* adjusted for initial position */
+    color: #6b7280;
+    transition: all 0.3s ease-in-out;
 }
 
 input[type="radio"]:checked {
-  background-color: #175d5f; /* This is for browsers that support background color */
-  border-color: #175d5f;     /* This sets the radio button border color */
+    background-color: #175d5f; /* This is for browsers that support background color */
+    border-color: #175d5f; /* This sets the radio button border color */
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
-  display: none;
-  -webkit-appearance: none;
+    display: none;
+    -webkit-appearance: none;
 }
 
 .custom-modal {
-  border-radius: 15px;
+    border-radius: 15px;
 }
 
 .align-super {
-  font-size: 0.65em; /* Adjust as needed */
-  vertical-align: super; /* Use super for proper alignment */
+    font-size: 0.65em; /* Adjust as needed */
+    vertical-align: super; /* Use super for proper alignment */
 }
 
 .custom-checkbox:checked {
-  background-color: #4ADE80; /* Your custom green color */
-  border-color: #4ADE80; /* Match the border with the checkmark color */
+    background-color: #4ade80; /* Your custom green color */
+    border-color: #4ade80; /* Match the border with the checkmark color */
 }
 
 .custom-checkbox:checked::after {
-  content: '';
-  width: 8px; /* Adjust width */
-  height: 8px; /* Adjust height */
-  background-color: white; /* Color of the checkmark */
-  left: 2px; /* Adjust position */
-  top: 2px; /* Adjust position */
-  transform: rotate(45deg); /* Rotate to create a checkmark */
+    content: "";
+    width: 8px; /* Adjust width */
+    height: 8px; /* Adjust height */
+    background-color: white; /* Color of the checkmark */
+    left: 2px; /* Adjust position */
+    top: 2px; /* Adjust position */
+    transform: rotate(45deg); /* Rotate to create a checkmark */
 }
 
 .custom-scrollbar::-webkit-scrollbar {
-  height: 9px; /* Change the height for horizontal scrollbar */
+    height: 9px; /* Change the height for horizontal scrollbar */
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #348017; /* Customize the color */
-  border-radius: 10px; /* Rounded corners */
+    background-color: #348017; /* Customize the color */
+    border-radius: 10px; /* Rounded corners */
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background-color: #f0f0f0; /* Track background */
+    background-color: #f0f0f0; /* Track background */
+}
+
+.property-feature-radio {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid #175d5f;
+    appearance: none;
+    cursor: pointer;
+    position: relative;
+}
+
+/* Checked state */
+.property-feature-radio:checked {
+    background-color: #175d5f;
+    border: 2px solid #175d5f;
+}
+
+/* Inner circle when checked */
+.property-feature-radio:checked::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
 
 textarea {
-  resize: none;
+    resize: none;
 }
 .shrink {
-  transform: scale(0.87); /* Adjust the scale factor as needed */
+    transform: scale(0.87); /* Adjust the scale factor as needed */
+}
+
+.transaction-scrollbar {
+    overflow-y: hidden; /* Hide the scrollbar initially */
+}
+
+.transaction-scrollbar:hover {
+    overflow-y: auto; /* Show the scrollbar on hover */
+}
+
+.transaction-scrollbar::-webkit-scrollbar {
+    width: 6px; /* Adjust the width for thinness */
+}
+
+.transaction-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #888; /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Rounded corners for the scrollbar thumb */
+}
+
+.transaction-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Darker color on hover */
+}
+
+.transaction-scrollbar::-webkit-scrollbar-track {
+    background-color: #f1f1f1; /* Background of the scrollbar track */
+    border-radius: 10px;
+}
+/*  */
+
+.transaction-card-scrollbar {
+    overflow-x: hidden; /* Hide the scrollbar initially */
+}
+
+.transaction-card-scrollbar:hover {
+    overflow-x: auto; /* Show the scrollbar on hover */
+}
+
+.transaction-card-scrollbar::-webkit-scrollbar {
+    width: 6px; /* Adjust the width for thinness */
+    height: 6px;
+}
+
+.transaction-card-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #888; /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Rounded corners for the scrollbar thumb */
+}
+
+.transaction-card-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Darker color on hover */
+}
+
+.transaction-card-scrollbar::-webkit-scrollbar-track {
+    background-color: #f1f1f1; /* Background of the scrollbar track */
+    border-radius: 10px;
+}
+
+.transaction-card-drag-scroll {
+    cursor: grab; /* Visual feedback when dragging */
+    user-select: none; /* Prevents text selection while dragging */
+    overflow-x: scroll; /* Allows scrolling but hides scrollbar */
+}
+
+.transaction-card-drag-scroll:active {
+    cursor: grabbing; /* Visual feedback while dragging */
+}
+
+.customer-scrollbar {
+    overflow-y: hidden; /* Hide the scrollbar initially */
+}
+
+.customer-scrollbar:hover {
+    overflow-y: auto;
+}
+.customer-scrollbar::-webkit-scrollbar {
+    height: 3px;
+    cursor: pointer;
+    width: 6px;
+}
+
+.customer-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #d4d4d4; /* Color of the scrollbar thumb */
+    border-radius: 10px; /* Rounded corners for the scrollbar thumb */
+}
+
+.customer-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #d4d4d4; /* Darker color on hover */
+}
+
+.customer-scrollbar::-webkit-scrollbar-track {
+    border-radius: 5px;
+}
+
+/* This checbox is intended for the checkboxes in the user rights and permissions page */
+
+.custom-checkbox-permission {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1px solid #175d5f; /* Red border */
+    appearance: none; /* Removes default styling */
+    cursor: pointer;
+    position: relative; /* Needed for proper positioning of the checkmark */
+}
+
+/* Checked state */
+.custom-checkbox-permission:checked {
+    background-color: #175d5f;
+}
+
+/* Checkmark inside the box */
+.custom-checkbox-permission:checked::after {
+    content: "✔"; /* Unicode check mark */
+    font-size: 12px;
+    color: white;
+    filter: invert(100%) hue-rotate(18deg) brightness(4.7);
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+.custom-checkbox-permission:disabled {
+    background-color: #f1f1f1 !important;
+    border-color: #175d5f !important;
+    cursor: not-allowed !important;
+}
+.custom-checkbox-permission:disabled:checked {
+    background-color: #175d5f !important;
+}
+
+/* Disabled checkmark */
+.custom-checkbox-permission:disabled:checked::after {
+    color: #175d5f !important;
+}
+
+.property-feature-checkbox:checked {
+    background-color: #175d5f; /* Custom background color */
+}
+
+.property-feature-checkbox {
+    width: 16px;
+    height: 16px;
+    border-radius: 3px;
+    border: 1px solid #175d5f;
+    appearance: none;
+    cursor: pointer;
+    position: relative;
+}
+
+/* Checked state */
+.property-feature-checkbox:checked {
+    background-color: #175d5f;
+}
+
+/* Checkmark inside the box */
+.property-feature-checkbox:checked::after {
+    content: "✔";
+    font-size: 10px;
+    color: white;
+    filter: invert(100%) hue-rotate(18deg) brightness(4.7);
+    position: absolute;
+    top: 45%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.property-feature-checkbox:disabled {
+    background-color: #f1f1f1 !important;
+    border-color: #175d5f !important;
+    cursor: not-allowed !important;
+}
+
+.property-feature-checkbox:disabled:checked {
+    background-color: #175d5f !important;
+}
+
+.property-feature-checkbox:disabled:checked::after {
+    color: #175d5f !important;
+}
+
+.custom-checkbox:checked::after {
+    content: "";
+    width: 8px; /* Adjust width */
+    height: 8px; /* Adjust height */
+    background-color: white; /* Color of the checkmark */
+    left: 2px; /* Adjust position */
+    top: 2px; /* Adjust position */
+    transform: rotate(45deg); /* Rotate to create a checkmark */
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    height: 9px; /* Change the height for horizontal scrollbar */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #348017; /* Customize the color */
+    border-radius: 10px; /* Rounded corners */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background-color: #f0f0f0; /* Track background */
+}
+
+textarea {
+    resize: none;
+}
+.shrink {
+    transform: scale(0.87); /* Adjust the scale factor as needed */
 }
 
 .custom-calendar {
-  z-index: 1000 !important;
+    z-index: 1000 !important;
+}
+
+
+.rdrDay:not(.rdrDayPassive) .rdrInRange ~ .rdrDayNumber span, .rdrDay:not(.rdrDayPassive) .rdrStartEdge ~ .rdrDayNumber span, .rdrDay:not(.rdrDayPassive) .rdrEndEdge ~ .rdrDayNumber span, .rdrDay:not(.rdrDayPassive) .rdrSelected ~ .rdrDayNumber span {
+  color: black !important;
+}
+
+.rdrDayToday:not(.rdrDayPassive) .rdrInRange ~ .rdrDayNumber span:after, .rdrDayToday:not(.rdrDayPassive) .rdrStartEdge ~ .rdrDayNumber span:after, .rdrDayToday:not(.rdrDayPassive) .rdrEndEdge ~ .rdrDayNumber span:after, .rdrDayToday:not(.rdrDayPassive) .rdrSelected ~ .rdrDayNumber span:after {
+    background: black !important;
+}
+
+.rdrDayToday .rdrDayNumber span:after {
+    background: black !important;
 }
