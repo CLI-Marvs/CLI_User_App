@@ -4,7 +4,9 @@ import IconNotes from "../../../../../public/Images/Icon_Notes.svg";
 import Attachment from "../../../../../public/Images/ATTCHMT.svg";
 import apiService from "../../../component/servicesApi/apiService";
 import Dropdown from "../../../../../resources/frontend/component/layout/documentManagementPage/TableMonitoringDropdown";
-import TitlingStepNotesModal from "./TitlingStepNotesModal"; // Import the new modal
+import AddFilesModal from "./AddFilesModal";
+import NotesAndUpdatesModal from "./NotesAndUpdatesModal"; 
+
 import { motion } from "framer-motion";
 
 const PersonIcon = () => (
@@ -48,15 +50,18 @@ export default function TitlingAndRegistrationMonitor({
     contractNumber,
     propertyName,
     unitNumber,
+    id
 }) {
     const [monitoringData, setMonitoringData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedRow, setSelectedRow] = useState(null);
-    // State for the new Titling Step Notes Modal
-    const [isTitlingStepNotesModalOpen, setIsTitlingStepNotesModalOpen] = useState(false);
-    const [selectedItemForTitlingNotes, setSelectedItemForTitlingNotes] = useState(null);
-
+    // const [isTitlingStepNotesModalOpen, setIsTitlingStepNotesModalOpen] = useState(false);
+    // const [selectedItemForTitlingNotes, setSelectedItemForTitlingNotes] = useState(null); 
+    const [isViewFilesModalOpen, setIsViewFilesModalOpen] = useState(false);
+    const [selectedItemForFilesView, setSelectedItemForFilesView] = useState(null);
+    const [isNotesAndUpdatesModalOpen, setIsNotesAndUpdatesModalOpen] = useState(false);
+    const [selectedItemForNotesAndUpdates, setSelectedItemForNotesAndUpdates] = useState(null);
 
     const TITLING_PROCESS_STEPS = [
         "Docketing",
@@ -136,14 +141,24 @@ export default function TitlingAndRegistrationMonitor({
         }
     }, [contractNumber]);
 
-    const handleOpenTitlingStepNotesModal = (item) => {
-        setSelectedItemForTitlingNotes(item);
-        setIsTitlingStepNotesModalOpen(true);
+    const handleOpenNotesAndUpdatesModal = (item) => {
+        setSelectedItemForNotesAndUpdates(item);
+        setIsNotesAndUpdatesModalOpen(true);
     };
 
-    const handleCloseTitlingStepNotesModal = () => {
-        setIsTitlingStepNotesModalOpen(false);
-        setSelectedItemForTitlingNotes(null);
+    const handleCloseNotesAndUpdatesModal = () => {
+        setIsNotesAndUpdatesModalOpen(false);
+        setSelectedItemForNotesAndUpdates(null);
+    };
+
+    const handleOpenViewFilesModal = (item) => {
+        setSelectedItemForFilesView(item);
+        setIsViewFilesModalOpen(true);
+    };
+
+    const handleCloseViewFilesModal = () => {
+        setIsViewFilesModalOpen(false);
+        setSelectedItemForFilesView(null);
     };
 
 
@@ -154,7 +169,6 @@ export default function TitlingAndRegistrationMonitor({
             </div>
         );
     }
-
     return (
         <div className="bg-white w-full rounded-lg shadow-lg overflow-hidden">
             <div className="bg-[#175D5F] text-white p-4 flex justify-center items-center relative">
@@ -200,7 +214,7 @@ export default function TitlingAndRegistrationMonitor({
 
                             return (
                                 <React.Fragment
-                                    key={`row-${item.workOrderId || index}`}
+                                    key={`${item.step}-${item.workOrderId}-${id}`}
                                 >
                                     <tr
                                         className={`hover:bg-gray-50 cursor-pointer ${
@@ -301,7 +315,7 @@ export default function TitlingAndRegistrationMonitor({
                                             {item.hasNotes ? (
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleOpenTitlingStepNotesModal(item)}
+                                                    onClick={() => handleOpenNotesAndUpdatesModal(item)}
                                                     className="bg-transparent border-none p-0 m-0 cursor-pointer hover:opacity-75 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded"
                                                     aria-label={`View notes for step ${item.step}`}
                                                 >
@@ -312,11 +326,19 @@ export default function TitlingAndRegistrationMonitor({
                                             )}
                                         </td>
                                         <td className="p-2 text-center align-middle">
-                                            {item.hasFiles ? <LinkIcon /> : "-"}
+                                            {item.hasFiles ? (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleOpenViewFilesModal(item)}
+                                                    className="bg-transparent border-none p-0 m-0 cursor-pointer hover:opacity-75 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded"
+                                                    aria-label={`View files for step ${item.step}`}
+                                                >
+                                                    <LinkIcon />
+                                                </button>) : "-"}
                                         </td>
                                     </tr>
                                     {isSelected && (
-                                        <tr className="bg-white">
+                                        <tr className="bg-gray-100">
                                             <td
                                                 colSpan={7}
                                                 className="p-0 border-b border-gray-200"
@@ -343,8 +365,8 @@ export default function TitlingAndRegistrationMonitor({
                                                         overflow: "hidden",
                                                     }}
                                                 >
-                                                    <div className="p-4">
-                                                        <Dropdown />
+                                                    <div className="p-3 ml-4">
+                                                        <Dropdown currentMilestone={item.step} workOrderId={item.workOrderId} accountId={id} />
                                                     </div>
                                                 </motion.div>
                                             </td>
@@ -357,16 +379,29 @@ export default function TitlingAndRegistrationMonitor({
                 </table>
             </div>
 
-            {isTitlingStepNotesModalOpen && selectedItemForTitlingNotes && (
-                <TitlingStepNotesModal
-                    isOpen={isTitlingStepNotesModalOpen}
-                    onClose={handleCloseTitlingStepNotesModal}
-                    contractNumber={contractNumber} // Account identifier
-                    workOrderId={selectedItemForTitlingNotes.workOrderId}
-                    stepName={selectedItemForTitlingNotes.step}
-                    // title prop can be customized if needed, or rely on default in modal
+            {isNotesAndUpdatesModalOpen && selectedItemForNotesAndUpdates && (
+                <NotesAndUpdatesModal
+                    selectedAccountId={id} 
+                    onClose={handleCloseNotesAndUpdatesModal}
+                    selectedWorkOrder={selectedItemForNotesAndUpdates.step}
+                    selectedAssignee={selectedItemForNotesAndUpdates.assignee} 
+                    workOrderData={{ 
+                        work_order_id: selectedItemForNotesAndUpdates.workOrderId,
+                    }}
                 />
             )}
+
+            {isViewFilesModalOpen && selectedItemForFilesView && (
+                <AddFilesModal
+                    selectedAccountId={id} 
+                    onClose={handleCloseViewFilesModal}
+                    selectedWorkOrder={selectedItemForFilesView.step}
+                    workOrderData={{ 
+                        work_order_id: selectedItemForFilesView.workOrderId,
+                    }}
+                />
+            )}
+
 
             <div className="bg-[#175D5F] text-white p-4 text-sm">
                 <div className="flex justify-between">

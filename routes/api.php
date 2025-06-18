@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConcernController;
 use App\Http\Controllers\DynamicBannerController;
@@ -15,7 +16,6 @@ use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\AccountLogController;
 use App\Models\DynamicBanner;
 use App\Models\PropertyMaster;
-use Illuminate\Http\Request;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\PriceVersionController;
 use App\Http\Controllers\EmployeeDepartmentController;
@@ -23,6 +23,8 @@ use App\Http\Controllers\EmployeeFeaturePermissionController;
 use App\Http\Controllers\DepartmentFeaturePermissionController;
 use App\Http\Controllers\MarkupSettignsController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\SubmilestoneController;
+use App\Http\Controllers\MilestoneController; 
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -86,6 +88,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/work-orders/{workOrder}', [WorkOrderController::class, 'update']);
     Route::patch('/work-orders/{workOrder}/soft-delete', [WorkOrderController::class, 'softDelete'])->name('work-orders.soft-delete');
     Route::get('/my-workorders', [WorkOrderController::class, 'index'])->middleware('my_work_orders_filter');
+    Route::patch('/work-orders/{workOrderId}/status-complete', [WorkOrderController::class, 'updateStatusToComplete']);
     // for titling and registration
     Route::patch('/taken-out-accounts/add-masterlist', [TakenOutAccountController::class, 'updateAddStatus']);
     Route::get('/taken-out-accounts/get-masterlist', [TakenOutAccountController::class, 'getMasterList']);
@@ -96,6 +99,10 @@ Route::middleware('auth:sanctum')->group(function () {
     // for account logs
     Route::get('/get-account-logs/{selectedId}', [AccountLogController::class, 'getLogData']);
     Route::patch('/update-is-new/{id}', [AccountLogController::class, 'updateIsNewStatus']);
+    // for milestones
+    Route::get('/milestones-details', [MilestoneController::class, 'getDetailsByName']);
+    // for submilestones
+    Route::get('/submilestones-details', [SubmilestoneController::class, 'getByWorkOrderType']);
 });
 
 // If you need public access to some data (e.g., specific work order types)

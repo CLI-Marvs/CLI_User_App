@@ -45,7 +45,12 @@ const LinkIcon = () => (
     />
 );
 
-const ViewWorkOrderModal = ({ isOpen, onClose, workOrderData, onInitiateDelete }) => {
+const ViewWorkOrderModal = ({
+    isOpen,
+    onClose,
+    workOrderData,
+    onInitiateDelete,
+}) => {
     const [mounted, setMounted] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isAddFilesModalOpen, setIsAddFilesModalOpen] = useState(false);
@@ -72,10 +77,21 @@ const ViewWorkOrderModal = ({ isOpen, onClose, workOrderData, onInitiateDelete }
         setIsAddFilesModalOpen(true);
     };
     const refreshWorkOrder = async () => {
-        const response = await apiService.get(
-            `/work-orders/${currentWorkOrderData.work_order_id}`
-        );
-        setCurrentWorkOrderData(response.data);
+        if (!workOrderData || !workOrderData.work_order_id) {
+            console.error(
+                "ViewWorkOrderModal: Cannot refresh work order. workOrderData prop or work_order_id is missing.",
+                workOrderData
+            );
+            return;
+        }
+        try {
+            const response = await apiService.get(
+                `/work-orders/${workOrderData.work_order_id}`
+            );
+            setCurrentWorkOrderData(response.data);
+        } catch (error) {
+            console.error("Error refreshing work order:", error);
+        }
     };
 
     useEffect(() => {
@@ -254,11 +270,13 @@ const ViewWorkOrderModal = ({ isOpen, onClose, workOrderData, onInitiateDelete }
                 </div>
 
                 <div className="flex justify-end space-x-3 mt-4">
-                    <button 
+                    <button
                         className="text-red-500 hover:text-red-700"
                         onClick={() => {
                             if (onInitiateDelete) {
-                                onInitiateDelete(currentWorkOrderData || workOrderData);
+                                onInitiateDelete(
+                                    currentWorkOrderData || workOrderData
+                                );
                             }
                         }}
                     >

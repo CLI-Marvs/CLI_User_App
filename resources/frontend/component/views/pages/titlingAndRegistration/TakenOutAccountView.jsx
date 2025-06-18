@@ -697,7 +697,7 @@ export default function PaginatedTable() {
                                         border: "none",
                                     }}
                                 >
-                                    <span className="truncate text-left flex-1">
+                                    <span className="truncate text-left flex-1 normal-case">
                                         {filterOption}
                                     </span>
                                     <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-500" />

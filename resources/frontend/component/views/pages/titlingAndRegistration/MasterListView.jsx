@@ -32,11 +32,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CircularProgress } from "@mui/material";
 import TitlingAndRegistrationMonitor from "../../../layout/documentManagementPage/TitlingAndRegistrationMonitor";
 
-const UploadIcon = ({ onClick, className: propClassName }) => ( // Added className prop and corrected typo
+const UploadIcon = ({ onClick, className: propClassName }) => ( 
     <img
         src={UploadSvg}
         alt="Upload Icon"
-        className={propClassName || 'size-4'} // Use provided className or default
+        className={propClassName || 'size-4'}
         onClick={onClick}
     />
 );
@@ -216,6 +216,7 @@ export default function PaginatedTable() {
     const dropdownRef = useRef(null);
     const [isAddingToMasterlist, setIsAddingToMasterlist] = useState(false);
     const [isFileUploading, setIsFileUploading] = useState(false);
+    const [isChecked, setIsChecked] = useState(false);
     // const [isViewOpen, setIsViewOpen] = useState(false);
     const [showTitlingMonitor, setShowTitlingMonitor] = useState(false);
     const [selectedRowDataForMonitor, setSelectedRowDataForMonitor] =
@@ -285,11 +286,10 @@ export default function PaginatedTable() {
         contractNumber,
         propertyName,
         unitNumber,
-        accountId
+        id,
     ) => {
         setShowTitlingMonitor(true);
-        const data = { user, contractNumber, propertyName, unitNumber, accountId };
-        console.log("Opening Titling Monitor with data:", data);
+        const data = { user, contractNumber, propertyName, unitNumber, id };
         setSelectedRowDataForMonitor(data);
     };
 
@@ -575,8 +575,6 @@ export default function PaginatedTable() {
         return filteredAndSortedData.slice(start, end);
     }, [filteredAndSortedData, takenOutMasterListCurrentPage, rowsPerPage]);
 
-    // const currentData = filteredRows.slice(takenOutIndexOfFirstRow, takenOutIndexOfLastRow);
-
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
 
@@ -697,7 +695,7 @@ export default function PaginatedTable() {
                                             border: "none",
                                         }}
                                     >
-                                        <span className="truncate text-left flex-1">
+                                        <span className="truncate text-left flex-1 normal-case">
                                             {filterOption}
                                         </span>
                                         <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-500" />
@@ -975,9 +973,9 @@ export default function PaginatedTable() {
                                 )}
                             </button>
                             <input
-                                id="masterListFileUpload" // Unique ID for the file input
+                                id="masterListFileUpload"
                                 type="file"
-                                accept=".xlsx, .xls" // Specify accepted file types
+                                accept=".xlsx, .xls" 
                                 onChange={handleFileUpload}
                                 className="hidden"
                             />
@@ -988,7 +986,7 @@ export default function PaginatedTable() {
                 {showTitlingMonitor && selectedRowDataForMonitor ? (
                     <TitlingAndRegistrationMonitor
                         onClose={handleCloseTitlingMonitor} 
-                        {...selectedRowDataForMonitor} // accountId is spread here
+                        {...selectedRowDataForMonitor}
                     />
                 ) : (
                     <>
@@ -1082,7 +1080,7 @@ export default function PaginatedTable() {
                                         paginatedData.map(
                                             (
                                                 {
-                                                    id, // Destructure id here
+                                                    id,
                                                     user,
                                                     contractNumber,
                                                     propertyName,
@@ -1152,7 +1150,8 @@ export default function PaginatedTable() {
                                                                                 user,
                                                                                 contractNumber,
                                                                                 propertyName,
-                                                                                unitNumber
+                                                                                unitNumber,
+                                                                                id
                                                                             );
                                                                         }}
                                                                     >

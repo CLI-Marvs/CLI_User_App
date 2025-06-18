@@ -1,10 +1,12 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import ReactDOM from "react-dom"; // Import ReactDOM
 import DateLogo from "../../../../../public/Images/Date_range.svg";
 import FileIcon from "../../../../../public/Images/folder_file_notes.svg";
 import ViewIcon from "../../../../../public/Images/eye_icon.svg";
 import DownloadIcon from "../../../../../public/Images/download_icon.svg";
 import AddNoteModal from "./AddNoteModal";
 import apiService from "../../../component/servicesApi/apiService";
+import FileViewerModal from "./FileViewerModal"; // Import FileViewerModal
 
 function NotesAndUpdatesModal({
     selectedAccountId,
@@ -19,6 +21,10 @@ function NotesAndUpdatesModal({
     const [showAll, setShowAll] = useState(false);
     const initialLogCount = 2;
     const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
+    const [mounted, setMounted] = useState(false); // Already present, which is good
+    const [isViewerOpen, setIsViewerOpen] = useState(false); // State for FileViewerModal
+    const [viewingFile, setViewingFile] = useState(null); // State for the file to view
+
 
     useEffect(() => {
         if (selectedAccountId) {
@@ -31,6 +37,11 @@ function NotesAndUpdatesModal({
             setLoading(false);
         }
     }, [selectedAccountId]);
+
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
 
     const fetchAccountAndLogData = async () => {
         setLoading(true);
@@ -71,6 +82,16 @@ function NotesAndUpdatesModal({
     const handleAddNoteSuccess = async () => {
         setIsAddNoteModalOpen(false);
         await fetchAccountAndLogData();
+    };
+
+    const handleOpenViewer = (file) => {
+        setViewingFile(file);
+        setIsViewerOpen(true);
+    };
+
+    const handleCloseViewer = () => {
+        setIsViewerOpen(false);
+        setViewingFile(null);
     };
 
     const currentUserId = workOrderData?.currentUser?.id || 1;
@@ -128,7 +149,6 @@ function NotesAndUpdatesModal({
             apiService
                 .patch(`/update-is-new/${log.id}`, { is_new: false })
                 .then((response) => {
-                    console.log(`Log ${log.id} marked as read:`, response.data);
                 })
                 .catch((error) => {
                     console.error(
@@ -188,21 +208,26 @@ function NotesAndUpdatesModal({
             ? displayedLogs[0].created_at
             : new Date().toISOString();
 
+    if (!mounted) {
+        return null;
+    }
+
     if (loading && !error) {
-        return (
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
+        return ReactDOM.createPortal(
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-[70]"> {/* Ensure z-index is high */}
                 <div className="bg-white rounded-lg p-8 w-auto min-w-[200px]">
                     <div className="flex justify-center items-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
                         <span className="ml-2">Loading...</span>
                     </div>
                 </div>
-            </div>
+            </div>,
+            document.body
         );
     }
 
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[60]"> {/* Main modal z-index */}
             <div
                 className="bg-white rounded-[10px] w-[449px] max-h-[90vh] overflow-y-auto shadow-xl p-[18px_25px] flex flex-col gap-[10px] relative"
                 onClick={(e) => e.stopPropagation()}
@@ -306,9 +331,9 @@ function NotesAndUpdatesModal({
                                                                 key={
                                                                     doc.document_id
                                                                 }
-                                                                className="flex items-center space-x-3"
+                                                                className="flex items-center space-x-0"
                                                             >
-                                                                <div className="w-24 flex-shrink-0">
+                                                                <div className="w-[250px] flex-shrink-0">
                                                                     <span
                                                                         className="text-sm font-normal text-custom-solidgreen truncate block"
                                                                         title={
@@ -320,9 +345,9 @@ function NotesAndUpdatesModal({
                                                                             "Document"}
                                                                     </span>
                                                                 </div>
-                                                                <div className="bg-[#D6E4D1] rounded-lg py-0 px-[10px] border w-66">
+                                                                <div className="bg-[#D6E4D1] rounded-lg py-0 px-[10px] border w-36">
                                                                     <div className="flex items-center justify-between">
-                                                                        <div className="flex items-center space-x-3 min-w-0 flex-1">
+                                                                        <div className="flex items-center space-x-0 min-w-0 flex-1">
                                                                             <div className=" p-2 rounded flex-shrink-0">
                                                                                 <img
                                                                                     src={
@@ -332,7 +357,7 @@ function NotesAndUpdatesModal({
                                                                                     className="w-[22px] h-[22px]"
                                                                                 />
                                                                             </div>
-                                                                            <span
+                                                                            {/* <span
                                                                                 className="text-xs font-light truncate"
                                                                                 title={
                                                                                     doc.file_name
@@ -341,17 +366,12 @@ function NotesAndUpdatesModal({
                                                                                 {
                                                                                     doc.file_name
                                                                                 }
-                                                                            </span>
+                                                                            </span> */}
                                                                         </div>
 
                                                                         <div className="flex items-center space-x-0 flex-shrink-0">
                                                                             <button
-                                                                                onClick={() =>
-                                                                                    window.open(
-                                                                                        doc.file_path,
-                                                                                        "_blank"
-                                                                                    )
-                                                                                }
+                                                                                onClick={() => handleOpenViewer(doc)}
                                                                                 className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
                                                                                 title="View document"
                                                                             >
@@ -430,7 +450,15 @@ function NotesAndUpdatesModal({
                     currentUserId={currentUserId}
                 />
             )}
-        </div>
+            {isViewerOpen && viewingFile && (
+                <FileViewerModal
+                    isOpen={isViewerOpen}
+                    onClose={handleCloseViewer}
+                    file={viewingFile}
+                />
+            )}
+        </div>,
+        document.body
     );
 }
 

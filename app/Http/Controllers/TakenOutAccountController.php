@@ -18,7 +18,7 @@ class TakenOutAccountController extends Controller
     public function updateAddStatus(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'ids' => 'required|array',
+            'ids'          => 'required|array',
             'added_status' => 'required|boolean',
         ]);
 
@@ -69,7 +69,9 @@ class TakenOutAccountController extends Controller
 
     public function getMasterList()
     {
-        $masterList = TakenOutAccount::where('added_status', 1)->get();
+        $masterList = TakenOutAccount::where('added_status', 1)
+            ->select('id', 'contract_no', 'account_name', 'financing', 'take_out_date', 'dou_expiry', 'property_name', 'unit_no') // Or other relevant columns
+            ->get();
         return response()->json($masterList);
     }
 

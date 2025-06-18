@@ -44,15 +44,6 @@ import PreloadWrapper from "./PreloadWrapper";
 import BannerSettingsView from "./views/pages/bannersettingsViews/BannerSettingsView";
 import CrsSettingsSidebar from "./layout/mainComponent/sidebars/CrsSettingsSidebar";
 import VersionLogsView from "./views/pages/raiseaconcernViews/VersionLogsView";
-import AccountMasterView from "./views/pages/titlingAndRegistration/MasterListView";
-import WorkOrderView from "./views/pages/titlingAndRegistration/WorkOrderView";
-import ExecutiveDashboardView from "./views/pages/titlingAndRegistration/ExecutiveDashboardView";
-import SettingsView from "./views/pages/titlingAndRegistration/SettingsView";
-import DocumentManagementSidebar from "./layout/mainComponent/sidebars/DocumentManagementSidebar";
-import TakenOutAccountView from "./views/pages/titlingAndRegistration/TakenOutAccountView";
-
-// PrivateRoute component to check authentication
-const PrivateRoute = () => {
 import { useStateContext } from "../context/contextprovider";
 import { ALLOWED_EMPLOYEES_CRS } from "../constant/data/allowedEmployeesCRS";
 import CustomerMasterListView from "@/component/views/pages/transactionViews/CustomerMasterListView";
@@ -64,6 +55,12 @@ import AutoPostingView from "./views/pages/transactionViews/AutoPostingView";
 import ErrorPage from "@/component/ErrorElement/ErrorPage";
 import MarkupSettingsView from "@/component/views/pages/transactionViews/MarkupSettingsView";
 import ReportsView from "./views/pages/transactionViews/ReportsView";
+import AccountMasterView from "./views/pages/titlingAndRegistration/MasterListView";
+import WorkOrderView from "./views/pages/titlingAndRegistration/WorkOrderView";
+import ExecutiveDashboardView from "./views/pages/titlingAndRegistration/ExecutiveDashboardView";
+import SettingsView from "./views/pages/titlingAndRegistration/SettingsView";
+import DocumentManagementSidebar from "./layout/mainComponent/sidebars/DocumentManagementSidebar";
+import TakenOutAccountView from "./views/pages/titlingAndRegistration/TakenOutAccountView";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, children }) => {
@@ -128,7 +125,6 @@ const App = () => {
                 <div className="flex bg-white relative h-full">
                     <div className="fixed h-full z-50">
                         <CrsSettingsSidebar />
-                        {/* <DocumentManagementSidebar /> */}
                     </div>
                     <div className="relative flex-1 ml-[230px] z-10">
                         <Outlet />
@@ -138,12 +134,11 @@ const App = () => {
         );
     };
 
-    const DocumentManagementSidebarLayout = () =>{
+    const DocumentManagementSidebarLayout = () => {
         return (
             <>
                 <div className="flex bg-white relative h-full">
                     <div className="fixed h-full z-50">
-                        {/* <CrsSettingsSidebar /> */}
                         <DocumentManagementSidebar />
                     </div>
                     <div className="relative flex-1 ml-[230px] z-10">
@@ -293,12 +288,22 @@ const App = () => {
                                     element: <AutoAssignView />,
                                 },
                                 {
-                                    path: "bannersettings",
-                                    element: <BannerSettingsView />,
-                                },
-                                {
-                                    path: "versionlogs",
-                                    element: <VersionLogsView />,
+                                    path: "settings",
+                                    element: <SecondLayout />,
+                                    children: [
+                                        {
+                                            path: "autoassign",
+                                            element: <AutoAssignView />,
+                                        },
+                                        {
+                                            path: "bannersettings",
+                                            element: <BannerSettingsView />,
+                                        },
+                                        {
+                                            path: "versionlogs",
+                                            element: <VersionLogsView />,
+                                        },
+                                    ],
                                 },
                             ],
                         },
@@ -328,22 +333,6 @@ const App = () => {
                                 {
                                     path: "takenoutaccounts",
                                     element: <TakenOutAccountView />,
-                                    path: "settings",
-                                    element: <SecondLayout />,
-                                    children: [
-                                        {
-                                            path: "autoassign",
-                                            element: <AutoAssignView />,
-                                        },
-                                        {
-                                            path: "bannersettings",
-                                            element: <BannerSettingsView />,
-                                        },
-                                        {
-                                            path: "versionlogs",
-                                            element: <VersionLogsView />,
-                                        },
-                                    ],
                                 },
                             ],
                         },
@@ -447,11 +436,6 @@ const App = () => {
         },
     ]);
 
-    return (
-        <ContextProvider> {/* Wrap the entire app with ContextProvider */}
-            <RouterProvider router={router} />
-        </ContextProvider>
-    );
+    return <RouterProvider router={router} />;
 };
-
 export default App;

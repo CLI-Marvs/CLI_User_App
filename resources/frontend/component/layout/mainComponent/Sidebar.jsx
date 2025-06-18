@@ -15,6 +15,7 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { useStateContext } from "../../../context/contextprovider";
 import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
+import { set } from "lodash";
 
 const Sidebar = () => {
 
@@ -55,16 +56,6 @@ const Sidebar = () => {
     const handleSuperAdminDropdownClick = () => {
         setSuperAdminOpen(!isSuperAdminOpen);
     };
-
-    const handleInvoiceDropdownClick = () => {
-        setIsInvoiceOpen((prev) => !prev);
-    };
-    const handleItemClick = (item) => {
-        setActiveItem(item);
-        // setIsDocumentManagementOpen(true);
-    const handleSuperAdminDropdownClick = () => {
-        setSuperAdminOpen(!isSuperAdminOpen);
-    };
     const handlePropertyPricingOpen = () => {
         setPropertyPricingOpen(!isPropertyPricingOpen);
     };
@@ -91,7 +82,7 @@ const Sidebar = () => {
                 setIsInvoiceOpen(false);
                 setSuperAdminOpen(true);
                 setIsSalesOpen(false);
-
+                setIsDocumentManagementOpen(false);
                 break;
             case "/transaction/invoices":
             case "/transaction/records":
@@ -105,6 +96,7 @@ const Sidebar = () => {
                 setIsInvoiceOpen(true);
                 setSuperAdminOpen(false);
                 setIsSalesOpen(false);
+                setIsDocumentManagementOpen(false);
                 break;
             case "/inquirymanagement/inquirylist":
             case "/inquirymanagement/report":
@@ -116,6 +108,7 @@ const Sidebar = () => {
                 setInquiryOpen(true);
                 setSuperAdminOpen(false);
                 setIsSalesOpen(false);
+                setIsDocumentManagementOpen(false);
                 break;
             case "/documentmanagement":
             case "/documentmanagement/titleandregistration":
@@ -133,12 +126,14 @@ const Sidebar = () => {
                 setIsSalesOpen(true);
                 setInquiryOpen(false);
                 setIsInvoiceOpen(false);
+                setIsDocumentManagementOpen(false);
                 break;
             default:
                 setInquiryOpen(false);
                 setIsInvoiceOpen(false);
                 setSuperAdminOpen(false);
                 setIsSalesOpen(false);
+                setIsDocumentManagementOpen(false);
                 break;
         }
     }, [location.pathname]);
@@ -622,5 +617,5 @@ const Sidebar = () => {
         </>
     );
 };
-};
+
 export default Sidebar;

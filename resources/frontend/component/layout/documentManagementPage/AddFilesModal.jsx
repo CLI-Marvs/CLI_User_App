@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import ReactDOM from "react-dom"; // Import ReactDOM
 import DateLogo from "../../../../../public/Images/Date_range.svg";
 import FileIcon from "../../../../../public/Images/folder_file_notes.svg";
 import ViewIcon from "../../../../../public/Images/eye_icon.svg";
 import DownloadIcon from "../../../../../public/Images/download_icon.svg";
-import axios from "axios";
 import UploadFilesOnlyModal from "./UploadFilesOnlyModal";
 import apiService from "../../../component/servicesApi/apiService";
+import FileViewerModal from "./FileViewerModal"; // Import the FileViewerModal
 
 function AddFilesModal({
     selectedAccountId,
@@ -20,6 +21,10 @@ function AddFilesModal({
     const [showAll, setShowAll] = useState(false);
     const [initialLogCount] = useState(3);
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+    const [isViewerOpen, setIsViewerOpen] = useState(false); // State for FileViewerModal
+    const [viewingFile, setViewingFile] = useState(null); // State for the file to view
+
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         if (selectedAccountId && workOrderData?.work_order_id) {
@@ -33,6 +38,11 @@ function AddFilesModal({
         }
     }, [selectedAccountId, workOrderData?.work_order_id, selectedWorkOrder]);
 
+    useEffect(() => {
+        setMounted(true);
+        return () => setMounted(false);
+    }, []);
+
     const fetchLogDataWithFiles = async () => {
         setLoading(true);
         setError(null);
@@ -43,7 +53,6 @@ function AddFilesModal({
             );
 
             const data = response.data;
-            console.log("ADD FILES MODAL LOG DATA:", data);
             const logsArray = data.log_data || [];
 
             const filteredLogs = logsArray
@@ -102,6 +111,16 @@ function AddFilesModal({
         await fetchLogDataWithFiles();
     };
 
+    const handleOpenViewer = (file) => {
+        setViewingFile(file);
+        setIsViewerOpen(true);
+    };
+
+    const handleCloseViewer = () => {
+        setIsViewerOpen(false);
+        setViewingFile(null);
+    };
+
     const formatHeaderDate = (dateStr) => {
         if (!dateStr) return "N/A";
         const date = new Date(dateStr);
@@ -141,21 +160,28 @@ function AddFilesModal({
         ? logsWithFiles
         : logsWithFiles.slice(0, initialLogCount);
 
+    if (!mounted) {
+        return null;
+    }
+
     if (loading && !error) {
-        return (
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-50">
+        return ReactDOM.createPortal(
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-[70]">
+                {" "}
                 <div className="bg-white rounded-lg p-8 w-auto min-w-[200px]">
                     <div className="flex justify-center items-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
                         <span className="ml-2">Loading Files...</span>
                     </div>
                 </div>
-            </div>
+            </div>,
+            document.body
         );
     }
 
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[60]">
+            {" "}
             <div
                 className="bg-white rounded-[10px] w-[449px] max-h-[90vh] overflow-y-auto shadow-xl p-[18px_25px] flex flex-col gap-[10px] relative"
                 onClick={(e) => e.stopPropagation()}
@@ -233,9 +259,9 @@ function AddFilesModal({
                                                                     doc.document_id ||
                                                                     doc.id
                                                                 }
-                                                                className="flex items-center space-x-3"
+                                                                className="flex items-center space-x-0"
                                                             >
-                                                                <div className="w-24 flex-shrink-0">
+                                                                <div className="w-64 flex-shrink-0">
                                                                     <span
                                                                         className="text-sm font-normal text-custom-solidgreen truncate block"
                                                                         title={
@@ -247,7 +273,7 @@ function AddFilesModal({
                                                                             "Document"}
                                                                     </span>
                                                                 </div>
-                                                                <div className="bg-[#D6E4D1] rounded-lg py-0 px-[10px] border w-66">
+                                                                <div className="bg-[#D6E4D1] rounded-lg py-0 px-[10px] border w-36">
                                                                     <div className="flex items-center justify-between">
                                                                         <div className="flex items-center space-x-3 min-w-0 flex-1">
                                                                             <div className=" p-2 rounded flex-shrink-0">
@@ -259,7 +285,7 @@ function AddFilesModal({
                                                                                     className="w-[22px] h-[22px]"
                                                                                 />
                                                                             </div>
-                                                                            <span
+                                                                            {/* <span
                                                                                 className="text-xs font-light truncate"
                                                                                 title={
                                                                                     doc.file_name
@@ -268,16 +294,11 @@ function AddFilesModal({
                                                                                 {
                                                                                     doc.file_name
                                                                                 }
-                                                                            </span>
+                                                                            </span> */}
                                                                         </div>
                                                                         <div className="flex items-center space-x-0 flex-shrink-0">
                                                                             <button
-                                                                                onClick={() =>
-                                                                                    window.open(
-                                                                                        doc.file_path,
-                                                                                        "_blank"
-                                                                                    )
-                                                                                }
+                                                                                onClick={() => handleOpenViewer(doc)}
                                                                                 className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
                                                                                 title="View document"
                                                                             >
@@ -354,7 +375,15 @@ function AddFilesModal({
                     currentUserId={workOrderData?.currentUser?.id}
                 />
             )}
-        </div>
+            {isViewerOpen && viewingFile && (
+                <FileViewerModal
+                    isOpen={isViewerOpen}
+                    onClose={handleCloseViewer}
+                    file={viewingFile}
+                />
+            )}
+        </div>,
+        document.body
     );
 }
 

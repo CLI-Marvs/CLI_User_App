@@ -11,6 +11,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Google\Cloud\Storage\StorageClient;
+use Carbon\Carbon; 
 use Illuminate\Support\Facades\Validator;
 
 class WorkOrderController extends Controller
@@ -406,12 +407,6 @@ class WorkOrderController extends Controller
         return $uploadedFilesData;
     }
 
-    /**
-     * Soft delete the specified work order.
-     *
-     * @param  WorkOrder $workOrder
-     * @return \Illuminate\Http\JsonResponse
-     */
     public function softDelete(WorkOrder $workOrder): \Illuminate\Http\JsonResponse
     {
         $workOrderIdForLogging = $workOrder->getKey();
@@ -425,5 +420,24 @@ class WorkOrderController extends Controller
             ]);
             return response()->json(['message' => 'Failed to soft delete work order.', 'error' => $e->getMessage(), 'exception_class' => get_class($e)], 500);
         }
+    }
+
+    public function updateStatusToComplete(Request $request, $workOrderId)
+    {
+        $workOrder = WorkOrder::find($workOrderId);
+
+        if (!$workOrder) {
+            return response()->json(['message' => 'Work Order not found.'], 404);
+        }
+
+        if ($workOrder->status !== 'Complete') {
+            $workOrder->status = 'Complete';
+            $workOrder->completed_at = Carbon::now();
+            $workOrder->save();
+
+            return response()->json(['message' => 'Work Order status updated to Complete.', 'work_order' => $workOrder]);
+        }
+
+        return response()->json(['message' => 'Work Order status is already Complete.', 'work_order' => $workOrder]);
     }
 }

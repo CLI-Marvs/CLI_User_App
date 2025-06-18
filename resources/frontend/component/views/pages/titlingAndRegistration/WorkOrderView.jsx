@@ -209,14 +209,11 @@ const WorkOrderView = () => {
         );
     });
 
-    const indexOfLastRow = Math.min(
-        currentPage * rowsPerPage,
-        filteredRows.length
-    );
-    const indexOfFirstRow = Math.max(indexOfLastRow - rowsPerPage, 0);
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    const currentData = filteredRows.slice(startIndex, endIndex);
 
-    const currentData = filteredRows.slice(indexOfFirstRow, indexOfLastRow);
-    const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+    const totalPages = Math.max(1, Math.ceil(filteredRows.length / rowsPerPage));
 
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
@@ -310,7 +307,7 @@ const WorkOrderView = () => {
                                     border: "none",
                                 }}
                             >
-                                <span className="truncate text-left flex-1">
+                                <span className="truncate text-left flex-1 normal-case">
                                     {workOrderFilterOption}
                                 </span>
                                 <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-500" />

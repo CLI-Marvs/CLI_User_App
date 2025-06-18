@@ -14,5 +14,9 @@ class WorkOrderType extends Model
         'type_name',
         'description',
     ];
+    public function submilestones()
+    {
+        return $this->hasMany(Submilestone::class, 'work_order_type_id');
+    }
 
 }
