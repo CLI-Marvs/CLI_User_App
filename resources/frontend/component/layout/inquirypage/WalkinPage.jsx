@@ -6,6 +6,8 @@ import WalkinTableRow from "@/component/layout/inquirypage/component/Walkin/Walk
 import EngageFormModal from "@/component/layout/inquirypage/component/Walkin/EngageFormModal";
 import { walkinTransactionService } from "@/component/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
 import { categoryService } from "@/component/servicesApi/apiCalls/emojiWalkin/categoryService";
+import { queueService } from "@/component/servicesApi/apiCalls/emojiWalkin/queueService";
+import { branchService } from "@/component/servicesApi/apiCalls/emojiWalkin/branchService";
 
 const WalkinPage = () => {
     //States
@@ -17,6 +19,10 @@ const WalkinPage = () => {
     const [hasError, setHasError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const dataFetchedRef = useRef(false);
+    const [branches, setBranches] = useState([]);
+    const [selectedBranch, setSelectedBranch] = useState({ id: "", name: "" });
+    const [desks, setDesks] = useState([]);
+    const [selectedDesk, setSelectedDesk] = useState({ id: "", name: "" });
 
     //Hooks
     // Effect to fetch data only once when component mounts
@@ -31,6 +37,8 @@ const WalkinPage = () => {
                     await walkinTransactionService.getAllWalkinTransactions();
                 const categoryResponse =
                     await categoryService.getAllCategories();
+                const branchResponse = await branchService.getAllBranches();
+                setBranches(branchResponse || []);
                 setWalkinData(response.data || []);
                 setCategories(categoryResponse || []);
                 dataFetchedRef.current = true;
@@ -51,6 +59,15 @@ const WalkinPage = () => {
     const handleOpenModal = (item) => {
         if (engageFormModalRef.current) {
             setSelectedItem(item);
+            const trimCounter = selectedDesk.name.replace(/\D/g, "");
+            //Send to queue monitor - firebase
+            const payload = {
+                priority_number: item?.priority_number,
+                status: "serving",
+                counter: trimCounter,
+            };
+
+            queueService.updateQueueStatus(payload);
             engageFormModalRef.current.showModal();
         }
     };
@@ -66,16 +83,33 @@ const WalkinPage = () => {
                         </span>
                         <div className="relative w-full">
                             <select
-                                name="user_type"
-                                //    value={formData.user_type}
-                                //    onChange={handleChange}
+                                name="branch_id"
+                                onChange={(e) => {
+                                    const branchId = e.target.value;
+                                    const branch = branches.find(
+                                        (b) => String(b.id) === branchId
+                                    );
+                                    setSelectedBranch({
+                                        id: branchId,
+                                        name: branch ? branch.name : "",
+                                    });
+                                    setDesks(branch ? branch.desks : []);
+                                }}
+                                value={selectedBranch.id}
                                 className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
                             >
                                 <option value="" className="montserrat-regular">
                                     (Select branch)
                                 </option>
-                                <option value="Property Owner">Branch 1</option>
-                                <option value="Buyer">Branch 2</option>
+                                {branches &&
+                                    branches.map((branch) => (
+                                        <option
+                                            key={branch.id}
+                                            value={branch.id}
+                                        >
+                                            {branch.name}
+                                        </option>
+                                    ))}
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                 <IoMdArrowDropdown />
@@ -92,16 +126,27 @@ const WalkinPage = () => {
                         </span>
                         <div className="relative w-full">
                             <select
-                                name="user_type"
-                                //    value={formData.user_type}
-                                //    onChange={handleChange}
+                                name="desk_id"
+                                onChange={(e) => {
+                                    const deskId = e.target.value;
+                                    const desk = desks.find(
+                                        (d) => String(d.id) === deskId
+                                    );
+                                    setSelectedDesk({
+                                        id: deskId,
+                                        name: desk ? desk.name : "",
+                                    });
+                                }}
                                 className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
                             >
                                 <option value="" className="montserrat-regular">
                                     (Select counter)
                                 </option>
-                                <option value="Property Owner">Branch 1</option>
-                                <option value="Buyer">Branch 2</option>
+                                {desks.map((desk) => (
+                                    <option key={desk.id} value={desk.id}>
+                                        {desk.name}
+                                    </option>
+                                ))}
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                 <IoMdArrowDropdown />
@@ -127,21 +172,6 @@ const WalkinPage = () => {
                             />
                         )}
                     />
-                    {/* <CustomTable
-                                            tableClassName="w-full min-w-[882px] px-2"
-                                            className="gap-4 w-full h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen mb-4 -mx-1 px-4"
-                                            columns={propertySettingColumns}
-                                            data={propertyFeatures}
-                                            isLoading={isLoading && isFirstLoad}
-                                            renderRow={(item) => (
-                                                <PropertyFeatureTableRow
-                                                    key={item.id}
-                                                    
-                                                    handleOpenModal={handleOpenModal}
-                                                    propertySettingColumns={propertySettingColumns}
-                                                />
-                                            )}
-                                        /> */}
                 </div>
             </div>
             <div>

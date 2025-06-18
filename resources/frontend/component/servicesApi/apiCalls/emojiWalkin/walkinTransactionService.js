@@ -34,4 +34,18 @@ export const walkinTransactionService = {
             throw error;
         }
     },
+    
+    updateWalkinTransactionStatus: async (payload) => {
+        try {
+            // Add this route to your admin group
+            const response = await walkinFeedbackService.put(
+                `/admin/transactions/${payload.walkin_transaction_id}`,
+                { status: payload.status }
+            );
+            return response.data;
+        } catch (error) {
+            console.error("Error updating walkin transaction status:", error);
+            throw error;
+        }
+    },
 };
