@@ -18,7 +18,7 @@ class TakenOutAccountController extends Controller
     public function updateAddStatus(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'ids'          => 'required|array',
+            'ids' => 'required|array',
             'added_status' => 'required|boolean',
         ]);
 
@@ -91,7 +91,7 @@ class TakenOutAccountController extends Controller
                 ->update(['added_status' => false]);
 
             return response()->json([
-                'message'       => 'Undo successful!',
+                'message' => 'Undo successful!',
                 'updated_count' => $updatedCount
             ]);
 

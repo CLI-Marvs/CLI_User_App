@@ -31,17 +31,25 @@ const UploadFilesOnlyModal = ({
                     setLoadingSubmilestones(true);
                     try {
                         const response = await apiService.get(
-                            `/submilestones-details?work_order_type_name=${encodeURIComponent(logType)}`
+                            `/submilestones-details?work_order_type_name=${encodeURIComponent(
+                                logType
+                            )}`
                         );
                         console.log(response.data);
                         if (Array.isArray(response.data)) {
                             setSubmilestoneOptions(response.data);
                         } else {
-                            console.warn("API for submilestones did not return an array. Received:", response.data);
+                            console.warn(
+                                "API for submilestones did not return an array. Received:",
+                                response.data
+                            );
                             setSubmilestoneOptions([]);
                         }
                     } catch (err) {
-                        console.error("Failed to fetch submilestone options:", err);
+                        console.error(
+                            "Failed to fetch submilestone options:",
+                            err
+                        );
                         setSubmilestoneOptions([]);
                     } finally {
                         setLoadingSubmilestones(false);
@@ -110,11 +118,11 @@ const UploadFilesOnlyModal = ({
     };
 
     const formatFileSize = (bytes) => {
-        if (bytes === 0) return '0 Bytes';
+        if (bytes === 0) return "0 Bytes";
         const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const sizes = ["Bytes", "KB", "MB", "GB"];
         const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
     };
 
     const handleSave = async () => {
@@ -122,12 +130,15 @@ const UploadFilesOnlyModal = ({
             setError("Please attach at least one file.");
             return;
         }
-        if (submilestoneOptions.length > 0) {
-            const filesWithoutTitles = attachedFiles.filter(fw => !fw.title);
-            if (filesWithoutTitles.length > 0) {
-                setError("Please select a document type for all attached files.");
-                return;
-            }
+        // Ensure all files have a title/document type
+        const filesWithoutTitles = attachedFiles.filter((fw) => !fw.title);
+        if (filesWithoutTitles.length > 0) {
+            setError(
+                submilestoneOptions.length > 0
+                    ? "Please select a document type for all attached files."
+                    : "Please provide a title for all attached files."
+            );
+            return;
         }
         setError(null);
         setIsSaving(true);
@@ -172,8 +183,6 @@ const UploadFilesOnlyModal = ({
                 },
             };
 
-            console.log("FORMDATA", formData);
-
             const csrfToken = document.querySelector('meta[name="csrf-token"]');
             const userToken = localStorage.getItem("authToken");
 
@@ -189,7 +198,19 @@ const UploadFilesOnlyModal = ({
             }
 
             const response = await apiService.request(config);
+            const fileTitles = attachedFiles.map((fw) => fw.title);
+            for (const fileWrapper of attachedFiles) {
+                const checklist_id = fileWrapper.checklist_id;
+                await apiService.post("/account-checklist-status/bulk", {
+                    account_id: selectedAccountId,
+                    file_titles: fileTitles,
+                    is_completed: true,
+                    completed_at: new Date().toISOString(),
+                });
+            }
+
             onUploadSuccess();
+            onClose();
         } catch (err) {
             console.error("Failed to upload files:", err);
 
@@ -219,14 +240,15 @@ const UploadFilesOnlyModal = ({
                 className="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
-                {/* Header */}
                 <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
                     <div>
                         <h2 className="text-xl font-semibold text-gray-900">
                             Upload Documents
                         </h2>
                         <p className="text-sm text-gray-600 mt-1">
-                            {logType ? `${logType} - Work Order No. ${numericWorkOrderId}` : `Work Order No. ${numericWorkOrderId}`}
+                            {logType
+                                ? `${logType} - Work Order No. ${numericWorkOrderId}`
+                                : `Work Order No. ${numericWorkOrderId}`}
                         </p>
                     </div>
                     <button
@@ -235,8 +257,18 @@ const UploadFilesOnlyModal = ({
                         aria-label="Close modal"
                         disabled={isSaving}
                     >
-                        <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                            className="w-5 h-5 text-gray-500"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M6 18L18 6M6 6l12 12"
+                            />
                         </svg>
                     </button>
                 </div>
@@ -248,13 +280,13 @@ const UploadFilesOnlyModal = ({
                         <label className="block text-sm font-medium text-gray-700 mb-3">
                             Select Files to Upload
                         </label>
-                        
+
                         {/* Drag and Drop Zone */}
                         <div
                             className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors duration-200 ${
-                                dragActive 
-                                    ? 'border-blue-400 bg-blue-50' 
-                                    : 'border-gray-300 hover:border-gray-400'
+                                dragActive
+                                    ? "border-blue-400 bg-blue-50"
+                                    : "border-gray-300 hover:border-gray-400"
                             }`}
                             onDragEnter={handleDrag}
                             onDragLeave={handleDrag}
@@ -269,10 +301,20 @@ const UploadFilesOnlyModal = ({
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                 disabled={isSaving}
                             />
-                            
+
                             <div className="flex flex-col items-center">
-                                <svg className="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                <svg
+                                    className="w-12 h-12 text-gray-400 mb-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                    />
                                 </svg>
                                 <p className="text-lg font-medium text-gray-700 mb-2">
                                     Drop files here or click to browse
@@ -299,7 +341,7 @@ const UploadFilesOnlyModal = ({
                                     Clear All
                                 </button>
                             </div>
-                            
+
                             <div className="space-y-3 max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
                                 {attachedFiles.map((fileWrapper) => (
                                     <div
@@ -308,70 +350,155 @@ const UploadFilesOnlyModal = ({
                                     >
                                         <div className="flex items-start justify-between mb-3">
                                             <div className="flex-1 min-w-0">
-                                                <p className="text-sm font-medium text-gray-900 truncate" title={fileWrapper.file.name}>
+                                                <p
+                                                    className="text-sm font-medium text-gray-900 truncate"
+                                                    title={
+                                                        fileWrapper.file.name
+                                                    }
+                                                >
                                                     {fileWrapper.file.name}
                                                 </p>
                                                 <p className="text-xs text-gray-500 mt-1">
-                                                    {formatFileSize(fileWrapper.file.size)} • {fileWrapper.file.type || 'Unknown type'}
+                                                    {formatFileSize(
+                                                        fileWrapper.file.size
+                                                    )}{" "}
+                                                    •{" "}
+                                                    {fileWrapper.file.type ||
+                                                        "Unknown type"}
                                                 </p>
                                             </div>
                                             <button
-                                                onClick={() => handleRemoveFile(fileWrapper.id)}
+                                                onClick={() =>
+                                                    handleRemoveFile(
+                                                        fileWrapper.id
+                                                    )
+                                                }
                                                 className="ml-3 p-1 text-red-500 hover:text-red-700 hover:bg-red-50 rounded transition-colors duration-200"
                                                 disabled={isSaving}
                                                 aria-label={`Remove ${fileWrapper.file.name}`}
                                             >
-                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                <svg
+                                                    className="w-4 h-4"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                                    />
                                                 </svg>
                                             </button>
                                         </div>
-                                        
+
                                         {/* Document Type Selection */}
                                         <div>
                                             <label className="block text-xs font-medium text-gray-700 mb-1">
-                                                Document Type {submilestoneOptions.length > 0 && <span className="text-red-500">*</span>}
+                                                Document Type{" "}
+                                                {submilestoneOptions.length >
+                                                    0 && (
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
+                                                )}
                                             </label>
                                             {loadingSubmilestones ? (
                                                 <div className="flex items-center text-sm text-gray-500 p-2 bg-gray-100 rounded">
-                                                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
-                                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    <svg
+                                                        className="animate-spin -ml-1 mr-2 h-4 w-4"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <circle
+                                                            className="opacity-25"
+                                                            cx="12"
+                                                            cy="12"
+                                                            r="10"
+                                                            stroke="currentColor"
+                                                            strokeWidth="4"
+                                                        ></circle>
+                                                        <path
+                                                            className="opacity-75"
+                                                            fill="currentColor"
+                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                                        ></path>
                                                     </svg>
                                                     Loading document types...
                                                 </div>
-                                            ) : submilestoneOptions.length > 0 ? (
+                                            ) : submilestoneOptions.length >
+                                              0 ? (
                                                 <select
                                                     value={fileWrapper.title}
-                                                    onChange={(e) => handleTitleChange(fileWrapper.id, e.target.value)}
+                                                    onChange={(e) =>
+                                                        handleTitleChange(
+                                                            fileWrapper.id,
+                                                            e.target.value
+                                                        )
+                                                    }
                                                     className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                                                     disabled={isSaving}
                                                 >
                                                     <option value="" disabled>
                                                         Select document type...
                                                     </option>
-                                                    {submilestoneOptions.map((submilestone) =>
-                                                        submilestone.checklists && submilestone.checklists.length > 0 ? (
-                                                            <optgroup key={`sub-${submilestone.id}`} label={submilestone.name}>
-                                                                {submilestone.checklists.map((checklist) => (
-                                                                    <option key={`chk-${checklist.id}`} value={checklist.name}>
-                                                                        {checklist.name}
-                                                                    </option>
-                                                                ))}
-                                                            </optgroup>
-                                                        ) : (
-                                                            <option key={`sub-${submilestone.id}`} value={submilestone.name}>
-                                                                {submilestone.name}
-                                                            </option>
-                                                        )
+                                                    {submilestoneOptions.map(
+                                                        (submilestone) =>
+                                                            submilestone.checklists &&
+                                                            submilestone
+                                                                .checklists
+                                                                .length > 0 ? (
+                                                                <optgroup
+                                                                    key={`sub-${submilestone.id}`}
+                                                                    label={
+                                                                        submilestone.name
+                                                                    }
+                                                                >
+                                                                    {submilestone.checklists.map(
+                                                                        (
+                                                                            checklist
+                                                                        ) => (
+                                                                            <option
+                                                                                key={`chk-${checklist.id}`}
+                                                                                value={
+                                                                                    checklist.name
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    checklist.name
+                                                                                }
+                                                                            </option>
+                                                                        )
+                                                                    )}
+                                                                </optgroup>
+                                                            ) : (
+                                                                <option
+                                                                    key={`sub-${submilestone.id}`}
+                                                                    value={
+                                                                        submilestone.name
+                                                                    }
+                                                                >
+                                                                    {
+                                                                        submilestone.name
+                                                                    }
+                                                                </option>
+                                                            )
                                                     )}
                                                 </select>
                                             ) : (
                                                 <input
                                                     type="text"
-                                                    value={fileWrapper.title || ""}
+                                                    value={
+                                                        fileWrapper.title || ""
+                                                    }
                                                     placeholder="Enter document title..."
-                                                    onChange={(e) => handleTitleChange(fileWrapper.id, e.target.value)}
+                                                    onChange={(e) =>
+                                                        handleTitleChange(
+                                                            fileWrapper.id,
+                                                            e.target.value
+                                                        )
+                                                    }
                                                     className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                                                     disabled={isSaving}
                                                 />
@@ -387,12 +514,26 @@ const UploadFilesOnlyModal = ({
                     {error && (
                         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
                             <div className="flex items-start">
-                                <svg className="w-5 h-5 text-red-400 mt-0.5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                <svg
+                                    className="w-5 h-5 text-red-400 mt-0.5 mr-3 flex-shrink-0"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                                    />
                                 </svg>
                                 <div>
-                                    <h3 className="text-sm font-medium text-red-800">Upload Error</h3>
-                                    <p className="text-sm text-red-700 mt-1">{error}</p>
+                                    <h3 className="text-sm font-medium text-red-800">
+                                        Upload Error
+                                    </h3>
+                                    <p className="text-sm text-red-700 mt-1">
+                                        {error}
+                                    </p>
                                 </div>
                             </div>
                         </div>
@@ -403,7 +544,10 @@ const UploadFilesOnlyModal = ({
                 <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
                     <div className="text-sm text-gray-600">
                         {attachedFiles.length > 0 && (
-                            <span>{attachedFiles.length} file{attachedFiles.length !== 1 ? 's' : ''} selected</span>
+                            <span>
+                                {attachedFiles.length} file
+                                {attachedFiles.length !== 1 ? "s" : ""} selected
+                            </span>
                         )}
                     </div>
                     <div className="flex space-x-3">
@@ -444,8 +588,18 @@ const UploadFilesOnlyModal = ({
                                 </>
                             ) : (
                                 <>
-                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    <svg
+                                        className="w-4 h-4 mr-2"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                        />
                                     </svg>
                                     Upload Files
                                 </>

@@ -5,7 +5,7 @@ import Attachment from "../../../../../public/Images/ATTCHMT.svg";
 import apiService from "../../../component/servicesApi/apiService";
 import Dropdown from "../../../../../resources/frontend/component/layout/documentManagementPage/TableMonitoringDropdown";
 import AddFilesModal from "./AddFilesModal";
-import NotesAndUpdatesModal from "./NotesAndUpdatesModal"; 
+import NotesAndUpdatesModal from "./NotesAndUpdatesModal";
 
 import { motion } from "framer-motion";
 
@@ -50,18 +50,22 @@ export default function TitlingAndRegistrationMonitor({
     contractNumber,
     propertyName,
     unitNumber,
-    id
+    id,
 }) {
     const [monitoringData, setMonitoringData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedRow, setSelectedRow] = useState(null);
     // const [isTitlingStepNotesModalOpen, setIsTitlingStepNotesModalOpen] = useState(false);
-    // const [selectedItemForTitlingNotes, setSelectedItemForTitlingNotes] = useState(null); 
+    // const [selectedItemForTitlingNotes, setSelectedItemForTitlingNotes] = useState(null);
     const [isViewFilesModalOpen, setIsViewFilesModalOpen] = useState(false);
-    const [selectedItemForFilesView, setSelectedItemForFilesView] = useState(null);
-    const [isNotesAndUpdatesModalOpen, setIsNotesAndUpdatesModalOpen] = useState(false);
-    const [selectedItemForNotesAndUpdates, setSelectedItemForNotesAndUpdates] = useState(null);
+    const [selectedItemForFilesView, setSelectedItemForFilesView] =
+        useState(null);
+    const [isNotesAndUpdatesModalOpen, setIsNotesAndUpdatesModalOpen] =
+        useState(false);
+    const [selectedItemForNotesAndUpdates, setSelectedItemForNotesAndUpdates] =
+        useState(null);
+    const [checklistStatuses, setChecklistStatuses] = useState({});
 
     const TITLING_PROCESS_STEPS = [
         "Docketing",
@@ -102,7 +106,10 @@ export default function TitlingAndRegistrationMonitor({
                     dueDate: item.dueDate || "TBD",
                     hasNotes: item.notesCount > 0,
                     hasFiles: item.filesCount > 0,
+                    submilestone_ids: item.submilestoneIds || [],
                 }));
+
+                console.log("Transformed Data:", transformedData);
 
                 setMonitoringData(transformedData);
             } catch (err) {
@@ -141,6 +148,84 @@ export default function TitlingAndRegistrationMonitor({
         }
     }, [contractNumber]);
 
+    useEffect(() => {
+        async function fetchChecklistStatuses() {
+            if (monitoringData.length > 0) {
+                const statusPromises = monitoringData.map(async (item) => {
+                    if (item.submilestone_ids?.length > 0) {
+                        const checklistStatusPromises =
+                            item.submilestone_ids.map((submilestoneId) =>
+                                apiService
+                                    .get(
+                                        `/account/${id}/submilestone/${submilestoneId}/checklist-status`
+                                    )
+                                    .then(
+                                        (res) => res?.data?.status || "Unknown"
+                                    )
+                                    .catch((error) => {
+                                        console.error(
+                                            `Error fetching status for ${item.step} - submilestone ${submilestoneId}:`,
+                                            error
+                                        );
+                                        return "Error";
+                                    })
+                            );
+
+                        const statuses = await Promise.all(
+                            checklistStatusPromises
+                        );
+
+                        let finalStatus;
+                        if (statuses.every((s) => s === "Complete")) {
+                            finalStatus = "Complete";
+                        } else if (statuses.some((s) => s === "Error")) {
+                            finalStatus = "Error";
+                        } else if (statuses.every((s) => s === "Pending")) {
+                            finalStatus = "Pending";
+                        } else {
+                            finalStatus = "In Progress";
+                        }
+
+                        return [item.step, finalStatus];
+                    } else {
+                        const validStatuses = [
+                            "In Progress",
+                            "On Hold",
+                            "Pending",
+                            "Complete",
+                            "Completed",
+                            "Incomplete",
+                            "Error",
+                            "Unassigned",
+                        ];
+
+                        const fallbackStatus = validStatuses.includes(
+                            item.status
+                        )
+                            ? item.status
+                            : "Unassigned";
+
+                        return [item.step, fallbackStatus];
+                    }
+                });
+
+                try {
+                    const results = await Promise.all(statusPromises);
+                    const statusMap = Object.fromEntries(results);
+                    setChecklistStatuses(statusMap);
+                } catch (error) {
+                    console.error("Error fetching checklist statuses:", error);
+                }
+            } else {
+                setChecklistStatuses({});
+            }
+        }
+
+        fetchChecklistStatuses();
+    }, [id, monitoringData]);
+
+    console.log("STATUS:", checklistStatuses);
+
     const handleOpenNotesAndUpdatesModal = (item) => {
         setSelectedItemForNotesAndUpdates(item);
         setIsNotesAndUpdatesModalOpen(true);
@@ -160,7 +245,6 @@ export default function TitlingAndRegistrationMonitor({
         setIsViewFilesModalOpen(false);
         setSelectedItemForFilesView(null);
     };
-
 
     if (isLoading) {
         return (
@@ -255,22 +339,31 @@ export default function TitlingAndRegistrationMonitor({
                                         </td>
                                         <td className="p-2 text-center align-middle">
                                             <span
-                                                className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
-                                                    item.status === "Completed"
+                                                className={`inline-block px-3 py-1 rounded-full text-xs font-medium w-28 ${
+                                                    checklistStatuses[
+                                                        item.step
+                                                    ] === "Complete" ||
+                                                    checklistStatuses[
+                                                        item.step
+                                                    ] === "Completed"
                                                         ? "bg-green-200 text-green-800"
-                                                        : item.status ===
-                                                          "In Progress"
+                                                        : checklistStatuses[
+                                                              item.step
+                                                          ] === "In Progress"
                                                         ? "bg-blue-200 text-blue-800"
-                                                        : item.status ===
-                                                          "On Hold"
+                                                        : checklistStatuses[
+                                                              item.step
+                                                          ] === "On Hold"
                                                         ? "bg-red-200 text-red-800"
-                                                        : item.status ===
-                                                          "Pending"
+                                                        : checklistStatuses[
+                                                              item.step
+                                                          ] === "Pending"
                                                         ? "bg-yellow-200 text-yellow-800"
                                                         : "bg-gray-200 text-gray-800"
                                                 }`}
                                             >
-                                                {item.status}
+                                                {checklistStatuses[item.step] ||
+                                                    item.status}
                                             </span>
                                         </td>
                                         <td className="pl-16 align-middle text-base font-normal text-gray-700">
@@ -315,7 +408,11 @@ export default function TitlingAndRegistrationMonitor({
                                             {item.hasNotes ? (
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleOpenNotesAndUpdatesModal(item)}
+                                                    onClick={() =>
+                                                        handleOpenNotesAndUpdatesModal(
+                                                            item
+                                                        )
+                                                    }
                                                     className="bg-transparent border-none p-0 m-0 cursor-pointer hover:opacity-75 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded"
                                                     aria-label={`View notes for step ${item.step}`}
                                                 >
@@ -329,12 +426,19 @@ export default function TitlingAndRegistrationMonitor({
                                             {item.hasFiles ? (
                                                 <button
                                                     type="button"
-                                                    onClick={() => handleOpenViewFilesModal(item)}
+                                                    onClick={() =>
+                                                        handleOpenViewFilesModal(
+                                                            item
+                                                        )
+                                                    }
                                                     className="bg-transparent border-none p-0 m-0 cursor-pointer hover:opacity-75 focus:outline-none focus:ring-1 focus:ring-blue-500 rounded"
                                                     aria-label={`View files for step ${item.step}`}
                                                 >
                                                     <LinkIcon />
-                                                </button>) : "-"}
+                                                </button>
+                                            ) : (
+                                                "-"
+                                            )}
                                         </td>
                                     </tr>
                                     {isSelected && (
@@ -366,7 +470,15 @@ export default function TitlingAndRegistrationMonitor({
                                                     }}
                                                 >
                                                     <div className="p-3 ml-4">
-                                                        <Dropdown currentMilestone={item.step} workOrderId={item.workOrderId} accountId={id} />
+                                                        <Dropdown
+                                                            currentMilestone={
+                                                                item.step
+                                                            }
+                                                            workOrderId={
+                                                                item.workOrderId
+                                                            }
+                                                            accountId={id}
+                                                        />
                                                     </div>
                                                 </motion.div>
                                             </td>
@@ -381,27 +493,27 @@ export default function TitlingAndRegistrationMonitor({
 
             {isNotesAndUpdatesModalOpen && selectedItemForNotesAndUpdates && (
                 <NotesAndUpdatesModal
-                    selectedAccountId={id} 
+                    selectedAccountId={id}
                     onClose={handleCloseNotesAndUpdatesModal}
                     selectedWorkOrder={selectedItemForNotesAndUpdates.step}
-                    selectedAssignee={selectedItemForNotesAndUpdates.assignee} 
-                    workOrderData={{ 
-                        work_order_id: selectedItemForNotesAndUpdates.workOrderId,
+                    selectedAssignee={selectedItemForNotesAndUpdates.assignee}
+                    workOrderData={{
+                        work_order_id:
+                            selectedItemForNotesAndUpdates.workOrderId,
                     }}
                 />
             )}
 
             {isViewFilesModalOpen && selectedItemForFilesView && (
                 <AddFilesModal
-                    selectedAccountId={id} 
+                    selectedAccountId={id}
                     onClose={handleCloseViewFilesModal}
                     selectedWorkOrder={selectedItemForFilesView.step}
-                    workOrderData={{ 
+                    workOrderData={{
                         work_order_id: selectedItemForFilesView.workOrderId,
                     }}
                 />
             )}
-
 
             <div className="bg-[#175D5F] text-white p-4 text-sm">
                 <div className="flex justify-between">

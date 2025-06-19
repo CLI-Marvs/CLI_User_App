@@ -25,6 +25,13 @@ class TakenOutAccount extends Model
         'take_out_date',
         'dou_expiry',
         'added_status',
+        'checklist_status',
+    ];
+
+    protected $casts = [
+        'added_status' => 'boolean',
+        'milestone_statuses' => 'array',
+        'checklist_status' => 'boolean',
     ];
 
     public function takenOutAccount()
@@ -40,6 +47,10 @@ class TakenOutAccount extends Model
     {
         return $this->belongsToMany(WorkOrderLog::class, 'account_log', 'account_id', 'work_order_log_id')
             ->withTimestamps();
+    }
+    public function checklistStatuses()
+    {
+        return $this->hasMany(AccountChecklistStatus::class, 'account_id');
     }
 
 

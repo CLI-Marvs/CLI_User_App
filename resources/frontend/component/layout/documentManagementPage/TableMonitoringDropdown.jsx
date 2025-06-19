@@ -14,6 +14,7 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
     const [error, setError] = useState(null);
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [viewingFile, setViewingFile] = useState(null);
+    const [milestoneOverallStatus, setMilestoneOverallStatus] = useState(null);
     const [isCompletionStatusUpdated, setIsCompletionStatusUpdated] = useState(false);
 
     useEffect(() => {
@@ -28,6 +29,7 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
             setMilestoneDetails({});
             setUploadedDocuments([]);
             setCheckedItems({});
+            setMilestoneOverallStatus(null);
             // Reset loading and error only if it's due to invalid work order/account ID, not just missing currentMilestone
             if (isWorkOrderInvalid || !accountId) {
                 setIsLoading(false);
@@ -49,6 +51,8 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                     )}&accountId=${encodeURIComponent(accountId)}`
                 );
 
+                console.log("MILESTONEDATA", response.data);
+
                 if (
                     typeof response.data === "object" &&
                     response.data !== null &&
@@ -64,6 +68,7 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                     }, {});
                     setMilestoneDetails(upperCasedData);
                     setUploadedDocuments(response.data.uploadedDocuments || []);
+                    setMilestoneOverallStatus(response.data.milestoneOverallStatus || null);
                 } else {
                     console.error(
                         "API did not return a valid object for milestone details:",
@@ -72,6 +77,7 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                     setError("Failed to load details: Invalid data format.");
                     setMilestoneDetails({});
                     setUploadedDocuments([]);
+                    setMilestoneOverallStatus(null);
                 }
             } catch (err) {
                 console.error(
@@ -83,6 +89,7 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                 );
                 setMilestoneDetails({});
                 setUploadedDocuments([]);
+                setMilestoneOverallStatus(null);
             } finally {
                 setIsLoading(false);
             }
@@ -127,13 +134,21 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
             workOrderId === WORK_ORDER_NA ||
             !accountId
         ) {
-            return; // Don't proceed if already updated, no details, invalid work order, or no accountId
+            return;
+        }
+
+        // If the fetched overall status from taken_out_accounts is already 'Complete',
+        // set isCompletionStatusUpdated to true to prevent redundant PATCH calls.
+        if (milestoneOverallStatus === 'Complete' && !isCompletionStatusUpdated) {
+            setIsCompletionStatusUpdated(true);
+            // The work order status might still need to be patched if it's different,
+            // but this prevents the checklist-driven update if the account already reflects completion.
         }
 
         const allSubmilestonesComplete = Object.keys(milestoneDetails).every(
             (subMilestone) => {
                 const items = milestoneDetails[subMilestone];
-                if (!items || items.length === 0) return true; // Consider empty submilestones as complete
+                if (!items || items.length === 0) return true; 
 
                 const checkedCount = items.filter(
                     (_, index) => checkedItems[`${subMilestone}-${index}`]
@@ -153,7 +168,7 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
             };
             updateWorkOrderStatus();
         }
-    }, [milestoneDetails, checkedItems, workOrderId, accountId, isCompletionStatusUpdated]);
+    }, [milestoneDetails, checkedItems, workOrderId, accountId, isCompletionStatusUpdated, milestoneOverallStatus]);
 
     const toggleSubMilestone = (subMilestone) => {
         setExpandedSubMilestones((prev) => ({

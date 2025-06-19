@@ -89,8 +89,8 @@ const WorkOrderView = () => {
     const workOrderFilterOptions = [
         { label: "All", value: "all" },
         { label: "Unassigned", value: "unassigned" },
-        { label: "In Progress", value: "in_progress" },
-        { label: "Completed", value: "completed" },
+        { label: "In Progress", value: "Pending" },
+        { label: "Complete", value: "complete" },
     ];
     const [tableRows, setTableRows] = useState([]);
     const [isFilterVisible, setIsFilterVisible] = useState(false);
@@ -419,7 +419,7 @@ const WorkOrderView = () => {
                                             <option value="">
                                                 All Statuses
                                             </option>
-                                            <option value="In Progress">
+                                            <option value="Pending">
                                                 In Progress
                                             </option>
                                             <option value="Completed">

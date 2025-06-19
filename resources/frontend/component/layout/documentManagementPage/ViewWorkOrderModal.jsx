@@ -113,6 +113,8 @@ const ViewWorkOrderModal = ({
 
     if (!isOpen || !mounted || !workOrderData) return null;
 
+    console.log("Work order account status:", workOrderData.status);
+
     return ReactDOM.createPortal(
         <div
             className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
@@ -180,7 +182,7 @@ const ViewWorkOrderModal = ({
                             Status:
                         </span>
                         <span
-                            className={`ml-2 px-3 py-1 rounded-full text-xs
+                            className={`ml-0 px-3 py-1 rounded-full text-sm text-custom-bluegreen
                                 ${
                                     workOrderData.status === "In Progress" ||
                                     workOrderData.status === "Pending"
@@ -229,20 +231,21 @@ const ViewWorkOrderModal = ({
                                 <span
                                     className={`px-3 py-1 rounded-full text-xs font-normal
                                         ${
-                                            workOrderData.status ===
-                                                "In Progress" ||
+                                            workOrderData.status === "In Progress" ||
                                             workOrderData.status === "Pending"
                                                 ? "bg-[#F5F4DC] text-custom-bluegreen text-sm font-normal"
                                                 : ""
                                         }
                                         ${
-                                            workOrderData.status === "Completed"
+                                            workOrderData.status === "Complete"
                                                 ? "bg-custom-bluegreen text-white"
                                                 : ""
                                         }
-                                  `}
+                                    `}
                                 >
-                                    In Progress
+                                    {workOrderData.status === "Complete"
+                                        ? "Completed"
+                                        : "In Progress"}
                                 </span>
                             </div>
                             <div className="col-span-2 flex justify-center">

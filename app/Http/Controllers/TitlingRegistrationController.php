@@ -23,7 +23,7 @@ class TitlingRegistrationController extends Controller
             return response()->json(['message' => 'Account not found for the given contract number.'], 404);
         }
 
-        $definedSteps = WorkOrderType::orderBy('id')->pluck('type_name')->all();
+        $definedSteps = WorkOrderType::with('submilestones')->orderBy('id')->get();
 
         $accountWorkOrders = WorkOrder::whereHas('accounts', function ($query) use ($account) {
             $query->where('taken_out_accounts.id', $account->id);
@@ -45,7 +45,12 @@ class TitlingRegistrationController extends Controller
             }
         }
 
-        $finalResponseData = collect($definedSteps)->map(function ($definedStepName) use ($workOrdersMappedByStepName) {
+        $finalResponseData = $definedSteps->map(function ($workOrderType) use ($workOrdersMappedByStepName) {
+            $definedStepName = $workOrderType->type_name;
+            
+            // Get all submilestone IDs as array
+            $submilestoneIds = $workOrderType->submilestones->pluck('id')->toArray();
+            
             $workOrderForStep = $workOrdersMappedByStepName[$definedStepName] ?? null;
 
             if ($workOrderForStep) {
@@ -55,6 +60,7 @@ class TitlingRegistrationController extends Controller
                 }
                 return [
                     'stepName'         => $definedStepName,
+                    'submilestoneIds'  => $submilestoneIds, // Array of all submilestone IDs
                     'workOrder'        => $workOrderForStep->work_order,
                     'workOrderId'      => $workOrderForStep->work_order_id,
                     'assigneeName'     => $assigneeName,
@@ -72,6 +78,7 @@ class TitlingRegistrationController extends Controller
             }
             return [
                 'stepName'         => $definedStepName,
+                'submilestoneIds'  => $submilestoneIds,
                 'workOrder'        => null,
                 'workOrderId'      => null,
                 'assigneeName'     => null,

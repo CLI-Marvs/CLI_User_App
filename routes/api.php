@@ -25,6 +25,7 @@ use App\Http\Controllers\MarkupSettignsController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\SubmilestoneController;
 use App\Http\Controllers\MilestoneController; 
+use App\Http\Controllers\AccountChecklistStatusController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -71,7 +72,7 @@ Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees'
 Route::post('/update-info', [ConcernController::class, 'updateInfo']);
 // Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
-
+// for titling and registration
 Route::middleware('auth:sanctum')->group(function () {
     // for work orders
     Route::post('/work-orders/{work_order}/updates', [WorkOrderController::class, 'addUpdate']);
@@ -89,7 +90,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/work-orders/{workOrder}/soft-delete', [WorkOrderController::class, 'softDelete'])->name('work-orders.soft-delete');
     Route::get('/my-workorders', [WorkOrderController::class, 'index'])->middleware('my_work_orders_filter');
     Route::patch('/work-orders/{workOrderId}/status-complete', [WorkOrderController::class, 'updateStatusToComplete']);
-    // for titling and registration
+    // for taken out accounts
     Route::patch('/taken-out-accounts/add-masterlist', [TakenOutAccountController::class, 'updateAddStatus']);
     Route::get('/taken-out-accounts/get-masterlist', [TakenOutAccountController::class, 'getMasterList']);
     Route::patch('/taken-out-accounts/undo-masterlist', [TakenOutAccountController::class, 'undoMasterListStatus']);
@@ -103,10 +104,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/milestones-details', [MilestoneController::class, 'getDetailsByName']);
     // for submilestones
     Route::get('/submilestones-details', [SubmilestoneController::class, 'getByWorkOrderType']);
+    // for checklists status
+    Route::post('/account-checklist-status', [AccountChecklistStatusController::class, 'store']);
+    Route::post('/account-checklist-status/bulk', [AccountChecklistStatusController::class, 'bulkStore']);
+    Route::get('/account/{accountId}/submilestone/{submilestoneId}/checklist-status', [AccountChecklistStatusController::class, 'getChecklistStatus']);
 });
-
-// If you need public access to some data (e.g., specific work order types)
-// Route::get('work-order-types', [WorkOrderTypeController::class, 'index']); // Create a separate controller for types
 
 //* For Sap 
 

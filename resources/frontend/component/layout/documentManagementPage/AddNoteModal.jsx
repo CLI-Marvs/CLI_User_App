@@ -240,11 +240,11 @@ const AddNoteModal = ({
             >
                 <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
                     <div>
-                        <h2 className="text-xl font-semibold text-gray-900">
+                        <h2 className="text-xl font-semibold text-custom-bluegreen">
                             Add Note
                         </h2>
                         <p className="text-sm text-gray-600 mt-1">
-                            {logType ? `${logType} - Work Order #${numericWorkOrderId}` : `Work Order #${numericWorkOrderId}`}
+                            {logType ? `${logType} - Work Order #${numericWorkOrderId}` : `Work Order No.${numericWorkOrderId}`}
                         </p>
                     </div>
                     <button
@@ -277,7 +277,7 @@ const AddNoteModal = ({
                             onChange={(e) => setNoteText(e.target.value)}
                             rows="5"
                             maxLength="500"
-                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-transparent resize-none"
                             placeholder="Enter your note here..."
                             disabled={isSaving}
                         />
@@ -459,7 +459,7 @@ const AddNoteModal = ({
                         <button
                             onClick={handleSave}
                             disabled={isSaving || !isValid}
-                            className="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center"
+                            className="px-6 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#175D5F] to-[#70AD47] border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center"
                         >
                             {isSaving ? (
                                 <>
@@ -486,7 +486,7 @@ const AddNoteModal = ({
                                 </>
                             ) : (
                                 <>
-                                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-4 h-4 mr-2 " fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                                     </svg>
                                     Save Note
