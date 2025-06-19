@@ -10,6 +10,7 @@ import { toLowerCaseText } from "@/util/formatToLowerCase";
 import { walkinTransactionService } from "@/component/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
 import { showToast } from "@/util/toastUtil";
 import Button from "@/component/layout/inquirypage/component/ui/button";
+import { queueService } from "@/component/servicesApi/apiCalls/emojiWalkin/queueService";
 
 const formDataInitialState = {
     category_id: "",
@@ -82,6 +83,11 @@ const EngageFormModal = forwardRef(
                 await walkinTransactionService.createWalkinTransactionDetail(
                     payload
                 );
+            const queuePayload = {
+                priority_number: itemData?.priority_number,
+                status: actionType,
+            };
+            queueService.updateQueueStatus(queuePayload);
             // Reset form data after submission
             setFormData(formDataInitialState);
             showToast(

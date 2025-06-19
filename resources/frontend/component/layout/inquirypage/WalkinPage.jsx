@@ -8,6 +8,9 @@ import { walkinTransactionService } from "@/component/servicesApi/apiCalls/emoji
 import { categoryService } from "@/component/servicesApi/apiCalls/emojiWalkin/categoryService";
 import { queueService } from "@/component/servicesApi/apiCalls/emojiWalkin/queueService";
 import { branchService } from "@/component/servicesApi/apiCalls/emojiWalkin/branchService";
+import { showToast } from "@/util/toastUtil";
+import Button from "@/component/layout/inquirypage/component/ui/button";
+import { FaHistory } from "react-icons/fa";
 
 const WalkinPage = () => {
     //States
@@ -58,6 +61,13 @@ const WalkinPage = () => {
     //Event handler
     const handleOpenModal = (item) => {
         if (engageFormModalRef.current) {
+            if (selectedDesk.id === "" || selectedBranch.id === "") {
+                showToast(
+                    "Please select a branch and a counter/desk first.",
+                    "warning"
+                );
+                return;
+            }
             setSelectedItem(item);
             const trimCounter = selectedDesk.name.replace(/\D/g, "");
             //Send to queue monitor - firebase
@@ -76,7 +86,7 @@ const WalkinPage = () => {
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
             <div>
                 {/* Branch */}
-                <div className="py-1">
+                <div className="py-1 flex justify-between items-center">
                     <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden w-[350px]">
                         <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[200px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1 montserrat-regular">
                             Branch
@@ -115,6 +125,14 @@ const WalkinPage = () => {
                                 <IoMdArrowDropdown />
                             </span>
                         </div>
+                    </div>
+                    <div className=" ">
+                        <Button className="border border-custom-bluegreen w-[150px] h-[35px] rounded-[5px] text-sm bg-white text-custom-bluegreen montserrat-semibold flex items-center justify-center gap-4 hover:shadow-custom4">
+                            <span>
+                                <FaHistory className="w-5 h-5"/>    
+                            </span>
+                            History
+                        </Button>
                     </div>
                 </div>
 

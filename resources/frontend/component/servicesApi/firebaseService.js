@@ -24,7 +24,7 @@
 
 //* FOR PRODUCTION API KEY
 import { initializeApp } from "firebase/app";
-import { getFirestore, doc, updateDoc } from "firebase/firestore";
+import { getFirestore, doc, updateDoc, getDoc } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: "AIzaSyAzNe-Cze3IN-EyAbqWb6S-UYHogIH0Z_E",
@@ -38,9 +38,4 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp); // use this one variable
 
-export {
-  firebaseApp,
-  db, 
-  doc,
-  updateDoc
-};
+export { firebaseApp, db, doc, updateDoc, getDoc };
