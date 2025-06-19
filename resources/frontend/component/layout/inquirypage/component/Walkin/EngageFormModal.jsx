@@ -11,6 +11,10 @@ import { walkinTransactionService } from "@/component/servicesApi/apiCalls/emoji
 import { showToast } from "@/util/toastUtil";
 import Button from "@/component/layout/inquirypage/component/ui/button";
 import { queueService } from "@/component/servicesApi/apiCalls/emojiWalkin/queueService";
+import isButtonDisabled from "@/util/isFormButtonDisabled";
+import CustomInput from "@/component/Input/CustomInput";
+import CircularProgress from "@mui/material/CircularProgress";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const formDataInitialState = {
     category_id: "",
@@ -25,12 +29,31 @@ const formDataInitialState = {
 
 const EngageFormModal = forwardRef(
     ({ itemData, categories, setSelectedItem }, ref) => {
-        //TODO: confirm why it loads even if I did not click the engage modal
-        //State
-        // Create dialog ref inside the component
+        //Ref
         const dialogRef = React.useRef(null);
-        const { propertyNamesList } = useProperty();
+        //States
         const [formData, setFormData] = useState(formDataInitialState);
+        //Hooks
+        const { propertyNamesList } = useProperty();
+        const queryClient = useQueryClient();
+        // Form validation
+        const isPropertyButtonDisabled = isButtonDisabled(
+            formData,
+            Object.keys(formDataInitialState).filter((key) => key !== "details_message")
+        );
+        // Mutations
+        const transactionMutation = useMutation({
+            mutationFn: walkinTransactionService.createWalkinTransactionDetail,
+            onSuccess: () => {
+                queryClient.invalidateQueries({ queryKey: ['walkinTransactions'] });
+            },
+        });
+        const queueMutation = useMutation({
+            mutationFn: queueService.updateQueueStatus,
+        });
+
+        // Derived state
+        const isSubmitting = transactionMutation.isPending || queueMutation.isPending;
 
         // Expose methods to parent through ref
         useImperativeHandle(ref, () => ({
@@ -46,7 +69,7 @@ const EngageFormModal = forwardRef(
             },
         }));
 
-        // Update the form with itemData when it changes
+        // Populate form when item data changes
         useEffect(() => {
             if (itemData) {
                 setFormData({
@@ -62,12 +85,13 @@ const EngageFormModal = forwardRef(
             }
         }, [itemData]);
 
-        //Event handler
+        //Event Handlers
+        // Handle form submission
         const handleSubmit = async (e, actionType) => {
             e.preventDefault();
 
-            // Handle form submission logic here
-            const payload = {
+            // Prepare transaction payload
+            const transactionPayload = {
                 walkin_transaction_id: itemData.id,
                 category_id: formData.category_id,
                 property_masters_id: formData.property_id,
@@ -79,24 +103,38 @@ const EngageFormModal = forwardRef(
                 detailed_notes: formData.details_message,
                 status: actionType,
             };
-            const reponse =
-                await walkinTransactionService.createWalkinTransactionDetail(
-                    payload
-                );
+
+            // Prepare queue payload
             const queuePayload = {
                 priority_number: itemData?.priority_number,
                 status: actionType,
             };
-            queueService.updateQueueStatus(queuePayload);
-            // Reset form data after submission
-            setFormData(formDataInitialState);
-            showToast(
-                reponse?.message ||
-                    "Walkin transaction details created successfully",
-                "success"
-            );
 
-            dialogRef.current?.close();
+            try {
+                // Submit transaction first
+                const transactionResponse = await transactionMutation.mutateAsync(transactionPayload);
+
+                // Then update queue status
+                await queueMutation.mutateAsync(queuePayload);
+
+                // Show success toast
+                showToast(
+                    transactionResponse?.message ||
+                    "Walkin transaction details created successfully",
+                    "success"
+                );
+
+                // Reset form data and close dialog
+                setFormData(formDataInitialState);
+                dialogRef.current?.close();
+                setSelectedItem(null);
+
+            } catch (error) {
+                showToast(
+                    error?.message || "An error occurred while processing the request",
+                    "error"
+                );
+            }
         };
 
         // Handle input changes
@@ -106,6 +144,12 @@ const EngageFormModal = forwardRef(
                 ...prevData,
                 [name]: value,
             }));
+        };
+
+        // Handle modal close
+        const handleCloseModal = () => {
+            dialogRef.current?.close();
+            setSelectedItem(null);
         };
 
         return (
@@ -120,7 +164,7 @@ const EngageFormModal = forwardRef(
                         <div>
                             <button
                                 className="absolute top-3 right-3 w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg"
-                                onClick={() => dialogRef.current?.close()}
+                                onClick={handleCloseModal}
                             >
                                 ✕
                             </button>
@@ -209,13 +253,12 @@ const EngageFormModal = forwardRef(
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     First Name
                                 </span>
-                                <input
+                                <CustomInput
                                     name="first_name"
                                     type="text"
                                     value={formData.first_name}
                                     onChange={handleInputChange}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
-                                    placeholder=""
                                 />
                             </div>
                         </div>
@@ -228,13 +271,12 @@ const EngageFormModal = forwardRef(
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     Last Name
                                 </span>
-                                <input
+                                <CustomInput
                                     name="last_name"
                                     type="text"
                                     value={formData.last_name}
                                     onChange={handleInputChange}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
-                                    placeholder=""
                                 />
                             </div>
                         </div>
@@ -247,34 +289,55 @@ const EngageFormModal = forwardRef(
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     Contact Number
                                 </span>
-                                <input
+                                <CustomInput
                                     name="contact_number"
-                                    type="text"
+                                    type="number"
                                     value={formData.contact_number}
                                     onChange={handleInputChange}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
-                                    placeholder=""
+                                    restrictNumbers={true}
                                 />
                             </div>
                         </div>
 
                         {/*Contract Number*/}
                         <div className="py-1">
+                            {/* TODO: refactor this and move the  validation to 'validateContractNumber util */}
                             <div
-                                className={`flex items-center border rounded-[5px] overflow-hidden  `}
+                                className={`flex items-center border rounded-[5px] overflow-hidden ${formData.contract_number && formData.contract_number.length !== 13
+                                    ? 'border-red-500'
+                                    : formData.contract_number.length === 13
+                                        ? 'border-green-500'
+                                        : ' '
+                                    }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     Contract Number
                                 </span>
-                                <input
+                                <CustomInput
                                     name="contract_number"
-                                    type="text"
+                                    type="number"
                                     value={formData.contract_number}
-                                    onChange={handleInputChange}
+                                    onChange={(e) => {
+                                        if (e.target.value.length <= 13) {
+                                            handleInputChange(e);
+                                        }
+                                    }}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
-                                    placeholder=""
+                                    restrictNumbers={true}
+                                    maxLength={13}
                                 />
                             </div>
+                            <span className={`flex justify-end text-xs ${formData.contract_number && formData.contract_number.length !== 13
+                                ? 'text-red-500'
+                                : formData.contract_number.length === 13
+                                    ? 'text-green-500'
+                                    : 'text-gray-400'
+                                }`}>
+                                {formData?.contract_number.length} /13
+                                {formData.contract_number && formData.contract_number.length !== 13 &&
+                                    " (Must be 13 digits)"}
+                            </span>
                         </div>
 
                         {/*Email*/}
@@ -285,13 +348,12 @@ const EngageFormModal = forwardRef(
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     Email
                                 </span>
-                                <input
+                                <CustomInput
                                     name="email"
                                     type="text"
                                     value={formData.email}
                                     onChange={handleInputChange}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
-                                    placeholder=""
                                 />
                             </div>
                         </div>
@@ -310,16 +372,16 @@ const EngageFormModal = forwardRef(
                                 </span>
                             </div>
                             <div className="flex gap-3 ">
-                                <textarea
+                                <CustomInput
+                                    type="textarea"
                                     id="details_message"
                                     name="details_message"
-                                    value={formData.details_message}
-                                    onChange={handleInputChange}
                                     maxLength={500}
-                                    placeholder=""
-                                    rows="4"
+                                    value={formData.details_message || ""}
                                     className={`border-custom-bluegreen rounded-b-[5px] border-t w-full pl-2 outline-none`}
-                                ></textarea>
+                                    onChange={handleInputChange}
+                                    rows="4"
+                                />
                             </div>
                         </div>
 
@@ -327,17 +389,32 @@ const EngageFormModal = forwardRef(
                             <Button
                                 type="submit"
                                 onClick={(e) => handleSubmit(e, "resolved")}
-                                // disabled={isButtonDisabled(formData) || isLoading}
-                                className="border border-custom-bluegreen w-[150px] h-[35px] rounded-[10px] text-sm bg-white text-custom-bluegreen montserrat-semibold"
+                                disabled={isPropertyButtonDisabled || isSubmitting}
+                                className={`border border-custom-bluegreen w-[150px] h-[35px] rounded-[10px] text-sm bg-white text-custom-bluegreen montserrat-semibold ${(isPropertyButtonDisabled || isSubmitting)
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
+                                    }`}
                             >
-                                Close ticket
+                                {isSubmitting && transactionMutation.variables?.status === "resolved" ? (
+                                    <CircularProgress className="spinnerSize" />
+                                ) : (
+                                    <>Close ticket</>
+                                )}
                             </Button>
                             <Button
                                 type="submit"
                                 onClick={(e) => handleSubmit(e, "save")}
-                                className="gradient-btn5 w-[150px] h-[35px] rounded-[10px] text-sm bg-gray-500 text-white montserrat-semibold"
+                                disabled={isPropertyButtonDisabled || isSubmitting}
+                                className={`gradient-btn5 w-[150px] h-[35px] rounded-[10px] text-sm bg-gray-500 text-white montserrat-semibold ${(isPropertyButtonDisabled || isSubmitting)
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
+                                    }`}
                             >
-                                Save
+                                {isSubmitting && transactionMutation.variables?.status === "save" ? (
+                                    <CircularProgress className="spinnerSize" />
+                                ) : (
+                                    <>Save</>
+                                )}
                             </Button>
                         </div>
                     </div>

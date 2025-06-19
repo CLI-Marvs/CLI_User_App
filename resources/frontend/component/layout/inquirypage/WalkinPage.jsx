@@ -197,6 +197,7 @@ const WalkinPage = () => {
                     ref={engageFormModalRef}
                     itemData={selectedItem}
                     categories={categories}
+                    setSelectedItem={setSelectedItem}
                 />
             </div>
         </div>
