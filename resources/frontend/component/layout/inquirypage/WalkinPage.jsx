@@ -11,6 +11,7 @@ import { branchService } from "@/component/servicesApi/apiCalls/emojiWalkin/bran
 import { showToast } from "@/util/toastUtil";
 import Button from "@/component/layout/inquirypage/component/ui/button";
 import { FaHistory } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 const WalkinPage = () => {
     //States
@@ -26,7 +27,7 @@ const WalkinPage = () => {
     const [selectedBranch, setSelectedBranch] = useState({ id: "", name: "" });
     const [desks, setDesks] = useState([]);
     const [selectedDesk, setSelectedDesk] = useState({ id: "", name: "" });
-
+    const navigate = useNavigate();
     //Hooks
     // Effect to fetch data only once when component mounts
     useEffect(() => {
@@ -127,9 +128,14 @@ const WalkinPage = () => {
                         </div>
                     </div>
                     <div className=" ">
-                        <Button className="border border-custom-bluegreen w-[150px] h-[35px] rounded-[5px] text-sm bg-white text-custom-bluegreen montserrat-semibold flex items-center justify-center gap-4 hover:shadow-custom4">
+                        <Button
+                            className="border border-custom-bluegreen w-[150px] h-[35px] rounded-[5px] text-sm bg-white text-custom-bluegreen montserrat-semibold flex items-center justify-center gap-4 hover:shadow-custom4"
+                            onClick={() => {
+                                navigate("/inquirymanagement/walk-in/history");
+                            }}
+                        >
                             <span>
-                                <FaHistory className="w-5 h-5"/>    
+                                <FaHistory className="w-5 h-5" />
                             </span>
                             History
                         </Button>
