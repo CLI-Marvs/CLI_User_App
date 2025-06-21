@@ -1,12 +1,14 @@
 import React from "react";
 import WalkinPage from "@/component/layout/inquirypage/WalkinPage";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import WalkinTransactionHistoryPage from "@/component/layout/inquirypage/WalkinTransactionHistoryPage";
 const WalkinView = () => {
+    const location = useLocation();
+    const isHistoryPage = location.pathname.includes('/walk-in/history');
+
     return (
         <div>
-            <WalkinPage />
-            <WalkinTransactionHistoryPage />
+            {!isHistoryPage && <WalkinPage />}
             <Outlet />
         </div>
     );

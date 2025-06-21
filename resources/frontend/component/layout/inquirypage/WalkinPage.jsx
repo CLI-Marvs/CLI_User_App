@@ -12,53 +12,40 @@ import { showToast } from "@/util/toastUtil";
 import Button from "@/component/layout/inquirypage/component/ui/button";
 import { FaHistory } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
+import { useCategories  } from "@/component/layout/inquirypage/hooks/useCategories";
 
 const WalkinPage = () => {
     //States
+    const [page, setPage] = useState(1);
+    const PAGE_SIZE = 10;
     const engageFormModalRef = useRef(null);
     const [selectedItem, setSelectedItem] = useState(null);
-    const [categories, setCategories] = useState([]);
-    const [walkinData, setWalkinData] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
+    // const [isLoading, setIsLoading] = useState(false);
     const [hasError, setHasError] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const dataFetchedRef = useRef(false);
-    const [branches, setBranches] = useState([]);
     const [selectedBranch, setSelectedBranch] = useState({ id: "", name: "" });
     const [desks, setDesks] = useState([]);
     const [selectedDesk, setSelectedDesk] = useState({ id: "", name: "" });
     const navigate = useNavigate();
-    //Hooks
-    // Effect to fetch data only once when component mounts
-    useEffect(() => {
-        // Skip fetch if we already have data
-        if (dataFetchedRef.current) return;
-
-        const fetchWalkinData = async () => {
-            setIsLoading(true);
-            try {
-                const response =
-                    await walkinTransactionService.getAllWalkinTransactions();
-                const categoryResponse =
-                    await categoryService.getAllCategories();
-                const branchResponse = await branchService.getAllBranches();
-                setBranches(branchResponse || []);
-                setWalkinData(response.data || []);
-                setCategories(categoryResponse || []);
-                dataFetchedRef.current = true;
-                setHasError(false);
-            } catch (error) {
-                setHasError(true);
-                setErrorMessage("Failed to load walkin data");
-                console.error("Error fetching walkin data:", error);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchWalkinData();
-    }, [dataFetchedRef]);
-
+    {/* TODO: refactor this or */}
+    const { data: walkinData, isLoading, isError, isFetching } = useQuery({
+        queryKey: ["queueWalkinTransactions", page],
+        queryFn: () => walkinTransactionService.getQueuedWalkinTransactions(page, PAGE_SIZE),
+        keepPreviousData: true,
+        staleTime: 1000 * 60,
+        cacheTime: 1000 * 60 * 5,
+    });
+    const { data: categoriesData } = useCategories();
+    const { data: branchesData } = useQuery({
+        queryKey: ["queueBranches"],
+        queryFn: () => branchService.getAllBranches(),
+        staleTime: 1000 * 60,
+        cacheTime: 1000 * 60 * 5,
+    });
+ 
     //Event handler
     const handleOpenModal = (item) => {
         if (engageFormModalRef.current) {
@@ -83,6 +70,18 @@ const WalkinPage = () => {
         }
     };
 
+    const handlePageChange = (newPage) => {
+        setPage(newPage);
+    };
+
+    if (isError) {
+        return (
+            <div className="text-red-500">
+                Error loading data: {error.message}
+            </div>
+        );
+    }
+
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
             <div>
@@ -97,7 +96,7 @@ const WalkinPage = () => {
                                 name="branch_id"
                                 onChange={(e) => {
                                     const branchId = e.target.value;
-                                    const branch = branches.find(
+                                    const branch = branchesData.find(
                                         (b) => String(b.id) === branchId
                                     );
                                     setSelectedBranch({
@@ -112,8 +111,8 @@ const WalkinPage = () => {
                                 <option value="" className="montserrat-regular">
                                     (Select branch)
                                 </option>
-                                {branches &&
-                                    branches.map((branch) => (
+                                {branchesData &&
+                                    branchesData.map((branch) => (
                                         <option
                                             key={branch.id}
                                             value={branch.id}
@@ -186,7 +185,7 @@ const WalkinPage = () => {
                         className="gap-4 w-full h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen mb-4 text-center "
                         tableClassName="w-full min-w-[882px]  "
                         columns={WALKIN_COLUMNS}
-                        data={walkinData || []}
+                        data={walkinData?.data || []}
                         isLoading={isLoading}
                         renderRow={(item) => (
                             <WalkinTableRow
@@ -196,13 +195,21 @@ const WalkinPage = () => {
                             />
                         )}
                     />
+                    <div className="mt-8 flex justify-end mx-1">
+                        <Pagination
+                            pageCount={walkinData?.last_page || 1}
+                            currentPage={walkinData?.current || 1}
+                            onPageChange={handlePageChange}
+                        />
+
+                    </div>
                 </div>
             </div>
             <div>
                 <EngageFormModal
                     ref={engageFormModalRef}
                     itemData={selectedItem}
-                    categories={categories}
+                    categories={categoriesData}
                     setSelectedItem={setSelectedItem}
                 />
             </div>

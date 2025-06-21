@@ -8,7 +8,7 @@ const CustomTableHeader = ({
     return (
         <thead>
             <tr className={`${className}`}>
-                {columns.map((col, index) => (
+                {columns?.map((col, index) => (
                     <th
                         key={index}
                         className={`${textAlign} shrink-0 pl-1 ${col.width}   `}

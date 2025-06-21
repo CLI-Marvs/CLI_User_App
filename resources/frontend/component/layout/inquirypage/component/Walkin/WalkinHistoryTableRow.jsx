@@ -1,0 +1,30 @@
+import React from 'react'
+
+const WalkinHistoryTableRow = ({ item }) => {
+    return (
+        <tr className={`bg-white border-b-8 border-gray-50`}>
+            <td className="w-[200px] py-4 montserrat-regular">
+                {item?.walkin_transaction_detail
+                    .first_name} {" "}
+                {item?.walkin_transaction_detail
+                    .last_name}
+            </td>
+            <td className="w-[250px] py-4 montserrat-regular">
+                {item?.priority_number}
+            </td>
+            <td className="w-[150px] py-4 montserrat-regular">
+                {item?.category?.name || "N/A"}
+            </td>
+            <td className="w-[200px] py-4 capitalize montserrat-regular">
+                {item?.status || "N/A"}
+            </td>
+            <td className="w-[150px] py-4 montserrat-regular">
+                {item?.updated_at
+                    ? `${new Date(item.updated_at).toLocaleTimeString()} ${new Date(item.updated_at).toLocaleDateString()}`
+                    : "N/A"}
+            </td>
+        </tr>
+    )
+}
+
+export default WalkinHistoryTableRow
