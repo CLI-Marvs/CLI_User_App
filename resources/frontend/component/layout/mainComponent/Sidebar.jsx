@@ -84,7 +84,6 @@ const Sidebar = () => {
             case "/transaction/receivables/posting":
             case "/transaction/settings/markup":
             case "/transaction/receivables/reports":
-
                 setInquiryOpen(false);
                 setIsInvoiceOpen(true);
                 setSuperAdminOpen(false);

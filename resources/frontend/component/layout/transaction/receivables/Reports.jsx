@@ -277,7 +277,7 @@ const Reports = () => {
                                         ₱{formatAmountPH(reportData[item.name])}
                                     </span>
                                     <div className="flex justify-end cursor-pointer">
-                                        <span className="text-[#348017] font-medium" onClick={() => navigateToTransaction("credit/debit card")}>
+                                        <span className="text-[#348017] font-medium" onClick={() => navigateToTransaction("Credit/Debit Card")}>
                                             View Breakdown <span>&gt;</span>
                                         </span>
                                     </div>

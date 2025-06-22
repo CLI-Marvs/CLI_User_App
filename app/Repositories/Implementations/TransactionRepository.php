@@ -176,7 +176,6 @@ class TransactionRepository
             $query->whereRaw('payment_option ILIKE ?', ["%{$data['payment_option']}%"]);
         }
 
-
         if ($startDate && $endDate) {
             $query->whereBetween('transaction.transaction_date', [$startDate, $endDate]);
         } elseif ($startDate) {
@@ -301,7 +300,9 @@ class TransactionRepository
                 'column_name' => $column['column_name'],
             ]);
         };
-        return $preset->id;
+
+        $data['presetId'] = $preset->id;
+        return $data;
     }
 
 
@@ -323,7 +324,8 @@ class TransactionRepository
             ->update(['is_default' => false]);
 
         if (!$presetId) {
-            $presetId = $this->storeViewAndColumns($data, $userId);
+            $data = $this->storeViewAndColumns($data, $userId);
+            $presetId = $data['presetId'];
         }
 
         TransactionPresets::where('id', $presetId)

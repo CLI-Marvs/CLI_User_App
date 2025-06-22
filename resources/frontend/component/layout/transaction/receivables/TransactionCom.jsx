@@ -15,7 +15,11 @@ import {
     transactionOptions,
 } from "@/constant/data/transaction";
 import moment from "moment";
-import { useSubFeatureId, useColumns } from "../hooks/useTransactionQueries";
+import {
+    useSubFeatureId,
+    useColumns,
+    useTransactionsExport,
+} from "../hooks/useTransactionQueries";
 import useRouteSections from "@/hooks/useRouteSections";
 import ColumnModal from "../component/ColumnModal";
 
@@ -23,6 +27,8 @@ const TransactionCom = () => {
     const { subSection } = useRouteSections();
     const { data: subFeature } = useSubFeatureId(subSection);
     const { data: views, isSuccess } = useColumns(subFeature?.id);
+    const { mutateAsync: exportTransactions, isPending: isExporting } =
+        useTransactionsExport();
 
     const { formattedPropertyNames } = usePropertyFormatter();
     const [searchValues, setSearchValues] = useState({});
@@ -42,71 +48,12 @@ const TransactionCom = () => {
     );
 
     //*Simple view Cell
-    /* const simpleViewColumns = [
-        {
-            header: "Date & Time",
-            accessor: "transaction_date",
-            render: (row) => (
-                <SimpleViewCell type="transaction_date" row={row} />
-            ),
-        },
-        {
-            header: "Transaction Number",
-            accessor: "transaction_number",
-            render: (row) => (
-                <SimpleViewCell type="transaction_number" row={row} />
-            ),
-        },
-        {
-            header: "Bill Amount",
-            accessor: "amount",
-            render: (row) => <SimpleViewCell type="amount" row={row} />,
-        },
-        {
-            header: "MDR Amount",
-            accessor: "mdr",
-            render: (row) => <SimpleViewCell type="mdr" row={row} />,
-        },
-        {
-            header: "CWT",
-            accessor: "withholding_tax",
-            render: (row) => (
-                <SimpleViewCell type="withholding_tax" row={row} />
-            ),
-        },
-        {
-            header: "Bank Recon Amount",
-            accessor: "bank_recon_amount",
-            render: (row) => (
-                <SimpleViewCell type="bank_recon_amount" row={row} />
-            ),
-        },
-        {
-            header: "Gateway Fee",
-            accessor: "gateway_fee",
-            render: (row) => <SimpleViewCell type="gateway_fee" row={row} />,
-        },
-        {
-            header: "Net Posting Amount",
-            accessor: "net_posting_amount",
-            render: (row) => (
-                <SimpleViewCell type="net_posting_amount" row={row} />
-            ),
-        },
-        {
-            header: "Total Amount",
-            accessor: "total_amount",
-            render: (row) => <SimpleViewCell type="total_amount" row={row} />,
-        },
-    ]; */
-
     const generateDynamicColumns = (defs) => {
         if (!defs) return [];
-        return defs
-            .map((def) => {
-                const label = def.column_name;
-                const accessor = columnNameToFieldKey[label];
 
+        return defs
+            .map(({ column_name: label }) => {
+                const accessor = columnNameToFieldKey[label];
                 if (!accessor) {
                     console.warn(`No field mapping found for column: ${label}`);
                     return null;
@@ -251,15 +198,19 @@ const TransactionCom = () => {
             : baseColumns
         : [];
 
-
     const isDynamicColumnsLoading = !isSuccess;
 
     const exportToExcel = async () => {
         try {
-            const response = await transaction.exportTransactions({
-                columns: [...dynamicColumns.map((col) => col.accessor)],
+            const payload = {
+                columns: dynamicColumns.map((col) =>
+                    col.accessor === "property_name" ? "id" : col.accessor
+                ),
+
                 filter: transactions?.filters,
-            });
+            };
+            console.log("payload", payload);
+            const response = await exportTransactions({data: payload});
 
             if (response.status !== 200) throw new Error("Export failed");
 
@@ -368,10 +319,35 @@ const TransactionCom = () => {
                     <ColumnModal subFeatureId={subFeature?.id} views={views} />
                     <div
                         className="flex items-center gap-2 h-[39px] w-[87px] rounded-md border-1 border-custom-solidgreen px-2 cursor-pointer text-custom-solidgreen"
-                        onClick={exportToExcel}
+                        onClick={!isExporting ? exportToExcel : undefined}
                     >
-                        <img src={exportIcon} alt="export-icon" />
-                        <span className="text-sm">Export</span>
+                        {isExporting ? (
+                            <svg
+                                className="animate-spin h-4 w-4 text-custom-solidgreen"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                />
+                                <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                                />
+                            </svg>
+                        ) : (
+                            <>
+                                <img src={exportIcon} alt="export-icon" />
+                                <span className="text-sm">Export</span>
+                            </>
+                        )}
                     </div>
                 </div>
                 <div className="flex flex-wrap px-2 gap-2">
@@ -415,7 +391,7 @@ const TransactionCom = () => {
         </>
     );
 };
-const ToggleSwitch = ({ enabled, setEnabled }) => {
+/* const ToggleSwitch = ({ enabled, setEnabled }) => {
     return (
         <div className="flex items-center">
             <button
@@ -433,6 +409,6 @@ const ToggleSwitch = ({ enabled, setEnabled }) => {
             </button>
         </div>
     );
-};
+}; */
 
 export default TransactionCom;

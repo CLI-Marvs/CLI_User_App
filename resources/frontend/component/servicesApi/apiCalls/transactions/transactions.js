@@ -77,11 +77,12 @@ export const transaction = {
         }
     },
 
-    exportTransactions: async (columns, filter) => {
+    exportTransactions: async (data) => {
         try {
+            console.log("data", data);
             const payload = {
-                columns: columns,
-                filter: filter,
+                columns: data.columns,
+                filter: data.filter,
             };
             const response = await apiService.post(
                 "export-transactions",
@@ -123,9 +124,9 @@ export const transaction = {
 
     storeViewAndColumns: async (data) => {
         try {
-            console.log("data", data);
             const response = await apiService.post("store-view-and-columns", data);
-            return response;
+
+            return response?.data.data;
         } catch (error) {
             console.log("error", error);
         }
@@ -134,7 +135,7 @@ export const transaction = {
     setDefaultView: async (data) => {
         try {
             const response = await apiService.put("set-default-view", data);
-            return response;
+            return response?.data.data;
         } catch (error) {
             console.log("error", error);
         }

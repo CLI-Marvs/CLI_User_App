@@ -281,7 +281,7 @@ class TransactionController extends Controller
     public function exportTransactions(Request $request)
     {
         try {
-            $data = $request->input('columns');
+            $data = $request->all();
 
             if (!is_array($data['columns']) || empty($data['columns'])) {
                 return response()->json([
