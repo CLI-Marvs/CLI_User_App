@@ -1,20 +1,20 @@
 import React, { useRef, useState, useEffect } from "react";
-import { IoIosSend, IoMdArrowDropdown, IoMdTrash } from "react-icons/io";
+import { IoMdArrowDropdown } from "react-icons/io";
 import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
 import { WALKIN_COLUMNS } from "@/constant/data/tableColumns";
 import WalkinTableRow from "@/component/layout/inquirypage/component/Walkin/WalkinTableRow";
 import EngageFormModal from "@/component/layout/inquirypage/component/Walkin/EngageFormModal";
 import { walkinTransactionService } from "@/component/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
-import { categoryService } from "@/component/servicesApi/apiCalls/emojiWalkin/categoryService";
 import { queueService } from "@/component/servicesApi/apiCalls/emojiWalkin/queueService";
 import { branchService } from "@/component/servicesApi/apiCalls/emojiWalkin/branchService";
 import { showToast } from "@/util/toastUtil";
 import Button from "@/component/layout/inquirypage/component/ui/button";
 import { FaHistory } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
-import { useCategories  } from "@/component/layout/inquirypage/hooks/useCategories";
+import { useCategories } from "@/component/layout/inquirypage/hooks/useCategories";
+import Skeleton from "@/component/Skeletons";
 
 const WalkinPage = () => {
     //States
@@ -22,22 +22,27 @@ const WalkinPage = () => {
     const PAGE_SIZE = 10;
     const engageFormModalRef = useRef(null);
     const [selectedItem, setSelectedItem] = useState(null);
-    // const [isLoading, setIsLoading] = useState(false);
-    const [hasError, setHasError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
-    const dataFetchedRef = useRef(false);
     const [selectedBranch, setSelectedBranch] = useState({ id: "", name: "" });
     const [desks, setDesks] = useState([]);
     const [selectedDesk, setSelectedDesk] = useState({ id: "", name: "" });
     const navigate = useNavigate();
-    {/* TODO: refactor this or */}
-    const { data: walkinData, isLoading, isError, isFetching } = useQuery({
+    const {
+        data: walkinData,
+        isLoading,
+        isError,
+    } = useQuery({
         queryKey: ["queueWalkinTransactions", page],
-        queryFn: () => walkinTransactionService.getQueuedWalkinTransactions(page, PAGE_SIZE),
+        queryFn: () =>
+            walkinTransactionService.getQueuedWalkinTransactions(
+                page,
+                PAGE_SIZE
+            ),
         keepPreviousData: true,
         staleTime: 1000 * 60,
         cacheTime: 1000 * 60 * 5,
+        refetchInterval: 10000,
     });
+    const queryClient = useQueryClient();
     const { data: categoriesData } = useCategories();
     const { data: branchesData } = useQuery({
         queryKey: ["queueBranches"],
@@ -45,28 +50,47 @@ const WalkinPage = () => {
         staleTime: 1000 * 60,
         cacheTime: 1000 * 60 * 5,
     });
- 
+
     //Event handler
-    const handleOpenModal = (item) => {
-        if (engageFormModalRef.current) {
-            if (selectedDesk.id === "" || selectedBranch.id === "") {
-                showToast(
-                    "Please select a branch and a counter/desk first.",
-                    "warning"
-                );
-                return;
-            }
-            setSelectedItem(item);
-            const trimCounter = selectedDesk.name.replace(/\D/g, "");
-            //Send to queue monitor - firebase
+    //Handle engage form modal open
+    const handleEngage = async (item) => {
+        if (!engageFormModalRef.current) return;
+
+        if (selectedDesk.id === "" || selectedBranch.id === "") {
+            showToast(
+                "Please select a branch and a counter/desk first.",
+                "warning"
+            );
+            return;
+        }
+
+        setSelectedItem(item);
+        const trimCounter = selectedDesk.name.replace(/\D/g, "");
+
+        try {
+            // Update the status
+            await walkinTransactionService.updateWalkinTransactionStatus({
+                walkin_transaction_id: item?.id,
+                status: "serving",
+            });
+
+            // Invalidate the query to refresh the list
+            queryClient.invalidateQueries({
+                queryKey: ["queueWalkinTransactions", page],
+            });
+
+            // Send to queue monitor - firebase
             const payload = {
                 priority_number: item?.priority_number,
                 status: "serving",
                 counter: trimCounter,
             };
-
             queueService.updateQueueStatus(payload);
+
             engageFormModalRef.current.showModal();
+        } catch (error) {
+            showToast("Failed to engage transaction.", "error");
+            console.error(error);
         }
     };
 
@@ -76,9 +100,7 @@ const WalkinPage = () => {
 
     if (isError) {
         return (
-            <div className="text-red-500">
-                Error loading data: {error.message}
-            </div>
+            <div className="text-red-500">Error loading data: {isError}</div>
         );
     }
 
@@ -179,29 +201,48 @@ const WalkinPage = () => {
                 </div>
 
                 {/* Table */}
-                <div className="py-4">
-                    <CustomTable
-                        textAlign="text-center"
-                        className="gap-4 w-full h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen mb-4 text-center "
-                        tableClassName="w-full min-w-[882px]  "
-                        columns={WALKIN_COLUMNS}
-                        data={walkinData?.data || []}
-                        isLoading={isLoading}
-                        renderRow={(item) => (
-                            <WalkinTableRow
-                                key={item.id}
-                                item={item}
-                                onOpenModal={handleOpenModal}
-                            />
-                        )}
-                    />
-                    <div className="mt-8 flex justify-end mx-1">
+                <div className="mt-3 mx-1 py-4">
+                    {isLoading ? (
+                        <div className="text-center py-4">
+                            <Skeleton height={140} className="my-1" />
+                            <Skeleton height={140} className="my-1" />
+                            <Skeleton height={140} className="my-1" />
+                        </div>
+                    ) : isError === "No data available." ? (
+                        <div className="text-center py-4 text-custom-bluegreen">
+                            No data available
+                        </div>
+                    ) : walkinData?.data?.length > 0 &&
+                      walkinData?.data?.length > 0 ? (
+                        <CustomTable
+                            textAlign="text-center"
+                            className="gap-4 w-full h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen mb-4 text-center "
+                            tableClassName="w-full min-w-[882px]  "
+                            columns={WALKIN_COLUMNS}
+                            data={walkinData?.data || []}
+                            isLoading={isLoading}
+                            renderRow={(item) => (
+                                <WalkinTableRow
+                                    key={item.id}
+                                    item={item}
+                                    onOpenModal={handleEngage}
+                                />
+                            )}
+                        />
+                    ) : (
+                        <div className="text-center py-4">
+                            <Skeleton height={140} className="my-1" />
+                            <Skeleton height={140} className="my-1" />
+                            <Skeleton height={140} className="my-1" />
+                        </div>
+                    )}
+
+                    <div className="mt-2 flex justify-end">
                         <Pagination
                             pageCount={walkinData?.last_page || 1}
                             currentPage={walkinData?.current || 1}
                             onPageChange={handlePageChange}
                         />
-
                     </div>
                 </div>
             </div>

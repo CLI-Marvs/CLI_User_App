@@ -30,38 +30,23 @@ export const walkinTransactionService = {
      * @param {number} perPage - Items per page
      * @param {Object} activeSearch - Search filters
      */
-    getWalkinTransactionsHistory: async (
-        page = 1,
-        perPage = 10,
-        activeSearch = {}
-    ) => {
+    getWalkinTransactionsHistory: async (page = 1, perPage = 10, filters) => {
         try {
-        
-            // Convert activeSearch to plain object if it's URLSearchParams
-            const searchObject =
-                activeSearch instanceof URLSearchParams
-                    ? Object.fromEntries(activeSearch)
-                    : activeSearch;
-
-            // Filter out empty values and format for Laravel
-            const filters = Object.entries(searchObject)
-                .filter(
-                    ([_, value]) =>
-                        value !== "" && value !== null && value !== undefined
+            const cleanFilters = Object.fromEntries(
+                Object.entries(filters || {}).filter(
+                    ([, v]) => v != null && v !== ""
                 )
-                .reduce((acc, [key, value]) => {
-                    acc[`filters[${key}]`] = value;
-                    return acc;
-                }, {});
+            );
 
-            const queryString = new URLSearchParams({
+            // Convert filters object into query parameters
+            const queryParams = new URLSearchParams({
                 page,
                 per_page: perPage,
-                ...filters,
+                // ...cleanFilters,
             }).toString();
-            console.log("Query String:", queryString);
+
             const response = await walkinFeedbackService.get(
-                `/admin/transactions/history?${queryString}`
+                `/admin/transactions/history?${queryParams}`
             );
             return response.data.data;
         } catch (error) {
@@ -89,16 +74,16 @@ export const walkinTransactionService = {
         }
     },
 
-    // updateWalkinTransactionStatus: async (payload) => {
-    //     try {
-    //         const response = await walkinFeedbackService.put(
-    //             `/admin/transactions/${payload.walkin_transaction_id}`,
-    //             { status: payload.status }
-    //         );
-    //         return response.data;
-    //     } catch (error) {
-    //         console.error("Error updating walkin transaction status:", error);
-    //         throw error;
-    //     }
-    // },
+    updateWalkinTransactionStatus: async (payload) => {
+        try {
+            const response = await walkinFeedbackService.put(
+                `/transactions/${payload.walkin_transaction_id}`,
+                payload
+            );
+            return response.data;
+        } catch (error) {
+            console.error("Error updating walkin transaction status:", error);
+            throw error;
+        }
+    },
 };

@@ -45,7 +45,7 @@ const EngageFormModal = forwardRef(
         const transactionMutation = useMutation({
             mutationFn: walkinTransactionService.createWalkinTransactionDetail,
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['walkinTransactions'] });
+                queryClient.invalidateQueries({ queryKey: ['queueWalkinTransactions'] });
             },
         });
         const queueMutation = useMutation({
@@ -124,6 +124,9 @@ const EngageFormModal = forwardRef(
                     "success"
                 );
 
+                //Refresh the transaction history list
+                queryClient.invalidateQueries({ queryKey: ["walkinTransactionHistory"] });
+                
                 // Reset form data and close dialog
                 setFormData(formDataInitialState);
                 dialogRef.current?.close();
