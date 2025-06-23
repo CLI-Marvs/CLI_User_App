@@ -22,6 +22,7 @@ const WalkinPage = () => {
     const PAGE_SIZE = 10;
     const engageFormModalRef = useRef(null);
     const [selectedItem, setSelectedItem] = useState(null);
+    {/* TODO: confirm this because it will handle many users, confirm also if to use passcode  */}
     const [selectedBranch, setSelectedBranch] = useState({ id: "", name: "" });
     const [desks, setDesks] = useState([]);
     const [selectedDesk, setSelectedDesk] = useState({ id: "", name: "" });
