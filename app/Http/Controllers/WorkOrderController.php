@@ -61,16 +61,36 @@ class WorkOrderController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'work_order_number' => 'required|string|max:50|unique:work_orders',
-            'account_id' => 'required|integer|exists:taken_out_accounts,id',
+            'work_order' => 'required|string|max:50|unique:work_orders,work_order_number',
+            'account_ids' => 'required|array',
+            'account_ids.*' => 'integer|exists:taken_out_accounts,id',
             'assigned_to_user_id' => 'nullable|integer|exists:users,id',
             'work_order_type_id' => 'required|integer|exists:work_order_types,type_id',
             'work_order_deadline' => 'nullable|date',
-            'status' => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Completed', 'Cancelled'])],
-            'description' => 'nullable|string',
+            'status' => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Completed', 'Cancelled'])], // <-- ADD THIS LINE
             'priority' => ['nullable', 'string', Rule::in(['Low', 'Medium', 'High', 'Urgent'])],
+            'description' => 'nullable|string',
+            'created_by_user_id' => 'nullable|integer|exists:users,id',
         ]);
+
+        \Log::info('Validated Data:', $validatedData);
+
+        $validatedData['work_order_number'] = $validatedData['work_order'];
+        unset($validatedData['work_order']);
+
+        $accountIds = $validatedData['account_ids'];
+        unset($validatedData['account_ids']);
+
+        if (empty($validatedData['status'])) {
+            $validatedData['status'] = 'In Progress';
+        }
+
         $workOrder = WorkOrder::create($validatedData);
+
+        if (method_exists($workOrder, 'accounts')) {
+            $workOrder->accounts()->sync($accountIds);
+        }
+
         return response()->json($workOrder->load(['account', 'assignedTo', 'type']), 201);
     }
     public function show(WorkOrder $workOrder)
@@ -208,7 +228,7 @@ class WorkOrderController extends Controller
         $query->with([
             'assignee:id,fullname,firstname,lastname',
             'workOrderType:id,type_name',
-            'accounts:id,account_name,contract_no',
+            'accounts:id,account_name,contract_no,checklist_status',
             'updates' => function ($query) {
                 $query->with('updatedBy:id,fullname,firstname,lastname')->orderBy('created_at', 'desc');
             },
@@ -431,13 +451,13 @@ class WorkOrderController extends Controller
         }
 
         if ($workOrder->status !== 'Complete') {
-            $workOrder->status = 'Complete';
+            $workOrder->status = 'Completed'; // Change 'Complete' to 'Completed'
             $workOrder->completed_at = Carbon::now();
             $workOrder->save();
 
             return response()->json(['message' => 'Work Order status updated to Complete.', 'work_order' => $workOrder]);
         }
 
-        return response()->json(['message' => 'Work Order status is already Complete.', 'work_order' => $workOrder]);
+        return response()->json(['message' => 'Work Order status is already Completed.', 'work_order' => $workOrder]);
     }
 }

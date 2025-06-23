@@ -100,8 +100,9 @@ const AddNoteModal = ({
             id: `${file.name}-${file.lastModified}-${file.size}-${Math.random()
                 .toString(36)
                 .substr(2, 9)}`,
-            file: file,
+            file,
             title: "",
+            checklist_id: null,
         }));
         const uniqueNewFiles = newFiles.filter(
             (nf) => !attachedFiles.some((af) => af.id === nf.id)
@@ -128,9 +129,11 @@ const AddNoteModal = ({
         }
     };
 
-    const handleTitleChange = (id, newTitle) => {
+    const handleTitleChange = (id, newTitle, newChecklistId) => {
         setAttachedFiles((prevFiles) =>
-            prevFiles.map((f) => (f.id === id ? { ...f, title: newTitle } : f))
+            prevFiles.map((f) =>
+                f.id === id ? { ...f, title: newTitle, checklist_id: newChecklistId } : f
+            )
         );
     };
 
@@ -157,7 +160,6 @@ const AddNoteModal = ({
             setError("Note cannot exceed 500 characters.");
             return;
         }
-
         if (submilestoneOptions.length > 0 && attachedFiles.length > 0) {
             const filesWithoutTitles = attachedFiles.filter(fw => !fw.title);
             if (filesWithoutTitles.length > 0) {
@@ -188,23 +190,45 @@ const AddNoteModal = ({
             formData.append("file_titles[]", fileWrapper.title);
         });
 
-        try {
-            const response = await apiService.post(
-                "/work-orders/notes/add",
-                formData,
-                {
-                    headers: {
-                        "Content-Type": undefined,
-                    },
-                }
-            );
+        const config = {
+            method: "post",
+            url: "/work-orders/notes/add",
+            data: formData,
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        };
 
-            if (response.data && response.data.success === false) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        if (csrfToken) {
+            const token = csrfToken.getAttribute("content");
+            if (token) {
+                config.headers["X-CSRF-TOKEN"] = token;
+            }
+        }
+        const userToken = localStorage.getItem("authToken");
+        if (userToken) {
+            config.headers["Authorization"] = `Bearer ${userToken}`;
+        }
+
+        try {
+            const response = await apiService.request(config); 
+
+            if (response.data && response.data.success === false) { 
                 throw new Error(
                     response.data.message || "Failed to save note."
                 );
             }
 
+            if (attachedFiles.length > 0) {
+                const fileTitles = attachedFiles.map((fw) => fw.title);
+                await apiService.post("/account-checklist-status/bulk", {
+                    account_id: selectedAccountId,
+                    file_titles: fileTitles,
+                    is_completed: true,
+                    completed_at: new Date().toISOString(),
+                });
+            }
             onSaveSuccess();
         } catch (err) {
             console.error("Failed to save note:", err);
@@ -387,7 +411,7 @@ const AddNoteModal = ({
                                             ) : submilestoneOptions.length > 0 ? (
                                                 <select
                                                     value={fileWrapper.title}
-                                                    onChange={(e) => handleTitleChange(fileWrapper.id, e.target.value)}
+                                                    onChange={(e) => handleTitleChange(fileWrapper.id, e.target.value, e.target.selectedOptions[0].dataset.checklistId)}
                                                     className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                                                     disabled={isSaving}
                                                 >

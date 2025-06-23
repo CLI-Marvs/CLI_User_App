@@ -60,7 +60,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             assigned_to_user_id: selectedAssignee?.id,
             work_order_type_id: selectedWorkOrderType?.id,
             work_order_deadline: formattedDueDate,
-            status: "Pending",
+            status: "In Progress",
             description: "",
             priority: "Medium",
             created_by_user_id: user.id,

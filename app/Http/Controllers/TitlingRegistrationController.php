@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\TakenOutAccount;
 use App\Models\WorkOrder;
+use App\Models\AccountChecklistStatus;
 use App\Models\WorkOrderType;
 
 class TitlingRegistrationController extends Controller
@@ -23,7 +24,7 @@ class TitlingRegistrationController extends Controller
             return response()->json(['message' => 'Account not found for the given contract number.'], 404);
         }
 
-        $definedSteps = WorkOrderType::with('submilestones')->orderBy('id')->get();
+        $definedSteps = WorkOrderType::with('submilestones.checklists')->orderBy('id')->get();
 
         $accountWorkOrders = WorkOrder::whereHas('accounts', function ($query) use ($account) {
             $query->where('taken_out_accounts.id', $account->id);
@@ -45,13 +46,47 @@ class TitlingRegistrationController extends Controller
             }
         }
 
-        $finalResponseData = $definedSteps->map(function ($workOrderType) use ($workOrdersMappedByStepName) {
+        $allAccountCompletedChecklistIds = AccountChecklistStatus::where('account_id', $account->id)
+            ->where('is_completed', true)
+            ->pluck('checklist_id')
+            ->flip(); 
+
+        $finalResponseData = $definedSteps->map(function ($workOrderType) use ($workOrdersMappedByStepName, $allAccountCompletedChecklistIds) {
             $definedStepName = $workOrderType->type_name;
-            
-            // Get all submilestone IDs as array
-            $submilestoneIds = $workOrderType->submilestones->pluck('id')->toArray();
-            
+
             $workOrderForStep = $workOrdersMappedByStepName[$definedStepName] ?? null;
+
+            $stepStatus = $workOrderForStep->status ?? 'Unassigned';
+
+            if ($workOrderType->submilestones->isNotEmpty()) {
+                $allSubmilestoneStatuses = $workOrderType->submilestones->map(function ($submilestone) use ($allAccountCompletedChecklistIds) {
+                    $requiredChecklistIds = $submilestone->checklists->pluck('id');
+
+                    if ($requiredChecklistIds->isEmpty()) {
+                        return 'Pending';
+                    }
+
+                    $completedCount = $requiredChecklistIds->filter(function ($id) use ($allAccountCompletedChecklistIds) {
+                        return isset($allAccountCompletedChecklistIds[$id]);
+                    })->count();
+
+                    if ($completedCount === 0) {
+                        return 'Pending';
+                    }
+                    if ($completedCount === $requiredChecklistIds->count()) {
+                        return 'Complete';
+                    }
+                    return 'In Progress';
+                });
+
+                if ($allSubmilestoneStatuses->every(fn ($s) => $s === 'Complete')) {
+                    $stepStatus = 'Complete';
+                } elseif ($allSubmilestoneStatuses->every(fn ($s) => $s === 'Pending')) {
+                    $stepStatus = 'Pending';
+                } elseif ($allSubmilestoneStatuses->contains('In Progress') || $allSubmilestoneStatuses->contains('Complete')) {
+                    $stepStatus = 'In Progress';
+                }
+            }
 
             if ($workOrderForStep) {
                 $assigneeName = null;
@@ -60,11 +95,10 @@ class TitlingRegistrationController extends Controller
                 }
                 return [
                     'stepName'         => $definedStepName,
-                    'submilestoneIds'  => $submilestoneIds, // Array of all submilestone IDs
                     'workOrder'        => $workOrderForStep->work_order,
                     'workOrderId'      => $workOrderForStep->work_order_id,
                     'assigneeName'     => $assigneeName,
-                    'status'           => $workOrderForStep->status,
+                    'status'           => $stepStatus,
                     'description'      => $workOrderForStep->description,
                     'priority'         => $workOrderForStep->priority,
                     'dueDate'          => $workOrderForStep->work_order_deadline ? $workOrderForStep->work_order_deadline->toDateString() : null,
@@ -78,11 +112,10 @@ class TitlingRegistrationController extends Controller
             }
             return [
                 'stepName'         => $definedStepName,
-                'submilestoneIds'  => $submilestoneIds,
                 'workOrder'        => null,
                 'workOrderId'      => null,
                 'assigneeName'     => null,
-                'status'           => 'Unassigned',
+                'status'           => $stepStatus,
                 'description'      => null,
                 'priority'         => null,
                 'dueDate'          => null,

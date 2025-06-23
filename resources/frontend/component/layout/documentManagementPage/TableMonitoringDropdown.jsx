@@ -23,14 +23,13 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
             workOrderId === WORK_ORDER_TBD ||
             workOrderId === WORK_ORDER_NA;
 
-        setIsCompletionStatusUpdated(false); // Reset when key identifiers change
+        setIsCompletionStatusUpdated(false); 
 
         if (!currentMilestone || isWorkOrderInvalid || !accountId) {
             setMilestoneDetails({});
             setUploadedDocuments([]);
             setCheckedItems({});
             setMilestoneOverallStatus(null);
-            // Reset loading and error only if it's due to invalid work order/account ID, not just missing currentMilestone
             if (isWorkOrderInvalid || !accountId) {
                 setIsLoading(false);
                 setError(null);
@@ -50,8 +49,6 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                         workOrderId
                     )}&accountId=${encodeURIComponent(accountId)}`
                 );
-
-                console.log("MILESTONEDATA", response.data);
 
                 if (
                     typeof response.data === "object" &&
@@ -136,13 +133,8 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
         ) {
             return;
         }
-
-        // If the fetched overall status from taken_out_accounts is already 'Complete',
-        // set isCompletionStatusUpdated to true to prevent redundant PATCH calls.
         if (milestoneOverallStatus === 'Complete' && !isCompletionStatusUpdated) {
             setIsCompletionStatusUpdated(true);
-            // The work order status might still need to be patched if it's different,
-            // but this prevents the checklist-driven update if the account already reflects completion.
         }
 
         const allSubmilestonesComplete = Object.keys(milestoneDetails).every(

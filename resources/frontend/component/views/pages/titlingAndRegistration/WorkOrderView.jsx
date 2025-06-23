@@ -532,10 +532,10 @@ const WorkOrderView = () => {
                                         <td className="p-4 border-b border-gray-300 text-center">
                                             <Typography
                                                 variant="small"
-                                                className={`font-semibold px-3 py-1 rounded-full inline-block ${
+                                                className={`font-semibold px-3 py-1 rounded-full inline-block w-28 ${
                                                     row.status === "In Progress"
                                                         ? "bg-[#F5F4DC] text-[#175D5F]"
-                                                        : "bg-[#175D5F] text-white"
+                                                        : "bg-green-200 text-green-800"
                                                 }`}
                                             >
                                                 {row.status}

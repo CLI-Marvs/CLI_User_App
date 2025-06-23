@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ExecutiveDashboardController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConcernController;
@@ -24,8 +25,10 @@ use App\Http\Controllers\DepartmentFeaturePermissionController;
 use App\Http\Controllers\MarkupSettignsController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\SubmilestoneController;
-use App\Http\Controllers\MilestoneController; 
+use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\AccountChecklistStatusController;
+use App\Http\Controllers\WorkOrderTypeSettingsController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -63,7 +66,7 @@ Route::middleware('auth:sanctum')->group(
         Route::get('/inquiries-channel', [ConcernController::class, 'getInquiriesPerChannel']);
     }
 );
-
+ 
 Route::post('delete-concerns', [ConcernController::class, 'deleteConcern']);
 Route::post('close-concerns', [ConcernController::class, 'markAsClosed']);
 Route::post('conversation', [ConcernController::class, 'sendMessageConcerns']);
@@ -108,6 +111,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/account-checklist-status', [AccountChecklistStatusController::class, 'store']);
     Route::post('/account-checklist-status/bulk', [AccountChecklistStatusController::class, 'bulkStore']);
     Route::get('/account/{accountId}/submilestone/{submilestoneId}/checklist-status', [AccountChecklistStatusController::class, 'getChecklistStatus']);
+    Route::prefix('admin/settings')->group(function () {
+        // Work Order Types
+        Route::get('/work-order-types', [WorkOrderTypeSettingsController::class, 'index']);
+        Route::post('/work-order-types', [WorkOrderTypeSettingsController::class, 'storeWorkOrderType']);
+        Route::put('/work-order-types/{workOrderType}', [WorkOrderTypeSettingsController::class, 'updateWorkOrderType']);
+        Route::delete('/work-order-types/{workOrderType}', [WorkOrderTypeSettingsController::class, 'destroyWorkOrderType']);
+        // Submilestones
+        Route::post('/submilestones', [WorkOrderTypeSettingsController::class, 'storeSubmilestone']);
+        Route::put('/submilestones/{submilestone}', [WorkOrderTypeSettingsController::class, 'updateSubmilestone']);
+        Route::delete('/submilestones/{submilestone}', [WorkOrderTypeSettingsController::class, 'destroySubmilestone']);
+        // Checklists
+        Route::post('/checklists', [WorkOrderTypeSettingsController::class, 'storeChecklist']);
+        Route::put('/checklists/{checklist}', [WorkOrderTypeSettingsController::class, 'updateChecklist']);
+        Route::delete('/checklists/{checklist}', [WorkOrderTypeSettingsController::class, 'destroyChecklist']);
+    });
+    // Dashboard Routes
+   Route::get('/dashboard/executive', [ExecutiveDashboardController::class, 'getExecutiveDashboardData']);
+
 });
 
 //* For Sap 
@@ -153,7 +174,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/transaction-reports', 'transactionReports');
     });
     Route::apiResource('markup-settings', MarkupSettignsController::class);
-    
+
     Route::controller(MarkupSettignsController::class)->group(function () {
         Route::get('/card/fee', 'retrieveCardMarkupDetails');
         Route::put('/card/fee/{id}', 'updateCardSettings');

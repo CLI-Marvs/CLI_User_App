@@ -6,7 +6,6 @@ import apiService from "../../../component/servicesApi/apiService";
 import Dropdown from "../../../../../resources/frontend/component/layout/documentManagementPage/TableMonitoringDropdown";
 import AddFilesModal from "./AddFilesModal";
 import NotesAndUpdatesModal from "./NotesAndUpdatesModal";
-
 import { motion } from "framer-motion";
 
 const PersonIcon = () => (
@@ -65,20 +64,6 @@ export default function TitlingAndRegistrationMonitor({
         useState(false);
     const [selectedItemForNotesAndUpdates, setSelectedItemForNotesAndUpdates] =
         useState(null);
-    const [checklistStatuses, setChecklistStatuses] = useState({});
-
-    const TITLING_PROCESS_STEPS = [
-        "Docketing",
-        "DOA",
-        "Transfer Tax Payment",
-        "BIR Submission",
-        "eCAR Release",
-        "Registry of Deeds Submission",
-        "Certificate of Title Release",
-        "Local Assessor Submission",
-        "Tax Declaration Release",
-        "Submission to Financial Institution",
-    ];
 
     useEffect(() => {
         const fetchMonitoringData = async (contractNumber) => {
@@ -102,14 +87,11 @@ export default function TitlingAndRegistrationMonitor({
                     assignee: item.assigneeName
                         ? { name: item.assigneeName }
                         : null,
-                    status: item.status || "Unassigned",
+                    status: item.status,
                     dueDate: item.dueDate || "TBD",
                     hasNotes: item.notesCount > 0,
                     hasFiles: item.filesCount > 0,
-                    submilestone_ids: item.submilestoneIds || [],
                 }));
-
-                console.log("Transformed Data:", transformedData);
 
                 setMonitoringData(transformedData);
             } catch (err) {
@@ -134,97 +116,9 @@ export default function TitlingAndRegistrationMonitor({
                 "Contract number is missing. Cannot load monitoring data."
             );
             setIsLoading(false);
-            setMonitoringData(
-                TITLING_PROCESS_STEPS.map((stepName) => ({
-                    step: stepName,
-                    workOrderId: "N/A",
-                    assignee: null,
-                    status: "N/A",
-                    dueDate: "N/A",
-                    hasNotes: false,
-                    hasFiles: false,
-                }))
-            );
+            setMonitoringData([]);
         }
     }, [contractNumber]);
-
-    useEffect(() => {
-        async function fetchChecklistStatuses() {
-            if (monitoringData.length > 0) {
-                const statusPromises = monitoringData.map(async (item) => {
-                    if (item.submilestone_ids?.length > 0) {
-                        const checklistStatusPromises =
-                            item.submilestone_ids.map((submilestoneId) =>
-                                apiService
-                                    .get(
-                                        `/account/${id}/submilestone/${submilestoneId}/checklist-status`
-                                    )
-                                    .then(
-                                        (res) => res?.data?.status || "Unknown"
-                                    )
-                                    .catch((error) => {
-                                        console.error(
-                                            `Error fetching status for ${item.step} - submilestone ${submilestoneId}:`,
-                                            error
-                                        );
-                                        return "Error";
-                                    })
-                            );
-
-                        const statuses = await Promise.all(
-                            checklistStatusPromises
-                        );
-
-                        let finalStatus;
-                        if (statuses.every((s) => s === "Complete")) {
-                            finalStatus = "Complete";
-                        } else if (statuses.some((s) => s === "Error")) {
-                            finalStatus = "Error";
-                        } else if (statuses.every((s) => s === "Pending")) {
-                            finalStatus = "Pending";
-                        } else {
-                            finalStatus = "In Progress";
-                        }
-
-                        return [item.step, finalStatus];
-                    } else {
-                        const validStatuses = [
-                            "In Progress",
-                            "On Hold",
-                            "Pending",
-                            "Complete",
-                            "Completed",
-                            "Incomplete",
-                            "Error",
-                            "Unassigned",
-                        ];
-
-                        const fallbackStatus = validStatuses.includes(
-                            item.status
-                        )
-                            ? item.status
-                            : "Unassigned";
-
-                        return [item.step, fallbackStatus];
-                    }
-                });
-
-                try {
-                    const results = await Promise.all(statusPromises);
-                    const statusMap = Object.fromEntries(results);
-                    setChecklistStatuses(statusMap);
-                } catch (error) {
-                    console.error("Error fetching checklist statuses:", error);
-                }
-            } else {
-                setChecklistStatuses({});
-            }
-        }
-
-        fetchChecklistStatuses();
-    }, [id, monitoringData]);
-
-    console.log("STATUS:", checklistStatuses);
 
     const handleOpenNotesAndUpdatesModal = (item) => {
         setSelectedItemForNotesAndUpdates(item);
@@ -340,30 +234,23 @@ export default function TitlingAndRegistrationMonitor({
                                         <td className="p-2 text-center align-middle">
                                             <span
                                                 className={`inline-block px-3 py-1 rounded-full text-xs font-medium w-28 ${
-                                                    checklistStatuses[
-                                                        item.step
-                                                    ] === "Complete" ||
-                                                    checklistStatuses[
-                                                        item.step
-                                                    ] === "Completed"
+                                                    item.status ===
+                                                        "Complete" ||
+                                                    item.status === "Completed"
                                                         ? "bg-green-200 text-green-800"
-                                                        : checklistStatuses[
-                                                              item.step
-                                                          ] === "In Progress"
+                                                        : item.status ===
+                                                          "In Progress"
                                                         ? "bg-blue-200 text-blue-800"
-                                                        : checklistStatuses[
-                                                              item.step
-                                                          ] === "On Hold"
+                                                        : item.status ===
+                                                          "On Hold"
                                                         ? "bg-red-200 text-red-800"
-                                                        : checklistStatuses[
-                                                              item.step
-                                                          ] === "Pending"
+                                                        : item.status ===
+                                                          "Pending"
                                                         ? "bg-yellow-200 text-yellow-800"
                                                         : "bg-gray-200 text-gray-800"
                                                 }`}
                                             >
-                                                {checklistStatuses[item.step] ||
-                                                    item.status}
+                                                {item.status}
                                             </span>
                                         </td>
                                         <td className="pl-16 align-middle text-base font-normal text-gray-700">

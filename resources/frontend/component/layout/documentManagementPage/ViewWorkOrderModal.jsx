@@ -113,8 +113,6 @@ const ViewWorkOrderModal = ({
 
     if (!isOpen || !mounted || !workOrderData) return null;
 
-    console.log("Work order account status:", workOrderData.status);
-
     return ReactDOM.createPortal(
         <div
             className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4"
@@ -229,21 +227,14 @@ const ViewWorkOrderModal = ({
                             </div>
                             <div className="col-span-3 flex justify-center">
                                 <span
-                                    className={`px-3 py-1 rounded-full text-xs font-normal
-                                        ${
-                                            workOrderData.status === "In Progress" ||
-                                            workOrderData.status === "Pending"
-                                                ? "bg-[#F5F4DC] text-custom-bluegreen text-sm font-normal"
-                                                : ""
-                                        }
-                                        ${
-                                            workOrderData.status === "Complete"
-                                                ? "bg-custom-bluegreen text-white"
-                                                : ""
-                                        }
+                                    className={`px-3 py-1 rounded-full text-xs font-normal ${
+                                        account.checklist_status
+                                            ? "bg-custom-bluegreen text-white" // Completed style
+                                            : "bg-[#F5F4DC] text-custom-bluegreen text-sm font-normal" // In Progress/Pending style
+                                    }
                                     `}
                                 >
-                                    {workOrderData.status === "Complete"
+                                    {account.checklist_status
                                         ? "Completed"
                                         : "In Progress"}
                                 </span>

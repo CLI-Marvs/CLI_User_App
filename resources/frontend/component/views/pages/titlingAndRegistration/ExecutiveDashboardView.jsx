@@ -1,10 +1,10 @@
 import React from 'react'
-import AdminSettings from '../../../layout/adminsettingpage/AdminSettings'
+import ExecutiveDashboard from '../../../../component/layout/documentManagementPage/ExecutiveDashboard'
 
 const ExecutiveDashboardView = () => {
   return (
     <div>
-        <AdminSettings/>
+        <ExecutiveDashboard/>
     </div>
   )
 }
