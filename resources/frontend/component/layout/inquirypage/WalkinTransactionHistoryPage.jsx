@@ -165,7 +165,11 @@ const WalkinTransactionHistoryPage = () => {
                         tableClassName="w-full min-w-[882px]"
                         className="gap-4 w-full h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen"
                         columns={WALKIN_HISTORY_COLUMNS}
-                        data={transactionHistory?.data || []}
+                        data={
+                            Array.isArray(transactionHistory?.data)
+                                ? transactionHistory.data
+                                : []
+                        }
                         isLoading={isLoading}
                         renderRow={(item) => (
                             <WalkinHistoryTableRow
