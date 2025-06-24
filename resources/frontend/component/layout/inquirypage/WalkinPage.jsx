@@ -101,13 +101,13 @@ const WalkinPage = () => {
         setPage(newPage);
     };
 
-    if (isError) {
-        return (
-            <div className="text-red-500 py-1   justify-between items-center h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
-                <h1 className="montserrat-regular">Error loading data: {isError}</h1>
-            </div>
-        );
-    }
+    // if (isError) {
+    //     return (
+    //         <div className="text-red-500 py-1   justify-between items-center h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
+    //             <h1 className="montserrat-regular">Error loading data: {isError}</h1>
+    //         </div>
+    //     );
+    // }
 
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
@@ -214,8 +214,8 @@ const WalkinPage = () => {
                             <Skeleton height={140} className="my-1" />
                         </div>
                     ) : walkinData &&
-                      Array.isArray(walkinData.data) &&
-                      walkinData.data.length === 0 ? (
+                      Array.isArray(walkinData?.data) &&
+                      walkinData?.data.length === 0 ? (
                         <div className="text-center py-4 text-custom-bluegreen">
                             No walkin transaction data
                         </div>
