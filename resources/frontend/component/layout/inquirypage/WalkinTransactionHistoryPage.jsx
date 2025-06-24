@@ -11,7 +11,7 @@ import Pagination from "@/component/layout/propertyandpricingpage/component/Pagi
 import Button from "@/component/layout/inquirypage/component/ui/button";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa6";
-import WalkinTransactionModal from "@/component/layout/inquirypage/component/walkin/WalkinTransactionModal";
+import WalkinTransactionModal from "@/component/layout/inquirypage/component/Walkin/WalkinTransactionModal";
 const INITIAL_SEARCH_STATE = {
     property_name: "",
     priority_number: "",
