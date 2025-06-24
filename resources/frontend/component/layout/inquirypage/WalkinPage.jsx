@@ -192,11 +192,12 @@ const WalkinPage = () => {
                                 <option value="" className="montserrat-regular">
                                     (Select counter)
                                 </option>
-                                {desks && desks.map((desk) => (
-                                    <option key={desk.id} value={desk.id}>
-                                        {desk.name}
-                                    </option>
-                                ))}
+                                {desks &&
+                                    desks.map((desk) => (
+                                        <option key={desk.id} value={desk.id}>
+                                            {desk.name}
+                                        </option>
+                                    ))}
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
                                 <IoMdArrowDropdown />
@@ -227,7 +228,11 @@ const WalkinPage = () => {
                             className="gap-4 w-full h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen mb-4 text-center "
                             tableClassName="w-full min-w-[882px]  "
                             columns={WALKIN_COLUMNS}
-                            data={walkinData.data}
+                            data={
+                                Array.isArray(walkinData?.data)
+                                    ? walkinData.data
+                                    : []
+                            }
                             isLoading={isLoading}
                             renderRow={(item) => (
                                 <WalkinTableRow
