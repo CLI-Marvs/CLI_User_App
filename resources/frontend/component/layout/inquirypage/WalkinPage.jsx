@@ -192,7 +192,7 @@ const WalkinPage = () => {
                                 <option value="" className="montserrat-regular">
                                     (Select counter)
                                 </option>
-                                {desks.map((desk) => (
+                                {desks && desks.map((desk) => (
                                     <option key={desk.id} value={desk.id}>
                                         {desk.name}
                                     </option>
