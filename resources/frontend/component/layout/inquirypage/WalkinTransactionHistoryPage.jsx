@@ -159,7 +159,7 @@ const WalkinTransactionHistoryPage = () => {
                     <div className="text-center py-4 text-custom-bluegreen">
                         No data available
                     </div>
-                ) : transactionHistory?.data.length > 0 &&
+                ) : transactionHistory &&
                   transactionHistory?.data?.length > 0 ? (
                     <CustomTable
                         tableClassName="w-full min-w-[882px]"
