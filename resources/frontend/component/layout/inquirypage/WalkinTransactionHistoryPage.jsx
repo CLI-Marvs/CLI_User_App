@@ -155,21 +155,18 @@ const WalkinTransactionHistoryPage = () => {
                         <Skeleton height={140} className="my-1" />
                         <Skeleton height={140} className="my-1" />
                     </div>
-                ) : isError === "No data available." ? (
+                ) : Array.isArray(transactionHistory?.data) &&
+                  transactionHistory.data.length === 0 ? (
                     <div className="text-center py-4 text-custom-bluegreen">
                         No data available
                     </div>
-                ) : transactionHistory &&
-                  transactionHistory?.data?.length > 0 ? (
+                ) : Array.isArray(transactionHistory?.data) &&
+                  transactionHistory.data.length > 0 ? (
                     <CustomTable
                         tableClassName="w-full min-w-[882px]"
                         className="gap-4 w-full h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen"
                         columns={WALKIN_HISTORY_COLUMNS}
-                        data={
-                            Array.isArray(transactionHistory?.data)
-                                ? transactionHistory.data
-                                : []
-                        }
+                        data={transactionHistory.data}
                         isLoading={isLoading}
                         renderRow={(item) => (
                             <WalkinHistoryTableRow
@@ -180,10 +177,8 @@ const WalkinTransactionHistoryPage = () => {
                         )}
                     />
                 ) : (
-                    <div className="text-center py-4">
-                        <Skeleton height={140} className="my-1" />
-                        <Skeleton height={140} className="my-1" />
-                        <Skeleton height={140} className="my-1" />
+                    <div className="text-center py-4 text-custom-bluegreen">
+                        No data available
                     </div>
                 )}
 
