@@ -22,7 +22,9 @@ const WalkinPage = () => {
     const PAGE_SIZE = 10;
     const engageFormModalRef = useRef(null);
     const [selectedItem, setSelectedItem] = useState(null);
-    {/* TODO: confirm this because it will handle many users, confirm also if to use passcode  */}
+    {
+        /* TODO: confirm this because it will handle many users, confirm also if to use passcode  */
+    }
     const [selectedBranch, setSelectedBranch] = useState({ id: "", name: "" });
     const [desks, setDesks] = useState([]);
     const [selectedDesk, setSelectedDesk] = useState({ id: "", name: "" });
@@ -51,7 +53,7 @@ const WalkinPage = () => {
         staleTime: 1000 * 60,
         cacheTime: 1000 * 60 * 5,
     });
-
+    console.log("walkinData:", walkinData);
     //Event handler
     //Handle engage form modal open
     const handleEngage = async (item) => {
@@ -209,18 +211,21 @@ const WalkinPage = () => {
                             <Skeleton height={140} className="my-1" />
                             <Skeleton height={140} className="my-1" />
                         </div>
-                    ) : isError === "No data available." ? (
+                    ) : walkinData &&
+                      Array.isArray(walkinData.data) &&
+                      walkinData.data.length === 0 ? (
                         <div className="text-center py-4 text-custom-bluegreen">
-                            No data available
+                            No walkin transaction data
                         </div>
-                    ) : walkinData?.data?.length > 0 &&
-                      walkinData?.data?.length > 0 ? (
+                    ) : walkinData &&
+                      Array.isArray(walkinData.data) &&
+                      walkinData.data.length > 0 ? (
                         <CustomTable
                             textAlign="text-center"
                             className="gap-4 w-full h-[49px] montserrat-semibold text-sm text-white bg-custom-lightgreen mb-4 text-center "
                             tableClassName="w-full min-w-[882px]  "
                             columns={WALKIN_COLUMNS}
-                            data={walkinData?.data || []}
+                            data={walkinData.data}
                             isLoading={isLoading}
                             renderRow={(item) => (
                                 <WalkinTableRow
@@ -231,10 +236,8 @@ const WalkinPage = () => {
                             )}
                         />
                     ) : (
-                        <div className="text-center py-4">
-                            <Skeleton height={140} className="my-1" />
-                            <Skeleton height={140} className="my-1" />
-                            <Skeleton height={140} className="my-1" />
+                        <div className="text-center py-4 text-custom-bluegreen">
+                            No walkin transaction data
                         </div>
                     )}
 
