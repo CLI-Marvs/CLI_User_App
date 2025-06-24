@@ -14,7 +14,7 @@ export const walkinTransactionService = {
                 status: "queue",
             }).toString();
             const response = await walkinFeedbackService.get(
-                `/transactions?${queryParams}`
+                `/admin/transactions/queue?${queryParams}`
             );
             return response.data.data;
         } catch (error) {

@@ -173,6 +173,7 @@ const EngageFormModal = forwardRef(
                             </button>
                         </div>
                     </div>
+
                     {/* Modal content */}
                     <div className=" ">
                         <div className="mt-10">
@@ -183,6 +184,7 @@ const EngageFormModal = forwardRef(
                                 </span>
                             </h1>
                         </div>
+                        
                         {/* Inquiry Type */}
                         <div className="py-2">
                             <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden ">

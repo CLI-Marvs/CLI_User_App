@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
 import { WALKIN_COLUMNS } from "@/constant/data/tableColumns";
@@ -53,7 +53,7 @@ const WalkinPage = () => {
         staleTime: 1000 * 60,
         cacheTime: 1000 * 60 * 5,
     });
-    console.log("walkinData:", walkinData);
+
     //Event handler
     //Handle engage form modal open
     const handleEngage = async (item) => {
@@ -103,7 +103,9 @@ const WalkinPage = () => {
 
     if (isError) {
         return (
-            <div className="text-red-500">Error loading data: {isError}</div>
+            <div className="text-red-500 py-1   justify-between items-center h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
+                <h1 className="montserrat-regular">Error loading data: {isError}</h1>
+            </div>
         );
     }
 
