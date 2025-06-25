@@ -71,7 +71,7 @@ const WalkinPage = () => {
         const trimCounter = selectedDesk.name.replace(/\D/g, "");
 
         try {
-            // Update the status
+            //Update the status
             await walkinTransactionService.updateWalkinTransactionStatus({
                 walkin_transaction_id: item?.id,
                 status: "serving",
@@ -100,14 +100,6 @@ const WalkinPage = () => {
     const handlePageChange = (newPage) => {
         setPage(newPage);
     };
-
-    // if (isError) {
-    //     return (
-    //         <div className="text-red-500 py-1   justify-between items-center h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">
-    //             <h1 className="montserrat-regular">Error loading data: {isError}</h1>
-    //         </div>
-    //     );
-    // }
 
     return (
         <div className="h-screen bg-custom-grayFA p-4 flex flex-col gap-[21px]">

@@ -39,13 +39,17 @@ const EngageFormModal = forwardRef(
         // Form validation
         const isPropertyButtonDisabled = isButtonDisabled(
             formData,
-            Object.keys(formDataInitialState).filter((key) => key !== "details_message")
+            Object.keys(formDataInitialState).filter(
+                (key) => key !== "details_message"
+            )
         );
         // Mutations
         const transactionMutation = useMutation({
             mutationFn: walkinTransactionService.createWalkinTransactionDetail,
             onSuccess: () => {
-                queryClient.invalidateQueries({ queryKey: ['queueWalkinTransactions'] });
+                queryClient.invalidateQueries({
+                    queryKey: ["queueWalkinTransactions"],
+                });
             },
         });
         const queueMutation = useMutation({
@@ -53,7 +57,8 @@ const EngageFormModal = forwardRef(
         });
 
         // Derived state
-        const isSubmitting = transactionMutation.isPending || queueMutation.isPending;
+        const isSubmitting =
+            transactionMutation.isPending || queueMutation.isPending;
 
         // Expose methods to parent through ref
         useImperativeHandle(ref, () => ({
@@ -112,7 +117,8 @@ const EngageFormModal = forwardRef(
 
             try {
                 // Submit transaction first
-                const transactionResponse = await transactionMutation.mutateAsync(transactionPayload);
+                const transactionResponse =
+                    await transactionMutation.mutateAsync(transactionPayload);
 
                 // Then update queue status
                 await queueMutation.mutateAsync(queuePayload);
@@ -120,21 +126,23 @@ const EngageFormModal = forwardRef(
                 // Show success toast
                 showToast(
                     transactionResponse?.message ||
-                    "Walkin transaction details created successfully",
+                        "Walkin transaction details created successfully",
                     "success"
                 );
 
                 //Refresh the transaction history list
-                queryClient.invalidateQueries({ queryKey: ["walkinTransactionHistory"] });
-                
+                queryClient.invalidateQueries({
+                    queryKey: ["walkinTransactionHistory"],
+                });
+
                 // Reset form data and close dialog
                 setFormData(formDataInitialState);
                 dialogRef.current?.close();
                 setSelectedItem(null);
-
             } catch (error) {
                 showToast(
-                    error?.message || "An error occurred while processing the request",
+                    error?.message ||
+                        "An error occurred while processing the request",
                     "error"
                 );
             }
@@ -150,9 +158,36 @@ const EngageFormModal = forwardRef(
         };
 
         // Handle modal close
-        const handleCloseModal = () => {
-            dialogRef.current?.close();
-            setSelectedItem(null);
+        const handleCloseModal = async () => {
+            try {
+                // Close the modal dialog first
+                dialogRef.current?.close();
+
+                // Create a single transaction for all updates
+                await Promise.all([
+                    // Update queue status
+                    queueMutation.mutateAsync({
+                        priority_number: itemData?.priority_number,
+                        status: "queue",
+                    }),
+
+                    // Update transaction status
+                    walkinTransactionService.updateWalkinTransactionStatus({
+                        walkin_transaction_id: itemData?.id,
+                        status: "queue",
+                    }),
+                ]);
+
+                // Batch invalidate queries
+                queryClient.invalidateQueries({
+                    queries: [{ queryKey: ["queueWalkinTransactions"] }],
+                });
+
+                // Reset selected item
+                setSelectedItem(null);
+            } catch (error) {
+                showToast("Error closing the form", "error");
+            }
         };
 
         return (
