@@ -184,7 +184,7 @@ const EngageFormModal = forwardRef(
                                 </span>
                             </h1>
                         </div>
-                        
+
                         {/* Inquiry Type */}
                         <div className="py-2">
                             <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden ">
@@ -309,12 +309,14 @@ const EngageFormModal = forwardRef(
                         <div className="py-1">
                             {/* TODO: refactor this and move the  validation to 'validateContractNumber util */}
                             <div
-                                className={`flex items-center border rounded-[5px] overflow-hidden ${formData.contract_number && formData.contract_number.length !== 13
-                                    ? 'border-red-500'
-                                    : formData.contract_number.length === 13
-                                        ? 'border-green-500'
-                                        : ' '
-                                    }`}
+                                className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                    formData.contract_number &&
+                                    formData.contract_number.length !== 13
+                                        ? "border-red-500"
+                                        : formData.contract_number.length === 13
+                                        ? "border-green-500"
+                                        : " "
+                                }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     Contract Number
@@ -333,14 +335,19 @@ const EngageFormModal = forwardRef(
                                     maxLength={13}
                                 />
                             </div>
-                            <span className={`flex justify-end text-xs ${formData.contract_number && formData.contract_number.length !== 13
-                                ? 'text-red-500'
-                                : formData.contract_number.length === 13
-                                    ? 'text-green-500'
-                                    : 'text-gray-400'
-                                }`}>
+                            <span
+                                className={`flex justify-end text-xs ${
+                                    formData.contract_number &&
+                                    formData.contract_number.length !== 13
+                                        ? "text-red-500"
+                                        : formData.contract_number.length === 13
+                                        ? "text-green-500"
+                                        : "text-gray-400"
+                                }`}
+                            >
                                 {formData?.contract_number.length} /13
-                                {formData.contract_number && formData.contract_number.length !== 13 &&
+                                {formData.contract_number &&
+                                    formData.contract_number.length !== 13 &&
                                     " (Must be 13 digits)"}
                             </span>
                         </div>
@@ -393,32 +400,42 @@ const EngageFormModal = forwardRef(
                         <div className="mt-10 flex justify-end gap-3">
                             <Button
                                 type="submit"
-                                onClick={(e) => handleSubmit(e, "resolved")}
-                                disabled={isPropertyButtonDisabled || isSubmitting}
-                                className={`border border-custom-bluegreen w-[150px] h-[35px] rounded-[10px] text-sm bg-white text-custom-bluegreen montserrat-semibold ${(isPropertyButtonDisabled || isSubmitting)
-                                    ? "cursor-not-allowed opacity-50"
-                                    : ""
-                                    }`}
+                                onClick={(e) => handleSubmit(e, "save")}
+                                disabled={
+                                    isPropertyButtonDisabled || isSubmitting
+                                }
+                                className={`bg-white border w-[150px] h-[35px] rounded-[10px] text-sm  text-custom-bluegreen montserrat-semibold  border-custom-bluegreen ${
+                                    isPropertyButtonDisabled || isSubmitting
+                                        ? "cursor-not-allowed opacity-50"
+                                        : ""
+                                }`}
                             >
-                                {isSubmitting && transactionMutation.variables?.status === "resolved" ? (
+                                {isSubmitting &&
+                                transactionMutation.variables?.status ===
+                                    "save" ? (
                                     <CircularProgress className="spinnerSize" />
                                 ) : (
-                                    <>Close ticket</>
+                                    <>Save</>
                                 )}
                             </Button>
                             <Button
                                 type="submit"
-                                onClick={(e) => handleSubmit(e, "save")}
-                                disabled={isPropertyButtonDisabled || isSubmitting}
-                                className={`gradient-btn5 w-[150px] h-[35px] rounded-[10px] text-sm bg-gray-500 text-white montserrat-semibold ${(isPropertyButtonDisabled || isSubmitting)
-                                    ? "cursor-not-allowed opacity-50"
-                                    : ""
-                                    }`}
+                                onClick={(e) => handleSubmit(e, "resolved")}
+                                disabled={
+                                    isPropertyButtonDisabled || isSubmitting
+                                }
+                                className={`border  w-[150px] h-[35px] rounded-[10px] text-sm bg-white text-white montserrat-semibold gradient-btn5 ${
+                                    isPropertyButtonDisabled || isSubmitting
+                                        ? "cursor-not-allowed opacity-50"
+                                        : ""
+                                }`}
                             >
-                                {isSubmitting && transactionMutation.variables?.status === "save" ? (
+                                {isSubmitting &&
+                                transactionMutation.variables?.status ===
+                                    "resolved" ? (
                                     <CircularProgress className="spinnerSize" />
                                 ) : (
-                                    <>Save</>
+                                    <>Close ticket</>
                                 )}
                             </Button>
                         </div>
