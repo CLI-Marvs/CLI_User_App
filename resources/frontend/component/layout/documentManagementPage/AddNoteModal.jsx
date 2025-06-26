@@ -20,7 +20,7 @@ const AddNoteModal = ({
     const [dragActive, setDragActive] = useState(false);
     const [submilestoneOptions, setSubmilestoneOptions] = useState([]);
     const [loadingSubmilestones, setLoadingSubmilestones] = useState(false);
-    const { user } = useStateContext();
+    const { user, fetchWorkOrders } = useStateContext();
 
     useEffect(() => {
         if (isOpen) {
@@ -248,6 +248,7 @@ const AddNoteModal = ({
         } finally {
             setIsSaving(false);
         }
+        fetchWorkOrders();
     };
 
     const remainingChars = 500 - noteText.length;

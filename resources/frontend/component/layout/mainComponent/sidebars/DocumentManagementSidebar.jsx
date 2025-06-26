@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Card, List, ListItem } from "@material-tailwind/react";
 import { Link, useLocation } from "react-router-dom";
 import { IoIosArrowForward } from "react-icons/io";
+import { set } from "lodash";
 
 const DocumentManagementSidebar = () => {
     const location = useLocation();
@@ -12,13 +13,21 @@ const DocumentManagementSidebar = () => {
     const popupRef = useRef(null);
 
     const togglePopup = () => {
-        setIsPopupOpen(!isPopupOpen);
-        setIsAccountMasterActive(!isAccountMasterActive);
+        const willBeOpen = !isPopupOpen;
+        setIsPopupOpen(willBeOpen);
+        setIsAccountMasterActive(willBeOpen);
+        // Close other popup
+        setIsWorkOrderPopUpOpen(false);
+        setIsWorkOrderActive(false);
     };
 
     const toggleWorkOrderPopUp = () => {
-        setIsWorkOrderPopUpOpen(!isWorkOrderPopUpOpen);
-        setIsWorkOrderActive(!isWorkOrderActive);
+        const willBeOpen = !isWorkOrderPopUpOpen;
+        setIsWorkOrderPopUpOpen(willBeOpen);
+        setIsWorkOrderActive(willBeOpen);
+        // Close other popup
+        setIsPopupOpen(false);
+        setIsAccountMasterActive(false);
     };
 
     useEffect(() => {
@@ -133,10 +142,10 @@ const DocumentManagementSidebar = () => {
                                         </Link>
                                         <div className="border-t border-gray-300 my-2"></div>
                                         <Link
-                                            to="masterlist"
+                                            to="myworkorders"
                                             onClick={() => {
                                                 setIsWorkOrderPopUpOpen(false);
-                                                setIsAccountMasterActive(false);
+                                                setIsWorkOrderActive(false);
                                             }}
                                         >
                                             <div className="text-[14px] pl-[15px] pb-2 hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-[#A5A5A5]">

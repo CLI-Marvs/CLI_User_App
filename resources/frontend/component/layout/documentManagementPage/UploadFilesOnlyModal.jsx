@@ -17,7 +17,7 @@ const UploadFilesOnlyModal = ({
     const [submilestoneOptions, setSubmilestoneOptions] = useState([]);
     const [loadingSubmilestones, setLoadingSubmilestones] = useState(false);
     const [dragActive, setDragActive] = useState(false);
-    const { user } = useStateContext();
+    const { user, fetchWorkOrders } = useStateContext();
 
     useEffect(() => {
         if (isOpen) {
@@ -229,6 +229,7 @@ const UploadFilesOnlyModal = ({
         } finally {
             setIsSaving(false);
         }
+        fetchWorkOrders();
     };
 
     return ReactDOM.createPortal(

@@ -192,20 +192,15 @@ export default function PaginatedTable() {
         setTakenOutCurrentPage,
         takenOutSearchQuery,
         setTakenOutSearchQuery,
-        setTakenOutFilteredRows,
         takenOutFilteredRows,
-        takenOutAppliedFilters,
         setTakenOutAppliedFilters,
-        takenOutTableRows,
         setTakenOutTableRows,
         takenOutCurrentData,
-        totalPages,
         takenOutCurrentPage,
         safeCurrentPage,
         takenOutIndexOfFirstRow,
         fetchTakenOutAccounts,
         loading,
-        setLoading,
     } = useStateContext();
     const [sortColumn, setSortColumn] = useState("accountname");
     const [sortDirection, setSortDirection] = useState("asc");
@@ -213,7 +208,6 @@ export default function PaginatedTable() {
     const isAnyRowChecked = Object.values(checkedRows).some(Boolean);
     const dropdownRef = useRef(null);
     const [isAddingToMasterlist, setIsAddingToMasterlist] = useState(false);
-    const [isFileUploading, setIsFileUploading] = useState(false);
 
     useEffect(() => {
         const handleOutsideClick = (event) => {
@@ -289,47 +283,6 @@ export default function PaginatedTable() {
         selectedDateFilter,
         selectedDate,
     ]);
-
-    const handleFileUpload = async (event) => {
-        const file = event.target.files[0];
-        if (!file) {
-            toast.error("No file selected.");
-            return;
-        }
-
-        try {
-            const formData = new FormData();
-            formData.append("file", file);
-
-            const response = await apiService.post(
-                "/upload-taken-out-accounts",
-                formData,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                }
-            );
-
-            if (response.status === 200) {
-                toast.success("Data uploaded successfully!");
-                await fetchTakenOutAccounts();
-            } else {
-                toast.error(
-                    `Failed to upload data: ${
-                        response.data?.message || "Unknown error"
-                    }`
-                );
-            }
-        } catch (error) {
-            const backendMsg =
-                error.response?.data?.message ||
-                error.message ||
-                "An error occurred while uploading the file.";
-            toast.error(backendMsg);
-            console.error("Error uploading file:", error);
-        }
-    };
 
     const fetchMasterList = async () => {
         try {
@@ -950,26 +903,6 @@ export default function PaginatedTable() {
                                 </>
                             )}
                         </button>
-
-                        <button
-                            onClick={() =>
-                                document.getElementById("fileUpload").click()
-                            }
-                            className="h-[47px] w-[130px] bg-[#067AC5] text-white text-sm rounded-[10px] flex items-center justify-center gap-1"
-                        >
-                            <UploadIcon className="w-5 h-5" />
-                            <span className="text-[14px] font-semibold">
-                                Upload
-                            </span>
-                        </button>
-
-                        <input
-                            id="fileUpload"
-                            type="file"
-                            accept=".xlsx, .xls"
-                            onChange={handleFileUpload}
-                            className="hidden"
-                        />
                     </div>
                 </div>
                 <div className="flex flex-wrap gap-2 w-full">

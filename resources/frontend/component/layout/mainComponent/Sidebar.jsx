@@ -115,6 +115,7 @@ const Sidebar = () => {
             case "/documentmanagement/titleandregistration/masterlist":
             case "/documentmanagement/titleandregistration/takenoutaccounts":
             case "/documentmanagement/titleandregistration/workorders":
+            case "/documentmanagement/titleandregistration/myworkorders":
             case "/documentmanagement/titleandregistration/executivedashboard":
             case "/documentmanagement/titleandregistration/settings":
                 setInquiryOpen(false);

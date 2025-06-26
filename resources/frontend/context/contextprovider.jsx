@@ -146,9 +146,7 @@ export const ContextProvider = ({ children }) => {
     const [assignee, setAssignee] = useState([]);
     const [accounts, setAccounts] = useState([]);
     const [workOrderTypes, setWorkOrderTypes] = useState([]);
-    const [workOrders, setWorkOrders]= useState([]);
-
-
+    const [workOrders, setWorkOrders] = useState([]);
 
     const fetchWorkOrders = async () => {
         try {
@@ -216,7 +214,7 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    const fetchMasterList = async () => {
+    const fetchMasterList = useCallback(async () => {
         setMasterListLoading(true);
         try {
             const response = await apiService.get(
@@ -239,7 +237,7 @@ export const ContextProvider = ({ children }) => {
         } finally {
             setMasterListLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchTakenOutAccounts();
@@ -1521,6 +1519,7 @@ export const ContextProvider = ({ children }) => {
                 assignee,
                 setAssignee,
                 accounts,
+                fetchWorkOrderTypes,
                 workOrderTypes,
                 workOrders,
                 fetchWorkOrders,

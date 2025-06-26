@@ -43,19 +43,61 @@ class WorkOrderController extends Controller
 
     public function index(Request $request)
     {
-        $query = WorkOrder::with(['account', 'assignedTo', 'type']);
-        if ($request->has('status')) {
-            $query->where('status', $request->status);
+        $user = $request->user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
         }
-        if ($request->has('assigned_personnel_id')) {
-            $query->where('assigned_to_user_id', $request->assigned_personnel_id);
+
+        $query = WorkOrder::query();
+
+        // Eager load relationships for efficiency, matching what the frontend component expects.
+        // Note the use of selecting specific columns to reduce payload size.
+        $query->with([
+            'assignee:id,fullname', // Frontend uses order.assignee.fullname
+            'workOrderType:id,type_name', // Frontend uses order.work_order_type.type_name
+            'accounts:id,account_name', // Frontend uses order.accounts
+            'createdBy:id,fullname' // The createdBy relationship points to Employee, which has fullname.
+        ]);
+
+        // Filter by the logged-in user's ID directly from the authenticated user.
+        $query->where('assigned_to_user_id', $user->id);
+
+        // Filter by status if provided in the request.
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
         }
-        if ($request->has('contract_no')) {
-            $query->whereHas('account', function ($q) use ($request) {
-                $q->where('contract_number', 'ILIKE', '%' . $request->contract_no . '%');
-            });
+
+        // Handle sorting based on frontend parameters.
+        if ($request->has('sortBy') && $request->has('sortOrder')) {
+            $sortBy = $request->input('sortBy');
+            $sortOrder = $request->input('sortOrder');
+            $allowedSortColumns = ['created_at', 'work_order_deadline', 'priority'];
+
+            if (in_array($sortBy, $allowedSortColumns)) {
+                if ($sortBy === 'priority') {
+                    // Custom sorting for priority string values.
+                    $direction = $sortOrder === 'asc' ? 'ASC' : 'DESC';
+                    $query->orderByRaw("
+                        CASE priority
+                            WHEN 'Urgent' THEN 4
+                            WHEN 'High' THEN 3
+                            WHEN 'Medium' THEN 2
+                            WHEN 'Low' THEN 1
+                            ELSE 0
+                        END {$direction}
+                    ");
+                } else {
+                    $query->orderBy($sortBy, $sortOrder);
+                }
+            }
         }
-        return response()->json($query->paginate(15));
+
+        // Handle pagination.
+        $perPage = $request->input('per_page', 10); // Default to 10, matching the frontend.
+        $workOrders = $query->paginate($perPage);
+
+        return response()->json($workOrders);
     }
 
     public function store(Request $request)
@@ -67,7 +109,7 @@ class WorkOrderController extends Controller
             'assigned_to_user_id' => 'nullable|integer|exists:users,id',
             'work_order_type_id' => 'required|integer|exists:work_order_types,type_id',
             'work_order_deadline' => 'nullable|date',
-            'status' => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Completed', 'Cancelled'])], // <-- ADD THIS LINE
+            'status' => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Complete', 'Cancelled'])], // <-- ADD THIS LINE
             'priority' => ['nullable', 'string', Rule::in(['Low', 'Medium', 'High', 'Urgent'])],
             'description' => 'nullable|string',
             'created_by_user_id' => 'nullable|integer|exists:users,id',
@@ -106,7 +148,7 @@ class WorkOrderController extends Controller
             'assigned_to_user_id' => 'nullable|integer|exists:employee,id',
             'work_order_type_id' => 'sometimes|required|integer|exists:work_order_types,id',
             'work_order_deadline' => 'nullable|date',
-            'status' => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Completed', 'Cancelled'])],
+            'status' => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Complete', 'Cancelled'])],
             'description' => 'nullable|string',
             'priority' => ['nullable', 'string', Rule::in(['Low', 'Medium', 'High', 'Urgent'])],
         ]);
@@ -158,7 +200,7 @@ class WorkOrderController extends Controller
             'completion_notes' => 'nullable|string',
         ]);
         $workOrder->update([
-            'status' => 'Completed',
+            'status' => 'Complete',
             'completed_at' => now(),
             'completion_notes' => $validatedData['completion_notes'],
         ]);
@@ -451,7 +493,7 @@ class WorkOrderController extends Controller
         }
 
         if ($workOrder->status !== 'Complete') {
-            $workOrder->status = 'Completed'; // Change 'Complete' to 'Completed'
+            $workOrder->status = 'Complete'; 
             $workOrder->completed_at = Carbon::now();
             $workOrder->save();
 

@@ -180,7 +180,7 @@ const ViewWorkOrderModal = ({
                             Status:
                         </span>
                         <span
-                            className={`ml-0 px-3 py-1 rounded-full text-sm text-custom-bluegreen
+                            className={`ml-2 px-3 py-1 rounded-full text-sm text-custom-bluegreen
                                 ${
                                     workOrderData.status === "In Progress" ||
                                     workOrderData.status === "Pending"
@@ -188,7 +188,7 @@ const ViewWorkOrderModal = ({
                                         : ""
                                 }
                                 ${
-                                    workOrderData.status === "Completed"
+                                    workOrderData.status === "Complete"
                                         ? "bg-custom-bluegreen text-white"
                                         : ""
                                 }
@@ -229,13 +229,13 @@ const ViewWorkOrderModal = ({
                                 <span
                                     className={`px-3 py-1 rounded-full text-xs font-normal ${
                                         account.checklist_status
-                                            ? "bg-custom-bluegreen text-white" // Completed style
-                                            : "bg-[#F5F4DC] text-custom-bluegreen text-sm font-normal" // In Progress/Pending style
+                                            ? "bg-custom-bluegreen text-white" 
+                                            : "bg-[#F5F4DC] text-custom-bluegreen text-sm font-normal" 
                                     }
                                     `}
                                 >
                                     {account.checklist_status
-                                        ? "Completed"
+                                        ? "Complete"
                                         : "In Progress"}
                                 </span>
                             </div>

@@ -57,6 +57,7 @@ import MarkupSettingsView from "@/component/views/pages/transactionViews/MarkupS
 import ReportsView from "./views/pages/transactionViews/ReportsView";
 import AccountMasterView from "./views/pages/titlingAndRegistration/MasterListView";
 import WorkOrderView from "./views/pages/titlingAndRegistration/WorkOrderView";
+import MyWorkOrderView from "./views/pages/titlingAndRegistration/MyWorkOrders";
 import ExecutiveDashboardView from "./views/pages/titlingAndRegistration/ExecutiveDashboardView";
 import SettingsView from "./views/pages/titlingAndRegistration/SettingsView";
 import DocumentManagementSidebar from "./layout/mainComponent/sidebars/DocumentManagementSidebar";
@@ -321,6 +322,10 @@ const App = () => {
                                 {
                                     path: "workorders",
                                     element: <WorkOrderView />,
+                                },
+                                {
+                                    path: "myworkorders",
+                                    element: <MyWorkOrderView />,
                                 },
                                 {
                                     path: "executivedashboard",

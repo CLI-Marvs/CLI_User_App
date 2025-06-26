@@ -88,4 +88,8 @@ class WorkOrder extends Model
     {
         return $this->hasMany(WorkOrderLog::class, 'work_order_id', 'work_order_id');
     }
+    public function createdBy()
+    {
+        return $this->belongsTo(Employee::class, 'created_by_user_id');
+    }
 }

@@ -422,8 +422,8 @@ const WorkOrderView = () => {
                                             <option value="Pending">
                                                 In Progress
                                             </option>
-                                            <option value="Completed">
-                                                Completed
+                                            <option value="Complete">
+                                                Complete
                                             </option>
                                         </select>
                                     </div>

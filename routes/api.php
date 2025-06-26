@@ -66,7 +66,7 @@ Route::middleware('auth:sanctum')->group(
         Route::get('/inquiries-channel', [ConcernController::class, 'getInquiriesPerChannel']);
     }
 );
- 
+
 Route::post('delete-concerns', [ConcernController::class, 'deleteConcern']);
 Route::post('close-concerns', [ConcernController::class, 'markAsClosed']);
 Route::post('conversation', [ConcernController::class, 'sendMessageConcerns']);
@@ -76,6 +76,7 @@ Route::post('/update-info', [ConcernController::class, 'updateInfo']);
 // Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 // for titling and registration
+Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName']);
 Route::middleware('auth:sanctum')->group(function () {
     // for work orders
     Route::post('/work-orders/{work_order}/updates', [WorkOrderController::class, 'addUpdate']);
@@ -91,7 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/work-orders/get-work-orders', [WorkOrderController::class, 'getWorkOrders']);
     Route::put('/work-orders/{workOrder}', [WorkOrderController::class, 'update']);
     Route::patch('/work-orders/{workOrder}/soft-delete', [WorkOrderController::class, 'softDelete'])->name('work-orders.soft-delete');
-    Route::get('/my-workorders', [WorkOrderController::class, 'index'])->middleware('my_work_orders_filter');
+    Route::get('/my-workorders', [WorkOrderController::class, 'index']);
     Route::patch('/work-orders/{workOrderId}/status-complete', [WorkOrderController::class, 'updateStatusToComplete']);
     // for taken out accounts
     Route::patch('/taken-out-accounts/add-masterlist', [TakenOutAccountController::class, 'updateAddStatus']);
@@ -99,7 +100,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/taken-out-accounts/undo-masterlist', [TakenOutAccountController::class, 'undoMasterListStatus']);
     Route::get('/taken-out-accounts', [TakenOutAccountController::class, 'getTakenOutAccounts']);
     Route::post('/upload-taken-out-accounts', [TakenOutAccountController::class, 'uploadTakenOutAccounts']);
-    Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName']);
+    
     // for account logs
     Route::get('/get-account-logs/{selectedId}', [AccountLogController::class, 'getLogData']);
     Route::patch('/update-is-new/{id}', [AccountLogController::class, 'updateIsNewStatus']);
@@ -127,7 +128,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/checklists/{checklist}', [WorkOrderTypeSettingsController::class, 'destroyChecklist']);
     });
     // Dashboard Routes
-   Route::get('/dashboard/executive', [ExecutiveDashboardController::class, 'getExecutiveDashboardData']);
+    Route::get('/dashboard/executive', [ExecutiveDashboardController::class, 'getExecutiveDashboardData']);
 
 });
 

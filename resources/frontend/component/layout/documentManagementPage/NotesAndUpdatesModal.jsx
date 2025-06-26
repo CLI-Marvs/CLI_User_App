@@ -1,12 +1,16 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
-import ReactDOM from "react-dom"; // Import ReactDOM
+import ReactDOM from "react-dom";
 import DateLogo from "../../../../../public/Images/Date_range.svg";
 import FileIcon from "../../../../../public/Images/folder_file_notes.svg";
 import ViewIcon from "../../../../../public/Images/eye_icon.svg";
 import DownloadIcon from "../../../../../public/Images/download_icon.svg";
+import apiService from "../../../../frontend/component/servicesApi/apiService";
+import {
+    getNotesAndUpdatesData, 
+    getCachedNotesAndUpdatesData,
+} from "../../../component/layout/documentManagementPage/service/notesAndUpdatesDataService";
 import AddNoteModal from "./AddNoteModal";
-import apiService from "../../../component/servicesApi/apiService";
-import FileViewerModal from "./FileViewerModal"; // Import FileViewerModal
+import FileViewerModal from "./FileViewerModal"; 
 
 function NotesAndUpdatesModal({
     selectedAccountId,
@@ -21,67 +25,75 @@ function NotesAndUpdatesModal({
     const [showAll, setShowAll] = useState(false);
     const initialLogCount = 2;
     const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
-    const [mounted, setMounted] = useState(false); // Already present, which is good
-    const [isViewerOpen, setIsViewerOpen] = useState(false); // State for FileViewerModal
-    const [viewingFile, setViewingFile] = useState(null); // State for the file to view
+    const [mounted, setMounted] = useState(false); 
+    const [isViewerOpen, setIsViewerOpen] = useState(false);
+    const [viewingFile, setViewingFile] = useState(null);
 
 
-    useEffect(() => {
-        if (selectedAccountId) {
-            setLogs([]);
-            setError(null);
-            fetchAccountAndLogData();
-        } else {
-            setLogs([]);
-            setError(null);
-            setLoading(false);
-        }
-    }, [selectedAccountId]);
+    const fetchData = useCallback(async (isMounted) => {
+        setLogs([]);
+        setError(null);
+        
+        if (!selectedAccountId) return;
 
-    useEffect(() => {
-        setMounted(true);
-        return () => setMounted(false);
-    }, []);
-
-    const fetchAccountAndLogData = async () => {
         setLoading(true);
         setError(null);
 
-        try {
-            const response = await apiService.get(
-                `/get-account-logs/${selectedAccountId}?log_type=${selectedWorkOrder}&work_order_id=${workOrderData.work_order_id}`
-            );
-            const data = response.data;
-            const logsArray = data.log_data || [];
+        const params = {
+            selectedAccountId,
+            selectedWorkOrder,
+            workOrderId: workOrderData.work_order_id,
+        };
 
+        const cachedData = getCachedNotesAndUpdatesData(params);
+        if (cachedData) {
             setLogs(
-                logsArray.sort(
+                cachedData.log_data.sort(
                     (a, b) => new Date(b.created_at) - new Date(a.created_at)
-                )
+                ) || []
             );
-        } catch (err) {
-            console.error("Error fetching account and log data:", err);
-            let errorMessage = `Failed to load notes and updates: ${err.message}`;
-            if (
-                err.response &&
-                err.response.data &&
-                err.response.data.message
-            ) {
-                errorMessage = `Failed to load notes and updates: ${err.response.data.message}`;
-            } else if (err.response) {
-                errorMessage = `Failed to load notes and updates: HTTP error! status: ${err.response.status}`;
-            }
-
-            setError(errorMessage);
-            setLogs([]);
-        } finally {
             setLoading(false);
+        } else {
+            setLoading(true);
         }
-    };
+
+        try {
+            const freshData = await getNotesAndUpdatesData(params);
+            if (isMounted) {
+                const logsArray = freshData.log_data || [];
+                setLogs(logsArray.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+            }
+        } catch (err) {
+            if (isMounted) {
+                setError(`Failed to load notes and updates: ${err.message}`);
+            }
+        } finally {
+            if (isMounted) { 
+                setLoading(false);
+            }
+        }
+    }, [selectedAccountId, selectedWorkOrder, workOrderData.work_order_id]);
+
+    useEffect(() => {
+        setMounted(true); 
+        let isMounted = true;
+
+        fetchData(isMounted); 
+
+        return () => {
+            isMounted = false; 
+            setMounted(false); 
+        };
+    }, [fetchData]);
 
     const handleAddNoteSuccess = async () => {
         setIsAddNoteModalOpen(false);
-        await fetchAccountAndLogData();
+        invalidateNotesAndUpdatesData({
+            selectedAccountId,
+            selectedWorkOrder,
+            workOrderId: workOrderData.work_order_id,
+        });
+        await fetchData(true); 
     };
 
     const handleOpenViewer = (file) => {

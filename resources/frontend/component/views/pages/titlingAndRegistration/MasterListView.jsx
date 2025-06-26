@@ -12,7 +12,7 @@ import {
     MenuList,
     MenuItem,
 } from "@material-tailwind/react";
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import TicketSvg from "../../../../../../public/Images/ticket.svg";
 import UploadSvg from "../../../../../../public/Images/csv_icon.svg";
 import CheckboxSvg from "../../../../../../public/Images/checkbox.svg";
@@ -31,12 +31,14 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { CircularProgress } from "@mui/material";
 import TitlingAndRegistrationMonitor from "../../../layout/documentManagementPage/TitlingAndRegistrationMonitor";
+// import Skeleton from "react-loading-skeleton";
+// import "react-loading-skeleton/dist/skeleton.css";
 
-const UploadIcon = ({ onClick, className: propClassName }) => ( 
+const UploadIcon = ({ onClick, className: propClassName }) => (
     <img
         src={UploadSvg}
         alt="Upload Icon"
-        className={propClassName || 'size-4'}
+        className={propClassName || "size-4"}
         onClick={onClick}
     />
 );
@@ -173,6 +175,116 @@ const financeColorClasses = {
     HDMF: "bg-[#FFCC00] text-black",
 };
 
+// // Skeleton Loader Component for MasterListView
+// const MasterListViewSkeleton = () => {
+//     const rowsPerPage = 5; // Matches the component's rowsPerPage
+
+//     return (
+//         <div className="w-[calc(100%-20px)] mx-1">
+//             {/* Header Skeleton */}
+//             <div className="relative flex items-center gap-1.5 mb-2 w-full">
+//                 <Skeleton height={47} width={120} className="flex-shrink-0" />{" "}
+//                 {/* Filter dropdown */}
+//                 <Skeleton height={47} className="flex-1" /> {/* Search input */}
+//                 <Skeleton height={47} width={130} /> {/* Add Account button */}
+//                 <Skeleton height={47} width={130} /> {/* Upload button */}
+//             </div>
+
+//             {/* Active Filters Skeleton (optional, can be simple line) */}
+//             <div className="flex flex-wrap gap-2 w-full mb-4">
+//                 {[...Array(2)].map(
+//                     (
+//                         _,
+//                         i // Simulate 2 active filters
+//                     ) => (
+//                         <Skeleton
+//                             key={i}
+//                             height={30}
+//                             width={100}
+//                             className="rounded-[10px]"
+//                         />
+//                     )
+//                 )}
+//             </div>
+
+//             {/* Table Skeleton */}
+//             <Card className="w-full overflow-hidden">
+//                 <table className="w-full table-fixed text-left">
+//                     <thead>
+//                         <tr>
+//                             {TABLE_HEAD.map((_, i) => (
+//                                 <th
+//                                     key={i}
+//                                     className="border-b bg-[#175D5F] text-white h-[60px] p-4"
+//                                 >
+//                                     <Skeleton height={20} width="80%" />
+//                                 </th>
+//                             ))}
+//                         </tr>
+//                     </thead>
+//                     <tbody>
+//                         {[...Array(rowsPerPage)].map((_, rowIndex) => (
+//                             <tr
+//                                 key={rowIndex}
+//                                 className="p-4 border-b border-gray-300"
+//                             >
+//                                 <td className="p-4">
+//                                     <div className="flex items-center gap-2">
+//                                         <Skeleton
+//                                             circle
+//                                             height={24}
+//                                             width={24}
+//                                         />{" "}
+//                                         {/* Ticket Icon */}
+//                                         <div className="flex flex-col items-start">
+//                                             <Skeleton height={20} width={100} />{" "}
+//                                             {/* User name */}
+//                                             <Skeleton
+//                                                 height={16}
+//                                                 width={60}
+//                                                 className="mt-1"
+//                                             />{" "}
+//                                             {/* View link */}
+//                                         </div>
+//                                     </div>
+//                                 </td>
+//                                 <td className="p-4">
+//                                     <Skeleton
+//                                         count={3}
+//                                         height={16}
+//                                         width="90%"
+//                                     />{" "}
+//                                     {/* Property details */}
+//                                 </td>
+//                                 <td className="p-4 text-center">
+//                                     <Skeleton
+//                                         height={30}
+//                                         width={80}
+//                                         className="rounded-[50px]"
+//                                     />{" "}
+//                                     {/* Financing */}
+//                                 </td>
+//                                 <td className="p-4">
+//                                     <Skeleton height={20} width={80} />{" "}
+//                                     {/* Takeout Date */}
+//                                 </td>
+//                                 <td className="p-4">
+//                                     <Skeleton height={20} width={80} />{" "}
+//                                     {/* DOU Expiry */}
+//                                 </td>
+//                             </tr>
+//                         ))}
+//                     </tbody>
+//                 </table>
+//                 {/* Card Footer Skeleton for Pagination */}
+//                 <CardFooter className="flex items-center justify-end border-t border-blue-gray-50 p-4 gap-2">
+//                     <Skeleton height={30} width={200} />
+//                 </CardFooter>
+//             </Card>
+//         </div>
+//     );
+// };
+
 export default function PaginatedTable() {
     const [tableRows, setTableRows] = useState([]);
     const [checkedRows, setCheckedRows] = useState({});
@@ -196,7 +308,6 @@ export default function PaginatedTable() {
         { label: "Unfinished", value: "unfinished" },
     ];
     const {
-        loading,
         setTakenOutMasterListTableRows,
         masterListFilteredRows,
         safeMasterListCurrentPage,
@@ -221,22 +332,49 @@ export default function PaginatedTable() {
     const [showTitlingMonitor, setShowTitlingMonitor] = useState(false);
     const [selectedRowDataForMonitor, setSelectedRowDataForMonitor] =
         useState(null);
+    // const [isPageLoading, setIsPageLoading] = useState(
+    //     !masterListFilteredRows || masterListFilteredRows.length === 0
+    // );
 
-    const fetchLocalMasterListData = async () => {
+    // const fetchLocalMasterListData = useCallback(async () => {
+    //     try {
+    //         const response = await apiService.get(
+    //             "/taken-out-accounts/get-masterlist"
+    //         );
+    //         setMasterList(response.data || []);
+    //     } catch (error) {
+    //         console.error(
+    //             "Failed to fetch local master list data for filtering:",
+    //             error
+    //         );
+    //         setMasterList([]);
+    //         toast.error(
+    //             "Could not refresh filter data for master list status."
+    //         );
+    //     }
+    // }, []);
+
+useEffect(() => {
+    const loadInitialData = async () => {
+        // setIsPageLoading(true); // Always set loading to true when fetching
         try {
-            const response = await apiService.get("/taken-out-accounts/get-masterlist");
-            setMasterList(response.data || []);
+            await Promise.all([
+                fetchMasterList(),
+                // fetchLocalMasterListData(),
+            ]);
+            // await new Promise((resolve) => setTimeout(resolve, 100));
         } catch (error) {
-            console.error("Failed to fetch local master list data for filtering:", error);
-            setMasterList([]); 
-            toast.error("Could not refresh filter data for master list status.");
+            console.error(
+                "Failed to load initial data for Master List view:",
+                error
+            );
+            toast.error("An error occurred while loading the master list.");
+        // } finally {
+        //     setIsPageLoading(false); // Only set to false after data is fetched
         }
     };
-
-    useEffect(() => {
-        fetchMasterList();
-        fetchLocalMasterListData(); 
-    }, []); 
+    loadInitialData();
+}, [fetchMasterList]);
 
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
@@ -250,7 +388,7 @@ export default function PaginatedTable() {
             const formData = new FormData();
             formData.append("file", file);
             const response = await apiService.post(
-                "/upload-taken-out-accounts", 
+                "/upload-taken-out-accounts",
                 formData,
                 {
                     headers: {
@@ -261,8 +399,8 @@ export default function PaginatedTable() {
 
             if (response.status === 200) {
                 toast.success("Data uploaded successfully!");
-                await fetchMasterList(); 
-                await fetchLocalMasterListData(); 
+                await fetchMasterList();
+                // await fetchLocalMasterListData();
             } else {
                 toast.error(
                     `Failed to upload data: ${
@@ -273,7 +411,9 @@ export default function PaginatedTable() {
         } catch (error) {
             console.error("File upload error:", error);
             toast.error(
-                `Failed to upload data: ${error.response?.data?.message || "Unknown error"}`
+                `Failed to upload data: ${
+                    error.response?.data?.message || "Unknown error"
+                }`
             );
         } finally {
             setIsFileUploading(false);
@@ -286,7 +426,7 @@ export default function PaginatedTable() {
         contractNumber,
         propertyName,
         unitNumber,
-        id,
+        id
     ) => {
         setShowTitlingMonitor(true);
         const data = { user, contractNumber, propertyName, unitNumber, id };
@@ -458,7 +598,7 @@ export default function PaginatedTable() {
                 if (response.status === 200) {
                     setCheckedRows({});
                     await fetchMasterList();
-                    await fetchLocalMasterListData();
+                    // await fetchLocalMasterListData();
                 }
             } catch (error) {
                 toast.error("Error adding to master list");
@@ -678,261 +818,291 @@ export default function PaginatedTable() {
 
     return (
         <>
-            <div className="w-[calc(100%-20px)] mx-1">
-                {!showTitlingMonitor && (
-                    <div className="relative flex items-center gap-1.5 mb-2 w-full">
-                        {" "}
-                        <div className="flex-shrink-0">
-                            <Menu>
-                                <MenuHandler>
-                                    <Button
-                                        variant="text"
-                                        size="sm"
-                                        className="bg-[#EFEFEF] text-gray-700 text-sm rounded-[10px] flex items-center justify-between gap-1 px-4 h-[47px] w-[120px] min-w-[120px] max-w-[120px] font-normal shadow-none border-none hover:bg-custom-grayF1 focus:bg-custom-grayF1 active:bg-custom-grayF1 transition-none"
-                                        style={{
-                                            transition: "none",
-                                            boxShadow: "none",
-                                            border: "none",
-                                        }}
-                                    >
-                                        <span className="truncate text-left flex-1 normal-case">
-                                            {filterOption}
-                                        </span>
-                                        <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-500" />
-                                    </Button>
-                                </MenuHandler>
-                                <MenuList className="z-50 flex flex-col justify-center min-h-[120px]">
-                                    {filterOptions.map((option) => (
-                                        <MenuItem
-                                            key={option.value}
-                                            onClick={() =>
-                                                setFilterOption(option.label)
-                                            }
-                                            className={`flex items-center justify-center h-9 w-full p-4 ${
-                                                filterOption === option.label
-                                                    ? "bg-custom-lightestgreen text-gray-900"
-                                                    : "text-gray-700"
-                                            }`}
-                                            style={{ fontWeight: "normal" }}
-                                        >
-                                            {option.label}
-                                        </MenuItem>
-                                    ))}
-                                </MenuList>
-                            </Menu>
-                        </div>
-                        <div className="relative flex-1">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth="1.5"
-                                stroke="currentColor"
-                                className="size-4 absolute left-3 top-4 text-gray-500"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-                                />
-                            </svg>
-
-                            <input
-                                type="text"
-                                value={takenOutMasterListSearchQuery}
-                                onChange={(e) => {
-                                    setTakenOutMasterListSearchQuery(
-                                        e.target.value
-                                    );
-                                    setTakenOutMasterListCurrentpage(1);
-                                }}
-                                className="h-[47px] w-full bg-custom-grayF1 rounded-[10px] pl-9 pr-12 text-sm"
-                                placeholder="Search"
-                            />
-
-                            <div className="absolute right-3 top-3 flex justify-end">
-                                <div className="cursor-pointer mr-2">
-                                    <FilterSearchIcon
-                                        onClick={toggleFilterBox}
-                                    />
+{/* {isPageLoading && paginatedData.length === 0 ? (
+            <MasterListViewSkeleton />
+        ) : (
+            <> */}
+                <div className="w-[calc(100%-20px)] mx-1">
+                        {!showTitlingMonitor && (
+                            <div className="relative flex items-center gap-1.5 mb-2 w-full">
+                                {" "}
+                                <div className="flex-shrink-0">
+                                    <Menu>
+                                        <MenuHandler>
+                                            <Button
+                                                variant="text"
+                                                size="sm"
+                                                className="bg-[#EFEFEF] text-gray-700 text-sm rounded-[10px] flex items-center justify-between gap-1 px-4 h-[47px] w-[120px] min-w-[120px] max-w-[120px] font-normal shadow-none border-none hover:bg-custom-grayF1 focus:bg-custom-grayF1 active:bg-custom-grayF1 transition-none"
+                                                style={{
+                                                    transition: "none",
+                                                    boxShadow: "none",
+                                                    border: "none",
+                                                }}
+                                            >
+                                                <span className="truncate text-left flex-1 normal-case">
+                                                    {filterOption}
+                                                </span>
+                                                <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-500" />
+                                            </Button>
+                                        </MenuHandler>
+                                        <MenuList className="z-50 flex flex-col justify-center min-h-[120px]">
+                                            {filterOptions.map((option) => (
+                                                <MenuItem
+                                                    key={option.value}
+                                                    onClick={() =>
+                                                        setFilterOption(
+                                                            option.label
+                                                        )
+                                                    }
+                                                    className={`flex items-center justify-center h-9 w-full p-4 ${
+                                                        filterOption ===
+                                                        option.label
+                                                            ? "bg-custom-lightestgreen text-gray-900"
+                                                            : "text-gray-700"
+                                                    }`}
+                                                    style={{
+                                                        fontWeight: "normal",
+                                                    }}
+                                                >
+                                                    {option.label}
+                                                </MenuItem>
+                                            ))}
+                                        </MenuList>
+                                    </Menu>
                                 </div>
-                                <button
-                                    className="cursor-pointer"
-                                    onClick={handleRefreshAndClearFilters}
-                                >
+                                <div className="relative flex-1">
                                     <svg
-                                        stroke="currentColor"
-                                        fill="currentColor"
-                                        stroke-width="0"
-                                        viewBox="0 0 24 24"
-                                        height="1em"
-                                        width="1em"
                                         xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth="1.5"
+                                        stroke="currentColor"
+                                        className="size-4 absolute left-3 top-4 text-gray-500"
                                     >
                                         <path
-                                            fill="none"
-                                            d="M0 0h24v24H0z"
-                                        ></path>
-                                        <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"></path>
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                                        />
                                     </svg>
-                                </button>
-                            </div>
-                            <AnimatePresence>
-                                {isFilterVisible && (
-                                    <motion.div
-                                        ref={dropdownRef}
-                                        initial={{ opacity: 0, y: -10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: -10 }}
-                                        transition={{ duration: 0.15 }}
-                                        className="absolute top-[110%] transform -translate-x-1/2 p-6 sm:p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[100%] max-w-full"
-                                    >
-                                        <div className="flex flex-col gap-4">
-                                            <div className="flex flex-col sm:flex-row">
-                                                <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
-                                                    Contract No.
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={selectedContractNo}
-                                                    onChange={(e) =>
-                                                        setSelectedContractNo(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    className="w-full border-b outline-none text-sm px-2"
-                                                />
-                                            </div>
 
-                                            <div className="flex flex-col sm:flex-row">
-                                                <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
-                                                    Account Name
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={selectedAccountName}
-                                                    onChange={(e) =>
-                                                        setSelectedAccountName(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    className="w-full border-b outline-none text-sm px-2"
-                                                />
-                                            </div>
+                                    <input
+                                        type="text"
+                                        value={takenOutMasterListSearchQuery}
+                                        onChange={(e) => {
+                                            setTakenOutMasterListSearchQuery(
+                                                e.target.value
+                                            );
+                                            setTakenOutMasterListCurrentpage(1);
+                                        }}
+                                        className="h-[47px] w-full bg-custom-grayF1 rounded-[10px] pl-9 pr-12 text-sm"
+                                        placeholder="Search"
+                                    />
 
-                                            <div className="flex flex-col sm:flex-row">
-                                                <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
-                                                    Project
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    value={selectedProject}
-                                                    onChange={(e) =>
-                                                        setSelectedProject(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    className="w-full border-b outline-none text-sm px-2"
-                                                />
-                                            </div>
-
-                                            <div className="flex flex-col sm:flex-row">
-                                                <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
-                                                    Financing
-                                                </label>
-                                                <select
-                                                    value={selectedFinancing}
-                                                    onChange={(e) =>
-                                                        setSelectedFinancing(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    className="w-full border-b outline-none text-sm px-2"
-                                                >
-                                                    <option value="">
-                                                        Select Financing
-                                                    </option>
-                                                    <option value="Cash">
-                                                        Cash
-                                                    </option>
-                                                    <option value="BPI">
-                                                        BPI
-                                                    </option>
-                                                    <option value="HDMF">
-                                                        HDMF
-                                                    </option>
-                                                </select>
-                                            </div>
-
-                                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                                <div className="flex flex-col sm:flex-row sm:items-center w-full">
-                                                    <label className="text-custom-bluegreen text-[12px] w-[114px] mb-1 sm:mb-0">
-                                                        Date Filter
-                                                    </label>
-                                                    <select
-                                                        value={
-                                                            selectedDateFilter
-                                                        }
-                                                        onChange={(e) =>
-                                                            setSelectedDateFilter(
-                                                                e.target.value
-                                                            )
-                                                        }
-                                                        className="w-full border-b outline-none text-sm px-2"
-                                                    >
-                                                        <option value=""></option>
-                                                        <option value="Takeout Date">
-                                                            Takeout Date
-                                                        </option>
-                                                        <option value="DOU Expiry">
-                                                            DOU Expiry
-                                                        </option>
-                                                    </select>
-                                                </div>
-
-                                                <div className="flex flex-col sm:flex-row sm:items-center w-full">
-                                                    <label className="text-custom-bluegreen text-[12px] sm:w-auto mb-1 sm:mb-0 sm:mr-3">
-                                                        Date
-                                                    </label>
-
-                                                    <div className="relative w-full border-b outline-none">
-                                                        <DatePicker
-                                                            selected={
-                                                                selectedDate
+                                    <div className="absolute right-3 top-3 flex justify-end">
+                                        <div className="cursor-pointer mr-2">
+                                            <FilterSearchIcon
+                                                onClick={toggleFilterBox}
+                                            />
+                                        </div>
+                                        <button
+                                            className="cursor-pointer"
+                                            onClick={
+                                                handleRefreshAndClearFilters
+                                            }
+                                        >
+                                            <svg
+                                                stroke="currentColor"
+                                                fill="currentColor"
+                                                stroke-width="0"
+                                                viewBox="0 0 24 24"
+                                                height="1em"
+                                                width="1em"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                                <path
+                                                    fill="none"
+                                                    d="M0 0h24v24H0z"
+                                                ></path>
+                                                <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <AnimatePresence>
+                                        {isFilterVisible && (
+                                            <motion.div
+                                                ref={dropdownRef}
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -10 }}
+                                                transition={{ duration: 0.15 }}
+                                                className="absolute top-[110%] transform -translate-x-1/2 p-6 sm:p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[100%] max-w-full"
+                                            >
+                                                <div className="flex flex-col gap-4">
+                                                    <div className="flex flex-col sm:flex-row">
+                                                        <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
+                                                            Contract No.
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            value={
+                                                                selectedContractNo
                                                             }
-                                                            onChange={(date) =>
-                                                                setSelectedDate(
-                                                                    date
+                                                            onChange={(e) =>
+                                                                setSelectedContractNo(
+                                                                    e.target
+                                                                        .value
                                                                 )
                                                             }
-                                                            className="w-full pr-10 text-sm text-center"
-                                                            calendarClassName="custom-calendar"
-                                                        />
-                                                        <img
-                                                            src={DateLogo}
-                                                            alt="date"
-                                                            className="absolute bottom-[1px] right-2 size-5 pointer-events-none"
+                                                            className="w-full border-b outline-none text-sm px-2"
                                                         />
                                                     </div>
+
+                                                    <div className="flex flex-col sm:flex-row">
+                                                        <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
+                                                            Account Name
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            value={
+                                                                selectedAccountName
+                                                            }
+                                                            onChange={(e) =>
+                                                                setSelectedAccountName(
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            }
+                                                            className="w-full border-b outline-none text-sm px-2"
+                                                        />
+                                                    </div>
+
+                                                    <div className="flex flex-col sm:flex-row">
+                                                        <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
+                                                            Project
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            value={
+                                                                selectedProject
+                                                            }
+                                                            onChange={(e) =>
+                                                                setSelectedProject(
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            }
+                                                            className="w-full border-b outline-none text-sm px-2"
+                                                        />
+                                                    </div>
+
+                                                    <div className="flex flex-col sm:flex-row">
+                                                        <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
+                                                            Financing
+                                                        </label>
+                                                        <select
+                                                            value={
+                                                                selectedFinancing
+                                                            }
+                                                            onChange={(e) =>
+                                                                setSelectedFinancing(
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            }
+                                                            className="w-full border-b outline-none text-sm px-2"
+                                                        >
+                                                            <option value="">
+                                                                Select Financing
+                                                            </option>
+                                                            <option value="Cash">
+                                                                Cash
+                                                            </option>
+                                                            <option value="BPI">
+                                                                BPI
+                                                            </option>
+                                                            <option value="HDMF">
+                                                                HDMF
+                                                            </option>
+                                                        </select>
+                                                    </div>
+
+                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                                        <div className="flex flex-col sm:flex-row sm:items-center w-full">
+                                                            <label className="text-custom-bluegreen text-[12px] w-[114px] mb-1 sm:mb-0">
+                                                                Date Filter
+                                                            </label>
+                                                            <select
+                                                                value={
+                                                                    selectedDateFilter
+                                                                }
+                                                                onChange={(e) =>
+                                                                    setSelectedDateFilter(
+                                                                        e.target
+                                                                            .value
+                                                                    )
+                                                                }
+                                                                className="w-full border-b outline-none text-sm px-2"
+                                                            >
+                                                                <option value=""></option>
+                                                                <option value="Takeout Date">
+                                                                    Takeout Date
+                                                                </option>
+                                                                <option value="DOU Expiry">
+                                                                    DOU Expiry
+                                                                </option>
+                                                            </select>
+                                                        </div>
+
+                                                        <div className="flex flex-col sm:flex-row sm:items-center w-full">
+                                                            <label className="text-custom-bluegreen text-[12px] sm:w-auto mb-1 sm:mb-0 sm:mr-3">
+                                                                Date
+                                                            </label>
+
+                                                            <div className="relative w-full border-b outline-none">
+                                                                <DatePicker
+                                                                    selected={
+                                                                        selectedDate
+                                                                    }
+                                                                    onChange={(
+                                                                        date
+                                                                    ) =>
+                                                                        setSelectedDate(
+                                                                            date
+                                                                        )
+                                                                    }
+                                                                    className="w-full pr-10 text-sm text-center"
+                                                                    calendarClassName="custom-calendar"
+                                                                />
+                                                                <img
+                                                                    src={
+                                                                        DateLogo
+                                                                    }
+                                                                    alt="date"
+                                                                    className="absolute bottom-[1px] right-2 size-5 pointer-events-none"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex justify-end mt-4">
+                                                        <button
+                                                            onClick={
+                                                                handleApplyFilters
+                                                            }
+                                                            className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
+                                                        >
+                                                            Search
+                                                        </button>
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div className="flex justify-end mt-4">
-                                                <button
-                                                    onClick={handleApplyFilters}
-                                                    className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
-                                                >
-                                                    Search
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                        <div className="flex gap-1.5 flex-shrink-0">
-                            <button
-                                onClick={handleAddToMasterList}
-                                className={`h-[47px] w-[130px] font-semibold text-sm rounded-[10px] flex items-center justify-center gap-1
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                                <div className="flex gap-1.5 flex-shrink-0">
+                                    <button
+                                        onClick={handleAddToMasterList}
+                                        className={`h-[47px] w-[130px] font-semibold text-sm rounded-[10px] flex items-center justify-center gap-1
                                     transition-all duration-300 ease-in-out
                                     ${
                                         isAnyRowChecked
@@ -940,246 +1110,294 @@ export default function PaginatedTable() {
                                             : "bg-[#A5A5A5] text-gray-300 cursor-not-allowed scale-95 shadow-none"
                                     }
                                 `}
-                                disabled={!isAnyRowChecked}
-                            >
-                                {isAddingToMasterlist ? (
-                                    <CircularProgress size={24} />
-                                ) : (
-                                    <>
-                                        <span className="text-[14px] font-semibold">
-                                            +
-                                        </span>{" "}
-                                        Add Account
-                                    </>
-                                )}
-                            </button>
-
-                            <button
-                                onClick={() => {
-                                    if (!isFileUploading) {
-                                        document.getElementById("masterListFileUpload").click();
-                                    }
-                                }}
-                                className={`h-[47px] w-[130px] bg-[#067AC5] text-white text-sm rounded-[10px] flex items-center justify-center gap-1 ${isFileUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                disabled={isFileUploading}
-                            >
-                                {isFileUploading ? (
-                                    <CircularProgress size={24} color="inherit" />
-                                ) : (
-                                    <>
-                                        <UploadIcon className="w-5 h-5" />
-                                        <span className="text-[14px] font-semibold">Upload</span>
-                                    </>
-                                )}
-                            </button>
-                            <input
-                                id="masterListFileUpload"
-                                type="file"
-                                accept=".xlsx, .xls" 
-                                onChange={handleFileUpload}
-                                className="hidden"
-                            />
-                        </div>
-                    </div>
-                )}
-
-                {showTitlingMonitor && selectedRowDataForMonitor ? (
-                    <TitlingAndRegistrationMonitor
-                        onClose={handleCloseTitlingMonitor} 
-                        {...selectedRowDataForMonitor}
-                    />
-                ) : (
-                    <>
-                        <div className="flex flex-wrap gap-2 w-full">
-                            {" "}
-                            {activeFilters.map((filter, index) => (
-                                <div
-                                    key={index}
-                                    className="flex items-center bg-[#70AD47] text-white px-3 py-1 rounded-[10px] font-normal text-sm mb-2"
-                                >
-                                    <span>{filter.label}</span>
-                                    <button
-                                        className="ml-2 text-white hover:text-gray-700"
-                                        onClick={() =>
-                                            handleRemoveFilter(filter.key)
-                                        }
+                                        disabled={!isAnyRowChecked}
                                     >
-                                        ✕
+                                        {isAddingToMasterlist ? (
+                                            <CircularProgress size={24} />
+                                        ) : (
+                                            <>
+                                                <span className="text-[14px] font-semibold">
+                                                    +
+                                                </span>{" "}
+                                                Add Account
+                                            </>
+                                        )}
                                     </button>
+
+                                    <button
+                                        onClick={() => {
+                                            if (!isFileUploading) {
+                                                document
+                                                    .getElementById(
+                                                        "masterListFileUpload"
+                                                    )
+                                                    .click();
+                                            }
+                                        }}
+                                        className={`h-[47px] w-[130px] bg-[#067AC5] text-white text-sm rounded-[10px] flex items-center justify-center gap-1 ${
+                                            isFileUploading
+                                                ? "opacity-50 cursor-not-allowed"
+                                                : ""
+                                        }`}
+                                        disabled={isFileUploading}
+                                    >
+                                        {isFileUploading ? (
+                                            <CircularProgress
+                                                size={24}
+                                                color="inherit"
+                                            />
+                                        ) : (
+                                            <>
+                                                <UploadIcon className="w-5 h-5" />
+                                                <span className="text-[14px] font-semibold">
+                                                    Upload
+                                                </span>
+                                            </>
+                                        )}
+                                    </button>
+                                    <input
+                                        id="masterListFileUpload"
+                                        type="file"
+                                        accept=".xlsx, .xls"
+                                        onChange={handleFileUpload}
+                                        className="hidden"
+                                    />
                                 </div>
-                            ))}
-                        </div>
-                        <Card className="w-full overflow-hidden">
-                            {" "}
-                            <table className="w-full table-fixed text-left">
-                                <thead>
-                                    <tr>
-                                        {TABLE_HEAD.map(({ head, icon }) => (
-                                            <th
-                                                key={head}
-                                                className="border-b bg-[#175D5F] text-white h-[60px] cursor-pointer"
-                                                onClick={() => {
-                                                    const columnMap = {
-                                                        "Account Name":
-                                                            "account_name",
-                                                        "Property Details":
-                                                            "contract_no",
-                                                        Financing: "financing",
-                                                        "Takeout Date":
-                                                            "take_out_date",
-                                                        "DOU Expiry":
-                                                            "dou_expiry",
-                                                    };
-                                                    const col = columnMap[head];
-                                                    if (col) {
-                                                        if (
-                                                            sortColumn === col
-                                                        ) {
-                                                            setSortDirection(
-                                                                sortDirection ===
-                                                                    "asc"
-                                                                    ? "desc"
-                                                                    : "asc"
-                                                            );
-                                                        } else {
-                                                            setSortColumn(col);
-                                                            setSortDirection(
-                                                                "asc"
-                                                            );
-                                                        }
-                                                    }
-                                                }}
+                            </div>
+                        )}
+
+                        {showTitlingMonitor && selectedRowDataForMonitor ? (
+                            <TitlingAndRegistrationMonitor
+                                onClose={handleCloseTitlingMonitor}
+                                {...selectedRowDataForMonitor}
+                            />
+                        ) : (
+                            <>
+                                <div className="flex flex-wrap gap-2 w-full">
+                                    {" "}
+                                    {activeFilters.map((filter, index) => (
+                                        <div
+                                            key={index}
+                                            className="flex items-center bg-[#70AD47] text-white px-3 py-1 rounded-[10px] font-normal text-sm mb-2"
+                                        >
+                                            <span>{filter.label}</span>
+                                            <button
+                                                className="ml-2 text-white hover:text-gray-700"
+                                                onClick={() =>
+                                                    handleRemoveFilter(
+                                                        filter.key
+                                                    )
+                                                }
                                             >
-                                                <div
-                                                    className={`flex items-center gap-2 ${
-                                                        head === "Financing"
-                                                            ? "justify-center pl-0"
-                                                            : "pl-4"
-                                                    }`}
-                                                >
-                                                    {head ===
-                                                        "Account Name" && (
-                                                        <span className="inline-flex justify-center items-center mr-2"></span>
-                                                    )}
-                                                    {icon}
-                                                    <Typography
-                                                        variant="small"
-                                                        className="!font-semibold text-base"
-                                                    >
-                                                        {head}
-                                                    </Typography>
-                                                </div>
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {paginatedData &&
-                                    paginatedData.length > 0 ? (
-                                        paginatedData.map(
-                                            (
-                                                {
-                                                    id,
-                                                    user,
-                                                    contractNumber,
-                                                    propertyName,
-                                                    unitNumber,
-                                                    finance,
-                                                    takeOutdate,
-                                                    douExpiry,
-                                                },
-                                                index
-                                            ) => {
-                                                const isLast =
-                                                    index ===
-                                                    masterListCurrentData.length -
-                                                        1;
-                                                const classes = isLast
-                                                    ? "p-4"
-                                                    : "p-4 border-b border-gray-300";
-
-                                                const globalIndex =
-                                                    masterListIndexOfFirstRow +
-                                                    index;
-
-                                                const isChecked =
-                                                    checkedRows[contractNumber];
-
-                                                const isInMasterList =
-                                                    masterListContracts.has(
-                                                        contractNumber
-                                                    );
-
-                                                return (
-                                                    <tr
-                                                        key={`${contractNumber}-${globalIndex}`}
-                                                        className={`${classes} ${
-                                                            isChecked
-                                                                ? "bg-slate-200 text-[#348017] text-base font-normal"
-                                                                : "text-[#348017] text-base font-normal"
-                                                        } cursor-pointer`}
-                                                        onClick={() =>
-                                                            setIsChecked(
-                                                                !isChecked
-                                                            )
-                                                        }
-                                                    >
-                                                        <td className={classes}>
-                                                            <div className="flex items-center gap-2">
-                                                                <span className="inline-flex w-6 h-6 justify-center items-center ml-5 mr-2">
-                                                                    <img
-                                                                        src={
-                                                                            TicketSvg
-                                                                        }
-                                                                        alt="Ticket Icon"
-                                                                        className="size-6"
-                                                                    />
-                                                                </span>
-                                                                <div className="flex flex-col items-start">
-                                                                    <span className="text-base font-normal">
-                                                                        {user}
-                                                                    </span>
-                                                                    <button
-                                                                        className="text-sm underline hover:text-[#067AC5]"
-                                                                        onClick={(
-                                                                            event
-                                                                        ) => {
-                                                                            event.stopPropagation();
-                                                                            handleOpenTitlingMonitor(
-                                                                                user,
-                                                                                contractNumber,
-                                                                                propertyName,
-                                                                                unitNumber,
-                                                                                id
-                                                                            );
-                                                                        }}
-                                                                    >
-                                                                        View
-                                                                    </button>
-                                                                </div>
+                                                ✕
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <Card className="w-full overflow-hidden">
+                                    {" "}
+                                    <table className="w-full table-fixed text-left">
+                                        <thead>
+                                            <tr>
+                                                {TABLE_HEAD.map(
+                                                    ({ head, icon }) => (
+                                                        <th
+                                                            key={head}
+                                                            className="border-b bg-[#175D5F] text-white h-[60px] cursor-pointer"
+                                                            onClick={() => {
+                                                                const columnMap =
+                                                                    {
+                                                                        "Account Name":
+                                                                            "account_name",
+                                                                        "Property Details":
+                                                                            "contract_no",
+                                                                        Financing:
+                                                                            "financing",
+                                                                        "Takeout Date":
+                                                                            "take_out_date",
+                                                                        "DOU Expiry":
+                                                                            "dou_expiry",
+                                                                    };
+                                                                const col =
+                                                                    columnMap[
+                                                                        head
+                                                                    ];
+                                                                if (col) {
+                                                                    if (
+                                                                        sortColumn ===
+                                                                        col
+                                                                    ) {
+                                                                        setSortDirection(
+                                                                            sortDirection ===
+                                                                                "asc"
+                                                                                ? "desc"
+                                                                                : "asc"
+                                                                        );
+                                                                    } else {
+                                                                        setSortColumn(
+                                                                            col
+                                                                        );
+                                                                        setSortDirection(
+                                                                            "asc"
+                                                                        );
+                                                                    }
+                                                                }
+                                                            }}
+                                                        >
+                                                            <div
+                                                                className={`flex items-center gap-2 ${
+                                                                    head ===
+                                                                    "Financing"
+                                                                        ? "justify-center pl-0"
+                                                                        : "pl-4"
+                                                                }`}
+                                                            >
+                                                                {head ===
+                                                                    "Account Name" && (
+                                                                    <span className="inline-flex justify-center items-center mr-2"></span>
+                                                                )}
+                                                                {icon}
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="!font-semibold text-base"
+                                                                >
+                                                                    {head}
+                                                                </Typography>
                                                             </div>
-                                                        </td>
+                                                        </th>
+                                                    )
+                                                )}
+                                            </tr>
+                                        </thead>
 
-                                                        <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="text-base font-normal"
+                                        <tbody>
+                                            {paginatedData &&
+                                            paginatedData.length > 0 ? (
+                                                paginatedData.map(
+                                                    (
+                                                        {
+                                                            id,
+                                                            user,
+                                                            contractNumber,
+                                                            propertyName,
+                                                            unitNumber,
+                                                            finance,
+                                                            takeOutdate,
+                                                            douExpiry,
+                                                        },
+                                                        index
+                                                    ) => {
+                                                        const isLast =
+                                                            index ===
+                                                            masterListCurrentData.length -
+                                                                1;
+                                                        const classes = isLast
+                                                            ? "p-4"
+                                                            : "p-4 border-b border-gray-300";
+
+                                                        const globalIndex =
+                                                            masterListIndexOfFirstRow +
+                                                            index;
+
+                                                        const isChecked =
+                                                            checkedRows[
+                                                                contractNumber
+                                                            ];
+
+                                                        const isInMasterList =
+                                                            masterListContracts.has(
+                                                                contractNumber
+                                                            );
+
+                                                        return (
+                                                            <tr
+                                                                key={`${contractNumber}-${globalIndex}`}
+                                                                className={`${classes} ${
+                                                                    isChecked
+                                                                        ? "bg-slate-200 text-[#348017] text-base font-normal"
+                                                                        : "text-[#348017] text-base font-normal"
+                                                                } cursor-pointer`}
+                                                                onClick={() =>
+                                                                    setIsChecked(
+                                                                        !isChecked
+                                                                    )
+                                                                }
                                                             >
-                                                                {contractNumber}
-                                                                <br />
-                                                                {propertyName}
-                                                                <br />
-                                                                {unitNumber}
-                                                            </Typography>
-                                                        </td>
-                                                        <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="text-base font-normal text-center"
-                                                            >
-                                                                <span
-                                                                    className={`w-[80px] h-[30px] px-[12px] py-1 rounded-[50px] inline-block font-montserrat
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
+                                                                >
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className="inline-flex w-6 h-6 justify-center items-center ml-5 mr-2">
+                                                                            <img
+                                                                                src={
+                                                                                    TicketSvg
+                                                                                }
+                                                                                alt="Ticket Icon"
+                                                                                className="size-6"
+                                                                            />
+                                                                        </span>
+                                                                        <div className="flex flex-col items-start">
+                                                                            <span className="text-base font-normal">
+                                                                                {
+                                                                                    user
+                                                                                }
+                                                                            </span>
+                                                                            <button
+                                                                                className="text-sm underline hover:text-[#067AC5]"
+                                                                                onClick={(
+                                                                                    event
+                                                                                ) => {
+                                                                                    event.stopPropagation();
+                                                                                    handleOpenTitlingMonitor(
+                                                                                        user,
+                                                                                        contractNumber,
+                                                                                        propertyName,
+                                                                                        unitNumber,
+                                                                                        id
+                                                                                    );
+                                                                                }}
+                                                                            >
+                                                                                View
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
+                                                                >
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="text-base font-normal"
+                                                                    >
+                                                                        {
+                                                                            contractNumber
+                                                                        }
+                                                                        <br />
+                                                                        {
+                                                                            propertyName
+                                                                        }
+                                                                        <br />
+                                                                        {
+                                                                            unitNumber
+                                                                        }
+                                                                    </Typography>
+                                                                </td>
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
+                                                                >
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="text-base font-normal text-center"
+                                                                    >
+                                                                        <span
+                                                                            className={`w-[80px] h-[30px] px-[12px] py-1 rounded-[50px] inline-block font-montserrat
                                                 ${
                                                     financeColorClasses[
                                                         finance
@@ -1187,98 +1405,109 @@ export default function PaginatedTable() {
                                                     "bg-gray-100 text-gray-700"
                                                 }
                                             `}
+                                                                        >
+                                                                            {
+                                                                                finance
+                                                                            }{" "}
+                                                                        </span>
+                                                                    </Typography>
+                                                                </td>
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
                                                                 >
-                                                                    {finance}{" "}
-                                                                </span>
-                                                            </Typography>
-                                                        </td>
-                                                        <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="text-base font-normal"
-                                                            >
-                                                                {takeOutdate}{" "}
-                                                            </Typography>
-                                                        </td>
-                                                        <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="text-base font-normal"
-                                                            >
-                                                                {douExpiry}
-                                                            </Typography>
-                                                        </td>
-                                                    </tr>
-                                                );
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="text-base font-normal"
+                                                                    >
+                                                                        {
+                                                                            takeOutdate
+                                                                        }{" "}
+                                                                    </Typography>
+                                                                </td>
+                                                                <td
+                                                                    className={
+                                                                        classes
+                                                                    }
+                                                                >
+                                                                    <Typography
+                                                                        variant="small"
+                                                                        className="text-base font-normal"
+                                                                    >
+                                                                        {
+                                                                            douExpiry
+                                                                        }
+                                                                    </Typography>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    }
+                                                )
+                                            ) : (
+                                                <tr>
+                                                    <td
+                                                        colSpan={
+                                                            TABLE_HEAD.length
+                                                        }
+                                                        className="p-4 text-center text-gray-500"
+                                                    >
+                                                        No records found
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                    <CardFooter className="flex items-center justify-end border-t border-blue-gray-50 p-4 gap-2">
+                                        {" "}
+                                        <ReactPaginate
+                                            previousLabel={
+                                                <MdKeyboardArrowLeft className="text-[#404B52]" />
                                             }
-                                        )
-                                    ) : loading ? (
-                                        <tr>
-                                            <td
-                                                colSpan={TABLE_HEAD.length}
-                                                className="p-4 text-center text-gray-500"
-                                            >
-                                                <CircularProgress />
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        <tr>
-                                            <td
-                                                colSpan={TABLE_HEAD.length}
-                                                className="p-4 text-center text-gray-500"
-                                            >
-                                                No records found
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                            <CardFooter className="flex items-center justify-end border-t border-blue-gray-50 p-4 gap-2">
-                                {" "}
-                                <ReactPaginate
-                                    previousLabel={
-                                        <MdKeyboardArrowLeft className="text-[#404B52]" />
-                                    }
-                                    nextLabel={
-                                        <MdKeyboardArrowRight className="text-[#404B52]" />
-                                    }
-                                    breakLabel={"..."}
-                                    pageCount={filteredTotalPages}
-                                    marginPagesDisplayed={2}
-                                    pageRangeDisplayed={2}
-                                    onPageChange={(data) => {
-                                        setTakenOutMasterListCurrentpage(
-                                            data.selected + 1
-                                        );
-                                    }}
-                                    containerClassName={"flex gap-2"}
-                                    previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
-                                    nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
-                                    pageClassName="border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
-                                    activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-white rounded-[4px] text-[12px]"
-                                    pageLinkClassName="w-full h-full flex justify-center items-center"
-                                    activeLinkClassName="w-full h-full flex justify-center items-center"
-                                    disabledLinkClassName="text-gray-300 cursor-not-allowed"
-                                    forcePage={safeMasterListCurrentPage - 1}
-                                />
-                            </CardFooter>
-                        </Card>
-                    </>
-                )}
-            </div>{" "}
-            <ToastContainer
-                position="bottom-right"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="dark"
-                className="custom-toast-container"
-            />
+                                            nextLabel={
+                                                <MdKeyboardArrowRight className="text-[#404B52]" />
+                                            }
+                                            breakLabel={"..."}
+                                            pageCount={filteredTotalPages}
+                                            marginPagesDisplayed={2}
+                                            pageRangeDisplayed={2}
+                                            onPageChange={(data) => {
+                                                setTakenOutMasterListCurrentpage(
+                                                    data.selected + 1
+                                                );
+                                            }}
+                                            containerClassName={"flex gap-2"}
+                                            previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
+                                            nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
+                                            pageClassName="border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
+                                            activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-white rounded-[4px] text-[12px]"
+                                            pageLinkClassName="w-full h-full flex justify-center items-center"
+                                            activeLinkClassName="w-full h-full flex justify-center items-center"
+                                            disabledLinkClassName="text-gray-300 cursor-not-allowed"
+                                            forcePage={
+                                                safeMasterListCurrentPage - 1
+                                            }
+                                        />
+                                    </CardFooter>
+                                </Card>
+                            </>
+                        )}
+                    </div>{" "}
+                {/* <ToastContainer
+                    position="bottom-right"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="dark"
+                    className="custom-toast-container"
+                /> */}
+                {/* </>
+            )} */}
         </>
     );
 }
