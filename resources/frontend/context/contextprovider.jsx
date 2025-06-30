@@ -278,43 +278,45 @@ export const ContextProvider = ({ children }) => {
     };
 
     const fetchCategory = async () => {
-        try {
-            const response = await apiService.get("category-monthly", {
-                params: {
-                    department: department,
-                    property: project,
-                    month: month,
-                    year: year,
-                    startDate: startDate,
-                    endDate: endDate,
-                },
-            });
-            const result = response.data;
+        if (token) {
+            try {
+                const response = await apiService.get("category-monthly", {
+                    params: {
+                        department: department,
+                        property: project,
+                        month: month,
+                        year: year,
+                        startDate: startDate,
+                        endDate: endDate,
+                    },
+                });
+                const result = response.data;
 
-            // Aggregate data into a single "Other Concerns" entry for null or "Other Concerns"
-            const aggregatedData = result.reduce((acc, item) => {
-                const name = item.details_concern || "Other Concerns"; // Replace null with "Other Concerns"
-                const existingIndex = acc.findIndex(
-                    (entry) => entry.name === name
-                );
+                // Aggregate data into a single "Other Concerns" entry for null or "Other Concerns"
+                const aggregatedData = result.reduce((acc, item) => {
+                    const name = item.details_concern || "Other Concerns"; // Replace null with "Other Concerns"
+                    const existingIndex = acc.findIndex(
+                        (entry) => entry.name === name
+                    );
 
-                if (existingIndex > -1) {
-                    // If "Other Concerns" already exists, add to its value
-                    acc[existingIndex].value += item.total;
-                } else {
-                    // Otherwise, create a new entry
-                    acc.push({
-                        name: name,
-                        value: item.total,
-                    });
-                }
+                    if (existingIndex > -1) {
+                        // If "Other Concerns" already exists, add to its value
+                        acc[existingIndex].value += item.total;
+                    } else {
+                        // Otherwise, create a new entry
+                        acc.push({
+                            name: name,
+                            value: item.total,
+                        });
+                    }
 
-                return acc;
-            }, []);
+                    return acc;
+                }, []);
 
-            setDataCategory(aggregatedData);
-        } catch (error) {
-            console.log("Error retrieving data", error);
+                setDataCategory(aggregatedData);
+            } catch (error) {
+                console.log("Error retrieving data", error);
+            }
         }
     };
 
@@ -330,130 +332,47 @@ export const ContextProvider = ({ children }) => {
     };
 
     const fetchDataReport = async () => {
-        try {
-            const response = await apiService.get("report-monthly", {
-                params: {
-                    department: department,
-                    property: project,
-                    month: month,
-                    year: year,
-                    startDate: startDate,
-                    endDate: endDate,
-                },
-            });
-            const result = response.data;
+        if (token) {
+            try {
+                const response = await apiService.get("report-monthly", {
+                    params: {
+                        department: department,
+                        property: project,
+                        month: month,
+                        year: year,
+                        startDate: startDate,
+                        endDate: endDate,
+                    },
+                });
+                const result = response.data;
 
-            const filteredResult = result.filter(
-                (item) =>
-                    item.resolved !== 0 ||
-                    item.unresolved !== 0 ||
-                    item.closed !== 0
-            );
+                const filteredResult = result.filter(
+                    (item) =>
+                        item.resolved !== 0 ||
+                        item.unresolved !== 0 ||
+                        item.closed !== 0
+                );
 
-            const formattedData = filteredResult.map((item) => ({
-                name: `${item.month.toString().padStart(2, "0")}/${item.year
-                    .toString()
-                    .slice(-2)}`,
-                Resolved: item.resolved,
-                Unresolved: item.unresolved,
-                Closed: item.closed,
-            }));
+                const formattedData = filteredResult.map((item) => ({
+                    name: `${item.month.toString().padStart(2, "0")}/${item.year
+                        .toString()
+                        .slice(-2)}`,
+                    Resolved: item.resolved,
+                    Unresolved: item.unresolved,
+                    Closed: item.closed,
+                }));
 
-            setDataSet(formattedData);
-        } catch (error) {
-            console.error("Error fetching data:", error);
+                setDataSet(formattedData);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
         }
     };
 
     const getInquiriesPerProperty = async () => {
-        try {
-            const response = await apiService.get("inquiries-property", {
-                params: {
-                    month: month,
-                    property: project,
-                    department: department,
-                    year: year,
-                    startDate: startDate,
-                    endDate: endDate,
-                },
-            });
-            const result = response.data;
-            const formattedData = result.reduce((acc, item) => {
-                const propertyName = item.property ? item.property : "N/A";
-                const existingProperty = acc.find(
-                    (entry) => entry.name === propertyName
-                );
-                if (existingProperty) {
-                    existingProperty.resolved += item.resolved;
-                    existingProperty.unresolved += item.unresolved;
-                    existingProperty.closed += item.closed;
-                } else {
-                    acc.push({
-                        name: propertyName,
-                        resolved: item.resolved,
-                        unresolved: item.unresolved,
-                        closed: item.closed,
-                    });
-                }
-                return acc;
-            }, []);
-
-            setDataPropery(formattedData);
-        } catch (error) {
-            console.log("error retrieving", error);
-        }
-    };
-
-    const getInquiriesPerDepartment = async () => {
-        try {
-            const response = await apiService.get("inquiries-department", {
-                params: {
-                    month: month,
-                    property: project,
-                    department: department,
-                    year: year,
-                    startDate: startDate,
-                    endDate: endDate,
-                },
-            });
-
-            const departments = response.data.departments;
-            const unassignedData = response.data.totalUnassigned;
-
-            const formattedData = departments.map((item) => ({
-                name: item.department,
-                resolved: item.resolved,
-                unresolved: item.unresolved,
-                closed: item.closed,
-            }));
-
-            let concatData = [...formattedData];
-
-            // Only push "Unassigned" data if it was requested explicitly
-            if (
-                unassignedData &&
-                (department === "Unassigned" || department === "All")
-            ) {
-                const formattedDataUnassigned = {
-                    name: "Unassigned",
-                    resolved: unassignedData.total_resolved,
-                    unresolved: unassignedData.total_unresolved,
-                    closed: unassignedData.total_closed,
-                };
-                concatData.push(formattedDataUnassigned);
-            }
-
-            setDataDepartment(concatData);
-        } catch (error) {
-            console.log("error retrieving", error);
-        }
-    };
-
-    const getCommunicationTypePerProperty = async () => {
-        try {
-            const response = await apiService.get(
-                "communication-type-property",
-                {
+        if (token) {
+            try {
+                const response = await apiService.get("inquiries-property", {
                     params: {
                         month: month,
                         property: project,
@@ -462,50 +381,143 @@ export const ContextProvider = ({ children }) => {
                         startDate: startDate,
                         endDate: endDate,
                     },
+                });
+                const result = response.data;
+                const formattedData = result.reduce((acc, item) => {
+                    const propertyName = item.property ? item.property : "N/A";
+                    const existingProperty = acc.find(
+                        (entry) => entry.name === propertyName
+                    );
+                    if (existingProperty) {
+                        existingProperty.resolved += item.resolved;
+                        existingProperty.unresolved += item.unresolved;
+                        existingProperty.closed += item.closed;
+                    } else {
+                        acc.push({
+                            name: propertyName,
+                            resolved: item.resolved,
+                            unresolved: item.unresolved,
+                            closed: item.closed,
+                        });
+                    }
+                    return acc;
+                }, []);
+
+                setDataPropery(formattedData);
+            } catch (error) {
+                console.log("error retrieving", error);
+            }
+        }
+    };
+
+    const getInquiriesPerDepartment = async () => {
+        if (token) {
+            try {
+                const response = await apiService.get("inquiries-department", {
+                    params: {
+                        month: month,
+                        property: project,
+                        department: department,
+                        year: year,
+                        startDate: startDate,
+                        endDate: endDate,
+                    },
+                });
+
+                const departments = response.data.departments;
+                const unassignedData = response.data.totalUnassigned;
+
+                const formattedData = departments.map((item) => ({
+                    name: item.department,
+                    resolved: item.resolved,
+                    unresolved: item.unresolved,
+                    closed: item.closed,
+                }));
+
+                let concatData = [...formattedData];
+
+                // Only push "Unassigned" data if it was requested explicitly
+                if (
+                    unassignedData &&
+                    (department === "Unassigned" || department === "All")
+                ) {
+                    const formattedDataUnassigned = {
+                        name: "Unassigned",
+                        resolved: unassignedData.total_resolved,
+                        unresolved: unassignedData.total_unresolved,
+                        closed: unassignedData.total_closed,
+                    };
+                    concatData.push(formattedDataUnassigned);
                 }
-            );
-            const result = response.data;
-            const formattedData = result.reduce((acc, item) => {
-                const name = item.communication_type || "No Type";
-                const existing = acc.find((entry) => entry.name === name);
 
-                if (existing) {
-                    existing.value += item.total;
-                } else {
-                    acc.push({ name, value: item.total });
-                }
+                setDataDepartment(concatData);
+            } catch (error) {
+                console.log("error retrieving", error);
+            }
+        }
+    };
 
-                return acc;
-            }, []);
+    const getCommunicationTypePerProperty = async () => {
+        if (token) {
+            try {
+                const response = await apiService.get(
+                    "communication-type-property",
+                    {
+                        params: {
+                            month: month,
+                            property: project,
+                            department: department,
+                            year: year,
+                            startDate: startDate,
+                            endDate: endDate,
+                        },
+                    }
+                );
+                const result = response.data;
+                const formattedData = result.reduce((acc, item) => {
+                    const name = item.communication_type || "No Type";
+                    const existing = acc.find((entry) => entry.name === name);
 
-            setCommunicationTypeData(formattedData);
-        } catch (error) {
-            console.log("Error retrieving communication types:", error);
+                    if (existing) {
+                        existing.value += item.total;
+                    } else {
+                        acc.push({ name, value: item.total });
+                    }
+
+                    return acc;
+                }, []);
+
+                setCommunicationTypeData(formattedData);
+            } catch (error) {
+                console.log("Error retrieving communication types:", error);
+            }
         }
     };
 
     const getInquiriesPerChannel = async () => {
-        try {
-            const response = await apiService.get("inquiries-channel", {
-                params: {
-                    month: month,
-                    property: project,
-                    department: department,
-                    year: year,
-                    startDate: startDate,
-                    endDate: endDate,
-                },
-            });
-            const result = response.data;
+        if (token) {
+            try {
+                const response = await apiService.get("inquiries-channel", {
+                    params: {
+                        month: month,
+                        property: project,
+                        department: department,
+                        year: year,
+                        startDate: startDate,
+                        endDate: endDate,
+                    },
+                });
+                const result = response.data;
 
-            const formattedData = result.map((item) => ({
-                name: item.channels || "No Channel",
-                value: item.total,
-            }));
+                const formattedData = result.map((item) => ({
+                    name: item.channels || "No Channel",
+                    value: item.total,
+                }));
 
-            setInquriesPerChannelData(formattedData);
-        } catch (error) {
-            console.error("Error fetching data:", error);
+                setInquriesPerChannelData(formattedData);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
         }
     };
     const getSpecificInquiry = async () => {

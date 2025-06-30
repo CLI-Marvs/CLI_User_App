@@ -8,8 +8,8 @@ const usePagination = (fetchData, contextState, contextSetter) => {
             const response = await fetchData(currentPage, filters);
             contextSetter((prev) => ({
                 ...prev,
-                data: response.data,
-                totalPages: response.last_page,
+                data: response?.data,
+                totalPages: response?.last_page,
                 loading: false
             }));
         } catch (error) {

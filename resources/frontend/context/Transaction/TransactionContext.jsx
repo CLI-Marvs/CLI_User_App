@@ -12,6 +12,8 @@ export const TransactionProvider = ({ children }) => {
     const [totalPagePosting, setTotalPagePosting] = useState(0);
     const [activeItemTransaction, setActiveItemTransaction] = useState("Cleared");
     const [banks, setBanks] = useState([]);
+    const [enabled, setEnabled] = useState(false);
+    const [defaultColumns, setDefaultColumns] = useState([]);
     
     const [transactions, setTransactions] = useState({
         data: [],
@@ -77,6 +79,10 @@ export const TransactionProvider = ({ children }) => {
                 setCardMarkupDetails,
                 banks,
                 setBanks,
+                enabled,
+                setEnabled,
+                defaultColumns,
+                setDefaultColumns,
             }}
         >
             {children}
