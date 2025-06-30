@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import CustomInput from "@/component/Input/CustomInput";
 import useFeature from "@/context/RoleManagement/FeatureContext";
-import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/PropertyFeatureCheckbox";
+import CustomRadioGroup from "@/component/layout/superadminpage/component/CustomRadioGroup";
 import Spinner from "@/util/Spinner";
 import usePropertyFeature from "@/context/RoleManagement/PropertyFeatureContext";
 import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
@@ -9,13 +9,15 @@ import { showToast } from "@/util/toastUtil";
 import { hasFormChanged } from "@/component/layout/superadminpage/utils/hasFormChanged";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import isFormButtonDisabled from "@/util/isFormButtonDisabled";
+import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/PropertyFeatureCheckbox";
 
 const formInitialState = {
     propertyName: "",
     description: "",
-    entity: "",
+    business_entity_sap: "",
     features: [],
     type: "",
+    project_category: "",
     google_map_link: "",
     barangay: "",
     city: "",
@@ -42,7 +44,7 @@ const PropertyFeatureForm = ({
             const initialFormState = {
                 propertyName: selectedProperty.property_name || "",
                 description: selectedProperty.description || "",
-                entity: selectedProperty.entity || "",
+                business_entity_sap: selectedProperty.business_entity_sap || "",
                 features: selectedProperty.features || [],
                 type: selectedProperty.type || "",
                 google_map_link: selectedProperty.google_map_link || "",
@@ -50,6 +52,7 @@ const PropertyFeatureForm = ({
                 city: selectedProperty.city || "",
                 province: selectedProperty.province || "",
                 country: selectedProperty.country || "",
+                project_category: selectedProperty.project_category || "",
             };
             setFormData(initialFormState);
             setInitialData(initialFormState);
@@ -103,13 +106,13 @@ const PropertyFeatureForm = ({
                 ...prev,
                 features: isChecked
                     ? [
-                          ...prev.features,
-                          {
-                              id: feature.id,
-                              name: feature.name,
-                              status: "Enabled",
-                          },
-                      ]
+                        ...prev.features,
+                        {
+                            id: feature.id,
+                            name: feature.name,
+                            status: "Enabled",
+                        },
+                    ]
                     : prev.features.filter((f) => f.id !== feature.id),
             }));
         }
@@ -124,7 +127,8 @@ const PropertyFeatureForm = ({
             const payload = {
                 propertyName: formData.propertyName,
                 description: formData.description,
-                entity: formData.entity,
+                business_entity_sap: formData.business_entity_sap,
+                project_category: formData.project_category,
                 features: formData.features.map((feature) => ({
                     id: feature.id,
                     status: feature.status === "Enabled",
@@ -145,12 +149,11 @@ const PropertyFeatureForm = ({
             const response =
                 mode === "edit"
                     ? await propertyMasterService.updatePropertyFeatureSettings(
-                          payload
-                      )
+                        payload
+                    )
                     : await propertyMasterService.storePropertyFeatureSettings(
-                          payload
-                      );
-
+                        payload
+                    );
             if (
                 response.status === 200 ||
                 response.status === 201 ||
@@ -158,9 +161,8 @@ const PropertyFeatureForm = ({
             ) {
                 showToast(
                     response.data.message ||
-                        `Property features ${
-                            mode === "edit" ? "updated" : "added"
-                        } successfully.`,
+                    `Property features ${mode === "edit" ? "updated" : "added"
+                    } successfully.`,
                     "success"
                 );
                 await refreshData();
@@ -203,7 +205,7 @@ const PropertyFeatureForm = ({
                         key !== "province" &&
                         key !== "country" &&
                         key !== "description" &&
-                        key !== "entity"
+                        key !== "business_entity_sap"
                 )
             );
             return !isPropertyButtonDisabled;
@@ -275,15 +277,15 @@ const PropertyFeatureForm = ({
                         </div>
                     </div>
 
-                    {/* Entity */}
+                    {/* business_entity */}
                     <div className="flex items-center border border-custom-gray81 rounded-md overflow-hidden">
                         <span className="text-custom-bluegreen bg-custom-lightestgreen py-1.5 flex w-3/4 pl-3 montserrat-semibold text-sm">
-                            Entity
+                            Business Entity (SAP)
                         </span>
                         <CustomInput
                             type="text"
-                            name="entity"
-                            value={formData.entity}
+                            name="business_entity_sap"
+                            value={formData.business_entity_sap}
                             className="w-full px-4 focus:outline-none"
                             onChange={handleInputChange}
                         />
@@ -407,59 +409,40 @@ const PropertyFeatureForm = ({
                             Type
                         </p>
                     </div>
-                    <div className="flex justify-center gap-x-6 items-center mt-4">
-                        <div className="flex gap-x-4">
-                            <p className="text-custom-bluegreen pl-3 montserrat-semibold text-sm">
-                                {"Vertical"}
-                            </p>
-                            <PropertyFeatureCheckbox
-                                type="radio"
-                                name="type"
-                                value="Vertical"
-                                checked={formData.type === "Vertical"}
-                                onChange={() =>
-                                    handleInputChange({
-                                        target: {
-                                            name: "type",
-                                            value: "Vertical",
-                                        },
-                                    })
-                                }
-                                className="property-feature-radio"
-                            />
-                        </div>
-                        <div className="flex gap-x-2">
-                            <p className="text-custom-bluegreen pl-3 montserrat-semibold text-sm">
-                                {"Horizontal"}
-                            </p>
-                            <PropertyFeatureCheckbox
-                                type="radio"
-                                name="type"
-                                value="Horizontal"
-                                checked={formData.type === "Horizontal"}
-                                onChange={() =>
-                                    handleInputChange({
-                                        target: {
-                                            name: "type",
-                                            value: "Horizontal",
-                                        },
-                                    })
-                                }
-                                className="property-feature-radio"
-                            />
-                        </div>
-                    </div>
+                    <CustomRadioGroup
+                        options={[
+                            { label: "Vertical", value: "Vertical" },
+                            { label: "Horizontal", value: "Horizontal" }
+                        ]}
+                        name="type"
+                        selectedValue={formData.type}
+                        onChange={handleInputChange}
+                    />
 
+                    {/* Project Category */}
+                    <div className="mt-10">
+                        <p className="text-sm font-semibold text-custom-solidgreen">
+                            Project Category
+                        </p>
+                    </div>
+                    <CustomRadioGroup
+                        options={[
+                            { label: "CLI", value: "CLI" },
+                            { label: "JV", value: "JV" }
+                        ]}
+                        name="project_category"
+                        selectedValue={formData.project_category}
+                        onChange={handleInputChange}
+                    />
                     {/* Submit Button */}
                     <div className="flex justify-center mt-10">
                         <button
                             type="button"
                             onClick={handleSubmit}
-                            className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${
-                                isLoading || !isFormValid()
-                                    ? "cursor-not-allowed opacity-50"
-                                    : ""
-                            }`}
+                            className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${isLoading || !isFormValid()
+                                ? "cursor-not-allowed opacity-50"
+                                : ""
+                                }`}
                             disabled={isLoading || !isFormValid()}
                         >
                             {isLoading ? (

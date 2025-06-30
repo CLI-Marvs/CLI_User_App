@@ -6,8 +6,8 @@ const PropertyFeatureContext = createContext();
 
 export const defaultFilters = {
     propertyName: "",
-    entity: "",
-    feature: "",
+    business_entity_sap: "",
+    projectCategory: "",
 };
 
 export const PropertyFeatureProvider = ({ children }) => {

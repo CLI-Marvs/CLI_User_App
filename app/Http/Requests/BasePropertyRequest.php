@@ -15,8 +15,8 @@ class BasePropertyRequest extends FormRequest
     {
         return [
             'propertyName' => 'required|string|max:255',
-            'description' => 'nullable|string|max:1000',
-            'entity' => [
+            'description' => 'nullable|string|max:350',
+            'business_entity_sap' => [
                 'nullable',
                 'string',
                 'max:255',
@@ -26,6 +26,7 @@ class BasePropertyRequest extends FormRequest
             'features.*.id' => 'nullable|integer|exists:features,id',
             'features.*.status' => 'nullable|boolean',
             'type' => 'nullable|string',
+            'project_category' => 'required|string',
             'description' => [
                 'nullable',
                 'string',
@@ -75,9 +76,9 @@ class BasePropertyRequest extends FormRequest
             'features.required' => 'At least one feature must be selected.',
             'features.*.exists' => 'The selected feature is invalid.',
             'barangay' => 'Barangay/Street must not contain special characters.',
-            'entity.required' => 'The entity is required.',
-            'entity.regex' => 'Entity must contain uppercase letters and numbers only (e.g., CSM02, AB123).',
-            'entity.format' => 'Entity must contain uppercase letters and numbers only (e.g., CSM02, AB123).',
+            'business_entity_sap.regex' => 'Business Entity must contain uppercase letters and numbers only (e.g., CSM02, AB123).',
+            'business_entity_sap.format' => 'Business Entity must contain uppercase letters and numbers only (e.g., CSM02, AB123).',
+            'project_category.required' => 'The project category is required.',
         ];
     }
 }
