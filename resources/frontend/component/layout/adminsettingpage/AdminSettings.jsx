@@ -19,6 +19,10 @@ import {
     ChevronRightIcon,
 } from "@heroicons/react/24/outline";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import { DndContext } from "@dnd-kit/core";
+import { SortableContext, useSortable, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import  TeamAssigneeComponent  from "../../layout/adminsettingpage/TeamAssignee"; 
 
 const CrudModal = ({
     isOpen,
@@ -71,7 +75,6 @@ const CrudModal = ({
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
 
-        // Clear error when user starts typing
         if (errors[name]) {
             setErrors((prev) => ({ ...prev, [name]: "" }));
         }
@@ -307,6 +310,118 @@ const ConfirmationDialog = ({
     );
 };
 
+function DraggableWOT({
+    wot,
+    isWOTExpanded,
+    toggleWorkOrderType,
+    openModal,
+    openConfirmDialog,
+    children,
+}) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: wot.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        // Remove cursor: "grab" from the whole card
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className="bg-white shadow-sm rounded-lg border border-gray-200"
+        >
+            {/* Work Order Type Header */}
+            <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center flex-1">
+                        {/* Drag handle */}
+                        <button
+                            type="button"
+                            {...attributes}
+                            {...listeners}
+                            tabIndex={-1}
+                            className="mr-2 p-1 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing"
+                            title="Drag to reorder"
+                            aria-label="Drag handle"
+                        >
+                            {/* You can use a drag icon here, e.g. Heroicons Bars3Icon */}
+                            <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M4 8h16M4 16h16"
+                                />
+                            </svg>
+                        </button>
+                        {/* Expand/collapse button */}
+                        <button
+                            onClick={() => toggleWorkOrderType(wot.id)}
+                            className="flex items-center p-1 mr-3 text-gray-400 hover:text-gray-600 rounded"
+                        >
+                            {isWOTExpanded ? (
+                                <ChevronDownIcon className="h-5 w-5" />
+                            ) : (
+                                <ChevronRightIcon className="h-5 w-5" />
+                            )}
+                        </button>
+                        <div className="flex-1">
+                            <div className="flex items-center">
+                                <h2 className="text-xl font-semibold text-gray-900">
+                                    {wot.type_name}
+                                </h2>
+                                <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                    {wot.submilestones?.length || 0} Milestones
+                                </span>
+                            </div>
+                            {wot.description && (
+                                <p className="mt-1 text-sm text-gray-600">
+                                    {wot.description}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <button
+                            onClick={() => openModal("wot", "edit", wot)}
+                            className="inline-flex items-center p-2 text-gray-400 hover:text-indigo-600 hover:bg-gray-50 rounded-md"
+                            title="Edit work order type"
+                        >
+                            <PencilIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                            onClick={() =>
+                                openConfirmDialog("wot", wot.id, wot.type_name)
+                            }
+                            className="inline-flex items-center p-2 text-gray-400 hover:text-red-600 hover:bg-gray-50 rounded-md"
+                            title="Delete work order type"
+                        >
+                            <TrashIcon className="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {/* Collapsible Sub-milestones Section */}
+            {children}
+        </div>
+    );
+}
+
 const AdminSettings = () => {
     const [workOrderTypes, setWorkOrderTypes] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -397,18 +512,21 @@ const AdminSettings = () => {
             setError(null);
         } catch (err) {
             if (isMounted) {
-                setError("Failed to fetch work order settings. Please try again.");
+                setError(
+                    "Failed to fetch work order settings. Please try again."
+                );
             }
             console.error("Fetch error:", err);
         } finally {
-            if (isMounted && !cachedData) { // Only set loading to false if we were actually in a loading state
+            if (isMounted && !cachedData) {
+                // Only set loading to false if we were actually in a loading state
                 setLoading(false);
             }
         }
 
         return () => {
             isMounted = false;
-        }
+        };
     }, []);
 
     useEffect(() => {
@@ -481,7 +599,7 @@ const AdminSettings = () => {
             }
 
             await apiService[method](url, body);
-            invalidateAdminSettingsData(); // Invalidate cache after successful save
+            invalidateAdminSettingsData();
             await fetchData();
             closeModal();
         } catch (err) {
@@ -539,7 +657,7 @@ const AdminSettings = () => {
             }
 
             await apiService.delete(url);
-            invalidateAdminSettingsData(); // Invalidate cache after successful delete
+            invalidateAdminSettingsData();
             await fetchData();
             setConfirmDialog({
                 isOpen: false,
@@ -831,113 +949,63 @@ const AdminSettings = () => {
                 </div>
 
                 {/* Content */}
-                {workOrderTypes.length === 0 ? (
-                    <div className="text-center py-12">
-                        <div className="mx-auto h-12 w-12 text-gray-400">
-                            <InformationCircleIcon className="h-full w-full" />
-                        </div>
-                        <h3 className="mt-2 text-sm font-semibold text-gray-900">
-                            No work order types
-                        </h3>
-                        <p className="mt-1 text-sm text-gray-500">
-                            Get started by creating your first work order type.
-                        </p>
-                        <div className="mt-6">
-                            <button
-                                onClick={() => openModal("wot", "add")}
-                                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                            >
-                                <PlusIcon className="h-4 w-4 mr-2" />
-                                Create Work Order Type
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="space-y-2">
+                <DndContext
+                    onDragEnd={({ active, over }) => {
+                        if (active.id !== over?.id) {
+                            const oldIndex = workOrderTypes.findIndex(
+                                (w) => w.id === active.id
+                            );
+                            const newIndex = workOrderTypes.findIndex(
+                                (w) => w.id === over.id
+                            );
+                            const newOrder = arrayMove(
+                                workOrderTypes,
+                                oldIndex,
+                                newIndex
+                            );
+                            setWorkOrderTypes(newOrder);
+
+                            const sequencePayload = newOrder.map(
+                                (wot, idx) => ({
+                                    id: wot.id,
+                                    sequence: idx + 1,
+                                })
+                            );
+                            apiService
+                                .post(
+                                    "/admin/settings/work-order-types/reorder",
+                                    sequencePayload
+                                )
+                                .catch((err) => {
+                                    console.error(
+                                        "Failed to update order",
+                                        err
+                                    );
+                                });
+                        }
+                    }}
+                >
+                    <SortableContext items={workOrderTypes.map((w) => w.id)}>
                         {workOrderTypes.map((wot) => {
                             const isWOTExpanded = expandedWorkOrderTypes.has(
                                 wot.id
                             );
 
                             return (
-                                <div
+                                <DraggableWOT
                                     key={wot.id}
-                                    className="bg-white shadow-sm rounded-lg border border-gray-200"
+                                    wot={wot}
+                                    isWOTExpanded={isWOTExpanded}
+                                    toggleWorkOrderType={toggleWorkOrderType}
+                                    openModal={openModal}
+                                    openConfirmDialog={openConfirmDialog}
                                 >
-                                    {/* Work Order Type Header */}
-                                    <div className="px-6 py-4 border-b border-gray-200">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center flex-1">
-                                                <button
-                                                    onClick={() =>
-                                                        toggleWorkOrderType(
-                                                            wot.id
-                                                        )
-                                                    }
-                                                    className="flex items-center p-1 mr-3 text-gray-400 hover:text-gray-600 rounded"
-                                                >
-                                                    {isWOTExpanded ? (
-                                                        <ChevronDownIcon className="h-5 w-5" />
-                                                    ) : (
-                                                        <ChevronRightIcon className="h-5 w-5" />
-                                                    )}
-                                                </button>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center">
-                                                        <h2 className="text-xl font-semibold text-gray-900">
-                                                            {wot.type_name}
-                                                        </h2>
-                                                        <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                                            {wot.submilestones
-                                                                ?.length ||
-                                                                0}{" "}
-                                                            sub-milestones
-                                                        </span>
-                                                    </div>
-                                                    {wot.description && (
-                                                        <p className="mt-1 text-sm text-gray-600">
-                                                            {wot.description}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <button
-                                                    onClick={() =>
-                                                        openModal(
-                                                            "wot",
-                                                            "edit",
-                                                            wot
-                                                        )
-                                                    }
-                                                    className="inline-flex items-center p-2 text-gray-400 hover:text-indigo-600 hover:bg-gray-50 rounded-md"
-                                                    title="Edit work order type"
-                                                >
-                                                    <PencilIcon className="h-4 w-4" />
-                                                </button>
-                                                <button
-                                                    onClick={() =>
-                                                        openConfirmDialog(
-                                                            "wot",
-                                                            wot.id,
-                                                            wot.type_name
-                                                        )
-                                                    }
-                                                    className="inline-flex items-center p-2 text-gray-400 hover:text-red-600 hover:bg-gray-50 rounded-md"
-                                                    title="Delete work order type"
-                                                >
-                                                    <TrashIcon className="h-4 w-4" />
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-
                                     {/* Collapsible Sub-milestones Section */}
                                     {isWOTExpanded && (
                                         <div className="px-6 py-4">
                                             <div className="flex items-center justify-between mb-4">
                                                 <h3 className="text-lg font-medium text-gray-900">
-                                                    Sub-milestones
+                                                    Milestones
                                                 </h3>
                                                 <button
                                                     onClick={() =>
@@ -951,7 +1019,7 @@ const AdminSettings = () => {
                                                     className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                                                 >
                                                     <PlusIcon className="h-4 w-4 mr-1" />
-                                                    Add Sub-milestone
+                                                    Add Milestone
                                                 </button>
                                             </div>
 
@@ -959,8 +1027,7 @@ const AdminSettings = () => {
                                             wot.submilestones.length === 0 ? (
                                                 <div className="text-center py-6 bg-gray-50 rounded-lg">
                                                     <p className="text-sm text-gray-500">
-                                                        No sub-milestones
-                                                        defined
+                                                        No milestones defined
                                                     </p>
                                                     <button
                                                         onClick={() =>
@@ -973,8 +1040,7 @@ const AdminSettings = () => {
                                                         }
                                                         className="mt-2 text-sm text-indigo-600 hover:text-indigo-500"
                                                     >
-                                                        Add the first
-                                                        sub-milestone
+                                                        Add the first Milestone
                                                     </button>
                                                 </div>
                                             ) : (
@@ -1182,11 +1248,12 @@ const AdminSettings = () => {
                                             )}
                                         </div>
                                     )}
-                                </div>
+                                </DraggableWOT>
                             );
                         })}
-                    </div>
-                )}
+                    </SortableContext>
+                </DndContext>
+                <TeamAssigneeComponent />
             </div>
 
             {/* Modals */}

@@ -13,6 +13,7 @@ class WorkOrderType extends Model
     protected $fillable = [
         'type_name',
         'description',
+        'sequence',
     ];
     public function submilestones()
     {

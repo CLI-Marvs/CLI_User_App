@@ -19,12 +19,27 @@ const SearchableDropdown = ({
     showCheckbox = true,
     showSelectedTags = false,
     hideInputValue = true,
+    showSelectAll = false,
 }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [isOpen, setIsOpen] = useState(false);
     const [isInputFocused, setIsInputFocused] = useState(false);
     const dropdownRef = useRef(null);
     const optionRefs = useRef({});
+    const selectAllCheckboxRef = useRef(null);
+
+    const getLabel = useCallback(
+        (option) => {
+            if (typeof getOptionLabel === "function") {
+                return getOptionLabel(option) || "";
+            }
+            if (optionLabel && option[optionLabel]) return option[optionLabel];
+            if (option.name) return option.name;
+            if (option.account_name) return option.account_name;
+            return "";
+        },
+        [getOptionLabel, optionLabel]
+    );
 
     const renderOption = (option) => {
         if (placeholder === "Select Account") {
@@ -39,35 +54,9 @@ const SearchableDropdown = ({
                     <span>{option.unit_no}</span>
                 </div>
             );
-        } else if (placeholder === "Select Work Order Type") {
-            return <span>{option.type_name}</span>;
-        } else if (placeholder === "Select Assignee") {
-            return (
-                <div>
-                    <span>
-                        {option.firstname} {option.lastname}
-                    </span>
-                    <br />
-                    <span>{option.employee_email}</span>
-                </div>
-            );
-        } else {
-            return <span>{option.account_name}</span>;
         }
+        return <span>{getLabel(option)}</span>;
     };
-
-    const getLabel = useCallback(
-        (option) => {
-            if (typeof getOptionLabel === "function") {
-                return getOptionLabel(option) || "";
-            }
-            if (optionLabel && option[optionLabel]) return option[optionLabel];
-            if (option.name) return option.name;
-            if (option.account_name) return option.account_name;
-            return "";
-        },
-        [getOptionLabel, optionLabel]
-    );
 
     const displayInputValue = useMemo(() => {
         if (hideInputValue) return "";
@@ -119,6 +108,36 @@ const SearchableDropdown = ({
         [setSelectedOptions, optionKey]
     );
 
+    const { isAllSelected, isIndeterminate } = useMemo(() => {
+        const optionsCount = options?.length || 0;
+        const selectedCount = selectedOptions?.length || 0;
+
+        if (optionsCount === 0) {
+            return { isAllSelected: false, isIndeterminate: false };
+        }
+
+        const allSelected = selectedCount === optionsCount;
+        const indeterminate = selectedCount > 0 && selectedCount < optionsCount;
+
+        return { isAllSelected: allSelected, isIndeterminate: indeterminate };
+    }, [options, selectedOptions]);
+
+    const handleSelectAll = useCallback(() => {
+        if (isAllSelected) {
+            setSelectedOptions([]);
+        } else {
+            setSelectedOptions(options);
+        }
+    }, [isAllSelected, options, setSelectedOptions]);
+
+    useEffect(() => {
+        if (selectAllCheckboxRef.current) {
+            selectAllCheckboxRef.current.checked = isAllSelected;
+            selectAllCheckboxRef.current.indeterminate =
+                !isAllSelected && isIndeterminate;
+        }
+    }, [isAllSelected, isIndeterminate]);
+
     useEffect(() => {
         const handleClickOutside = (e) => {
             if (
@@ -138,7 +157,7 @@ const SearchableDropdown = ({
     return (
         <div className="relative w-full" ref={dropdownRef}>
             <div
-                className="flex flex-wrap items-center mt-1 w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus-within:ring-indigo-500 focus-within:border-indigo-500 sm:text-sm rounded-md shadow-sm bg-white min-h-[42px]"
+                className="flex flex-wrap items-center mt-1 w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus-within:ring-indigo-500 focus-within:border-indigo-500 sm:text-sm rounded-md shadow-sm bg-white min-h-[42px] max-h-28 overflow-y-auto"
                 onClick={() => {
                     setIsOpen(true);
                     setIsInputFocused(true);
@@ -196,6 +215,31 @@ const SearchableDropdown = ({
             </div>
             {isOpen && (
                 <ul className="absolute z-10 mt-1 w-full bg-[#F7F7F7] p-5 shadow-lg max-h-60 rounded-md text-base ring-1 ring-black ring-opacity-5 overflow-auto sm:text-sm">
+                    {showSelectAll && options.length > 0 && (
+                        <li
+                            className={`cursor-pointer select-none rounded-[10px] relative py-5 pl-6 mb-4 hover:bg-[#A8C18C] hover:bg-opacity-40 ${
+                                isIndeterminate || isAllSelected
+                                    ? "bg-custom-lightestgreen font-semibold"
+                                    : "bg-[#D7E9D066]"
+                            }`}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleSelectAll();
+                            }}
+                        >
+                            <div className="flex items-center">
+                                <input
+                                    type="checkbox"
+                                    ref={selectAllCheckboxRef}
+                                    readOnly
+                                    className="mr-2 h-5 w-5 pointer-events-none text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                />
+                                <div className="flex-grow">
+                                    Select All
+                                </div>
+                            </div>
+                        </li>
+                    )}
                     {displayOptions.length > 0 ? (
                         displayOptions.map((option) => {
                             const isSelected =

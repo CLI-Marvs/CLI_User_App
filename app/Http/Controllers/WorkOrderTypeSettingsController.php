@@ -20,15 +20,24 @@ class WorkOrderTypeSettingsController extends Controller
     /**
      * Store a new work order type.
      */
-    public function storeWorkOrderType(Request $request)
-    {
+public function storeWorkOrderType(Request $request)
+{
+    try {
         $validated = $request->validate([
             'type_name' => 'required|string|max:100|unique:work_order_types',
             'description' => 'nullable|string',
         ]);
+
+        // Get the current max sequence and add 1
+        $maxSequence = WorkOrderType::max('sequence');
+        $validated['sequence'] = $maxSequence ? $maxSequence + 1 : 1;
+
         $workOrderType = WorkOrderType::create($validated);
         return response()->json($workOrderType, 201);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
 
     /**
      * Update a work order type.
@@ -119,5 +128,18 @@ class WorkOrderTypeSettingsController extends Controller
     {
         $checklist->delete();
         return response()->json(null, 204);
+    }
+    public function reorderWorkOrderTypes(Request $request)
+    {
+        $data = $request->validate([
+            '*.id' => 'required|integer|exists:work_order_types,id',
+            '*.sequence' => 'required|integer',
+        ]);
+
+        foreach ($data as $item) {
+            WorkOrderType::where('id', $item['id'])->update(['sequence' => $item['sequence']]);
+        }
+
+        return response()->json(['success' => true]);
     }
 }

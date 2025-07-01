@@ -29,6 +29,7 @@ use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\AccountChecklistStatusController;
 use App\Http\Controllers\WorkOrderTypeSettingsController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TeamController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -75,61 +76,104 @@ Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees'
 Route::post('/update-info', [ConcernController::class, 'updateInfo']);
 // Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
+
 // for titling and registration
-Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName']);
 Route::middleware('auth:sanctum')->group(function () {
-    // for work orders
-    Route::post('/work-orders/{work_order}/updates', [WorkOrderController::class, 'addUpdate']);
-    Route::post('/work-orders/{work_order}/documents', [WorkOrderController::class, 'uploadDocument']);
-    Route::put('/work-orders/{work_order}/mark-done', [WorkOrderController::class, 'markAsDone']);
-    Route::post('/work-orders/create-work-order', [WorkOrderController::class, 'createWorkOrders']);
-    Route::get('/work-orders/get-assignee', [WorkOrderController::class, 'getAssignee']);
-    Route::get('/work-orders/assignee/{id}', [WorkOrderController::class, 'getAssigneeById']);
-    Route::post('/post-account-log', [AccountLogController::class, 'attachAccountsToLog']);
-    Route::get('/work-orders/work-order-types', [WorkOrderController::class, 'getWorkOrderTypes']);
+
+    /**
+     * Work Orders
+     */
+    Route::prefix('work-orders')->group(function () {
+        Route::post('create-work-order', [WorkOrderController::class, 'createWorkOrders']);
+        Route::get('get-assignee', [WorkOrderController::class, 'getAssignee']);
+        Route::get('assignee/{id}', [WorkOrderController::class, 'getAssigneeById']);
+        Route::get('get-work-orders', [WorkOrderController::class, 'getWorkOrders']);
+        Route::get('work-order-types', [WorkOrderController::class, 'getWorkOrderTypes']);
+        Route::post('notes/add', [WorkOrderController::class, 'addNoteWithAttachments']);
+        Route::post('{work_order}/updates', [WorkOrderController::class, 'addUpdate']);
+        Route::post('{work_order}/documents', [WorkOrderController::class, 'uploadDocument']);
+        Route::put('{work_order}/mark-done', [WorkOrderController::class, 'markAsDone']);
+        Route::put('{workOrder}', [WorkOrderController::class, 'update']);
+        Route::patch('{workOrder}/soft-delete', [WorkOrderController::class, 'softDelete'])->name('work-orders.soft-delete');
+        Route::patch('{workOrderId}/status-complete', [WorkOrderController::class, 'updateStatusToComplete']);
+    });
+
     Route::post('/work-order-logs', [WorkOrderController::class, 'createWorkOrderLog']);
-    Route::post('/work-orders/notes/add', [WorkOrderController::class, 'addNoteWithAttachments']);
-    Route::get('/work-orders/get-work-orders', [WorkOrderController::class, 'getWorkOrders']);
-    Route::put('/work-orders/{workOrder}', [WorkOrderController::class, 'update']);
-    Route::patch('/work-orders/{workOrder}/soft-delete', [WorkOrderController::class, 'softDelete'])->name('work-orders.soft-delete');
     Route::get('/my-workorders', [WorkOrderController::class, 'index']);
-    Route::patch('/work-orders/{workOrderId}/status-complete', [WorkOrderController::class, 'updateStatusToComplete']);
-    // for taken out accounts
-    Route::patch('/taken-out-accounts/add-masterlist', [TakenOutAccountController::class, 'updateAddStatus']);
-    Route::get('/taken-out-accounts/get-masterlist', [TakenOutAccountController::class, 'getMasterList']);
-    Route::patch('/taken-out-accounts/undo-masterlist', [TakenOutAccountController::class, 'undoMasterListStatus']);
-    Route::get('/taken-out-accounts', [TakenOutAccountController::class, 'getTakenOutAccounts']);
-    Route::post('/upload-taken-out-accounts', [TakenOutAccountController::class, 'uploadTakenOutAccounts']);
-    
-    // for account logs
+
+    /**
+     * Account Logs
+     */
+    Route::post('/post-account-log', [AccountLogController::class, 'attachAccountsToLog']);
     Route::get('/get-account-logs/{selectedId}', [AccountLogController::class, 'getLogData']);
     Route::patch('/update-is-new/{id}', [AccountLogController::class, 'updateIsNewStatus']);
-    // for milestones
+
+    /**
+     * Taken Out Accounts
+     */
+Route::prefix('taken-out-accounts')->group(function () {
+        Route::get('/', [TakenOutAccountController::class, 'getTakenOutAccounts']);
+        Route::get('get-masterlist', [TakenOutAccountController::class, 'getMasterList']);
+        Route::patch('add-masterlist', [TakenOutAccountController::class, 'updateAddStatus']);
+        Route::patch('undo-masterlist', [TakenOutAccountController::class, 'undoMasterListStatus']);
+        Route::post('upload-taken-out-accounts', [TakenOutAccountController::class, 'uploadTakenOutAccounts']);
+    });
+    
+
+
+    /**
+     * Titling & Registration
+     */
+    Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName']);
+
+    /**
+     * Milestones
+     */
     Route::get('/milestones-details', [MilestoneController::class, 'getDetailsByName']);
-    // for submilestones
+
+    /**
+     * Submilestones
+     */
     Route::get('/submilestones-details', [SubmilestoneController::class, 'getByWorkOrderType']);
-    // for checklists status
+
+    /**
+     * Account Checklist Status
+     */
     Route::post('/account-checklist-status', [AccountChecklistStatusController::class, 'store']);
     Route::post('/account-checklist-status/bulk', [AccountChecklistStatusController::class, 'bulkStore']);
     Route::get('/account/{accountId}/submilestone/{submilestoneId}/checklist-status', [AccountChecklistStatusController::class, 'getChecklistStatus']);
+
+    /**
+     * Admin Settings
+     */
     Route::prefix('admin/settings')->group(function () {
         // Work Order Types
         Route::get('/work-order-types', [WorkOrderTypeSettingsController::class, 'index']);
-        Route::post('/work-order-types', [WorkOrderTypeSettingsController::class, 'storeWorkOrderType']);
+        
+        Route::post('/work-order-types/reorder', [WorkOrderTypeSettingsController::class, 'reorderWorkOrderTypes']);
         Route::put('/work-order-types/{workOrderType}', [WorkOrderTypeSettingsController::class, 'updateWorkOrderType']);
         Route::delete('/work-order-types/{workOrderType}', [WorkOrderTypeSettingsController::class, 'destroyWorkOrderType']);
+
         // Submilestones
         Route::post('/submilestones', [WorkOrderTypeSettingsController::class, 'storeSubmilestone']);
         Route::put('/submilestones/{submilestone}', [WorkOrderTypeSettingsController::class, 'updateSubmilestone']);
         Route::delete('/submilestones/{submilestone}', [WorkOrderTypeSettingsController::class, 'destroySubmilestone']);
+
         // Checklists
         Route::post('/checklists', [WorkOrderTypeSettingsController::class, 'storeChecklist']);
         Route::put('/checklists/{checklist}', [WorkOrderTypeSettingsController::class, 'updateChecklist']);
         Route::delete('/checklists/{checklist}', [WorkOrderTypeSettingsController::class, 'destroyChecklist']);
     });
-    // Dashboard Routes
+Route::post('/admin/settings/work-order-types', [WorkOrderTypeSettingsController::class, 'storeWorkOrderType']);
+    /**
+     * Dashboard
+     */
     Route::get('/dashboard/executive', [ExecutiveDashboardController::class, 'getExecutiveDashboardData']);
-
+    // Team Management Endpoints
+    Route::get('/employees', [TeamController::class, 'getEmployees']);
+    Route::put('/teams/{team}/members', [TeamController::class, 'updateMembers']);
+    Route::apiResource('teams', TeamController::class);
+    Route::get('/teams/{team}/get-members', [TeamController::class, 'members']);
 });
 
 //* For Sap 

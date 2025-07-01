@@ -388,7 +388,7 @@ useEffect(() => {
             const formData = new FormData();
             formData.append("file", file);
             const response = await apiService.post(
-                "/upload-taken-out-accounts",
+                "/taken-out-accounts/upload-taken-out-accounts",
                 formData,
                 {
                     headers: {

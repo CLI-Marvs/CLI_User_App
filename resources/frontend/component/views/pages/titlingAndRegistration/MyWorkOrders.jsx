@@ -2,18 +2,21 @@ import React, { useState, useEffect } from "react";
 import apiService from "../../../servicesApi/apiService";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { Card, CardFooter, Typography } from "@material-tailwind/react";
+import ReactPaginate from "react-paginate";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
 const MyWorkOrders = () => {
     const [workOrders, setWorkOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [perPage, setPerPage] = useState(10);
+    const [perPage, setPerPage] = useState(5);
     const [totalWorkOrders, setTotalWorkOrders] = useState(0);
     const [statusFilter, setStatusFilter] = useState("");
     const [sortBy, setSortBy] = useState("created_at");
     const [sortOrder, setSortOrder] = useState("desc");
-    const [viewMode, setViewMode] = useState("grid");
+    const [viewMode, setViewMode] = useState("table");
 
     useEffect(() => {
         const fetchWorkOrders = async () => {
@@ -66,6 +69,16 @@ const MyWorkOrders = () => {
         // Example: navigate(`/work-orders/${workOrderId}/work`);
     };
 
+    const TABLE_HEAD = [
+        { head: "Work Order" },
+        { head: "Type" },
+        { head: "Status" },
+        { head: "Priority" },
+        { head: "Deadline" },
+        { head: "Created By" },
+        { head: "Actions" },
+    ];
+
     const SkeletonGridCard = () => (
         <div className="bg-white border border-gray-200 rounded-xl shadow flex flex-col h-[330px]">
             <div className="px-4 py-3 border-b border-gray-100 bg-gray-50 rounded-t-xl">
@@ -114,24 +127,24 @@ const MyWorkOrders = () => {
     );
 
     const SkeletonTableRow = () => (
-        <tr>
-            <td className="px-6 py-4 whitespace-nowrap">
+        <tr className="hover:bg-gray-100">
+            <td className="p-4 border-b border-gray-300">
                 <Skeleton width={80} />
                 <Skeleton width={150} />
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
+            <td className="p-4 border-b border-gray-300">
                 <Skeleton width={100} />
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
+            <td className="p-4 border-b border-gray-300">
                 <Skeleton width={70} height={20} borderRadius="9999px" />
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
+            <td className="p-4 border-b border-gray-300">
                 <Skeleton width={70} height={20} borderRadius="9999px" />
             </td>
-            <td className="px-6 py-4 whitespace-nowrap">
+            <td className="p-4 border-b border-gray-300">
                 <Skeleton width={90} />
             </td>
-            <td className="px-6 py-4 whitespace-nowrap text-right">
+            <td className="p-4 border-b border-gray-300">
                 <Skeleton width={50} height={28} borderRadius="0.375rem" />
             </td>
         </tr>
@@ -197,18 +210,18 @@ const MyWorkOrders = () => {
 
     const getHeaderBackgroundColor = (status) => {
         switch (status) {
-            case 'Complete':
-                return 'bg-green-50';
-            case 'In Progress':
-                return 'bg-indigo-50';
-            case 'Pending':
-                return 'bg-yellow-50';
-            case 'Assigned':
-                return 'bg-blue-50';
-            case 'Cancelled':
-                return 'bg-red-50';
+            case "Complete":
+                return "bg-green-50";
+            case "In Progress":
+                return "bg-indigo-50";
+            case "Pending":
+                return "bg-yellow-50";
+            case "Assigned":
+                return "bg-blue-50";
+            case "Cancelled":
+                return "bg-red-50";
             default:
-                return 'bg-gray-50';
+                return "bg-gray-50";
         }
     };
 
@@ -220,7 +233,11 @@ const MyWorkOrders = () => {
                     className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-150 flex flex-col h-[280px]"
                 >
                     {/* Header */}
-                    <div className={`px-3 py-2 border-b border-gray-100 rounded-t-xl ${getHeaderBackgroundColor(order.status)}`}>
+                    <div
+                        className={`px-3 py-2 border-b border-gray-100 rounded-t-xl ${getHeaderBackgroundColor(
+                            order.status
+                        )}`}
+                    >
                         <div className="flex items-center justify-between">
                             <h3 className="text-sm font-semibold text-gray-800">
                                 WO #{order.work_order_id}
@@ -311,105 +328,193 @@ const MyWorkOrders = () => {
     );
 
     const renderTableView = () => (
-        <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
+        <Card className="w-full overflow-hidden">
             <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                <table className="w-full min-w-max table-auto text-left">
+                    <thead>
                         <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Work Order
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Type
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Status
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Priority
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Deadline
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Assignee
-                            </th>
-                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Actions
-                            </th>
+                            {TABLE_HEAD.map(({ head }) => (
+                                <th
+                                    key={head}
+                                    className="border-b bg-[#175D5F] text-white h-[60px] p-4"
+                                >
+                                    <Typography
+                                        variant="small"
+                                        className="!font-semibold text-white leading-none"
+                                    >
+                                        {head}
+                                    </Typography>
+                                </th>
+                            ))}
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody>
                         {workOrders.map((order) => (
                             <tr
                                 key={order.work_order_id}
                                 className="hover:bg-gray-50"
                             >
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                    <div>
-                                        <div className="text-sm font-medium text-gray-900">
-                                            WO #{order.work_order_id}
-                                        </div>
-                                        <div className="text-sm text-gray-500 truncate max-w-xs">
-                                            {order.description ||
-                                                "No description"}
-                                        </div>
-                                    </div>
+                                <td className="p-4 border-b border-gray-300">
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-bold"
+                                    >
+                                        WO #{order.work_order_id}
+                                    </Typography>
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-normal opacity-70"
+                                    >
+                                        {order.description || "No description"}
+                                    </Typography>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {order.work_order_type?.type_name || "N/A"}
+                                <td className="p-4 border-b border-gray-300">
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-normal"
+                                    >
+                                        {order.work_order_type?.type_name ||
+                                            "N/A"}
+                                    </Typography>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                <td className="p-4 border-b border-gray-300">
                                     {getStatusBadge(order.status)}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
+                                <td className="p-4 border-b border-gray-300">
                                     {getPriorityBadge(order.priority)}
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    <span
-                                        className={
+                                <td className="p-4 border-b border-gray-300">
+                                    <Typography
+                                        variant="small"
+                                        className={`font-normal ${
                                             isOverdue(order.work_order_deadline)
                                                 ? "text-red-600 font-semibold"
                                                 : "text-gray-900"
-                                        }
+                                        }`}
                                     >
                                         {formatDate(order.work_order_deadline)}
-                                    </span>
-                                    {isOverdue(order.work_order_deadline) && (
-                                        <div className="text-xs text-red-600">
-                                            Overdue
-                                        </div>
+                                    </Typography>
+                                </td>
+                                <td className="p-4 border-b border-gray-300">
+                                    <Typography
+                                        variant="small"
+                                        color="blue-gray"
+                                        className="font-normal"
+                                    >
+                                        {order.created_by?.fullname || "N/A"}
+                                    </Typography>
+                                </td>
+                                <td className="p-4 border-b border-gray-300 text-right">
+                                    {canWorkOnOrder(order.status) && (
+                                        <button
+                                            onClick={() =>
+                                                handleWorkOnOrder(
+                                                    order.work_order_id
+                                                )
+                                            }
+                                            className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
+                                        >
+                                            Process
+                                        </button>
                                     )}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {order.assignee?.fullname || "N/A"}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <div className="flex items-center justify-end space-x-2">
-                                        {canWorkOnOrder(order.status) && (
-                                            <button
-                                                onClick={() =>
-                                                    handleWorkOnOrder(
-                                                        order.work_order_id
-                                                    )
-                                                }
-                                                className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
-                                            >
-                                                Work
-                                            </button>
-                                        )}
-                                    </div>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
-        </div>
+        </Card>
     );
+
+    const renderPagination = () => (
+        <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4 mt-4">
+            <Typography
+                variant="small"
+                color="blue-gray"
+                className="font-normal"
+            >
+                Page {currentPage} of {Math.ceil(totalWorkOrders / perPage)}
+            </Typography>
+            <ReactPaginate
+                previousLabel={
+                    <MdKeyboardArrowLeft className="text-[#404B52]" />
+                }
+                nextLabel={<MdKeyboardArrowRight className="text-[#404B52]" />}
+                breakLabel={"..."}
+                pageCount={Math.ceil(totalWorkOrders / perPage)}
+                marginPagesDisplayed={2}
+                pageRangeDisplayed={2}
+                onPageChange={(data) => {
+                    handlePageChange(data.selected + 1);
+                }}
+                containerClassName={"flex gap-2"}
+                previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
+                nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
+                pageClassName="border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
+                activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-white rounded-[4px] text-[12px]"
+                pageLinkClassName="w-full h-full flex justify-center items-center"
+                activeLinkClassName="w-full h-full flex justify-center items-center"
+                disabledLinkClassName="text-gray-300 cursor-not-allowed"
+                forcePage={currentPage - 1}
+            />
+        </CardFooter>
+    );
+
+    const showDevOverlay = false;
 
     return (
         <div className="min-h-screen bg-gray-50">
+            {showDevOverlay && (
+                <div className="absolute inset-0 z-40 flex items-center justify-center bg-gradient-to-br from-black/40 via-black/50 to-black/60 backdrop-blur-sm rounded-lg">
+                    <div className="relative bg-white rounded-2xl shadow-2xl px-10 py-8 text-center max-w-md mx-4 transform transition-all duration-300 hover:scale-105">
+                        <div className="flex justify-center mb-6">
+                            <div className="relative">
+                                <div className="absolute inset-0 bg-gradient-to-r gradient-btn5 rounded-full blur-lg opacity-30 animate-pulse"></div>
+                                <div className="relative bg-gradient-to-r gradient-btn5 p-3 rounded-full">
+                                    <svg
+                                        className="w-6 h-6 text-white"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+                                        />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-4">
+                            Under Development
+                        </h2>
+                        <p className="text-gray-600 mb-6 leading-relaxed">
+                            This section is currently under development.
+                        </p>
+
+                        {/* Progress bar */}
+                        <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                            <div
+                                className="bg-gradient-to-r gradient-btn5 h-2 rounded-full animate-pulse transition-all duration-1000"
+                                style={{ width: "30%" }}
+                            ></div>
+                        </div>
+
+                        {/* Status text */}
+                        <p className="text-sm text-gray-500">30% Complete</p>
+
+                        {/* Subtle border glow */}
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-sm -z-10"></div>
+                    </div>
+                </div>
+            )}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header */}
                 <div className="mb-8">
@@ -543,37 +648,29 @@ const MyWorkOrders = () => {
                                 ))}
                             </div>
                         ) : (
-                            <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Work Order
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Type
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Status
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Priority
-                                            </th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Deadline
-                                            </th>
-                                            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                Actions
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="bg-white divide-y divide-gray-200">
-                                        {[...Array(6)].map((_, i) => (
-                                            <SkeletonTableRow key={i} />
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                            <Card className="w-full overflow-hidden">
+                                <div className="overflow-x-auto">
+                                    <table className="w-full min-w-max table-auto text-left">
+                                        <thead>
+                                            <tr>
+                                                {TABLE_HEAD.map(({ head }) => (
+                                                    <th
+                                                        key={head}
+                                                        className="border-b bg-[#175D5F] text-white h-[60px] p-4"
+                                                    >
+                                                        <Skeleton height={20} />
+                                                    </th>
+                                                ))}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {[...Array(perPage)].map((_, i) => (
+                                                <SkeletonTableRow key={i} />
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </Card>
                         )}
                     </SkeletonTheme>
                 )}
@@ -620,53 +717,7 @@ const MyWorkOrders = () => {
                             ? renderGridView()
                             : renderTableView()}
 
-                        {/* Pagination */}
-                        <div className="mt-8 flex items-center justify-between">
-                            <div className="text-sm text-gray-700">
-                                Showing{" "}
-                                <span className="font-medium">
-                                    {(currentPage - 1) * perPage + 1}
-                                </span>{" "}
-                                to{" "}
-                                <span className="font-medium">
-                                    {Math.min(
-                                        currentPage * perPage,
-                                        totalWorkOrders
-                                    )}
-                                </span>{" "}
-                                of{" "}
-                                <span className="font-medium">
-                                    {totalWorkOrders}
-                                </span>{" "}
-                                results
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <button
-                                    onClick={() =>
-                                        handlePageChange(currentPage - 1)
-                                    }
-                                    disabled={currentPage === 1}
-                                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    Previous
-                                </button>
-                                <span className="text-sm text-gray-700">
-                                    Page {currentPage} of{" "}
-                                    {Math.ceil(totalWorkOrders / perPage)}
-                                </span>
-                                <button
-                                    onClick={() =>
-                                        handlePageChange(currentPage + 1)
-                                    }
-                                    disabled={
-                                        currentPage * perPage >= totalWorkOrders
-                                    }
-                                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    Next
-                                </button>
-                            </div>
-                        </div>
+                        {renderPagination()}
                     </>
                 )}
             </div>

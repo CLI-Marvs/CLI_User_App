@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import ReactDOM from "react-dom";
 import apiService from "../../../component/servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
@@ -9,6 +9,7 @@ import WorkOrderCreatedModal from "./WorkOrderCreatedModal";
 const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     const [selectedAccounts, setSelectedAccounts] = useState([]);
     const [selectedWorkOrderType, setSelectedWorkOrderType] = useState(null);
+    const [selectedProject, setSelectedProject] = useState("");
     const [selectedAssignee, setSelectedAssignee] = useState(null);
     const [dueDate, setDueDate] = useState("");
     const modalRef = useRef();
@@ -42,9 +43,27 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             setSelectedAccounts([]);
             setSelectedWorkOrderType(null);
             setSelectedAssignee(null);
+            setSelectedProject("");
             setDueDate("");
         }
     }, [isOpen]);
+
+    const projects = useMemo(() => {
+        if (!accounts) return [];
+        const projectNames = accounts
+            .map((acc) => acc.property_name)
+            .filter(Boolean);
+        return [...new Set(projectNames)].sort();
+    }, [accounts]);
+
+    const filteredAccounts = useMemo(() => {
+        if (!selectedProject) {
+            return accounts;
+        }
+        return accounts.filter(
+            (account) => account.property_name === selectedProject
+        );
+    }, [accounts, selectedProject]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -257,7 +276,37 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                 </div>
                             </div>
 
-                            <div class="flex items-center mb-2 justify-between">
+                            <div className="flex items-center mb-2 justify-between">
+                                <label
+                                    htmlFor="project-filter"
+                                    className="block text-sm ml-4 font-semibold text-custom-bluegreen w-1/4"
+                                >
+                                    Filter by Project:
+                                </label>
+                                <div className="w-2/3">
+                                    <SearchableDropdown
+                                        options={projects.map((p) => ({
+                                            id: p,
+                                            name: p,
+                                        }))}
+                                        selectedOptions={
+                                            selectedProject
+                                                ? [{ id: selectedProject, name: selectedProject }]
+                                                : []
+                                        }
+                                        setSelectedOptions={(newOptions) => {
+                                            setSelectedProject(newOptions[0]?.name || "");
+                                            setSelectedAccounts([]);
+                                        }}
+                                        placeholder="Filter by Project"
+                                        showCheckbox={false}
+                                        showSelectedTags={false}
+                                        hideInputValue={false}
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center mb-2 justify-between">
                                 <label
                                     htmlFor="account"
                                     className="block text-sm ml-4 font-semibold text-custom-bluegreen w-1/4"
@@ -266,7 +315,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                 </label>
                                 <div className="w-2/3">
                                     <SearchableDropdown
-                                        options={accounts}
+                                        options={filteredAccounts}
                                         selectedOptions={selectedAccounts}
                                         setSelectedOptions={setSelectedAccounts}
                                         optionKey="id"
@@ -274,6 +323,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                         showCheckbox={true}
                                         showSelectedTags={true}
                                         hideInputValue={true}
+                                        showSelectAll={true}
                                     />
                                 </div>
                             </div>

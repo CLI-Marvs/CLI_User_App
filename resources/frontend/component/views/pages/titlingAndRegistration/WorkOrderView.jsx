@@ -88,7 +88,6 @@ const WorkOrderView = () => {
     const [workOrderFilterOption, setWorkOrderFilterOption] = useState("All");
     const workOrderFilterOptions = [
         { label: "All", value: "all" },
-        { label: "Unassigned", value: "unassigned" },
         { label: "In Progress", value: "Pending" },
         { label: "Complete", value: "complete" },
     ];

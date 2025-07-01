@@ -8,6 +8,7 @@ import apiService from "../../../../frontend/component/servicesApi/apiService";
 import {
     getNotesAndUpdatesData, 
     getCachedNotesAndUpdatesData,
+    invalidateNotesAndUpdatesData,
 } from "../../../component/layout/documentManagementPage/service/notesAndUpdatesDataService";
 import AddNoteModal from "./AddNoteModal";
 import FileViewerModal from "./FileViewerModal"; 
