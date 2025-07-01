@@ -177,14 +177,19 @@ export const ContextProvider = ({ children }) => {
 
     //Check if the user has permission to write
     const canWrite = (permissionName) => {
-        const inquiryPermissions =
-            userAccessData?.employeePermissions?.find(
-                (perm) => perm.name === permissionName
-            ) ||
-            userAccessData?.departmentPermissions?.find(
-                (perm) => perm.name === permissionName
-            );
-        return inquiryPermissions?.pivot?.can_write || false;
+        // Check for employee-specific permission first
+        const empPerm = userAccessData?.employeePermissions?.find(
+            (perm) => perm.name === permissionName
+        );
+        if (empPerm) {
+            // Always use employee permission if it exists
+            return empPerm.pivot?.can_write || false;
+        }
+        // Only check department if employee permission does not exist
+        const deptPerm = userAccessData?.departmentPermissions?.find(
+            (perm) => perm.name === permissionName
+        );
+        return deptPerm?.pivot?.can_write || false;
     };
 
     const getAllConcerns = async () => {
