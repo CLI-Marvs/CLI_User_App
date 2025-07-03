@@ -68,32 +68,47 @@ const WalkinPage = () => {
         }
 
         setSelectedItem(item);
-        const trimCounter = selectedDesk.name.replace(/\D/g, "");
-
-        try {
-            //Update the status
-            await walkinTransactionService.updateWalkinTransactionStatus({
-                walkin_transaction_id: item?.id,
-                status: "serving",
-            });
-
-            // Invalidate the query to refresh the list
-            queryClient.invalidateQueries({
-                queryKey: ["queueWalkinTransactions", page],
-            });
-
-            // Send to queue monitor - firebase
-            const payload = {
-                priority_number: item?.priority_number,
-                status: "serving",
-                counter: trimCounter,
+        if (selectedDesk.name) {
+            // Helper function to process desk name
+            const processCounter = (deskName) => {
+                // Check if name contains number pattern like "desk 1"
+                const numericMatch = deskName
+                    .toLowerCase()
+                    .match(/desk\s*(\d+)/);
+                if (numericMatch) {
+                    return numericMatch[1]; // Return just the number
+                }
+                // Return full name for descriptive desks like "Front Desk"
+                return deskName;
             };
-            queueService.updateQueueStatus(payload);
 
-            engageFormModalRef.current.showModal();
-        } catch (error) {
-            showToast("Failed to engage transaction.", "error");
-            console.error(error);
+            // If no number found, use the full desk name (e.g., "Front Desk")
+            const trimCounter = processCounter(selectedDesk.name);
+            try {
+                //Update the status
+                await walkinTransactionService.updateWalkinTransactionStatus({
+                    walkin_transaction_id: item?.id,
+                    status: "serving",
+                });
+
+                // Invalidate the query to refresh the list
+                queryClient.invalidateQueries({
+                    queryKey: ["queueWalkinTransactions", page],
+                });
+
+                // Send to queue monitor - firebase
+                const payload = {
+                    priority_number: item?.priority_number,
+                    status: "serving",
+                    counter: trimCounter,
+                };
+                queueService.updateQueueStatus(payload);
+
+                engageFormModalRef.current.showModal();
+            } catch (error) {
+                showToast("Failed to engage transaction.", "error");
+                console.error(error);
+            }
         }
     };
 
