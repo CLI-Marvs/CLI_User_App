@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ExecutiveDashboardController;
+use App\Http\Controllers\ProjectAssigneeController;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ConcernController;
@@ -153,7 +154,7 @@ Route::prefix('taken-out-accounts')->group(function () {
         Route::post('/work-order-types/reorder', [WorkOrderTypeSettingsController::class, 'reorderWorkOrderTypes']);
         Route::put('/work-order-types/{workOrderType}', [WorkOrderTypeSettingsController::class, 'updateWorkOrderType']);
         Route::delete('/work-order-types/{workOrderType}', [WorkOrderTypeSettingsController::class, 'destroyWorkOrderType']);
-
+        Route::post('/work-order-types', [WorkOrderTypeSettingsController::class, 'storeWorkOrderType']);
         // Submilestones
         Route::post('/submilestones', [WorkOrderTypeSettingsController::class, 'storeSubmilestone']);
         Route::put('/submilestones/{submilestone}', [WorkOrderTypeSettingsController::class, 'updateSubmilestone']);
@@ -164,7 +165,7 @@ Route::prefix('taken-out-accounts')->group(function () {
         Route::put('/checklists/{checklist}', [WorkOrderTypeSettingsController::class, 'updateChecklist']);
         Route::delete('/checklists/{checklist}', [WorkOrderTypeSettingsController::class, 'destroyChecklist']);
     });
-Route::post('/admin/settings/work-order-types', [WorkOrderTypeSettingsController::class, 'storeWorkOrderType']);
+
     /**
      * Dashboard
      */
@@ -174,6 +175,18 @@ Route::post('/admin/settings/work-order-types', [WorkOrderTypeSettingsController
     Route::put('/teams/{team}/members', [TeamController::class, 'updateMembers']);
     Route::apiResource('teams', TeamController::class);
     Route::get('/teams/{team}/get-members', [TeamController::class, 'members']);
+    //submilestone assignees
+    Route::get('/submilestones-with-assignees', [SubmilestoneController::class, 'indexWithAssignees']);
+    Route::get('/submilestones/{submilestone}/assignees', [SubmilestoneController::class, 'getAssignees']);
+    Route::put('/submilestones/{submilestone}/assignees', [SubmilestoneController::class, 'updateAssignees']);
+    Route::delete('/submilestones/{submilestone}/assignees/{employee}', [SubmilestoneController::class, 'removeAssignee']);
+    // Project Assignee Management
+    Route::get('/projects-with-assignees', [ProjectAssigneeController::class, 'index']);
+    Route::get('/projects/{projectName}/all-assignees', [ProjectAssigneeController::class, 'getAssigneesForProject'])->where('projectName', '.*');
+    Route::get('/projects/{projectName}/submilestones', [ProjectAssigneeController::class, 'getSubmilestonesForProject'])->where('projectName', '.*');
+    Route::get('/projects/{projectName}/milestones/{submilestone}/assignees', [ProjectAssigneeController::class, 'getAssignees'])->where('projectName', '.*');
+    Route::put('/projects/{projectName}/milestones/{submilestone}/assignees', [ProjectAssigneeController::class, 'updateAssignees'])->where('projectName', '.*');
+    Route::delete('/projects/{projectName}/milestones/{submilestone}/assignees/{employee}', [ProjectAssigneeController::class, 'removeAssignee'])->where('projectName', '.*');
 });
 
 //* For Sap 

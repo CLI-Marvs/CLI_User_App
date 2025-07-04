@@ -8,13 +8,12 @@ import WorkOrderCreatedModal from "./WorkOrderCreatedModal";
 
 const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     const [selectedAccounts, setSelectedAccounts] = useState([]);
-    const [selectedWorkOrderType, setSelectedWorkOrderType] = useState(null);
     const [selectedProject, setSelectedProject] = useState("");
-    const [selectedAssignee, setSelectedAssignee] = useState(null);
     const [dueDate, setDueDate] = useState("");
     const modalRef = useRef();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [workOrderId, setWorkOrderId] = useState(null);
+    const [projectAssignees, setProjectAssignees] = useState([]);
     const {
         accounts,
         assignee,
@@ -29,6 +28,22 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     }, []);
 
     useEffect(() => {
+        if (selectedProject) {
+            apiService
+                .get(`/projects/${encodeURIComponent(selectedProject)}/all-assignees`)
+                .then((res) => {
+                    const assigneesWithFullname = res.data.map((emp) => ({
+                        ...emp,
+                        fullname: emp.fullname || `${emp.firstname || ""} ${emp.lastname || ""}`.trim(),
+                    }));
+                    setProjectAssignees(assigneesWithFullname);
+                });
+        } else {
+            setProjectAssignees([]);
+        }
+    }, [selectedProject]);
+
+    useEffect(() => {
         const handleEscape = (event) => {
             if (event.key === "Escape" && isOpen) {
                 onClose();
@@ -41,12 +56,18 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     useEffect(() => {
         if (!isOpen) {
             setSelectedAccounts([]);
-            setSelectedWorkOrderType(null);
-            setSelectedAssignee(null);
             setSelectedProject("");
             setDueDate("");
         }
     }, [isOpen]);
+
+    const firstWorkOrderType = useMemo(() => {
+        if (!workOrderTypes || workOrderTypes.length === 0) {
+            return null;
+        }
+        // Assuming workOrderTypes are already sorted by sequence from the context/API
+        return workOrderTypes[0];
+    }, [workOrderTypes]);
 
     const projects = useMemo(() => {
         if (!accounts) return [];
@@ -73,109 +94,91 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             formattedDueDate = dueDate.toISOString().slice(0, 10);
         }
 
+        if (!projectAssignees || projectAssignees.length === 0) {
+            alert(
+                "The selected project has no assigned employees. Please assign employees to this project first."
+            );
+            return;
+        }
+
+        // Assign each account to a project assignee in ascending order (round-robin)
+        const accountAssignments = selectedAccounts.map((account, idx) => {
+            const assignee = projectAssignees[idx % projectAssignees.length];
+            return {
+                account_id: account.id,
+                employee_id: assignee.id,
+            };
+        });
+
+        if (accountAssignments.some((a) => !a.employee_id)) {
+            alert("One or more accounts could not be assigned to an employee.");
+            return;
+        }
+
         const formData = {
-            work_order: selectedWorkOrderType?.type_name,
+            work_order: firstWorkOrderType?.type_name,
             account_ids: selectedAccounts.map((account) => account.id),
-            assigned_to_user_id: selectedAssignee?.id,
-            work_order_type_id: selectedWorkOrderType?.id,
+            work_order_type_id: firstWorkOrderType?.id,
             work_order_deadline: formattedDueDate,
             status: "In Progress",
             description: "",
             priority: "Medium",
             created_by_user_id: user.id,
+            account_assignments: accountAssignments,
         };
-
+        console.log("Submitting work order:", formData);
         try {
             const response = await apiService.post(
                 "/work-orders/create-work-order",
                 formData
             );
 
-            if (
-                response.status === 201 ||
-                response.message === "Work order created successfully." ||
-                response.data?.message === "Work order created successfully."
-            ) {
+            if (response.status === 201) {
                 const newWorkOrderId = response.data.data.work_order_id;
                 setWorkOrderId(newWorkOrderId);
                 setIsModalOpen(true);
                 fetchWorkOrders();
 
-                const logData = {
-                    work_order_id: newWorkOrderId,
-                    log_type: selectedWorkOrderType?.type_name,
-                    log_message: `Work Order #${newWorkOrderId} created.`,
-                    account_ids: selectedAccounts.map((account) => account.id),
-                    created_by_user_id: user.id,
-                    assigned_user_id: selectedAssignee?.id,
-                };
+                if (response.status === 201) {
+                    const newWorkOrderId = response.data.data.work_order_id;
+                    setWorkOrderId(newWorkOrderId);
+                    setIsModalOpen(true);
+                    fetchWorkOrders();
 
+                    // LOG FEATURE: Create a log entry for the new work order
+                    const logData = {
+                        work_order_id: newWorkOrderId,
+                        log_type: firstWorkOrderType?.type_name,
+                        log_message: `Work Order #${newWorkOrderId} created.`,
+                        account_ids: selectedAccounts.map(
+                            (account) => account.id
+                        ),
+                        created_by_user_id: user.id,
+                    };
 
-                try {
-                    const logResponse = await apiService.post(
-                        "/work-order-logs",
-                        logData
-                    );
-
-                    if (
-                        logResponse.status === 201 ||
-                        logResponse.data?.message ===
-                            "Log created successfully."
-                    ) {
-                        console.log(
-                            "Work order log created successfully:",
-                            logResponse.data
+                    try {
+                        const logResponse = await apiService.post(
+                            "/work-order-logs",
+                            logData
                         );
-
-                        const logId = logResponse.data.data.id;
-
-                        if (selectedAccounts.length > 0) {
-                            try {
-                                const accountIds = selectedAccounts.map(
-                                    (account) => account.id
-                                );
-                                const attachResponse = await apiService.post(
-                                    "/post-account-log",
-                                    {
-                                        work_order_log_id: logId,
-                                        account_ids: accountIds,
-                                    }
-                                );
-
-                                if (
-                                    attachResponse.status === 200 ||
-                                    attachResponse.data?.message ===
-                                        "Accounts attached successfully."
-                                ) {
-                                    console.log(
-                                        "Accounts successfully linked to work order log."
-                                    );
-                                } else {
-                                    console.error(
-                                        "Failed to link accounts to log:",
-                                        attachResponse
-                                    );
-                                }
-                            } catch (attachError) {
-                                console.error(
-                                    "Error attaching accounts to log:",
-                                    attachError
-                                );
-                            }
-                        }
-                    } else {
-                        console.error(
-                            "Error creating work order log:",
-                            logResponse.error ||
-                                logResponse.message ||
+                        if (
+                            logResponse.status === 201 ||
+                            logResponse.data?.message ===
+                                "Log created successfully."
+                        ) {
+                            // Optionally handle log success
+                        } else {
+                            console.error(
+                                "Error creating work order log:",
                                 logResponse
+                            );
+                        }
+                    } catch (logError) {
+                        console.error(
+                            "Exception while creating work order log:",
+                            logError
                         );
                     }
-                } catch (logError) {
-                    console.error(
-                        "Exception while creating work order log:",
-                        logError.message || logError
-                    );
                 }
             } else {
                 console.error(
@@ -188,10 +191,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             }
         } catch (error) {
             console.error("Error creating work order:", error.message || error);
-        }      
+        }
 
-        const shouldTriggerModal = true;
-        return shouldTriggerModal;
+        return true; // Always return true, even if the work order creation fails
     };
 
     if (!isOpen) return null;
@@ -226,58 +228,6 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                         >
                             <div className="flex items-center mb-2 justify-between">
                                 <label
-                                    htmlFor="work-order-type"
-                                    className="block text-sm ml-4 font-semibold text-custom-bluegreen w-1/4"
-                                >
-                                    Work Order:
-                                </label>
-                                <div className="w-2/3">
-                                    <SearchableDropdown
-                                        options={workOrderTypes}
-                                        selectedOptions={
-                                            selectedWorkOrderType
-                                                ? [selectedWorkOrderType]
-                                                : []
-                                        }
-                                        setSelectedOptions={(
-                                            newOptionsArray
-                                        ) => {
-                                            if (newOptionsArray.length === 0) {
-                                                setSelectedWorkOrderType(null);
-                                            } else if (
-                                                newOptionsArray.length === 1
-                                            ) {
-                                                setSelectedWorkOrderType(
-                                                    newOptionsArray[0]
-                                                );
-                                            } else {
-                                                const newSelectedItem =
-                                                    newOptionsArray.find(
-                                                        (opt) =>
-                                                            opt.id !==
-                                                            selectedWorkOrderType?.id
-                                                    );
-                                                setSelectedWorkOrderType(
-                                                    newSelectedItem ||
-                                                        newOptionsArray[
-                                                            newOptionsArray.length -
-                                                                1
-                                                        ]
-                                                );
-                                            }
-                                        }}
-                                        optionKey="id"
-                                        optionLabel="type_name"
-                                        placeholder="Select Work Order Type"
-                                        showCheckbox={false}
-                                        showSelectedTags={false}
-                                        hideInputValue={false}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex items-center mb-2 justify-between">
-                                <label
                                     htmlFor="project-filter"
                                     className="block text-sm ml-4 font-semibold text-custom-bluegreen w-1/4"
                                 >
@@ -291,11 +241,18 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                         }))}
                                         selectedOptions={
                                             selectedProject
-                                                ? [{ id: selectedProject, name: selectedProject }]
+                                                ? [
+                                                      {
+                                                          id: selectedProject,
+                                                          name: selectedProject,
+                                                      },
+                                                  ]
                                                 : []
                                         }
                                         setSelectedOptions={(newOptions) => {
-                                            setSelectedProject(newOptions[0]?.name || "");
+                                            setSelectedProject(
+                                                newOptions[0]?.name || ""
+                                            );
                                             setSelectedAccounts([]);
                                         }}
                                         placeholder="Filter by Project"
@@ -328,62 +285,20 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                 </div>
                             </div>
 
-                            <div class="flex items-center mb-2 justify-between">
-                                <label
-                                    htmlFor="assignee"
-                                    className="block text-sm ml-4 font-semibold text-custom-bluegreen w-1/4"
-                                >
-                                    Assignee:
+                            <div className="flex items-start mb-2 justify-between">
+                                <label className="block text-sm ml-4 font-semibold text-custom-bluegreen w-1/4 pt-2">
+                                    Assigned To:
                                 </label>
                                 <div className="w-2/3">
-                                    <SearchableDropdown
-                                        options={assignee}
-                                        selectedOptions={
-                                            selectedAssignee
-                                                ? [selectedAssignee]
-                                                : []
-                                        }
-                                        setSelectedOptions={(
-                                            newOptionsArray
-                                        ) => {
-                                            if (newOptionsArray.length === 0) {
-                                                setSelectedAssignee(null);
-                                            } else if (
-                                                newOptionsArray.length === 1
-                                            ) {
-                                                setSelectedAssignee(
-                                                    newOptionsArray[0]
-                                                );
-                                            } else {
-                                                const newSelectedItem =
-                                                    newOptionsArray.find(
-                                                        (opt) =>
-                                                            opt.id !==
-                                                            selectedAssignee?.id
-                                                    );
-                                                if (newSelectedItem) {
-                                                    setSelectedAssignee(
-                                                        newSelectedItem
-                                                    );
-                                                } else {
-                                                    setSelectedAssignee(
-                                                        newOptionsArray[
-                                                            newOptionsArray.length -
-                                                                1
-                                                        ]
-                                                    );
-                                                }
-                                            }
-                                        }}
-                                        optionKey="id"
-                                        getOptionLabel={(a) =>
-                                            `${a.firstname} ${a.lastname}`
-                                        }
-                                        placeholder="Select Assignee"
-                                        showCheckbox={false}
-                                        showSelectedTags={false}
-                                        hideInputValue={false}
-                                    />
+                                    {projectAssignees.length > 0 ? (
+                                        <div className="flex flex-wrap gap-2 p-2 border border-gray-200 rounded-md bg-gray-50">
+                                            {projectAssignees.map(assignee => (
+                                                <span key={assignee.id} className="px-2 py-1 text-sm bg-blue-100 text-blue-800 rounded-full">{assignee.fullname}</span>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <p className="text-sm text-gray-500 pt-2">{selectedProject ? "Loading assignees..." : "Select a project to see assignees"}</p>
+                                    )}
                                 </div>
                             </div>
 

@@ -22,7 +22,7 @@ import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import { DndContext } from "@dnd-kit/core";
 import { SortableContext, useSortable, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import  TeamAssigneeComponent  from "../../layout/adminsettingpage/TeamAssignee"; 
+import ProjectAssigneeComponent from "./ProjectAssignee";
 
 const CrudModal = ({
     isOpen,
@@ -1253,7 +1253,7 @@ const AdminSettings = () => {
                         })}
                     </SortableContext>
                 </DndContext>
-                <TeamAssigneeComponent />
+                <ProjectAssigneeComponent />
             </div>
 
             {/* Modals */}

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\WorkOrderGroup;
 use App\Models\Employee;
+use App\Models\Team;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderType;
 use App\Models\WorkOrderLog;
@@ -54,14 +56,16 @@ class WorkOrderController extends Controller
         // Eager load relationships for efficiency, matching what the frontend component expects.
         // Note the use of selecting specific columns to reduce payload size.
         $query->with([
-            'assignee:id,fullname', // Frontend uses order.assignee.fullname
+            'assignees:id,fullname', // A work order can have multiple assignees
             'workOrderType:id,type_name', // Frontend uses order.work_order_type.type_name
-            'accounts:id,account_name', // Frontend uses order.accounts
+            'accounts:id,account_name,property_name', // Frontend uses order.accounts
             'createdBy:id,fullname' // The createdBy relationship points to Employee, which has fullname.
         ]);
 
-        // Filter by the logged-in user's ID directly from the authenticated user.
-        $query->where('assigned_to_user_id', $user->id);
+        // Filter for work orders where the authenticated user is one of the assignees.
+        $query->whereHas('assignees', function ($q) use ($user) {
+            $q->where('employee.id', $user->id);
+        });
 
         // Filter by status if provided in the request.
         if ($request->filled('status')) {
@@ -245,19 +249,57 @@ class WorkOrderController extends Controller
             'work_order' => 'required|string|max:50',
             'account_ids' => 'required|array',
             'account_ids.*' => 'integer|exists:taken_out_accounts,id',
-            'assigned_to_user_id' => 'required|integer|exists:employee,id',
             'work_order_type_id' => 'required|integer|exists:work_order_types,id',
             'work_order_deadline' => 'required|date',
+            'account_assignments' => 'required|array',
+            'account_assignments.*.account_id' => 'required|integer|exists:taken_out_accounts,id',
+            'account_assignments.*.employee_id' => 'required|integer|exists:employee,id',
         ]);
         Log::info('Validated data:', $validatedData);
+
+        // Find an existing unfinished work order for this account
+        $existingWorkOrder = WorkOrder::whereHas('accounts', function($q) use ($validatedData) {
+            $q->whereIn('taken_out_accounts.id', $validatedData['account_ids']);
+        })
+        ->where('status', '!=', 'Complete')
+        ->orderByDesc('created_at')
+        ->first();
+
+        if ($existingWorkOrder) {
+            // Reuse group and number
+            $workOrderGroupId = $existingWorkOrder->work_order_group_id;
+            $workOrderNumber = $existingWorkOrder->work_order_number;
+        } else {
+            // Create new group and number
+            $workOrderGroup = WorkOrderGroup::create();
+            $workOrderGroupId = $workOrderGroup->id;
+            $workOrderNumber = 'WO-' . str_pad($workOrderGroupId, 6, '0', STR_PAD_LEFT);
+        }
+
         $workOrder = WorkOrder::create([
             'work_order' => $validatedData['work_order'],
-            'assigned_to_user_id' => $validatedData['assigned_to_user_id'],
+            'work_order_number' => $workOrderNumber,
+            'work_order_group_id' => $workOrderGroupId,
             'work_order_type_id' => $validatedData['work_order_type_id'],
             'work_order_deadline' => $validatedData['work_order_deadline'],
             'created_by_user_id' => auth()->id(),
         ]);
+
         $workOrder->accounts()->sync($validatedData['account_ids']);
+
+        // Insert account-assignee mapping
+        if (!empty($validatedData['account_assignments'])) {
+            foreach ($validatedData['account_assignments'] as $assignment) {
+                \DB::table('work_order_account_assignee')->insert([
+                    'work_order_id' => $workOrder->work_order_id,
+                    'account_id' => $assignment['account_id'],
+                    'employee_id' => $assignment['employee_id'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
         return response()->json([
             'message' => 'Work order created successfully.',
             'data' => $workOrder->load('accounts')
@@ -268,7 +310,7 @@ class WorkOrderController extends Controller
         Log::info('Received request for work orders with query parameters:', $request->all());
         $query = WorkOrder::query();
         $query->with([
-            'assignee:id,fullname,firstname,lastname',
+            'team:id,name',
             'workOrderType:id,type_name',
             'accounts:id,account_name,contract_no,checklist_status',
             'updates' => function ($query) {
@@ -493,7 +535,7 @@ class WorkOrderController extends Controller
         }
 
         if ($workOrder->status !== 'Complete') {
-            $workOrder->status = 'Complete'; 
+            $workOrder->status = 'Complete';
             $workOrder->completed_at = Carbon::now();
             $workOrder->save();
 

@@ -4,19 +4,32 @@ import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Card, CardFooter, Typography } from "@material-tailwind/react";
 import ReactPaginate from "react-paginate";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardArrowDown } from "react-icons/md";
+import ProcessWorkOrderModal from "../../../layout/documentManagementPage/ProcessWorkOrderModal";
+import _ from "lodash";
+import AddFilesModal from "../../../layout/documentManagementPage/AddFilesModal";
+import WorkOrderGroupDetailsModal from "../../../layout/documentManagementPage/WorkOrderGroupDetailsModal";
 
 const MyWorkOrders = () => {
-    const [workOrders, setWorkOrders] = useState([]);
+    const [workOrderGroups, setWorkOrderGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [perPage, setPerPage] = useState(5);
+    const [perPage, setPerPage] = useState(6);
     const [totalWorkOrders, setTotalWorkOrders] = useState(0);
     const [statusFilter, setStatusFilter] = useState("");
     const [sortBy, setSortBy] = useState("created_at");
     const [sortOrder, setSortOrder] = useState("desc");
     const [viewMode, setViewMode] = useState("table");
+    const [isProcessModalOpen, setIsProcessModalOpen] = useState(false);
+    const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
+    const [isAddFilesModalOpen, setIsAddFilesModalOpen] = useState(false);
+    const [selectedAccountId, setSelectedAccountId] = useState(null);
+    const [selectedWorkOrderData, setSelectedWorkOrderData] = useState(null);
+    const [selectedStepName, setSelectedStepName] = useState("");
+    // State for the new details modal
+    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+    const [selectedGroupForDetails, setSelectedGroupForDetails] = useState(null);
 
     useEffect(() => {
         const fetchWorkOrders = async () => {
@@ -32,8 +45,22 @@ const MyWorkOrders = () => {
                         sortOrder: sortOrder,
                     },
                 });
-                console.log("Response:", response.data);
-                setWorkOrders(response.data.data);
+                console.log(response);
+                // Group by work_order_group_id
+                const grouped = Object.values(
+                    (response.data.data || []).reduce((acc, wo) => {
+                        const groupId = wo.work_order_group_id || "ungrouped";
+                        if (!acc[groupId]) {
+                            acc[groupId] = {
+                                id: groupId,
+                                work_orders: [],
+                            };
+                        }
+                        acc[groupId].work_orders.push(wo);
+                        return acc;
+                    }, {})
+                );
+                setWorkOrderGroups(grouped);
                 setTotalWorkOrders(response.data.total);
                 setLoading(false);
             } catch (err) {
@@ -62,11 +89,37 @@ const MyWorkOrders = () => {
         setCurrentPage(1);
     };
 
-    const handleWorkOnOrder = (workOrderId) => {
-        // Navigate to work order details/work page
-        // Replace with your actual navigation logic
-        console.log("Working on order:", workOrderId);
-        // Example: navigate(`/work-orders/${workOrderId}/work`);
+    const handleProcessClick = (order) => {
+        setSelectedWorkOrder(order);
+        setIsProcessModalOpen(true);
+    };
+
+    const handleCloseProcessModal = (didSubmit) => {
+        setIsProcessModalOpen(false);
+        setSelectedWorkOrder(null);
+        // If a submission was successful, refetch the work orders to show updated data
+        if (didSubmit) {
+            // A simple way to trigger a refetch
+            setCurrentPage(1);
+            // Or call a dedicated fetch function if you have one
+        }
+    };
+
+    const handleOpenDetailsModal = (group) => {
+        setSelectedGroupForDetails(group);
+        setIsDetailsModalOpen(true);
+    };
+
+    const handleCloseDetailsModal = () => {
+        setIsDetailsModalOpen(false);
+        setSelectedGroupForDetails(null);
+    };
+
+    const handleAddFiles = (accountId, workOrder, stepName) => {
+        setSelectedAccountId(accountId);
+        setSelectedWorkOrderData(workOrder);
+        setSelectedStepName(stepName);
+        setIsAddFilesModalOpen(true);
     };
 
     const TABLE_HEAD = [
@@ -227,207 +280,136 @@ const MyWorkOrders = () => {
 
     const renderGridView = () => (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {workOrders.map((order) => (
+            {workOrderGroups.map((group) => (
                 <div
-                    key={order.work_order_id}
-                    className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md hover:scale-[1.01] transition-all duration-150 flex flex-col h-[280px]"
+                    key={group.id}
+                    className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-150 flex flex-col"
                 >
                     {/* Header */}
                     <div
-                        className={`px-3 py-2 border-b border-gray-100 rounded-t-xl ${getHeaderBackgroundColor(
-                            order.status
-                        )}`}
+                        className={`px-3 py-2 border-b border-gray-100 rounded-t-xl bg-gray-50`}
                     >
                         <div className="flex items-center justify-between">
                             <h3 className="text-sm font-semibold text-gray-800">
-                                WO #{order.work_order_id}
+                                WO #{group.id}
                             </h3>
-                            <div className="flex items-center space-x-1">
-                                {getStatusBadge(order.status)}
-                                {getPriorityBadge(order.priority)}
-                            </div>
                         </div>
                     </div>
 
                     {/* Content */}
-                    <div className="px-3 py-2 text-xs flex-1 text-gray-700 space-y-1">
-                        <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-                            <InfoItem
-                                label="Type"
-                                value={order.work_order_type?.type_name}
-                            />
-                            <InfoItem
-                                label="Created By"
-                                value={order.created_by?.fullname}
-                            />
-                            <InfoItem
-                                label="Assignee"
-                                value={order.assignee?.fullname}
-                            />
-
-                            <InfoItem
-                                label="Deadline"
-                                value={
-                                    <span
-                                        className={`${
-                                            isOverdue(order.work_order_deadline)
-                                                ? "text-red-600 font-medium"
-                                                : "text-gray-800"
-                                        }`}
-                                    >
-                                        {formatDate(order.work_order_deadline)}
-                                        {isOverdue(order.work_order_deadline) &&
-                                            " (Overdue)"}
-                                    </span>
-                                }
-                            />
-                            <InfoItem
-                                label="Accounts"
-                                value={
-                                    order.accounts?.length
-                                        ? order.accounts
-                                              .map((acc) => acc.account_name)
-                                              .join(", ")
-                                        : "N/A"
-                                }
-                                className="col-span-2"
-                            />
-                        </div>
-                    </div>
-
-                    {/* Actions */}
-                    <div className="px-3 py-2 bg-gray-50 border-t border-gray-100 rounded-b-xl">
-                        <div className="flex justify-end">
-                            {canWorkOnOrder(order.status) && (
-                                <button
-                                    onClick={() =>
-                                        handleWorkOnOrder(order.work_order_id)
-                                    }
-                                    className="px-2.5 py-1 text-xs font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 transition"
-                                >
-                                    Process
-                                </button>
-                            )}
-                        </div>
+                    <div className="p-1 flex-1">
+                        <ul className="space-y-1">
+                           {(group.work_orders || []).map((order) => (
+                                <li key={order.work_order_id} className="bg-white rounded-lg p-2 border border-gray-100 hover:bg-indigo-50/50">
+                                    <div className="grid grid-cols-3 gap-x-2">
+                                        <div className="col-span-2">
+                                            <p className="text-xs font-medium text-gray-800 truncate">{order.work_order_type?.type_name}</p>
+                                            <p className="text-xs text-gray-500 truncate">
+                                                {order.accounts?.map(a => a.account_name).join(', ')}
+                                            </p>
+                                        </div>
+                                        <div className="flex items-center justify-end space-x-2">
+                                            {getStatusBadge(order.status)}
+                                            {canWorkOnOrder(order.status) && (
+                                                <button
+                                                    onClick={() => handleProcessClick(order)}
+                                                    className="px-2 py-0.5 text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
+                                                >
+                                                    Process
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 </div>
             ))}
         </div>
     );
 
-    // Compact InfoItem component
-    const InfoItem = ({ label, value, className = "" }) => (
-        <div className={className}>
-            <span className="block text-[11px] text-gray-500 font-medium">
-                {label}:
-            </span>
-            <p className="mt-0.5 text-[13px] text-gray-800 truncate">
-                {value || "N/A"}
-            </p>
-        </div>
-    );
-
-    const renderTableView = () => (
+ const renderTableView = () => {
+    return (
         <Card className="w-full overflow-hidden">
             <div className="overflow-x-auto">
                 <table className="w-full min-w-max table-auto text-left">
                     <thead>
                         <tr>
-                            {TABLE_HEAD.map(({ head }) => (
-                                <th
-                                    key={head}
-                                    className="border-b bg-[#175D5F] text-white h-[60px] p-4"
-                                >
-                                    <Typography
-                                        variant="small"
-                                        className="!font-semibold text-white leading-none"
-                                    >
-                                        {head}
-                                    </Typography>
-                                </th>
-                            ))}
+                            <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
+                                <Typography variant="small" className="!font-semibold text-white leading-none">
+                                    WO #
+                                </Typography>
+                            </th>
+                            <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
+                                <Typography variant="small" className="!font-semibold text-white leading-none">
+                                    Project
+                                </Typography>
+                            </th>
+                            <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
+                                <Typography variant="small" className="!font-semibold text-white leading-none">
+                                    Due Date
+                                </Typography>
+                            </th>
+                            <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
+                                <Typography variant="small" className="!font-semibold text-white leading-none">
+                                    Last Updated
+                                </Typography>
+                            </th>
+                            <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
+                                <Typography variant="small" className="!font-semibold text-white leading-none">
+                                    {/* Toggle/Expand */}
+                                </Typography>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
-                        {workOrders.map((order) => (
-                            <tr
-                                key={order.work_order_id}
-                                className="hover:bg-gray-50"
-                            >
-                                <td className="p-4 border-b border-gray-300">
-                                    <Typography
-                                        variant="small"
-                                        color="blue-gray"
-                                        className="font-bold"
+                        {workOrderGroups.map((group) => {
+                            // Find the latest work order in the group (by updated_at or sequence)
+                            const latestWO = (group.work_orders || [])
+                                .slice()
+                                .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0];
+
+                            return (
+                                <React.Fragment key={group.id}>
+                                    <tr
+                                        onClick={() => handleOpenDetailsModal(group)}
+                                        className="hover:bg-gray-100 cursor-pointer"
                                     >
-                                        WO #{order.work_order_id}
-                                    </Typography>
-                                    <Typography
-                                        variant="small"
-                                        color="blue-gray"
-                                        className="font-normal opacity-70"
-                                    >
-                                        {order.description || "No description"}
-                                    </Typography>
-                                </td>
-                                <td className="p-4 border-b border-gray-300">
-                                    <Typography
-                                        variant="small"
-                                        color="blue-gray"
-                                        className="font-normal"
-                                    >
-                                        {order.work_order_type?.type_name ||
-                                            "N/A"}
-                                    </Typography>
-                                </td>
-                                <td className="p-4 border-b border-gray-300">
-                                    {getStatusBadge(order.status)}
-                                </td>
-                                <td className="p-4 border-b border-gray-300">
-                                    {getPriorityBadge(order.priority)}
-                                </td>
-                                <td className="p-4 border-b border-gray-300">
-                                    <Typography
-                                        variant="small"
-                                        className={`font-normal ${
-                                            isOverdue(order.work_order_deadline)
-                                                ? "text-red-600 font-semibold"
-                                                : "text-gray-900"
-                                        }`}
-                                    >
-                                        {formatDate(order.work_order_deadline)}
-                                    </Typography>
-                                </td>
-                                <td className="p-4 border-b border-gray-300">
-                                    <Typography
-                                        variant="small"
-                                        color="blue-gray"
-                                        className="font-normal"
-                                    >
-                                        {order.created_by?.fullname || "N/A"}
-                                    </Typography>
-                                </td>
-                                <td className="p-4 border-b border-gray-300 text-right">
-                                    {canWorkOnOrder(order.status) && (
-                                        <button
-                                            onClick={() =>
-                                                handleWorkOnOrder(
-                                                    order.work_order_id
-                                                )
-                                            }
-                                            className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
-                                        >
-                                            Process
-                                        </button>
-                                    )}
-                                </td>
-                            </tr>
-                        ))}
+                                        <td className="p-4 border-b border-gray-300 font-bold">
+                                            WO #{String(group.id).padStart(6, "0")}
+                                        </td>
+                                        <td className="p-4 border-b border-gray-300 text-sm opacity-70">
+                                            {latestWO?.accounts && latestWO.accounts.length > 0
+                                                ? latestWO.accounts
+                                                    .map(acc => acc.property_name || acc.project || acc.account_name || "No Property")
+                                                    .filter((v, i, a) => a.indexOf(v) === i)
+                                                    .join(", ")
+                                                : "No Property"}
+                                        </td>
+                                        <td className="p-4 border-b border-gray-300">
+                                            {latestWO?.work_order_deadline
+                                                ? formatDate(latestWO.work_order_deadline)
+                                                : "N/A"}
+                                        </td>
+                                        <td className="p-4 border-b border-gray-300">
+                                            {latestWO?.updated_at
+                                                ? formatDate(latestWO.updated_at)
+                                                : "N/A"}
+                                        </td>
+                                        <td className="p-4 border-b border-gray-300">
+                                            <MdKeyboardArrowRight size={20} />
+                                        </td>
+                                    </tr>
+                                </React.Fragment>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>
         </Card>
     );
+};
 
     const renderPagination = () => (
         <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4 mt-4">
@@ -463,58 +445,8 @@ const MyWorkOrders = () => {
         </CardFooter>
     );
 
-    const showDevOverlay = false;
-
     return (
         <div className="min-h-screen bg-gray-50">
-            {showDevOverlay && (
-                <div className="absolute inset-0 z-40 flex items-center justify-center bg-gradient-to-br from-black/40 via-black/50 to-black/60 backdrop-blur-sm rounded-lg">
-                    <div className="relative bg-white rounded-2xl shadow-2xl px-10 py-8 text-center max-w-md mx-4 transform transition-all duration-300 hover:scale-105">
-                        <div className="flex justify-center mb-6">
-                            <div className="relative">
-                                <div className="absolute inset-0 bg-gradient-to-r gradient-btn5 rounded-full blur-lg opacity-30 animate-pulse"></div>
-                                <div className="relative bg-gradient-to-r gradient-btn5 p-3 rounded-full">
-                                    <svg
-                                        className="w-6 h-6 text-white"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
-                                        />
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Content */}
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-4">
-                            Under Development
-                        </h2>
-                        <p className="text-gray-600 mb-6 leading-relaxed">
-                            This section is currently under development.
-                        </p>
-
-                        {/* Progress bar */}
-                        <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-                            <div
-                                className="bg-gradient-to-r gradient-btn5 h-2 rounded-full animate-pulse transition-all duration-1000"
-                                style={{ width: "30%" }}
-                            ></div>
-                        </div>
-
-                        {/* Status text */}
-                        <p className="text-sm text-gray-500">30% Complete</p>
-
-                        {/* Subtle border glow */}
-                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 blur-sm -z-10"></div>
-                    </div>
-                </div>
-            )}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 {/* Header */}
                 <div className="mb-8">
@@ -639,7 +571,7 @@ const MyWorkOrders = () => {
                 </div>
 
                 {/* Loading State */}
-                {loading && workOrders.length === 0 && (
+                {loading && workOrderGroups.length === 0 && (
                     <SkeletonTheme baseColor="#f3f4f6" highlightColor="#e5e7eb">
                         {viewMode === "grid" ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -684,7 +616,7 @@ const MyWorkOrders = () => {
                 )}
 
                 {/* Empty State */}
-                {!loading && !error && workOrders.length === 0 && (
+                {!loading && !error && workOrderGroups.length === 0 && (
                     <div className="text-center py-12">
                         <svg
                             className="mx-auto h-12 w-12 text-gray-400"
@@ -711,7 +643,7 @@ const MyWorkOrders = () => {
                 )}
 
                 {/* Content */}
-                {workOrders.length > 0 && (
+                {workOrderGroups.length > 0 && (
                     <>
                         {viewMode === "grid"
                             ? renderGridView()
@@ -720,6 +652,29 @@ const MyWorkOrders = () => {
                         {renderPagination()}
                     </>
                 )}
+
+                <ProcessWorkOrderModal
+                    isOpen={isProcessModalOpen}
+                    onClose={handleCloseProcessModal}
+                    workOrder={selectedWorkOrder}
+                />
+                {isAddFilesModalOpen && selectedAccountId && selectedWorkOrderData && (
+                    <AddFilesModal
+                        selectedAccountId={selectedAccountId}
+                        onClose={() => setIsAddFilesModalOpen(false)}
+                        selectedWorkOrder={selectedStepName}
+                        workOrderData={selectedWorkOrderData}
+                    />
+                )}
+
+                <WorkOrderGroupDetailsModal
+                    isOpen={isDetailsModalOpen}
+                    onClose={handleCloseDetailsModal}
+                    group={selectedGroupForDetails}
+                    onAddFiles={handleAddFiles}
+                    getStatusBadge={getStatusBadge}
+                />
+
             </div>
         </div>
     );

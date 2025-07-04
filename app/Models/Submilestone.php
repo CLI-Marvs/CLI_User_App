@@ -19,4 +19,8 @@ class Submilestone extends Model
     {
         return $this->hasMany(Checklist::class, 'submilestone_id');
     }
+    public function assignees()
+    {
+        return $this->belongsToMany(Employee::class, 'employee_submilestone', 'submilestone_id', 'employee_id');
+    }
 }

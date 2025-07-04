@@ -18,7 +18,7 @@ class WorkOrder extends Model
     protected $fillable = [
         'work_order',
         'account_id',
-        'assigned_to_user_id',
+        'work_order_group_id',
         'work_order_type_id',
         'work_order_deadline',
         'status',
@@ -46,6 +46,11 @@ class WorkOrder extends Model
         $this->accounts()->sync($accountIds);
     }
 
+    public function group()
+    {
+        return $this->belongsTo(WorkOrderGroup::class, 'work_order_group_id');
+    }
+
     public function account()
     {
         return $this->belongsTo(TakenOutAccount::class, 'account_id', 'id');
@@ -56,7 +61,11 @@ class WorkOrder extends Model
         return $this->belongsTo(User::class, 'assigned_to_user_id', 'id');
     }
 
-    // Renamed from type() to workOrderType() to match usage in controller
+    public function assignees(): BelongsToMany
+    {
+        return $this->belongsToMany(Employee::class, 'work_order_account_assignee', 'work_order_id', 'employee_id')->distinct();
+    }
+
     public function workOrderType()
     {
         return $this->belongsTo(WorkOrderType::class, 'work_order_type_id', 'id'); // Assuming 'id' is PK in work_order_types
@@ -91,5 +100,13 @@ class WorkOrder extends Model
     public function createdBy()
     {
         return $this->belongsTo(Employee::class, 'created_by_user_id');
+    }
+    public function team()
+    {
+        return $this->belongsTo(Team::class, 'team_id');
+    }
+    public function subMilestones()
+    {
+        return $this->hasMany(SubMilestone::class, 'work_order_id', 'work_order_id');
     }
 }

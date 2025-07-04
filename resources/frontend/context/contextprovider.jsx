@@ -1371,9 +1371,7 @@ export const ContextProvider = ({ children }) => {
                 fetchDataReport,
                 dataSet,
                 pricingMasterLists,
-
                 paymentSchemes,
-
                 setPropertyId,
                 propertyFloors,
                 propertyId,
@@ -1451,7 +1449,6 @@ export const ContextProvider = ({ children }) => {
                 setTotalPagesCustomer,
                 isTotalPages,
                 setIsTotalPages,
-
                 selectedOption,
                 setSelectedOption,
                 setActiveDayButton,

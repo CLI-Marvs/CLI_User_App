@@ -13,7 +13,7 @@ import {
 } from "@material-tailwind/react";
 import FilterIcon from "../../../../../../public/Images/filterIcon.svg";
 import File from "../../../../../../public/Images/fileIcon.svg";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import View from "../../../../../../public/Images/view.svg";
 import Edit from "../../../../../../public/Images/Subtract.svg";
@@ -27,8 +27,7 @@ import EditWorkOrderModal from "../../../layout/documentManagementPage/EditWorkO
 import WorkOrderDeletionModal from "../../../layout/documentManagementPage/WorkOrderDeletionModal";
 
 const TABLE_HEAD = [
-    { head: "Work Order Details" },
-    { head: "Assignee" },
+    { head: "Work Order Group" },
     { head: "Status" },
     { head: "Date Created" },
     { head: "Due Date" },
@@ -98,32 +97,19 @@ const WorkOrderView = () => {
     const [filterStatus, setFilterStatus] = useState("");
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-    const [selectedWorkOrderForView, setSelectedWorkOrderForView] =
-        useState(null);
+    const [selectedWorkOrderForView, setSelectedWorkOrderForView] = useState(null);
     const toggleFilterBox = () => setIsFilterVisible((prev) => !prev);
     const [tableRowsData, setTableRowsData] = useState([]);
     const { workOrders, fetchWorkOrders } = useStateContext();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [selectedWorkOrderForEdit, setSelectedWorkOrderForEdit] =
-        useState(null);
+    const [selectedWorkOrderForEdit, setSelectedWorkOrderForEdit] = useState(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [selectedWorkOrderForDelete, setSelectedWorkOrderForDelete] =
-        useState(null);
+    const [selectedWorkOrderForDelete, setSelectedWorkOrderForDelete] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
-
-    // useEffect(() => {
-    //     const fetchWorkOrders = async () => {
-    //         try {
-    //             const response = await apiService.get(
-    //                 "/work-orders/get-work-orders"
-    //             );
-    //             setTableRows(response.data);
-    //         } catch (error) {
-    //             console.error("Failed to fetch work orders:", error);
-    //         }
-    //     };
-    //     fetchWorkOrders();
-    // }, []);
+    
+    // New state for expandable rows
+    const [expandedGroups, setExpandedGroups] = useState({});
+    const [expandedSteps, setExpandedSteps] = useState({});
 
     useEffect(() => {
         const TABLE_ROWS = async () => {
@@ -132,7 +118,7 @@ const WorkOrderView = () => {
             const data = workOrders.data.map((row) => ({
                 workOrder: row.work_order,
                 workOrderId: row.work_order_id,
-                assignee: row.assignee?.fullname || "Unassigned",
+                team: row.team?.name || "No Team Assigned",
                 status: row.status,
                 dateCreated: new Date(row.created_at)
                     .toISOString()
@@ -140,8 +126,12 @@ const WorkOrderView = () => {
                 dueDate: new Date(row.work_order_deadline)
                     .toISOString()
                     .slice(0, 10),
+                groupId: row.work_order_group_id,
+                steps: row.steps || [], // Assuming steps data exists
+                accounts: row.accounts || [], // Assuming accounts data exists
             }));
             setTableRowsData(data);
+            console.log("DATA", data);
         };
 
         TABLE_ROWS();
@@ -154,6 +144,8 @@ const WorkOrderView = () => {
         setWorkOrderFilterOption("All");
         setIsFilterVisible(false);
         setCurrentPage(1);
+        setExpandedGroups({});
+        setExpandedSteps({});
         fetchWorkOrders();
     };
 
@@ -172,47 +164,50 @@ const WorkOrderView = () => {
         };
     }, []);
 
-    const filteredRows = tableRowsData.filter((row) => {
-        const workOrderIdString = String(row.workOrderId || "");
-        const rowDateCreatedString = row.dateCreated || "";
-        const rowDueDateString = row.dueDate || "";
+    // Group work orders by group ID
+    const groupedByGroupId = workOrders?.data
+        ? workOrders.data.reduce((acc, wo) => {
+            const groupId = wo.work_order_group_id;
+            if (!acc[groupId]) {
+                acc[groupId] = {
+                    groupId,
+                    workOrders: [],
+                    // Get the earliest date and latest due date for the group
+                    dateCreated: new Date(wo.created_at).toISOString().slice(0, 10),
+                    dueDate: new Date(wo.work_order_deadline).toISOString().slice(0, 10),
+                    // You might want to determine group status based on individual work order statuses
+                    status: wo.status, // This might need logic to determine overall group status
+                };
+            }
+            acc[groupId].workOrders.push(wo);
+            return acc;
+        }, {})
+        : {};
 
+    // Filter groups based on search and filter criteria
+    const filteredGroups = Object.values(groupedByGroupId).filter((group) => {
+        const groupIdString = String(group.groupId || "");
+        
         const searchMatch =
             searchQuery === "" ||
-            row.workOrder.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            workOrderIdString
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-            row.assignee.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            rowDateCreatedString.includes(searchQuery) ||
-            rowDueDateString.includes(searchQuery);
-
-        const menuFilterMatch =
-            workOrderFilterOption === "All" ||
-            row.status.toLowerCase().replace(/\s+/g, "_") ===
-                workOrderFilterOption.toLowerCase().replace(/\s+/g, "_");
-
-        const assigneeFilterMatch =
-            filterAssignee === "" ||
-            row.assignee.toLowerCase().includes(filterAssignee.toLowerCase());
+            groupIdString.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            group.workOrders.some(wo => 
+                wo.work_order.toLowerCase().includes(searchQuery.toLowerCase())
+            );
 
         const statusFilterMatch =
-            filterStatus === "" ||
-            row.status.toLowerCase() === filterStatus.toLowerCase();
+            workOrderFilterOption === "All" ||
+            group.status.toLowerCase().replace(/\s+/g, "_") ===
+                workOrderFilterOption.toLowerCase().replace(/\s+/g, "_");
 
-        return (
-            searchMatch &&
-            menuFilterMatch &&
-            assigneeFilterMatch &&
-            statusFilterMatch
-        );
+        return searchMatch && statusFilterMatch;
     });
 
     const startIndex = (currentPage - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
-    const currentData = filteredRows.slice(startIndex, endIndex);
+    const currentData = filteredGroups.slice(startIndex, endIndex);
 
-    const totalPages = Math.max(1, Math.ceil(filteredRows.length / rowsPerPage));
+    const totalPages = Math.max(1, Math.ceil(filteredGroups.length / rowsPerPage));
 
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
@@ -227,10 +222,12 @@ const WorkOrderView = () => {
     const handleOpenCreateModal = () => {
         setIsCreateModalOpen(true);
     };
+
     const handleCloseCreateModal = () => {
         setIsCreateModalOpen(false);
         fetchWorkOrders();
     };
+
     const handleCreateWorkOrder = () => {
         console.log("New Work Order to be created:");
     };
@@ -252,7 +249,9 @@ const WorkOrderView = () => {
         setIsDeleting(true);
         try {
             await apiService.patch(`/work-orders/${workOrderId}/soft-delete`);
-            console.log(`Work order ${workOrderId} soft deleted successfully. Reason: ${reason}`);
+            console.log(
+                `Work order ${workOrderId} soft deleted successfully. Reason: ${reason}`
+            );
             fetchWorkOrders();
         } catch (error) {
             console.error("Failed to soft delete work order:", error);
@@ -265,7 +264,6 @@ const WorkOrderView = () => {
         } finally {
             setIsDeleting(false);
         }
-        console.log("Delete Triggered");
     };
 
     const handleOpenDeleteModal = (workOrderData) => {
@@ -277,19 +275,37 @@ const WorkOrderView = () => {
         setIsDeleteModalOpen(false);
         setSelectedWorkOrderForDelete(null);
     };
+
     const confirmDeleteHandler = async (reason) => {
         if (selectedWorkOrderForDelete) {
             try {
                 await handleSoftDeleteWorkOrder(
                     selectedWorkOrderForDelete.work_order_id ||
                         selectedWorkOrderForDelete.workOrderId,
-                    reason 
+                    reason
                 );
             } catch (error) {
-                console.log("confirmDeleteHandler: Deletion API call failed. Modal will not show confirmation.");
+                console.log(
+                    "confirmDeleteHandler: Deletion API call failed. Modal will not show confirmation."
+                );
             }
         }
     };
+
+    const toggleGroupExpansion = (groupId) => {
+        setExpandedGroups(prev => ({
+            ...prev,
+            [groupId]: !prev[groupId]
+        }));
+    };
+
+    const toggleStepExpansion = (stepId) => {
+        setExpandedSteps(prev => ({
+            ...prev,
+            [stepId]: !prev[stepId]
+        }));
+    };
+
     return (
         <div className="w-[calc(100%-20px)] mx-1 pt-1">
             <div className="relative flex items-center gap-1.5 mb-2 w-full">
@@ -355,7 +371,7 @@ const WorkOrderView = () => {
                         value={searchQuery}
                         onChange={handleSearchChange}
                         className="h-[47px] w-full bg-custom-grayF1 rounded-[10px] pl-9 pr-20 text-sm"
-                        placeholder="Search Work Order, ID, Assignee"
+                        placeholder="Search Work Order Group, ID"
                     />
 
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
@@ -380,26 +396,6 @@ const WorkOrderView = () => {
                                     Filter Work Orders
                                 </Typography>
                                 <div className="flex flex-col gap-4">
-                                    <div>
-                                        <label
-                                            htmlFor="filterAssignee"
-                                            className="text-sm font-medium text-gray-700 block mb-1"
-                                        >
-                                            Assignee
-                                        </label>
-                                        <input
-                                            id="filterAssignee"
-                                            type="text"
-                                            value={filterAssignee}
-                                            onChange={(e) =>
-                                                setFilterAssignee(
-                                                    e.target.value
-                                                )
-                                            }
-                                            placeholder="Enter assignee name"
-                                            className="w-full border border-gray-300 rounded-md p-2 text-sm outline-none focus:ring-1 focus:ring-custom-bluegreen focus:border-custom-bluegreen"
-                                        />
-                                    </div>
                                     <div>
                                         <label
                                             htmlFor="filterStatus"
@@ -449,6 +445,7 @@ const WorkOrderView = () => {
                     </button>
                 </div>
             </div>
+
             {isCreateModalOpen && (
                 <CreateWorkOrderModal
                     isOpen={isCreateModalOpen}
@@ -456,13 +453,14 @@ const WorkOrderView = () => {
                     onCreateWorkOrder={handleCreateWorkOrder}
                 />
             )}
+
             <ViewWorkOrderModal
                 isOpen={isViewModalOpen}
                 onClose={handleCloseViewModal}
                 workOrderData={selectedWorkOrderForView}
                 onInitiateDelete={(dataToDelete) => {
-                    handleCloseViewModal(); 
-                    handleOpenDeleteModal(dataToDelete); 
+                    handleCloseViewModal();
+                    handleOpenDeleteModal(dataToDelete);
                 }}
             />
 
@@ -470,15 +468,16 @@ const WorkOrderView = () => {
                 <WorkOrderDeletionModal
                     isOpen={isDeleteModalOpen}
                     onClose={handleCloseDeleteModal}
-                    onSubmit={confirmDeleteHandler} 
+                    onSubmit={confirmDeleteHandler}
                     workOrderName={
                         selectedWorkOrderForDelete.work_order ||
                         selectedWorkOrderForDelete.workOrder
-                    } 
-                    isDeleting={isDeleting} 
-                    workOrderDetails={selectedWorkOrderForDelete} 
+                    }
+                    isDeleting={isDeleting}
+                    workOrderDetails={selectedWorkOrderForDelete}
                 />
             )}
+
             <Card className="w-full overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="table-fixed w-full text-center">
@@ -500,31 +499,26 @@ const WorkOrderView = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {currentData.length > 0 ? (
-                                currentData.map((row, rowIndex) => (
-                                    <tr
-                                        key={rowIndex}
-                                        className="hover:bg-gray-100"
+                            {currentData.map((group) => (
+                                <React.Fragment key={group.groupId}>
+                                    {/* Main Group Row */}
+                                    <tr 
+                                        className="hover:bg-gray-50 cursor-pointer"
+                                        onClick={() => toggleGroupExpansion(group.groupId)}
                                     >
                                         <td className="p-4 border-b border-gray-300 text-left">
-                                            <Typography
-                                                variant="small"
-                                                className="font-semibold text-[#175D5F] pl-4"
-                                            >
-                                                {row.workOrder} <br />
-                                                <span className="font font-semibold text-[#067AC5] text-[16px]">
-                                                    {row.workOrderId}
-                                                </span>
-                                            </Typography>
-                                        </td>
-                                        <td className="p-4 border-b border-gray-300">
-                                            <div className="flex items-center justify-left gap-2 pl-5">
-                                                <ProfileIcon />
-                                                <Typography
-                                                    variant="small"
-                                                    className="font-normal text-base text-[#175D5F]"
-                                                >
-                                                    {row.assignee}
+                                            <div className="flex items-center gap-2">
+                                                {expandedGroups[group.groupId] ? (
+                                                    <ChevronDownIcon className="w-4 h-4 text-gray-600" />
+                                                ) : (
+                                                    <ChevronRightIcon className="w-4 h-4 text-gray-600" />
+                                                )}
+                                                <Typography variant="small" className="font-semibold text-[#175D5F]">
+                                                    WO-{String(group.groupId).padStart(6, "0")}
+                                                    <br />
+                                                    <span className="text-gray-600 text-sm">
+                                                        {group.workOrders.length} work order(s)
+                                                    </span>
                                                 </Typography>
                                             </div>
                                         </td>
@@ -532,12 +526,12 @@ const WorkOrderView = () => {
                                             <Typography
                                                 variant="small"
                                                 className={`font-semibold px-3 py-1 rounded-full inline-block w-28 ${
-                                                    row.status === "In Progress"
+                                                    group.status === "In Progress"
                                                         ? "bg-[#F5F4DC] text-[#175D5F]"
                                                         : "bg-green-200 text-green-800"
                                                 }`}
                                             >
-                                                {row.status}
+                                                {group.status}
                                             </Typography>
                                         </td>
                                         <td className="p-4 border-b border-gray-300 text-center">
@@ -545,7 +539,7 @@ const WorkOrderView = () => {
                                                 variant="small"
                                                 className="font-normal text-base text-[#175D5F]"
                                             >
-                                                {row.dateCreated}
+                                                {group.dateCreated}
                                             </Typography>
                                         </td>
                                         <td className="p-4 border-b border-gray-300 text-center">
@@ -553,45 +547,33 @@ const WorkOrderView = () => {
                                                 variant="small"
                                                 className="font-normal text-base text-[#175D5F]"
                                             >
-                                                {row.dueDate}
+                                                {group.dueDate}
                                             </Typography>
                                         </td>
                                         <td className="p-4 border-b border-gray-300 text-center">
                                             <div className="flex items-center justify-center gap-2">
                                                 <button
-                                                    onClick={() =>
-                                                        handleOpenViewModal(row)
-                                                    }
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleOpenViewModal(group.workOrders[0]);
+                                                    }}
                                                 >
                                                     <ViewIcon />
                                                 </button>
                                                 <button
-                                                    onClick={() => {
-                                                        const fullWorkOrder =
-                                                            workOrders?.data?.find(
-                                                                (wo) =>
-                                                                    wo.work_order_id ===
-                                                                    row.workOrderId
-                                                            );
-                                                        setSelectedWorkOrderForEdit(
-                                                            fullWorkOrder || row
-                                                        );
-                                                        setIsEditModalOpen(
-                                                            true
-                                                        );
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setSelectedWorkOrderForEdit(group.workOrders[0]);
+                                                        setIsEditModalOpen(true);
                                                     }}
                                                 >
                                                     <EditIcon />
                                                 </button>
                                                 <button
-                                                    onClick={() =>
-                                                        {
-                                                            const fullWorkOrder = workOrders?.data?.find(
-                                                                (wo) => wo.work_order_id === row.workOrderId
-                                                            );
-                                                            handleOpenDeleteModal(fullWorkOrder || row);
-                                                        }
-                                                    }
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleOpenDeleteModal(group.workOrders[0]);
+                                                    }}
                                                     disabled={isDeleting}
                                                 >
                                                     <DeleteIcon />
@@ -599,17 +581,104 @@ const WorkOrderView = () => {
                                             </div>
                                         </td>
                                     </tr>
-                                ))
-                            ) : (
-                                <tr>
-                                    <td
-                                        colSpan={TABLE_HEAD.length}
-                                        className="p-4 text-center text-gray-500"
-                                    >
-                                        No work orders found.
-                                    </td>
-                                </tr>
-                            )}
+
+                                    {/* Expanded Steps */}
+                                    {expandedGroups[group.groupId] && (
+                                        <tr>
+                                            <td colSpan={TABLE_HEAD.length} className="p-0 border-b border-gray-300">
+                                                <div className="bg-gray-50 p-4">
+                                                    {(() => {
+    // 1. Get all work orders (steps) in this group, with their type's sequence
+    const steps = group.workOrders.map(wo => ({
+        ...wo,
+        stepName: wo.work_order,
+        accounts: wo.accounts || [],
+        sequence: wo.work_order_type?.sequence ?? wo.sequence ?? 0, // ensure you have sequence, else fetch work_order_types and join
+    }));
+
+    // 2. Sort steps by sequence ASC (or as needed)
+    steps.sort((a, b) => a.sequence - b.sequence);
+
+    // 3. Build a map: accountId -> step with highest sequence
+    const accountLatestStep = {};
+    steps.forEach(step => {
+        step.accounts.forEach(acc => {
+            if (
+                !accountLatestStep[acc.id] ||
+                step.sequence > accountLatestStep[acc.id].sequence
+            ) {
+                accountLatestStep[acc.id] = { stepName: step.stepName, sequence: step.sequence };
+            }
+        });
+    });
+
+    // 4. Render steps, only show accounts whose latest step is this step
+    return steps.map((step, idx) => {
+        const filteredAccounts = step.accounts.filter(
+            acc => accountLatestStep[acc.id]?.stepName === step.stepName
+        );
+
+        return (
+            <div key={`${group.groupId}-${step.stepName}`} className="mb-2">
+                <div
+                    className="flex items-center gap-2 p-2 bg-white rounded cursor-pointer hover:bg-gray-100"
+                    onClick={() => toggleStepExpansion(`${group.groupId}-${step.stepName}`)}
+                >
+                    {expandedSteps[`${group.groupId}-${step.stepName}`] ? (
+                        <ChevronDownIcon className="w-4 h-4 text-gray-600" />
+                    ) : (
+                        <ChevronRightIcon className="w-4 h-4 text-gray-600" />
+                    )}
+                    <Typography variant="small" className="font-medium text-[#175D5F]">
+                    {step.stepName}
+                    </Typography>
+                    <div className="flex items-center gap-2 ml-auto">
+                        <ProfileIcon />
+                        <Typography variant="small" className="text-gray-600">
+                            {step.team?.name || step.team || "No Team Assigned"}
+                        </Typography>
+                    </div>
+                </div>
+
+                {/* Expanded Accounts */}
+                {expandedSteps[`${group.groupId}-${step.stepName}`] && (
+                    <div className="ml-6 mt-2 p-3 bg-blue-50 rounded">
+                        <Typography variant="small" className="font-semibold text-[#175D5F] mb-2">
+                            Accounts:
+                        </Typography>
+                        {filteredAccounts.length > 0 ? (
+                            <div className="space-y-1">
+                                {filteredAccounts.map((account, accountIndex) => (
+                                    <div key={account.id || accountIndex} className="flex items-center gap-2 p-2 bg-white rounded">
+                                        <ProfileIcon />
+                                        <Typography variant="small" className="text-gray-700">
+                                            {account.name || account.account_name || `Account ${accountIndex + 1}`}
+                                        </Typography>
+                                        {account.email && (
+                                            <Typography variant="small" className="text-gray-500">
+                                                ({account.email})
+                                            </Typography>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <Typography variant="small" className="text-gray-500 italic">
+                                No accounts assigned
+                            </Typography>
+                        )}
+                    </div>
+                )}
+            </div>
+        );
+    });
+})()}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </React.Fragment>
+                            ))}
                         </tbody>
                     </table>
                 </div>
