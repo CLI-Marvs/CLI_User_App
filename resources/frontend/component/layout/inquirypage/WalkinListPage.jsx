@@ -16,7 +16,7 @@ import Pagination from "@/component/layout/propertyandpricingpage/component/Pagi
 import { useCategories } from "@/component/layout/inquirypage/hooks/useCategories";
 import Skeleton from "@/component/Skeletons";
 
-const WalkinPage = () => {
+const WalkinListPage = () => {
     //States
     const [page, setPage] = useState(1);
     const PAGE_SIZE = 10;
@@ -259,4 +259,4 @@ const WalkinPage = () => {
     );
 };
 
-export default WalkinPage;
+export default WalkinListPage;

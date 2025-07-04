@@ -6,7 +6,6 @@ const WalkinTableRow = ({ item, onOpenModal }) => {
         <tr className="text-center">
             <td className="montserrat-medium">{item.priority_number}</td>
             <td className="montserrat-regular">{item.person_type?.name}</td>
-            <td className="montserrat-regular">{item.category?.name}</td>
 
             <td className="flex justify-center items-center">
                 <Button
