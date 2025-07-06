@@ -1,5 +1,5 @@
 import React from 'react'
-import { BarChart, Bar, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 
 const data = [
@@ -65,6 +65,49 @@ const SummaryVerticalBar = ({ question }) => {
     const extraPadding = 40;
     const chartHeight = optionsArray.length * (barHeight + gapHeight) + extraPadding;
     const sortedOptionsArray = [...optionsArray].sort((a, b) => a.id - b.id);
+
+
+    const CustomXAxisTick = ({ x, y, payload }) => {
+        const words = payload.value.split(' ');
+        const lines = [];
+        let line = '';
+
+        words.forEach((word) => {
+            if ((line + word).length > 30) {
+                lines.push(line.trim());
+                line = word + ' ';
+            } else {
+                line += word + ' ';
+            }
+        });
+        lines.push(line.trim());
+
+        return (
+            <g transform={`translate(${x}, ${y + 10})`}>
+                <text textAnchor="middle" fontSize={12} fill="#333">
+                    {lines.map((line, index) => (
+                        <tspan key={index} x={0} dy={index === 0 ? 0 : 14}>
+                            {line}
+                        </tspan>
+                    ))}
+                </text>
+            </g>
+        );
+    };
+
+    const CustomBarLabel = ({ x, y, width, value }) => (
+        <text
+            x={x + width / 2}
+            y={y - 6}
+            fill="#333"
+            fontSize={12}
+            textAnchor="middle"
+        >
+            {value}
+        </text>
+    );
+
+
     return (
         <div>
             <div className='flex flex-col gap-[16px] pt-[18px] px-[16px]'>
@@ -74,14 +117,32 @@ const SummaryVerticalBar = ({ question }) => {
                 <div>
                     <p>Acknowledgements: <span className='font-bold'>{question?.total_responses}</span></p>
                 </div>
-                <div className="max-w-[600px] w-full" style={{ height: chartHeight }}>
+                <div className=" w-full min-h-[360px] h-[250px]" >
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart width={150} height={40} data={sortedOptionsArray}>
-                            <Bar dataKey="value" fill="#8884d8" />
+                        <BarChart
+                            width={500}
+                            height={chartHeight}
+                            data={sortedOptionsArray}
+                            margin={{
+                                top: 16,
+                                right: 20,
+                                left: 20,
+                                bottom: 80
+                            }}
+                            barSize={72}
+                        >
+                            <XAxis
+                                dataKey="name"
+                                tick={<CustomXAxisTick />}
+                                interval={0}
+                                padding={{ left: 40, right: 40 }}
+                            />
+                            <YAxis />
+                            <CartesianGrid stroke="#ADC8F3" strokeDasharray="4 4" />
+                            <Bar  label={{ position: 'top', fill: '#333', fontSize: 16}} dataKey="value" fill="#378017" background={{ fill: '#E2F2D7' }} radius={[10, 10, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
-
             </div>
         </div>
     )
