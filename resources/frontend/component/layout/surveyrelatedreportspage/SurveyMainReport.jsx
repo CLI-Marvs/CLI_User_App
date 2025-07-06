@@ -61,11 +61,25 @@ const SurveyMainReport = () => {
     const extraPadding = 40;
     const chartHeight = surveysRespondents.length * (barHeight + gapHeight) + extraPadding;
 
+    const totals = [5, 4, 3, 2, 1].reduce((acc, rating) => {
+        acc[rating] = surveysRatings.reduce((sum, survey) => sum + (survey.ratings?.[rating] || 0), 0);
+        return acc;
+    }, {});
+
+    const grandTotal = [5, 4, 3, 2, 1].reduce((sum, rating) => sum + totals[rating], 0);
+
+    const average =
+        grandTotal > 0
+            ? (
+                ([5, 4, 3, 2, 1].reduce((sum, rating) => sum + (totals[rating] * rating), 0) / grandTotal).toFixed(2)
+            )
+            : '0.00';
+
     return (
         <div className='h-screen max-w-full bg-custom-grayFA'>
-            <div className='flex flex-col p-[30px]'>
+            <div className='flex flex-col p-[30px] gap-[20px]'>
                 <div>
-                    <div className='w-full h-[600px]'>
+                    <div className='w-full h-auto'>
                         <div>
                             <div className="flex flex-col gap-[16px] pt-[18px] px-[16px]">
                                 <div className="p-[10.9px] border-b-[0.5px] border-[#3A3A3A]">
@@ -136,7 +150,7 @@ const SurveyMainReport = () => {
                                                     }}
                                                 />
                                             </Bar>
-                                            
+
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </div>
@@ -164,19 +178,28 @@ const SurveyMainReport = () => {
                                                             {emojiMap[rating]}
                                                         </th>
                                                     ))}
+                                                    <th className="border-2 px-2 py-1 text-center">Total</th>
+                                                    <th className="border-2 px-2 py-1 text-center">Average</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {surveysRatings.map((survey, idx) => (
-                                                    <tr key={idx}>
-                                                        <td className="w-[350px] border-2 px-2 py-1 text-center">{survey.survey_title}</td>
-                                                        {[5, 4, 3, 2, 1].map(rating => (
-                                                            <td key={rating} className="border-2 px-2 py-1 text-center">
-                                                                {survey.ratings?.[rating] ?? 0}
-                                                            </td>
-                                                        ))}
-                                                    </tr>
-                                                ))}
+                                                {surveysRatings.map((survey, idx) => {
+                                                    const ratings = [5, 4, 3, 2, 1].map(r => survey.ratings?.[r] ?? 0);
+                                                    const total = ratings.reduce((sum, val) => sum + val, 0);
+                                                    const weightedSum = ratings.reduce((sum, val, i) => sum + val * (5 - i), 0);
+                                                    const average = total > 0 ? (weightedSum / total).toFixed(2) : '0.00';
+
+                                                    return (
+                                                        <tr key={idx}>
+                                                            <td className="w-[350px] border-2 px-2 py-1 text-center">{survey.survey_title}</td>
+                                                            {ratings.map((count, i) => (
+                                                                <td key={i} className="border-2 px-2 py-1 text-center">{count}</td>
+                                                            ))}
+                                                            <td className="border-2 px-2 py-1 text-center font-semibold">{total}</td>
+                                                            <td className="border-2 px-2 py-1 text-center font-semibold">{average}</td>
+                                                        </tr>
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
                                     </div>

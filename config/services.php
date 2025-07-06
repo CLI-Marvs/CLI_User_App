@@ -55,4 +55,10 @@ return [
 
     'app_url' => env('APP_URL'),
 
+
+    'paynamics' => [
+        'username' => env('PAYNAMICS_USERNAME'),
+        'password' => env('PAYNAMICS_PASSWORD'),
+    ],
+
 ];

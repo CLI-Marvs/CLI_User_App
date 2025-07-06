@@ -42,7 +42,7 @@ class SapController extends Controller
     {
         $client = new Client();
         try {
-            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zdevposcol/200/zdevposcol/zdevposcol', [
+            $response = $client->post('https://SAP-DEV.cebulandmasters.com:44304/sap/bc/srt/rfc/sap/zlast/200/zlast/zlast', [
                 'headers' => [
                     'Authorization' => 'Basic ' . base64_encode('KBELMONTE:Tomorrowbytogether2019!'),
                     'Content-Type' => 'application/soap+xml',
@@ -51,10 +51,9 @@ class SapController extends Controller
                 'timeout' => 14400,
             ]);
         } catch (\Exception $e) {
-            // Log error and response for further analysis
             \Log::error('SAP Request Error: ', [
                 'error' => $e->getMessage(),
-                'response' => $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response'
+               /*  'response' => $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response' */
             ]);
             return response()->json(['error' => 'SAP Server Error'], 500);
         }
@@ -81,19 +80,17 @@ class SapController extends Controller
     public function retrieveInvoicesFromSap(Request $request)
     {
         try {
-            \Log::info('Invoice posting request', [
-                'request' => $request->all()
-            ]);
-
-            $existingInvoice = Invoices::where('document_number', $request->input('D_BELNR'))
+            \Log::info("request all", $request->all());
+            $existingInvoice = Invoices::where('invoice_number', $request->input('D_BELNR'))
                 ->where('flow_type', $request->input('D_VBEWA'))
                 ->first();
             $attachment = $request->input('D_INVDOC');
             $fileLink = $this->uploadToFile($attachment);
+            $soaLink = $this->uploadToFile($request->input('D_SOADOC'));
             if (!$existingInvoice) {
                 $invoice = new Invoices();
                 $invoice->contract_number = $request->input('D_RECNNR');
-                $invoice->document_number = $request->input('D_BELNR');
+                $invoice->invoice_number = $request->input('D_BELNR');
                 $invoice->customer_bp_number = $request->input('D_KUNNR');
                 $invoice->sap_unique_id = $request->input('D_BUZEI');
                 $invoice->company_code = $request->input('D_BUKRS');
@@ -105,8 +102,9 @@ class SapController extends Controller
                 $invoice->post_date = $request->input('D_BUDAT');
                 $invoice->customer_name = $request->input('D_NAME1');
                 $invoice->flow_type = $request->input('D_VBEWA');
-                $invoice->invoice_status = $request->input('D_STATS');
+                $invoice->invoice_status = "Uncleared";
                 $invoice->invoice_link = $fileLink;
+                $invoice->soa_link = $soaLink;
                 /*  $invoice->invoice_status = $request->input('invoice_status'); 
                 $invoice->status = $request->input('status');
                 $invoice->posting_response = $request->input('posting_response'); */
@@ -342,7 +340,7 @@ class SapController extends Controller
     public function getTransactionByBankName()
     {
         try {
-            $listOfBanks = BankTransaction::distinct()->pluck('bank_name')->toArray();
+            $listOfBanks = BankTransaction::distinct()->pluck('destination_bank')->toArray();
             return response()->json($listOfBanks);
         } catch (\Exception $e) {
             return response()->json(['error' => 'An error occurred', 'message' => $e->getMessage()], 500);
@@ -361,40 +359,41 @@ class SapController extends Controller
         } */
     }
 
-
     public function postRecordsFromSap(Request $request)
     {
         try {
-            \Log::info('Posting Records from SAP', [
-                $request->all()
-            ]);
-
-            $idRef = $request->input('ID');
-            $invoiceIdRef = $request->input('INVID');
+            \Log::info('Post Records From Sap Kyla', [$request->all()]);
+            
+            $idRef = (int) $request->input('ID');
+            $invoiceIdRef = (int) $request->input('INVID');
+            
             $attachment = $request->input('file'); 
             $fileLink = $this->uploadToFile($attachment);
+            
             $transactionRef = BankTransaction::find($idRef);
             $invoiceRef = Invoices::find($invoiceIdRef);
-
-            $invoiceRef->invoice_status = "Posted";
-            $invoiceRef->save();
-
-            if (!$transactionRef) {
-                \Log::info('transaction not found');
+    
+            if ($invoiceRef) {
+                $invoiceRef->invoice_status = "Posted";
+                $invoiceRef->save();
             }
-
-            $transactionRef->document_number = $request->input('BELNR');
-            $transactionRef->company_code = $request->input('BUKRS');
-            $transactionRef->collection_receipt_link = $fileLink;
-            $transactionRef->status = "Posted";
-            $transactionRef->save();
-
+    
+            if (!$transactionRef) {
+                \Log::info('Transaction not found');
+            } else {
+                $transactionRef->document_number = $request->input('BELNR');
+                $transactionRef->collection_receipt_link = $fileLink;
+                $transactionRef->status = "Posted";
+                $transactionRef->save();
+            }
+    
             return response()->json(['message' => 'Records updated successfully']);
+            
         } catch (\Throwable $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
-
+    
 
     public function uploadToFile($attachment)
     {

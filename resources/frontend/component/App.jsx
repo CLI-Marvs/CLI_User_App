@@ -1,14 +1,14 @@
-import React, { Component, Suspense, lazy } from 'react';
+import React, { Component, Suspense, lazy } from "react";
 import {
     Outlet,
     RouterProvider,
     createBrowserRouter,
     Navigate,
 } from "react-router-dom";
-import { useEffect } from 'react';
+import { useEffect } from "react";
 import DasboardView from "../views/Dashboard/DasboardView";
-const LoginView = lazy(() => import("./views/pages/loginViews/LoginView"))
-import CLILoader from '../../../public/Images/CLI-Logo-Loading-Screen.gif';
+const LoginView = lazy(() => import("./views/pages/loginViews/LoginView"));
+import CLILoader from "../../../public/Images/CLI-Logo-Loading-Screen.gif";
 import "./layout/css/font.css";
 import "./layout/css/style.css";
 import Home from "./layout/Home";
@@ -21,6 +21,7 @@ import CallBackView from "./views/pages/callback/CallBackView";
 import ReportViews from "./views/pages/raiseaconcernViews/ReportViews";
 import PropertyAndPricingLayout from "./views/layout/PropertyAndPricingLayout";
 import PricingMasterListView from "./views/pages/PropertyAndPricingViews/PricingMasterListView";
+import WorkFlowNotificationView from "./views/pages/PropertyAndPricingViews/WorkFlowNotificationView";
 import BasicPricingView from "./views/pages/PropertyAndPricingViews/BasicPricingView";
 import PaymentSchemeView from "./views/pages/PropertyAndPricingViews/PaymentSchemeView";
 import PriceVersioningView from "./views/pages/PropertyAndPricingViews/PriceVersioningView";
@@ -34,27 +35,57 @@ import PaymentMainView from "./views/pages/paymentViews/PaymentMainView";
 import PaymentSectionView from "./views/pages/paymentViews/PaymentSectionView";
 import MainComponent from "./layout/chatComponent/MainComponent";
 import AdminSettingView from "./views/pages/adminsettingsViews/AdminSettingView";
-import TransactionView from "./views/pages/transactionViews/TransactionView";
-import TransactionSidebar from "./views/pages/transactionViews/TransactionSidebar";
 import BankStatementView from "./views/pages/transactionViews/BankStatementView";
 import AutoAssignView from "./views/pages/raiseaconcernViews/AutoAssignView";
 import UserRightsAndPermissionsView from "./views/pages/userrightsandpermissionsViews/UserRightsAndPermissionsView";
-import FallbackLoader from './FallbackLoader';
+import PropertySettingViews from "@/component/views/pages/propertySettingViews/propertySettingView";
+import FallbackLoader from "./FallbackLoader";
 import PreloadWrapper from "./PreloadWrapper";
-import BannerSettingsView from './views/pages/bannersettingsViews/BannerSettingsView';
-import CrsSettingsSidebar from './layout/mainComponent/sidebars/CrsSettingsSidebar';
-import VersionLogsView from './views/pages/raiseaconcernViews/VersionLogsView';
-import SurveyReportsView from './views/pages/surveyrelatedreportsViews/SurveyReportsView';
-import SurveyFormView from './views/pages/surveyrelatedreportsViews/SurveyFormView';
-import SurveyReviewView from './views/pages/surveyrelatedreportsViews/SurveyReviewView';
-import SurveyMainView from './views/pages/surveyrelatedreportsViews/SurveyMainView';
-import SurveyMainReportView from './views/pages/surveyrelatedreportsViews/SurveyMainReportView';
-import SurveySummaryView from './views/pages/surveyrelatedreportsViews/SurveySummaryView';
-// PrivateRoute component to check authentication
-const PrivateRoute = () => {
+import BannerSettingsView from "./views/pages/bannersettingsViews/BannerSettingsView";
+import CrsSettingsSidebar from "./layout/mainComponent/sidebars/CrsSettingsSidebar";
+import VersionLogsView from "./views/pages/raiseaconcernViews/VersionLogsView";
+import { useStateContext } from "../context/contextprovider";
+import { ALLOWED_EMPLOYEES_CRS } from "../constant/data/allowedEmployeesCRS";
+import CustomerMasterListView from "@/component/views/pages/transactionViews/CustomerMasterListView";
+import CustomerDetailsView from "@/component/views/pages/transactionViews/CustomerDetailsView";
+import TransactionSidebar from "./layout/transaction/TransactionSidebar";
+import InvoicesView from "@/component/views/pages/transactionViews/InvoicesView";
+import TransactionView from "./views/pages/transactionViews/TransactionView";
+import AutoPostingView from "./views/pages/transactionViews/AutoPostingView";
+import ErrorPage from "@/component/ErrorElement/ErrorPage";
+import MarkupSettingsView from "@/component/views/pages/transactionViews/MarkupSettingsView";
+import ReportsView from "./views/pages/transactionViews/ReportsView";
+import SurveyReportsView from "./views/pages/surveyrelatedreportsViews/SurveyReportsView";
+import SurveyMainView from "./views/pages/surveyrelatedreportsViews/SurveyMainView";
+import SurveyReviewView from "./views/pages/surveyrelatedreportsViews/SurveyReviewView";
+import SurveyMainReportView from "./views/pages/surveyrelatedreportsViews/SurveyMainReportView";
+import SurveySummaryView from "./views/pages/surveyrelatedreportsViews/SurveySummaryView";
+
+// PrivateRoute component to check authentication and permissions( department and employee )
+const PrivateRoute = ({ requiredPermission, children }) => {
+    const { hasPermission } = useStateContext();
+
+    // Check for authentication token
     const authToken = localStorage.getItem("authToken");
-    return authToken ? <Outlet /> : <Navigate to="/" replace />;
+
+    // Redirect to login page if not authenticated
+    if (!authToken) {
+        return <Navigate to="/" replace />;
+    }
+
+    // Check for required permissions
+    if (requiredPermission && !hasPermission(requiredPermission)) {
+        return (
+            <div className="w-full h-full flex justify-center   text-custom-bluegreen text-lg">
+                You do not have permission to view this page.
+            </div>
+        );
+    }
+
+    // Render the child routes if authentication and permission checks pass
+    return children ? children : <Outlet />;
 };
+
 const App = () => {
     /**
      * Implement storage event listener to handle authToken changes across tabs
@@ -77,28 +108,14 @@ const App = () => {
         return (
             <div className="bg-white relative max-h-screen flex flex-col h-screen">
                 <Navbar />
-                <div className="relative flex flex-1 overflow-hidden z-50">
+                <div className="flex flex-1 overflow-hidden z-30">
                     <Sidebar />
-                    <div className="flex-1 overflow-y-auto bg-custom-grayFA z-10">
+                    <div className="flex-1 overflow-y-auto bg-custom-grayFA z-20">
                         <Outlet />
                     </div>
                 </div>
             </div>
         );
-
-        /*  return (
-            <>
-                <div className="bg-white relative max-h-screen flex flex-col">
-                    <Navbar/>
-                    <div className="flex flex-1 overflow-hidden">
-                        <Sidebar/>
-                        <div className="flex-1 overflow-y-auto ">
-                            <Outlet />
-                        </div>
-                    </div>
-                </div>
-            </>
-        ); */
     };
 
     const SecondLayout = () => {
@@ -116,151 +133,28 @@ const App = () => {
         );
     };
 
-    // const router = createBrowserRouter([
-    //     {
-    //         path: "/",
-    //         element: <LoginView />,
-    //     },
-    //     {
-    //         path: "/login",
-    //         element: <LoginView />,
-    //     },
+    const TransactionLayout = () => {
+        return (
+            <>
+                <div className="flex relative overflow-x-hidden min-h-screen bg-custom-grayFA">
+                    <div className="w-[210px] h-full fixed z-10">
+                        <TransactionSidebar />
+                    </div>
 
-    //     {
-    //         path: "/callback",
-    //         element: <CallBackView />,
-    //     },
-    //     {
-    //         path: "/chatbox",
-    //         element: <MainComponent />,
-    //     },
-    //     {
-    //         path: "/",
-    //         element: <Layout />,
-    //         children: [
-    //             {
-    //                 path: "home",
-    //                 element: <Home />,
-    //             },
-    //             {
-    //                 path: "notification",
-    //                 element: <NotificationView />,
-    //             },
-    //             {
-    //                 path: "transactionmanagement/invoices",
-    //                 element: <TransactionView />,
-    //             },
-    //             {
-    //                 path: "transactionmanagement/transactionrecords",
-    //                 element: <BankStatementView />,
-    //             },
-    //             /*  {
-    //                 path: "transaction",
-    //                 element: <SecondLayout />,
-    //                 children: [
-    //                     {
-    //                         path: "invoices",
-    //                         element: <TransactionView/>,
-    //                     },
-    //                     {
-    //                         path: "bankstatements",
-    //                         element: <BankStatementView/>,
-    //                     },
-    //                 ],
+                    <div className="ml-[200px] flex-1 overflow-y-auto">
+                        <Outlet />
+                    </div>
+                </div>
+            </>
+        );
+    };
 
-    //             }, */
-    //             {
-    //                 path: "inquirymanagement/inquirylist",
-    //                 element: <InquiryListView />,
-    //             },
-    //             {
-    //                 path: "inquirymanagement/thread/:id",
-    //                 element: <InquiryThreadView />,
-    //             },
-    //             {
-    //                 path: "inquirymanagement/report",
-    //                 element: <ReportViews />,
-    //             },
-
-    //             {
-    //                 path: "propertyandpricing",
-    //                 element: <PropertyAndPricingLayout />,
-    //                 children: [
-    //                     {
-    //                         path: "pricingmasterlist",
-    //                         element: <PricingMasterListView />,
-    //                     },
-    //                     {
-    //                         path: "basicpricing/:id",
-    //                         element: <BasicPricingView />,
-    //                     },
-    //                     {
-    //                         path: "paymentscheme",
-    //                         element: <PaymentSchemeView />,
-    //                     },
-    //                     {
-    //                         path: "priceversioning",
-    //                         element: <PriceVersioningView />,
-    //                     },
-    //                     {
-    //                         path: "promotionalPricing",
-    //                         element: <PromotionalPricingView />,
-    //                     },
-    //                 ],
-    //             },
-    //             {
-    //                 path: "salesmanagement",
-    //                 element: <SalesManagementLayout />,
-    //                 children: [
-    //                     {
-    //                         path: "reservationlist",
-    //                         element: <ReservationListView />,
-    //                     },
-    //                     {
-    //                         path: "reservationpage",
-    //                         element: <ReservationPageView />,
-    //                     },
-    //                 ],
-    //             },
-    //             {
-    //                 path: "adminsettings",
-    //                 element: <AdminSettingView />,
-    //             },
-    //         ],
-    //     },
-    //     {
-    //         path: "/paymentmethod",
-    //         element: <PaymentMainView />,
-    //     },
-    //     {
-    //         path: "/file-viewer/attachment/:id",
-    //         element: <FileViewer />,
-    //     },
-    //     {
-    //         path: "/paymentmethod/payonlinenow",
-    //         element: <PaymentSectionView />,
-    //     },
-
-    // ]);
-    // router.beforeEach((to, from, next) => {
-    //     if (to.meta.requiresAuth && !localStorage.getItem("authToken")) {
-    //         router.replace({ name: "/" });
-    //     } else if (to.meta.requiresAuth && localStorage.getItem("authToken")) {
-    //         UserApi.check_authorization().then((callback) => {
-    //             if (callback.result) next();
-    //         });
-    //     } else {
-    //         next();
-    //     }
-    // });
     const router = createBrowserRouter([
         {
             path: "/",
             element: (
                 <Suspense fallback={<FallbackLoader />}>
-                    <PreloadWrapper resources={[
-                        "/Images/Imagebg.webp",
-                    ]}>
+                    <PreloadWrapper resources={["/Images/Imagebg.webp"]}>
                         <LoginView />
                     </PreloadWrapper>
                 </Suspense>
@@ -270,9 +164,7 @@ const App = () => {
             path: "/login",
             element: (
                 <Suspense fallback={<FallbackLoader />}>
-                    <PreloadWrapper resources={[
-                        "/Images/Imagebg.webp",
-                    ]}>
+                    <PreloadWrapper resources={["/Images/Imagebg.webp"]}>
                         <LoginView />
                     </PreloadWrapper>
                 </Suspense>
@@ -300,115 +192,180 @@ const App = () => {
                         },
                         {
                             path: "notification",
-                            element: <NotificationView />,
-                        },
-                        {
-                            path: "transactionmanagement/invoices",
-                            element: <TransactionView />,
-                        },
-                        {
-                            path: "transactionmanagement/transactionrecords",
-                            element: <BankStatementView />,
-                        },
-                        {
-                            path: "inquirymanagement/inquirylist",
-                            element: <InquiryListView />,
-                        },
-                        {
-                            path: "inquirymanagement/inquirylist/:filter",
-                            element: <InquiryListView />,
-                        },
-                        {
-                            path: "inquirymanagement/thread/:id",
-                            element: <InquiryThreadView />,
-                        },
-                        {
-                            path: "inquirymanagement/report/inquiries",
-                            element: <ReportViews />,
-                        },
-                        {
-                            path: "inquirymanagement/report/survey",
-                            element: <SurveyMainReportView />,
-                        },
-                        {
-                            path: "inquirymanagement/report/survey/:id?",
-                            element: <SurveySummaryView />,
-                        },
-                        {
-                            path: "inquirymanagement/autoassign",
-                            element: <AutoAssignView />,
-                        },
-                        {
-                            path: "inquirymanagement/settings",
-                            element: <SecondLayout />,
+                            element: (
+                                <PrivateRoute requiredPermission="Notification" />
+                            ),
                             children: [
+                                { path: "", element: <NotificationView /> },
+                            ],
+                        },
+                        {
+                            path: "transaction",
+                            element: (
+                                <PrivateRoute requiredPermission="Transaction Management" />
+                            ),
+                            children: [
+                                {
+                                    path: "bank-monitoring",
+                                    element: <TransactionLayout />,
+                                    children: [
+                                        {
+                                            path: "bank-statements",
+                                            element: <BankStatementView />,
+                                        },
+                                    ],
+                                },
+                                {
+                                    path: "receivables",
+                                    element: <TransactionLayout />,
+                                    children: [
+                                        {
+                                            path: "invoices",
+                                            element: <InvoicesView />,
+                                        },
+                                        {
+                                            path: "transactions",
+                                            element: <TransactionView />,
+                                        },
+                                        {
+                                            path: "posting",
+                                            element: <AutoPostingView />,
+                                        },
+                                        {
+                                            path: "reports",
+                                            element: <ReportsView />,
+                                        },
+                                    ],
+                                },
+                                {
+                                    path: "settings",
+                                    element: <TransactionLayout />,
+                                    children: [
+                                        {
+                                            path: "markup",
+                                            element: <MarkupSettingsView />,
+                                        },
+                                    ],
+                                },
+                            ],
+                        },
+                        {
+                            path: "inquirymanagement",
+                            element: (
+                                <PrivateRoute requiredPermission="Inquiry Management" />
+                            ),
+                            children: [
+                                {
+                                    path: "inquirylist",
+                                    element: <InquiryListView />,
+                                },
+                                {
+                                    path: "inquirylist/:filter",
+                                    element: <InquiryListView />,
+                                },
+                                {
+                                    path: "thread/:id",
+                                    element: <InquiryThreadView />,
+                                },
+                                {
+                                    path: "report/inquiries",
+                                    element: <ReportViews />,
+                                },
+                                {
+                                    path: "report/survey",
+                                    element: <SurveyMainReportView />,
+                                },
+                                {
+                                    path: "report/survey/:id?",
+                                    element: <SurveySummaryView />,
+                                },
                                 {
                                     path: "autoassign",
                                     element: <AutoAssignView />,
                                 },
                                 {
-                                    path: "surveysettings",
-                                    element: <SurveyReportsView />,
-                                },
-                                {
-                                    path: "surveysettings/surveyform",
-                                    element: <SurveyMainView />,
-                                },
-                                {
-                                    path: "surveysettings/surveyform/:id?",
-                                    element: <SurveyMainView />,
-                                },
-                                {
-                                    path: "surveysettings/surveyreview",
-                                    element: <SurveyReviewView />,
-                                },
-                                {
-                                    path: "bannersettings",
-                                    element: <BannerSettingsView />,
-                                },
-                                {
-                                    path: "versionlogs",
-                                    element: <VersionLogsView/>,
+                                    path: "settings",
+                                    element: <SecondLayout />,
+                                    children: [
+                                        {
+                                            path: "autoassign",
+                                            element: <AutoAssignView />,
+                                        },
+                                        {
+                                            path: "surveysettings",
+                                            element: <SurveyReportsView />,
+                                        },
+                                        {
+                                            path: "surveysettings/surveyform",
+                                            element: <SurveyMainView />,
+                                        },
+                                        {
+                                            path: "surveysettings/surveyform/:id?",
+                                            element: <SurveyMainView />,
+                                        },
+                                        {
+                                            path: "surveysettings/surveyreview",
+                                            element: <SurveyReviewView />,
+                                        },
+                                        {
+                                            path: "bannersettings",
+                                            element: <BannerSettingsView />,
+                                        },
+                                        {
+                                            path: "versionlogs",
+                                            element: <VersionLogsView/>,
+                                        },
+                                    ],
                                 },
                             ],
                         },
                         {
-                            path: "propertyandpricing",
-                            element: <PropertyAndPricingLayout />,
+                            path: "property-pricing",
+                            element: (
+                                <PrivateRoute requiredPermission="Property Pricing">
+                                    <PropertyAndPricingLayout />
+                                </PrivateRoute>
+                            ),
                             children: [
                                 {
-                                    path: "pricingmasterlist",
+                                    path: "workflow-notification",
+                                    element: <WorkFlowNotificationView />,
+                                },
+                                {
+                                    path: "master-lists",
                                     element: <PricingMasterListView />,
                                 },
                                 {
-                                    path: "basicpricing/:id",
+                                    path: "basic-pricing/:id",
                                     element: <BasicPricingView />,
                                 },
                                 {
-                                    path: "paymentscheme",
+                                    path: "payment-scheme",
                                     element: <PaymentSchemeView />,
                                 },
                                 {
-                                    path: "priceversioning",
+                                    path: "price-versioning",
                                     element: <PriceVersioningView />,
                                 },
                                 {
-                                    path: "promotionalPricing",
+                                    path: "promotional-pricing",
                                     element: <PromotionalPricingView />,
                                 },
                             ],
                         },
                         {
-                            path: "salesmanagement",
-                            element: <SalesManagementLayout />,
+                            path: "sales",
+                            element: (
+                                <PrivateRoute requiredPermission="Sales Management" />
+                            ),
                             children: [
                                 {
-                                    path: "reservationlist",
-                                    element: <ReservationListView />,
+                                    path: "customer",
+                                    element: <CustomerMasterListView />,
                                 },
                                 {
-                                    path: "reservationpage",
-                                    element: <ReservationPageView />,
+                                    path: "details/:id",
+                                    element: <CustomerDetailsView />,
                                 },
                             ],
                         },
@@ -417,8 +374,22 @@ const App = () => {
                             element: <AdminSettingView />,
                         },
                         {
-                            path: "superadmin/userrightsandpermissions",
-                            element: <UserRightsAndPermissionsView />,
+                            path: "super-admin",
+                            // element: (
+                            //     <PrivateRoute requiredPermission="Super Admin">
+                            //         <SuperAdminLayout />
+                            //     </PrivateRoute>
+                            // ),
+                            children: [
+                                {
+                                    path: "user-rights-and-permissions",
+                                    element: <UserRightsAndPermissionsView />,
+                                },
+                                {
+                                    path: "property-settings",
+                                    element: <PropertySettingViews />,
+                                },
+                            ],
                         },
                     ],
                 },
@@ -441,6 +412,10 @@ const App = () => {
         {
             path: "/paymentmethod/payonlinenow",
             element: <PaymentSectionView />,
+        },
+        {
+            path: "*",
+            element: <ErrorPage />,
         },
     ]);
 

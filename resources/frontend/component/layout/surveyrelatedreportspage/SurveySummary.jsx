@@ -22,7 +22,7 @@ const SurveySummary = () => {
             .get(`/survey-summary/${surveyId}`)
             .then((response) => {
                 setSurveySummary(response.data);
-
+                console.log(response.data);
             })
             .catch((error) => {
                 console.error('Error fetching survey summary:', error);

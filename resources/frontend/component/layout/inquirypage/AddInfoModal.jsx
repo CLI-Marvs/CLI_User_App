@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
-import Alert from "../mainComponent/Alert";
+import Alert from "../../Alert";
 import { showToast } from "../../../util/toastUtil";
 import { PREDEFINED_USER_TYPES } from "../../../constant/data/preDefinedUserTypes";
 
@@ -53,6 +53,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         isUserTypeChange,
         setIsUserTypeChange,
         categories,
+        getNavBarData,
     } = useStateContext();
 
     const [message, setMessage] = useState(dataConcern.admin_remarks || "");
@@ -282,7 +283,11 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             setIsUserTypeChange(false);
 
             onupdate({ ...dataToUpdate, dataConcern });
-            await Promise.all([getInquiryLogs(dataConcern.ticket_id), getAllConcerns(), getNavBarData(dataConcern.ticket_id)]);
+            await Promise.all([
+                getInquiryLogs(dataConcern.ticket_id),
+                getAllConcerns(),
+                getNavBarData(dataConcern.ticket_id),
+            ]);
         } catch (error) {
             console.log("error", error);
         }
@@ -653,27 +658,27 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                              * Disable button if no changes detected
                              * Visually indicate button is non-interactive when no changes exist
                              */}
-                            {user?.department ===
-                                "Customer Relations - Services" && (
-                                <button
-                                    disabled={!isUserTypeChange && !hasChanges}
-                                    className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
-                                    type="button"
-                                    onClick={handleShowUpdateAlert}
-                                    style={{
-                                        opacity:
-                                            !isUserTypeChange && !hasChanges
-                                                ? 0.5
-                                                : 1,
-                                        cursor:
-                                            !isUserTypeChange && !hasChanges
-                                                ? "not-allowed"
-                                                : "pointer",
-                                    }}
-                                >
-                                    Update
-                                </button>
-                            )}
+                            {/*  {user?.department === "Customer Relations - Services" && ( */}
+                            <button
+                                disabled={!isUserTypeChange && !hasChanges}
+                                className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
+                                type="button"
+                                onClick={handleShowUpdateAlert}
+                                style={{
+                                    opacity:
+                                        !isUserTypeChange && !hasChanges
+                                            ? 0.5
+                                            : 1,
+                                    cursor:
+                                        !isUserTypeChange && !hasChanges
+                                            ? "not-allowed"
+                                            : "pointer",
+                                }}
+                            >
+                                Update
+                            </button>
+
+                            {/*  )} */}
                         </div>
                     </div>
                 </div>

@@ -16,10 +16,10 @@ const Notification = () => {
         getAllConcerns,
         getNotifications,
         setNotifStatus,
-        notifStatus,
+        notifStatus
     } = useStateContext();
     const [activeButton, setActiveButton] = useState("All");
-
+    
     const handleClick = (button) => {
         setNotifStatus((prev) => (prev === button ? "All" : button));
         setNotifCurrentPage(0);
@@ -38,6 +38,7 @@ const Notification = () => {
         setNotifStatus("");
         getNotifications();
     }; */
+
     const buttonLabels = ["All", "Unread", "Read"];
 
     const navigateToThread = (items) => {
@@ -82,11 +83,13 @@ const Notification = () => {
 
     useEffect(() => {
         getNotifications();
+
     }, [notifCurrentPage, notifStatus]);
 
     useEffect(() => {
         setNotifStatus("All");
     }, [location.pathname]);
+
 
     return (
         <div className=" bg-custom-grayFA ">
@@ -102,11 +105,10 @@ const Notification = () => {
                             <button
                                 key={label}
                                 onClick={() => handleClick(label)}
-                                className={`flex items-center border montserrat-semibold border-custom-lightgreen h-[24px] px-3 rounded-[50px] text-[13px] ${
-                                    activeButton === label
-                                        ? "bg-custom-lightgreen text-white"
-                                        : "text-custom-lightgreen"
-                                }`}
+                                className={`flex items-center border montserrat-semibold border-custom-lightgreen h-[24px] px-3 rounded-[50px] text-[13px] ${activeButton === label
+                                    ? "bg-custom-lightgreen text-white"
+                                    : "text-custom-lightgreen"
+                                    }`}
                             >
                                 {label}
                             </button>
@@ -122,11 +124,11 @@ const Notification = () => {
                                 notifications.map((item, index) => (
                                     <tr
                                         onClick={() => navigateToThread(item)}
-                                        className={`flex items-center min-h-[47px] cursor-pointer my-1 ${
-                                            item.is_read === 1
-                                                ? "bg-custom-grayF1"
-                                                : "bg-white"
-                                        } hover:shadow-custom4`}
+                                        className={`flex items-center min-h-[47px] cursor-pointer my-1 ${item.is_read === 1
+                                            ? "bg-custom-grayF1"
+                                            : "bg-white"
+                                            } hover:shadow-custom4 
+                                             `}
                                         key={index}
                                     >
                                         <td className="w-[228px] shrink-0 h-full px-4">

@@ -8,6 +8,7 @@ import { MdOutlineShortText } from "react-icons/md";
 import { GrTextAlignFull } from "react-icons/gr";
 import { SurveyRadioOption } from './SurveyRadioOption';
 import { add } from 'lodash';
+import SurveyDeleteModal from './SurveyDeleteModal';
 
 
 const adjustHeight = (element) => {
@@ -32,9 +33,20 @@ export const SurveyAddQuestion = (
 
     }) => {
 
+    const modalRef = useRef(null);
 
     const questionTextareaRef = useRef(null);
     const dropdownRef = useRef(null);
+
+    const handleDeleteModal = () => { 
+        if (modalRef.current) {
+            modalRef.current.showModal();
+        }
+    };
+
+    const handleDelete = () => {
+        onDelete(); 
+    };
 
     useEffect(() => {
         if (questionTextareaRef.current) {
@@ -64,7 +76,7 @@ export const SurveyAddQuestion = (
     ];
 
     return (
-        <div>
+        <div className='relative'>
             <div className='relative flex flex-col w-full bg-white rounded-[10px] gap-[15px] p-[15px]'>
                 <div className='flex flex-col'>
                     <textarea
@@ -77,6 +89,7 @@ export const SurveyAddQuestion = (
                             adjustHeight(e.target);
                         }}
                         ref={questionTextareaRef}
+                        maxLength={255}
                     />
                     <div className='flex w-full border-b border-custom-grayA5'></div>
                 </div>
@@ -200,7 +213,7 @@ export const SurveyAddQuestion = (
                     <div className='flex gap-[10px]'>
                         <FaRegTrashAlt
                             className='size-[20px] cursor-pointer text-red-500 hover:text-red-600'
-                            onClick={onDelete}
+                            onClick={handleDeleteModal}
                         />
                     </div>
                     <div className='border-r-[0.5px] border-custom-grayA5 h-full '></div>
@@ -225,6 +238,9 @@ export const SurveyAddQuestion = (
                         </div>
                     </div>
                 </div>
+            </div>
+            <div>
+                <SurveyDeleteModal modalRef={modalRef} handleDelete={handleDelete} />
             </div>
         </div>
     )
