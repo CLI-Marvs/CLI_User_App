@@ -6,6 +6,7 @@ const SurveyContext = createContext();
 export const SurveyProvider = ({ children }) => {
   const [survey_title, setSurveyTitle] = useState("");
   const [survey_loading, setLoading] = useState(false);
+  const [ratingDetails, setRatingDetails] = useState([]);
 
   const fetchSurveyTitle = async (survey_list_id) => {
     setLoading(true);
@@ -21,8 +22,19 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
+  const fetchSurveyRatingDetails = async (survey_list_id) => {
+    try {
+      const response = await apiService.get(`/survey-rating-details/${survey_list_id}`);
+      
+      setRatingDetails(response.data.data);
+    } catch (error) {
+      console.error('Error fetching survey rating details:', error);
+      setRatingDetails([]);
+    } 
+  };
+
   return (
-    <SurveyContext.Provider value={{ survey_title, fetchSurveyTitle, survey_loading }}>
+    <SurveyContext.Provider value={{ survey_title, fetchSurveyTitle, survey_loading, ratingDetails, fetchSurveyRatingDetails }}>
       {children}
     </SurveyContext.Provider>
   );

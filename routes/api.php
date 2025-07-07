@@ -121,11 +121,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/transaction-reports', 'transactionReports');
     });
     Route::apiResource('markup-settings', MarkupSettignsController::class);
-    
+
     Route::controller(MarkupSettignsController::class)->group(function () {
         Route::get('/card/fee', 'retrieveCardMarkupDetails');
         Route::put('/card/fee/{id}', 'updateCardSettings');
-
     });
 
     Route::controller(ConcernController::class)->group(function () {
@@ -220,6 +219,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/experience-ratings/count/{id}', [SurveyController::class, 'countRatings']);
     Route::get('/surveys-count/respondents', [SurveyController::class, 'getSurveysWithRatingCounts']);
     Route::get('/surveys-count/ratings', [SurveyController::class, 'getSurveysWithRatingBreakdown']);
+    Route::get('/survey-rating-details/{id}', [SurveyController::class, 'getSurveyRatingDetails']);
 
     //Employee Department
     Route::get('/get-employees-departments', [EmployeeDepartmentController::class, 'index']);

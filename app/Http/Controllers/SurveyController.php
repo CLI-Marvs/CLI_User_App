@@ -467,31 +467,52 @@ class SurveyController extends Controller
     }
 
     public function getSurveysWithRatingBreakdown()
-{
-    $surveys = Survey_list::select('id', 'survey_title', 'survey_link')->get();
+    {
+        $surveys = Survey_list::select('id', 'survey_title', 'survey_link')->get();
 
-    $result = $surveys->map(function ($survey) {
-        // Fetch counts of each rating (1-5) for this survey_link
-        $ratingCounts = ExperienceRating::where('survey_link', $survey->survey_link)
-            ->select('rating', DB::raw('COUNT(*) as total'))
-            ->groupBy('rating')
-            ->pluck('total', 'rating'); // [rating => count]
+        $result = $surveys->map(function ($survey) {
+            // Fetch counts of each rating (1-5) for this survey_link
+            $ratingCounts = ExperienceRating::where('survey_link', $survey->survey_link)
+                ->select('rating', DB::raw('COUNT(*) as total'))
+                ->groupBy('rating')
+                ->pluck('total', 'rating'); // [rating => count]
 
-        // Ensure all ratings from 1 to 5 are included, default to 0 if missing
-        $fullRatingCounts = [];
-        for ($i = 1; $i <= 5; $i++) {
-            $fullRatingCounts[$i] = $ratingCounts->get($i, 0);
+            // Ensure all ratings from 1 to 5 are included, default to 0 if missing
+            $fullRatingCounts = [];
+            for ($i = 1; $i <= 5; $i++) {
+                $fullRatingCounts[$i] = $ratingCounts->get($i, 0);
+            }
+
+            return [
+                'id' => $survey->id,
+                'survey_title' => $survey->survey_title,
+                'ratings' => $fullRatingCounts, // e.g., [1 => 3, 2 => 0, 3 => 5, 4 => 2, 5 => 8]
+            ];
+        });
+
+        return response()->json([
+            'data' => $result
+        ]);
+    }
+
+    public function getSurveyRatingDetails($id)
+    {
+
+        $survey = Survey_list::find($id);
+
+        if (!$survey) {
+            return response()->json(['error' => 'Survey not found'], 404);
         }
 
-        return [
-            'id' => $survey->id,
-            'survey_title' => $survey->survey_title,
-            'ratings' => $fullRatingCounts, // e.g., [1 => 3, 2 => 0, 3 => 5, 4 => 2, 5 => 8]
-        ];
-    });
 
-    return response()->json([
-        'data' => $result
-    ]);
-}
+        $ratings = ExperienceRating::where('survey_link', $survey->survey_link)
+            ->orderBy('created_at', 'desc')
+            ->select('ticket_id', 'email', 'rating', 'created_at')
+            ->get();
+
+
+        return response()->json([
+            'data' => $ratings,
+        ]);
+    }
 }
