@@ -39,7 +39,7 @@ const Navbar = () => {
 
     useEffect(() => {
         if (id) {
-          fetchSurveyTitle();
+          fetchSurveyTitle(id);
         }
       }, [id]);
 

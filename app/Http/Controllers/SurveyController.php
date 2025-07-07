@@ -434,10 +434,11 @@ class SurveyController extends Controller
         }
     }
 
-    public function getSurveyTitle()
+    public function getSurveyTitle($id)
     {
         $survey = DB::table('surveys_list')
-            ->where('status', "true")
+            ->where('id', $id)
+            ->where('status', 'true')
             ->value('survey_title');
 
         if (!$survey) {
@@ -467,31 +468,31 @@ class SurveyController extends Controller
     }
 
     public function getSurveysWithRatingBreakdown()
-{
-    $surveys = Survey_list::select('id', 'survey_title', 'survey_link')->get();
+    {
+        $surveys = Survey_list::select('id', 'survey_title', 'survey_link')->get();
 
-    $result = $surveys->map(function ($survey) {
-        // Fetch counts of each rating (1-5) for this survey_link
-        $ratingCounts = ExperienceRating::where('survey_link', $survey->survey_link)
-            ->select('rating', DB::raw('COUNT(*) as total'))
-            ->groupBy('rating')
-            ->pluck('total', 'rating'); // [rating => count]
+        $result = $surveys->map(function ($survey) {
+            // Fetch counts of each rating (1-5) for this survey_link
+            $ratingCounts = ExperienceRating::where('survey_link', $survey->survey_link)
+                ->select('rating', DB::raw('COUNT(*) as total'))
+                ->groupBy('rating')
+                ->pluck('total', 'rating'); // [rating => count]
 
-        // Ensure all ratings from 1 to 5 are included, default to 0 if missing
-        $fullRatingCounts = [];
-        for ($i = 1; $i <= 5; $i++) {
-            $fullRatingCounts[$i] = $ratingCounts->get($i, 0);
-        }
+            // Ensure all ratings from 1 to 5 are included, default to 0 if missing
+            $fullRatingCounts = [];
+            for ($i = 1; $i <= 5; $i++) {
+                $fullRatingCounts[$i] = $ratingCounts->get($i, 0);
+            }
 
-        return [
-            'id' => $survey->id,
-            'survey_title' => $survey->survey_title,
-            'ratings' => $fullRatingCounts, // e.g., [1 => 3, 2 => 0, 3 => 5, 4 => 2, 5 => 8]
-        ];
-    });
+            return [
+                'id' => $survey->id,
+                'survey_title' => $survey->survey_title,
+                'ratings' => $fullRatingCounts, // e.g., [1 => 3, 2 => 0, 3 => 5, 4 => 2, 5 => 8]
+            ];
+        });
 
-    return response()->json([
-        'data' => $result
-    ]);
-}
+        return response()->json([
+            'data' => $result
+        ]);
+    }
 }
