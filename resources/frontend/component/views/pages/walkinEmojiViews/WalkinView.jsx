@@ -1,5 +1,5 @@
 import React from "react";
-import WalkinPage from "@/component/layout/inquirypage/WalkinPage";
+import WalkinListPage from "@/component/layout/inquirypage/WalkinListPage";
 import { Outlet, useLocation } from "react-router-dom";
 import WalkinTransactionHistoryPage from "@/component/layout/inquirypage/WalkinTransactionHistoryPage";
 const WalkinView = () => {
@@ -8,7 +8,7 @@ const WalkinView = () => {
 
     return (
         <div>
-            {!isHistoryPage && <WalkinPage />}
+            {!isHistoryPage && <WalkinListPage />}
             <Outlet />
         </div>
     );

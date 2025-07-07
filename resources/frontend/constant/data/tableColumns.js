@@ -23,7 +23,6 @@ export const PROPERTY_SETTING_COLUMNS = [
 export const WALKIN_COLUMNS = [
     { label: "Priority Number", width: "w-[150px]" },
     { label: "Person Type", width: "w-[150px]" },
-    { label: "Inquiry Type", width: "w-[150px]" },
     { label: "Action", width: "w-[150px]" },
 ];
 
