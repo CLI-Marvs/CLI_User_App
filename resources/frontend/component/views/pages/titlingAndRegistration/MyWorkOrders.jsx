@@ -5,6 +5,7 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { Card, CardFooter, Typography } from "@material-tailwind/react";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardArrowDown } from "react-icons/md";
+import { BsArrowsFullscreen } from "react-icons/bs";
 import ProcessWorkOrderModal from "../../../layout/documentManagementPage/ProcessWorkOrderModal";
 import _ from "lodash";
 import AddFilesModal from "../../../layout/documentManagementPage/AddFilesModal";
@@ -27,9 +28,10 @@ const MyWorkOrders = () => {
     const [selectedAccountId, setSelectedAccountId] = useState(null);
     const [selectedWorkOrderData, setSelectedWorkOrderData] = useState(null);
     const [selectedStepName, setSelectedStepName] = useState("");
-    // State for the new details modal
-    const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-    const [selectedGroupForDetails, setSelectedGroupForDetails] = useState(null);
+    const [expandedGroup, setExpandedGroup] = useState(null);
+    const [isGroupDetailsModalOpen, setIsGroupDetailsModalOpen] = useState(false);
+    const [groupDetailsData, setGroupDetailsData] = useState(null);
+    const [isGroupDetailsLoading, setIsGroupDetailsLoading] = useState(null);
 
     useEffect(() => {
         const fetchWorkOrders = async () => {
@@ -45,7 +47,6 @@ const MyWorkOrders = () => {
                         sortOrder: sortOrder,
                     },
                 });
-                console.log(response);
                 // Group by work_order_group_id
                 const grouped = Object.values(
                     (response.data.data || []).reduce((acc, wo) => {
@@ -97,29 +98,37 @@ const MyWorkOrders = () => {
     const handleCloseProcessModal = (didSubmit) => {
         setIsProcessModalOpen(false);
         setSelectedWorkOrder(null);
-        // If a submission was successful, refetch the work orders to show updated data
         if (didSubmit) {
-            // A simple way to trigger a refetch
             setCurrentPage(1);
-            // Or call a dedicated fetch function if you have one
         }
     };
 
-    const handleOpenDetailsModal = (group) => {
-        setSelectedGroupForDetails(group);
-        setIsDetailsModalOpen(true);
+    const handleOpenGroupDetailsModal = async (group) => {
+        setIsGroupDetailsModalOpen(true);
+        setIsGroupDetailsLoading(true);
+        setGroupDetailsData(null);
+        try {
+            const response = await apiService.get(`/work-order-groups/${group.id}/details`);
+            setGroupDetailsData(response.data);
+        } catch (err) {
+            console.erro("Error fetching group details:", err);
+            handleclosedGroupDetailsModal();
+        } finally {
+            setIsGroupDetailsLoading(false);
+        }
     };
 
-    const handleCloseDetailsModal = () => {
-        setIsDetailsModalOpen(false);
-        setSelectedGroupForDetails(null);
+    const handleCloseGroupDetailsModal = () => {
+        setIsGroupDetailsModalOpen(false);
+        setGroupDetailsData(null);
     };
 
-    const handleAddFiles = (accountId, workOrder, stepName) => {
+    const handleAddFilesFromDetails = (accountId, workOrder, stepName) => {
         setSelectedAccountId(accountId);
         setSelectedWorkOrderData(workOrder);
         setSelectedStepName(stepName);
         setIsAddFilesModalOpen(true);
+        handleCloseGroupDetailsModal();
     };
 
     const TABLE_HEAD = [
@@ -330,6 +339,10 @@ const MyWorkOrders = () => {
     );
 
  const renderTableView = () => {
+    const toggleGroup = (groupId) => {
+        setExpandedGroup(prev => (prev === groupId ? null : groupId));
+    };
+
     return (
         <Card className="w-full overflow-hidden">
             <div className="overflow-x-auto">
@@ -358,7 +371,7 @@ const MyWorkOrders = () => {
                             </th>
                             <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
                                 <Typography variant="small" className="!font-semibold text-white leading-none">
-                                    {/* Toggle/Expand */}
+                                    Actions
                                 </Typography>
                             </th>
                         </tr>
@@ -369,15 +382,66 @@ const MyWorkOrders = () => {
                             const latestWO = (group.work_orders || [])
                                 .slice()
                                 .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0];
+                            console.log("latestWO", latestWO);
+                            // --- Restore stepRows for expanded dropdown ---
+                            // 1. Gather all steps (work orders) and sort by sequence
+                            const steps = (group.work_orders || []).map(wo => ({
+                                ...wo,
+                                sequence: wo.work_order_type?.sequence ?? 0,
+                            })).sort((a, b) => a.sequence - b.sequence);
+
+                            // 2. Build a map: accountId -> step with highest sequence
+                            const accountLatestStep = {};
+                            steps.forEach(step => {
+                                (step.accounts || []).forEach(acc => {
+                                    if (
+                                        !accountLatestStep[acc.id] ||
+                                        step.sequence > accountLatestStep[acc.id].sequence
+                                    ) {
+                                        accountLatestStep[acc.id] = {
+                                            stepId: step.work_order_id,
+                                            sequence: step.sequence,
+                                            stepName: step.work_order_type?.type_name || step.work_order,
+                                            workOrder: step,
+                                            account: acc,
+                                        };
+                                    }
+                                });
+                            });
+
+                            // 3. For each step, filter accounts to only show those whose latest step is this step
+                            const stepRows = steps.map(step => {
+                                const filteredAccounts = (step.accounts || []).filter(
+                                    acc => accountLatestStep[acc.id]?.stepId === step.work_order_id
+                                );
+                                if (filteredAccounts.length === 0) return null;
+                                return filteredAccounts.map(account => (
+                                    <tr key={account.id} className="border-t border-gray-200">
+                                        <td className="p-2">{account.account_name}</td>
+                                        <td className="p-2">{step.work_order_type?.type_name || step.work_order}</td>
+                                        <td className="p-2">{getStatusBadge(step.status)}</td>
+                                        <td className="p-2">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedAccountId(account.id);
+                                                    setSelectedWorkOrderData(step);
+                                                    setSelectedStepName(step.work_order_type?.type_name || step.work_order);
+                                                    setIsAddFilesModalOpen(true);
+                                            }}
+                                            className="px-2 py-0.5 text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
+                                        >
+                                            Add Files
+                                        </button>
+                                        </td>
+                                    </tr>
+                                ));
+                            });
 
                             return (
                                 <React.Fragment key={group.id}>
-                                    <tr
-                                        onClick={() => handleOpenDetailsModal(group)}
-                                        className="hover:bg-gray-100 cursor-pointer"
-                                    >
+                                    <tr className="hover:bg-gray-100">
                                         <td className="p-4 border-b border-gray-300 font-bold">
-                                            WO #{String(group.id).padStart(6, "0")}
+                                            WO #{group.id}
                                         </td>
                                         <td className="p-4 border-b border-gray-300 text-sm opacity-70">
                                             {latestWO?.accounts && latestWO.accounts.length > 0
@@ -398,9 +462,47 @@ const MyWorkOrders = () => {
                                                 : "N/A"}
                                         </td>
                                         <td className="p-4 border-b border-gray-300">
-                                            <MdKeyboardArrowRight size={20} />
+                                            <div className="flex items-center justify-center space-x-3">
+                                                <button
+                                                    onClick={() => handleOpenGroupDetailsModal(group)}
+                                                    className="text-gray-500 hover:text-indigo-600"
+                                                    title="Maximize Details"
+                                                >
+                                                    <BsArrowsFullscreen size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => toggleGroup(group.id)}
+                                                    className="text-gray-500 hover:text-indigo-600"
+                                                    title={expandedGroup === group.id ? "Collapse" : "Expand"}
+                                                >
+                                                    {expandedGroup === group.id ? (
+                                                        <MdKeyboardArrowDown size={20} />
+                                                    ) : (
+                                                        <MdKeyboardArrowRight size={20} />
+                                                    )}
+                                                </button>
+                                            </div>
                                         </td>
                                     </tr>
+                                    {expandedGroup === group.id && (
+                                        <tr>
+                                            <td colSpan={5} className="p-4 border-b border-gray-300 bg-gray-50">
+                                                <table className="w-full table-auto text-left">
+                                                    <thead>
+                                                        <tr>
+                                                            <th className="p-2 font-semibold">Account Name</th>
+                                                            <th className="p-2 font-semibold">Current Step</th>
+                                                            <th className="p-2 font-semibold">Overall Status</th>
+                                                            <th className="p-2 font-semibold">Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {stepRows.flat().filter(Boolean)}
+                                                    </tbody>
+                                                </table>
+                                            </td>
+                                        </tr>
+                                    )}
                                 </React.Fragment>
                             );
                         })}
@@ -658,6 +760,14 @@ const MyWorkOrders = () => {
                     onClose={handleCloseProcessModal}
                     workOrder={selectedWorkOrder}
                 />
+                <WorkOrderGroupDetailsModal
+                    isOpen={isGroupDetailsModalOpen}
+                    onClose={handleCloseGroupDetailsModal}
+                    group={groupDetailsData}
+                    onAddFiles={handleAddFilesFromDetails}
+                    isLoading={isGroupDetailsLoading}
+                    getStatusBadge={getStatusBadge}
+                />
                 {isAddFilesModalOpen && selectedAccountId && selectedWorkOrderData && (
                     <AddFilesModal
                         selectedAccountId={selectedAccountId}
@@ -666,15 +776,6 @@ const MyWorkOrders = () => {
                         workOrderData={selectedWorkOrderData}
                     />
                 )}
-
-                <WorkOrderGroupDetailsModal
-                    isOpen={isDetailsModalOpen}
-                    onClose={handleCloseDetailsModal}
-                    group={selectedGroupForDetails}
-                    onAddFiles={handleAddFiles}
-                    getStatusBadge={getStatusBadge}
-                />
-
             </div>
         </div>
     );

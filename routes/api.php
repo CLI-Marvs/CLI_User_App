@@ -31,6 +31,7 @@ use App\Http\Controllers\AccountChecklistStatusController;
 use App\Http\Controllers\WorkOrderTypeSettingsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TeamController;
+use App\Http\Controllers\WorkOrderGroupController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -77,6 +78,7 @@ Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees'
 Route::post('/update-info', [ConcernController::class, 'updateInfo']);
 // Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
+
 
 // for titling and registration
 Route::middleware('auth:sanctum')->group(function () {
@@ -187,6 +189,8 @@ Route::prefix('taken-out-accounts')->group(function () {
     Route::get('/projects/{projectName}/milestones/{submilestone}/assignees', [ProjectAssigneeController::class, 'getAssignees'])->where('projectName', '.*');
     Route::put('/projects/{projectName}/milestones/{submilestone}/assignees', [ProjectAssigneeController::class, 'updateAssignees'])->where('projectName', '.*');
     Route::delete('/projects/{projectName}/milestones/{submilestone}/assignees/{employee}', [ProjectAssigneeController::class, 'removeAssignee'])->where('projectName', '.*');
+    //for workorder group
+    Route::get('/work-order-groups/{groupId}/details', [WorkOrderGroupController::class, 'showDetails']);
 });
 
 //* For Sap 

@@ -97,16 +97,19 @@ const WorkOrderView = () => {
     const [filterStatus, setFilterStatus] = useState("");
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-    const [selectedWorkOrderForView, setSelectedWorkOrderForView] = useState(null);
+    const [selectedWorkOrderForView, setSelectedWorkOrderForView] =
+        useState(null);
     const toggleFilterBox = () => setIsFilterVisible((prev) => !prev);
     const [tableRowsData, setTableRowsData] = useState([]);
     const { workOrders, fetchWorkOrders } = useStateContext();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    const [selectedWorkOrderForEdit, setSelectedWorkOrderForEdit] = useState(null);
+    const [selectedWorkOrderForEdit, setSelectedWorkOrderForEdit] =
+        useState(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [selectedWorkOrderForDelete, setSelectedWorkOrderForDelete] = useState(null);
+    const [selectedWorkOrderForDelete, setSelectedWorkOrderForDelete] =
+        useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
-    
+
     // New state for expandable rows
     const [expandedGroups, setExpandedGroups] = useState({});
     const [expandedSteps, setExpandedSteps] = useState({});
@@ -127,8 +130,8 @@ const WorkOrderView = () => {
                     .toISOString()
                     .slice(0, 10),
                 groupId: row.work_order_group_id,
-                steps: row.steps || [], // Assuming steps data exists
-                accounts: row.accounts || [], // Assuming accounts data exists
+                steps: row.steps || [],
+                accounts: row.accounts || [],
             }));
             setTableRowsData(data);
             console.log("DATA", data);
@@ -167,31 +170,35 @@ const WorkOrderView = () => {
     // Group work orders by group ID
     const groupedByGroupId = workOrders?.data
         ? workOrders.data.reduce((acc, wo) => {
-            const groupId = wo.work_order_group_id;
-            if (!acc[groupId]) {
-                acc[groupId] = {
-                    groupId,
-                    workOrders: [],
-                    // Get the earliest date and latest due date for the group
-                    dateCreated: new Date(wo.created_at).toISOString().slice(0, 10),
-                    dueDate: new Date(wo.work_order_deadline).toISOString().slice(0, 10),
-                    // You might want to determine group status based on individual work order statuses
-                    status: wo.status, // This might need logic to determine overall group status
-                };
-            }
-            acc[groupId].workOrders.push(wo);
-            return acc;
-        }, {})
+              const groupId = wo.work_order_group_id;
+              if (!acc[groupId]) {
+                  acc[groupId] = {
+                      groupId,
+                      workOrders: [],
+                      // Get the earliest date and latest due date for the group
+                      dateCreated: new Date(wo.created_at)
+                          .toISOString()
+                          .slice(0, 10),
+                      dueDate: new Date(wo.work_order_deadline)
+                          .toISOString()
+                          .slice(0, 10),
+                      // You might want to determine group status based on individual work order statuses
+                      status: wo.status, // This might need logic to determine overall group status
+                  };
+              }
+              acc[groupId].workOrders.push(wo);
+              return acc;
+          }, {})
         : {};
 
     // Filter groups based on search and filter criteria
     const filteredGroups = Object.values(groupedByGroupId).filter((group) => {
         const groupIdString = String(group.groupId || "");
-        
+
         const searchMatch =
             searchQuery === "" ||
             groupIdString.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            group.workOrders.some(wo => 
+            group.workOrders.some((wo) =>
                 wo.work_order.toLowerCase().includes(searchQuery.toLowerCase())
             );
 
@@ -207,7 +214,10 @@ const WorkOrderView = () => {
     const endIndex = startIndex + rowsPerPage;
     const currentData = filteredGroups.slice(startIndex, endIndex);
 
-    const totalPages = Math.max(1, Math.ceil(filteredGroups.length / rowsPerPage));
+    const totalPages = Math.max(
+        1,
+        Math.ceil(filteredGroups.length / rowsPerPage)
+    );
 
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
@@ -293,16 +303,16 @@ const WorkOrderView = () => {
     };
 
     const toggleGroupExpansion = (groupId) => {
-        setExpandedGroups(prev => ({
+        setExpandedGroups((prev) => ({
             ...prev,
-            [groupId]: !prev[groupId]
+            [groupId]: !prev[groupId],
         }));
     };
 
     const toggleStepExpansion = (stepId) => {
-        setExpandedSteps(prev => ({
+        setExpandedSteps((prev) => ({
             ...prev,
-            [stepId]: !prev[stepId]
+            [stepId]: !prev[stepId],
         }));
     };
 
@@ -502,22 +512,36 @@ const WorkOrderView = () => {
                             {currentData.map((group) => (
                                 <React.Fragment key={group.groupId}>
                                     {/* Main Group Row */}
-                                    <tr 
+                                    <tr
                                         className="hover:bg-gray-50 cursor-pointer"
-                                        onClick={() => toggleGroupExpansion(group.groupId)}
+                                        onClick={() =>
+                                            toggleGroupExpansion(group.groupId)
+                                        }
                                     >
                                         <td className="p-4 border-b border-gray-300 text-left">
                                             <div className="flex items-center gap-2">
-                                                {expandedGroups[group.groupId] ? (
+                                                {expandedGroups[
+                                                    group.groupId
+                                                ] ? (
                                                     <ChevronDownIcon className="w-4 h-4 text-gray-600" />
                                                 ) : (
                                                     <ChevronRightIcon className="w-4 h-4 text-gray-600" />
                                                 )}
-                                                <Typography variant="small" className="font-semibold text-[#175D5F]">
-                                                    WO-{String(group.groupId).padStart(6, "0")}
+                                                <Typography
+                                                    variant="small"
+                                                    className="font-semibold text-[#175D5F]"
+                                                >
+                                                    WO-
+                                                    {String(
+                                                        group.groupId
+                                                    ).padStart(6, "0")}
                                                     <br />
                                                     <span className="text-gray-600 text-sm">
-                                                        {group.workOrders.length} work order(s)
+                                                        {
+                                                            group.workOrders
+                                                                .length
+                                                        }{" "}
+                                                        work order(s)
                                                     </span>
                                                 </Typography>
                                             </div>
@@ -526,7 +550,8 @@ const WorkOrderView = () => {
                                             <Typography
                                                 variant="small"
                                                 className={`font-semibold px-3 py-1 rounded-full inline-block w-28 ${
-                                                    group.status === "In Progress"
+                                                    group.status ===
+                                                    "In Progress"
                                                         ? "bg-[#F5F4DC] text-[#175D5F]"
                                                         : "bg-green-200 text-green-800"
                                                 }`}
@@ -555,7 +580,9 @@ const WorkOrderView = () => {
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        handleOpenViewModal(group.workOrders[0]);
+                                                        handleOpenViewModal(
+                                                            group.workOrders[0]
+                                                        );
                                                     }}
                                                 >
                                                     <ViewIcon />
@@ -563,8 +590,12 @@ const WorkOrderView = () => {
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        setSelectedWorkOrderForEdit(group.workOrders[0]);
-                                                        setIsEditModalOpen(true);
+                                                        setSelectedWorkOrderForEdit(
+                                                            group.workOrders[0]
+                                                        );
+                                                        setIsEditModalOpen(
+                                                            true
+                                                        );
                                                     }}
                                                 >
                                                     <EditIcon />
@@ -572,7 +603,9 @@ const WorkOrderView = () => {
                                                 <button
                                                     onClick={(e) => {
                                                         e.stopPropagation();
-                                                        handleOpenDeleteModal(group.workOrders[0]);
+                                                        handleOpenDeleteModal(
+                                                            group.workOrders[0]
+                                                        );
                                                     }}
                                                     disabled={isDeleting}
                                                 >
@@ -585,94 +618,200 @@ const WorkOrderView = () => {
                                     {/* Expanded Steps */}
                                     {expandedGroups[group.groupId] && (
                                         <tr>
-                                            <td colSpan={TABLE_HEAD.length} className="p-0 border-b border-gray-300">
+                                            <td
+                                                colSpan={TABLE_HEAD.length}
+                                                className="p-0 border-b border-gray-300"
+                                            >
                                                 <div className="bg-gray-50 p-4">
                                                     {(() => {
-    // 1. Get all work orders (steps) in this group, with their type's sequence
-    const steps = group.workOrders.map(wo => ({
-        ...wo,
-        stepName: wo.work_order,
-        accounts: wo.accounts || [],
-        sequence: wo.work_order_type?.sequence ?? wo.sequence ?? 0, // ensure you have sequence, else fetch work_order_types and join
-    }));
+                                                        // 1. Get all work orders (steps) in this group, with their type's sequence
+                                                        const steps =
+                                                            group.workOrders.map(
+                                                                (wo) => ({
+                                                                    ...wo,
+                                                                    stepName:
+                                                                        wo.work_order,
+                                                                    accounts:
+                                                                        wo.accounts ||
+                                                                        [],
+                                                                    sequence:
+                                                                        wo
+                                                                            .work_order_type
+                                                                            ?.sequence ??
+                                                                        wo.sequence ??
+                                                                        0, // ensure you have sequence, else fetch work_order_types and join
+                                                                })
+                                                            );
 
-    // 2. Sort steps by sequence ASC (or as needed)
-    steps.sort((a, b) => a.sequence - b.sequence);
+                                                        // 2. Sort steps by sequence ASC (or as needed)
+                                                        steps.sort(
+                                                            (a, b) =>
+                                                                a.sequence -
+                                                                b.sequence
+                                                        );
 
-    // 3. Build a map: accountId -> step with highest sequence
-    const accountLatestStep = {};
-    steps.forEach(step => {
-        step.accounts.forEach(acc => {
-            if (
-                !accountLatestStep[acc.id] ||
-                step.sequence > accountLatestStep[acc.id].sequence
-            ) {
-                accountLatestStep[acc.id] = { stepName: step.stepName, sequence: step.sequence };
-            }
-        });
-    });
+                                                        // 3. Build a map: accountId -> step with highest sequence
+                                                        const accountLatestStep =
+                                                            {};
+                                                        steps.forEach(
+                                                            (step) => {
+                                                                step.accounts.forEach(
+                                                                    (acc) => {
+                                                                        if (
+                                                                            !accountLatestStep[
+                                                                                acc
+                                                                                    .id
+                                                                            ] ||
+                                                                            step.sequence >
+                                                                                accountLatestStep[
+                                                                                    acc
+                                                                                        .id
+                                                                                ]
+                                                                                    .sequence
+                                                                        ) {
+                                                                            accountLatestStep[
+                                                                                acc.id
+                                                                            ] =
+                                                                                {
+                                                                                    stepName:
+                                                                                        step.stepName,
+                                                                                    sequence:
+                                                                                        step.sequence,
+                                                                                };
+                                                                        }
+                                                                    }
+                                                                );
+                                                            }
+                                                        );
 
-    // 4. Render steps, only show accounts whose latest step is this step
-    return steps.map((step, idx) => {
-        const filteredAccounts = step.accounts.filter(
-            acc => accountLatestStep[acc.id]?.stepName === step.stepName
-        );
+                                                        // 4. Render steps, only show accounts whose latest step is this step
+                                                        return steps.map(
+                                                            (step, idx) => {
+                                                                const filteredAccounts =
+                                                                    step.accounts.filter(
+                                                                        (acc) =>
+                                                                            accountLatestStep[
+                                                                                acc
+                                                                                    .id
+                                                                            ]
+                                                                                ?.stepName ===
+                                                                            step.stepName
+                                                                    );
 
-        return (
-            <div key={`${group.groupId}-${step.stepName}`} className="mb-2">
-                <div
-                    className="flex items-center gap-2 p-2 bg-white rounded cursor-pointer hover:bg-gray-100"
-                    onClick={() => toggleStepExpansion(`${group.groupId}-${step.stepName}`)}
-                >
-                    {expandedSteps[`${group.groupId}-${step.stepName}`] ? (
-                        <ChevronDownIcon className="w-4 h-4 text-gray-600" />
-                    ) : (
-                        <ChevronRightIcon className="w-4 h-4 text-gray-600" />
-                    )}
-                    <Typography variant="small" className="font-medium text-[#175D5F]">
-                    {step.stepName}
-                    </Typography>
-                    <div className="flex items-center gap-2 ml-auto">
-                        <ProfileIcon />
-                        <Typography variant="small" className="text-gray-600">
-                            {step.team?.name || step.team || "No Team Assigned"}
-                        </Typography>
-                    </div>
-                </div>
+                                                                return (
+                                                                    <div
+                                                                        key={`${group.groupId}-${step.stepName}`}
+                                                                        className="mb-2"
+                                                                    >
+                                                                        <div
+                                                                            className="flex items-center gap-2 p-2 bg-white rounded cursor-pointer hover:bg-gray-100"
+                                                                            onClick={() =>
+                                                                                toggleStepExpansion(
+                                                                                    `${group.groupId}-${step.stepName}`
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            {expandedSteps[
+                                                                                `${group.groupId}-${step.stepName}`
+                                                                            ] ? (
+                                                                                <ChevronDownIcon className="w-4 h-4 text-gray-600" />
+                                                                            ) : (
+                                                                                <ChevronRightIcon className="w-4 h-4 text-gray-600" />
+                                                                            )}
+                                                                            <Typography
+                                                                                variant="small"
+                                                                                className="font-medium text-[#175D5F]"
+                                                                            >
+                                                                                {
+                                                                                    step.stepName
+                                                                                }
+                                                                            </Typography>
+                                                                            <div className="flex items-center gap-2 ml-auto">
+                                                                                <ProfileIcon />
+                                                                                <Typography
+                                                                                    variant="small"
+                                                                                    className="text-gray-600"
+                                                                                >
+                                                                                    {step
+                                                                                        .team
+                                                                                        ?.name ||
+                                                                                        step.team ||
+                                                                                        "No Team Assigned"}
+                                                                                </Typography>
+                                                                            </div>
+                                                                        </div>
 
-                {/* Expanded Accounts */}
-                {expandedSteps[`${group.groupId}-${step.stepName}`] && (
-                    <div className="ml-6 mt-2 p-3 bg-blue-50 rounded">
-                        <Typography variant="small" className="font-semibold text-[#175D5F] mb-2">
-                            Accounts:
-                        </Typography>
-                        {filteredAccounts.length > 0 ? (
-                            <div className="space-y-1">
-                                {filteredAccounts.map((account, accountIndex) => (
-                                    <div key={account.id || accountIndex} className="flex items-center gap-2 p-2 bg-white rounded">
-                                        <ProfileIcon />
-                                        <Typography variant="small" className="text-gray-700">
-                                            {account.name || account.account_name || `Account ${accountIndex + 1}`}
-                                        </Typography>
-                                        {account.email && (
-                                            <Typography variant="small" className="text-gray-500">
-                                                ({account.email})
-                                            </Typography>
-                                        )}
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <Typography variant="small" className="text-gray-500 italic">
-                                No accounts assigned
-                            </Typography>
-                        )}
-                    </div>
-                )}
-            </div>
-        );
-    });
-})()}
+                                                                        {/* Expanded Accounts */}
+                                                                        {expandedSteps[
+                                                                            `${group.groupId}-${step.stepName}`
+                                                                        ] && (
+                                                                            <div className="ml-6 mt-2 p-3 bg-blue-50 rounded">
+                                                                                <Typography
+                                                                                    variant="small"
+                                                                                    className="font-semibold text-[#175D5F] mb-2"
+                                                                                >
+                                                                                    Accounts:
+                                                                                </Typography>
+                                                                                {filteredAccounts.length >
+                                                                                0 ? (
+                                                                                    <div className="space-y-1">
+                                                                                        {filteredAccounts.map(
+                                                                                            (
+                                                                                                account,
+                                                                                                accountIndex
+                                                                                            ) => (
+                                                                                                <div
+                                                                                                    key={
+                                                                                                        account.id ||
+                                                                                                        accountIndex
+                                                                                                    }
+                                                                                                    className="flex items-center gap-2 p-2 bg-white rounded"
+                                                                                                >
+                                                                                                    <ProfileIcon />
+                                                                                                    <Typography
+                                                                                                        variant="small"
+                                                                                                        className="text-gray-700"
+                                                                                                    >
+                                                                                                        {account.name ||
+                                                                                                            account.account_name ||
+                                                                                                            `Account ${
+                                                                                                                accountIndex +
+                                                                                                                1
+                                                                                                            }`}
+                                                                                                    </Typography>
+                                                                                                    {account.email && (
+                                                                                                        <Typography
+                                                                                                            variant="small"
+                                                                                                            className="text-gray-500"
+                                                                                                        >
+                                                                                                            (
+                                                                                                            {
+                                                                                                                account.email
+                                                                                                            }
+                                                                                                            )
+                                                                                                        </Typography>
+                                                                                                    )}
+                                                                                                </div>
+                                                                                            )
+                                                                                        )}
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <Typography
+                                                                                        variant="small"
+                                                                                        className="text-gray-500 italic"
+                                                                                    >
+                                                                                        No
+                                                                                        accounts
+                                                                                        assigned
+                                                                                    </Typography>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            }
+                                                        );
+                                                    })()}
                                                 </div>
                                             </td>
                                         </tr>

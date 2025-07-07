@@ -35,9 +35,24 @@ class AccountChecklistStatusController extends Controller
                 'completed_at' => $isCompleted ? now() : null,
             ]
         );
+
         $accountId = $validated['account_id'];
+
+        // Find the work order associated with this checklist and account
+        $checklist = Checklist::with('submilestone')->find($validated['checklist_id']);
+        if ($checklist && $checklist->submilestone) {
+            $workOrderTypeId = $checklist->submilestone->work_order_type_id;
+            $workOrder = WorkOrder::where('work_order_type_id', $workOrderTypeId)
+                ->whereHas('accounts', function ($query) use ($accountId) {
+                    $query->where('taken_out_accounts.id', $accountId);
+                })->first();
+
+            if ($workOrder) {
+                $this->_checkAndTriggerNextStep($accountId, $workOrder);
+            }
+        }
+
         $this->_checkAndUpdateOverallCompletion($accountId);
-        $this->_checkAndUpdateWorkOrderStatus($accountId);
         return response()->json(['success' => true]);
     }
     public function bulkStore(Request $request)
@@ -71,8 +86,23 @@ class AccountChecklistStatusController extends Controller
                 );
             }
         }
+
+        if (!empty($validated['file_titles'])) {
+            $firstChecklist = Checklist::with('submilestone')->where('name', $validated['file_titles'][0])->first();
+            if ($firstChecklist && $firstChecklist->submilestone) {
+                $workOrderTypeId = $firstChecklist->submilestone->work_order_type_id;
+                $workOrder = WorkOrder::where('work_order_type_id', $workOrderTypeId)
+                    ->whereHas('accounts', function ($query) use ($validated) {
+                        $query->where('taken_out_accounts.id', $validated['account_id']);
+                    })->first();
+
+                if ($workOrder) {
+                    $this->_checkAndTriggerNextStep($validated['account_id'], $workOrder);
+                }
+            }
+        }
+
         $this->_checkAndUpdateOverallCompletion($validated['account_id']);
-        $this->_checkAndUpdateWorkOrderStatus($validated['account_id']);
         return response()->json(['success' => true]);
     }
 
@@ -102,9 +132,6 @@ public function getChecklistStatus($accountId, $submilestoneId)
 
     return response()->json(['status' => $status]);
 }
- /**
-     * Check if all required checklists for an account are complete and update its status.
-     */
     private function _checkAndUpdateOverallCompletion(int $accountId)
     {
         $account = TakenOutAccount::find($accountId);
@@ -114,22 +141,15 @@ public function getChecklistStatus($accountId, $submilestoneId)
             return;
         }
 
-        // Get all unique WorkOrderType IDs associated with this account
-        // This assumes TakenOutAccount has a workOrders() relationship
-        // and WorkOrder has a workOrderType() relationship.
-        $workOrderTypeIds = $account->workOrders() // Assuming this relationship exists in TakenOutAccount model
+        $workOrderTypeIds = $account->workOrders() 
                                     ->with('workOrderType')
                                     ->get()
                                     ->pluck('workOrderType.id')
                                     ->unique()
-                                    ->filter() // Remove nulls if any workOrderType is missing
+                                    ->filter()
                                     ->toArray();
 
         if (empty($workOrderTypeIds)) {
-            // No work orders or work order types associated with this account,
-            // so no checklists are "required" in this context.
-            // If there's nothing to do, the checklist_status should reflect that.
-            // Setting to false if it was true, as no work is defined.
             if ($account->checklist_status) {
                 $account->checklist_status = false;
                 $account->save();
@@ -138,7 +158,6 @@ public function getChecklistStatus($accountId, $submilestoneId)
             return;
         }
 
-        // Get all unique checklist IDs associated with these WorkOrderTypes
         $requiredChecklistIds = Checklist::whereHas('submilestone.workOrderType', function ($query) use ($workOrderTypeIds) { // Assuming submilestone and workOrderType relationships exist
                                     $query->whereIn('id', $workOrderTypeIds);
                                 })
@@ -147,8 +166,6 @@ public function getChecklistStatus($accountId, $submilestoneId)
                                 ->toArray();
 
         if (empty($requiredChecklistIds)) {
-            // No checklists defined for the associated work order types.
-            // Consider the account's checklist status as complete if there's nothing to check.
             if (!$account->checklist_status) {
                 $account->checklist_status = true;
                 $account->save();
@@ -157,8 +174,7 @@ public function getChecklistStatus($accountId, $submilestoneId)
             return;
         }
 
-        // Get the count of completed checklists for this account from the required set
-        $completedRequiredChecklistsCount = AccountChecklistStatus::where('account_id', $accountId) // Use Eloquent model
+        $completedRequiredChecklistsCount = AccountChecklistStatus::where('account_id', $accountId)
                                             ->whereIn('checklist_id', $requiredChecklistIds)
                                             ->where('is_completed', true)
                                             ->count();
@@ -170,41 +186,45 @@ public function getChecklistStatus($accountId, $submilestoneId)
             $account->save();
             Log::info("Account checklist_status set to true for account ID: {$accountId} (all required checklists completed).");
         } elseif (!$allRequiredCompleted && $account->checklist_status) {
-            // If it was true but now not all are completed (e.g., due to un-checking or new checklists added)
             $account->checklist_status = false;
             $account->save();
             Log::info("Account checklist_status set to false for account ID: {$accountId} (not all required checklists completed).");
         }
     }
+
     /**
-     * Check if all accounts associated with a Work Order have their checklist_status set to true,
-     * and update the Work Order's status accordingly.
-     * This method is called after an individual account's checklist_status is potentially updated.
+     * Checks if all checklists for a specific work order step are complete for a given account.
+     * If they are, it triggers the creation of the next work order in the sequence for that account.
      *
-     * @param int $accountId The ID of the account whose checklist status was just updated.
+     * @param int $accountId The ID of the account being checked.
+     * @param WorkOrder $workOrder The specific work order (step) to check against.
      */
-    private function _checkAndUpdateWorkOrderStatus(int $accountId)
+    private function _checkAndTriggerNextStep(int $accountId, WorkOrder $workOrder)
     {
-        // Find all work orders associated with the updated account.
-        $workOrders = WorkOrder::whereHas('accounts', function ($query) use ($accountId) {
-            $query->where('taken_out_accounts.id', $accountId);
-        })->with('accounts')->get();
+        $account = TakenOutAccount::find($accountId);
+        if (!$account) {
+            Log::warning("_checkAndTriggerNextStep: Account not found for ID: {$accountId}");
+            return;
+        }
 
-        foreach ($workOrders as $workOrder) {
-            // We only care about the account that was just updated.
-            $account = $workOrder->accounts()->find($accountId);
+        $requiredChecklistIds = Checklist::whereHas('submilestone', function ($query) use ($workOrder) {
+            $query->where('work_order_type_id', $workOrder->work_order_type_id);
+        })->pluck('id')->toArray();
 
-            if ($account) {
-                // Refresh to get the latest status
-                $account->refresh();
+        if (empty($requiredChecklistIds)) {
+            Log::info("No checklists required for Work Order Type ID: {$workOrder->work_order_type_id}. Triggering next step for account {$accountId}.");
+            $this->_createNextWorkOrder($workOrder, $account);
+            return;
+        }
 
-                // If this specific account has all its checklists done...
-                if ($account->checklist_status === true) {
-                    // ...then it's ready to move to the next step for this specific work order.
-                    Log::info("Account {$accountId} is complete for Work Order {$workOrder->work_order_id}. Triggering next step creation.");
-                    $this->_createNextWorkOrder($workOrder, $account);
-                }
-            }
+        $completedChecklistsCount = AccountChecklistStatus::where('account_id', $accountId)
+            ->whereIn('checklist_id', $requiredChecklistIds)
+            ->where('is_completed', true)
+            ->count();
+
+        if ($completedChecklistsCount === count($requiredChecklistIds)) {
+            Log::info("All checklists for Work Order {$workOrder->work_order_id} are complete for account {$accountId}. Triggering next step.");
+            $this->_createNextWorkOrder($workOrder, $account);
         }
     }
 
@@ -233,56 +253,60 @@ public function getChecklistStatus($accountId, $submilestoneId)
             return;
         }
 
-        // Check if a work order for this next step already exists for this account in this group
-        $alreadyExists = WorkOrder::where('work_order_group_id', $workOrderGroup->id)
+        // Find if a work order for the next step already exists in the group.
+        $nextWorkOrder = WorkOrder::where('work_order_group_id', $workOrderGroup->id)
             ->where('work_order_type_id', $nextWorkOrderType->id)
-            ->whereHas('accounts', function ($query) use ($completedAccount) {
-                $query->where('taken_out_accounts.id', $completedAccount->id);
-            })
-            ->exists();
+            ->first();
 
-        if ($alreadyExists) {
-            Log::info("Automation skipped: Work order for next step '{$nextWorkOrderType->type_name}' already exists for account {$completedAccount->id} in group {$workOrderGroup->id}.");
+        $workOrderForProcessing = $nextWorkOrder;
+        $logMessageAction = "added to";
+
+        if (!$workOrderForProcessing) {
+            // No work order for the next step exists yet. Create it.
+            $workOrderForProcessing = WorkOrder::create([
+                'work_order' => $nextWorkOrderType->type_name,
+                'work_order_number' => $completedWorkOrder->work_order_number, 
+                'work_order_type_id' => $nextWorkOrderType->id,
+                'work_order_group_id' => $workOrderGroup->id,
+                'work_order_deadline' => now()->addDays(14),
+                'created_by_user_id' => auth()->id(),
+                'status' => 'In Progress',
+                'priority' => 'Medium',
+            ]);
+            $logMessageAction = "created for";
+        }
+
+        // Check if the account is already attached to avoid redundant operations.
+        if ($workOrderForProcessing->accounts()->where('taken_out_accounts.id', $completedAccount->id)->exists()) {
+            Log::info("Automation skipped: Account {$completedAccount->id} is already attached to work order {$workOrderForProcessing->work_order_id}.");
             return;
         }
 
-        // Create the new Work Order for the next step
-        $newWorkOrder = WorkOrder::create([
-            'work_order' => $nextWorkOrderType->type_name,
-            'work_order_number' => $completedWorkOrder->work_order_number, // Carry over the work order number
-            'work_order_type_id' => $nextWorkOrderType->id,
-            'work_order_group_id' => $workOrderGroup->id, // Link to the same group
-            'work_order_deadline' => now()->addDays(14), // Default deadline, can be configured
-            'created_by_user_id' => auth()->id(),
-            'status' => 'In Progress',
-            'priority' => 'Medium',
-        ]);
-
-        // Sync ONLY the completed account to the new work order
-        $newWorkOrder->accounts()->sync([$completedAccount->id]);
+        // Attach the completed account to the work order.
+        $workOrderForProcessing->accounts()->attach($completedAccount->id);
 
         // Assign employees for this specific account
         $projectName = $completedAccount->property_name;
         if (empty($projectName)) {
-            Log::warning("Account {$completedAccount->id} has no property_name, skipping assignment for new work order {$newWorkOrder->work_order_id}.");
+            Log::warning("Account {$completedAccount->id} has no property_name, skipping assignment for work order {$workOrderForProcessing->work_order_id}.");
         } else {
             $projectEmployeeIds = DB::table('project_milestone_assignees')->where('property_name', $projectName)->distinct()->pluck('employee_id')->toArray();
 
             if (empty($projectEmployeeIds)) {
-                Log::warning("No employees assigned to project '{$projectName}' in settings. Cannot auto-assign for work order {$newWorkOrder->work_order_id}.");
+                Log::warning("No employees assigned to project '{$projectName}' in settings. Cannot auto-assign for work order {$workOrderForProcessing->work_order_id}.");
             } else {
                 // Assign all pre-configured employees for that project to this new step.
                 foreach ($projectEmployeeIds as $employeeId) {
-                    DB::table('work_order_account_assignee')->insert(['work_order_id' => $newWorkOrder->work_order_id, 'account_id' => $completedAccount->id, 'employee_id' => $employeeId, 'created_at' => now(), 'updated_at' => now()]);
+                    DB::table('work_order_account_assignee')->insert(['work_order_id' => $workOrderForProcessing->work_order_id, 'account_id' => $completedAccount->id, 'employee_id' => $employeeId, 'created_at' => now(), 'updated_at' => now()]);
                 }
             }
         }
 
-        // Create a log entry for the automated creation
-        $logEntry = WorkOrderLog::create(['work_order_id' => $newWorkOrder->work_order_id, 'log_type' => $nextWorkOrderType->type_name, 'log_message' => "Work Order automatically created for account '{$completedAccount->account_name}' upon completion of previous step.", 'created_by_user_id' => auth()->id(), 'note_type' => 'System Generated']);
+        // Create a log entry for the automated action
+        $logEntry = WorkOrderLog::create(['work_order_id' => $workOrderForProcessing->work_order_id, 'log_type' => $nextWorkOrderType->type_name, 'log_message' => "Account '{$completedAccount->account_name}' automatically {$logMessageAction} this step upon completion of the previous one.", 'created_by_user_id' => auth()->id(), 'note_type' => 'System Generated']);
         $logEntry->accounts()->sync([$completedAccount->id]);
 
-        Log::info("Automatically created next step work order {$newWorkOrder->work_order_id} for '{$nextWorkOrderType->type_name}'.");
+        Log::info("Automation: Account {$completedAccount->id} was {$logMessageAction} work order {$workOrderForProcessing->work_order_id} ('{$nextWorkOrderType->type_name}').");
     }
 
 }
