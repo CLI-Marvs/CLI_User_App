@@ -1,4 +1,4 @@
-import CheckmarkIcon from '../../../../../public/Images/round_check.svg';
+import CheckmarkIcon from "../../../../../public/Images/round_check.svg";
 
 const WorkOrderCreatedModal = ({ isOpen, workOrderId, onClose }) => {
     if (!isOpen) return null;
@@ -8,8 +8,11 @@ const WorkOrderCreatedModal = ({ isOpen, workOrderId, onClose }) => {
             <div className="bg-white rounded-lg shadow-xl overflow-hidden sm:max-w-md w-[554px] mx-4 p-8 flex flex-col items-center">
                 <div className="flex items-center justify-center mb-4">
                     <span className="flex items-center justify-center">
-                        <img src={CheckmarkIcon} alt="Checkmark" className="h-10 w-10" />
-
+                        <img
+                            src={CheckmarkIcon}
+                            alt="Checkmark"
+                            className="h-10 w-10"
+                        />
                     </span>
                 </div>
                 <div className="text-center rounded-3xl mb-2 px-8 py-1 bg-[#067AC5]">

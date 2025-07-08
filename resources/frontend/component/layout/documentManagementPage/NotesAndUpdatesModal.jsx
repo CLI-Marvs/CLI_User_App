@@ -227,7 +227,7 @@ function NotesAndUpdatesModal({
 
     if (loading && !error) {
         return ReactDOM.createPortal(
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-[70]"> {/* Ensure z-index is high */}
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-[10002]"> {/* z-index > parent modal's content */}
                 <div className="bg-white rounded-lg p-8 w-auto min-w-[200px]">
                     <div className="flex justify-center items-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
@@ -240,7 +240,7 @@ function NotesAndUpdatesModal({
     }
 
     return ReactDOM.createPortal(
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[60]"> {/* Main modal z-index */}
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[10001]"> {/* z-index > parent modal's overlay */}
             <div
                 className="bg-white rounded-[10px] w-[449px] max-h-[90vh] overflow-y-auto shadow-xl p-[18px_25px] flex flex-col gap-[10px] relative"
                 onClick={(e) => e.stopPropagation()}

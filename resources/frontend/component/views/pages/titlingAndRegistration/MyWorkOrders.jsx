@@ -4,7 +4,11 @@ import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Card, CardFooter, Typography } from "@material-tailwind/react";
 import ReactPaginate from "react-paginate";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdKeyboardArrowDown } from "react-icons/md";
+import {
+    MdKeyboardArrowLeft,
+    MdKeyboardArrowRight,
+    MdKeyboardArrowDown,
+} from "react-icons/md";
 import { BsArrowsFullscreen } from "react-icons/bs";
 import ProcessWorkOrderModal from "../../../layout/documentManagementPage/ProcessWorkOrderModal";
 import _ from "lodash";
@@ -29,7 +33,8 @@ const MyWorkOrders = () => {
     const [selectedWorkOrderData, setSelectedWorkOrderData] = useState(null);
     const [selectedStepName, setSelectedStepName] = useState("");
     const [expandedGroup, setExpandedGroup] = useState(null);
-    const [isGroupDetailsModalOpen, setIsGroupDetailsModalOpen] = useState(false);
+    const [isGroupDetailsModalOpen, setIsGroupDetailsModalOpen] =
+        useState(false);
     const [groupDetailsData, setGroupDetailsData] = useState(null);
     const [isGroupDetailsLoading, setIsGroupDetailsLoading] = useState(null);
 
@@ -108,11 +113,13 @@ const MyWorkOrders = () => {
         setIsGroupDetailsLoading(true);
         setGroupDetailsData(null);
         try {
-            const response = await apiService.get(`/work-order-groups/${group.id}/details`);
+            const response = await apiService.get(
+                `/work-order-groups/${group.id}/details`
+            );
             setGroupDetailsData(response.data);
+            console.log("response", response.data);
         } catch (err) {
-            console.erro("Error fetching group details:", err);
-            handleclosedGroupDetailsModal();
+            console.error("Error fetching group details:", err);
         } finally {
             setIsGroupDetailsLoading(false);
         }
@@ -308,20 +315,34 @@ const MyWorkOrders = () => {
                     {/* Content */}
                     <div className="p-1 flex-1">
                         <ul className="space-y-1">
-                           {(group.work_orders || []).map((order) => (
-                                <li key={order.work_order_id} className="bg-white rounded-lg p-2 border border-gray-100 hover:bg-indigo-50/50">
+                            {(group.work_orders || []).map((order) => (
+                                <li
+                                    key={order.work_order_id}
+                                    className="bg-white rounded-lg p-2 border border-gray-100 hover:bg-indigo-50/50"
+                                >
                                     <div className="grid grid-cols-3 gap-x-2">
                                         <div className="col-span-2">
-                                            <p className="text-xs font-medium text-gray-800 truncate">{order.work_order_type?.type_name}</p>
+                                            <p className="text-xs font-medium text-gray-800 truncate">
+                                                {
+                                                    order.work_order_type
+                                                        ?.type_name
+                                                }
+                                            </p>
                                             <p className="text-xs text-gray-500 truncate">
-                                                {order.accounts?.map(a => a.account_name).join(', ')}
+                                                {order.accounts
+                                                    ?.map((a) => a.account_name)
+                                                    .join(", ")}
                                             </p>
                                         </div>
                                         <div className="flex items-center justify-end space-x-2">
                                             {getStatusBadge(order.status)}
                                             {canWorkOnOrder(order.status) && (
                                                 <button
-                                                    onClick={() => handleProcessClick(order)}
+                                                    onClick={() =>
+                                                        handleProcessClick(
+                                                            order
+                                                        )
+                                                    }
                                                     className="px-2 py-0.5 text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
                                                 >
                                                     Process
@@ -338,180 +359,288 @@ const MyWorkOrders = () => {
         </div>
     );
 
- const renderTableView = () => {
-    const toggleGroup = (groupId) => {
-        setExpandedGroup(prev => (prev === groupId ? null : groupId));
-    };
+    const renderTableView = () => {
+        const toggleGroup = (groupId) => {
+            setExpandedGroup((prev) => (prev === groupId ? null : groupId));
+        };
 
-    return (
-        <Card className="w-full overflow-hidden">
-            <div className="overflow-x-auto">
-                <table className="w-full min-w-max table-auto text-left">
-                    <thead>
-                        <tr>
-                            <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
-                                <Typography variant="small" className="!font-semibold text-white leading-none">
-                                    WO #
-                                </Typography>
-                            </th>
-                            <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
-                                <Typography variant="small" className="!font-semibold text-white leading-none">
-                                    Project
-                                </Typography>
-                            </th>
-                            <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
-                                <Typography variant="small" className="!font-semibold text-white leading-none">
-                                    Due Date
-                                </Typography>
-                            </th>
-                            <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
-                                <Typography variant="small" className="!font-semibold text-white leading-none">
-                                    Last Updated
-                                </Typography>
-                            </th>
-                            <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
-                                <Typography variant="small" className="!font-semibold text-white leading-none">
-                                    Actions
-                                </Typography>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {workOrderGroups.map((group) => {
-                            // Find the latest work order in the group (by updated_at or sequence)
-                            const latestWO = (group.work_orders || [])
-                                .slice()
-                                .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0];
-                            console.log("latestWO", latestWO);
-                            // --- Restore stepRows for expanded dropdown ---
-                            // 1. Gather all steps (work orders) and sort by sequence
-                            const steps = (group.work_orders || []).map(wo => ({
-                                ...wo,
-                                sequence: wo.work_order_type?.sequence ?? 0,
-                            })).sort((a, b) => a.sequence - b.sequence);
+        return (
+            <Card className="w-full overflow-hidden">
+                <div className="overflow-x-auto">
+                    <table className="w-full min-w-max table-auto text-left">
+                        <thead>
+                            <tr>
+                                <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
+                                    <Typography
+                                        variant="small"
+                                        className="!font-semibold text-white leading-none"
+                                    >
+                                        Work Order No.
+                                    </Typography>
+                                </th>
+                                <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
+                                    <Typography
+                                        variant="small"
+                                        className="!font-semibold text-white leading-none"
+                                    >
+                                        Project
+                                    </Typography>
+                                </th>
+                                <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
+                                    <Typography
+                                        variant="small"
+                                        className="!font-semibold text-white leading-none"
+                                    >
+                                        Due Date
+                                    </Typography>
+                                </th>
+                                <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
+                                    <Typography
+                                        variant="small"
+                                        className="!font-semibold text-white leading-none"
+                                    >
+                                        Last Updated
+                                    </Typography>
+                                </th>
+                                <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
+                                    <Typography
+                                        variant="small"
+                                        className="!font-semibold text-white leading-none"
+                                    >
+                                        Actions
+                                    </Typography>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {workOrderGroups.map((group) => {
+                                // Find the latest work order in the group (by updated_at or sequence)
+                                const latestWO = (group.work_orders || [])
+                                    .slice()
+                                    .sort(
+                                        (a, b) =>
+                                            new Date(b.updated_at) -
+                                            new Date(a.updated_at)
+                                    )[0];
+                                console.log("latestWO", latestWO);
+                                // --- Restore stepRows for expanded dropdown ---
+                                // 1. Gather all steps (work orders) and sort by sequence
+                                const steps = (group.work_orders || [])
+                                    .map((wo) => ({
+                                        ...wo,
+                                        sequence:
+                                            wo.work_order_type?.sequence ?? 0,
+                                    }))
+                                    .sort((a, b) => a.sequence - b.sequence);
 
-                            // 2. Build a map: accountId -> step with highest sequence
-                            const accountLatestStep = {};
-                            steps.forEach(step => {
-                                (step.accounts || []).forEach(acc => {
-                                    if (
-                                        !accountLatestStep[acc.id] ||
-                                        step.sequence > accountLatestStep[acc.id].sequence
-                                    ) {
-                                        accountLatestStep[acc.id] = {
-                                            stepId: step.work_order_id,
-                                            sequence: step.sequence,
-                                            stepName: step.work_order_type?.type_name || step.work_order,
-                                            workOrder: step,
-                                            account: acc,
-                                        };
-                                    }
+                                // 2. Build a map: accountId -> step with highest sequence
+                                const accountLatestStep = {};
+                                steps.forEach((step) => {
+                                    (step.accounts || []).forEach((acc) => {
+                                        if (
+                                            !accountLatestStep[acc.id] ||
+                                            step.sequence >
+                                                accountLatestStep[acc.id]
+                                                    .sequence
+                                        ) {
+                                            accountLatestStep[acc.id] = {
+                                                stepId: step.work_order_id,
+                                                sequence: step.sequence,
+                                                stepName:
+                                                    step.work_order_type
+                                                        ?.type_name ||
+                                                    step.work_order,
+                                                workOrder: step,
+                                                account: acc,
+                                            };
+                                        }
+                                    });
                                 });
-                            });
 
-                            // 3. For each step, filter accounts to only show those whose latest step is this step
-                            const stepRows = steps.map(step => {
-                                const filteredAccounts = (step.accounts || []).filter(
-                                    acc => accountLatestStep[acc.id]?.stepId === step.work_order_id
-                                );
-                                if (filteredAccounts.length === 0) return null;
-                                return filteredAccounts.map(account => (
-                                    <tr key={account.id} className="border-t border-gray-200">
-                                        <td className="p-2">{account.account_name}</td>
-                                        <td className="p-2">{step.work_order_type?.type_name || step.work_order}</td>
-                                        <td className="p-2">{getStatusBadge(step.status)}</td>
-                                        <td className="p-2">
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedAccountId(account.id);
-                                                    setSelectedWorkOrderData(step);
-                                                    setSelectedStepName(step.work_order_type?.type_name || step.work_order);
-                                                    setIsAddFilesModalOpen(true);
-                                            }}
-                                            className="px-2 py-0.5 text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
+                                // 3. For each step, filter accounts to only show those whose latest step is this step
+                                const stepRows = steps.map((step) => {
+                                    const filteredAccounts = (
+                                        step.accounts || []
+                                    ).filter(
+                                        (acc) =>
+                                            accountLatestStep[acc.id]
+                                                ?.stepId === step.work_order_id
+                                    );
+                                    if (filteredAccounts.length === 0)
+                                        return null;
+                                    return filteredAccounts.map((account) => (
+                                        <tr
+                                            key={account.id}
+                                            className="border-t border-gray-200"
                                         >
-                                            Add Files
-                                        </button>
-                                        </td>
-                                    </tr>
-                                ));
-                            });
-
-                            return (
-                                <React.Fragment key={group.id}>
-                                    <tr className="hover:bg-gray-100">
-                                        <td className="p-4 border-b border-gray-300 font-bold">
-                                            WO #{group.id}
-                                        </td>
-                                        <td className="p-4 border-b border-gray-300 text-sm opacity-70">
-                                            {latestWO?.accounts && latestWO.accounts.length > 0
-                                                ? latestWO.accounts
-                                                    .map(acc => acc.property_name || acc.project || acc.account_name || "No Property")
-                                                    .filter((v, i, a) => a.indexOf(v) === i)
-                                                    .join(", ")
-                                                : "No Property"}
-                                        </td>
-                                        <td className="p-4 border-b border-gray-300">
-                                            {latestWO?.work_order_deadline
-                                                ? formatDate(latestWO.work_order_deadline)
-                                                : "N/A"}
-                                        </td>
-                                        <td className="p-4 border-b border-gray-300">
-                                            {latestWO?.updated_at
-                                                ? formatDate(latestWO.updated_at)
-                                                : "N/A"}
-                                        </td>
-                                        <td className="p-4 border-b border-gray-300">
-                                            <div className="flex items-center justify-center space-x-3">
+                                            <td className="p-2">
+                                                {account.account_name}
+                                            </td>
+                                            <td className="p-2">
+                                                {step.work_order_type
+                                                    ?.type_name ||
+                                                    step.work_order}
+                                            </td>
+                                            <td className="p-2">
+                                                {getStatusBadge(step.status)}
+                                            </td>
+                                            <td className="p-2">
                                                 <button
-                                                    onClick={() => handleOpenGroupDetailsModal(group)}
-                                                    className="text-gray-500 hover:text-indigo-600"
-                                                    title="Maximize Details"
+                                                    onClick={() => {
+                                                        setSelectedAccountId(
+                                                            account.id
+                                                        );
+                                                        setSelectedWorkOrderData(
+                                                            step
+                                                        );
+                                                        setSelectedStepName(
+                                                            step.work_order_type
+                                                                ?.type_name ||
+                                                                step.work_order
+                                                        );
+                                                        setIsAddFilesModalOpen(
+                                                            true
+                                                        );
+                                                    }}
+                                                    className="px-2 py-0.5 text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
                                                 >
-                                                    <BsArrowsFullscreen size={16} />
+                                                    Add Files
                                                 </button>
-                                                <button
-                                                    onClick={() => toggleGroup(group.id)}
-                                                    className="text-gray-500 hover:text-indigo-600"
-                                                    title={expandedGroup === group.id ? "Collapse" : "Expand"}
-                                                >
-                                                    {expandedGroup === group.id ? (
-                                                        <MdKeyboardArrowDown size={20} />
-                                                    ) : (
-                                                        <MdKeyboardArrowRight size={20} />
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {expandedGroup === group.id && (
-                                        <tr>
-                                            <td colSpan={5} className="p-4 border-b border-gray-300 bg-gray-50">
-                                                <table className="w-full table-auto text-left">
-                                                    <thead>
-                                                        <tr>
-                                                            <th className="p-2 font-semibold">Account Name</th>
-                                                            <th className="p-2 font-semibold">Current Step</th>
-                                                            <th className="p-2 font-semibold">Overall Status</th>
-                                                            <th className="p-2 font-semibold">Action</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {stepRows.flat().filter(Boolean)}
-                                                    </tbody>
-                                                </table>
                                             </td>
                                         </tr>
-                                    )}
-                                </React.Fragment>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
-        </Card>
-    );
-};
+                                    ));
+                                });
+
+                                return (
+                                    <React.Fragment key={group.id}>
+                                        <tr className="hover:bg-gray-100">
+                                            <td className="p-4 border-b border-gray-300 font-bold">
+                                                {String(group.id).padStart(
+                                                    7,
+                                                    "1000-"
+                                                )}
+                                            </td>
+                                            <td className="p-4 border-b border-gray-300 text-sm opacity-70">
+                                                {latestWO?.accounts &&
+                                                latestWO.accounts.length > 0
+                                                    ? latestWO.accounts
+                                                          .map(
+                                                              (acc) =>
+                                                                  acc.property_name ||
+                                                                  acc.project ||
+                                                                  acc.account_name ||
+                                                                  "No Property"
+                                                          )
+                                                          .filter(
+                                                              (v, i, a) =>
+                                                                  a.indexOf(
+                                                                      v
+                                                                  ) === i
+                                                          )
+                                                          .join(", ")
+                                                    : "No Property"}
+                                            </td>
+                                            <td className="p-4 border-b border-gray-300">
+                                                {latestWO?.work_order_deadline
+                                                    ? formatDate(
+                                                          latestWO.work_order_deadline
+                                                      )
+                                                    : "N/A"}
+                                            </td>
+                                            <td className="p-4 border-b border-gray-300">
+                                                {latestWO?.updated_at
+                                                    ? formatDate(
+                                                          latestWO.updated_at
+                                                      )
+                                                    : "N/A"}
+                                            </td>
+                                            <td className="p-4 border-b border-gray-300">
+                                                <div className="flex items-center justify-center space-x-3">
+                                                    <button
+                                                        onClick={() =>
+                                                            handleOpenGroupDetailsModal(
+                                                                group
+                                                            )
+                                                        }
+                                                        className="text-gray-500 hover:text-indigo-600"
+                                                        title="Maximize Details"
+                                                    >
+                                                        <BsArrowsFullscreen
+                                                            size={16}
+                                                        />
+                                                    </button>
+                                                    <button
+                                                        onClick={() =>
+                                                            toggleGroup(
+                                                                group.id
+                                                            )
+                                                        }
+                                                        className="text-gray-500 hover:text-indigo-600"
+                                                        title={
+                                                            expandedGroup ===
+                                                            group.id
+                                                                ? "Collapse"
+                                                                : "Expand"
+                                                        }
+                                                    >
+                                                        {expandedGroup ===
+                                                        group.id ? (
+                                                            <MdKeyboardArrowDown
+                                                                size={20}
+                                                            />
+                                                        ) : (
+                                                            <MdKeyboardArrowRight
+                                                                size={20}
+                                                            />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {expandedGroup === group.id && (
+                                            <tr>
+                                                <td
+                                                    colSpan={5}
+                                                    className="p-4 border-b border-gray-300 bg-gray-50"
+                                                >
+                                                    <table className="w-full table-auto text-left">
+                                                        <thead>
+                                                            <tr>
+                                                                <th className="p-2 font-semibold">
+                                                                    Account Name
+                                                                </th>
+                                                                <th className="p-2 font-semibold">
+                                                                    Current Step
+                                                                </th>
+                                                                <th className="p-2 font-semibold">
+                                                                    Overall
+                                                                    Status
+                                                                </th>
+                                                                <th className="p-2 font-semibold">
+                                                                    Action
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {stepRows
+                                                                .flat()
+                                                                .filter(
+                                                                    Boolean
+                                                                )}
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </React.Fragment>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+                </div>
+            </Card>
+        );
+    };
 
     const renderPagination = () => (
         <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4 mt-4">
@@ -661,14 +790,6 @@ const MyWorkOrders = () => {
                                 </option>
                             </select>
                         </div>
-                        <div className="flex items-end">
-                            <div className="text-sm text-gray-600">
-                                <span className="font-medium">
-                                    {totalWorkOrders}
-                                </span>{" "}
-                                total work orders
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -768,14 +889,16 @@ const MyWorkOrders = () => {
                     isLoading={isGroupDetailsLoading}
                     getStatusBadge={getStatusBadge}
                 />
-                {isAddFilesModalOpen && selectedAccountId && selectedWorkOrderData && (
-                    <AddFilesModal
-                        selectedAccountId={selectedAccountId}
-                        onClose={() => setIsAddFilesModalOpen(false)}
-                        selectedWorkOrder={selectedStepName}
-                        workOrderData={selectedWorkOrderData}
-                    />
-                )}
+                {isAddFilesModalOpen &&
+                    selectedAccountId &&
+                    selectedWorkOrderData && (
+                        <AddFilesModal
+                            selectedAccountId={selectedAccountId}
+                            onClose={() => setIsAddFilesModalOpen(false)}
+                            selectedWorkOrder={selectedStepName}
+                            workOrderData={selectedWorkOrderData}
+                        />
+                    )}
             </div>
         </div>
     );

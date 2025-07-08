@@ -78,7 +78,7 @@ Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees'
 Route::post('/update-info', [ConcernController::class, 'updateInfo']);
 // Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
-
+ Route::get('/work-order-groups/{groupId}/details', [WorkOrderGroupController::class, 'showDetails']);
 
 // for titling and registration
 Route::middleware('auth:sanctum')->group(function () {
@@ -190,7 +190,7 @@ Route::prefix('taken-out-accounts')->group(function () {
     Route::put('/projects/{projectName}/milestones/{submilestone}/assignees', [ProjectAssigneeController::class, 'updateAssignees'])->where('projectName', '.*');
     Route::delete('/projects/{projectName}/milestones/{submilestone}/assignees/{employee}', [ProjectAssigneeController::class, 'removeAssignee'])->where('projectName', '.*');
     //for workorder group
-    Route::get('/work-order-groups/{groupId}/details', [WorkOrderGroupController::class, 'showDetails']);
+   
 });
 
 //* For Sap 

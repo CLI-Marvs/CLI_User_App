@@ -531,18 +531,9 @@ const WorkOrderView = () => {
                                                     variant="small"
                                                     className="font-semibold text-[#175D5F]"
                                                 >
-                                                    WO-
                                                     {String(
                                                         group.groupId
-                                                    ).padStart(6, "0")}
-                                                    <br />
-                                                    <span className="text-gray-600 text-sm">
-                                                        {
-                                                            group.workOrders
-                                                                .length
-                                                        }{" "}
-                                                        work order(s)
-                                                    </span>
+                                                    ).padStart(7, "1000-")}
                                                 </Typography>
                                             </div>
                                         </td>
