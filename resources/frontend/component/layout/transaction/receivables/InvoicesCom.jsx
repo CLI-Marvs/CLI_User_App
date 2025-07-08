@@ -6,7 +6,6 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import "./loader.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import apiServiceSap from "../../../servicesApi/apiServiceSap";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
 import apiService from "../../../servicesApi/apiService";
 import moment from "moment";
@@ -125,7 +124,7 @@ const InvoicesCom = () => {
 
     return (
         <>
-            <div className="overflow-y-hidden flex flex-col space-y-2 w-full">
+            <div className="flex flex-col space-y-2 w-full">
                     <TransactionSearchBar
                         fields={fields}
                         searchValues={searchValues}

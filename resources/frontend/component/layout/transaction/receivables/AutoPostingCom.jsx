@@ -6,7 +6,6 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { transaction } from "@/component/servicesApi/apiCalls/transactions";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
 import Skeletons from "@/component/Skeletons";
-import apiServiceSap from "@/component/servicesApi/apiServiceSap";
 import { usePropertyFormatter } from "@/component/layout/transaction/hooks/usePropertyFormatter";
 
 const AutoPostingCom = () => {
@@ -201,10 +200,6 @@ const AutoPostingCom = () => {
                     </soap:Body>
                     </soap:Envelope>`;
 
-                const response = await apiServiceSap.post(
-                    "post-data-sap",
-                    soapBody
-                );
             }
             alert("All Data Posted Successfully!");
         } catch (error) {
@@ -392,7 +387,7 @@ const AutoPostingCom = () => {
     ];
 
     return (
-        <div className="overflow-y-hidden flex flex-col space-y-1 w-full">
+        <div className="flex flex-col space-y-1 w-full">
             <TransactionSearchBar
                 fields={fields}
                 searchValues={searchValues}

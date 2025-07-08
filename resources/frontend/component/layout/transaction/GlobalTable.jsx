@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import Skeletons from "@/component/Skeletons";
 
-const GlobalTable = ({ columns, data, loading }) => {
+const GlobalTable = ({ columns, data, loading, columnsLoading }) => {
     const skeletonRows = 5;
     const tableRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -27,7 +27,9 @@ const GlobalTable = ({ columns, data, loading }) => {
 
     return (
         <div
-            className={`overflow-x-auto px-2  ${isDragging ? "cursor-grab active:cursor-grabbing" : ""}`}
+            className={`overflow-x-auto px-2 ${
+                isDragging ? "cursor-grab active:cursor-grabbing" : ""
+            }`}
             ref={tableRef}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
@@ -37,23 +39,41 @@ const GlobalTable = ({ columns, data, loading }) => {
             <table className="border-separate border-spacing-y-2 w-full min-w-max">
                 <thead>
                     <tr className="text-white bg-custom-lightgreen">
-                        {columns.map((col, index) => (
-                            <th
-                                key={index}
-                                className="border-r-[1px] border-[#B9B7B7] px-[10px] py-[16px] text-sm shadow-custom12 font-semibold text-center"
-                            >
-                                {col.header}
-                            </th>
-                        ))}
+                        {!columnsLoading
+                            ? columns.map((col, index) => (
+                                  <th
+                                      key={index}
+                                      className="border-r-[1px] border-[#B9B7B7] px-[10px] py-[16px] text-sm shadow-custom12 font-semibold text-center"
+                                  >
+                                      {col.header}
+                                  </th>
+                              ))
+                            : [...Array(4)].map((_, index) => (
+                                  <th
+                                      key={index}
+                                      className="border-r-[1px] border-[#B9B7B7] px-[10px] py-[16px] text-sm shadow-custom12 text-center"
+                                  >
+                                      <Skeletons height={20} width={80} />
+                                  </th>
+                              ))}
                     </tr>
                 </thead>
                 <tbody>
-                    {loading ? (
+                    {loading  || columnsLoading  ? (
                         <>
                             {[...Array(skeletonRows)].map((_, rowIndex) => (
-                                <tr key={rowIndex} className="border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11">
-                                    {columns.map((_, colIndex) => (
-                                        <td key={colIndex} className="px-3 py-3 text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7]">
+                                <tr
+                                    key={rowIndex}
+                                    className="border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11"
+                                >
+                                    {(columns.length > 0
+                                        ? columns
+                                        : [...Array(4)]
+                                    ).map((_, colIndex) => (
+                                        <td
+                                            key={colIndex}
+                                            className="px-3 py-3 text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7]"
+                                        >
                                             <Skeletons height={20} />
                                         </td>
                                     ))}
@@ -63,10 +83,18 @@ const GlobalTable = ({ columns, data, loading }) => {
                     ) : data && data.length > 0 ? (
                         <>
                             {data.map((row, rowIndex) => (
-                                <tr key={rowIndex} className="border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11">
+                                <tr
+                                    key={rowIndex}
+                                    className="border-r-[1px] border-opacity-10 border-[#B9B7B7] shadow-custom11"
+                                >
                                     {columns.map((col, colIndex) => (
-                                        <td key={colIndex} className="px-3 py-3 text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7]">
-                                            {col.render ? col.render(row) : row[col.accessor]}
+                                        <td
+                                            key={colIndex}
+                                            className="px-3 py-3 text-xs border-r-[1px] border-opacity-50 border-[#B9B7B7]"
+                                        >
+                                            {col.render
+                                                ? col.render(row)
+                                                : row[col.accessor]}
                                         </td>
                                     ))}
                                 </tr>
@@ -74,7 +102,10 @@ const GlobalTable = ({ columns, data, loading }) => {
                         </>
                     ) : (
                         <tr>
-                            <td colSpan={columns.length} className="text-center py-4 text-gray-500">
+                            <td
+                                colSpan={columns.length || 4}
+                                className="text-center py-4 text-gray-500"
+                            >
                                 No data to show.
                             </td>
                         </tr>

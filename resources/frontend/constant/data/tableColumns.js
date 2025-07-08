@@ -20,4 +20,16 @@ export const PROPERTY_SETTING_COLUMNS = [
     { label: "Entity", width: "w-[150px]" },
 ];
 
+export const WALKIN_COLUMNS = [
+    { label: "Priority Number", width: "w-[150px]" },
+    { label: "Person Type", width: "w-[150px]" },
+    { label: "Action", width: "w-[150px]" },
+];
 
+export const WALKIN_HISTORY_COLUMNS = [
+    { label: "Full Name", width: "w-[200px]" },
+    { label: "Priority Number", width: "w-[250px]" },
+    { label: "Inquiry Type", width: "w-[150px]" },
+    { label: "Status", width: "w-[200px]" },
+    { label: "Date", width: "w-[150px]" },
+];

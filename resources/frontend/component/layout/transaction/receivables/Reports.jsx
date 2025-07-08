@@ -7,22 +7,21 @@ import reportGcash from "../../../../../../public/Images/report-gcash.png";
 import { format } from "date-fns";
 
 import { DateRange } from "react-date-range";
-import { addDays } from "date-fns";
 import "react-date-range/dist/styles.css";
 import "react-date-range/dist/theme/default.css";
-import { transaction } from "@/component/servicesApi/apiCalls/transactions";
-import moment from "moment";
-import { useTransactionContext } from "@/context/Transaction/TransactionContext";
 import Skeletons from "@/component/Skeletons";
-import { useTransactionReports } from "../hooks/useTransactionReports";
+import { useNavigate } from "react-router-dom";
+import { useTransactionContext } from "@/context/Transaction/TransactionContext";
+import moment from "moment";
+import { useTransactionReports } from "../hooks/useTransactionQueries";
 
 const cardData = [
-    { label: "Bank Recon Amount", name: "total_bank_recon_amount" },
-    { label: "Net Posting", name: "total_net_posting" },
-    { label: "Bill", name: "total_bill" },
-    { label: "Creditable Withholding Tax", name: "total_withholding_tax" },
-    { label: "MDR Amount", name: "total_mdr_amount" },
-    { label: "Gateway Fee", name: "total_gtw" },
+    { label: "Bank Recon Amount", name: "bank_recon_amount"},
+    { label: "Net Posting", name: "net_posting_amount" },
+    { label: "Bill", name: "amount" },
+    { label: "Creditable Withholding Tax", name: "withholding_tax" },
+    { label: "MDR Amount", name: "mdr" },
+    { label: "Gateway Fee", name: "gateway_fee" },
 ];
 
 const eWallets = [
@@ -43,7 +42,9 @@ const eWallets = [
 const Reports = () => {
     const [activeTab, setActiveTab] = useState("Credit/Debit Card");
     const [showCalendar, setShowCalendar] = useState(false);
-    const [paymentOption, setPaymentOption] = useState("Credit/Debit Card");
+    const navigate = useNavigate();
+    const { setTransactions, setEnabled } = useTransactionContext();
+
     const [dateRange, setDateRange] = useState([
         {
             startDate: new Date(),
@@ -72,9 +73,8 @@ const Reports = () => {
     const toggleCalendar = () => {
         setShowCalendar((prev) => !prev);
     };
-    
+
     const toggleTabs = (tab) => {
-        setPaymentOption(tab);
         setActiveTab(tab);
     };
 
@@ -82,7 +82,7 @@ const Reports = () => {
         setDateRange(state);
     };
     const confirmDates = () => {
-        setShowCalendar(false); 
+        setShowCalendar(false);
     };
     const resetDates = () => {
         setState([
@@ -109,14 +109,30 @@ const Reports = () => {
         };
     }, [wrapperRef]);
 
-    function formatAmountPH(value) {
+    const formatAmountPH = (value) => {
         const num = parseFloat(value);
         if (isNaN(num)) return "0.00";
         return num.toLocaleString("en-PH", {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2,
         });
-    }
+    };
+
+    const navigateToTransaction = (p_method) => {
+        const startDate = moment(dateRange[0]?.startDate).format("YYYY-MM-DD");
+        const endDate = moment(dateRange[0]?.endDate).format("YYYY-MM-DD");
+        navigate("/transaction/receivables/transactions");
+        setTransactions((prev) => ({
+            ...prev,
+            loading: true,
+            filters: {
+                payment_option: p_method,
+                start_date: startDate,
+                end_date: endDate,
+            },
+        }));
+        setEnabled(true);
+    };
 
     const TabItem = ({ isActive, onClick, icon, label }) => (
         <div
@@ -243,17 +259,29 @@ const Reports = () => {
                     {cardData.map((item, index) => (
                         <div
                             key={index}
-                            className="w-full h-[132px] bg-white rounded-[16px] p-[40px] pr-[48px] pl-[48px] flex flex-col justify-between shadow-card space-y-2"
+                            className="w-full h-full bg-white rounded-[16px] py-[40px] pr-[48px] pl-[48px] flex flex-col justify-between shadow-card space-y-2"
                         >
                             <span className="text-base text-custom-solidgreen font-medium">
                                 {item.label}
                             </span>
                             {isLoading ? (
-                                <Skeletons height={20} width={100} />
+                                <>
+                                    <Skeletons height={20} width={100} />
+                                    <div className="flex justify-end">
+                                        <Skeletons height={16} width={120} />{" "}
+                                    </div>
+                                </>
                             ) : (
-                                <span className="text-2xl font-semibold text-[#212121] montserrat-medium">
-                                    ₱{formatAmountPH(reportData[item.name])}
-                                </span>
+                                <>
+                                    <span className="text-2xl font-semibold text-[#212121] montserrat-medium">
+                                        ₱{formatAmountPH(reportData[item.name])}
+                                    </span>
+                                    <div className="flex justify-end cursor-pointer">
+                                        <span className="text-[#348017] font-medium" onClick={() => navigateToTransaction("Credit/Debit Card")}>
+                                            View Breakdown <span>&gt;</span>
+                                        </span>
+                                    </div>
+                                </>
                             )}
                         </div>
                     ))}
@@ -277,7 +305,7 @@ const Reports = () => {
                                 <span className="text-[40px] font-semibold text-[#212121] montserrat-medium">
                                     ₱
                                     {formatAmountPH(
-                                        reportData[item.name]?.total_bill
+                                        reportData[item.name]?.amount
                                     )}
                                 </span>
                             )}
@@ -286,14 +314,31 @@ const Reports = () => {
                                 {item.gatewayLabel}
                             </span>
                             {isLoading ? (
-                                <Skeletons height={40} width={120} />
+                                <>
+                                    <Skeletons height={40} width={120} />
+                                    <div className="flex justify-end">
+                                        <Skeletons height={16} width={120} />{" "}
+                                    </div>
+                                </>
                             ) : (
-                                <span className="text-[40px] font-semibold text-[#212121] montserrat-medium">
-                                    ₱
-                                    {formatAmountPH(
-                                        reportData[item.name]?.total_pnf
-                                    )}
-                                </span>
+                                <>
+                                    <span className="text-[40px] font-semibold text-[#212121] montserrat-medium">
+                                        ₱
+                                        {formatAmountPH(
+                                            reportData[item.name]?.paynamics_fee
+                                        )}
+                                    </span>
+                                    <div className="flex justify-end cursor-pointer">
+                                        <span
+                                            className="text-[#348017] font-medium"
+                                            onClick={() =>
+                                                navigateToTransaction(item.name)
+                                            }
+                                        >
+                                            View Breakdown <span>&gt;</span>
+                                        </span>
+                                    </div>
+                                </>
                             )}
                         </div>
                     ))}
