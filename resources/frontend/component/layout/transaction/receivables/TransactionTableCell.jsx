@@ -73,9 +73,6 @@ const TransactionTableCell = ({ type, row }) => {
                         <span className="text-[13px] montserrat-semibold">
                             {toLowerCaseText(row.property_name)}
                         </span>
-                        {/*  <span className="text-xs text-custom-lightgreen break-all">
-                            {row.remarks}
-                        </span> */}
                     </div>
                     <div className="flex flex-col montserrat-regular">
                         <div className="flex gap-2">
@@ -106,7 +103,7 @@ const TransactionTableCell = ({ type, row }) => {
                         <div className="flex flex-col text-[13px]">
                             <div className="mt-1 text-gray-700 flex flex-col">
                                 <div className="flex justify-between">
-                                    <span>Bill:</span>
+                                    <span>Bill Amount:</span>
                                     <span>
                                         Php{" "}
                                         {parseFloat(row.amount).toLocaleString(
@@ -199,7 +196,7 @@ const TransactionTableCell = ({ type, row }) => {
                         <div className="flex flex-col text-[13px]">
                             <div className="mt-1 text-gray-700 flex flex-col">
                                 <div className="flex justify-between">
-                                    <span>Payment Amount:</span>
+                                    <span>Bill Amount:</span>
                                     <span>
                                         Php{" "}
                                         {parseFloat(row.amount).toLocaleString(
@@ -212,31 +209,7 @@ const TransactionTableCell = ({ type, row }) => {
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span>CLI Markup:</span>
-                                    <span>
-                                        Php{" "}
-                                        {parseFloat(
-                                            row.cli_markup
-                                        ).toLocaleString("en-PH", {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2,
-                                        })}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Bank Fee:</span>
-                                    <span>
-                                        Php{" "}
-                                        {parseFloat(
-                                            row.bank_fee
-                                        ).toLocaleString("en-PH", {
-                                            minimumFractionDigits: 2,
-                                            maximumFractionDigits: 2,
-                                        })}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span>Paynamics Fee:</span>
+                                    <span>Gateway Fee:</span>
                                     <span>
                                         Php{" "}
                                         {parseFloat(
@@ -326,7 +299,7 @@ const TransactionTableCell = ({ type, row }) => {
             );
 
         default:
-            return <span>{row[type]}</span>;
+            return <span className="montserrat-regular text-[13px] break-all">{row[type]}</span>;
     }
 };
 

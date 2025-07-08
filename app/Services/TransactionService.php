@@ -28,7 +28,7 @@ class TransactionService
                 'body' => $request->getContent(),
                 'timeout' => 14400,
             ]);
-           } catch (\Throwable $th) {
+        } catch (\Throwable $th) {
             \Log::error('SAP Request Error: ', [
                 'error' => $e->getMessage(),
                 'response' => $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response'
@@ -69,7 +69,7 @@ class TransactionService
     {
         return $this->repository->runAutoPosting();
     }
-   
+
     public function paygateWebHook(array $data)
     {
         return $this->repository->paygateWebHook($data);
@@ -79,7 +79,7 @@ class TransactionService
     {
         return $this->repository->clearedBankStatements($data);
     }
-    
+
     public function retrieveTransactions(array $data)
     {
         return $this->repository->retrieveTransactions($data);
@@ -109,4 +109,18 @@ class TransactionService
         return $this->repository->transactionReports($data);
     }
 
+    public function storeViewAndColumns(array $data, int $userId)
+    {
+        return $this->repository->storeViewAndColumns($data, $userId);
+    }
+
+    public function getTransactionColumns(array $data, int $userId)
+    {
+        return $this->repository->getTransactionColumns($data, $userId);
+    }
+
+    public function setDefaultView(array $data, int $userId)
+    {
+        return $this->repository->setDefaultView($data, $userId);
+    }
 }

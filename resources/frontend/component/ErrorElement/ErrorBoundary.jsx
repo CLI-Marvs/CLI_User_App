@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 
 const ErrorBoundary = ({ children }) => {
     const [hasError, setHasError] = useState(false);
+    const token = localStorage.getItem('authToken');
 
     useEffect(() => {
         const errorHandler = (error, errorInfo) => {
@@ -18,7 +19,7 @@ const ErrorBoundary = ({ children }) => {
         };
     }, []);
 
-    if (hasError) {
+    if (hasError && !token) {
         return (
             <div className="relative flex flex-col justify-center items-center h-screen text-center">
                 <div className="absolute inset-0"></div>

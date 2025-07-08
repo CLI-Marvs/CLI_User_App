@@ -19,6 +19,7 @@ import InquiryListView from "./views/pages/raiseaconcernViews/InquiryListView";
 import InquiryThreadView from "./views/pages/raiseaconcernViews/InquiryThreadView";
 import CallBackView from "./views/pages/callback/CallBackView";
 import ReportViews from "./views/pages/raiseaconcernViews/ReportViews";
+import WalkinView from "@/component/views/pages/walkinEmojiViews/WalkinView";
 import PropertyAndPricingLayout from "./views/layout/PropertyAndPricingLayout";
 import PricingMasterListView from "./views/pages/PropertyAndPricingViews/PricingMasterListView";
 import WorkFlowNotificationView from "./views/pages/PropertyAndPricingViews/WorkFlowNotificationView";
@@ -61,6 +62,7 @@ import SurveyReviewView from "./views/pages/surveyrelatedreportsViews/SurveyRevi
 import SurveyMainReportView from "./views/pages/surveyrelatedreportsViews/SurveyMainReportView";
 import SurveySummaryView from "./views/pages/surveyrelatedreportsViews/SurveySummaryView";
 
+import WalkinTransactionHistoryView from '@/component/views/pages/walkinEmojiViews/WalkinTransactionHistoryView';
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, children }) => {
     const { hasPermission } = useStateContext();
@@ -278,6 +280,19 @@ const App = () => {
                                 {
                                     path: "report/survey/:id?",
                                     element: <SurveySummaryView />,
+                                    
+                                },
+                                {
+                                    path: "walk-in",
+                                    element: <WalkinView />,
+                                    children: [
+                                        {
+                                            path: "history",
+                                            element: (
+                                                <WalkinTransactionHistoryView />
+                                            ),
+                                        },
+                                    ],
                                 },
                                 {
                                     path: "autoassign",
