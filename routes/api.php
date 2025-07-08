@@ -119,6 +119,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/bank-statements-store', 'storeBankStatements');
         Route::get('/retrieve-banks', 'retrieveBanks');
         Route::get('/transaction-reports', 'transactionReports');
+        Route::post('/export-transactions', 'exportTransactions');
+        Route::get('/sub-feature-id', 'retrieveSubFeatureId');
+        Route::get('/transaction-columns', 'getTransactionColumns');
+        Route::post('/store-view-and-columns', 'storeViewAndColumns');
+        Route::put('/set-default-view', 'setDefaultView');
     });
     Route::apiResource('markup-settings', MarkupSettignsController::class);
     

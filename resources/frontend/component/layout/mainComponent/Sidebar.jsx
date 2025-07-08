@@ -138,7 +138,7 @@ const Sidebar = () => {
         "/inquirymanagement/settings/versionlogs",
         "/inquirymanagement/settings/surveysettings",
         "/inquirymanagement/settings/surveysettings/surveyreview",
-        
+
       ].includes(pathname) || isSurveyForm || isSurveyReport:
         setIsInvoiceOpen(false);
         setInquiryOpen(true);
@@ -170,9 +170,9 @@ const Sidebar = () => {
           <Link to="/notification">
             <ListItem
               className={`flex text-sm items-center w-[185px] h-[36px] pl-[12px] pr-[60px] gap-2 rounded-[10px] ${activeItem === "notification" &&
-                  location.pathname.startsWith("/notification")
-                  ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold shadow-custom4"
-                  : " hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                location.pathname.startsWith("/notification")
+                ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold shadow-custom4"
+                : " hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                 } `}
               onClick={() => handleItemClick("notification")}
             >
@@ -233,6 +233,21 @@ const Sidebar = () => {
                     }
                   >
                     Feedback
+                  </ListItem>
+                </Link>
+                <Link to="/inquirymanagement/walk-in">
+                  <ListItem
+                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
+                      "/inquirymanagement/walk-in"
+                    )
+                        ? "bg-white text-custom-solidgreen font-semibold"
+                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      }`}
+                    onClick={() =>
+                      handleItemClick("/walk-in")
+                    }
+                  >
+                    Walk-in
                   </ListItem>
                 </Link>
                 <div className="relative">
@@ -356,8 +371,8 @@ const Sidebar = () => {
                     className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
                       "/transaction/bank-monitoring/bank-statements"
                     )
-                        ? "bg-white text-custom-solidgreen font-semibold"
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      ? "bg-white text-custom-solidgreen font-semibold"
+                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                       }`}
                     onClick={() =>
                       handleItemTransactionClick(
@@ -369,44 +384,42 @@ const Sidebar = () => {
                   </ListItem>
                 </Link>
 
-                                <Link to="/transaction/receivables/transactions">
-                                    <ListItem
-                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
-                                            location.pathname.startsWith(
-                                                "/transaction/receivables"
-                                            )
-                                                ? "bg-white text-custom-solidgreen font-semibold"
-                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
-                                        onClick={() =>
-                                            handleItemTransactionClick(
-                                                "/transaction/receivables/transactions"
-                                            )
-                                        }
-                                    >
-                                        Online Payment
-                                    </ListItem>
-                                </Link>
-                                <Link to="/transaction/settings/markup">
-                                    <ListItem
-                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
-                                            location.pathname.startsWith(
-                                                "/transaction/settings"
-                                            )
-                                                ? "bg-white text-custom-solidgreen font-semibold"
-                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
-                                        onClick={() =>
-                                            handleItemTransactionClick(
-                                                "/transaction/settings/markup"
-                                            )
-                                        }
-                                    >
-                                        Settings
-                                    </ListItem>
-                                </Link>
-                            </div>
-                        )}
+                <Link to="/transaction/receivables/transactions">
+                  <ListItem
+                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
+                      "/transaction/receivables"
+                    )
+                        ? "bg-white text-custom-solidgreen font-semibold"
+                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      }`}
+                    onClick={() =>
+                      handleItemTransactionClick(
+                        "/transaction/receivables/transactions"
+                      )
+                    }
+                  >
+                    Online Payment
+                  </ListItem>
+                </Link>
+                <Link to="/transaction/settings/markup">
+                  <ListItem
+                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
+                      "/transaction/settings"
+                    )
+                        ? "bg-white text-custom-solidgreen font-semibold"
+                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                      }`}
+                    onClick={() =>
+                      handleItemTransactionClick(
+                        "/transaction/settings/markup"
+                      )
+                    }
+                  >
+                    Settings
+                  </ListItem>
+                </Link>
+              </div>
+            )}
 
           {/* <Link to="/sales/customer">
                         <ListItem
@@ -443,8 +456,8 @@ const Sidebar = () => {
                   className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
                     "/sales/customer"
                   )
-                      ? "bg-white text-custom-solidgreen font-semibold"
-                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                    ? "bg-white text-custom-solidgreen font-semibold"
+                    : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
                     }`}
                   onClick={() =>
                     handleItemSalesClick("/customer")
@@ -565,8 +578,8 @@ const Sidebar = () => {
                     className={`h-[48px] w-full py-[8px] px-[18px] text-sm rounded-[25px] ${location.pathname.startsWith(
                       "/super-admin/user-rights-and-permissions"
                     )
-                        ? "bg-white text-custom-solidgreen font-semibold"
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
+                      ? "bg-white text-custom-solidgreen font-semibold"
+                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
                       }`}
                     onClick={() =>
                       handleItemClick(
@@ -582,8 +595,8 @@ const Sidebar = () => {
                     className={`h-[48px] w-full py-[8px] px-[18px] text-sm rounded-[25px] ${location.pathname.startsWith(
                       "/super-admin/property-settings"
                     )
-                        ? "bg-white text-custom-solidgreen font-semibold"
-                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
+                      ? "bg-white text-custom-solidgreen font-semibold"
+                      : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
                       }`}
                     onClick={() =>
                       handleItemClick("property-settings")
