@@ -495,4 +495,25 @@ class SurveyController extends Controller
             'data' => $result
         ]);
     }
+
+    public function getSurveyRatingDetails($id)
+    {
+
+        $survey = Survey_list::find($id);
+
+        if (!$survey) {
+            return response()->json(['error' => 'Survey not found'], 404);
+        }
+
+
+        $ratings = ExperienceRating::where('survey_link', $survey->survey_link)
+            ->orderBy('created_at', 'desc')
+            ->select('ticket_id', 'email', 'rating', 'created_at')
+            ->get();
+
+
+        return response()->json([
+            'data' => $ratings,
+        ]);
+    }
 }

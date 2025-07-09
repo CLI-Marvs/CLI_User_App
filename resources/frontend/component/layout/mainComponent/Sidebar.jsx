@@ -235,7 +235,7 @@ const Sidebar = () => {
                     Feedback
                   </ListItem>
                 </Link>
-                <Link to="/inquirymanagement/walk-in">
+                 <Link to="/inquirymanagement/walk-in">
                   <ListItem
                     className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
                       "/inquirymanagement/walk-in"
