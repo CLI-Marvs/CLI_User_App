@@ -29,6 +29,8 @@ export const SurveySection = (
         updateDescription,
         updateConsent,
         updateConsentDescription,
+        updateInputType,
+        resetOption,
 
     }) => {
 
@@ -128,28 +130,22 @@ export const SurveySection = (
                     className={`w-full rounded-[10px] bg-custom-lightestgreen p-[10px] flex flex-col gap-[10px] ${data?.dataQASet?.length === 0 && "hidden"
                         }`}
                 >
-                    {data?.dataQASet?.map((item, questionIndex) => {
-                        const isLast = questionIndex === data.dataQASet.length - 1;
-
-                        return (
-                            <div
-                                key={item.id}
-                                ref={isLast ? lastQuestionRef : null}
-                            >
-                                <SurveyAddQuestion
-                                    data={item}
-                                    sectionIndex={sectionIndex}
-                                    questionIndex={questionIndex}
-                                    onDelete={() => deleteQuestion(sectionIndex, questionIndex)}
-                                    addOption={() => addOption(sectionIndex, questionIndex)}
-                                    deleteOption={deleteOption}
-                                    updateQuestionText={updateQuestionText}
-                                    updateOptionText={updateOptionText}
-                                    updateIsRequired={updateIsRequired}
-                                />
-                            </div>
-                        );
-                    })}
+                    {data?.dataQASet?.map((item, questionIndex) => (
+                        <SurveyAddQuestion
+                            key={item.id}
+                            data={item}
+                            sectionIndex={sectionIndex}
+                            questionIndex={questionIndex}
+                            onDelete={() => deleteQuestion(sectionIndex, questionIndex)}
+                            addOption={() => addOption(sectionIndex, questionIndex)}
+                            deleteOption={deleteOption}
+                            updateQuestionText={updateQuestionText}
+                            updateOptionText={updateOptionText}
+                            updateIsRequired={updateIsRequired}
+                            updateInputType={updateInputType}
+                            resetOption={resetOption}
+                        />
+                    ))}
                 </div>
                 {data?.dataQASet?.length > 2 && (
                     <div className='w-full border-custom-grayA5 my-[20px]'>

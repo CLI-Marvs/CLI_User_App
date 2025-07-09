@@ -3,16 +3,35 @@ import { IoMdRadioButtonOn } from "react-icons/io";
 import { RxCross2 } from "react-icons/rx";
 import { MdContentCopy } from "react-icons/md";
 import { FaRegTrashAlt } from "react-icons/fa";
+import { IoIosCheckboxOutline } from "react-icons/io";
+import { MdOutlineShortText } from "react-icons/md";
+import { GrTextAlignFull } from "react-icons/gr";
 import { SurveyRadioOption } from './SurveyRadioOption';
 import { add } from 'lodash';
 import SurveyDeleteModal from './SurveyDeleteModal';
+
 
 const adjustHeight = (element) => {
     element.style.height = "auto";
     element.style.height = `${element.scrollHeight}px`;
 };
 
-export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete, addOption, deleteOption, updateQuestionText, updateOptionText, updateIsRequired }) => {
+export const SurveyAddQuestion = (
+    {
+        data,
+        sectionIndex,
+        questionIndex,
+        onDelete,
+        addOption,
+        deleteOption,
+        updateQuestionText,
+        updateOptionText,
+        updateIsRequired,
+        updateInputType,
+        resetOption,
+
+
+    }) => {
 
     const modalRef = useRef(null);
 
@@ -48,11 +67,12 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
         };
     }, []);
 
-    const [selectedOption, setSelectedOption] = useState("Multiple choice");
     const [isOpen, setIsOpen] = useState(false);
 
     const options = [
         { value: "multiple-choice", label: "Multiple choice", icon: <IoMdRadioButtonOn /> },
+        { value: "checkboxes", label: "Checkboxes", icon: <IoIosCheckboxOutline /> },
+        { value: "textbox", label: "Short answer", icon: <MdOutlineShortText /> },
     ];
 
     return (
@@ -80,8 +100,8 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
                         onClick={() => setIsOpen(!isOpen)}
                     >
                         <span className="flex items-center gap-2">
-                            {options.find((option) => option.label === selectedOption)?.icon}
-                            {selectedOption}
+                            {options.find((option) => option.value === data.inputType)?.icon}
+                            {options.find((option) => option.value === data.inputType)?.label}
                         </span>
                         <span>▼</span>
                     </div>
@@ -94,7 +114,16 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
                                     key={option.value}
                                     className="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-gray-100"
                                     onClick={() => {
-                                        setSelectedOption(option.label);
+                                        updateInputType(sectionIndex, questionIndex, option.value);
+
+                                        if (option.value === "textbox") {
+                                            resetOption(sectionIndex, questionIndex);
+                                        } else {
+                                            if (!data.option || data.option.length === 0) {
+                                                addOption(sectionIndex, questionIndex);
+                                            }
+                                        }
+
                                         setIsOpen(false);
                                     }}
                                 >
@@ -105,24 +134,80 @@ export const SurveyAddQuestion = ({ data, sectionIndex, questionIndex, onDelete,
                         </ul>
                     )}
                 </div>
-                <div className='flex flex-col gap-[16px] z-10'>
-                    {data?.option?.map((item, optionIndex) => (
-                        <SurveyRadioOption
-                            key={optionIndex}
-                            option={item}
-                            optionIndex={optionIndex}
-                            onDelete={() => deleteOption(sectionIndex, questionIndex, item.id)}
-                            onUpdate={(optionId, newText) =>
-                                updateOptionText(sectionIndex, questionIndex, optionId, newText)
-                            }
-                        />
-                    ))}
+                <div className='flex flex-col z-10'>
+                    <div className='flex flex-col gap-2 '>
+                        {data?.option?.map((item, optionIndex) => (
+                            <>
+                                <div key={item.id} className='flex gap-[8px] items-center'>
+                                    {data.inputType === "multiple-choice" && (
+                                        <input
+                                            disabled={true}
+                                            type="radio"
+                                            name="question-type"
+                                            value="multiple-choice"
+                                            id="multiple-choice"
+                                            className="w-[17px] h-[16px] appearance-none border-[1px] border-custom-solidgreen bg-white rounded-full flex items-center justify-center relative
+                                     before:content-[''] before:w-[14px] before:h-[14px] before:bg-white before:rounded-full before:absolute
+                                     after:content-[''] after:w-[10px] after:h-[10px] after:bg-custom-solidgreen after:rounded-full after:absolute after:scale-0 checked:after:scale-100 transition-all"
+                                        />
+                                    )}
+                                    {data.inputType === "checkboxes" && (
+                                        <input
+                                            type="checkbox"
+                                            className="h-[17px] w-[17px] rounded-[2px] border border-gray-400 accent-custom-lightgreen"
+                                            value="checkbox"
+                                            disabled={true}
+                                        />
+                                    )}
+
+                                    {data.inputType === "multiple-choice" || data.inputType === "checkboxes" ? (
+                                        <SurveyRadioOption
+                                            key={optionIndex}
+                                            option={item}
+                                            optionIndex={optionIndex}
+                                            onDelete={() => deleteOption(sectionIndex, questionIndex, item.id)}
+                                            onUpdate={(optionId, newText) =>
+                                                updateOptionText(sectionIndex, questionIndex, optionId, newText)
+                                            }
+                                        />
+                                    ) : (
+                                        <></>
+                                    )}
+
+                                </div>
+                            </>
+                        ))}
+                    </div>
+                    {data.inputType === "textbox" && (
+                        <div>
+                            <div className="flex flex-col gap-[10.9px]">
+                                <textarea
+                                    className="w-full border-b-2 min-h-[12px] resize-none overflow-hidden leading-tight text-[16px] montserrat-medium p-[8px]"
+                                    rows="1"
+                                    placeholder="Answer text"
+                                    disabled={true}
+
+                                />
+                            </div>
+                        </div>
+                    )}
+
+                    {data.inputType != "textbox" && (
+                        <div className="flex items-center gap-2 mt-[16px]">
+                            <button onClick={addOption} className='montserrat-light text-sm text-custom-lightgreen underline cursor-pointer hover:text-custom-solidgreen'>
+                                Add option
+                            </button>
+                        </div>
+                    )}
+                </div>
+                {/*  <div className='flex flex-col gap-[16px] z-10'>
+                   <SurveyCheckboxOption />
                     <div className="flex items-center gap-2">
                         <button onClick={addOption} className='montserrat-light text-sm text-custom-lightgreen underline cursor-pointer hover:text-custom-solidgreen'>
                             Add option
                         </button>
                     </div>
-                </div>
+                </div> */}
                 <div className='border-b-[0.5px] w-full border-custom-grayA5'></div>
                 <div className='w-full h-[25px] flex justify-end items-center px-[20px] gap-[14px]'>
                     <div className='flex gap-[10px]'>

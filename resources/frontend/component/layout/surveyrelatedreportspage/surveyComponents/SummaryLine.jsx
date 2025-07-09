@@ -79,9 +79,9 @@ const SummaryLine = ({ question }) => {
                 <div>
                     <p>Acknowledgements: <span className='font-bold'>{question?.total_responses}</span></p>
                 </div>
-                <div className="max-w-[1040px] w-full h-[320px]">
+                <div className=" w-full h-[320px]">
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={chartData} margin={{ top: 30, right: 40, left: 0, bottom: 20 }}>
+                        <LineChart data={chartData} margin={{ top: 40, right: 40, left: 0, bottom: 20 }}>
                             <CartesianGrid stroke="#ADC8F3" strokeDasharray="0" />
                             <XAxis dataKey="name" padding={{ left: 30, right: 30 }} />
                             <YAxis allowDecimals={false} />

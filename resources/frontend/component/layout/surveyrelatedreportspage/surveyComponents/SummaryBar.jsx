@@ -75,7 +75,7 @@ const SummaryBar = ({ question }) => {
                 <div>
                     <p>Acknowledgements: <span className='font-bold'>{question?.total_responses}</span></p>
                 </div>
-                <div className="max-w-[600px] w-full" style={{ height: chartHeight }}>
+                <div className="max-w-[600px] w-full h-[340px]" >
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart
                             layout="vertical"

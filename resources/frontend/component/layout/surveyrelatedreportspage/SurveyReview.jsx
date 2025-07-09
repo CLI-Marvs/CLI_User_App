@@ -1,10 +1,17 @@
-import React, { useEffect } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { IoCaretBackOutline } from "react-icons/io5";
 import AskCli from '../../../../../public/Images/AskCLI_BGFAQs.webp'
 import AskCliLogo from '../../../../../public/Images/AskCli_Logo3.png'
 import SurveyBg from '../../../../../public/Images/surveyBg.jpg'
 import { use } from 'react';
 const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
+
+
+    const handleInput = (e) => {
+        e.target.style.height = "auto";
+        e.target.style.height = e.target.scrollHeight + "px";
+    };
+
 
     return (
         <dialog
@@ -34,14 +41,14 @@ const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
                             </div>
                             <div className="w-full h-auto  relative">
                                 <div className="flex flex-col items-center"
-                                     style={{
+                                    style={{
                                         backgroundImage: `url(${SurveyBg})`,
                                         backgroundColor: 'rgba(255, 255, 255, .89)', // white with 60% opacity
                                         backgroundSize: 'cover',
                                         backgroundPosition: 'bottom',
                                         backgroundRepeat: 'no-repeat',
                                         backgroundBlendMode: 'overlay' // or 'lighten', 'screen', 'multiply'
-                                      }}
+                                    }}
                                 >
                                     <div className='mt-[40px]'></div>
                                     <div className='w-[740px] mb-[21.8px]'>
@@ -56,7 +63,7 @@ const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
 
                                         {surveyData.dataQASet.map((item, index) => (
                                             <div key={item.id} className="flex flex-col gap-[16px] bg-white w-[718px] rounded-[10px] pt-[18px] pb-[22px] px-[16px]">
-                                                <div >
+                                                <div>
                                                     {/* Question Section */}
                                                     <div className="w-full p-[10.9px] border-b-[0.5px] border-[#3A3A3A]">
                                                         <p className="montserrat-medium text-[18px]">
@@ -65,7 +72,7 @@ const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
                                                     </div>
 
                                                     {/* Options Section (for multiple choice) */}
-                                                    {item.inputType === "dropdown" && (
+                                                    {item.inputType === "multiple-choice" && (
                                                         <div className="flex flex-col gap-[10.9px] mt-[10px]">
                                                             {item.option.map((opt) => (
                                                                 <label key={opt.id} className="flex items-center px-[10.9px] gap-[10.9px]">
@@ -82,6 +89,38 @@ const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
                                                             ))}
                                                         </div>
                                                     )}
+
+                                                    {item.inputType === "checkboxes" && (
+                                                        <div className="flex flex-col gap-[10.9px] mt-[10px]">
+                                                            {item.option.map((opt) => (
+                                                                <label key={opt.id} className="flex items-center px-[10.9px] gap-[10.9px]">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        name={`question-${item.id}-${opt.id}`}
+                                                                        value={opt.text}
+                                                                        className="h-[17px] w-[18px] rounded-[2px] border border-gray-400 accent-custom-lightgreen"
+                                                                    />
+
+                                                                    <p className="montserrat-light">{opt.text || "Option"}</p>
+                                                                </label>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {item.inputType === "textbox" && (
+                                                        <div className="flex flex-col gap-[10.9px] mt-[20px]">
+                                                            <textarea
+                                                                className="w-full border-b-2 min-h-[12px] resize-none overflow-hidden leading-tight text-[16px] montserrat-medium p-[8px]"
+                                                                rows="1"
+                                                                placeholder="Your answer"
+                                                                value={item.option[0]?.text}
+                                                                onInput={(e) => {
+                                                                    e.target.style.height = "auto";
+                                                                    e.target.style.height = e.target.scrollHeight + "px";
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    )}
+
 
                                                     {/* Required Message */}
                                                     {item.required && (
