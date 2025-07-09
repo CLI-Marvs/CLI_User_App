@@ -6,7 +6,6 @@ import WalkinTableRow from "@/component/layout/inquirypage/component/Walkin/Walk
 import EngageFormModal from "@/component/layout/inquirypage/component/Walkin/EngageFormModal";
 import { walkinTransactionService } from "@/component/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
 import { queueService } from "@/component/servicesApi/apiCalls/emojiWalkin/queueService";
-import { branchService } from "@/component/servicesApi/apiCalls/emojiWalkin/branchService";
 import { showToast } from "@/util/toastUtil";
 import Button from "@/component/layout/inquirypage/component/ui/button";
 import { FaHistory } from "react-icons/fa";
@@ -14,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
 import { useCategories } from "@/component/layout/inquirypage/hooks/useCategories";
+import { useBranch } from "@/component/layout/inquirypage/hooks/useBranch";
 import Skeleton from "@/component/Skeletons";
 
 const WalkinListPage = () => {
@@ -47,12 +47,7 @@ const WalkinListPage = () => {
     });
     const queryClient = useQueryClient();
     const { data: categoriesData } = useCategories();
-    const { data: branchesData } = useQuery({
-        queryKey: ["queueBranches"],
-        queryFn: () => branchService.getAllBranches(),
-        staleTime: 1000 * 60,
-        cacheTime: 1000 * 60 * 5,
-    });
+    const { data: branchesData } = useBranch();
 
     //Event handler
     //Handle engage form modal open
