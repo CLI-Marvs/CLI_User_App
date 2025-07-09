@@ -280,7 +280,7 @@ const App = () => {
                                 {
                                     path: "report/survey/:id?",
                                     element: <SurveySummaryView />,
-
+                                    
                                 },
                                 {
                                     path: "walk-in",
