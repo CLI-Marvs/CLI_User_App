@@ -6,6 +6,7 @@ import { ToastContainer } from "react-toastify";
 import { RoleManagementProvider } from "@/context/RoleManagement/RoleManagementContext";
 import { PropertyPricingProvider } from "@/context/PropertyPricing/PropertyPricingContext";
 import { TransactionProvider } from "@/context/Transaction/TransactionContext";
+import { WalkinSelectionProvider } from "@/context/InquiryManagement/WalkinSelectionContext";
 import ErrorBoundary from "@/component/ErrorElement/ErrorBoundary";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -14,9 +15,10 @@ const queryClient = new QueryClient();
 
 if (rootElement) {
     ReactDOM.createRoot(rootElement).render(
-       /*  <React.StrictMode> */
-            <QueryClientProvider client={queryClient}>
-                <ContextProvider>
+        /*  <React.StrictMode> */
+        <QueryClientProvider client={queryClient}>
+            <ContextProvider>
+                <WalkinSelectionProvider>
                     <PropertyPricingProvider>
                         <RoleManagementProvider>
                             <TransactionProvider>
@@ -40,8 +42,9 @@ if (rootElement) {
                             </TransactionProvider>
                         </RoleManagementProvider>
                     </PropertyPricingProvider>
-                </ContextProvider>
-            </QueryClientProvider>
-      /*   </React.StrictMode> */
+                </WalkinSelectionProvider>
+            </ContextProvider>
+        </QueryClientProvider>
+        /*   </React.StrictMode> */
     );
 }

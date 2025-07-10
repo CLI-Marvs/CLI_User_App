@@ -15,6 +15,7 @@ import Pagination from "@/component/layout/propertyandpricingpage/component/Pagi
 import { useCategories } from "@/component/layout/inquirypage/hooks/useCategories";
 import { useBranch } from "@/component/layout/inquirypage/hooks/useBranch";
 import Skeleton from "@/component/Skeletons";
+import { useWalkinSelection } from "@/context/InquiryManagement/WalkinSelectionContext";
 
 const WalkinListPage = () => {
     //States
@@ -22,24 +23,30 @@ const WalkinListPage = () => {
     const PAGE_SIZE = 10;
     const engageFormModalRef = useRef(null);
     const [selectedItem, setSelectedItem] = useState(null);
-    {
-        /* TODO: confirm this because it will handle many users, confirm also if to use passcode  */
-    }
-    const [selectedBranch, setSelectedBranch] = useState({ id: "", name: "" });
-    const [desks, setDesks] = useState([]);
-    const [selectedDesk, setSelectedDesk] = useState({ id: "", name: "" });
-    const navigate = useNavigate();
     const {
-        data: walkinData,
-        isLoading,
-        isError,
-    } = useQuery({
-        queryKey: ["queueWalkinTransactions", page],
-        queryFn: () =>
-            walkinTransactionService.getQueuedWalkinTransactions(
+        selectedBranch,
+        setSelectedBranch,
+        desks,
+        setDesks,
+        selectedDesk,
+        setSelectedDesk,
+    } = useWalkinSelection();
+    const navigate = useNavigate();
+    const { data: walkinData, isLoading } = useQuery({
+        queryKey: ["queueWalkinTransactions", page, selectedBranch.slug],
+        queryFn: () => {
+            if (!selectedBranch.slug) {
+                // Don't fetch if no branch selected
+                return Promise.resolve(undefined);
+            }
+            // Pass slug to the service
+            return walkinTransactionService.getQueuedWalkinTransactions(
                 page,
-                PAGE_SIZE
-            ),
+                PAGE_SIZE,
+                selectedBranch.slug
+            );
+        },
+        enabled: !!selectedBranch.slug,
         keepPreviousData: true,
         staleTime: 1000 * 60,
         cacheTime: 1000 * 60 * 5,
@@ -54,11 +61,13 @@ const WalkinListPage = () => {
     const handleEngage = async (item) => {
         if (!engageFormModalRef.current) return;
 
-        if (selectedDesk.id === "" || selectedBranch.id === "") {
-            showToast(
-                "Please select a branch and a counter/desk first.",
-                "warning"
-            );
+        if (selectedBranch.id === "") {
+            showToast("Please select a branch first.", "warning");
+            return;
+        }
+
+        if (!selectedDesk.id) {
+            showToast("Please select a desk/counter first.", "warning");
             return;
         }
 
@@ -114,6 +123,7 @@ const WalkinListPage = () => {
                                     setSelectedBranch({
                                         id: branchId,
                                         name: branch ? branch.name : "",
+                                        slug: branch ? branch.slug : "",
                                     });
                                     setDesks(branch ? branch.desks : []);
                                 }}
@@ -193,7 +203,12 @@ const WalkinListPage = () => {
 
                 {/* Table */}
                 <div className="mt-3 mx-1 py-4">
-                    {isLoading ? (
+                    {!selectedBranch.id || !selectedBranch.id ? (
+                        <div className="text-center py-4 text-custom-bluegreen montserrat-medium">
+                            Please select a branch and desk first to show walkin
+                            transactions.
+                        </div>
+                    ) : isLoading ? (
                         <div className="text-center py-4">
                             <Skeleton height={140} className="my-1" />
                             <Skeleton height={140} className="my-1" />
