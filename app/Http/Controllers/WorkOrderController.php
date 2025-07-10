@@ -43,7 +43,7 @@ class WorkOrderController extends Controller
         }
     }
 
-    public function index(Request $request)
+public function index(Request $request)
     {
         $user = $request->user();
 
@@ -286,6 +286,18 @@ class WorkOrderController extends Controller
         ]);
 
         $workOrder->accounts()->sync($validatedData['account_ids']);
+
+            // Get the first work order type
+        $firstWorkOrderType = WorkOrderType::find($validatedData['work_order_type_id']);
+
+        // Get the submilestones for the first work order type
+        $submilestones = $firstWorkOrderType->submilestones;
+
+        // Set the current submilestone ID for each account to the first submilestone ID
+        foreach ($workOrder->accounts as $account) {
+            $account->current_submilestone_id = $submilestones->first()->id;
+            $account->save();
+        }
 
         // Insert account-assignee mapping
         if (!empty($validatedData['account_assignments'])) {

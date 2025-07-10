@@ -18,7 +18,7 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(50);
     const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('All'); // 'All', 'In Progress', 'Completed'
+    const [statusFilter, setStatusFilter] = useState('All'); 
     const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
     const [selectedAccountForNotes, setSelectedAccountForNotes] = useState(null);
 
@@ -100,9 +100,11 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
             const notesData = {
                 accountId: account.id,
                 workOrder: account.latestStep.workOrder,
-                workOrderType: account.latestStep.workOrder.work_order_type?.type_name,
+                workOrderType: "All Steps", // Special value to show all logs
+                addNoteLogType: account.latestStep.workOrder.work_order_type?.type_name, // For adding new notes
                 assignee: account.latestStep.workOrder.assignee,
                 currentUser: group.currentUser,
+                workOrderGroupId: group.id,
             };
 
             return {
@@ -455,9 +457,11 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
                     selectedAccountId={selectedAccountForNotes.accountId}
                     onClose={handleCloseNotesModal}
                     selectedWorkOrder={selectedAccountForNotes.workOrderType}
+                    addNoteLogType={selectedAccountForNotes.addNoteLogType}
                     selectedAssignee={selectedAccountForNotes.assignee}
                     workOrderData={{
                         work_order_id: selectedAccountForNotes.workOrder.work_order_id,
+                        work_order_group_id: selectedAccountForNotes.workOrderGroupId,
                         currentUser: selectedAccountForNotes.currentUser,
                     }}
                 />

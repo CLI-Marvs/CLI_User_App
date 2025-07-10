@@ -256,7 +256,7 @@ const AddNoteModal = ({
 
     return ReactDOM.createPortal(
         <div
-            className="fixed inset-0 z-[60] bg-black bg-opacity-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-[10003] bg-black bg-opacity-50 flex items-center justify-center p-4"
             onClick={onClose}
         >
             <div

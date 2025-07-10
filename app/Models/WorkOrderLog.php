@@ -27,6 +27,7 @@ class WorkOrderLog extends Model
         'note_type',
         'is_new',
         'account_id',
+        'note_content',
     ];
 
     /**

@@ -79,7 +79,7 @@ Route::post('/update-info', [ConcernController::class, 'updateInfo']);
 // Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
  Route::get('/work-order-groups/{groupId}/details', [WorkOrderGroupController::class, 'showDetails']);
-
+ Route::get('/get-account-logs/{selectedId}', [AccountLogController::class, 'getLogData']);
 // for titling and registration
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -108,7 +108,7 @@ Route::middleware('auth:sanctum')->group(function () {
      * Account Logs
      */
     Route::post('/post-account-log', [AccountLogController::class, 'attachAccountsToLog']);
-    Route::get('/get-account-logs/{selectedId}', [AccountLogController::class, 'getLogData']);
+   
     Route::patch('/update-is-new/{id}', [AccountLogController::class, 'updateIsNewStatus']);
 
     /**

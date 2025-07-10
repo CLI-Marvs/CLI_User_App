@@ -52,6 +52,7 @@ const MyWorkOrders = () => {
                         sortOrder: sortOrder,
                     },
                 });
+                console.log(response.data);
                 // Group by work_order_group_id
                 const grouped = Object.values(
                     (response.data.data || []).reduce((acc, wo) => {

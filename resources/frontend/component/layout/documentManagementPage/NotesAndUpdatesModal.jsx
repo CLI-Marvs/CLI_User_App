@@ -17,6 +17,7 @@ function NotesAndUpdatesModal({
     selectedAccountId,
     onClose,
     selectedWorkOrder,
+    addNoteLogType,
     selectedAssignee,
     workOrderData,
 }) {
@@ -43,9 +44,14 @@ function NotesAndUpdatesModal({
         const params = {
             selectedAccountId,
             selectedWorkOrder,
-            workOrderId: workOrderData.work_order_id,
         };
 
+        if (selectedWorkOrder === "All Steps") {
+            params.workOrderGroupId = workOrderData?.work_order_group_id;
+        } else {
+            params.workOrderId = workOrderData?.work_order_id;
+        }
+        console.log("SelectedWorkOrder", selectedWorkOrder);
         const cachedData = getCachedNotesAndUpdatesData(params);
         if (cachedData) {
             setLogs(
@@ -60,6 +66,7 @@ function NotesAndUpdatesModal({
 
         try {
             const freshData = await getNotesAndUpdatesData(params);
+            
             if (isMounted) {
                 const logsArray = freshData.log_data || [];
                 setLogs(logsArray.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
@@ -73,7 +80,7 @@ function NotesAndUpdatesModal({
                 setLoading(false);
             }
         }
-    }, [selectedAccountId, selectedWorkOrder, workOrderData.work_order_id]);
+    }, [selectedAccountId, selectedWorkOrder, workOrderData?.work_order_id, workOrderData?.work_order_group_id]);
 
     useEffect(() => {
         setMounted(true); 
@@ -89,11 +96,17 @@ function NotesAndUpdatesModal({
 
     const handleAddNoteSuccess = async () => {
         setIsAddNoteModalOpen(false);
-        invalidateNotesAndUpdatesData({
+
+        const paramsToInvalidate = {
             selectedAccountId,
             selectedWorkOrder,
-            workOrderId: workOrderData.work_order_id,
-        });
+        };
+        if (selectedWorkOrder === "All Steps") {
+            paramsToInvalidate.workOrderGroupId = workOrderData?.work_order_group_id;
+        } else {
+            paramsToInvalidate.workOrderId = workOrderData?.work_order_id;
+        }
+        invalidateNotesAndUpdatesData(paramsToInvalidate);
         await fetchData(true); 
     };
 
@@ -136,12 +149,16 @@ function NotesAndUpdatesModal({
 
     const displayedLogs = useMemo(() => {
         return logs.filter((log) => {
-            const matchesLogType = log.log_type === selectedWorkOrder;
+            // If selectedWorkOrder is "All Steps", we don't filter by log_type.
+            // Otherwise, we match the log_type.
+            const matchesLogType = selectedWorkOrder === "All Steps" ? true : log.log_type === selectedWorkOrder;
+
             const matchesAccount =
                 (log.note_type === "Manual Entry" &&
                     log.account_id === selectedAccountId) ||
                 (log.account_ids &&
                     log.account_ids.includes(selectedAccountId));
+
             return matchesLogType && matchesAccount;
         });
     }, [logs, selectedWorkOrder, selectedAccountId]);
@@ -150,7 +167,7 @@ function NotesAndUpdatesModal({
         const logsToUpdate = displayedLogs.filter(
             (log) =>
                 log.is_new &&
-                log.log_type === selectedWorkOrder &&
+                (selectedWorkOrder === "All Steps" ? true : log.log_type === selectedWorkOrder) &&
                 ((log.note_type === "Manual Entry" &&
                     log.account_id === selectedAccountId) ||
                     (log.account_ids &&
@@ -459,7 +476,7 @@ function NotesAndUpdatesModal({
                     selectedAccountId={selectedAccountId}
                     selectedAssignee={selectedAssignee}
                     numericWorkOrderId={workOrderData?.work_order_id}
-                    logType={selectedWorkOrder}
+                    logType={addNoteLogType || selectedWorkOrder}
                     currentUserId={currentUserId}
                 />
             )}

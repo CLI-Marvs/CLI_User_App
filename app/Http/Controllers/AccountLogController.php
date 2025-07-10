@@ -45,53 +45,54 @@ class AccountLogController extends Controller
     public function getLogData(Request $request, $selectedId)
     {
         $selectedWorkOrder = $request->query('log_type');
-        $selectedAssignee = $request->query('assigned_user_id');
         $requestedWorkOrderId = $request->query('work_order_id');
+        $requestedWorkOrderGroupId = $request->query('work_order_group_id');
+        $targetId = $requestedWorkOrderId ?: $requestedWorkOrderGroupId;
 
-        if ($requestedWorkOrderId) {
-            $targetWorkOrderId = $requestedWorkOrderId;
-        } else {
-            $firstRelevantLog = WorkOrderLog::whereHas('accountLog', function ($query) use ($selectedId) {
-                $query->where('account_id', $selectedId);
-            })
-                ->when($selectedWorkOrder, function ($query) use ($selectedWorkOrder) {
-                    $query->where('log_type', $selectedWorkOrder);
-                })
-                ->select('work_order_id')
-                ->first();
+        $logDataQuery = WorkOrderLog::query();
 
-            if (!$firstRelevantLog) {
-                Log::info('No relevant log found for account_id and log_type to determine work_order_id', [
-                    'account_id' => $selectedId,
-                    'log_type'   => $selectedWorkOrder
-                ]);
-                return response()->json(['log_data' => []], 200);
+        // This is the primary filter: always get logs for the selected account.
+        $logDataQuery->where(function ($query) use ($selectedId) {
+            $query->where('account_id', $selectedId)
+                ->orWhereHas('accounts', function ($subQuery) use ($selectedId) {
+                    $subQuery->where('taken_out_accounts.id', $selectedId);
+                });
+        });
+
+        if ($requestedWorkOrderGroupId && $selectedWorkOrder === 'All Steps') {
+            Log::info('Fetching all logs for account in group.', [
+                'account_id' => $selectedId,
+                'group_id' => $requestedWorkOrderGroupId
+            ]);
+            
+            $workOrderIdsInGroup = \App\Models\WorkOrder::where('work_order_group_id', $requestedWorkOrderGroupId)
+                                            ->pluck('work_order_id');
+
+            if ($workOrderIdsInGroup->isEmpty()) {
+                return response()->json(['log_data' => [], 'work_order_id_queried' => $targetId], 200);
             }
 
-            $targetWorkOrderId = $firstRelevantLog->work_order_id;
+            $logDataQuery->whereIn('work_order_id', $workOrderIdsInGroup);
+
+        } elseif ($requestedWorkOrderId) {
+            Log::info('Fetching logs for specific work order.', [
+                'account_id' => $selectedId,
+                'work_order_id' => $requestedWorkOrderId,
+                'log_type' => $selectedWorkOrder
+            ]);
+            $logDataQuery->where('work_order_id', $requestedWorkOrderId);
+            if ($selectedWorkOrder && $selectedWorkOrder !== 'All Steps') {
+                $logDataQuery->where('log_type', $selectedWorkOrder);
+            }
         }
+        // If no specific context is provided, the query will fetch all logs for the account across all work orders.
 
-        Log::info('Target work_order_id found or provided:', ['work_order_id' => $targetWorkOrderId]);
-
-        $logDataQuery = WorkOrderLog::where('work_order_id', $targetWorkOrderId)
-            ->where(function ($query) use ($selectedWorkOrder, $selectedAssignee) {
-                $query->where('log_type', $selectedWorkOrder);
-
-                if ($selectedAssignee) {
-                    $query->orWhere(function ($subQuery) use ($selectedAssignee) {
-                        $subQuery->where('note_type', 'Manual Entry')
-                            ->where('assigned_user_id', $selectedAssignee);
-                    });
-                }
-            })
-            ->with([
-                'createdBy:id,fullname,firstname,lastname',
-                'assignedUser:id,fullname,firstname,lastname',
-                'documents',
-                'accountLog',
-            ])
-            ->orderBy('created_at', 'desc');
-
+        $logDataQuery->with([
+            'createdBy:id,fullname,firstname,lastname',
+            'assignedUser:id,fullname,firstname,lastname',
+            'documents',
+            'accounts:id',
+        ])->orderBy('created_at', 'desc');
 
         $logs = $logDataQuery->get();
 
@@ -101,11 +102,12 @@ class AccountLogController extends Controller
                 'work_order_id'      => $log->work_order_id,
                 'log_type'           => $log->log_type,
                 'log_message'        => $log->log_message,
+                'note_content'       => $log->note_content,
                 'created_at'         => $log->created_at ? Carbon::parse($log->created_at)->toIso8601String() : null,
                 'created_by_user_id' => $log->created_by_user_id,
                 'is_new'             => $log->is_new,
                 'fullname'           => $log->createdBy->fullname ?? ($log->createdBy ? trim($log->createdBy->firstname . ' ' . $log->createdBy->lastname) : null),
-                'account_ids'        => $log->accountLog->pluck('account_id')->all(),
+                'account_ids'        => $log->accounts->pluck('id')->all(),
                 'account_id'         => $log->account_id,
                 'note_type'          => $log->note_type,
                 'assigned_user_id'   => $log->assigned_user_id,
@@ -122,33 +124,32 @@ class AccountLogController extends Controller
             ];
         });
 
-        Log::info('Returning log data for work_order_id', [
-            'work_order_id' => $targetWorkOrderId,
+        Log::info('Returning log data for query', [
+            'target_id' => $targetId,
             'count'         => $transformed->count()
         ]);
 
         return response()->json([
             'log_data'              => $transformed,
-            'work_order_id_queried' => $targetWorkOrderId,
+            'work_order_id_queried' => $targetId,
         ], 200);
     }
 
-public function updateIsNewStatus(Request $request, $id)
-{
-    \Log::info('Incoming PATCH request', [
-        'id'   => $id,
-        'body' => $request->all()
-    ]);
+    public function updateIsNewStatus(Request $request, $id)
+    {
+        \Log::info('Incoming PATCH request', [
+            'id'   => $id,
+            'body' => $request->all()
+        ]);
 
-    try {
-        $log = WorkOrderLog::findOrFail($id);
-        $log->is_new = $request->input('is_new');
-        $log->save();
+        try {
+            $log = WorkOrderLog::findOrFail($id);
+            $log->is_new = $request->input('is_new');
+            $log->save();
 
-    } catch (\Exception $e) {
-        \Log::error('Error updating log', ['error' => $e->getMessage()]);
-        return response()->json(['error' => $e->getMessage()], 500);
+        } catch (\Exception $e) {
+            \Log::error('Error updating log', ['error' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
-}
-
 }
