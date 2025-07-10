@@ -11,6 +11,7 @@ use App\Models\WorkOrderLog;
 use App\Models\WorkOrderType;
 use App\Models\Checklist;
 use App\Models\TakenOutAccount;
+use App\Models\Submilestone;
 
 
 class AccountChecklistStatusController extends Controller
@@ -70,9 +71,9 @@ class AccountChecklistStatusController extends Controller
         $completedAt = $validated['completed_at'] ? Carbon::parse($validated['completed_at']) : null;
 
         foreach ($validated['file_titles'] as $title) {
-            $checklist = Checklist::where('name', $title)->first(); 
+            $checklist = Checklist::where('name', $title)->first();
             if ($checklist) {
-                 AccountChecklistStatus::updateOrCreate(
+                AccountChecklistStatus::updateOrCreate(
                     [
                         'account_id' => $validated['account_id'],
                         'checklist_id' => $checklist->id,
@@ -106,32 +107,32 @@ class AccountChecklistStatusController extends Controller
         return response()->json(['success' => true]);
     }
 
-public function getChecklistStatus($accountId, $submilestoneId)
-{
-    $allChecklistIds = Checklist::where('submilestone_id', $submilestoneId)
-        ->pluck('id')
-        ->toArray();
+    public function getChecklistStatus($accountId, $submilestoneId)
+    {
+        $allChecklistIds = Checklist::where('submilestone_id', $submilestoneId)
+            ->pluck('id')
+            ->toArray();
 
-    if (empty($allChecklistIds)) {
-        return response()->json(['status' => 'Pending']);
+        if (empty($allChecklistIds)) {
+            return response()->json(['status' => 'Pending']);
+        }
+
+        $completedChecklistIds = AccountChecklistStatus::where('account_id', $accountId)
+            ->whereIn('checklist_id', $allChecklistIds)
+            ->where('is_completed', true)
+            ->pluck('checklist_id')
+            ->toArray();
+
+        if (count($completedChecklistIds) === 0) {
+            $status = 'Pending';
+        } elseif (count($completedChecklistIds) === count($allChecklistIds)) {
+            $status = 'Complete';
+        } else {
+            $status = 'In Progress';
+        }
+
+        return response()->json(['status' => $status]);
     }
-
-    $completedChecklistIds = AccountChecklistStatus::where('account_id', $accountId)
-        ->whereIn('checklist_id', $allChecklistIds)
-        ->where('is_completed', true)
-        ->pluck('checklist_id')
-        ->toArray();
-
-    if (count($completedChecklistIds) === 0) {
-        $status = 'Pending';
-    } elseif (count($completedChecklistIds) === count($allChecklistIds)) {
-        $status = 'Complete';
-    } else {
-        $status = 'In Progress';
-    }
-
-    return response()->json(['status' => $status]);
-}
     private function _checkAndUpdateOverallCompletion(int $accountId)
     {
         $account = TakenOutAccount::find($accountId);
@@ -141,13 +142,13 @@ public function getChecklistStatus($accountId, $submilestoneId)
             return;
         }
 
-        $workOrderTypeIds = $account->workOrders() 
-                                    ->with('workOrderType')
-                                    ->get()
-                                    ->pluck('workOrderType.id')
-                                    ->unique()
-                                    ->filter()
-                                    ->toArray();
+        $workOrderTypeIds = $account->workOrders()
+            ->with('workOrderType')
+            ->get()
+            ->pluck('workOrderType.id')
+            ->unique()
+            ->filter()
+            ->toArray();
 
         if (empty($workOrderTypeIds)) {
             if ($account->checklist_status) {
@@ -159,11 +160,11 @@ public function getChecklistStatus($accountId, $submilestoneId)
         }
 
         $requiredChecklistIds = Checklist::whereHas('submilestone.workOrderType', function ($query) use ($workOrderTypeIds) { // Assuming submilestone and workOrderType relationships exist
-                                    $query->whereIn('id', $workOrderTypeIds);
-                                })
-                                ->pluck('id')
-                                ->unique()
-                                ->toArray();
+            $query->whereIn('id', $workOrderTypeIds);
+        })
+            ->pluck('id')
+            ->unique()
+            ->toArray();
 
         if (empty($requiredChecklistIds)) {
             if (!$account->checklist_status) {
@@ -175,9 +176,9 @@ public function getChecklistStatus($accountId, $submilestoneId)
         }
 
         $completedRequiredChecklistsCount = AccountChecklistStatus::where('account_id', $accountId)
-                                            ->whereIn('checklist_id', $requiredChecklistIds)
-                                            ->where('is_completed', true)
-                                            ->count();
+            ->whereIn('checklist_id', $requiredChecklistIds)
+            ->where('is_completed', true)
+            ->count();
 
         $allRequiredCompleted = ($completedRequiredChecklistsCount === count($requiredChecklistIds));
 
@@ -199,34 +200,38 @@ public function getChecklistStatus($accountId, $submilestoneId)
      * @param int $accountId The ID of the account being checked.
      * @param WorkOrder $workOrder The specific work order (step) to check against.
      */
-    private function _checkAndTriggerNextStep(int $accountId, WorkOrder $workOrder)
-    {
-        $account = TakenOutAccount::find($accountId);
-        if (!$account) {
-            Log::warning("_checkAndTriggerNextStep: Account not found for ID: {$accountId}");
-            return;
-        }
-
-        $requiredChecklistIds = Checklist::whereHas('submilestone', function ($query) use ($workOrder) {
-            $query->where('work_order_type_id', $workOrder->work_order_type_id);
-        })->pluck('id')->toArray();
-
-        if (empty($requiredChecklistIds)) {
-            Log::info("No checklists required for Work Order Type ID: {$workOrder->work_order_type_id}. Triggering next step for account {$accountId}.");
-            $this->_createNextWorkOrder($workOrder, $account);
-            return;
-        }
-
-        $completedChecklistsCount = AccountChecklistStatus::where('account_id', $accountId)
-            ->whereIn('checklist_id', $requiredChecklistIds)
-            ->where('is_completed', true)
-            ->count();
-
-        if ($completedChecklistsCount === count($requiredChecklistIds)) {
-            Log::info("All checklists for Work Order {$workOrder->work_order_id} are complete for account {$accountId}. Triggering next step.");
-            $this->_createNextWorkOrder($workOrder, $account);
-        }
+private function _checkAndTriggerNextStep(int $accountId, WorkOrder $workOrder)
+{
+    $account = TakenOutAccount::find($accountId);
+    if (!$account) {
+        Log::warning("_checkAndTriggerNextStep: Account not found for ID: {$accountId}");
+        return;
     }
+
+    // ✅ Advance the submilestone if needed
+    $this->_advanceSubmilestoneIfComplete($accountId);
+
+    $requiredChecklistIds = Checklist::whereHas('submilestone', function ($query) use ($workOrder) {
+        $query->where('work_order_type_id', $workOrder->work_order_type_id);
+    })->pluck('id')->toArray();
+
+    if (empty($requiredChecklistIds)) {
+        Log::info("No checklists required for Work Order Type ID: {$workOrder->work_order_type_id}. Triggering next step for account {$accountId}.");
+        $this->_createNextWorkOrder($workOrder, $account);
+        return;
+    }
+
+    $completedChecklistsCount = AccountChecklistStatus::where('account_id', $accountId)
+        ->whereIn('checklist_id', $requiredChecklistIds)
+        ->where('is_completed', true)
+        ->count();
+
+    if ($completedChecklistsCount === count($requiredChecklistIds)) {
+        Log::info("All checklists for Work Order {$workOrder->work_order_id} are complete for account {$accountId}. Triggering next step.");
+        $this->_createNextWorkOrder($workOrder, $account);
+    }
+}
+
 
     /**
      * Creates the next work order in the sequence automatically for a single account.
@@ -265,7 +270,7 @@ public function getChecklistStatus($accountId, $submilestoneId)
             // No work order for the next step exists yet. Create it.
             $workOrderForProcessing = WorkOrder::create([
                 'work_order' => $nextWorkOrderType->type_name,
-                'work_order_number' => $completedWorkOrder->work_order_number, 
+                'work_order_number' => $completedWorkOrder->work_order_number,
                 'work_order_type_id' => $nextWorkOrderType->id,
                 'work_order_group_id' => $workOrderGroup->id,
                 'work_order_deadline' => now()->addDays(14),
@@ -308,5 +313,38 @@ public function getChecklistStatus($accountId, $submilestoneId)
 
         Log::info("Automation: Account {$completedAccount->id} was {$logMessageAction} work order {$workOrderForProcessing->work_order_id} ('{$nextWorkOrderType->type_name}').");
     }
+
+    protected function _advanceSubmilestoneIfComplete(int $accountId)
+    {
+        $account = TakenOutAccount::find($accountId);
+        if (!$account || !$account->current_submilestone_id)
+            return;
+
+        $currentSubmilestoneId = $account->current_submilestone_id;
+
+        $checklistIds = Checklist::where('submilestone_id', $currentSubmilestoneId)->pluck('id');
+        $completedCount = AccountChecklistStatus::where('account_id', $accountId)
+            ->whereIn('checklist_id', $checklistIds)
+            ->where('is_completed', true)
+            ->count();
+
+        if ($checklistIds->count() > 0 && $completedCount === $checklistIds->count()) {
+            // Advance to next submilestone
+            $currentSubmilestone = Submilestone::find($currentSubmilestoneId);
+
+            $nextSubmilestone = Submilestone::where('work_order_type_id', $currentSubmilestone->work_order_type_id)
+                ->where('id', '>', $currentSubmilestoneId)
+                ->orderBy('id')
+                ->first();
+
+            if ($nextSubmilestone) {
+                $account->current_submilestone_id = $nextSubmilestone->id;
+                $account->save();
+
+                Log::info("Account {$accountId} advanced to Submilestone ID {$nextSubmilestone->id}");
+            }
+        }
+    }
+
 
 }
