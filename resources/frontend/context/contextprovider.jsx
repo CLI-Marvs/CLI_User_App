@@ -1093,7 +1093,6 @@ export const ContextProvider = ({ children }) => {
                 setSpecificAssigneeCsr,
                 specificAssigneeCsr,
                 canWrite,
-                categories,
             }}
         >
             {children}

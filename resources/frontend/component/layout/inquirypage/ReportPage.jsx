@@ -99,7 +99,6 @@ const ReportPage = () => {
         setActiveDayButton,
         setSpecificAssigneeCsr,
         setAssignedToMeActive,
-        categories,
     } = useStateContext();
 
     const [searchSummary, setSearchSummary] = useState([]);
