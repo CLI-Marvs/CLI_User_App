@@ -365,279 +365,345 @@ const MyWorkOrders = () => {
             setExpandedGroup((prev) => (prev === groupId ? null : groupId));
         };
 
+        // Helper to prevent row click when clicking on action buttons
+        const handleRowClick = (e, groupId) => {
+            // Prevent toggle if clicking on a button or its child
+            if (
+                e.target.closest("button") ||
+                e.target.closest("a") ||
+                e.target.closest(".ignore-row-toggle")
+            ) {
+                return;
+            }
+            toggleGroup(groupId);
+        };
+
         return (
-            <Card className="w-full overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full min-w-max table-auto text-left">
-                        <thead>
-                            <tr>
-                                <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
-                                    <Typography
-                                        variant="small"
-                                        className="!font-semibold text-white leading-none"
-                                    >
-                                        Work Order No.
-                                    </Typography>
-                                </th>
-                                <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
-                                    <Typography
-                                        variant="small"
-                                        className="!font-semibold text-white leading-none"
-                                    >
-                                        Project
-                                    </Typography>
-                                </th>
-                                <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
-                                    <Typography
-                                        variant="small"
-                                        className="!font-semibold text-white leading-none"
-                                    >
-                                        Due Date
-                                    </Typography>
-                                </th>
-                                <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
-                                    <Typography
-                                        variant="small"
-                                        className="!font-semibold text-white leading-none"
-                                    >
-                                        Last Updated
-                                    </Typography>
-                                </th>
-                                <th className="border-b bg-[#175D5F] text-white h-[60px] p-4">
-                                    <Typography
-                                        variant="small"
-                                        className="!font-semibold text-white leading-none"
-                                    >
-                                        Actions
-                                    </Typography>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {workOrderGroups.map((group) => {
-                                // Find the latest work order in the group (by updated_at or sequence)
-                                const latestWO = (group.work_orders || [])
-                                    .slice()
-                                    .sort(
-                                        (a, b) =>
-                                            new Date(b.updated_at) -
-                                            new Date(a.updated_at)
-                                    )[0];
-                                console.log("latestWO", latestWO);
-                                // --- Restore stepRows for expanded dropdown ---
-                                // 1. Gather all steps (work orders) and sort by sequence
-                                const steps = (group.work_orders || [])
-                                    .map((wo) => ({
-                                        ...wo,
-                                        sequence:
-                                            wo.work_order_type?.sequence ?? 0,
-                                    }))
-                                    .sort((a, b) => a.sequence - b.sequence);
+            <Card className="w-full overflow-hidden shadow-xl rounded-3xl border-0 bg-white backdrop-blur-sm">
+                <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-1 rounded-t-3xl">
+                    <div className="overflow-x-auto bg-white rounded-2xl shadow-inner">
+                        <table className="w-full min-w-max table-auto text-left">
+                            <thead className="sticky top-0 z-10 bg-custom-bluegreen shadow-lg">
+                                <tr>
+                                    <th className="text-white h-[70px] px-6 py-4 first:rounded-tl-2xl">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                            <Typography
+                                                variant="small"
+                                                className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                            >
+                                                Work Order No.
+                                            </Typography>
+                                        </div>
+                                    </th>
+                                    <th className="text-white h-[70px] px-6 py-4">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                            <Typography
+                                                variant="small"
+                                                className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                            >
+                                                Project
+                                            </Typography>
+                                        </div>
+                                    </th>
+                                    <th className="text-white h-[70px] px-6 py-4">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                                            <Typography
+                                                variant="small"
+                                                className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                            >
+                                                Due Date
+                                            </Typography>
+                                        </div>
+                                    </th>
+                                    <th className="text-white h-[70px] px-6 py-4">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                                            <Typography
+                                                variant="small"
+                                                className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                            >
+                                                Last Updated
+                                            </Typography>
+                                        </div>
+                                    </th>
+                                    <th className="text-white h-[70px] px-6 py-4 last:rounded-tr-2xl text-center">
+                                        <div className="flex items-center justify-center space-x-2">
+                                            <div className="w-2 h-2 bg-rose-400 rounded-full"></div>
+                                            <Typography
+                                                variant="small"
+                                                className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                            >
+                                                Actions
+                                            </Typography>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-100">
+                                {workOrderGroups.map((group, idx) => {
+                                    // Find the latest work order in the group (by updated_at or sequence)
+                                    const latestWO = (group.work_orders || [])
+                                        .slice()
+                                        .sort(
+                                            (a, b) =>
+                                                new Date(b.updated_at) -
+                                                new Date(a.updated_at)
+                                        )[0];
+                                    // --- Restore stepRows for expanded dropdown ---
+                                    // 1. Gather all steps (work orders) and sort by sequence
+                                    const steps = (group.work_orders || [])
+                                        .map((wo) => ({
+                                            ...wo,
+                                            sequence:
+                                                wo.work_order_type?.sequence ??
+                                                0,
+                                        }))
+                                        .sort(
+                                            (a, b) => a.sequence - b.sequence
+                                        );
 
-                                // 2. Build a map: accountId -> step with highest sequence
-                                const accountLatestStep = {};
-                                steps.forEach((step) => {
-                                    (step.accounts || []).forEach((acc) => {
-                                        if (
-                                            !accountLatestStep[acc.id] ||
-                                            step.sequence >
-                                                accountLatestStep[acc.id]
-                                                    .sequence
-                                        ) {
-                                            accountLatestStep[acc.id] = {
-                                                stepId: step.work_order_id,
-                                                sequence: step.sequence,
-                                                stepName:
-                                                    step.work_order_type
-                                                        ?.type_name ||
-                                                    step.work_order,
-                                                workOrder: step,
-                                                account: acc,
-                                            };
-                                        }
+                                    // 2. Build a map: accountId -> step with highest sequence
+                                    const accountLatestStep = {};
+                                    steps.forEach((step) => {
+                                        (step.accounts || []).forEach((acc) => {
+                                            if (
+                                                !accountLatestStep[acc.id] ||
+                                                step.sequence >
+                                                    accountLatestStep[acc.id]
+                                                        .sequence
+                                            ) {
+                                                accountLatestStep[acc.id] = {
+                                                    stepId: step.work_order_id,
+                                                    sequence: step.sequence,
+                                                    stepName:
+                                                        step.work_order_type
+                                                            ?.type_name ||
+                                                        step.work_order,
+                                                    workOrder: step,
+                                                    account: acc,
+                                                };
+                                            }
+                                        });
                                     });
-                                });
 
-                                // 3. For each step, filter accounts to only show those whose latest step is this step
-                                const stepRows = steps.map((step) => {
-                                    const filteredAccounts = (
-                                        step.accounts || []
-                                    ).filter(
-                                        (acc) =>
-                                            accountLatestStep[acc.id]
-                                                ?.stepId === step.work_order_id
-                                    );
-                                    if (filteredAccounts.length === 0)
-                                        return null;
-                                    return filteredAccounts.map((account) => (
-                                        <tr
-                                            key={account.id}
-                                            className="border-t border-gray-200"
-                                        >
-                                            <td className="p-2">
-                                                {account.account_name}
-                                            </td>
-                                            <td className="p-2">
-                                                {step.work_order_type
-                                                    ?.type_name ||
-                                                    step.work_order}
-                                            </td>
-                                            <td className="p-2">
-                                                {getStatusBadge(step.status)}
-                                            </td>
-                                            <td className="p-2">
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedAccountId(
-                                                            account.id
-                                                        );
-                                                        setSelectedWorkOrderData(
-                                                            step
-                                                        );
-                                                        setSelectedStepName(
-                                                            step.work_order_type
-                                                                ?.type_name ||
-                                                                step.work_order
-                                                        );
-                                                        setIsAddFilesModalOpen(
-                                                            true
-                                                        );
-                                                    }}
-                                                    className="px-2 py-0.5 text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
+                                    // 3. For each step, filter accounts to only show those whose latest step is this step
+                                    const stepRows = steps.map((step) => {
+                                        const filteredAccounts = (
+                                            step.accounts || []
+                                        ).filter(
+                                            (acc) =>
+                                                accountLatestStep[acc.id]
+                                                    ?.stepId ===
+                                                step.work_order_id
+                                        );
+                                        if (filteredAccounts.length === 0)
+                                            return null;
+                                        return filteredAccounts.map(
+                                            (account) => (
+                                                <tr
+                                                    key={account.id}
+                                                    className="hover:bg-slate-50 transition-colors duration-150"
                                                 >
-                                                    Add Files
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ));
-                                });
-
-                                return (
-                                    <React.Fragment key={group.id}>
-                                        <tr className="hover:bg-gray-100">
-                                            <td className="p-4 border-b border-gray-300 font-bold">
-                                                {String(group.id).padStart(
-                                                    7,
-                                                    "1000-"
-                                                )}
-                                            </td>
-                                            <td className="p-4 border-b border-gray-300 text-sm opacity-70">
-                                                {latestWO?.accounts &&
-                                                latestWO.accounts.length > 0
-                                                    ? latestWO.accounts
-                                                          .map(
-                                                              (acc) =>
-                                                                  acc.property_name ||
-                                                                  acc.project ||
-                                                                  acc.account_name ||
-                                                                  "No Property"
-                                                          )
-                                                          .filter(
-                                                              (v, i, a) =>
-                                                                  a.indexOf(
-                                                                      v
-                                                                  ) === i
-                                                          )
-                                                          .join(", ")
-                                                    : "No Property"}
-                                            </td>
-                                            <td className="p-4 border-b border-gray-300">
-                                                {latestWO?.work_order_deadline
-                                                    ? formatDate(
-                                                          latestWO.work_order_deadline
-                                                      )
-                                                    : "N/A"}
-                                            </td>
-                                            <td className="p-4 border-b border-gray-300">
-                                                {latestWO?.updated_at
-                                                    ? formatDate(
-                                                          latestWO.updated_at
-                                                      )
-                                                    : "N/A"}
-                                            </td>
-                                            <td className="p-4 border-b border-gray-300">
-                                                <div className="flex items-center justify-center space-x-3">
-                                                    <button
-                                                        onClick={() =>
-                                                            handleOpenGroupDetailsModal(
-                                                                group
-                                                            )
-                                                        }
-                                                        className="text-gray-500 hover:text-indigo-600"
-                                                        title="Maximize Details"
-                                                    >
-                                                        <BsArrowsFullscreen
-                                                            size={16}
-                                                        />
-                                                    </button>
-                                                    <button
-                                                        onClick={() =>
-                                                            toggleGroup(
-                                                                group.id
-                                                            )
-                                                        }
-                                                        className="text-gray-500 hover:text-indigo-600"
-                                                        title={
-                                                            expandedGroup ===
-                                                            group.id
-                                                                ? "Collapse"
-                                                                : "Expand"
-                                                        }
-                                                    >
-                                                        {expandedGroup ===
-                                                        group.id ? (
-                                                            <MdKeyboardArrowDown
-                                                                size={20}
-                                                            />
-                                                        ) : (
-                                                            <MdKeyboardArrowRight
-                                                                size={20}
-                                                            />
+                                                    <td className="px-4 py-3 font-medium text-gray-900">
+                                                        {account.account_name}
+                                                    </td>
+                                                    <td className="px-4 py-3 text-gray-700">
+                                                        {step.work_order_type
+                                                            ?.type_name ||
+                                                            step.work_order}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        {getStatusBadge(
+                                                            step.status
                                                         )}
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        {expandedGroup === group.id && (
-                                            <tr>
-                                                <td
-                                                    colSpan={5}
-                                                    className="p-4 border-b border-gray-300 bg-gray-50"
-                                                >
-                                                    <table className="w-full table-auto text-left">
-                                                        <thead>
-                                                            <tr>
-                                                                <th className="p-2 font-semibold">
-                                                                    Account Name
-                                                                </th>
-                                                                <th className="p-2 font-semibold">
-                                                                    Current Step
-                                                                </th>
-                                                                <th className="p-2 font-semibold">
-                                                                    Overall
-                                                                    Status
-                                                                </th>
-                                                                <th className="p-2 font-semibold">
-                                                                    Action
-                                                                </th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {stepRows
-                                                                .flat()
-                                                                .filter(
-                                                                    Boolean
-                                                                )}
-                                                        </tbody>
-                                                    </table>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-center">
+                                                        <button
+                                                            onClick={() => {
+                                                                setSelectedAccountId(
+                                                                    account.id
+                                                                );
+                                                                setSelectedWorkOrderData(
+                                                                    step
+                                                                );
+                                                                setSelectedStepName(
+                                                                    step
+                                                                        .work_order_type
+                                                                        ?.type_name ||
+                                                                        step.work_order
+                                                                );
+                                                                setIsAddFilesModalOpen(
+                                                                    true
+                                                                );
+                                                            }}
+                                                            className="px-3 py-1.5 text-xs font-semibold rounded-lg text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105"
+                                                        >
+                                                            Add Files
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            )
+                                        );
+                                    });
+
+                                    return (
+                                        <React.Fragment key={group.id}>
+                                            <tr
+                                                className={`transition-all duration-200 ease-in-out ${
+                                                    idx % 2 === 0
+                                                        ? "bg-gradient-to-r from-slate-50 to-gray-50"
+                                                        : "bg-white"
+                                                } hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 group cursor-pointer`}
+                                                style={{
+                                                    boxShadow:
+                                                        expandedGroup ===
+                                                        group.id
+                                                            ? "0 8px 25px 0 rgba(59, 130, 246, 0.15)"
+                                                            : undefined,
+                                                }}
+                                                onClick={(e) =>
+                                                    handleRowClick(e, group.id)
+                                                }
+                                            >
+                                                <td className="px-6 py-5 font-bold text-lg text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className="w-3 h-3 bg-blue-500 rounded-full opacity-70"></div>
+                                                        <span className="font-mono tracking-wide">
+                                                            {String(
+                                                                group.id
+                                                            ).padStart(
+                                                                7,
+                                                                "1000-"
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-5 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                        <span className="font-medium">
+                                                            {latestWO?.accounts &&
+                                                            latestWO.accounts
+                                                                .length > 0
+                                                                ? latestWO.accounts
+                                                                      .map(
+                                                                          (
+                                                                              acc
+                                                                          ) =>
+                                                                              acc.property_name ||
+                                                                              acc.project ||
+                                                                              acc.account_name ||
+                                                                              "No Property"
+                                                                      )
+                                                                      .filter(
+                                                                          (
+                                                                              v,
+                                                                              i,
+                                                                              a
+                                                                          ) =>
+                                                                              a.indexOf(
+                                                                                  v
+                                                                              ) ===
+                                                                              i
+                                                                      )
+                                                                      .join(
+                                                                          ", "
+                                                                      )
+                                                                : "No Property"}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-5 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                                                        <span className="font-medium">
+                                                            {latestWO?.work_order_deadline
+                                                                ? formatDate(
+                                                                      latestWO.work_order_deadline
+                                                                  )
+                                                                : "N/A"}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-5 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                                    <div className="flex items-center space-x-2">
+                                                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                                        <span className="font-medium">
+                                                            {latestWO?.updated_at
+                                                                ? formatDate(
+                                                                      latestWO.updated_at
+                                                                  )
+                                                                : "N/A"}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-5 text-center">
+                                                    <div className="flex items-center justify-center">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handleOpenGroupDetailsModal(
+                                                                    group
+                                                                );
+                                                            }}
+                                                            className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-lg transition-all duration-200 transform hover:scale-110 ignore-row-toggle"
+                                                            title="Maximize Details"
+                                                        >
+                                                            <BsArrowsFullscreen
+                                                                size={18}
+                                                            />
+                                                        </button>
+                                                    </div>
                                                 </td>
                                             </tr>
-                                        )}
-                                    </React.Fragment>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                            {expandedGroup === group.id && (
+                                                <tr>
+                                                    <td
+                                                        colSpan={5}
+                                                        className="px-6 py-4 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50"
+                                                    >
+                                                        <div className="rounded-2xl bg-white shadow-lg border border-gray-200 overflow-hidden">
+                                                            <table className="w-full table-auto text-left">
+                                                                <thead>
+                                                                    <tr className="bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-200">
+                                                                        <th className="px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                                                            Account
+                                                                            Name
+                                                                        </th>
+                                                                        <th className="px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                                                            Current
+                                                                            Step
+                                                                        </th>
+                                                                        <th className="px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                                                            Overall
+                                                                            Status
+                                                                        </th>
+                                                                        <th className="px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center">
+                                                                            Action
+                                                                        </th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody className="divide-y divide-gray-100">
+                                                                    {stepRows
+                                                                        .flat()
+                                                                        .filter(
+                                                                            Boolean
+                                                                        )}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </Card>
         );

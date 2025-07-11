@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccountChecklistStatus;
 use App\Models\Checklist;
 use App\Models\Submilestone;
 use App\Models\TakenOutAccount;
@@ -46,69 +47,80 @@ class WorkOrderController extends Controller
         }
     }
 
-public function index(Request $request)
-{
-    $user = $request->user();
+    public function index(Request $request)
+    {
+        $user = $request->user();
 
-    if (!$user) {
-        return response()->json(['message' => 'Unauthenticated.'], 401);
-    }
+        if (!$user) {
+            return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
 
-    Log::info('Fetching work orders for employee ID: ' . $user->id);
+        $query = WorkOrder::query();
 
-    $query = WorkOrder::query();
+        $query->with([
+            'assignees:id,fullname',
+            'workOrderType:id,type_name,sequence',
+            'accounts:id,account_name,property_name,current_submilestone_id',
+            'createdBy:id,fullname'
+        ]);
 
-    $query->with([
-        'assignees:id,fullname',
-        'workOrderType:id,type_name',
-        'accounts:id,account_name,property_name,current_submilestone_id',
-        'createdBy:id,fullname'
-    ]);
-
-    // 🔍 Filter by accounts where the current submilestone is assigned to the user
-    $query->whereHas('accounts', function ($q) use ($user) {
-        $q->whereExists(function ($sub) use ($user) {
-            $sub->select(DB::raw(1))
-                ->from('project_milestone_assignees as pma')
-                ->whereColumn('pma.submilestone_id', 'taken_out_accounts.current_submilestone_id')
-                ->whereColumn('pma.property_name', 'taken_out_accounts.property_name')
-                ->where('pma.employee_id', $user->id);
+        $query->whereHas('accounts', function ($q) use ($user) {
+            $q->where(function ($accountSub) use ($user) {
+                $accountSub->whereExists(function ($subquery) use ($user) {
+                    $subquery->select(DB::raw(1))
+                        ->from('project_milestone_assignees as pma')
+                        ->join('submilestones as sm', 'sm.id', '=', 'pma.submilestone_id')
+                        ->join('work_order_types as wot', 'wot.id', '=', 'sm.work_order_type_id')
+                        ->where(function ($condition) use ($user) {
+                            $condition
+                                // ✅ Step 1: show if current submilestone belongs to step 1 AND user assigned to ANY milestone in step 1
+                                ->where(function ($inner) use ($user) {
+                                    $inner->where('wot.sequence', 1)
+                                        ->whereColumn('sm.work_order_type_id', '=', DB::raw('wot.id'))
+                                        ->whereColumn('pma.property_name', '=', 'taken_out_accounts.property_name')
+                                        ->where('pma.employee_id', $user->id);
+                                })
+                                // ✅ Steps >1: show only if user is assigned to the exact current submilestone
+                                ->orWhere(function ($inner) use ($user) {
+                                    $inner->whereColumn('pma.submilestone_id', '=', 'taken_out_accounts.current_submilestone_id')
+                                        ->whereColumn('pma.property_name', '=', 'taken_out_accounts.property_name')
+                                        ->where('pma.employee_id', $user->id);
+                                });
+                        });
+                });
+            });
         });
-    });
 
-    // Optional status filtering
-    if ($request->filled('status')) {
-        $query->where('status', $request->input('status'));
-    }
+        // Optional filters
+        if ($request->filled('status')) {
+            $query->where('status', $request->input('status'));
+        }
 
-    // Sorting
-    $sortBy = $request->input('sortBy');
-    $sortOrder = $request->input('sortOrder', 'asc');
+        // Optional sorting
+        $sortBy = $request->input('sortBy');
+        $sortOrder = $request->input('sortOrder', 'asc');
 
-    if ($sortBy && in_array($sortBy, ['created_at', 'work_order_deadline', 'priority'])) {
-        if ($sortBy === 'priority') {
-            $direction = strtolower($sortOrder) === 'asc' ? 'ASC' : 'DESC';
-            $query->orderByRaw("
+        if ($sortBy && in_array($sortBy, ['created_at', 'work_order_deadline', 'priority'])) {
+            if ($sortBy === 'priority') {
+                $query->orderByRaw("
                 CASE priority
                     WHEN 'Urgent' THEN 4
                     WHEN 'High' THEN 3
                     WHEN 'Medium' THEN 2
                     WHEN 'Low' THEN 1
                     ELSE 0
-                END {$direction}
-            ");
-        } else {
-            $query->orderBy($sortBy, $sortOrder);
+                END " . ($sortOrder === 'desc' ? 'DESC' : 'ASC')
+                );
+            } else {
+                $query->orderBy($sortBy, $sortOrder);
+            }
         }
+
+        $perPage = $request->input('per_page', 10);
+        $workOrders = $query->paginate($perPage);
+
+        return response()->json($workOrders);
     }
-
-    $perPage = $request->input('per_page', 10);
-    $workOrders = $query->paginate($perPage);
-
-    Log::info('Work orders returned: ' . $workOrders->count());
-
-    return response()->json($workOrders);
-}
 
 
     public function store(Request $request)
@@ -265,12 +277,12 @@ public function index(Request $request)
         Log::info('Validated data:', $validatedData);
 
         // Find an existing unfinished work order for this account
-        $existingWorkOrder = WorkOrder::whereHas('accounts', function($q) use ($validatedData) {
+        $existingWorkOrder = WorkOrder::whereHas('accounts', function ($q) use ($validatedData) {
             $q->whereIn('taken_out_accounts.id', $validatedData['account_ids']);
         })
-        ->where('status', '!=', 'Complete')
-        ->orderByDesc('created_at')
-        ->first();
+            ->where('status', '!=', 'Complete')
+            ->orderByDesc('created_at')
+            ->first();
 
         if ($existingWorkOrder) {
             // Reuse group and number
@@ -294,7 +306,7 @@ public function index(Request $request)
 
         $workOrder->accounts()->sync($validatedData['account_ids']);
 
-            // Get the first work order type
+        // Get the first work order type
         $firstWorkOrderType = WorkOrderType::find($validatedData['work_order_type_id']);
 
         // Get the submilestones for the first work order type
@@ -564,36 +576,46 @@ public function index(Request $request)
         return response()->json(['message' => 'Work Order status is already Completed.', 'work_order' => $workOrder]);
     }
 
-//     public function advanceSubmilestoneIfComplete($accountId)
-// {
-//     $account = TakenOutAccount::findOrFail($accountId);
+ public function advanceSubmilestoneIfComplete($accountId)
+    {
+        $account = TakenOutAccount::findOrFail($accountId);
 
-//     $currentSubmilestoneId = $account->current_submilestone_id;
+        $currentSubmilestoneId = $account->current_submilestone_id;
 
-//     // Check if all checklists for this account and this submilestone are completed
-//     $isComplete = Checklist::where('account_id', $accountId)
-//         ->where('submilestone_id', $currentSubmilestoneId)
-//         ->where('is_completed', false)
-//         ->doesntExist();
+        // Get checklist IDs for the current submilestone
+        $checklistIds = Checklist::where('submilestone_id', $currentSubmilestoneId)->pluck('id');
 
-//     if (!$isComplete) {
-//         return;
-//     }
+        if ($checklistIds->isEmpty()) {
+            // No checklists required, so we can advance
+            $isComplete = true;
+        } else {
+            // Check if all checklist statuses are completed for this account
+            $incompleteCount = AccountChecklistStatus::where('account_id', $accountId)
+                ->whereIn('checklist_id', $checklistIds)
+                ->where('is_completed', false)
+                ->count();
 
-//     // Get the submilestone object
-//     $currentSubmilestone = Submilestone::find($currentSubmilestoneId);
+            $isComplete = $incompleteCount === 0;
+        }
 
-//     // Get the next submilestone in the same work order type (ordered by ID or some sequence)
-//     $nextSubmilestone = Submilestone::where('work_order_type_id', $currentSubmilestone->work_order_type_id)
-//         ->where('id', '>', $currentSubmilestoneId)
-//         ->orderBy('id')
-//         ->first();
+        if (!$isComplete) {
+            return;
+        }
 
-//     // If there's a next step, advance it
-//     if ($nextSubmilestone) {
-//         $account->current_submilestone_id = $nextSubmilestone->id;
-//         $account->save();
-//     }
-// }
+        // Get the current submilestone
+        $currentSubmilestone = Submilestone::find($currentSubmilestoneId);
+
+        // Get the next submilestone based on ordering (by sequence or ID)
+        $nextSubmilestone = Submilestone::where('work_order_type_id', $currentSubmilestone->work_order_type_id)
+            ->where('step_number', '>', $currentSubmilestone->step_number)
+            ->orderBy('step_number')
+            ->first();
+
+        if ($nextSubmilestone) {
+            $account->current_submilestone_id = $nextSubmilestone->id;
+            $account->save();
+        }
+    }
+
 
 }

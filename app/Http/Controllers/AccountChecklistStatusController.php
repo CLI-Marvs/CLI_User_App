@@ -200,37 +200,37 @@ class AccountChecklistStatusController extends Controller
      * @param int $accountId The ID of the account being checked.
      * @param WorkOrder $workOrder The specific work order (step) to check against.
      */
-private function _checkAndTriggerNextStep(int $accountId, WorkOrder $workOrder)
-{
-    $account = TakenOutAccount::find($accountId);
-    if (!$account) {
-        Log::warning("_checkAndTriggerNextStep: Account not found for ID: {$accountId}");
-        return;
+    private function _checkAndTriggerNextStep(int $accountId, WorkOrder $workOrder)
+    {
+        $account = TakenOutAccount::find($accountId);
+        if (!$account) {
+            Log::warning("_checkAndTriggerNextStep: Account not found for ID: {$accountId}");
+            return;
+        }
+
+        // ✅ Advance the submilestone if needed
+        $this->_advanceSubmilestoneIfComplete($accountId);
+
+        $requiredChecklistIds = Checklist::whereHas('submilestone', function ($query) use ($workOrder) {
+            $query->where('work_order_type_id', $workOrder->work_order_type_id);
+        })->pluck('id')->toArray();
+
+        if (empty($requiredChecklistIds)) {
+            Log::info("No checklists required for Work Order Type ID: {$workOrder->work_order_type_id}. Triggering next step for account {$accountId}.");
+            $this->_createNextWorkOrder($workOrder, $account);
+            return;
+        }
+
+        $completedChecklistsCount = AccountChecklistStatus::where('account_id', $accountId)
+            ->whereIn('checklist_id', $requiredChecklistIds)
+            ->where('is_completed', true)
+            ->count();
+
+        if ($completedChecklistsCount === count($requiredChecklistIds)) {
+            Log::info("All checklists for Work Order {$workOrder->work_order_id} are complete for account {$accountId}. Triggering next step.");
+            $this->_createNextWorkOrder($workOrder, $account);
+        }
     }
-
-    // ✅ Advance the submilestone if needed
-    $this->_advanceSubmilestoneIfComplete($accountId);
-
-    $requiredChecklistIds = Checklist::whereHas('submilestone', function ($query) use ($workOrder) {
-        $query->where('work_order_type_id', $workOrder->work_order_type_id);
-    })->pluck('id')->toArray();
-
-    if (empty($requiredChecklistIds)) {
-        Log::info("No checklists required for Work Order Type ID: {$workOrder->work_order_type_id}. Triggering next step for account {$accountId}.");
-        $this->_createNextWorkOrder($workOrder, $account);
-        return;
-    }
-
-    $completedChecklistsCount = AccountChecklistStatus::where('account_id', $accountId)
-        ->whereIn('checklist_id', $requiredChecklistIds)
-        ->where('is_completed', true)
-        ->count();
-
-    if ($completedChecklistsCount === count($requiredChecklistIds)) {
-        Log::info("All checklists for Work Order {$workOrder->work_order_id} are complete for account {$accountId}. Triggering next step.");
-        $this->_createNextWorkOrder($workOrder, $account);
-    }
-}
 
 
     /**
@@ -289,6 +289,18 @@ private function _checkAndTriggerNextStep(int $accountId, WorkOrder $workOrder)
 
         // Attach the completed account to the work order.
         $workOrderForProcessing->accounts()->attach($completedAccount->id);
+
+        // Update the account's current_submilestone_id to the first sub-milestone of the next step
+        $firstSubmilestone = Submilestone::where('work_order_type_id', $nextWorkOrderType->id)
+            ->orderBy('sequence', 'asc')
+            ->first();
+        if ($firstSubmilestone) {
+            $completedAccount->current_submilestone_id = $firstSubmilestone->id;
+            $completedAccount->save();
+            Log::info("Account {$completedAccount->id} current_submilestone_id updated to {$firstSubmilestone->id} for next step.");
+        } else {
+            Log::warning("No submilestone found for next work order type {$nextWorkOrderType->id} when updating account {$completedAccount->id}.");
+        }
 
         // Assign employees for this specific account
         $projectName = $completedAccount->property_name;

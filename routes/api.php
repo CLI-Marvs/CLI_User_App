@@ -78,8 +78,8 @@ Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees'
 Route::post('/update-info', [ConcernController::class, 'updateInfo']);
 // Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
- Route::get('/work-order-groups/{groupId}/details', [WorkOrderGroupController::class, 'showDetails']);
- Route::get('/get-account-logs/{selectedId}', [AccountLogController::class, 'getLogData']);
+ 
+ 
 // for titling and registration
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -108,13 +108,13 @@ Route::middleware('auth:sanctum')->group(function () {
      * Account Logs
      */
     Route::post('/post-account-log', [AccountLogController::class, 'attachAccountsToLog']);
-   
+    Route::get('/get-account-logs/{selectedId}', [AccountLogController::class, 'getLogData']);
     Route::patch('/update-is-new/{id}', [AccountLogController::class, 'updateIsNewStatus']);
 
     /**
      * Taken Out Accounts
      */
-Route::prefix('taken-out-accounts')->group(function () {
+    Route::prefix('taken-out-accounts')->group(function () {
         Route::get('/', [TakenOutAccountController::class, 'getTakenOutAccounts']);
         Route::get('get-masterlist', [TakenOutAccountController::class, 'getMasterList']);
         Route::patch('add-masterlist', [TakenOutAccountController::class, 'updateAddStatus']);
@@ -190,7 +190,7 @@ Route::prefix('taken-out-accounts')->group(function () {
     Route::put('/projects/{projectName}/milestones/{submilestone}/assignees', [ProjectAssigneeController::class, 'updateAssignees'])->where('projectName', '.*');
     Route::delete('/projects/{projectName}/milestones/{submilestone}/assignees/{employee}', [ProjectAssigneeController::class, 'removeAssignee'])->where('projectName', '.*');
     //for workorder group
-   
+    Route::get('/work-order-groups/{groupId}/details', [WorkOrderGroupController::class, 'showDetails']);
 });
 
 //* For Sap 
