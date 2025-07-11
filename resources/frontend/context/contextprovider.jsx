@@ -7,12 +7,7 @@ import React, {
 } from "react";
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
-<<<<<<< HEAD
-import { set } from "lodash";
-import { json } from "react-router-dom";
-=======
 import { get, set } from "lodash";
->>>>>>> 57a2ed710e1e876a0338b41e6705246cf46effbb
 
 const StateContext = createContext({
     user: null,
