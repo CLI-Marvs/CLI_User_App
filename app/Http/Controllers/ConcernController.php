@@ -1146,9 +1146,9 @@ class ConcernController extends Controller
             if ($searchParams['departments'] !== "Unassigned") {
                 $departments = $searchParams['departments'];
 
-                if (!is_array($departments)) {
-                    $departments = explode(',', $departments);
-                }
+            if (!is_array($departments)) {
+                $departments = explode(',', $departments);
+            }
 
                 foreach ($departments as $department) {
                     $query->whereJsonContains('assign_to', [['department' => $department]]);
@@ -2405,6 +2405,7 @@ class ConcernController extends Controller
 
     public function getInquiriesByCategory(Request $request)
     {
+        // dd($request->all());
         try {
             $project = $request->property;
             $department = $request->department;
@@ -2449,7 +2450,7 @@ class ConcernController extends Controller
         }
 
         $concerns = $query->groupBy('details_concern')->get();
-
+ 
         return response()->json($concerns);
     }
 

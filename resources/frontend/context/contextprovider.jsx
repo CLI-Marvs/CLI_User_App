@@ -7,8 +7,7 @@ import React, {
 } from "react";
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
-import { set } from "lodash";
-import { json } from "react-router-dom";
+import { get, set } from "lodash";
 
 const StateContext = createContext({
     user: null,
@@ -54,6 +53,7 @@ export const ContextProvider = ({ children }) => {
 
     const [currentPageCustomer, setCurrentPageCustomer] = useState(0);
     const [totalPagesCustomer, setTotalPagesCustomer] = useState(0);
+    const [categories, setCategories] = useState([]);
     const [department, setDepartment] = useState("All");
     const [project, setProject] = useState("All");
     const [month, setMonth] = useState("All");
@@ -323,6 +323,21 @@ export const ContextProvider = ({ children }) => {
                 }, []);
 
                 setDataCategory(aggregatedData);
+            } catch (error) {
+                console.log("Error retrieving data", error);
+            }
+        }
+    };
+
+    /* Fetch categories or concern regarding (e.g.  'Reservation Documents',
+            'Account / Payment Issues',
+            'Turn Over Status',
+            'Unit Status', etc... */
+    const getCategories = async () => {
+        if (token) {
+            try {
+                const response = await apiService.get("categories");
+                setCategories(response.data);
             } catch (error) {
                 console.log("Error retrieving data", error);
             }
@@ -814,6 +829,9 @@ export const ContextProvider = ({ children }) => {
     //         console.log("error", error);
     //     }
     // };
+    useEffect(() => {
+        getCategories();
+    }, []);
 
     // useEffect(() => {
     //     getPropertyUnits(towerPhaseId, selectedFloor);
@@ -1119,6 +1137,7 @@ export const ContextProvider = ({ children }) => {
                 setSpecificAssigneeCsr,
                 specificAssigneeCsr,
                 canWrite,
+                categories,
             }}
         >
             {children}
