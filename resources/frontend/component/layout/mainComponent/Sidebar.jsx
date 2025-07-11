@@ -119,7 +119,7 @@ const Sidebar = () => {
 
     return (
         <>
-            <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pr-[20px] pt-0 rounded-none bg-custom-grayFA relative z-30 overflow-hidden">
+            <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pr-[20px] pt-0 rounded-none bg-custom-grayFA relative z-30 overflow-hidden crs-sidebar-blur">
                 <List className="p-0 gap-0">
                     <Link to="/notification">
                         <ListItem

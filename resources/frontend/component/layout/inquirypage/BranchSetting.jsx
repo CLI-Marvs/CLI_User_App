@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
 import { BRANCH_SETTING_COLUMNS } from "@/constant/data/tableColumns";
 import { useBranch } from "@/component/layout/inquirypage/hooks/useBranch";
@@ -34,6 +34,15 @@ const BranchSetting = () => {
         },
         onSettled: () => setIsSubmitting(false),
     });
+
+    //Hooks
+    useEffect(() => {
+        if (showAlert) {
+            document.body.classList.add("alert-open");
+        } else {
+            document.body.classList.remove("alert-open");
+        }
+    }, [showAlert]);
 
     //Event handler
     const handleCopyAllLinks = (urls) => {

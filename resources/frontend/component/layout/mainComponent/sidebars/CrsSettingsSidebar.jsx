@@ -20,7 +20,7 @@ const CrsSettingsSidebar = () => {
 
     return (
         <>
-            <div className="bg-custom-grayFA">
+            <div className="bg-custom-grayFA crs-sidebar-blur">
                 <Card className="flex min-w-[189px] h-screen pt-3 rounded-[10px] bg-[#EFEFEF]">
                     <List className="flex flex-col justify-center w-full">
                         <div className="px-5 leading-1">
