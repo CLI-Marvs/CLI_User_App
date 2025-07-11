@@ -98,6 +98,7 @@ const ReportPage = () => {
         setActiveDayButton,
         setSpecificAssigneeCsr,
         setAssignedToMeActive,
+        categories,
     } = useStateContext();
 
     const [searchSummary, setSearchSummary] = useState([]);
@@ -123,7 +124,37 @@ const ReportPage = () => {
         "#7F7F7F", // Gray
         "#BCBD22", // Olive
         "#17BECF", // Teal
+        "#F39C12", // Yellow (New)
+        "#C0392B", // Dark Red (New)
+        "#8E44AD", // Violet (New)
+        "#2ECC71", // Light Green (New)
+        "#3498DB", // Light Blue (New)
     ];
+
+    // Dynamically assign unique colors to concerns based on the COLORS array
+    const categoryColors = {};
+    let colorIndex = 0;
+
+    const assignColorToCategory = (category) => {
+        // Check if the category already has a color assigned
+        if (!categoryColors[category]) {
+            // Assign the next available color from the COLORS array
+            categoryColors[category] = COLORS[colorIndex % COLORS.length];
+            colorIndex++;
+        }
+        return categoryColors[category];
+    };
+
+    if (Array.isArray(categories)) {
+        categories.forEach((category) => assignColorToCategory(category.name));
+    } else {
+        console.error("categories is not an array or is undefined");
+    }
+
+    // Function to get the color for a category
+    const getCategoryColor = (categoryName) => {
+        return categoryColors[categoryName] || "#8884d8";
+    };
 
     const navigate = useNavigate();
     const getBarColorPerType = (name) => {
@@ -171,28 +202,12 @@ const ReportPage = () => {
         );
     };
 
-    const categoryColors = {
-        Commissions: COLORS[0],
-        Leasing: COLORS[1],
-        "Loan Application": COLORS[2],
-        "Other Concerns": COLORS[3],
-        "Payment Issues": COLORS[4],
-        "Reservation Documents": COLORS[5],
-        "SOA/ Buyer's Ledger": COLORS[6],
-        "Title and Other Registration Documents": COLORS[7],
-        "Turn Over Status": COLORS[8],
-        "Unit Status": COLORS[9],
-    };
     // Function to get a unique color from COLORS if a category is missing from categoryColors
     const getColor = (category, index) => {
         if (categoryColors[category]) return categoryColors[category];
         return COLORS[index % COLORS.length];
     };
-    const SINGLE_COLOR = "#5B9BD5";
 
-    const getCategoryColor = (categoryName) => {
-        return categoryColors[categoryName] || "#8884d8";
-    };
     const CustomTooltip = ({ active, payload }) => {
         if (active && payload && payload.length) {
             const { name } = payload[0].payload;
@@ -482,36 +497,41 @@ const ReportPage = () => {
         );
     };
 
-    const formattedPropertyNames = [
+      const formattedPropertyNames = [
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
                   .filter((item) => !item.toLowerCase().includes("phase"))
                   .map((item) => {
-                      let formattedItem = formatFunc(item);
-
-                      // Capitalize each word in the string
+                      // First trim to remove any whitespace or \n
+                      let formattedItem = item.trim();
+                      
+                      // Apply the formatting function
+                      formattedItem = formatFunc(formattedItem);
+    
+                      // Split and clean each word
                       formattedItem = formattedItem
                           .split(" ")
+                          .map(word => word.trim()) // Trim each word
+                          .filter(word => word.length > 0) // Remove empty strings
                           .map((word) => {
                               // Check for specific words that need to be fully capitalized
                               if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
                                   return word.toUpperCase();
                               }
                               // Capitalize the first letter of all other words
-                              return (
-                                  word.charAt(0).toUpperCase() +
-                                  word.slice(1).toLowerCase()
-                              );
+                              return word.charAt(0).toUpperCase() + 
+                                     word.slice(1).toLowerCase();
                           })
                           .join(" ");
-
+    
                       // Replace specific names if needed
                       if (formattedItem === "Casamira South") {
                           formattedItem = "Casa Mira South";
                       }
-
-                      return formattedItem;
+    
+                      // Final trim to ensure no leftover spaces
+                      return formattedItem.trim();
                   })
                   .sort((a, b) => {
                       if (a === "N/A") return -1;
@@ -520,6 +540,7 @@ const ReportPage = () => {
                   })
             : []),
     ];
+
 
     //Get current year
 
@@ -949,21 +970,20 @@ const ReportPage = () => {
                                 {/* Empty default option */}
                                 <option value="All">All</option>
                                 {user?.department ===
-                                "Customer Relations - Services"
-                                    ? allDepartment
-                                          .filter((item) => item !== "All")
-                                          .sort()
-                                          .map((item, index) => (
-                                              <option key={index} value={item}>
-                                                  {item}
-                                              </option>
-                                          ))
-                                    : user?.department && (
-                                          <option value={user?.department}>
-                                              {user?.department}
-                                          </option>
-                                      )}
-                                <option value="Unassigned">Unassigned</option>
+                                "Customer Relations - Services" ? (
+                                    allDepartment
+                                        .filter((item) => item !== "All")
+                                        .sort()
+                                        .map((item, index) => (
+                                            <option key={index} value={item}>
+                                                {item}
+                                            </option>
+                                        ))
+                                ) : (
+                                    <option value={user?.department}>
+                                        {user?.department}
+                                    </option>
+                                )}
                             </select>
                             <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-custom-lightgreen pointer-events-none cursor-pointer">
                                 <IoMdArrowDropdown />

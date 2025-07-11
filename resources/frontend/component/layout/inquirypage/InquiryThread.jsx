@@ -18,8 +18,8 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { toast } from "react-toastify";
-import { showToast } from "../../../util/toastUtil";
-import Alert from "../../Alert";
+import { showToast } from "../../../util/toastUtil"
+import Alert from "../mainComponent/Alert";
 import AddInfoModal from "./AddInfoModal";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
 import InquiryFormModal from "./InquiryFormModal";
@@ -69,6 +69,7 @@ const InquiryThread = () => {
         setMessages,
         setIsUserTypeChange,
         isUserTypeChange,
+        categories,
     } = useStateContext();
     const [chatMessage, setChatMessage] = useState("");
     const userLoggedInEmail = user?.employee_email;
@@ -157,9 +158,14 @@ const InquiryThread = () => {
                   .map((item) => {
                       let formattedItem = formatFunc(item);
 
-                      // Capitalize each word in the string
+                      // Apply the formatting function
+                      formattedItem = formatFunc(formattedItem);
+
+                      // Split and clean each word
                       formattedItem = formattedItem
                           .split(" ")
+                          .map((word) => word.trim()) // Trim each word
+                          .filter((word) => word.length > 0) // Remove empty strings
                           .map((word) => {
                               // Check for specific words that need to be fully capitalized
                               if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
@@ -608,55 +614,23 @@ const InquiryThread = () => {
                                             {" "}
                                             Category
                                         </label>
-
-                                        <div className="flex bg-red-900 justify-start w-full relative">
-                                            <label
-                                                htmlFor=""
-                                                className="w-full border-b-2"
-                                            >
-                                                {""}
-                                            </label>
-                                            <select
-                                                className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
-                                                value={category}
-                                                onChange={(e) =>
-                                                    setCategory(e.target.value)
-                                                }
-                                            >
-                                                <option value=" ">
-                                                    Select Category
-                                                </option>
-                                                <option value="Reservation Documents">
-                                                    Reservation Documents
-                                                </option>
-                                                <option value="Payment Issues">
-                                                    Payment Issues
-                                                </option>
-                                                <option value="SOA/ Buyer's Ledger">
-                                                    SOA/ Buyer's Ledger
-                                                </option>
-                                                <option value="Turn Over Status">
-                                                    Turn Over Status
-                                                </option>
-                                                <option value="Unit Status">
-                                                    Unit Status
-                                                </option>
-                                                <option value="Loan Application">
-                                                    Loan Application
-                                                </option>
-                                                <option value="Title and Other Registration Documents">
-                                                    Title and Other Registration
-                                                    Documents
-                                                </option>
-                                                <option value="Commissions">
-                                                    Commissions
-                                                </option>
-                                                <option value="Other Concerns">
-                                                    Other Concerns
-                                                </option>
-                                            </select>
-                                        </div>
-
+                                        <select
+                                            className="w-full border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                            value={category}
+                                            onChange={(e) =>
+                                                setCategory(e.target.value)
+                                            }
+                                        >
+                                            <option value="">
+                                                Select Category
+                                            </option>
+                                            {categories &&
+                                                categories.map((category) => (
+                                                    <option key={category.id}>
+                                                        {category.name}
+                                                    </option>
+                                                ))}
+                                        </select>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
                                             <IoIosArrowDown />
                                         </span>
@@ -856,48 +830,6 @@ const InquiryThread = () => {
                                                             </option>
                                                         )
                                                     )}
-                                                <option value="Unassigned">
-                                                    {" "}
-                                                    Unassigned
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                            <IoIosArrowDown />
-                                        </span>
-                                    </div>
-                                    <div className="flex relative">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Property
-                                        </label>
-                                        <div className="fle justify-start w-full relative">
-                                            <label
-                                                htmlFor=""
-                                                className="w-full border-b-2"
-                                            >
-                                                {""}
-                                            </label>
-                                            <select
-                                                className="w-full border-b-1 outline-none appearance-none text-sm px-[8px]"
-                                                onChange={handleSelectProperty}
-                                                value={selectedProperty}
-                                            >
-                                                <option value="">
-                                                    Select Property
-                                                </option>
-                                                {formattedPropertyNames.map(
-                                                    (item, index) => {
-                                                        return (
-                                                            <option
-                                                                key={index}
-                                                                value={item}
-                                                            >
-                                                                {item}
-                                                            </option>
-                                                        );
-                                                    }
-                                                )}
                                             </select>
                                         </div>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
@@ -1029,13 +961,11 @@ const InquiryThread = () => {
                                                 <select
                                                     className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
                                                     value={selectedYear}
-                                                    onChange={(e) => {
+                                                    onChange={(e) =>
                                                         setSelectedYear(
                                                             e.target.value
-                                                        );
-                                                        setStartDate(null);
-                                                        setEndDate(null);
-                                                    }}
+                                                        )
+                                                    }
                                                 >
                                                     <option value="">
                                                         {" "}

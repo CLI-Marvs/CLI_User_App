@@ -12,6 +12,7 @@ use App\Http\Controllers\UnitController;
 use App\Http\Controllers\ConcernController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\PriceVersionController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DynamicBannerController;
 use App\Http\Controllers\PaymentSchemeController;
 use App\Http\Controllers\PropertyMasterController;
@@ -100,6 +101,7 @@ Route::post('bank/statement', [TransactionController::class, 'clearedBankStateme
 Route::post('/posting-invoices', [SapController::class, 'retrieveInvoicesFromSap']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
 
