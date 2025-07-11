@@ -165,8 +165,6 @@ const ColumnModal = ({ subFeatureId, views }) => {
         }
     };
 
-    console.log("selectedFields", selectedFields);
-    console.log("viewName", viewName);
     return (
         <div className="relative">
             <div

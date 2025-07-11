@@ -57,6 +57,9 @@ import ErrorPage from "@/component/ErrorElement/ErrorPage";
 import MarkupSettingsView from "@/component/views/pages/transactionViews/MarkupSettingsView";
 import ReportsView from "./views/pages/transactionViews/ReportsView";
 import WalkinTransactionHistoryView from '@/component/views/pages/walkinEmojiViews/WalkinTransactionHistoryView';
+import FinancialToolsView from "./views/pages/transactionViews/FinancialToolsView";
+import CheckStreamReportsView from "./views/pages/transactionViews/CheckStreamReportsView";
+
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, children }) => {
     const { hasPermission } = useStateContext();
@@ -240,6 +243,20 @@ const App = () => {
                                         {
                                             path: "markup",
                                             element: <MarkupSettingsView />,
+                                        },
+                                    ],
+                                },
+                                {
+                                    path: "tools",
+                                    element: <TransactionLayout />,
+                                    children: [
+                                        {
+                                            path: "check-generator",
+                                            element: <FinancialToolsView />,
+                                        },
+                                         {
+                                            path: "reports",
+                                            element: <CheckStreamReportsView />,
                                         },
                                     ],
                                 },

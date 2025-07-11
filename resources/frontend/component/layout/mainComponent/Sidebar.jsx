@@ -84,6 +84,8 @@ const Sidebar = () => {
             case "/transaction/receivables/posting":
             case "/transaction/settings/markup":
             case "/transaction/receivables/reports":
+            case "/transaction/tools/check-generator":
+            case "/transaction/tools/reports":
                 setInquiryOpen(false);
                 setIsInvoiceOpen(true);
                 setSuperAdminOpen(false);
@@ -300,7 +302,7 @@ const Sidebar = () => {
 
                     {isInvoiceOpen &&
                         location.pathname.startsWith("/transaction") && (
-                            <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+                            <div className="px-[10px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
                                 <Link to="/transaction/bank-monitoring/bank-statements">
                                     <ListItem
                                         className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
@@ -335,7 +337,7 @@ const Sidebar = () => {
                                             )
                                         }
                                     >
-                                        Online Payment
+                                        Receivables/Incoming
                                     </ListItem>
                                 </Link>
                                 <Link to="/transaction/settings/markup">
@@ -354,6 +356,24 @@ const Sidebar = () => {
                                         }
                                     >
                                         Settings
+                                    </ListItem>
+                                </Link>
+                                  <Link to="/transaction/tools/check-generator">
+                                    <ListItem
+                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                            location.pathname.startsWith(
+                                                "/transaction/tools"
+                                            )
+                                                ? "bg-white text-custom-solidgreen font-semibold"
+                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                        }`}
+                                        onClick={() =>
+                                            handleItemTransactionClick(
+                                                "/transaction/tools/check-generator"
+                                            )
+                                        }
+                                    >
+                                        Tools
                                     </ListItem>
                                 </Link>
                             </div>

@@ -232,6 +232,9 @@ const Navbar = () => {
             if (value.toLowerCase() === "bank-statements") {
                 breadcrumbLabel = "Bank Statements";
             }
+              if (value.toLowerCase() === "check-generator") {
+                breadcrumbLabel = "Check Generator";
+            }
 
             if (value.toLowerCase() === "receivables") {
                 breadcrumbLabel = "Receivables/Incoming";
@@ -335,7 +338,7 @@ const Navbar = () => {
 
     return (
         <>
-            <div className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
+            <nav className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
                 <div className="flex w-full">
                     <div className="flex">
                         <div className="flex justify-center items-center">
@@ -446,7 +449,7 @@ const Navbar = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </nav>
             <div>
                 <FeedbackModal modalRef={modalRef} />
             </div>
