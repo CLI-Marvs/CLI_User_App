@@ -7,8 +7,7 @@ import React, {
 } from "react";
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
-import { set } from "lodash";
-import { json } from "react-router-dom";
+import { get, set } from "lodash";
 
 const StateContext = createContext({
     user: null,
@@ -51,10 +50,10 @@ export const ContextProvider = ({ children }) => {
     const [communicationTypeMonth, setCommunicationTypeMonth] = useState("");
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
-    const [categories, setCategories] = useState([]);
 
     const [currentPageCustomer, setCurrentPageCustomer] = useState(0);
     const [totalPagesCustomer, setTotalPagesCustomer] = useState(0);
+    const [categories, setCategories] = useState([]);
     const [department, setDepartment] = useState("All");
     const [project, setProject] = useState("All");
     const [month, setMonth] = useState("All");
@@ -1094,6 +1093,7 @@ export const ContextProvider = ({ children }) => {
                 setSpecificAssigneeCsr,
                 specificAssigneeCsr,
                 canWrite,
+                categories,
             }}
         >
             {children}

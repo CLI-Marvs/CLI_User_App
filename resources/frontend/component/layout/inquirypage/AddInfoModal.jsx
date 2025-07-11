@@ -52,8 +52,8 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         getInquiryLogs,
         isUserTypeChange,
         setIsUserTypeChange,
-        categories,
         getNavBarData,
+        categories,
     } = useStateContext();
 
     const [message, setMessage] = useState(dataConcern.admin_remarks || "");
@@ -658,27 +658,27 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                              * Disable button if no changes detected
                              * Visually indicate button is non-interactive when no changes exist
                              */}
-                            {/*  {user?.department === "Customer Relations - Services" && ( */}
-                            <button
-                                disabled={!isUserTypeChange && !hasChanges}
-                                className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
-                                type="button"
-                                onClick={handleShowUpdateAlert}
-                                style={{
-                                    opacity:
-                                        !isUserTypeChange && !hasChanges
-                                            ? 0.5
-                                            : 1,
-                                    cursor:
-                                        !isUserTypeChange && !hasChanges
-                                            ? "not-allowed"
-                                            : "pointer",
-                                }}
-                            >
-                                Update
-                            </button>
-
-                            {/*  )} */}
+                            {user?.department ===
+                                "Customer Relations - Services" && (
+                                <button
+                                    disabled={!isUserTypeChange && !hasChanges}
+                                    className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
+                                    type="button"
+                                    onClick={handleShowUpdateAlert}
+                                    style={{
+                                        opacity:
+                                            !isUserTypeChange && !hasChanges
+                                                ? 0.5
+                                                : 1,
+                                        cursor:
+                                            !isUserTypeChange && !hasChanges
+                                                ? "not-allowed"
+                                                : "pointer",
+                                    }}
+                                >
+                                    Update
+                                </button>
+                            )}
                         </div>
                     </div>
                 </div>

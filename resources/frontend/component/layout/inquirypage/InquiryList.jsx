@@ -100,7 +100,8 @@ const InquiryList = () => {
     const [selectedYear, setSelectedYear] = useState("");
     const [selectedMonth, setSelectedMonth] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
-    const { propertyNamesList, categories } = useStateContext();
+    const { propertyNamesList,categories } = useStateContext();
+
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [lastActivity, setLastActivity] = useState(null);
