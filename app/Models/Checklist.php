@@ -16,6 +16,16 @@ class Checklist extends Model
     protected $fillable = [
         'submilestone_id',
         'name',
+        'requires_document',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'requires_document' => 'boolean',
     ];
 
     /**

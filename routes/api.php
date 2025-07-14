@@ -185,6 +185,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Project Assignee Management
     Route::get('/projects-with-assignees', [ProjectAssigneeController::class, 'index']);
     Route::get('/projects/{projectName}/all-assignees', [ProjectAssigneeController::class, 'getAssigneesForProject'])->where('projectName', '.*');
+    Route::get('/projects/{projectName}/milestone-structure', [ProjectAssigneeController::class, 'getProjectMilestoneStructure'])->where('projectName', '.*');
     Route::get('/projects/{projectName}/submilestones', [ProjectAssigneeController::class, 'getSubmilestonesForProject'])->where('projectName', '.*');
     Route::get('/projects/{projectName}/milestones/{submilestone}/assignees', [ProjectAssigneeController::class, 'getAssignees'])->where('projectName', '.*');
     Route::put('/projects/{projectName}/milestones/{submilestone}/assignees', [ProjectAssigneeController::class, 'updateAssignees'])->where('projectName', '.*');

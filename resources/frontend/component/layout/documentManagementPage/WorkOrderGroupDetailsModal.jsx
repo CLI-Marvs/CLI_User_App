@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, Fragment } from "react";
 import {
     Dialog,
     DialogHeader,
@@ -11,131 +11,195 @@ import {
     Input,
     IconButton,
 } from "@material-tailwind/react";
-import EnhancedControlBar from './EnhancedControlBar';
-import NotesAndUpdatesModal from './NotesAndUpdatesModal';
+import EnhancedControlBar from "./EnhancedControlBar";
+import NotesAndUpdatesModal from "./NotesAndUpdatesModal";
 
-const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getStatusBadge, isLoading }) => {
+const WorkOrderGroupDetailsModal = ({
+    isOpen,
+    onClose,
+    group,
+    onAddFiles,
+    getStatusBadge,
+    isLoading,
+}) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(50);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [statusFilter, setStatusFilter] = useState('All'); 
+    const [searchTerm, setSearchTerm] = useState("");
+    const [statusFilter, setStatusFilter] = useState("All");
     const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
-    const [selectedAccountForNotes, setSelectedAccountForNotes] = useState(null);
+    const [selectedAccountForNotes, setSelectedAccountForNotes] =
+        useState(null);
 
-    const { columnHeaders, tableRows, filteredRows, totalPages } = useMemo(() => {
-        if (!group || !group.work_orders) return { columnHeaders: [], tableRows: [], filteredRows: [], totalPages: 0 };
+    const { columnHeaders, tableRows, filteredRows, totalPages, steps } =
+        useMemo(() => {
+            if (!group || !group.work_orders)
+                return {
+                    columnHeaders: [],
+                    tableRows: [],
+                    filteredRows: [],
+                    totalPages: 0,
+                    steps: [],
+                };
 
-        // 1. Gather all steps (work orders) and sort by sequence
-        const steps = [...group.work_orders]
-            .sort((a, b) => (a.work_order_type?.sequence ?? 0) - (b.work_order_type?.sequence ?? 0))
-            .map(wo => ({
-                id: wo.work_order_id,
-                stepName: wo.work_order_type?.type_name || `Step`,
-                sequence: wo.work_order_type?.sequence ?? 0,
-                subMilestones: group.submilestonesByType?.[wo.work_order_type_id] || [],
-                workOrder: wo,
+            // 1. Gather all steps (work orders) and sort by sequence
+            const steps = [...group.work_orders]
+                .sort(
+                    (a, b) =>
+                        (a.work_order_type?.sequence ?? 0) -
+                        (b.work_order_type?.sequence ?? 0)
+                )
+                .map((wo) => ({
+                    id: wo.work_order_id,
+                    stepName: wo.work_order_type?.type_name || `Step`,
+                    sequence: wo.work_order_type?.sequence ?? 0,
+                    subMilestones:
+                        group.submilestonesByType?.[wo.work_order_type_id] ||
+                        [],
+                    workOrder: wo,
+                }));
+
+            // 2. Prepare column headers for each step and its sub-milestones
+            const columnHeaders = steps.map((step) => ({
+                stepName: step.stepName,
+                subMilestones:
+                    step.subMilestones.length > 0
+                        ? step.subMilestones.map((m) => m.name)
+                        : ["Progress"],
             }));
 
-        // 2. Prepare column headers for each step and its sub-milestones
-        const columnHeaders = steps.map(step => ({
-            stepName: step.stepName,
-            subMilestones: step.subMilestones.length > 0 ? step.subMilestones.map(m => m.name) : ['Progress'],
-        }));
+            // 3. Gather accounts and build milestone completion data
+            const accountMap = {};
 
-        // 3. Gather accounts and build milestone completion data
-        const accountMap = {};
+            steps.forEach((step) => {
+                (step.workOrder.accounts || []).forEach((account) => {
+                    const accId = account.id;
+                    if (!accountMap[accId]) {
+                        accountMap[accId] = {
+                            ...account,
+                            milestoneData: {},
+                            latestStep: {
+                                sequence: step.sequence,
+                                status: step.workOrder.status,
+                                workOrder: step.workOrder,
+                            },
+                            remarks: step.workOrder.remarks || "-",
+                            currentSubMilestoneId:
+                                account.current_submilestone_id,
+                        };
+                    }
+                    // Update latest step if this step is further
+                    if (step.sequence > accountMap[accId].latestStep.sequence) {
+                        accountMap[accId].latestStep = {
+                            sequence: step.sequence,
+                            status: step.workOrder.status,
+                            workOrder: step.workOrder,
+                        };
+                        accountMap[accId].remarks =
+                            step.workOrder.remarks || "-";
+                    }
 
-        steps.forEach(step => {
-            (step.workOrder.accounts || []).forEach(account => {
-                const accId = account.id;
-                if (!accountMap[accId]) {
-                    accountMap[accId] = {
-                        ...account,
-                        milestoneData: {},
-                        latestStep: { sequence: step.sequence, status: step.workOrder.status, workOrder: step.workOrder },
-                        remarks: step.workOrder.remarks || '-',
-                        currentStepId: account.current_step_id,
-                        currentSubMilestoneId: account.current_submilestone_id,
-                    };
-                }
-                // Update latest step if this step is further
-                if (step.sequence > accountMap[accId].latestStep.sequence) {
-                    accountMap[accId].latestStep = { sequence: step.sequence, status: step.workOrder.status, workOrder: step.workOrder };
-                    accountMap[accId].remarks = step.workOrder.remarks || '-';
-                }
+                    // Mark milestones as completed or current
+                    let values;
+                    if (step.subMilestones.length > 0) {
+                        values = step.subMilestones.map((sub) => {
+                            const items = sub.checklists || [];
+                            if (!items || items.length === 0) return 0;
 
-                // Mark milestones as completed or current
-                let values;
-                if (step.subMilestones.length > 0) {
-                    values = step.subMilestones.map(sub => {
-                        const items = sub.checklists || [];
-                        if (!items || items.length === 0) return 0;
+                            const uploadedDocs =
+                                account.uploaded_documents || [];
+                            const completedCount = items.filter((item) =>
+                                uploadedDocs.some(
+                                    (doc) => doc.file_title === item.name
+                                )
+                            ).length;
 
-                        const uploadedDocs = account.uploaded_documents || [];
-                        const completedCount = items.filter(item =>
-                            uploadedDocs.some(doc => doc.file_title === item.name)
-                        ).length;
-
-                        return Math.round((completedCount / items.length) * 100);
-                    });
-                } else {
-                    if (step.id === account.currentStepId) values = [50];
-                    else if (step.sequence < steps.find(s => s.id === account.currentStepId)?.sequence) values = [100];
-                    else values = [0];
-                }
-                accountMap[accId].milestoneData[step.id] = values;
+                            return Math.round(
+                                (completedCount / items.length) * 100
+                            );
+                        });
+                    } else {
+                        // For steps without submilestones, we need to determine progress differently
+                        // Since we only have current_submilestone_id, we'll set default values
+                        values = [0]; // Default to 0% if no submilestones exist
+                    }
+                    accountMap[accId].milestoneData[step.id] = values;
+                });
             });
-        });
 
-        const tableRows = Object.values(accountMap).map(account => {
-            const stepData = steps.map(step => {
-                return account.milestoneData[step.id] || (step.subMilestones.length > 0
-                    ? step.subMilestones.map(() => "")
-                    : [""]);
+            const tableRows = Object.values(accountMap).map((account) => {
+                const stepData = steps.map((step) => {
+                    return (
+                        account.milestoneData[step.id] ||
+                        (step.subMilestones.length > 0
+                            ? step.subMilestones.map(() => "")
+                            : [""])
+                    );
+                });
+
+                // Determine the overall status based on whether all checklists for the account are complete.
+                const overallStatus = account.checklist_status
+                    ? "Completed"
+                    : "In Progress";
+
+                const notesData = {
+                    accountId: account.id,
+                    workOrder: account.latestStep.workOrder,
+                    workOrderType: "All Steps", // Special value to show all logs
+                    addNoteLogType:
+                        account.latestStep.workOrder.work_order_type?.type_name, // For adding new notes
+                    assignee: account.latestStep.workOrder.assignee,
+                    currentUser: group.currentUser,
+                    workOrderGroupId: group.id,
+                };
+
+                return {
+                    key: account.id,
+                    accountName: account.account_name,
+                    stepData,
+                    status: overallStatus,
+                    remarks: account.remarks,
+                    notesData: notesData,
+                    currentSubMilestoneId: account.currentSubMilestoneId, // Add current submilestone ID
+                    onAddFilesClick: () =>
+                        onAddFiles(
+                            account.id,
+                            account.latestStep.workOrder,
+                            account.latestStep.workOrder.work_order_type
+                                ?.type_name
+                        ),
+                };
             });
 
-            // Determine the overall status based on whether all checklists for the account are complete.
-            const overallStatus = account.checklist_status ? 'Completed' : 'In Progress';
+            // Filter rows based on search term and status
+            const filteredRows = tableRows.filter((row) => {
+                const searchMatch =
+                    searchTerm === "" ||
+                    row.accountName
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()) ||
+                    row.status
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase()) ||
+                    row.remarks
+                        .toLowerCase()
+                        .includes(searchTerm.toLowerCase());
 
-            const notesData = {
-                accountId: account.id,
-                workOrder: account.latestStep.workOrder,
-                workOrderType: "All Steps", // Special value to show all logs
-                addNoteLogType: account.latestStep.workOrder.work_order_type?.type_name, // For adding new notes
-                assignee: account.latestStep.workOrder.assignee,
-                currentUser: group.currentUser,
-                workOrderGroupId: group.id,
-            };
+                const statusMatch =
+                    statusFilter === "All" || row.status === statusFilter;
+
+                return searchMatch && statusMatch;
+            });
+
+            const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
 
             return {
-                key: account.id,
-                accountName: account.account_name,
-                stepData,
-                status: overallStatus,
-                remarks: account.remarks,
-                notesData: notesData,
-                onAddFilesClick: () =>
-                    onAddFiles(account.id, account.latestStep.workOrder, account.latestStep.workOrder.work_order_type?.type_name),
+                columnHeaders,
+                tableRows,
+                filteredRows,
+                totalPages,
+                steps,
             };
-        });
-
-        // Filter rows based on search term and status
-        const filteredRows = tableRows.filter(row => {
-            const searchMatch = searchTerm === '' ||
-                row.accountName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                row.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                row.remarks.toLowerCase().includes(searchTerm.toLowerCase());
-
-            const statusMatch = statusFilter === 'All' || row.status === statusFilter;
-
-            return searchMatch && statusMatch;
-        }
-        );
-
-        const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
-
-        return { columnHeaders, tableRows, filteredRows, totalPages };
-    }, [group, onAddFiles, searchTerm, itemsPerPage, statusFilter]);
+        }, [group, onAddFiles, searchTerm, itemsPerPage, statusFilter]);
 
     // Paginated data
     const paginatedData = useMemo(() => {
@@ -175,10 +239,10 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
     if (!isOpen) return null;
 
     return (
-        <Dialog 
-            open={isOpen} 
-            handler={onClose} 
-            size="xxl" 
+        <Dialog
+            open={isOpen}
+            handler={onClose}
+            size="xxl"
             className="max-w-none w-screen h-screen m-0 rounded-none"
         >
             {/* Header */}
@@ -186,13 +250,23 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
                 <div className="flex items-center justify-between w-full">
                     <div className="flex items-center gap-3">
                         <div className="w-8 h-8 gradient-btn5 rounded flex items-center justify-center">
-                            <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/>
-                                <path fillRule="evenodd" d="M4 5a2 2 0 012-2v1a1 1 0 001 1h6a1 1 0 001-1V3a2 2 0 012 2v6.5a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 016 11.5V5z"/>
+                            <svg
+                                className="w-4 h-4 text-white"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                            >
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                <path
+                                    fillRule="evenodd"
+                                    d="M4 5a2 2 0 012-2v1a1 1 0 001 1h6a1 1 0 001-1V3a2 2 0 012 2v6.5a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 016 11.5V5z"
+                                />
                             </svg>
                         </div>
                         <div>
-                            <Typography variant="h5" className="text-gray-800 font-semibold">
+                            <Typography
+                                variant="h5"
+                                className="text-gray-800 font-semibold"
+                            >
                                 Work Order No. 1000{group?.id}
                             </Typography>
                         </div>
@@ -203,8 +277,15 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
                         onClick={onClose}
                         className="hover:bg-gray-100 text-gray-600"
                     >
-                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"/>
+                        <svg
+                            className="w-5 h-5"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                        >
+                            <path
+                                fillRule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            />
                         </svg>
                     </IconButton>
                 </div>
@@ -224,11 +305,29 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
                 {isLoading ? (
                     <div className="flex items-center justify-center h-full bg-gray-50">
                         <div className="text-center">
-                            <svg className="animate-spin h-8 w-8 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            <svg
+                                className="animate-spin h-8 w-8 text-blue-600 mx-auto"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                ></circle>
+                                <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                ></path>
                             </svg>
-                            <Typography color="gray" className="mt-4 text-sm">Loading...</Typography>
+                            <Typography color="gray" className="mt-4 text-sm">
+                                Loading...
+                            </Typography>
                         </div>
                     </div>
                 ) : paginatedData.length > 0 ? (
@@ -237,45 +336,91 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
                             <thead className="sticky top-0 z-10">
                                 {/* Row 1: Step headers */}
                                 <tr className="bg-custom-bluegreen text-white">
-                                    <th className="px-3 py-2 font-medium sticky left-0 bg-custom-bluegreen z-20 border-r border-white min-w-[180px]" rowSpan={2}>
+                                    <th
+                                        className="px-3 py-2 font-medium sticky left-0 bg-custom-bluegreen z-20 border-r border-white min-w-[180px]"
+                                        rowSpan={3}
+                                    >
                                         <div className="flex items-center gap-2">
-                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
+                                            <svg
+                                                className="w-4 h-4"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
                                             </svg>
-                                            <span className="text-xs font-semibold">ACCOUNT NAME</span>
+                                            <span className="text-xs font-semibold">
+                                                ACCOUNT NAME
+                                            </span>
                                         </div>
                                     </th>
                                     {columnHeaders.map((col, idx) => (
                                         <th
                                             key={idx}
-                                            colSpan={col.subMilestones.length}
+                                            colSpan={
+                                                col.subMilestones.length * 2
+                                            }
                                             className="text-center px-2 py-2 font-medium border-x border-white min-w-[100px]"
                                         >
-                                            <span className="text-xs font-semibold uppercase tracking-wide">{col.stepName}</span>
+                                            <span className="text-xs font-semibold uppercase tracking-wide">
+                                                {col.stepName}
+                                            </span>
                                         </th>
                                     ))}
-                                    <th className="px-2 py-2 font-medium border-l border-white min-w-[80px]" rowSpan={2}>
+                                    <th
+                                        className="px-2 py-2 font-medium border-l border-white min-w-[80px]"
+                                        rowSpan={3}
+                                    >
                                         <div className="flex items-center justify-center gap-1">
-                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"/>
+                                            <svg
+                                                className="w-3 h-3"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                />
                                             </svg>
-                                            <span className="text-xs font-semibold">STATUS</span>
+                                            <span className="text-xs font-semibold">
+                                                STATUS
+                                            </span>
                                         </div>
                                     </th>
-                                    <th className="px-2 py-2 font-medium border-l border-white min-w-[120px]" rowSpan={2}>
+                                    <th
+                                        className="px-2 py-2 font-medium border-l border-white min-w-[120px]"
+                                        rowSpan={3}
+                                    >
                                         <div className="flex items-center justify-center gap-1">
-                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"/>
+                                            <svg
+                                                className="w-3 h-3"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                />
                                             </svg>
-                                            <span className="text-xs font-semibold">REMARKS</span>
+                                            <span className="text-xs font-semibold">
+                                                REMARKS
+                                            </span>
                                         </div>
                                     </th>
-                                    <th className="px-2 py-2 font-medium border-l border-white min-w-[80px]" rowSpan={2}>
+                                    <th
+                                        className="px-2 py-2 font-medium border-l border-white min-w-[80px]"
+                                        rowSpan={3}
+                                    >
                                         <div className="flex items-center justify-center gap-1">
-                                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z"/>
+                                            <svg
+                                                className="w-3 h-3"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                                             </svg>
-                                            <span className="text-xs font-semibold">ACTION</span>
+                                            <span className="text-xs font-semibold">
+                                                ACTION
+                                            </span>
                                         </div>
                                     </th>
                                 </tr>
@@ -283,53 +428,185 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
                                 {/* Row 2: Sub-milestone headers */}
                                 <tr className="bg-custom-bluegreen text-white">
                                     {columnHeaders.map((col, idx) =>
-                                        col.subMilestones.map((milestone, i) => (
-                                            <th
-                                                key={`${idx}-${i}`}
-                                                className="text-center px-2 py-1 font-medium border-x border-y border-white min-w-[90px]"
-                                            >
-                                                <span className="text-xs font-medium truncate block" title={milestone}>
-                                                    {milestone.length > 12 ? milestone.substring(0, 12) + '...' : milestone}
-                                                </span>
-                                            </th>
-                                        ))
+                                        col.subMilestones.map(
+                                            (milestone, i) => (
+                                                <th
+                                                    key={`${idx}-${i}`}
+                                                    colSpan={2}
+                                                    className="text-center px-2 py-1 font-medium border-x border-y border-white min-w-[180px]"
+                                                >
+                                                    <span
+                                                        className="text-xs font-medium truncate block"
+                                                        title={milestone}
+                                                    >
+                                                        {milestone.length > 12
+                                                            ? milestone.substring(
+                                                                  0,
+                                                                  12
+                                                              ) + "..."
+                                                            : milestone}
+                                                    </span>
+                                                </th>
+                                            )
+                                        )
+                                    )}
+                                </tr>
+
+                                {/* Row 3: Date sub-headers */}
+                                <tr className="bg-custom-bluegreen text-white">
+                                    {columnHeaders.map((col, idx) =>
+                                        col.subMilestones.map(
+                                            (milestone, i) => (
+                                                <React.Fragment
+                                                    key={`${idx}-${i}-dates`}
+                                                >
+                                                    <th className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px]">
+                                                        <span className="text-xs font-medium">
+                                                            Date Created
+                                                        </span>
+                                                    </th>
+                                                    <th className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px]">
+                                                        <span className="text-xs font-medium">
+                                                            Date Updated
+                                                        </span>
+                                                    </th>
+                                                </React.Fragment>
+                                            )
+                                        )
                                     )}
                                 </tr>
                             </thead>
                             <tbody>
                                 {paginatedData.map((row, index) => (
-                                    <tr key={row.key} className={`border-b border-gray-100 hover:bg-blue-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                                    <tr
+                                        key={row.key}
+                                        className={`border-b border-gray-100 hover:bg-blue-50 transition-colors ${
+                                            index % 2 === 0
+                                                ? "bg-white"
+                                                : "bg-gray-50"
+                                        }`}
+                                    >
                                         <td className="px-3 py-2 font-medium text-gray-900 sticky left-0 bg-inherit z-10 border-r border-gray-200">
                                             <div className="flex items-center gap-2">
-                                                <span className="text-sm font-medium text-gray-900 truncate" title={row.accountName}>
+                                                <span
+                                                    className="text-sm font-medium text-gray-900 truncate"
+                                                    title={row.accountName}
+                                                >
                                                     {row.accountName}
                                                 </span>
                                             </div>
-                                        </td>
-                                        {row.stepData.map((step, i) =>
-                                            step.map((completion, j) => (
-                                                <td
+                                        </td>{" "}
+                                        {row.stepData.map((step, i) => {
+                                            // Get the current step information for this account
+                                            const currentStep = steps[i];
+
+                                            // Find if this step contains the current submilestone
+                                            const isCurrentStep =
+                                                currentStep &&
+                                                currentStep.subMilestones.some(
+                                                    (sub) =>
+                                                        sub.id ===
+                                                        row.currentSubMilestoneId
+                                                );
+
+                                            return step.map((completion, j) => (
+                                                <React.Fragment
                                                     key={`${i}-${j}`}
-                                                    className="px-2 py-2 text-center border-x border-gray-100"
                                                 >
-                                                    <div className="flex items-center justify-center gap-1">
-                                                        <div className="w-16 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                                            <div
-                                                                className={`h-full rounded-full transition-all duration-300 ${
-                                                                    completion === 100 ? "bg-green-500"
-                                                                    : completion > 0 ? "bg-amber-500"
+                                                    {/* Milestone container with shared progress background */}
+                                                    <td
+                                                        className={`px-0 py-0 relative ${
+                                                            isCurrentStep
+                                                                ? "border-4 border-blue-600 shadow-lg ring-2 ring-blue-300 ring-opacity-50"
+                                                                : "border border-gray-200"
+                                                        }`}
+                                                        colSpan={2}
+                                                        style={{
+                                                            backgroundColor:
+                                                                isCurrentStep
+                                                                    ? "#dbeafe"
+                                                                    : "inherit",
+                                                        }}
+                                                    >
+                                                        {/* Progress indicator background for entire milestone */}
+                                                        <div
+                                                            className={`absolute inset-0 ${
+                                                                isCurrentStep
+                                                                    ? "opacity-30"
+                                                                    : "opacity-20"
+                                                            } ${
+                                                                completion ===
+                                                                100
+                                                                    ? "bg-green-500"
+                                                                    : completion >
+                                                                      0
+                                                                    ? "bg-amber-500"
                                                                     : "bg-gray-200"
-                                                                }`}
-                                                                style={{ width: `${completion}%` }}
-                                                            ></div>
+                                                            }`}
+                                                            style={{
+                                                                width: `${completion}%`,
+                                                            }}
+                                                        ></div>
+
+                                                        {/* Content container with two date columns */}
+                                                        <div className="flex relative z-10">
+                                                            {/* Date Created */}
+                                                            <div className="flex-1 px-2 py-2 text-center border-r border-gray-100">
+                                                                <span
+                                                                    className={`text-xs ${
+                                                                        isCurrentStep
+                                                                            ? "text-blue-800 font-semibold"
+                                                                            : "text-gray-600"
+                                                                    }`}
+                                                                >
+                                                                    {new Date().toLocaleDateString(
+                                                                        "en-US",
+                                                                        {
+                                                                            month: "2-digit",
+                                                                            day: "2-digit",
+                                                                            year: "2-digit",
+                                                                        }
+                                                                    )}
+                                                                </span>
+                                                            </div>
+
+                                                            {/* Date Updated */}
+                                                            <div className="flex-1 px-2 py-2 text-center">
+                                                                <span
+                                                                    className={`text-xs ${
+                                                                        isCurrentStep
+                                                                            ? "text-blue-800 font-semibold"
+                                                                            : "text-gray-600"
+                                                                    }`}
+                                                                >
+                                                                    {completion >
+                                                                    0
+                                                                        ? new Date().toLocaleDateString(
+                                                                              "en-US",
+                                                                              {
+                                                                                  month: "2-digit",
+                                                                                  day: "2-digit",
+                                                                                  year: "2-digit",
+                                                                              }
+                                                                          )
+                                                                        : "-"}
+                                                                </span>
+                                                            </div>
                                                         </div>
-                                                        <span className="text-xs font-medium text-gray-600 w-6 text-right">
-                                                            {completion}%
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                            ))
-                                        )}
+
+                                                        {/* Current Step Indicator Badge */}
+                                                        {isCurrentStep && (
+                                                            <>
+                                                                <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-blue-600 rounded-full animate-pulse border border-white shadow-sm"></div>
+                                                                <div className="absolute top-0.5 right-0.5 px-1 py-0.5 bg-blue-600 text-white text-[8px] rounded font-bold shadow-sm leading-none">
+                                                                    CURRENT
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </td>
+                                                </React.Fragment>
+                                            ));
+                                        })}
                                         <td className="px-2 py-2 text-center border-l border-gray-200">
                                             <div className="flex justify-center">
                                                 {getStatusBadge(row.status)}
@@ -337,13 +614,34 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
                                         </td>
                                         <td className="px-2 py-2 text-xs text-gray-600 border-l border-gray-200">
                                             <div className="flex items-center gap-1 max-w-[150px]">
-                                                <span className="truncate" title={row.remarks}>
+                                                <span
+                                                    className="truncate"
+                                                    title={row.remarks}
+                                                >
                                                     {row.remarks}
                                                 </span>
-                                                <IconButton variant="text" size="sm" className="text-gray-500 hover:text-gray-800" onClick={() => handleOpenNotesModal(row.notesData)}>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                                <IconButton
+                                                    variant="text"
+                                                    size="sm"
+                                                    className="text-gray-500 hover:text-gray-800"
+                                                    onClick={() =>
+                                                        handleOpenNotesModal(
+                                                            row.notesData
+                                                        )
+                                                    }
+                                                >
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        className="h-4 w-4"
+                                                        viewBox="0 0 20 20"
+                                                        fill="currentColor"
+                                                    >
                                                         <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                                                        <path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" />
+                                                        <path
+                                                            fillRule="evenodd"
+                                                            d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+                                                            clipRule="evenodd"
+                                                        />
                                                     </svg>
                                                 </IconButton>
                                             </div>
@@ -353,7 +651,9 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
                                                 <Button
                                                     size="sm"
                                                     className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs font-medium"
-                                                    onClick={row.onAddFilesClick}
+                                                    onClick={
+                                                        row.onAddFilesClick
+                                                    }
                                                 >
                                                     Files
                                                 </Button>
@@ -368,15 +668,27 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
                     <div className="flex items-center justify-center h-full bg-gray-50">
                         <div className="text-center">
                             <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <svg className="w-6 h-6 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"/>
+                                <svg
+                                    className="w-6 h-6 text-gray-400"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                    />
                                 </svg>
                             </div>
-                            <Typography variant="h6" className="text-gray-600 mb-1">
+                            <Typography
+                                variant="h6"
+                                className="text-gray-600 mb-1"
+                            >
                                 No Results Found
                             </Typography>
                             <Typography className="text-gray-500 text-sm">
-                                {searchTerm ? `No accounts match "${searchTerm}"` : "No data available"}
+                                {searchTerm
+                                    ? `No accounts match "${searchTerm}"`
+                                    : "No data available"}
                             </Typography>
                         </div>
                     </div>
@@ -387,9 +699,10 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
             <DialogFooter className="bg-white border-t border-gray-200 p-3">
                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
                     <Typography variant="small" className="text-gray-600">
-                        Page {currentPage} of {totalPages} • {filteredRows.length} entries
+                        Page {currentPage} of {totalPages} •{" "}
+                        {filteredRows.length} entries
                     </Typography>
-                    
+
                     <div className="flex items-center gap-1">
                         <Button
                             variant="outlined"
@@ -409,19 +722,32 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
                         >
                             ‹
                         </Button>
-                        
+
                         <div className="flex items-center gap-1">
                             {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                                const pageNum = Math.max(1, Math.min(currentPage - 2 + i, totalPages - 4 + i));
+                                const pageNum = Math.max(
+                                    1,
+                                    Math.min(
+                                        currentPage - 2 + i,
+                                        totalPages - 4 + i
+                                    )
+                                );
                                 return pageNum <= totalPages ? (
                                     <Button
                                         key={pageNum}
-                                        variant={currentPage === pageNum ? "filled" : "outlined"}
+                                        variant={
+                                            currentPage === pageNum
+                                                ? "filled"
+                                                : "outlined"
+                                        }
                                         size="sm"
-                                        onClick={() => handlePageChange(pageNum)}
-                                        className={currentPage === pageNum 
-                                            ? "bg-custom-lightgreen text-white px-2 py-1 text-xs min-w-[28px]" 
-                                            : "border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs min-w-[28px]"
+                                        onClick={() =>
+                                            handlePageChange(pageNum)
+                                        }
+                                        className={
+                                            currentPage === pageNum
+                                                ? "bg-custom-lightgreen text-white px-2 py-1 text-xs min-w-[28px]"
+                                                : "border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs min-w-[28px]"
                                         }
                                     >
                                         {pageNum}
@@ -429,7 +755,7 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
                                 ) : null;
                             })}
                         </div>
-                        
+
                         <Button
                             variant="outlined"
                             size="sm"
@@ -460,8 +786,10 @@ const WorkOrderGroupDetailsModal = ({ isOpen, onClose, group, onAddFiles, getSta
                     addNoteLogType={selectedAccountForNotes.addNoteLogType}
                     selectedAssignee={selectedAccountForNotes.assignee}
                     workOrderData={{
-                        work_order_id: selectedAccountForNotes.workOrder.work_order_id,
-                        work_order_group_id: selectedAccountForNotes.workOrderGroupId,
+                        work_order_id:
+                            selectedAccountForNotes.workOrder.work_order_id,
+                        work_order_group_id:
+                            selectedAccountForNotes.workOrderGroupId,
                         currentUser: selectedAccountForNotes.currentUser,
                     }}
                 />

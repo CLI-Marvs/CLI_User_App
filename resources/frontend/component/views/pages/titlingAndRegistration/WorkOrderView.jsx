@@ -13,7 +13,6 @@ import {
 } from "@material-tailwind/react";
 import FilterIcon from "../../../../../../public/Images/filterIcon.svg";
 import File from "../../../../../../public/Images/fileIcon.svg";
-import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 import View from "../../../../../../public/Images/view.svg";
 import Edit from "../../../../../../public/Images/Subtract.svg";
@@ -25,6 +24,7 @@ import ViewWorkOrderModal from "../../../layout/documentManagementPage/ViewWorkO
 import apiService from "../../../../component/servicesApi/apiService";
 import EditWorkOrderModal from "../../../layout/documentManagementPage/EditWorkOrderModal";
 import WorkOrderDeletionModal from "../../../layout/documentManagementPage/WorkOrderDeletionModal";
+import WorkOrderGroupDetailsModal from "../../../layout/documentManagementPage/WorkOrderGroupDetailsModal";
 
 const TABLE_HEAD = [
     { head: "Work Order Group" },
@@ -110,9 +110,13 @@ const WorkOrderView = () => {
         useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    // New state for expandable rows
-    const [expandedGroups, setExpandedGroups] = useState({});
-    const [expandedSteps, setExpandedSteps] = useState({});
+    // State for WorkOrderGroupDetailsModal
+    const [isGroupDetailsModalOpen, setIsGroupDetailsModalOpen] =
+        useState(false);
+    const [selectedGroupForDetails, setSelectedGroupForDetails] =
+        useState(null);
+    const [groupDetailsData, setGroupDetailsData] = useState(null);
+    const [isGroupDetailsLoading, setIsGroupDetailsLoading] = useState(false);
 
     useEffect(() => {
         const TABLE_ROWS = async () => {
@@ -147,8 +151,6 @@ const WorkOrderView = () => {
         setWorkOrderFilterOption("All");
         setIsFilterVisible(false);
         setCurrentPage(1);
-        setExpandedGroups({});
-        setExpandedSteps({});
         fetchWorkOrders();
     };
 
@@ -302,18 +304,65 @@ const WorkOrderView = () => {
         }
     };
 
-    const toggleGroupExpansion = (groupId) => {
-        setExpandedGroups((prev) => ({
-            ...prev,
-            [groupId]: !prev[groupId],
-        }));
+    // Handlers for WorkOrderGroupDetailsModal
+    const handleOpenGroupDetailsModal = async (group) => {
+        setIsGroupDetailsModalOpen(true);
+        setIsGroupDetailsLoading(true);
+        setGroupDetailsData(null);
+        try {
+            const response = await apiService.get(
+                `/work-order-groups/${group.groupId}/details`
+            );
+            setGroupDetailsData(response.data);
+            console.log("Group details response:", response.data);
+        } catch (err) {
+            console.error("Error fetching group details:", err);
+        } finally {
+            setIsGroupDetailsLoading(false);
+        }
     };
 
-    const toggleStepExpansion = (stepId) => {
-        setExpandedSteps((prev) => ({
-            ...prev,
-            [stepId]: !prev[stepId],
-        }));
+    const handleCloseGroupDetailsModal = () => {
+        setIsGroupDetailsModalOpen(false);
+        setGroupDetailsData(null);
+        setSelectedGroupForDetails(null);
+    };
+
+    // Helper function for status badge (required by WorkOrderGroupDetailsModal)
+    const getStatusBadge = (status) => {
+        const statusColors = {
+            Pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
+            Assigned: "bg-blue-100 text-blue-800 border-blue-200",
+            "In Progress": "bg-indigo-100 text-indigo-800 border-indigo-200",
+            Complete: "bg-green-100 text-green-800 border-green-200",
+            Cancelled: "bg-red-100 text-red-800 border-red-200",
+        };
+
+        return (
+            <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                    statusColors[status] ||
+                    "bg-gray-100 text-gray-800 border-gray-200"
+                }`}
+            >
+                {status}
+            </span>
+        );
+    };
+
+    // Placeholder function for adding files (required by WorkOrderGroupDetailsModal)
+    const handleAddFiles = (accountId, workOrder, stepName) => {
+        console.log(
+            "Add files for account:",
+            accountId,
+            "Work Order:",
+            workOrder,
+            "Step:",
+            stepName
+        );
+        // Implement your file upload logic here
+        // You might want to open a file upload modal here
+        handleCloseGroupDetailsModal(); // Close the details modal when opening file upload
     };
 
     return (
@@ -335,7 +384,19 @@ const WorkOrderView = () => {
                                 <span className="truncate text-left flex-1 normal-case">
                                     {workOrderFilterOption}
                                 </span>
-                                <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-500" />
+                                <svg
+                                    className="w-4 h-4 flex-shrink-0 text-gray-500"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M19 9l-7 7-7-7"
+                                    />
+                                </svg>
                             </Button>
                         </MenuHandler>
                         <MenuList className="z-50 flex flex-col justify-center min-h-[120px]">
@@ -562,19 +623,12 @@ const WorkOrderView = () => {
                                 {/* Main Group Row */}
                                 <tr
                                     className={`transition-all duration-200 ease-in-out ${
-                                        expandedGroups[group.groupId]
-                                            ? "bg-gradient-to-r from-blue-50 to-indigo-50"
-                                            : idx % 2 === 0
+                                        idx % 2 === 0
                                             ? "bg-gradient-to-r from-slate-50 to-gray-50"
                                             : "bg-white"
                                     } hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 group cursor-pointer`}
-                                    style={{
-                                        boxShadow: expandedGroups[group.groupId]
-                                            ? "0 8px 25px 0 rgba(59, 130, 246, 0.15)"
-                                            : undefined,
-                                    }}
                                     onClick={() =>
-                                        toggleGroupExpansion(group.groupId)
+                                        handleOpenGroupDetailsModal(group)
                                     }
                                 >
                                     <td className="px-3 py-2 font-bold text-base text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
@@ -586,11 +640,6 @@ const WorkOrderView = () => {
                                                     "1000-"
                                                 )}
                                             </span>
-                                            {expandedGroups[group.groupId] ? (
-                                                <ChevronDownIcon className="w-4 h-4 text-gray-600 ml-2" />
-                                            ) : (
-                                                <ChevronRightIcon className="w-4 h-4 text-gray-600 ml-2" />
-                                            )}
                                         </div>
                                     </td>
                                     <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
@@ -667,286 +716,6 @@ const WorkOrderView = () => {
                                         </div>
                                     </td>
                                 </tr>
-
-                                {/* Expanded Steps */}
-                                {expandedGroups[group.groupId] && (
-                                    <tr>
-                                        <td
-                                            colSpan={5}
-                                            className="px-0 py-0 bg-gradient-to-r from-blue-50 to-indigo-50"
-                                        >
-                                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50">
-                                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4">
-                                                    {(() => {
-                                                        // 1. Get all work orders (steps) in this group, with their type's sequence
-                                                        const steps =
-                                                            group.workOrders.map(
-                                                                (wo) => ({
-                                                                    ...wo,
-                                                                    stepName:
-                                                                        wo.work_order,
-                                                                    accounts:
-                                                                        wo.accounts ||
-                                                                        [],
-                                                                    sequence:
-                                                                        wo
-                                                                            .work_order_type
-                                                                            ?.sequence ??
-                                                                        wo.sequence ??
-                                                                        0, // ensure you have sequence, else fetch work_order_types and join
-                                                                })
-                                                            );
-
-                                                        // 2. Sort steps by sequence ASC (or as needed)
-                                                        steps.sort(
-                                                            (a, b) =>
-                                                                a.sequence -
-                                                                b.sequence
-                                                        );
-
-                                                        // 3. Build a map: accountId -> step with highest sequence
-                                                        const accountLatestStep =
-                                                            {};
-                                                        steps.forEach(
-                                                            (step) => {
-                                                                step.accounts.forEach(
-                                                                    (acc) => {
-                                                                        if (
-                                                                            !accountLatestStep[
-                                                                                acc
-                                                                                    .id
-                                                                            ] ||
-                                                                            step.sequence >
-                                                                                accountLatestStep[
-                                                                                    acc
-                                                                                        .id
-                                                                                ]
-                                                                                    .sequence
-                                                                        ) {
-                                                                            accountLatestStep[
-                                                                                acc.id
-                                                                            ] =
-                                                                                {
-                                                                                    stepName:
-                                                                                        step.stepName,
-                                                                                    sequence:
-                                                                                        step.sequence,
-                                                                                };
-                                                                        }
-                                                                    }
-                                                                );
-                                                            }
-                                                        );
-
-                                                        // 4. Render steps, only show accounts whose latest step is this step
-                                                        return steps.map(
-                                                            (step, idx) => {
-                                                                const filteredAccounts =
-                                                                    step.accounts.filter(
-                                                                        (acc) =>
-                                                                            accountLatestStep[
-                                                                                acc
-                                                                                    .id
-                                                                            ]
-                                                                                ?.stepName ===
-                                                                            step.stepName
-                                                                    );
-
-                                                                return (
-                                                                    <div
-                                                                        key={`${group.groupId}-${step.stepName}`}
-                                                                        className="mb-2"
-                                                                    >
-                                                                        <div
-                                                                            className="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 shadow-sm"
-                                                                            onClick={() =>
-                                                                                toggleStepExpansion(
-                                                                                    `${group.groupId}-${step.stepName}`
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            <div className="flex items-center gap-2 flex-shrink-0">
-                                                                                {expandedSteps[
-                                                                                    `${group.groupId}-${step.stepName}`
-                                                                                ] ? (
-                                                                                    <ChevronDownIcon className="w-4 h-4 text-blue-600" />
-                                                                                ) : (
-                                                                                    <ChevronRightIcon className="w-4 h-4 text-blue-600" />
-                                                                                )}
-                                                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                                                                                <Typography
-                                                                                    variant="small"
-                                                                                    className="font-semibold text-slate-800"
-                                                                                >
-                                                                                    {
-                                                                                        step.stepName
-                                                                                    }
-                                                                                </Typography>
-                                                                            </div>
-
-                                                                            <div className="flex items-center gap-1 text-xs text-gray-500 ml-auto">
-                                                                                <span>
-                                                                                    {
-                                                                                        filteredAccounts.length
-                                                                                    }
-                                                                                </span>
-                                                                                <span>
-                                                                                    account
-                                                                                    {filteredAccounts.length !==
-                                                                                    1
-                                                                                        ? "s"
-                                                                                        : ""}
-                                                                                </span>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        {/* Expanded Accounts */}
-                                                                        {expandedSteps[
-                                                                            `${group.groupId}-${step.stepName}`
-                                                                        ] && (
-                                                                            <div className="ml-6 mt-2 ">
-                                                                                {filteredAccounts.length >
-                                                                                0 ? (
-                                                                                    <div className="space-y-2">
-                                                                                        {filteredAccounts.map(
-                                                                                            (
-                                                                                                account,
-                                                                                                accountIndex
-                                                                                            ) => (
-                                                                                                <div
-                                                                                                    key={
-                                                                                                        account.id ||
-                                                                                                        accountIndex
-                                                                                                    }
-                                                                                                    className="flex items-center gap-3 px-3 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gradient-to-r hover:from-slate-50 hover:to-gray-50 transition-all duration-200"
-                                                                                                >
-                                                                                                    <div className="w-2 h-2 bg-amber-400 rounded-full flex-shrink-0"></div>
-                                                                                                    <ProfileIcon />
-                                                                                                    <div className="flex-1 min-w-0">
-                                                                                                        <div className="flex items-center gap-3">
-                                                                                                            <div className="flex-shrink-0">
-                                                                                                                <Typography
-                                                                                                                    variant="small"
-                                                                                                                    className="text-slate-800 font-medium text-sm"
-                                                                                                                >
-                                                                                                                    {account.name ||
-                                                                                                                        account.account_name ||
-                                                                                                                        `Account ${
-                                                                                                                            accountIndex +
-                                                                                                                            1
-                                                                                                                        }`}
-                                                                                                                </Typography>
-                                                                                                                {account.email && (
-                                                                                                                    <Typography
-                                                                                                                        variant="small"
-                                                                                                                        className="text-slate-500 text-xs"
-                                                                                                                    >
-                                                                                                                        {
-                                                                                                                            account.email
-                                                                                                                        }
-                                                                                                                    </Typography>
-                                                                                                                )}
-                                                                                                            </div>
-
-                                                                                                            {/* Individual Account Progress Bar */}
-                                                                                                            <div className="flex-1 max-w-xs">
-                                                                                                                {(() => {
-                                                                                                                    // Calculate progress for this account
-                                                                                                                    const currentStepIndex =
-                                                                                                                        steps.findIndex(
-                                                                                                                            (
-                                                                                                                                s
-                                                                                                                            ) =>
-                                                                                                                                s.stepName ===
-                                                                                                                                step.stepName
-                                                                                                                        );
-                                                                                                                    const accountCurrentStepIndex =
-                                                                                                                        steps.findIndex(
-                                                                                                                            (
-                                                                                                                                s
-                                                                                                                            ) =>
-                                                                                                                                accountLatestStep[
-                                                                                                                                    account
-                                                                                                                                        .id
-                                                                                                                                ]
-                                                                                                                                    ?.stepName ===
-                                                                                                                                s.stepName
-                                                                                                                        );
-
-                                                                                                                    let progress = 0;
-                                                                                                                    if (
-                                                                                                                        accountCurrentStepIndex >=
-                                                                                                                        0
-                                                                                                                    ) {
-                                                                                                                        progress =
-                                                                                                                            Math.round(
-                                                                                                                                ((accountCurrentStepIndex +
-                                                                                                                                    1) /
-                                                                                                                                    steps.length) *
-                                                                                                                                    100
-                                                                                                                            );
-                                                                                                                    }
-
-                                                                                                                    const progressClass =
-                                                                                                                        progress >=
-                                                                                                                        100
-                                                                                                                            ? "bg-green-500"
-                                                                                                                            : progress >
-                                                                                                                              0
-                                                                                                                            ? "bg-amber-500"
-                                                                                                                            : "bg-gray-300";
-
-                                                                                                                    return (
-                                                                                                                        <div className="flex items-center gap-2">
-                                                                                                                            <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                                                                                                                <div
-                                                                                                                                    className={`h-full rounded-full transition-all duration-300 ${progressClass}`}
-                                                                                                                                    style={{
-                                                                                                                                        width: `${progress}%`,
-                                                                                                                                    }}
-                                                                                                                                ></div>
-                                                                                                                            </div>
-                                                                                                                            <span className="text-xs font-medium text-gray-600 w-8 text-right">
-                                                                                                                                {
-                                                                                                                                    progress
-                                                                                                                                }
-                                                                                                                                %
-                                                                                                                            </span>
-                                                                                                                        </div>
-                                                                                                                    );
-                                                                                                                })()}
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    </div>
-                                                                                                </div>
-                                                                                            )
-                                                                                        )}
-                                                                                    </div>
-                                                                                ) : (
-                                                                                    <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-gray-200 hover:bg-gradient-to-r hover:from-slate-50 hover:to-gray-50 transition-all duration-200">
-                                                                                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                                                                                        <Typography
-                                                                                            variant="small"
-                                                                                            className="text-slate-500 italic"
-                                                                                        >
-                                                                                            No
-                                                                                            accounts
-                                                                                            assigned
-                                                                                        </Typography>
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                );
-                                                            }
-                                                        );
-                                                    })()}
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                )}
                             </React.Fragment>
                         ))}
                     </tbody>
@@ -1011,6 +780,18 @@ const WorkOrderView = () => {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Work Order Group Details Modal */}
+            {isGroupDetailsModalOpen && (
+                <WorkOrderGroupDetailsModal
+                    isOpen={isGroupDetailsModalOpen}
+                    onClose={handleCloseGroupDetailsModal}
+                    group={groupDetailsData}
+                    onAddFiles={handleAddFiles}
+                    getStatusBadge={getStatusBadge}
+                    isLoading={isGroupDetailsLoading}
+                />
             )}
         </div>
     );

@@ -41,7 +41,11 @@ const CrudModal = ({
     useEffect(() => {
         if (isOpen) {
             const initialData = fields.reduce((acc, field) => {
-                acc[field.name] = item?.[field.name] || "";
+                if (field.type === "checkbox") {
+                    acc[field.name] = Boolean(item?.[field.name]);
+                } else {
+                    acc[field.name] = item?.[field.name] || "";
+                }
                 return acc;
             }, {});
             setFormData(initialData);
@@ -72,8 +76,9 @@ const CrudModal = ({
     };
 
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        const { name, value, type, checked } = e.target;
+        const newValue = type === "checkbox" ? checked : value;
+        setFormData((prev) => ({ ...prev, [name]: newValue }));
 
         if (errors[name]) {
             setErrors((prev) => ({ ...prev, [name]: "" }));
@@ -164,6 +169,20 @@ const CrudModal = ({
                                                 }`}
                                                 placeholder={field.placeholder}
                                             />
+                                        ) : field.type === "checkbox" ? (
+                                            <div className="flex items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    name={field.name}
+                                                    id={field.name}
+                                                    checked={Boolean(formData[field.name])}
+                                                    onChange={handleChange}
+                                                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                />
+                                                <label htmlFor={field.name} className="ml-2 text-sm text-gray-700">
+                                                    {field.checkboxLabel || "Enable this option"}
+                                                </label>
+                                            </div>
                                         ) : (
                                             <input
                                                 type={field.type || "text"}
@@ -592,7 +611,11 @@ const AdminSettings = () => {
                             ? "/admin/settings/checklists"
                             : `/admin/settings/checklists/${item.id}`;
                     method = mode === "add" ? "post" : "put";
-                    body = { name: formData.name, submilestone_id: parentId };
+                    body = { 
+                        name: formData.name, 
+                        submilestone_id: parentId,
+                        requires_document: Boolean(formData.requires_document)
+                    };
                     break;
                 default:
                     throw new Error("Unknown operation type");
@@ -738,6 +761,14 @@ const AdminSettings = () => {
                         placeholder: "Enter checklist item description",
                         helpText:
                             "Specific, actionable task that can be checked off",
+                    },
+                    {
+                        name: "requires_document",
+                        label: "Document Requirement",
+                        type: "checkbox",
+                        checkboxLabel: "This checklist item requires document upload",
+                        helpText:
+                            "Check this if users need to upload a document to complete this item",
                     },
                 ],
             },
@@ -1197,12 +1228,28 @@ const AdminSettings = () => {
                                                                                                 className="flex items-center justify-between py-2 px-3 bg-white rounded-md border border-gray-200"
                                                                                             >
                                                                                                 <div className="flex items-center space-x-3">
-                                                                                                    <div className="h-4 w-4 border-2 border-gray-300 rounded"></div>
-                                                                                                    <span className="text-sm text-gray-700">
-                                                                                                        {
-                                                                                                            chk.name
-                                                                                                        }
-                                                                                                    </span>
+                                                                                                    <div className="flex flex-col">
+                                                                                                        <div className="flex items-center space-x-2">
+                                                                                                            <span className="text-sm text-gray-700">
+                                                                                                                {chk.name}
+                                                                                                            </span>
+                                                                                                            {chk.requires_document ? (
+                                                                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
+                                                                                                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                                                                        <path fillRule="evenodd" d="M3 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1v-3zM12 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1V4zM12 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-3z" clipRule="evenodd" />
+                                                                                                                    </svg>
+                                                                                                                    Document Required
+                                                                                                                </span>
+                                                                                                            ) : (
+                                                                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                                                                                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                                                                    </svg>
+                                                                                                                    Mark as done Only
+                                                                                                                </span>
+                                                                                                            )}
+                                                                                                        </div>
+                                                                                                    </div>
                                                                                                 </div>
                                                                                                 <div className="flex items-center space-x-1">
                                                                                                     <button

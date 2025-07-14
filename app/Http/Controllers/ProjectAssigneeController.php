@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Employee;
 use App\Models\Submilestone;
 use App\Models\WorkOrder;
+use App\Models\WorkOrderType;
 use App\Models\TakenOutAccount;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -167,5 +168,72 @@ class ProjectAssigneeController extends Controller
         });
 
         return response()->json($assignees);
+    }
+
+    /**
+     * Get hierarchical structure of steps/milestones with their assignees for a specific project.
+     */
+    public function getProjectMilestoneStructure(string $projectName)
+    {
+        // Get all work order types with their submilestones ordered by sequence
+        $workOrderTypes = WorkOrderType::with([
+            'submilestones' => function ($query) {
+                $query->orderBy('id');
+            }
+        ])
+        ->orderBy('sequence')
+        ->get();
+
+        $result = [];
+
+        foreach ($workOrderTypes as $workOrderType) {
+            $stepData = [
+                'id' => $workOrderType->id,
+                'step_name' => $workOrderType->type_name,
+                'sequence' => $workOrderType->sequence,
+                'milestones' => []
+            ];
+
+            foreach ($workOrderType->submilestones as $submilestone) {
+                // Get assignees for this specific project and submilestone
+                $assigneeIds = DB::table('project_milestone_assignees')
+                    ->where('property_name', $projectName)
+                    ->where('submilestone_id', $submilestone->id)
+                    ->pluck('employee_id');
+
+                $assignees = [];
+                if ($assigneeIds->isNotEmpty()) {
+                    $employees = Employee::whereIn('id', $assigneeIds)
+                        ->get(['id', 'firstname', 'lastname', 'fullname']);
+
+                    $assignees = $employees->map(function ($employee) {
+                        $fullName = trim($employee->fullname);
+                        if (empty($fullName)) {
+                            $fullName = trim(($employee->firstname ?? '') . ' ' . ($employee->lastname ?? ''));
+                        }
+                        
+                        return [
+                            'id' => $employee->id,
+                            'full_name' => $fullName, // Changed from fullname to full_name
+                            'firstname' => $employee->firstname,
+                            'lastname' => $employee->lastname
+                        ];
+                    })->toArray();
+                }
+
+                $stepData['milestones'][] = [
+                    'id' => $submilestone->id,
+                    'milestone_name' => $submilestone->name, // Changed from name to milestone_name
+                    'assignees' => $assignees
+                ];
+            }
+
+            // Include all steps, even if they don't have assignees (for better visualization)
+            if (!empty($stepData['milestones'])) {
+                $result[] = $stepData;
+            }
+        }
+
+        return response()->json($result);
     }
 }

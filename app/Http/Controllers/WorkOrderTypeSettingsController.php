@@ -20,24 +20,24 @@ class WorkOrderTypeSettingsController extends Controller
     /**
      * Store a new work order type.
      */
-public function storeWorkOrderType(Request $request)
-{
-    try {
-        $validated = $request->validate([
-            'type_name' => 'required|string|max:100|unique:work_order_types',
-            'description' => 'nullable|string',
-        ]);
+    public function storeWorkOrderType(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'type_name' => 'required|string|max:100|unique:work_order_types',
+                'description' => 'nullable|string',
+            ]);
 
-        // Get the current max sequence and add 1
-        $maxSequence = WorkOrderType::max('sequence');
-        $validated['sequence'] = $maxSequence ? $maxSequence + 1 : 1;
+            // Get the current max sequence and add 1
+            $maxSequence = WorkOrderType::max('sequence');
+            $validated['sequence'] = $maxSequence ? $maxSequence + 1 : 1;
 
-        $workOrderType = WorkOrderType::create($validated);
-        return response()->json($workOrderType, 201);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
+            $workOrderType = WorkOrderType::create($validated);
+            return response()->json($workOrderType, 201);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
-}
 
     /**
      * Update a work order type.
@@ -104,6 +104,7 @@ public function storeWorkOrderType(Request $request)
         $validated = $request->validate([
             'submilestone_id' => 'required|exists:submilestones,id',
             'name' => 'required|string|max:255',
+            'requires_document' => 'boolean',
         ]);
         $checklist = Checklist::create($validated);
         return response()->json($checklist, 201);
@@ -116,6 +117,7 @@ public function storeWorkOrderType(Request $request)
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
+            'requires_document' => 'boolean',
         ]);
         $checklist->update($validated);
         return response()->json($checklist);
