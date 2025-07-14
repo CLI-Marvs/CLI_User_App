@@ -8,6 +8,8 @@ import {
     MdKeyboardArrowLeft,
     MdKeyboardArrowRight,
     MdKeyboardArrowDown,
+    MdSearch,
+    MdClear,
 } from "react-icons/md";
 import { BsArrowsFullscreen } from "react-icons/bs";
 import ProcessWorkOrderModal from "../../../layout/documentManagementPage/ProcessWorkOrderModal";
@@ -38,6 +40,12 @@ const MyWorkOrders = () => {
     const [groupDetailsData, setGroupDetailsData] = useState(null);
     const [isGroupDetailsLoading, setIsGroupDetailsLoading] = useState(null);
 
+    // Filter states
+    const [workOrderNoFilter, setWorkOrderNoFilter] = useState("");
+    const [projectFilter, setProjectFilter] = useState("");
+    const [dueDateFilter, setDueDateFilter] = useState("");
+    const [lastUpdatedFilter, setLastUpdatedFilter] = useState("");
+
     useEffect(() => {
         const fetchWorkOrders = async () => {
             setLoading(true);
@@ -47,7 +55,6 @@ const MyWorkOrders = () => {
                     params: {
                         page: currentPage,
                         per_page: perPage,
-                        status: statusFilter,
                         sortBy: sortBy,
                         sortOrder: sortOrder,
                     },
@@ -78,7 +85,7 @@ const MyWorkOrders = () => {
         };
 
         fetchWorkOrders();
-    }, [currentPage, perPage, statusFilter, sortBy, sortOrder]);
+    }, [currentPage, perPage, sortBy, sortOrder]);
 
     const handlePageChange = (newPage) => {
         setCurrentPage(newPage);
@@ -94,6 +101,236 @@ const MyWorkOrders = () => {
         setSortBy(newSortBy);
         setSortOrder(newSortOrder);
         setCurrentPage(1);
+    };
+
+    const handleWorkOrderNoFilterChange = (e) => {
+        setWorkOrderNoFilter(e.target.value);
+    };
+
+    const handleProjectFilterChange = (e) => {
+        setProjectFilter(e.target.value);
+    };
+
+    const handleDueDateFilterChange = (e) => {
+        setDueDateFilter(e.target.value);
+    };
+
+    const handleLastUpdatedFilterChange = (e) => {
+        setLastUpdatedFilter(e.target.value);
+    };
+
+    const clearAllFilters = () => {
+        setStatusFilter("");
+        setWorkOrderNoFilter("");
+        setProjectFilter("");
+        setDueDateFilter("");
+        setLastUpdatedFilter("");
+        setSortBy("created_at");
+        setSortOrder("desc");
+        setCurrentPage(1);
+    };
+
+    const hasActiveFilters = () => {
+        return (
+            statusFilter ||
+            workOrderNoFilter ||
+            projectFilter ||
+            dueDateFilter ||
+            lastUpdatedFilter
+        );
+    };
+
+    // Client-side filtering function
+    const getFilteredWorkOrderGroups = () => {
+        let filtered = [...workOrderGroups];
+
+        // Filter by work order number (work order group id)
+        if (workOrderNoFilter) {
+            filtered = filtered.filter((group) => {
+                // Check if any work order in the group has a matching work_order_group_id
+                return (
+                    (group.work_orders || []).some(
+                        (wo) =>
+                            String(wo.work_order_group_id || "")
+                                .toLowerCase()
+                                .includes(workOrderNoFilter.toLowerCase()) ||
+                            String(wo.work_order_group_id || "")
+                                .padStart(7, "1000-")
+                                .toLowerCase()
+                                .includes(workOrderNoFilter.toLowerCase())
+                    ) ||
+                    // Also check the group id itself as fallback
+                    String(group.id)
+                        .toLowerCase()
+                        .includes(workOrderNoFilter.toLowerCase()) ||
+                    String(group.id)
+                        .padStart(7, "1000-")
+                        .toLowerCase()
+                        .includes(workOrderNoFilter.toLowerCase())
+                );
+            });
+        }
+
+        // Filter by project
+        if (projectFilter) {
+            filtered = filtered.filter((group) => {
+                const latestWO = (group.work_orders || [])
+                    .slice()
+                    .sort(
+                        (a, b) =>
+                            new Date(b.updated_at) - new Date(a.updated_at)
+                    )[0];
+
+                if (!latestWO?.accounts) return false;
+
+                return latestWO.accounts.some((acc) =>
+                    (acc.property_name || acc.project || acc.account_name || "")
+                        .toLowerCase()
+                        .includes(projectFilter.toLowerCase())
+                );
+            });
+        }
+
+        // Filter by status
+        if (statusFilter) {
+            filtered = filtered.filter((group) =>
+                (group.work_orders || []).some(
+                    (wo) => wo.status === statusFilter
+                )
+            );
+        }
+
+        // Filter by due date
+        if (dueDateFilter) {
+            const now = new Date();
+            const today = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate()
+            );
+            const weekFromNow = new Date(
+                today.getTime() + 7 * 24 * 60 * 60 * 1000
+            );
+            const monthFromNow = new Date(
+                today.getFullYear(),
+                today.getMonth() + 1,
+                today.getDate()
+            );
+
+            filtered = filtered.filter((group) => {
+                const latestWO = (group.work_orders || [])
+                    .slice()
+                    .sort(
+                        (a, b) =>
+                            new Date(b.updated_at) - new Date(a.updated_at)
+                    )[0];
+
+                if (!latestWO?.work_order_deadline) return false;
+
+                const dueDate = new Date(latestWO.work_order_deadline);
+
+                switch (dueDateFilter) {
+                    case "overdue":
+                        return dueDate < today;
+                    case "today":
+                        return dueDate.toDateString() === today.toDateString();
+                    case "week":
+                        return dueDate >= today && dueDate <= weekFromNow;
+                    case "month":
+                        return dueDate >= today && dueDate <= monthFromNow;
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        // Filter by last updated
+        if (lastUpdatedFilter) {
+            const now = new Date();
+            const today = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate()
+            );
+            const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const monthAgo = new Date(
+                today.getFullYear(),
+                today.getMonth() - 1,
+                today.getDate()
+            );
+
+            filtered = filtered.filter((group) => {
+                const latestWO = (group.work_orders || [])
+                    .slice()
+                    .sort(
+                        (a, b) =>
+                            new Date(b.updated_at) - new Date(a.updated_at)
+                    )[0];
+
+                if (!latestWO?.updated_at) return false;
+
+                const updatedDate = new Date(latestWO.updated_at);
+
+                switch (lastUpdatedFilter) {
+                    case "today":
+                        return (
+                            updatedDate.toDateString() === today.toDateString()
+                        );
+                    case "week":
+                        return updatedDate >= weekAgo;
+                    case "month":
+                        return updatedDate >= monthAgo;
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        // Apply sorting
+        filtered.sort((a, b) => {
+            const getLatestWO = (group) => {
+                return (group.work_orders || [])
+                    .slice()
+                    .sort((wo1, wo2) => new Date(wo2.updated_at) - new Date(wo1.updated_at))[0];
+            };
+
+            const latestWO_A = getLatestWO(a);
+            const latestWO_B = getLatestWO(b);
+
+            let comparison = 0;
+
+            switch (sortBy) {
+                case 'created_at':
+                    const createdA = latestWO_A?.created_at ? new Date(latestWO_A.created_at) : new Date(0);
+                    const createdB = latestWO_B?.created_at ? new Date(latestWO_B.created_at) : new Date(0);
+                    comparison = createdA - createdB;
+                    break;
+
+                case 'updated_at':
+                    const updatedA = latestWO_A?.updated_at ? new Date(latestWO_A.updated_at) : new Date(0);
+                    const updatedB = latestWO_B?.updated_at ? new Date(latestWO_B.updated_at) : new Date(0);
+                    comparison = updatedA - updatedB;
+                    break;
+
+                case 'work_order_deadline':
+                    const deadlineA = latestWO_A?.work_order_deadline ? new Date(latestWO_A.work_order_deadline) : new Date(0);
+                    const deadlineB = latestWO_B?.work_order_deadline ? new Date(latestWO_B.work_order_deadline) : new Date(0);
+                    comparison = deadlineA - deadlineB;
+                    break;
+
+                default:
+                    // Default to created_at
+                    const defaultCreatedA = latestWO_A?.created_at ? new Date(latestWO_A.created_at) : new Date(0);
+                    const defaultCreatedB = latestWO_B?.created_at ? new Date(latestWO_B.created_at) : new Date(0);
+                    comparison = defaultCreatedA - defaultCreatedB;
+                    break;
+            }
+
+            // Apply sort order (asc or desc)
+            return sortOrder === 'desc' ? -comparison : comparison;
+        });
+
+        return filtered;
     };
 
     const handleProcessClick = (order) => {
@@ -295,72 +532,83 @@ const MyWorkOrders = () => {
         }
     };
 
-    const renderGridView = () => (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-            {workOrderGroups.map((group) => (
-                <div
-                    key={group.id}
-                    className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-150 flex flex-col"
-                >
-                    {/* Header */}
+    const renderGridView = () => {
+        const filteredGroups = getFilteredWorkOrderGroups();
+
+        return (
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                {filteredGroups.map((group) => (
                     <div
-                        className={`px-3 py-2 border-b border-gray-100 rounded-t-xl bg-gray-50`}
+                        key={group.id}
+                        className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-150 flex flex-col"
                     >
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-sm font-semibold text-gray-800">
-                                WO #{group.id}
-                            </h3>
+                        {/* Header */}
+                        <div
+                            className={`px-3 py-2 border-b border-gray-100 rounded-t-xl bg-gray-50`}
+                        >
+                            <div className="flex items-center justify-between">
+                                <h3 className="text-sm font-semibold text-gray-800">
+                                    WO #{group.id}
+                                </h3>
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-1 flex-1">
+                            <ul className="space-y-1">
+                                {(group.work_orders || []).map((order) => (
+                                    <li
+                                        key={order.work_order_id}
+                                        className="bg-white rounded-lg p-2 border border-gray-100 hover:bg-indigo-50/50"
+                                    >
+                                        <div className="grid grid-cols-3 gap-x-2">
+                                            <div className="col-span-2">
+                                                <p className="text-xs font-medium text-gray-800 truncate">
+                                                    {
+                                                        order.work_order_type
+                                                            ?.type_name
+                                                    }
+                                                </p>
+                                                <p className="text-xs text-gray-500 truncate">
+                                                    {order.accounts
+                                                        ?.map(
+                                                            (a) =>
+                                                                a.account_name
+                                                        )
+                                                        .join(", ")}
+                                                </p>
+                                            </div>
+                                            <div className="flex items-center justify-end space-x-2">
+                                                {getStatusBadge(order.status)}
+                                                {canWorkOnOrder(
+                                                    order.status
+                                                ) && (
+                                                    <button
+                                                        onClick={() =>
+                                                            handleProcessClick(
+                                                                order
+                                                            )
+                                                        }
+                                                        className="px-2 py-0.5 text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
+                                                    >
+                                                        Process
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
                     </div>
-
-                    {/* Content */}
-                    <div className="p-1 flex-1">
-                        <ul className="space-y-1">
-                            {(group.work_orders || []).map((order) => (
-                                <li
-                                    key={order.work_order_id}
-                                    className="bg-white rounded-lg p-2 border border-gray-100 hover:bg-indigo-50/50"
-                                >
-                                    <div className="grid grid-cols-3 gap-x-2">
-                                        <div className="col-span-2">
-                                            <p className="text-xs font-medium text-gray-800 truncate">
-                                                {
-                                                    order.work_order_type
-                                                        ?.type_name
-                                                }
-                                            </p>
-                                            <p className="text-xs text-gray-500 truncate">
-                                                {order.accounts
-                                                    ?.map((a) => a.account_name)
-                                                    .join(", ")}
-                                            </p>
-                                        </div>
-                                        <div className="flex items-center justify-end space-x-2">
-                                            {getStatusBadge(order.status)}
-                                            {canWorkOnOrder(order.status) && (
-                                                <button
-                                                    onClick={() =>
-                                                        handleProcessClick(
-                                                            order
-                                                        )
-                                                    }
-                                                    className="px-2 py-0.5 text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
-                                                >
-                                                    Process
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
+                ))}
+            </div>
+        );
+    };
 
     const renderTableView = () => {
+        const filteredGroups = getFilteredWorkOrderGroups();
+
         const toggleGroup = (groupId) => {
             setExpandedGroup((prev) => (prev === groupId ? null : groupId));
         };
@@ -379,332 +627,309 @@ const MyWorkOrders = () => {
         };
 
         return (
-            <Card className="w-full overflow-hidden shadow-xl rounded-3xl border-0 bg-white backdrop-blur-sm">
-                <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-1 rounded-t-3xl">
-                    <div className="overflow-x-auto bg-white rounded-2xl shadow-inner">
-                        <table className="w-full min-w-max table-auto text-left">
-                            <thead className="sticky top-0 z-10 bg-custom-bluegreen shadow-lg">
-                                <tr>
-                                    <th className="text-white h-[70px] px-6 py-4 first:rounded-tl-2xl">
-                                        <div className="flex items-center space-x-2">
-                                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                                            <Typography
-                                                variant="small"
-                                                className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
-                                            >
-                                                Work Order No.
-                                            </Typography>
-                                        </div>
-                                    </th>
-                                    <th className="text-white h-[70px] px-6 py-4">
-                                        <div className="flex items-center space-x-2">
-                                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                                            <Typography
-                                                variant="small"
-                                                className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
-                                            >
-                                                Project
-                                            </Typography>
-                                        </div>
-                                    </th>
-                                    <th className="text-white h-[70px] px-6 py-4">
-                                        <div className="flex items-center space-x-2">
-                                            <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                                            <Typography
-                                                variant="small"
-                                                className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
-                                            >
-                                                Due Date
-                                            </Typography>
-                                        </div>
-                                    </th>
-                                    <th className="text-white h-[70px] px-6 py-4">
-                                        <div className="flex items-center space-x-2">
-                                            <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                                            <Typography
-                                                variant="small"
-                                                className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
-                                            >
-                                                Last Updated
-                                            </Typography>
-                                        </div>
-                                    </th>
-                                    <th className="text-white h-[70px] px-6 py-4 last:rounded-tr-2xl text-center">
-                                        <div className="flex items-center justify-center space-x-2">
-                                            <div className="w-2 h-2 bg-rose-400 rounded-full"></div>
-                                            <Typography
-                                                variant="small"
-                                                className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
-                                            >
-                                                Actions
-                                            </Typography>
-                                        </div>
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-100">
-                                {workOrderGroups.map((group, idx) => {
-                                    // Find the latest work order in the group (by updated_at or sequence)
-                                    const latestWO = (group.work_orders || [])
-                                        .slice()
-                                        .sort(
-                                            (a, b) =>
-                                                new Date(b.updated_at) -
-                                                new Date(a.updated_at)
-                                        )[0];
-                                    // --- Restore stepRows for expanded dropdown ---
-                                    // 1. Gather all steps (work orders) and sort by sequence
-                                    const steps = (group.work_orders || [])
-                                        .map((wo) => ({
-                                            ...wo,
-                                            sequence:
-                                                wo.work_order_type?.sequence ??
-                                                0,
-                                        }))
-                                        .sort(
-                                            (a, b) => a.sequence - b.sequence
-                                        );
+            <Card className="w-full overflow-hidden rounded-md border-0 bg-white backdrop-blur-sm">
+                <table className="w-full table-fixed bg-white rounded-md shadow-inner">
+                    <colgroup>
+                        <col style={{ width: "28%" }} />
+                        <col style={{ width: "22%" }} />
+                        <col style={{ width: "16%" }} />
+                        <col style={{ width: "18%" }} />
+                        <col style={{ width: "16%" }} />
+                    </colgroup>
+                    <thead className="sticky top-0 z-10 bg-custom-bluegreen">
+                        <tr>
+                            <th className="text-white h-[44px] px-3 py-1 first:rounded-tl-2xl">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                    <Typography
+                                        variant="small"
+                                        className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                    >
+                                        Work Order No.
+                                    </Typography>
+                                </div>
+                            </th>
+                            <th className="text-white h-[44px] px-3 py-1">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                    <Typography
+                                        variant="small"
+                                        className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                    >
+                                        Project
+                                    </Typography>
+                                </div>
+                            </th>
+                            <th className="text-white h-[44px] px-3 py-1">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                                    <Typography
+                                        variant="small"
+                                        className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                    >
+                                        Due Date
+                                    </Typography>
+                                </div>
+                            </th>
+                            <th className="text-white h-[44px] px-3 py-1">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                                    <Typography
+                                        variant="small"
+                                        className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                    >
+                                        Last Updated
+                                    </Typography>
+                                </div>
+                            </th>
+                            <th className="text-white h-[44px] px-3 py-1 last:rounded-tr-2xl text-center">
+                                <div className="flex items-center justify-center space-x-2">
+                                    <div className="w-2 h-2 bg-rose-400 rounded-full"></div>
+                                    <Typography
+                                        variant="small"
+                                        className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                    >
+                                        Actions
+                                    </Typography>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                        {filteredGroups.map((group, idx) => {
+                            // Find the latest work order in the group (by updated_at or sequence)
+                            const latestWO = (group.work_orders || [])
+                                .slice()
+                                .sort(
+                                    (a, b) =>
+                                        new Date(b.updated_at) -
+                                        new Date(a.updated_at)
+                                )[0];
+                            // --- Restore stepRows for expanded dropdown ---
+                            // 1. Gather all steps (work orders) and sort by sequence
+                            const steps = (group.work_orders || [])
+                                .map((wo) => ({
+                                    ...wo,
+                                    sequence: wo.work_order_type?.sequence ?? 0,
+                                }))
+                                .sort((a, b) => a.sequence - b.sequence);
 
-                                    // 2. Build a map: accountId -> step with highest sequence
-                                    const accountLatestStep = {};
-                                    steps.forEach((step) => {
-                                        (step.accounts || []).forEach((acc) => {
-                                            if (
-                                                !accountLatestStep[acc.id] ||
-                                                step.sequence >
-                                                    accountLatestStep[acc.id]
-                                                        .sequence
-                                            ) {
-                                                accountLatestStep[acc.id] = {
-                                                    stepId: step.work_order_id,
-                                                    sequence: step.sequence,
-                                                    stepName:
+                            // 2. Build a map: accountId -> step with highest sequence
+                            const accountLatestStep = {};
+                            steps.forEach((step) => {
+                                (step.accounts || []).forEach((acc) => {
+                                    if (
+                                        !accountLatestStep[acc.id] ||
+                                        step.sequence >
+                                            accountLatestStep[acc.id].sequence
+                                    ) {
+                                        accountLatestStep[acc.id] = {
+                                            stepId: step.work_order_id,
+                                            sequence: step.sequence,
+                                            stepName:
+                                                step.work_order_type
+                                                    ?.type_name ||
+                                                step.work_order,
+                                            workOrder: step,
+                                            account: acc,
+                                        };
+                                    }
+                                });
+                            });
+
+                            // 3. For each step, filter accounts to only show those whose latest step is this step
+                            const stepRows = steps.map((step) => {
+                                const filteredAccounts = (
+                                    step.accounts || []
+                                ).filter(
+                                    (acc) =>
+                                        accountLatestStep[acc.id]?.stepId ===
+                                        step.work_order_id
+                                );
+                                if (filteredAccounts.length === 0) return null;
+                                return filteredAccounts.map((account) => (
+                                    <tr
+                                        key={account.id}
+                                        className="hover:bg-slate-50 transition-colors duration-150"
+                                    >
+                                        <td className="px-2 py-1.5 font-medium text-gray-900 text-sm">
+                                            {account.account_name}
+                                        </td>
+                                        <td className="px-2 py-1.5 text-gray-700 text-sm">
+                                            {step.work_order_type?.type_name ||
+                                                step.work_order}
+                                        </td>
+                                        <td className="px-2 py-1.5">
+                                            {getStatusBadge(step.status)}
+                                        </td>
+                                        <td className="px-2 py-1.5 text-center">
+                                            <button
+                                                onClick={() => {
+                                                    setSelectedAccountId(
+                                                        account.id
+                                                    );
+                                                    setSelectedWorkOrderData(
+                                                        step
+                                                    );
+                                                    setSelectedStepName(
                                                         step.work_order_type
                                                             ?.type_name ||
-                                                        step.work_order,
-                                                    workOrder: step,
-                                                    account: acc,
-                                                };
-                                            }
-                                        });
-                                    });
-
-                                    // 3. For each step, filter accounts to only show those whose latest step is this step
-                                    const stepRows = steps.map((step) => {
-                                        const filteredAccounts = (
-                                            step.accounts || []
-                                        ).filter(
-                                            (acc) =>
-                                                accountLatestStep[acc.id]
-                                                    ?.stepId ===
-                                                step.work_order_id
-                                        );
-                                        if (filteredAccounts.length === 0)
-                                            return null;
-                                        return filteredAccounts.map(
-                                            (account) => (
-                                                <tr
-                                                    key={account.id}
-                                                    className="hover:bg-slate-50 transition-colors duration-150"
-                                                >
-                                                    <td className="px-4 py-3 font-medium text-gray-900">
-                                                        {account.account_name}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-gray-700">
-                                                        {step.work_order_type
-                                                            ?.type_name ||
-                                                            step.work_order}
-                                                    </td>
-                                                    <td className="px-4 py-3">
-                                                        {getStatusBadge(
-                                                            step.status
-                                                        )}
-                                                    </td>
-                                                    <td className="px-4 py-3 text-center">
-                                                        <button
-                                                            onClick={() => {
-                                                                setSelectedAccountId(
-                                                                    account.id
-                                                                );
-                                                                setSelectedWorkOrderData(
-                                                                    step
-                                                                );
-                                                                setSelectedStepName(
-                                                                    step
-                                                                        .work_order_type
-                                                                        ?.type_name ||
-                                                                        step.work_order
-                                                                );
-                                                                setIsAddFilesModalOpen(
-                                                                    true
-                                                                );
-                                                            }}
-                                                            className="px-3 py-1.5 text-xs font-semibold rounded-lg text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105"
-                                                        >
-                                                            Add Files
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            )
-                                        );
-                                    });
-
-                                    return (
-                                        <React.Fragment key={group.id}>
-                                            <tr
-                                                className={`transition-all duration-200 ease-in-out ${
-                                                    idx % 2 === 0
-                                                        ? "bg-gradient-to-r from-slate-50 to-gray-50"
-                                                        : "bg-white"
-                                                } hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 group cursor-pointer`}
-                                                style={{
-                                                    boxShadow:
-                                                        expandedGroup ===
-                                                        group.id
-                                                            ? "0 8px 25px 0 rgba(59, 130, 246, 0.15)"
-                                                            : undefined,
+                                                            step.work_order
+                                                    );
+                                                    setIsAddFilesModalOpen(
+                                                        true
+                                                    );
                                                 }}
-                                                onClick={(e) =>
-                                                    handleRowClick(e, group.id)
-                                                }
+                                                className="px-2 py-1 text-xs font-semibold rounded-lg text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105"
                                             >
-                                                <td className="px-6 py-5 font-bold text-lg text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
-                                                    <div className="flex items-center space-x-3">
-                                                        <div className="w-3 h-3 bg-blue-500 rounded-full opacity-70"></div>
-                                                        <span className="font-mono tracking-wide">
-                                                            {String(
-                                                                group.id
-                                                            ).padStart(
-                                                                7,
-                                                                "1000-"
-                                                            )}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-5 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
-                                                    <div className="flex items-center space-x-2">
-                                                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                                        <span className="font-medium">
-                                                            {latestWO?.accounts &&
-                                                            latestWO.accounts
-                                                                .length > 0
-                                                                ? latestWO.accounts
-                                                                      .map(
-                                                                          (
-                                                                              acc
-                                                                          ) =>
-                                                                              acc.property_name ||
-                                                                              acc.project ||
-                                                                              acc.account_name ||
-                                                                              "No Property"
-                                                                      )
-                                                                      .filter(
-                                                                          (
-                                                                              v,
-                                                                              i,
-                                                                              a
-                                                                          ) =>
-                                                                              a.indexOf(
-                                                                                  v
-                                                                              ) ===
-                                                                              i
-                                                                      )
-                                                                      .join(
-                                                                          ", "
-                                                                      )
-                                                                : "No Property"}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-5 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
-                                                    <div className="flex items-center space-x-2">
-                                                        <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                                                        <span className="font-medium">
-                                                            {latestWO?.work_order_deadline
-                                                                ? formatDate(
-                                                                      latestWO.work_order_deadline
-                                                                  )
-                                                                : "N/A"}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-5 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
-                                                    <div className="flex items-center space-x-2">
-                                                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                                        <span className="font-medium">
-                                                            {latestWO?.updated_at
-                                                                ? formatDate(
-                                                                      latestWO.updated_at
-                                                                  )
-                                                                : "N/A"}
-                                                        </span>
-                                                    </div>
-                                                </td>
-                                                <td className="px-6 py-5 text-center">
-                                                    <div className="flex items-center justify-center">
-                                                        <button
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                handleOpenGroupDetailsModal(
-                                                                    group
-                                                                );
-                                                            }}
-                                                            className="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-lg transition-all duration-200 transform hover:scale-110 ignore-row-toggle"
-                                                            title="Maximize Details"
-                                                        >
-                                                            <BsArrowsFullscreen
-                                                                size={18}
-                                                            />
-                                                        </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            {expandedGroup === group.id && (
-                                                <tr>
-                                                    <td
-                                                        colSpan={5}
-                                                        className="px-6 py-4 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50"
-                                                    >
-                                                        <div className="rounded-2xl bg-white shadow-lg border border-gray-200 overflow-hidden">
-                                                            <table className="w-full table-auto text-left">
-                                                                <thead>
-                                                                    <tr className="bg-gradient-to-r from-gray-50 to-slate-50 border-b border-gray-200">
-                                                                        <th className="px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                                                                            Account
-                                                                            Name
-                                                                        </th>
-                                                                        <th className="px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                                                                            Current
-                                                                            Step
-                                                                        </th>
-                                                                        <th className="px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                                                                            Overall
-                                                                            Status
-                                                                        </th>
-                                                                        <th className="px-4 py-3 text-xs font-bold text-slate-600 uppercase tracking-wider text-center">
-                                                                            Action
-                                                                        </th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody className="divide-y divide-gray-100">
-                                                                    {stepRows
-                                                                        .flat()
-                                                                        .filter(
-                                                                            Boolean
-                                                                        )}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )}
-                                        </React.Fragment>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                                Add Files
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ));
+                            });
+
+                            return (
+                                <React.Fragment key={group.id}>
+                                    <tr
+                                        className={`transition-all duration-200 ease-in-out ${
+                                            expandedGroup === group.id
+                                                ? "bg-gradient-to-r from-blue-50 to-indigo-50"
+                                                : idx % 2 === 0
+                                                ? "bg-gradient-to-r from-slate-50 to-gray-50"
+                                                : "bg-white"
+                                        } hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 group cursor-pointer`}
+                                        style={{
+                                            boxShadow:
+                                                expandedGroup === group.id
+                                                    ? "0 8px 25px 0 rgba(59, 130, 246, 0.15)"
+                                                    : undefined,
+                                        }}
+                                        onClick={(e) =>
+                                            handleRowClick(e, group.id)
+                                        }
+                                    >
+                                        <td className="px-3 py-2 font-bold text-base text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
+                                            <div className="flex items-center space-x-2">
+                                                <div className="w-2 h-2 bg-blue-500 rounded-full opacity-70"></div>
+                                                <span className="font-mono tracking-wide">
+                                                    {String(group.id).padStart(
+                                                        7,
+                                                        "1000-"
+                                                    )}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                            <div className="flex items-center space-x-1">
+                                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                <span className="font-medium">
+                                                    {latestWO?.accounts &&
+                                                    latestWO.accounts.length > 0
+                                                        ? latestWO.accounts
+                                                              .map(
+                                                                  (acc) =>
+                                                                      acc.property_name ||
+                                                                      acc.project ||
+                                                                      acc.account_name ||
+                                                                      "No Property"
+                                                              )
+                                                              .filter(
+                                                                  (v, i, a) =>
+                                                                      a.indexOf(
+                                                                          v
+                                                                      ) === i
+                                                              )
+                                                              .join(", ")
+                                                        : "No Property"}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                            <div className="flex items-center space-x-1">
+                                                <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                                                <span className="font-medium">
+                                                    {latestWO?.work_order_deadline
+                                                        ? formatDate(
+                                                              latestWO.work_order_deadline
+                                                          )
+                                                        : "N/A"}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                            <div className="flex items-center space-x-1">
+                                                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                                <span className="font-medium">
+                                                    {latestWO?.updated_at
+                                                        ? formatDate(
+                                                              latestWO.updated_at
+                                                          )
+                                                        : "N/A"}
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-3 py-2 text-center">
+                                            <div className="flex items-center justify-center">
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleOpenGroupDetailsModal(
+                                                            group
+                                                        );
+                                                    }}
+                                                    className="p-1 text-slate-500 hover:text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-lg transition-all duration-200 ignore-row-toggle"
+                                                    title="Maximize Details"
+                                                >
+                                                    <BsArrowsFullscreen
+                                                        size={16}
+                                                    />
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {expandedGroup === group.id && (
+                                        <tr>
+                                            <td
+                                                colSpan={5}
+                                                className="px-3 py-2 bg-gradient-to-r from-blue-50 to-indigo-50"
+                                            >
+                                                <div className="rounded-md border border-gray-200 overflow-hidden bg-white">
+                                                    <table className="w-full table-auto text-left">
+                                                        <thead>
+                                                            <tr className="border-b border-gray-200 bg-white">
+                                                                <th className="px-2 py-1 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                                                    Account Name
+                                                                </th>
+                                                                <th className="px-2 py-1 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                                                    Current Step
+                                                                </th>
+                                                                <th className="px-2 py-1 text-xs font-bold text-slate-600 uppercase tracking-wider">
+                                                                    Overall
+                                                                    Status
+                                                                </th>
+                                                                <th className="px-2 py-1 text-xs font-bold text-slate-600 uppercase tracking-wider text-center">
+                                                                    Action
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody className="divide-y divide-gray-100">
+                                                            {stepRows
+                                                                .flat()
+                                                                .filter(
+                                                                    Boolean
+                                                                )}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+                                </React.Fragment>
+                            );
+                        })}
+                    </tbody>
+                </table>
             </Card>
         );
     };
@@ -800,62 +1025,141 @@ const MyWorkOrders = () => {
                     </div>
                 </div>
 
-                {/* Filters */}
-                <div className="bg-white p-3 rounded-lg shadow-sm border border-gray-200 mb-3">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
-                            <label
-                                htmlFor="statusFilter"
-                                className="block text-sm font-medium text-gray-700 mb-2"
-                            >
-                                Filter by Status
-                            </label>
+                {/* Enhanced Compact Filters */}
+                <div className="bg-gradient-to-r from-white to-blue-50/30 rounded-xl shadow-sm border border-gray-200/60 mb-4 p-2.5">
+                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                        {/* Work Order No Filter */}
+                        <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                            <MdSearch className="text-gray-400 text-sm" />
+                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">WO:</label>
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                value={workOrderNoFilter}
+                                onChange={handleWorkOrderNoFilterChange}
+                                className="w-20 text-xs border-none outline-none bg-transparent placeholder-gray-400"
+                            />
+                            {workOrderNoFilter && (
+                                <button
+                                    onClick={() => setWorkOrderNoFilter("")}
+                                    className="text-gray-400 hover:text-red-500 transition-colors duration-200"
+                                >
+                                    <MdClear size={12} />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Project Filter */}
+                        <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                            <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Project:</label>
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                value={projectFilter}
+                                onChange={handleProjectFilterChange}
+                                className="w-20 text-xs border-none outline-none bg-transparent placeholder-gray-400"
+                            />
+                            {projectFilter && (
+                                <button
+                                    onClick={() => setProjectFilter("")}
+                                    className="text-gray-400 hover:text-red-500 transition-colors duration-200"
+                                >
+                                    <MdClear size={12} />
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Status Filter */}
+                        <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Status:</label>
                             <select
-                                id="statusFilter"
                                 value={statusFilter}
                                 onChange={handleStatusFilterChange}
-                                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="text-xs border-none outline-none bg-transparent cursor-pointer"
                             >
-                                <option value="">All Statuses</option>
+                                <option value="">All</option>
                                 <option value="Pending">Pending</option>
                                 <option value="Assigned">Assigned</option>
                                 <option value="In Progress">In Progress</option>
-                                <option value="Complete">Completed</option>
+                                <option value="Complete">Complete</option>
                                 <option value="Cancelled">Cancelled</option>
                             </select>
                         </div>
-                        <div>
-                            <label
-                                htmlFor="sortOrder"
-                                className="block text-sm font-medium text-gray-700 mb-2"
-                            >
-                                Sort By
-                            </label>
+
+                        {/* Due Date Filter */}
+                        <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                            <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Due:</label>
                             <select
-                                id="sortOrder"
+                                value={dueDateFilter}
+                                onChange={handleDueDateFilterChange}
+                                className="text-xs border-none outline-none bg-transparent cursor-pointer"
+                            >
+                                <option value="">All</option>
+                                <option value="overdue">Overdue</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                            </select>
+                        </div>
+
+                        {/* Last Updated Filter */}
+                        <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                            <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Updated:</label>
+                            <select
+                                value={lastUpdatedFilter}
+                                onChange={handleLastUpdatedFilterChange}
+                                className="text-xs border-none outline-none bg-transparent cursor-pointer"
+                            >
+                                <option value="">All</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                            </select>
+                        </div>
+
+                        {/* Sort Filter */}
+                        <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                            <MdKeyboardArrowDown className="text-gray-400 text-sm" />
+                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Sort:</label>
+                            <select
                                 value={`${sortBy}:${sortOrder}`}
                                 onChange={handleSortChange}
-                                className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="text-xs border-none outline-none bg-transparent cursor-pointer"
                             >
-                                <option value="created_at:desc">
-                                    Created At (Newest First)
-                                </option>
-                                <option value="created_at:asc">
-                                    Created At (Oldest First)
-                                </option>
-                                <option value="work_order_deadline:asc">
-                                    Deadline (Soonest First)
-                                </option>
-                                <option value="work_order_deadline:desc">
-                                    Deadline (Latest First)
-                                </option>
-                                <option value="priority:desc">
-                                    Priority (High to Low)
-                                </option>
-                                <option value="priority:asc">
-                                    Priority (Low to High)
-                                </option>
+                                <option value="created_at:desc">Newest First</option>
+                                <option value="created_at:asc">Oldest First</option>
+                                <option value="work_order_deadline:asc">Due Soon</option>
+                                <option value="work_order_deadline:desc">Due Later</option>
+                                <option value="updated_at:desc">Recently Updated</option>
+                                <option value="updated_at:asc">Least Recently Updated</option>
                             </select>
+                        </div>
+
+                        {/* Results Count & Actions */}
+                        <div className="flex items-center space-x-2 ml-auto">
+                            {hasActiveFilters() && (
+                                <button
+                                    onClick={clearAllFilters}
+                                    className="flex items-center space-x-1 px-2 py-1 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg border border-red-200 transition-all duration-200 hover:scale-105"
+                                >
+                                    <MdClear size={12} />
+                                    <span>Clear</span>
+                                </button>
+                            )}
+                            <div className="flex items-center space-x-1.5 bg-gray-50 rounded-lg px-2.5 py-1.5 border border-gray-200">
+                                <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
+                                <span className="text-xs text-gray-600 font-medium">
+                                    {getFilteredWorkOrderGroups().length} 
+                                    <span className="text-gray-500 ml-0.5">
+                                        result{getFilteredWorkOrderGroups().length !== 1 ? 's' : ''}
+                                    </span>
+                                    {hasActiveFilters() && <span className="text-blue-600 ml-1">(filtered)</span>}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -906,6 +1210,45 @@ const MyWorkOrders = () => {
                 )}
 
                 {/* Empty State */}
+                {!loading &&
+                    !error &&
+                    getFilteredWorkOrderGroups().length === 0 &&
+                    workOrderGroups.length > 0 && (
+                        <div className="text-center py-12">
+                            <svg
+                                className="mx-auto h-12 w-12 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                            </svg>
+                            <h3 className="mt-4 text-lg font-medium text-gray-900">
+                                No work orders found
+                            </h3>
+                            <p className="mt-2 text-gray-600">
+                                {hasActiveFilters()
+                                    ? "No work orders match your current filters."
+                                    : "You have no work orders assigned to you."}
+                            </p>
+                            {hasActiveFilters() && (
+                                <button
+                                    onClick={clearAllFilters}
+                                    className="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200"
+                                >
+                                    <MdClear className="mr-2" />
+                                    Clear all filters
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                {/* No Data State */}
                 {!loading && !error && workOrderGroups.length === 0 && (
                     <div className="text-center py-12">
                         <svg
@@ -925,15 +1268,13 @@ const MyWorkOrders = () => {
                             No work orders found
                         </h3>
                         <p className="mt-2 text-gray-600">
-                            {statusFilter
-                                ? "No work orders match your current filter."
-                                : "You have no work orders assigned to you."}
+                            You have no work orders assigned to you.
                         </p>
                     </div>
                 )}
 
                 {/* Content */}
-                {workOrderGroups.length > 0 && (
+                {getFilteredWorkOrderGroups().length > 0 && (
                     <>
                         {viewMode === "grid"
                             ? renderGridView()

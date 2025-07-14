@@ -77,7 +77,7 @@ const DeleteIcon = () => {
 };
 
 const ProfileIcon = () => {
-    return <img src={Profile} className="size-6" />;
+    return <img src={Profile} className="size-4" />;
 };
 
 const WorkOrderView = () => {
@@ -488,132 +488,195 @@ const WorkOrderView = () => {
                 />
             )}
 
-            <Card className="w-full overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="table-fixed w-full text-center">
-                        <thead>
-                            <tr>
-                                {TABLE_HEAD.map(({ head }, index) => (
-                                    <th
-                                        key={index}
-                                        className="border-b bg-[#175D5F] text-white h-[60px] px-4"
+            <Card className="w-full overflow-hidden rounded-md border-0 bg-white backdrop-blur-sm">
+                <table className="w-full table-fixed bg-white rounded-md shadow-inner">
+                    <colgroup>
+                        <col style={{ width: "25%" }} />
+                        <col style={{ width: "18%" }} />
+                        <col style={{ width: "18%" }} />
+                        <col style={{ width: "18%" }} />
+                        <col style={{ width: "21%" }} />
+                    </colgroup>
+                    <thead className="sticky top-0 z-10 bg-custom-bluegreen">
+                        <tr>
+                            <th className="text-white h-[44px] px-3 py-1 first:rounded-tl-2xl">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                    <Typography
+                                        variant="small"
+                                        className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
                                     >
-                                        <Typography
-                                            variant="small"
-                                            className="!font-semibold text-white"
-                                        >
-                                            {head}
-                                        </Typography>
-                                    </th>
-                                ))}
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {currentData.map((group) => (
-                                <React.Fragment key={group.groupId}>
-                                    {/* Main Group Row */}
-                                    <tr
-                                        className="hover:bg-gray-50 cursor-pointer"
-                                        onClick={() =>
-                                            toggleGroupExpansion(group.groupId)
-                                        }
+                                        Work Order Group
+                                    </Typography>
+                                </div>
+                            </th>
+                            <th className="text-white h-[44px] px-3 py-1">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                    <Typography
+                                        variant="small"
+                                        className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
                                     >
-                                        <td className="p-4 border-b border-gray-300 text-left">
-                                            <div className="flex items-center gap-2">
-                                                {expandedGroups[
-                                                    group.groupId
-                                                ] ? (
-                                                    <ChevronDownIcon className="w-4 h-4 text-gray-600" />
-                                                ) : (
-                                                    <ChevronRightIcon className="w-4 h-4 text-gray-600" />
+                                        Status
+                                    </Typography>
+                                </div>
+                            </th>
+                            <th className="text-white h-[44px] px-3 py-1">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
+                                    <Typography
+                                        variant="small"
+                                        className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                    >
+                                        Date Created
+                                    </Typography>
+                                </div>
+                            </th>
+                            <th className="text-white h-[44px] px-3 py-1">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
+                                    <Typography
+                                        variant="small"
+                                        className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                    >
+                                        Due Date
+                                    </Typography>
+                                </div>
+                            </th>
+                            <th className="text-white h-[44px] px-3 py-1 last:rounded-tr-2xl text-center">
+                                <div className="flex items-center justify-center space-x-2">
+                                    <div className="w-2 h-2 bg-rose-400 rounded-full"></div>
+                                    <Typography
+                                        variant="small"
+                                        className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                    >
+                                        Actions
+                                    </Typography>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                        {currentData.map((group, idx) => (
+                            <React.Fragment key={group.groupId}>
+                                {/* Main Group Row */}
+                                <tr
+                                    className={`transition-all duration-200 ease-in-out ${
+                                        expandedGroups[group.groupId]
+                                            ? "bg-gradient-to-r from-blue-50 to-indigo-50"
+                                            : idx % 2 === 0
+                                            ? "bg-gradient-to-r from-slate-50 to-gray-50"
+                                            : "bg-white"
+                                    } hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 group cursor-pointer`}
+                                    style={{
+                                        boxShadow: expandedGroups[group.groupId]
+                                            ? "0 8px 25px 0 rgba(59, 130, 246, 0.15)"
+                                            : undefined,
+                                    }}
+                                    onClick={() =>
+                                        toggleGroupExpansion(group.groupId)
+                                    }
+                                >
+                                    <td className="px-3 py-2 font-bold text-base text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
+                                        <div className="flex items-center space-x-2">
+                                            <div className="w-2 h-2 bg-blue-500 rounded-full opacity-70"></div>
+                                            <span className="font-mono tracking-wide">
+                                                {String(group.groupId).padStart(
+                                                    7,
+                                                    "1000-"
                                                 )}
-                                                <Typography
-                                                    variant="small"
-                                                    className="font-semibold text-[#175D5F]"
-                                                >
-                                                    {String(
-                                                        group.groupId
-                                                    ).padStart(7, "1000-")}
-                                                </Typography>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 border-b border-gray-300 text-center">
-                                            <Typography
-                                                variant="small"
-                                                className={`font-semibold px-3 py-1 rounded-full inline-block w-28 ${
+                                            </span>
+                                            {expandedGroups[group.groupId] ? (
+                                                <ChevronDownIcon className="w-4 h-4 text-gray-600 ml-2" />
+                                            ) : (
+                                                <ChevronRightIcon className="w-4 h-4 text-gray-600 ml-2" />
+                                            )}
+                                        </div>
+                                    </td>
+                                    <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                        <div className="flex items-center space-x-1">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                            <span
+                                                className={`font-medium px-2 py-1 rounded-full text-xs ${
                                                     group.status ===
                                                     "In Progress"
-                                                        ? "bg-[#F5F4DC] text-[#175D5F]"
-                                                        : "bg-green-200 text-green-800"
+                                                        ? "bg-yellow-100 text-yellow-800"
+                                                        : "bg-green-100 text-green-800"
                                                 }`}
                                             >
                                                 {group.status}
-                                            </Typography>
-                                        </td>
-                                        <td className="p-4 border-b border-gray-300 text-center">
-                                            <Typography
-                                                variant="small"
-                                                className="font-normal text-base text-[#175D5F]"
-                                            >
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                        <div className="flex items-center space-x-1">
+                                            <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                                            <span className="font-medium">
                                                 {group.dateCreated}
-                                            </Typography>
-                                        </td>
-                                        <td className="p-4 border-b border-gray-300 text-center">
-                                            <Typography
-                                                variant="small"
-                                                className="font-normal text-base text-[#175D5F]"
-                                            >
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                        <div className="flex items-center space-x-1">
+                                            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                            <span className="font-medium">
                                                 {group.dueDate}
-                                            </Typography>
-                                        </td>
-                                        <td className="p-4 border-b border-gray-300 text-center">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleOpenViewModal(
-                                                            group.workOrders[0]
-                                                        );
-                                                    }}
-                                                >
-                                                    <ViewIcon />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setSelectedWorkOrderForEdit(
-                                                            group.workOrders[0]
-                                                        );
-                                                        setIsEditModalOpen(
-                                                            true
-                                                        );
-                                                    }}
-                                                >
-                                                    <EditIcon />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleOpenDeleteModal(
-                                                            group.workOrders[0]
-                                                        );
-                                                    }}
-                                                    disabled={isDeleting}
-                                                >
-                                                    <DeleteIcon />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-
-                                    {/* Expanded Steps */}
-                                    {expandedGroups[group.groupId] && (
-                                        <tr>
-                                            <td
-                                                colSpan={TABLE_HEAD.length}
-                                                className="p-0 border-b border-gray-300"
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td className="px-3 py-2 text-center">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleOpenViewModal(
+                                                        group.workOrders[0]
+                                                    );
+                                                }}
+                                                className="p-1 text-slate-500 hover:text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-lg transition-all duration-200"
+                                                title="View Details"
                                             >
-                                                <div className="bg-gray-50 p-4">
+                                                <ViewIcon />
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedWorkOrderForEdit(
+                                                        group.workOrders[0]
+                                                    );
+                                                    setIsEditModalOpen(true);
+                                                }}
+                                                className="p-1 text-slate-500 hover:text-green-600 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-300 rounded-lg transition-all duration-200"
+                                                title="Edit Work Order"
+                                            >
+                                                <EditIcon />
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleOpenDeleteModal(
+                                                        group.workOrders[0]
+                                                    );
+                                                }}
+                                                disabled={isDeleting}
+                                                className="p-1 text-slate-500 hover:text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                title="Delete Work Order"
+                                            >
+                                                <DeleteIcon />
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                {/* Expanded Steps */}
+                                {expandedGroups[group.groupId] && (
+                                    <tr>
+                                        <td
+                                            colSpan={5}
+                                            className="px-0 py-0 bg-gradient-to-r from-blue-50 to-indigo-50"
+                                        >
+                                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50">
+                                                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4">
                                                     {(() => {
                                                         // 1. Get all work orders (steps) in this group, with their type's sequence
                                                         const steps =
@@ -695,40 +758,45 @@ const WorkOrderView = () => {
                                                                         className="mb-2"
                                                                     >
                                                                         <div
-                                                                            className="flex items-center gap-2 p-2 bg-white rounded cursor-pointer hover:bg-gray-100"
+                                                                            className="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-gray-200 cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 transition-all duration-200 shadow-sm"
                                                                             onClick={() =>
                                                                                 toggleStepExpansion(
                                                                                     `${group.groupId}-${step.stepName}`
                                                                                 )
                                                                             }
                                                                         >
-                                                                            {expandedSteps[
-                                                                                `${group.groupId}-${step.stepName}`
-                                                                            ] ? (
-                                                                                <ChevronDownIcon className="w-4 h-4 text-gray-600" />
-                                                                            ) : (
-                                                                                <ChevronRightIcon className="w-4 h-4 text-gray-600" />
-                                                                            )}
-                                                                            <Typography
-                                                                                variant="small"
-                                                                                className="font-medium text-[#175D5F]"
-                                                                            >
-                                                                                {
-                                                                                    step.stepName
-                                                                                }
-                                                                            </Typography>
-                                                                            <div className="flex items-center gap-2 ml-auto">
-                                                                                <ProfileIcon />
+                                                                            <div className="flex items-center gap-2 flex-shrink-0">
+                                                                                {expandedSteps[
+                                                                                    `${group.groupId}-${step.stepName}`
+                                                                                ] ? (
+                                                                                    <ChevronDownIcon className="w-4 h-4 text-blue-600" />
+                                                                                ) : (
+                                                                                    <ChevronRightIcon className="w-4 h-4 text-blue-600" />
+                                                                                )}
+                                                                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                                                                 <Typography
                                                                                     variant="small"
-                                                                                    className="text-gray-600"
+                                                                                    className="font-semibold text-slate-800"
                                                                                 >
-                                                                                    {step
-                                                                                        .team
-                                                                                        ?.name ||
-                                                                                        step.team ||
-                                                                                        "No Team Assigned"}
+                                                                                    {
+                                                                                        step.stepName
+                                                                                    }
                                                                                 </Typography>
+                                                                            </div>
+
+                                                                            <div className="flex items-center gap-1 text-xs text-gray-500 ml-auto">
+                                                                                <span>
+                                                                                    {
+                                                                                        filteredAccounts.length
+                                                                                    }
+                                                                                </span>
+                                                                                <span>
+                                                                                    account
+                                                                                    {filteredAccounts.length !==
+                                                                                    1
+                                                                                        ? "s"
+                                                                                        : ""}
+                                                                                </span>
                                                                             </div>
                                                                         </div>
 
@@ -736,16 +804,10 @@ const WorkOrderView = () => {
                                                                         {expandedSteps[
                                                                             `${group.groupId}-${step.stepName}`
                                                                         ] && (
-                                                                            <div className="ml-6 mt-2 p-3 bg-blue-50 rounded">
-                                                                                <Typography
-                                                                                    variant="small"
-                                                                                    className="font-semibold text-[#175D5F] mb-2"
-                                                                                >
-                                                                                    Accounts:
-                                                                                </Typography>
+                                                                            <div className="ml-6 mt-2 ">
                                                                                 {filteredAccounts.length >
                                                                                 0 ? (
-                                                                                    <div className="space-y-1">
+                                                                                    <div className="space-y-2">
                                                                                         {filteredAccounts.map(
                                                                                             (
                                                                                                 account,
@@ -756,45 +818,122 @@ const WorkOrderView = () => {
                                                                                                         account.id ||
                                                                                                         accountIndex
                                                                                                     }
-                                                                                                    className="flex items-center gap-2 p-2 bg-white rounded"
+                                                                                                    className="flex items-center gap-3 px-3 py-2 bg-white rounded-lg border border-gray-200 hover:bg-gradient-to-r hover:from-slate-50 hover:to-gray-50 transition-all duration-200"
                                                                                                 >
+                                                                                                    <div className="w-2 h-2 bg-amber-400 rounded-full flex-shrink-0"></div>
                                                                                                     <ProfileIcon />
-                                                                                                    <Typography
-                                                                                                        variant="small"
-                                                                                                        className="text-gray-700"
-                                                                                                    >
-                                                                                                        {account.name ||
-                                                                                                            account.account_name ||
-                                                                                                            `Account ${
-                                                                                                                accountIndex +
-                                                                                                                1
-                                                                                                            }`}
-                                                                                                    </Typography>
-                                                                                                    {account.email && (
-                                                                                                        <Typography
-                                                                                                            variant="small"
-                                                                                                            className="text-gray-500"
-                                                                                                        >
-                                                                                                            (
-                                                                                                            {
-                                                                                                                account.email
-                                                                                                            }
-                                                                                                            )
-                                                                                                        </Typography>
-                                                                                                    )}
+                                                                                                    <div className="flex-1 min-w-0">
+                                                                                                        <div className="flex items-center gap-3">
+                                                                                                            <div className="flex-shrink-0">
+                                                                                                                <Typography
+                                                                                                                    variant="small"
+                                                                                                                    className="text-slate-800 font-medium text-sm"
+                                                                                                                >
+                                                                                                                    {account.name ||
+                                                                                                                        account.account_name ||
+                                                                                                                        `Account ${
+                                                                                                                            accountIndex +
+                                                                                                                            1
+                                                                                                                        }`}
+                                                                                                                </Typography>
+                                                                                                                {account.email && (
+                                                                                                                    <Typography
+                                                                                                                        variant="small"
+                                                                                                                        className="text-slate-500 text-xs"
+                                                                                                                    >
+                                                                                                                        {
+                                                                                                                            account.email
+                                                                                                                        }
+                                                                                                                    </Typography>
+                                                                                                                )}
+                                                                                                            </div>
+
+                                                                                                            {/* Individual Account Progress Bar */}
+                                                                                                            <div className="flex-1 max-w-xs">
+                                                                                                                {(() => {
+                                                                                                                    // Calculate progress for this account
+                                                                                                                    const currentStepIndex =
+                                                                                                                        steps.findIndex(
+                                                                                                                            (
+                                                                                                                                s
+                                                                                                                            ) =>
+                                                                                                                                s.stepName ===
+                                                                                                                                step.stepName
+                                                                                                                        );
+                                                                                                                    const accountCurrentStepIndex =
+                                                                                                                        steps.findIndex(
+                                                                                                                            (
+                                                                                                                                s
+                                                                                                                            ) =>
+                                                                                                                                accountLatestStep[
+                                                                                                                                    account
+                                                                                                                                        .id
+                                                                                                                                ]
+                                                                                                                                    ?.stepName ===
+                                                                                                                                s.stepName
+                                                                                                                        );
+
+                                                                                                                    let progress = 0;
+                                                                                                                    if (
+                                                                                                                        accountCurrentStepIndex >=
+                                                                                                                        0
+                                                                                                                    ) {
+                                                                                                                        progress =
+                                                                                                                            Math.round(
+                                                                                                                                ((accountCurrentStepIndex +
+                                                                                                                                    1) /
+                                                                                                                                    steps.length) *
+                                                                                                                                    100
+                                                                                                                            );
+                                                                                                                    }
+
+                                                                                                                    const progressClass =
+                                                                                                                        progress >=
+                                                                                                                        100
+                                                                                                                            ? "bg-green-500"
+                                                                                                                            : progress >
+                                                                                                                              0
+                                                                                                                            ? "bg-amber-500"
+                                                                                                                            : "bg-gray-300";
+
+                                                                                                                    return (
+                                                                                                                        <div className="flex items-center gap-2">
+                                                                                                                            <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                                                                                                                <div
+                                                                                                                                    className={`h-full rounded-full transition-all duration-300 ${progressClass}`}
+                                                                                                                                    style={{
+                                                                                                                                        width: `${progress}%`,
+                                                                                                                                    }}
+                                                                                                                                ></div>
+                                                                                                                            </div>
+                                                                                                                            <span className="text-xs font-medium text-gray-600 w-8 text-right">
+                                                                                                                                {
+                                                                                                                                    progress
+                                                                                                                                }
+                                                                                                                                %
+                                                                                                                            </span>
+                                                                                                                        </div>
+                                                                                                                    );
+                                                                                                                })()}
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
                                                                                                 </div>
                                                                                             )
                                                                                         )}
                                                                                     </div>
                                                                                 ) : (
-                                                                                    <Typography
-                                                                                        variant="small"
-                                                                                        className="text-gray-500 italic"
-                                                                                    >
-                                                                                        No
-                                                                                        accounts
-                                                                                        assigned
-                                                                                    </Typography>
+                                                                                    <div className="flex items-center gap-2 px-3 py-1 bg-white rounded-lg border border-gray-200 hover:bg-gradient-to-r hover:from-slate-50 hover:to-gray-50 transition-all duration-200">
+                                                                                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                                                                                        <Typography
+                                                                                            variant="small"
+                                                                                            className="text-slate-500 italic"
+                                                                                        >
+                                                                                            No
+                                                                                            accounts
+                                                                                            assigned
+                                                                                        </Typography>
+                                                                                    </div>
                                                                                 )}
                                                                             </div>
                                                                         )}
@@ -804,14 +943,14 @@ const WorkOrderView = () => {
                                                         );
                                                     })()}
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    )}
-                                </React.Fragment>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                )}
+                            </React.Fragment>
+                        ))}
+                    </tbody>
+                </table>
 
                 {isEditModalOpen && selectedWorkOrderForEdit && (
                     <EditWorkOrderModal
@@ -825,35 +964,54 @@ const WorkOrderView = () => {
                     />
                 )}
 
-                {/* Card Footer */}
-                <CardFooter className="flex items-center justify-end border-t border-blue-gray-50 p-4 gap-2">
-                    <ReactPaginate
-                        previousLabel={
-                            <MdKeyboardArrowLeft className="text-[#404B52]" />
-                        }
-                        nextLabel={
-                            <MdKeyboardArrowRight className="text-[#404B52]" />
-                        }
-                        breakLabel={"..."}
-                        pageCount={totalPages}
-                        marginPagesDisplayed={2}
-                        pageRangeDisplayed={2}
-                        onPageChange={(data) => {
-                            const selectedPage = data.selected + 1;
-                            setCurrentPage(selectedPage);
-                        }}
-                        containerClassName={"flex gap-2"}
-                        previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
-                        nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
-                        pageClassName="border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
-                        activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-white rounded-[4px] text-[12px]"
-                        pageLinkClassName="w-full h-full flex justify-center items-center"
-                        activeLinkClassName="w-full h-full flex justify-center items-center"
-                        disabledLinkClassName="text-gray-300 cursor-not-allowed"
-                        forcePage={currentPage - 1}
-                    />
+                <CardFooter className="flex items-center justify-between border-t border-blue-gray-50 p-4 mt-4">
+                    <Typography
+                        variant="small"
+                        color="blue-gray"
+                        className="font-normal"
+                    >
+                        Showing {filteredGroups.length} work order groups
+                    </Typography>
                 </CardFooter>
             </Card>
+
+            {/* Delete Confirmation Modal */}
+            {isDeleteModalOpen && selectedWorkOrderForDelete && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                            Confirm Delete
+                        </h3>
+                        <p className="text-gray-600 mb-6">
+                            Are you sure you want to delete this work order?
+                            This action cannot be undone.
+                        </p>
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={() => {
+                                    setIsDeleteModalOpen(false);
+                                    setSelectedWorkOrderForDelete(null);
+                                }}
+                                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                                disabled={isDeleting}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={() =>
+                                    confirmDeleteHandler(
+                                        selectedWorkOrderForDelete
+                                    )
+                                }
+                                disabled={isDeleting}
+                                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                {isDeleting ? "Deleting..." : "Delete"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
