@@ -13,7 +13,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     const modalRef = useRef();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [workOrderId, setWorkOrderId] = useState(null);
-    const [projectMilestoneStructure, setProjectMilestoneStructure] = useState([]);
+    const [projectMilestoneStructure, setProjectMilestoneStructure] = useState(
+        []
+    );
     const {
         accounts,
         assignee,
@@ -30,12 +32,19 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     useEffect(() => {
         if (selectedProject) {
             apiService
-                .get(`/projects/${encodeURIComponent(selectedProject)}/milestone-structure`)
+                .get(
+                    `/projects/${encodeURIComponent(
+                        selectedProject
+                    )}/milestone-structure`
+                )
                 .then((res) => {
                     setProjectMilestoneStructure(res.data || []);
                 })
                 .catch((err) => {
-                    console.error("Failed to fetch project milestone structure:", err);
+                    console.error(
+                        "Failed to fetch project milestone structure:",
+                        err
+                    );
                     setProjectMilestoneStructure([]);
                 });
         } else {
@@ -94,7 +103,10 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             formattedDueDate = dueDate.toISOString().slice(0, 10);
         }
 
-        if (!projectMilestoneStructure || projectMilestoneStructure.length === 0) {
+        if (
+            !projectMilestoneStructure ||
+            projectMilestoneStructure.length === 0
+        ) {
             alert(
                 "The selected project has no assigned employees. Please assign employees to this project first."
             );
@@ -103,10 +115,14 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
 
         // Get all assignees from all milestones
         const allProjectAssignees = [];
-        projectMilestoneStructure.forEach(step => {
-            step.milestones.forEach(milestone => {
-                milestone.assignees.forEach(assignee => {
-                    if (!allProjectAssignees.find(emp => emp.id === assignee.id)) {
+        projectMilestoneStructure.forEach((step) => {
+            step.milestones.forEach((milestone) => {
+                milestone.assignees.forEach((assignee) => {
+                    if (
+                        !allProjectAssignees.find(
+                            (emp) => emp.id === assignee.id
+                        )
+                    ) {
                         allProjectAssignees.push(assignee);
                     }
                 });
@@ -122,7 +138,8 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
 
         // Assign each account to a project assignee in ascending order (round-robin)
         const accountAssignments = selectedAccounts.map((account, idx) => {
-            const assignee = allProjectAssignees[idx % allProjectAssignees.length];
+            const assignee =
+                allProjectAssignees[idx % allProjectAssignees.length];
             return {
                 account_id: account.id,
                 employee_id: assignee.id,
@@ -153,14 +170,20 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             );
 
             if (response.status === 201) {
+                console.log("Full response data:", response.data);
                 const newWorkOrderId = response.data.data.work_order_id;
-                setWorkOrderId(newWorkOrderId);
+                const workOrderGroupId = response.data.data.work_order_group_id;
+                console.log("Work Order ID:", newWorkOrderId);
+                console.log("Work Order Group ID:", workOrderGroupId);
+                setWorkOrderId(workOrderGroupId || newWorkOrderId);
                 setIsModalOpen(true);
                 fetchWorkOrders();
 
                 if (response.status === 201) {
                     const newWorkOrderId = response.data.data.work_order_id;
-                    setWorkOrderId(newWorkOrderId);
+                    const workOrderGroupId =
+                        response.data.data.work_order_group_id;
+                    setWorkOrderId(workOrderGroupId || newWorkOrderId);
                     setIsModalOpen(true);
                     fetchWorkOrders();
 
@@ -309,45 +332,103 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                     Assigned To:
                                 </label>
                                 <div className="w-2/3">
-                                    {projectMilestoneStructure && projectMilestoneStructure.length > 0 ? (
+                                    {projectMilestoneStructure &&
+                                    projectMilestoneStructure.length > 0 ? (
                                         <div className="p-3 border border-gray-200 rounded-md bg-gray-50 max-h-60 overflow-y-auto font-mono text-sm">
-                                            {projectMilestoneStructure.map((step, stepIndex) => (
-                                                <div key={stepIndex} className="mb-3">
-                                                    {/* Step */}
-                                                    <div className="font-semibold text-blue-700 text-sm mb-1">
-                                                        {step.step_name}
-                                                    </div>
-                                                    
-                                                    {/* Milestones */}
-                                                    {step.milestones.map((milestone, milestoneIndex) => (
-                                                        <div key={milestoneIndex} className="mb-1">
-                                                            {/* Milestone with tree connector */}
-                                                            <div className="flex items-start text-gray-700 text-xs mb-1">
-                                                                <span className="text-gray-400 mr-2 mt-0.5 select-none">
-                                                                    {milestoneIndex === step.milestones.length - 1 ? '└──' : '├──'}
-                                                                </span>
-                                                                <span className="font-medium leading-tight">{milestone.milestone_name}</span>
-                                                            </div>
-                                                            
-                                                            {/* Assignees */}
-                                                            {milestone.assignees.length > 0 && milestone.assignees.map((assignee, assigneeIndex) => (
-                                                                <div key={assigneeIndex} className="flex items-start text-xs">
-                                                                    <span className="text-gray-400 mr-2 mt-0.5 select-none whitespace-pre">
-                                                                        {milestoneIndex === step.milestones.length - 1 ? '    ' : '│   '}
-                                                                        {assigneeIndex === milestone.assignees.length - 1 ? '└──' : '├──'}
-                                                                    </span>
-                                                                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs leading-tight">
-                                                                        {assignee.full_name}
-                                                                    </span>
-                                                                </div>
-                                                            ))}
+                                            {projectMilestoneStructure.map(
+                                                (step, stepIndex) => (
+                                                    <div
+                                                        key={stepIndex}
+                                                        className="mb-3"
+                                                    >
+                                                        {/* Step */}
+                                                        <div className="font-semibold text-blue-700 text-sm mb-1">
+                                                            {step.step_name}
                                                         </div>
-                                                    ))}
-                                                </div>
-                                            ))}
+
+                                                        {/* Milestones */}
+                                                        {step.milestones.map(
+                                                            (
+                                                                milestone,
+                                                                milestoneIndex
+                                                            ) => (
+                                                                <div
+                                                                    key={
+                                                                        milestoneIndex
+                                                                    }
+                                                                    className="mb-1"
+                                                                >
+                                                                    {/* Milestone with tree connector */}
+                                                                    <div className="flex items-start text-gray-700 text-xs mb-1">
+                                                                        <span className="text-gray-400 mr-2 mt-0.5 select-none">
+                                                                            {milestoneIndex ===
+                                                                            step
+                                                                                .milestones
+                                                                                .length -
+                                                                                1
+                                                                                ? "└──"
+                                                                                : "├──"}
+                                                                        </span>
+                                                                        <span className="font-medium leading-tight">
+                                                                            {
+                                                                                milestone.milestone_name
+                                                                            }
+                                                                        </span>
+                                                                    </div>
+
+                                                                    {/* Assignees */}
+                                                                    {milestone
+                                                                        .assignees
+                                                                        .length >
+                                                                        0 &&
+                                                                        milestone.assignees.map(
+                                                                            (
+                                                                                assignee,
+                                                                                assigneeIndex
+                                                                            ) => (
+                                                                                <div
+                                                                                    key={
+                                                                                        assigneeIndex
+                                                                                    }
+                                                                                    className="flex items-start text-xs"
+                                                                                >
+                                                                                    <span className="text-gray-400 mr-2 mt-0.5 select-none whitespace-pre">
+                                                                                        {milestoneIndex ===
+                                                                                        step
+                                                                                            .milestones
+                                                                                            .length -
+                                                                                            1
+                                                                                            ? "    "
+                                                                                            : "│   "}
+                                                                                        {assigneeIndex ===
+                                                                                        milestone
+                                                                                            .assignees
+                                                                                            .length -
+                                                                                            1
+                                                                                            ? "└──"
+                                                                                            : "├──"}
+                                                                                    </span>
+                                                                                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs leading-tight">
+                                                                                        {
+                                                                                            assignee.full_name
+                                                                                        }
+                                                                                    </span>
+                                                                                </div>
+                                                                            )
+                                                                        )}
+                                                                </div>
+                                                            )
+                                                        )}
+                                                    </div>
+                                                )
+                                            )}
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-gray-500 pt-2">{selectedProject ? "Loading assignees..." : "Select a project to see assignees"}</p>
+                                        <p className="text-sm text-gray-500 pt-2">
+                                            {selectedProject
+                                                ? "Loading assignees..."
+                                                : "Select a project to see assignees"}
+                                        </p>
                                     )}
                                 </div>
                             </div>
@@ -391,7 +472,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             ) : (
                 <WorkOrderCreatedModal
                     isOpen={isModalOpen}
-                    workOrderId={workOrderId}
+                    workOrderGroupId={workOrderId}
                     onClose={() => {
                         setIsModalOpen(false);
                         onClose();

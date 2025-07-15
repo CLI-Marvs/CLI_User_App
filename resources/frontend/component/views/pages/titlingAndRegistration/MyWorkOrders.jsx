@@ -1064,11 +1064,11 @@ const MyWorkOrders = () => {
                     </div>
                 </div>
 
-                {/* Enhanced Compact Filters */}
+                {/* Enhanced Inline Filters */}
                 <div className="bg-gradient-to-r from-white to-blue-50/30 rounded-xl shadow-sm border border-gray-200/60 mb-4 p-2.5">
-                    <div className="flex flex-wrap items-center gap-2 text-sm">
+                    <div className="flex items-center gap-1.5 text-sm overflow-x-auto">
                         {/* Work Order No Filter */}
-                        <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div className="flex items-center space-x-1 bg-white rounded-lg px-2 py-1 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0">
                             <MdSearch className="text-gray-400 text-sm" />
                             <label className="text-xs font-medium text-gray-600 whitespace-nowrap">
                                 WO:
@@ -1078,7 +1078,7 @@ const MyWorkOrders = () => {
                                 placeholder="Search..."
                                 value={workOrderNoFilter}
                                 onChange={handleWorkOrderNoFilterChange}
-                                className="w-20 text-xs border-none outline-none bg-transparent placeholder-gray-400"
+                                className="w-16 text-xs border-none outline-none bg-transparent placeholder-gray-400"
                             />
                             {workOrderNoFilter && (
                                 <button
@@ -1091,7 +1091,7 @@ const MyWorkOrders = () => {
                         </div>
 
                         {/* Project Filter */}
-                        <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div className="flex items-center space-x-1 bg-white rounded-lg px-2 py-1 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0">
                             <div className="w-2 h-2 bg-green-400 rounded-full"></div>
                             <label className="text-xs font-medium text-gray-600 whitespace-nowrap">
                                 Project:
@@ -1101,7 +1101,7 @@ const MyWorkOrders = () => {
                                 placeholder="Search..."
                                 value={projectFilter}
                                 onChange={handleProjectFilterChange}
-                                className="w-20 text-xs border-none outline-none bg-transparent placeholder-gray-400"
+                                className="w-16 text-xs border-none outline-none bg-transparent placeholder-gray-400"
                             />
                             {projectFilter && (
                                 <button
@@ -1114,7 +1114,7 @@ const MyWorkOrders = () => {
                         </div>
 
                         {/* Status Filter */}
-                        <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div className="flex items-center space-x-1 bg-white rounded-lg px-2 py-1 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0">
                             <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                             <label className="text-xs font-medium text-gray-600 whitespace-nowrap">
                                 Status:
@@ -1134,7 +1134,7 @@ const MyWorkOrders = () => {
                         </div>
 
                         {/* Due Date Filter */}
-                        <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div className="flex items-center space-x-1 bg-white rounded-lg px-2 py-1 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0">
                             <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
                             <label className="text-xs font-medium text-gray-600 whitespace-nowrap">
                                 Due:
@@ -1153,7 +1153,7 @@ const MyWorkOrders = () => {
                         </div>
 
                         {/* Last Updated Filter */}
-                        <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div className="flex items-center space-x-1 bg-white rounded-lg px-2 py-1 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0">
                             <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                             <label className="text-xs font-medium text-gray-600 whitespace-nowrap">
                                 Updated:
@@ -1171,7 +1171,7 @@ const MyWorkOrders = () => {
                         </div>
 
                         {/* Sort Filter */}
-                        <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
+                        <div className="flex items-center space-x-1 bg-white rounded-lg px-2 py-1 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0">
                             <MdKeyboardArrowDown className="text-gray-400 text-sm" />
                             <label className="text-xs font-medium text-gray-600 whitespace-nowrap">
                                 Sort:
@@ -1202,7 +1202,7 @@ const MyWorkOrders = () => {
                             </select>
                         </div>
 
-                        {/* Results Count & Actions */}
+                        {/* Clear Filter Action */}
                         <div className="flex items-center space-x-2 ml-auto">
                             {hasActiveFilters() && (
                                 <button
@@ -1213,24 +1213,6 @@ const MyWorkOrders = () => {
                                     <span>Clear</span>
                                 </button>
                             )}
-                            <div className="flex items-center space-x-1.5 bg-gray-50 rounded-lg px-2.5 py-1.5 border border-gray-200">
-                                <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
-                                <span className="text-xs text-gray-600 font-medium">
-                                    {getFilteredWorkOrderGroups().length}
-                                    <span className="text-gray-500 ml-0.5">
-                                        result
-                                        {getFilteredWorkOrderGroups().length !==
-                                        1
-                                            ? "s"
-                                            : ""}
-                                    </span>
-                                    {hasActiveFilters() && (
-                                        <span className="text-blue-600 ml-1">
-                                            (filtered)
-                                        </span>
-                                    )}
-                                </span>
-                            </div>
                         </div>
                     </div>
                 </div>
