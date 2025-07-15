@@ -618,6 +618,7 @@ class SurveyController extends Controller
     public function getSurveysWithRatingCounts()
     {
         $surveys = Survey_list::select('id', 'survey_title', 'survey_link')
+            ->where('status', true)
             ->get()
             ->map(function ($survey) {
                 $respondentsCount = ExperienceRating::where('survey_link', $survey->survey_link)->count();
