@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import apiService from "../../../servicesApi/apiService";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -16,8 +16,10 @@ import ProcessWorkOrderModal from "../../../layout/documentManagementPage/Proces
 import _ from "lodash";
 import AddFilesModal from "../../../layout/documentManagementPage/AddFilesModal";
 import WorkOrderGroupDetailsModal from "../../../layout/documentManagementPage/WorkOrderGroupDetailsModal";
+import { useStateContext } from "../../../../context/contextprovider";
 
 const MyWorkOrders = () => {
+    const { user } = useStateContext(); // Get current user from context
     const [workOrderGroups, setWorkOrderGroups] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -291,7 +293,10 @@ const MyWorkOrders = () => {
             const getLatestWO = (group) => {
                 return (group.work_orders || [])
                     .slice()
-                    .sort((wo1, wo2) => new Date(wo2.updated_at) - new Date(wo1.updated_at))[0];
+                    .sort(
+                        (wo1, wo2) =>
+                            new Date(wo2.updated_at) - new Date(wo1.updated_at)
+                    )[0];
             };
 
             const latestWO_A = getLatestWO(a);
@@ -300,34 +305,50 @@ const MyWorkOrders = () => {
             let comparison = 0;
 
             switch (sortBy) {
-                case 'created_at':
-                    const createdA = latestWO_A?.created_at ? new Date(latestWO_A.created_at) : new Date(0);
-                    const createdB = latestWO_B?.created_at ? new Date(latestWO_B.created_at) : new Date(0);
+                case "created_at":
+                    const createdA = latestWO_A?.created_at
+                        ? new Date(latestWO_A.created_at)
+                        : new Date(0);
+                    const createdB = latestWO_B?.created_at
+                        ? new Date(latestWO_B.created_at)
+                        : new Date(0);
                     comparison = createdA - createdB;
                     break;
 
-                case 'updated_at':
-                    const updatedA = latestWO_A?.updated_at ? new Date(latestWO_A.updated_at) : new Date(0);
-                    const updatedB = latestWO_B?.updated_at ? new Date(latestWO_B.updated_at) : new Date(0);
+                case "updated_at":
+                    const updatedA = latestWO_A?.updated_at
+                        ? new Date(latestWO_A.updated_at)
+                        : new Date(0);
+                    const updatedB = latestWO_B?.updated_at
+                        ? new Date(latestWO_B.updated_at)
+                        : new Date(0);
                     comparison = updatedA - updatedB;
                     break;
 
-                case 'work_order_deadline':
-                    const deadlineA = latestWO_A?.work_order_deadline ? new Date(latestWO_A.work_order_deadline) : new Date(0);
-                    const deadlineB = latestWO_B?.work_order_deadline ? new Date(latestWO_B.work_order_deadline) : new Date(0);
+                case "work_order_deadline":
+                    const deadlineA = latestWO_A?.work_order_deadline
+                        ? new Date(latestWO_A.work_order_deadline)
+                        : new Date(0);
+                    const deadlineB = latestWO_B?.work_order_deadline
+                        ? new Date(latestWO_B.work_order_deadline)
+                        : new Date(0);
                     comparison = deadlineA - deadlineB;
                     break;
 
                 default:
                     // Default to created_at
-                    const defaultCreatedA = latestWO_A?.created_at ? new Date(latestWO_A.created_at) : new Date(0);
-                    const defaultCreatedB = latestWO_B?.created_at ? new Date(latestWO_B.created_at) : new Date(0);
+                    const defaultCreatedA = latestWO_A?.created_at
+                        ? new Date(latestWO_A.created_at)
+                        : new Date(0);
+                    const defaultCreatedB = latestWO_B?.created_at
+                        ? new Date(latestWO_B.created_at)
+                        : new Date(0);
                     comparison = defaultCreatedA - defaultCreatedB;
                     break;
             }
 
             // Apply sort order (asc or desc)
-            return sortOrder === 'desc' ? -comparison : comparison;
+            return sortOrder === "desc" ? -comparison : comparison;
         });
 
         return filtered;
@@ -360,6 +381,24 @@ const MyWorkOrders = () => {
             console.error("Error fetching group details:", err);
         } finally {
             setIsGroupDetailsLoading(false);
+        }
+    };
+
+    // Create a refresh function for group details
+    const refreshGroupDetails = async () => {
+        if (groupDetailsData && groupDetailsData.id) {
+            setIsGroupDetailsLoading(true);
+            try {
+                const response = await apiService.get(
+                    `/work-order-groups/${groupDetailsData.id}/details`
+                );
+                setGroupDetailsData(response.data);
+                console.log("Refreshed group details:", response.data);
+            } catch (err) {
+                console.error("Error refreshing group details:", err);
+            } finally {
+                setIsGroupDetailsLoading(false);
+            }
         }
     };
 
@@ -1031,7 +1070,9 @@ const MyWorkOrders = () => {
                         {/* Work Order No Filter */}
                         <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
                             <MdSearch className="text-gray-400 text-sm" />
-                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">WO:</label>
+                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">
+                                WO:
+                            </label>
                             <input
                                 type="text"
                                 placeholder="Search..."
@@ -1052,7 +1093,9 @@ const MyWorkOrders = () => {
                         {/* Project Filter */}
                         <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
                             <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Project:</label>
+                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">
+                                Project:
+                            </label>
                             <input
                                 type="text"
                                 placeholder="Search..."
@@ -1073,7 +1116,9 @@ const MyWorkOrders = () => {
                         {/* Status Filter */}
                         <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
                             <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Status:</label>
+                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">
+                                Status:
+                            </label>
                             <select
                                 value={statusFilter}
                                 onChange={handleStatusFilterChange}
@@ -1091,7 +1136,9 @@ const MyWorkOrders = () => {
                         {/* Due Date Filter */}
                         <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
                             <div className="w-2 h-2 bg-amber-400 rounded-full"></div>
-                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Due:</label>
+                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">
+                                Due:
+                            </label>
                             <select
                                 value={dueDateFilter}
                                 onChange={handleDueDateFilterChange}
@@ -1108,7 +1155,9 @@ const MyWorkOrders = () => {
                         {/* Last Updated Filter */}
                         <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
                             <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Updated:</label>
+                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">
+                                Updated:
+                            </label>
                             <select
                                 value={lastUpdatedFilter}
                                 onChange={handleLastUpdatedFilterChange}
@@ -1124,18 +1173,32 @@ const MyWorkOrders = () => {
                         {/* Sort Filter */}
                         <div className="flex items-center space-x-1.5 bg-white rounded-lg px-2.5 py-1.5 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200">
                             <MdKeyboardArrowDown className="text-gray-400 text-sm" />
-                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">Sort:</label>
+                            <label className="text-xs font-medium text-gray-600 whitespace-nowrap">
+                                Sort:
+                            </label>
                             <select
                                 value={`${sortBy}:${sortOrder}`}
                                 onChange={handleSortChange}
                                 className="text-xs border-none outline-none bg-transparent cursor-pointer"
                             >
-                                <option value="created_at:desc">Newest First</option>
-                                <option value="created_at:asc">Oldest First</option>
-                                <option value="work_order_deadline:asc">Due Soon</option>
-                                <option value="work_order_deadline:desc">Due Later</option>
-                                <option value="updated_at:desc">Recently Updated</option>
-                                <option value="updated_at:asc">Least Recently Updated</option>
+                                <option value="created_at:desc">
+                                    Newest First
+                                </option>
+                                <option value="created_at:asc">
+                                    Oldest First
+                                </option>
+                                <option value="work_order_deadline:asc">
+                                    Due Soon
+                                </option>
+                                <option value="work_order_deadline:desc">
+                                    Due Later
+                                </option>
+                                <option value="updated_at:desc">
+                                    Recently Updated
+                                </option>
+                                <option value="updated_at:asc">
+                                    Least Recently Updated
+                                </option>
                             </select>
                         </div>
 
@@ -1153,11 +1216,19 @@ const MyWorkOrders = () => {
                             <div className="flex items-center space-x-1.5 bg-gray-50 rounded-lg px-2.5 py-1.5 border border-gray-200">
                                 <div className="w-2 h-2 bg-indigo-400 rounded-full"></div>
                                 <span className="text-xs text-gray-600 font-medium">
-                                    {getFilteredWorkOrderGroups().length} 
+                                    {getFilteredWorkOrderGroups().length}
                                     <span className="text-gray-500 ml-0.5">
-                                        result{getFilteredWorkOrderGroups().length !== 1 ? 's' : ''}
+                                        result
+                                        {getFilteredWorkOrderGroups().length !==
+                                        1
+                                            ? "s"
+                                            : ""}
                                     </span>
-                                    {hasActiveFilters() && <span className="text-blue-600 ml-1">(filtered)</span>}
+                                    {hasActiveFilters() && (
+                                        <span className="text-blue-600 ml-1">
+                                            (filtered)
+                                        </span>
+                                    )}
                                 </span>
                             </div>
                         </div>
@@ -1296,6 +1367,9 @@ const MyWorkOrders = () => {
                     onAddFiles={handleAddFilesFromDetails}
                     isLoading={isGroupDetailsLoading}
                     getStatusBadge={getStatusBadge}
+                    showChecklistTable={true}
+                    currentUserId={user?.id}
+                    onRefresh={refreshGroupDetails}
                 />
                 {isAddFilesModalOpen &&
                     selectedAccountId &&

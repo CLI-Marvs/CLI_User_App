@@ -6,12 +6,12 @@ import ViewIcon from "../../../../../public/Images/eye_icon.svg";
 import DownloadIcon from "../../../../../public/Images/download_icon.svg";
 import apiService from "../../../../frontend/component/servicesApi/apiService";
 import {
-    getNotesAndUpdatesData, 
+    getNotesAndUpdatesData,
     getCachedNotesAndUpdatesData,
     invalidateNotesAndUpdatesData,
 } from "../../../component/layout/documentManagementPage/service/notesAndUpdatesDataService";
 import AddNoteModal from "./AddNoteModal";
-import FileViewerModal from "./FileViewerModal"; 
+import FileViewerModal from "./FileViewerModal";
 
 function NotesAndUpdatesModal({
     selectedAccountId,
@@ -20,6 +20,9 @@ function NotesAndUpdatesModal({
     addNoteLogType,
     selectedAssignee,
     workOrderData,
+    checklistId, // Add checklist ID
+    checklistName, // Add checklist name
+    onRefresh, // Add refresh callback
 }) {
     const [logs, setLogs] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -27,87 +30,135 @@ function NotesAndUpdatesModal({
     const [showAll, setShowAll] = useState(false);
     const initialLogCount = 2;
     const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
-    const [mounted, setMounted] = useState(false); 
+    const [mounted, setMounted] = useState(false);
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [viewingFile, setViewingFile] = useState(null);
 
+    const fetchData = useCallback(
+        async (isMounted) => {
+            setLogs([]);
+            setError(null);
 
-    const fetchData = useCallback(async (isMounted) => {
-        setLogs([]);
-        setError(null);
-        
-        if (!selectedAccountId) return;
+            if (!selectedAccountId) return;
 
-        setLoading(true);
-        setError(null);
+            setLoading(true);
+            setError(null);
 
-        const params = {
+            const params = {
+                selectedAccountId,
+                selectedWorkOrder,
+            };
+
+            if (selectedWorkOrder === "All Steps") {
+                params.workOrderGroupId = workOrderData?.work_order_group_id;
+            } else {
+                params.workOrderId = workOrderData?.work_order_id;
+            }
+            console.log("SelectedWorkOrder", selectedWorkOrder);
+            const cachedData = getCachedNotesAndUpdatesData(params);
+            if (cachedData) {
+                setLogs(
+                    cachedData.log_data.sort(
+                        (a, b) =>
+                            new Date(b.created_at) - new Date(a.created_at)
+                    ) || []
+                );
+                setLoading(false);
+            } else {
+                setLoading(true);
+            }
+
+            try {
+                const freshData = await getNotesAndUpdatesData(params);
+
+                if (isMounted) {
+                    const logsArray = freshData.log_data || [];
+                    setLogs(
+                        logsArray.sort(
+                            (a, b) =>
+                                new Date(b.created_at) - new Date(a.created_at)
+                        )
+                    );
+                }
+            } catch (err) {
+                if (isMounted) {
+                    setError(
+                        `Failed to load notes and updates: ${err.message}`
+                    );
+                }
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        },
+        [
             selectedAccountId,
             selectedWorkOrder,
-        };
-
-        if (selectedWorkOrder === "All Steps") {
-            params.workOrderGroupId = workOrderData?.work_order_group_id;
-        } else {
-            params.workOrderId = workOrderData?.work_order_id;
-        }
-        console.log("SelectedWorkOrder", selectedWorkOrder);
-        const cachedData = getCachedNotesAndUpdatesData(params);
-        if (cachedData) {
-            setLogs(
-                cachedData.log_data.sort(
-                    (a, b) => new Date(b.created_at) - new Date(a.created_at)
-                ) || []
-            );
-            setLoading(false);
-        } else {
-            setLoading(true);
-        }
-
-        try {
-            const freshData = await getNotesAndUpdatesData(params);
-            
-            if (isMounted) {
-                const logsArray = freshData.log_data || [];
-                setLogs(logsArray.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
-            }
-        } catch (err) {
-            if (isMounted) {
-                setError(`Failed to load notes and updates: ${err.message}`);
-            }
-        } finally {
-            if (isMounted) { 
-                setLoading(false);
-            }
-        }
-    }, [selectedAccountId, selectedWorkOrder, workOrderData?.work_order_id, workOrderData?.work_order_group_id]);
+            workOrderData?.work_order_id,
+            workOrderData?.work_order_group_id,
+        ]
+    );
 
     useEffect(() => {
-        setMounted(true); 
+        setMounted(true);
         let isMounted = true;
 
-        fetchData(isMounted); 
+        fetchData(isMounted);
 
         return () => {
-            isMounted = false; 
-            setMounted(false); 
+            isMounted = false;
+            setMounted(false);
         };
     }, [fetchData]);
 
     const handleAddNoteSuccess = async () => {
+        console.log("handleAddNoteSuccess called");
+        console.log("checklistId:", checklistId);
+        console.log("checklistName:", checklistName);
+        console.log("selectedAccountId:", selectedAccountId);
+
         setIsAddNoteModalOpen(false);
+
+        // Mark checklist as complete if checklistId is provided
+        if (checklistId && selectedAccountId) {
+            try {
+                console.log(
+                    `Marking checklist ${checklistId} as complete for account ${selectedAccountId}`
+                );
+                await apiService.post("/account-checklist-status/bulk", {
+                    account_id: selectedAccountId,
+                    file_titles: [checklistName], // Use checklist name as file title
+                    is_completed: true,
+                    completed_at: new Date().toISOString(),
+                });
+                console.log(`Checklist ${checklistName} marked as complete`);
+            } catch (error) {
+                console.error("Error marking checklist as complete:", error);
+            }
+        } else {
+            console.log(
+                "Skipping checklist completion - missing checklistId or selectedAccountId"
+            );
+        }
 
         const paramsToInvalidate = {
             selectedAccountId,
             selectedWorkOrder,
         };
         if (selectedWorkOrder === "All Steps") {
-            paramsToInvalidate.workOrderGroupId = workOrderData?.work_order_group_id;
+            paramsToInvalidate.workOrderGroupId =
+                workOrderData?.work_order_group_id;
         } else {
             paramsToInvalidate.workOrderId = workOrderData?.work_order_id;
         }
         invalidateNotesAndUpdatesData(paramsToInvalidate);
-        await fetchData(true); 
+        await fetchData(true);
+
+        // Call refresh callback if provided to update parent component data
+        if (onRefresh) {
+            onRefresh();
+        }
     };
 
     const handleOpenViewer = (file) => {
@@ -151,7 +202,10 @@ function NotesAndUpdatesModal({
         return logs.filter((log) => {
             // If selectedWorkOrder is "All Steps", we don't filter by log_type.
             // Otherwise, we match the log_type.
-            const matchesLogType = selectedWorkOrder === "All Steps" ? true : log.log_type === selectedWorkOrder;
+            const matchesLogType =
+                selectedWorkOrder === "All Steps"
+                    ? true
+                    : log.log_type === selectedWorkOrder;
 
             const matchesAccount =
                 (log.note_type === "Manual Entry" &&
@@ -167,7 +221,9 @@ function NotesAndUpdatesModal({
         const logsToUpdate = displayedLogs.filter(
             (log) =>
                 log.is_new &&
-                (selectedWorkOrder === "All Steps" ? true : log.log_type === selectedWorkOrder) &&
+                (selectedWorkOrder === "All Steps"
+                    ? true
+                    : log.log_type === selectedWorkOrder) &&
                 ((log.note_type === "Manual Entry" &&
                     log.account_id === selectedAccountId) ||
                     (log.account_ids &&
@@ -178,8 +234,7 @@ function NotesAndUpdatesModal({
         logsToUpdate.forEach((log) => {
             apiService
                 .patch(`/update-is-new/${log.id}`, { is_new: false })
-                .then((response) => {
-                })
+                .then((response) => {})
                 .catch((error) => {
                     console.error(
                         `Error marking log ${log.id} as read:`,
@@ -244,7 +299,9 @@ function NotesAndUpdatesModal({
 
     if (loading && !error) {
         return ReactDOM.createPortal(
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-[10002]"> {/* z-index > parent modal's content */}
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-[10002]">
+                {" "}
+                {/* z-index > parent modal's content */}
                 <div className="bg-white rounded-lg p-8 w-auto min-w-[200px]">
                     <div className="flex justify-center items-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
@@ -257,7 +314,9 @@ function NotesAndUpdatesModal({
     }
 
     return ReactDOM.createPortal(
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[10001]"> {/* z-index > parent modal's overlay */}
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[10001]">
+            {" "}
+            {/* z-index > parent modal's overlay */}
             <div
                 className="bg-white rounded-[10px] w-[449px] max-h-[90vh] overflow-y-auto shadow-xl p-[18px_25px] flex flex-col gap-[10px] relative"
                 onClick={(e) => e.stopPropagation()}
@@ -401,7 +460,11 @@ function NotesAndUpdatesModal({
 
                                                                         <div className="flex items-center space-x-0 flex-shrink-0">
                                                                             <button
-                                                                                onClick={() => handleOpenViewer(doc)}
+                                                                                onClick={() =>
+                                                                                    handleOpenViewer(
+                                                                                        doc
+                                                                                    )
+                                                                                }
                                                                                 className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
                                                                                 title="View document"
                                                                             >

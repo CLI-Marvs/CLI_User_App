@@ -7,6 +7,7 @@ import DownloadIcon from "../../../../../public/Images/download_icon.svg";
 import UploadFilesOnlyModal from "./UploadFilesOnlyModal";
 import apiService from "../../../component/servicesApi/apiService";
 import FileViewerModal from "./FileViewerModal"; // Import the FileViewerModal
+import { useStateContext } from "../../../../../resources/frontend/context/contextprovider";
 
 function AddFilesModal({
     selectedAccountId,
@@ -15,6 +16,7 @@ function AddFilesModal({
     workOrderData,
     // selectedAssignee,
 }) {
+    const { user } = useStateContext(); // Get user from context
     const [logsWithFiles, setLogsWithFiles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -23,18 +25,30 @@ function AddFilesModal({
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
     const [isViewerOpen, setIsViewerOpen] = useState(false); // State for FileViewerModal
     const [viewingFile, setViewingFile] = useState(null); // State for the file to view
+    const [propertyName, setPropertyName] = useState(null); // State for property name
 
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        if (selectedAccountId && workOrderData?.work_order_id) {
+        if (selectedAccountId) {
             setLogsWithFiles([]);
             setError(null);
-            fetchLogDataWithFiles();
+
+            // Always fetch property name
+            fetchAccountPropertyName();
+
+            // Only fetch logs if workOrderData.work_order_id exists
+            if (workOrderData?.work_order_id) {
+                fetchLogDataWithFiles();
+            } else {
+                // If no work_order_id, just set loading to false
+                setLoading(false);
+            }
         } else {
             setLogsWithFiles([]);
             setError(null);
             setLoading(false);
+            setPropertyName(null);
         }
     }, [selectedAccountId, workOrderData?.work_order_id, selectedWorkOrder]);
 
@@ -43,13 +57,44 @@ function AddFilesModal({
         return () => setMounted(false);
     }, []);
 
+    const fetchAccountPropertyName = async () => {
+        try {
+            const response = await apiService.get(
+                `/taken-out-accounts/${selectedAccountId}`
+            );
+            const accountData = response.data;
+            setPropertyName(
+                accountData.property_name ||
+                    accountData.project ||
+                    accountData.account_name ||
+                    null
+            );
+        } catch (err) {
+            console.error("Error fetching account property name:", err);
+            setPropertyName(null);
+        }
+    };
+
     const fetchLogDataWithFiles = async () => {
         setLoading(true);
         setError(null);
 
         try {
+            // Build the API URL with query parameters
+            const queryParams = new URLSearchParams({
+                log_type: selectedWorkOrder,
+            });
+
+            // Only add work_order_id if it exists
+            if (workOrderData?.work_order_id) {
+                queryParams.append(
+                    "work_order_id",
+                    workOrderData.work_order_id
+                );
+            }
+
             const response = await apiService.get(
-                `/get-account-logs/${selectedAccountId}?log_type=${selectedWorkOrder}&work_order_id=${workOrderData.work_order_id}`
+                `/get-account-logs/${selectedAccountId}?${queryParams.toString()}`
             );
 
             const data = response.data;
@@ -298,7 +343,11 @@ function AddFilesModal({
                                                                         </div>
                                                                         <div className="flex items-center space-x-0 flex-shrink-0">
                                                                             <button
-                                                                                onClick={() => handleOpenViewer(doc)}
+                                                                                onClick={() =>
+                                                                                    handleOpenViewer(
+                                                                                        doc
+                                                                                    )
+                                                                                }
                                                                                 className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
                                                                                 title="View document"
                                                                             >
@@ -372,7 +421,8 @@ function AddFilesModal({
                     selectedAccountId={selectedAccountId}
                     numericWorkOrderId={workOrderData?.work_order_id}
                     logType={selectedWorkOrder}
-                    currentUserId={workOrderData?.currentUser?.id}
+                    currentUserId={user?.id}
+                    propertyName={propertyName}
                 />
             )}
             {isViewerOpen && viewingFile && (

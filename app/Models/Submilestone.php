@@ -23,4 +23,10 @@ class Submilestone extends Model
     {
         return $this->belongsToMany(Employee::class, 'employee_submilestone', 'submilestone_id', 'employee_id');
     }
+
+    // Add relationship to project milestone assignees
+    public function projectMilestoneAssignees()
+    {
+        return $this->hasMany(ProjectMilestoneAssignee::class, 'submilestone_id');
+    }
 }

@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 use App\Models\WorkOrderType;
 use App\Models\Submilestone;
 use App\Models\Employee;
+use App\Models\ProjectMilestoneAssignee;
+use App\Models\AccountChecklistStatus;
+use Illuminate\Support\Facades\Log;
 
 class SubmilestoneController extends Controller
 {
@@ -21,14 +24,27 @@ class SubmilestoneController extends Controller
     {
         $request->validate([
             'work_order_type_name' => 'required|string|max:100',
+            'user_id' => 'nullable|integer',
+            'account_id' => 'nullable|integer',
+            'property_name' => 'nullable|string',
         ]);
 
-
         $workOrderTypeName = $request->input('work_order_type_name');
+        $userId = $request->input('user_id');
+        $accountId = $request->input('account_id');
+        $propertyName = $request->input('property_name');
+
+        \Log::info('SubmilestoneController - API Request', [
+            'work_order_type_name' => $workOrderTypeName,
+            'user_id' => $userId,
+            'account_id' => $accountId,
+            'property_name' => $propertyName
+        ]);
 
         $workOrderType = WorkOrderType::where('type_name', $workOrderTypeName)->first();
 
         if (!$workOrderType) {
+            \Log::info('Work order type not found: ' . $workOrderTypeName);
             // If the work order type doesn't exist, return an empty array
             // or a 404 error, depending on your preference.
             // Returning an empty array is often friendlier for frontend dropdowns.
@@ -37,19 +53,72 @@ class SubmilestoneController extends Controller
             // return response()->json(['message' => 'Work order type not found.'], 404);
         }
 
+        \Log::info('Found work order type: ' . $workOrderType->type_name . ' (ID: ' . $workOrderType->id . ')');
+
         // Get the submilestones associated with this work order type
-        // Eager load checklists and select necessary fields for both submilestones and checklists.
         $submilestones = $workOrderType->submilestones()
             ->with([
-                'checklists' => function ($query) {
-                    // Select only id and name for checklists
-                    $query->select('id', 'submilestone_id', 'name');
+                'checklists' => function ($query) use ($accountId) {
+                    // Select checklist fields including requires_document and include file status
+                    $query->select('id', 'submilestone_id', 'name', 'requires_document');
+
+                    if ($accountId) {
+                        $query->with([
+                            'accountChecklistStatus' => function ($statusQuery) use ($accountId) {
+                                $statusQuery->where('account_id', $accountId)
+                                    ->select('checklist_id', 'is_completed', 'completed_at');
+                            }
+                        ]);
+                    }
+                },
+                'projectMilestoneAssignees' => function ($query) {
+                    // Load all assignees without filtering here
+                    $query->with('employee:id,firstname,lastname,fullname');
                 }
             ])
-            ->select('id', 'name', 'work_order_type_id') // Ensure work_order_type_id is selected if needed, id is crucial for the relationship
-            ->get();
+            ->select('id', 'name', 'work_order_type_id')
+            ->get();        // Filter submilestones based on user assignments if user_id is provided
+        if ($userId) {
+            \Log::info('Filtering submilestones for user_id: ' . $userId);
+            $originalCount = $submilestones->count();
 
-        return response()->json($submilestones);
+            $submilestones = $submilestones->filter(function ($submilestone) use ($userId, $propertyName) {
+                // Debug: Log the submilestone and its assignees
+                \Log::info('Submilestone: ' . $submilestone->name . ' - Assignees count: ' . $submilestone->projectMilestoneAssignees->count());
+
+                if ($submilestone->projectMilestoneAssignees->isNotEmpty()) {
+                    foreach ($submilestone->projectMilestoneAssignees as $assignee) {
+                        \Log::info('Assignee - employee_id: ' . $assignee->employee_id . ', property_name: ' . $assignee->property_name);
+                    }
+                }
+
+                // If no assignees are found, include the submilestone (fallback behavior)
+                if ($submilestone->projectMilestoneAssignees->isEmpty()) {
+                    \Log::info('No assignees found for submilestone ' . $submilestone->name . ', including by default');
+                    return true;
+                }
+
+                // Check if the current user is assigned to this milestone for the specified property
+                $hasAssignment = $submilestone->projectMilestoneAssignees->contains(function ($assignee) use ($userId, $propertyName) {
+                    $employeeMatches = $assignee->employee_id == $userId;
+                    $propertyMatches = $propertyName ? $assignee->property_name == $propertyName : true;
+
+                    \Log::info('Checking assignment - employee_id: ' . $assignee->employee_id . ' == ' . $userId . ' (' . ($employeeMatches ? 'true' : 'false') . '), property_name: ' . $assignee->property_name . ' == ' . $propertyName . ' (' . ($propertyMatches ? 'true' : 'false') . ')');
+
+                    return $employeeMatches && $propertyMatches;
+                });
+
+                \Log::info('Submilestone ' . $submilestone->name . ' has assignment: ' . ($hasAssignment ? 'true' : 'false'));
+
+                return $hasAssignment;
+            });
+
+            $filteredCount = $submilestones->count();
+            \Log::info('Filtered submilestones: ' . $filteredCount . ' out of ' . $originalCount . ' total');
+        }
+
+        \Log::info('Returning submilestones count: ' . $submilestones->count());
+        return response()->json($submilestones->values());
     }
 
     public function indexWithAssignees()

@@ -10,6 +10,8 @@ const UploadFilesOnlyModal = ({
     selectedAccountId,
     numericWorkOrderId,
     logType,
+    currentUserId,
+    propertyName,
 }) => {
     const [attachedFiles, setAttachedFiles] = useState([]);
     const [isSaving, setIsSaving] = useState(false);
@@ -29,13 +31,37 @@ const UploadFilesOnlyModal = ({
             if (logType) {
                 const fetchSubmilestones = async () => {
                     setLoadingSubmilestones(true);
+                    console.log("UploadFilesOnlyModal - Props:", {
+                        currentUserId,
+                        selectedAccountId,
+                        propertyName,
+                        logType,
+                    });
                     try {
+                        const params = new URLSearchParams({
+                            work_order_type_name: logType,
+                        });
+
+                        // Add user filtering if currentUserId is provided
+                        if (currentUserId) {
+                            params.append("user_id", currentUserId);
+                        }
+
+                        // Add account filtering if selectedAccountId is provided
+                        if (selectedAccountId) {
+                            params.append("account_id", selectedAccountId);
+                        }
+
+                        // Add property name filtering if propertyName is provided
+                        if (propertyName) {
+                            params.append("property_name", propertyName);
+                        }
+
                         const response = await apiService.get(
-                            `/submilestones-details?work_order_type_name=${encodeURIComponent(
-                                logType
-                            )}`
+                            `/submilestones-details?${params.toString()}`
                         );
-                        console.log(response.data);
+                        console.log("API Request params:", params.toString());
+                        console.log("API Response:", response.data);
                         if (Array.isArray(response.data)) {
                             setSubmilestoneOptions(response.data);
                         } else {
@@ -58,7 +84,7 @@ const UploadFilesOnlyModal = ({
                 fetchSubmilestones();
             }
         }
-    }, [isOpen, logType]);
+    }, [isOpen, logType, currentUserId, selectedAccountId, propertyName]);
 
     if (!isOpen) return null;
 
@@ -459,18 +485,42 @@ const UploadFilesOnlyModal = ({
                                                                     {submilestone.checklists.map(
                                                                         (
                                                                             checklist
-                                                                        ) => (
-                                                                            <option
-                                                                                key={`chk-${checklist.id}`}
-                                                                                value={
-                                                                                    checklist.name
-                                                                                }
-                                                                            >
-                                                                                {
-                                                                                    checklist.name
-                                                                                }
-                                                                            </option>
-                                                                        )
+                                                                        ) => {
+                                                                            const isCompleted =
+                                                                                checklist
+                                                                                    .account_checklist_status
+                                                                                    ?.is_completed ||
+                                                                                false;
+                                                                            const displayName =
+                                                                                isCompleted
+                                                                                    ? `${checklist.name} (Already Uploaded)`
+                                                                                    : checklist.name;
+
+                                                                            return (
+                                                                                <option
+                                                                                    key={`chk-${checklist.id}`}
+                                                                                    value={
+                                                                                        checklist.name
+                                                                                    }
+                                                                                    disabled={
+                                                                                        isCompleted
+                                                                                    }
+                                                                                    style={
+                                                                                        isCompleted
+                                                                                            ? {
+                                                                                                  color: "#9CA3AF",
+                                                                                                  backgroundColor:
+                                                                                                      "#F3F4F6",
+                                                                                              }
+                                                                                            : {}
+                                                                                    }
+                                                                                >
+                                                                                    {
+                                                                                        displayName
+                                                                                    }
+                                                                                </option>
+                                                                            );
+                                                                        }
                                                                     )}
                                                                 </optgroup>
                                                             ) : (

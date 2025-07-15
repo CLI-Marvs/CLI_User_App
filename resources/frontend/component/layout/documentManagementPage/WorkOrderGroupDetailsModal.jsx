@@ -1,4 +1,6 @@
 import React, { useMemo, useState, Fragment } from "react";
+import WorkOrderMilestoneRow from "./WorkOrderMilestoneRow";
+import ChecklistTable from "./ChecklistTable";
 import {
     Dialog,
     DialogHeader,
@@ -21,6 +23,9 @@ const WorkOrderGroupDetailsModal = ({
     onAddFiles,
     getStatusBadge,
     isLoading,
+    showChecklistTable = false, // Add this prop
+    currentUserId, // Add current user ID prop
+    onRefresh, // Add refresh callback
 }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(50);
@@ -120,7 +125,7 @@ const WorkOrderGroupDetailsModal = ({
                     } else {
                         // For steps without submilestones, we need to determine progress differently
                         // Since we only have current_submilestone_id, we'll set default values
-                        values = [0]; // Default to 0% if no submilestones exist
+                        values = [0];
                     }
                     accountMap[accId].milestoneData[step.id] = values;
                 });
@@ -144,7 +149,7 @@ const WorkOrderGroupDetailsModal = ({
                 const notesData = {
                     accountId: account.id,
                     workOrder: account.latestStep.workOrder,
-                    workOrderType: "All Steps", // Special value to show all logs
+                    workOrderType: "All Steps",
                     addNoteLogType:
                         account.latestStep.workOrder.work_order_type?.type_name, // For adding new notes
                     assignee: account.latestStep.workOrder.assignee,
@@ -201,7 +206,6 @@ const WorkOrderGroupDetailsModal = ({
             };
         }, [group, onAddFiles, searchTerm, itemsPerPage, statusFilter]);
 
-    // Paginated data
     const paginatedData = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         return filteredRows.slice(startIndex, startIndex + itemsPerPage);
@@ -322,13 +326,32 @@ const WorkOrderGroupDetailsModal = ({
                                 <path
                                     className="opacity-75"
                                     fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                 ></path>
                             </svg>
                             <Typography color="gray" className="mt-4 text-sm">
                                 Loading...
                             </Typography>
                         </div>
+                    </div>
+                ) : showChecklistTable ? (
+                    <div className="h-full overflow-auto">
+                        <ChecklistTable
+                            steps={steps}
+                            accounts={Object.values(
+                                steps.reduce((acc, step) => {
+                                    (step.workOrder.accounts || []).forEach(
+                                        (account) => {
+                                            acc[account.id] = account;
+                                        }
+                                    );
+                                    return acc;
+                                }, {})
+                            )}
+                            onAddFiles={onAddFiles}
+                            handleOpenNotesModal={handleOpenNotesModal}
+                            currentUserId={currentUserId}
+                        />
                     </div>
                 ) : paginatedData.length > 0 ? (
                     <div className="h-full overflow-auto">
@@ -477,192 +500,31 @@ const WorkOrderGroupDetailsModal = ({
                                 </tr>
                             </thead>
                             <tbody>
-                                {paginatedData.map((row, index) => (
-                                    <tr
+                                {paginatedData.map((row) => (
+                                    <WorkOrderMilestoneRow
                                         key={row.key}
-                                        className={`border-b border-gray-100 hover:bg-blue-50 transition-colors ${
-                                            index % 2 === 0
-                                                ? "bg-white"
-                                                : "bg-gray-50"
-                                        }`}
-                                    >
-                                        <td className="px-3 py-2 font-medium text-gray-900 sticky left-0 bg-inherit z-10 border-r border-gray-200">
-                                            <div className="flex items-center gap-2">
-                                                <span
-                                                    className="text-sm font-medium text-gray-900 truncate"
-                                                    title={row.accountName}
-                                                >
-                                                    {row.accountName}
-                                                </span>
-                                            </div>
-                                        </td>{" "}
-                                        {row.stepData.map((step, i) => {
-                                            // Get the current step information for this account
-                                            const currentStep = steps[i];
-
-                                            // Find if this step contains the current submilestone
-                                            const isCurrentStep =
-                                                currentStep &&
-                                                currentStep.subMilestones.some(
-                                                    (sub) =>
-                                                        sub.id ===
-                                                        row.currentSubMilestoneId
-                                                );
-
-                                            return step.map((completion, j) => (
-                                                <React.Fragment
-                                                    key={`${i}-${j}`}
-                                                >
-                                                    {/* Milestone container with shared progress background */}
-                                                    <td
-                                                        className={`px-0 py-0 relative ${
-                                                            isCurrentStep
-                                                                ? "border-4 border-blue-600 shadow-lg ring-2 ring-blue-300 ring-opacity-50"
-                                                                : "border border-gray-200"
-                                                        }`}
-                                                        colSpan={2}
-                                                        style={{
-                                                            backgroundColor:
-                                                                isCurrentStep
-                                                                    ? "#dbeafe"
-                                                                    : "inherit",
-                                                        }}
-                                                    >
-                                                        {/* Progress indicator background for entire milestone */}
-                                                        <div
-                                                            className={`absolute inset-0 ${
-                                                                isCurrentStep
-                                                                    ? "opacity-30"
-                                                                    : "opacity-20"
-                                                            } ${
-                                                                completion ===
-                                                                100
-                                                                    ? "bg-green-500"
-                                                                    : completion >
-                                                                      0
-                                                                    ? "bg-amber-500"
-                                                                    : "bg-gray-200"
-                                                            }`}
-                                                            style={{
-                                                                width: `${completion}%`,
-                                                            }}
-                                                        ></div>
-
-                                                        {/* Content container with two date columns */}
-                                                        <div className="flex relative z-10">
-                                                            {/* Date Created */}
-                                                            <div className="flex-1 px-2 py-2 text-center border-r border-gray-100">
-                                                                <span
-                                                                    className={`text-xs ${
-                                                                        isCurrentStep
-                                                                            ? "text-blue-800 font-semibold"
-                                                                            : "text-gray-600"
-                                                                    }`}
-                                                                >
-                                                                    {new Date().toLocaleDateString(
-                                                                        "en-US",
-                                                                        {
-                                                                            month: "2-digit",
-                                                                            day: "2-digit",
-                                                                            year: "2-digit",
-                                                                        }
-                                                                    )}
-                                                                </span>
-                                                            </div>
-
-                                                            {/* Date Updated */}
-                                                            <div className="flex-1 px-2 py-2 text-center">
-                                                                <span
-                                                                    className={`text-xs ${
-                                                                        isCurrentStep
-                                                                            ? "text-blue-800 font-semibold"
-                                                                            : "text-gray-600"
-                                                                    }`}
-                                                                >
-                                                                    {completion >
-                                                                    0
-                                                                        ? new Date().toLocaleDateString(
-                                                                              "en-US",
-                                                                              {
-                                                                                  month: "2-digit",
-                                                                                  day: "2-digit",
-                                                                                  year: "2-digit",
-                                                                              }
-                                                                          )
-                                                                        : "-"}
-                                                                </span>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Current Step Indicator Badge */}
-                                                        {isCurrentStep && (
-                                                            <>
-                                                                <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-blue-600 rounded-full animate-pulse border border-white shadow-sm"></div>
-                                                                <div className="absolute top-0.5 right-0.5 px-1 py-0.5 bg-blue-600 text-white text-[8px] rounded font-bold shadow-sm leading-none">
-                                                                    CURRENT
-                                                                </div>
-                                                            </>
-                                                        )}
-                                                    </td>
-                                                </React.Fragment>
-                                            ));
-                                        })}
-                                        <td className="px-2 py-2 text-center border-l border-gray-200">
-                                            <div className="flex justify-center">
-                                                {getStatusBadge(row.status)}
-                                            </div>
-                                        </td>
-                                        <td className="px-2 py-2 text-xs text-gray-600 border-l border-gray-200">
-                                            <div className="flex items-center gap-1 max-w-[150px]">
-                                                <span
-                                                    className="truncate"
-                                                    title={row.remarks}
-                                                >
-                                                    {row.remarks}
-                                                </span>
-                                                <IconButton
-                                                    variant="text"
-                                                    size="sm"
-                                                    className="text-gray-500 hover:text-gray-800"
-                                                    onClick={() =>
-                                                        handleOpenNotesModal(
-                                                            row.notesData
-                                                        )
-                                                    }
-                                                >
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        className="h-4 w-4"
-                                                        viewBox="0 0 20 20"
-                                                        fill="currentColor"
-                                                    >
-                                                        <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                                                        <path
-                                                            fillRule="evenodd"
-                                                            d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-                                                            clipRule="evenodd"
-                                                        />
-                                                    </svg>
-                                                </IconButton>
-                                            </div>
-                                        </td>
-                                        <td className="px-2 py-2 border-l border-gray-200">
-                                            <div className="flex justify-center">
-                                                <Button
-                                                    size="sm"
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs font-medium"
-                                                    onClick={
-                                                        row.onAddFilesClick
-                                                    }
-                                                >
-                                                    Files
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                        row={row}
+                                        steps={steps}
+                                        getStatusBadge={getStatusBadge}
+                                        handleOpenNotesModal={
+                                            handleOpenNotesModal
+                                        }
+                                    />
                                 ))}
                             </tbody>
                         </table>
+
+                        {/* Checklist Table - Show/Hide based on prop */}
+                        {showChecklistTable && (
+                            <div className="mt-4">
+                                <ChecklistTable
+                                    workOrders={group.work_orders}
+                                    onAddFiles={onAddFiles}
+                                    getStatusBadge={getStatusBadge}
+                                    currentUserId={currentUserId}
+                                />
+                            </div>
+                        )}
                     </div>
                 ) : (
                     <div className="flex items-center justify-center h-full bg-gray-50">
@@ -792,6 +654,9 @@ const WorkOrderGroupDetailsModal = ({
                             selectedAccountForNotes.workOrderGroupId,
                         currentUser: selectedAccountForNotes.currentUser,
                     }}
+                    checklistId={selectedAccountForNotes.checklistId}
+                    checklistName={selectedAccountForNotes.checklistName}
+                    onRefresh={onRefresh}
                 />
             )}
         </Dialog>

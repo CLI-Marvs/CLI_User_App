@@ -36,8 +36,13 @@ class Checklist extends Model
         return $this->belongsTo(Submilestone::class, 'submilestone_id');
     }
 
-        public function accountChecklistStatuses()
+    public function accountChecklistStatuses()
     {
         return $this->hasMany(AccountChecklistStatus::class, 'checklist_id');
+    }
+
+    public function accountChecklistStatus()
+    {
+        return $this->hasOne(AccountChecklistStatus::class, 'checklist_id');
     }
 }

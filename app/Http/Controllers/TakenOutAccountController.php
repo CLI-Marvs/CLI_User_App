@@ -10,6 +10,12 @@ use App\Imports\TakenOutAccountsImport;
 
 class TakenOutAccountController extends Controller
 {
+    public function show($id)
+    {
+        $account = TakenOutAccount::findOrFail($id);
+        return response()->json($account);
+    }
+
     public function getTakenOutAccounts()
     {
         $accounts = TakenOutAccount::paginate(100);

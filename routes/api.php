@@ -78,8 +78,8 @@ Route::get('/personnel-assignee', [ConcernController::class, 'retrieveAssignees'
 Route::post('/update-info', [ConcernController::class, 'updateInfo']);
 // Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
- 
- 
+
+
 // for titling and registration
 Route::middleware('auth:sanctum')->group(function () {
 
@@ -117,11 +117,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('taken-out-accounts')->group(function () {
         Route::get('/', [TakenOutAccountController::class, 'getTakenOutAccounts']);
         Route::get('get-masterlist', [TakenOutAccountController::class, 'getMasterList']);
+        Route::get('{id}', [TakenOutAccountController::class, 'show']);
         Route::patch('add-masterlist', [TakenOutAccountController::class, 'updateAddStatus']);
         Route::patch('undo-masterlist', [TakenOutAccountController::class, 'undoMasterListStatus']);
         Route::post('upload-taken-out-accounts', [TakenOutAccountController::class, 'uploadTakenOutAccounts']);
     });
-    
+
 
 
     /**
@@ -152,7 +153,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('admin/settings')->group(function () {
         // Work Order Types
         Route::get('/work-order-types', [WorkOrderTypeSettingsController::class, 'index']);
-        
+
         Route::post('/work-order-types/reorder', [WorkOrderTypeSettingsController::class, 'reorderWorkOrderTypes']);
         Route::put('/work-order-types/{workOrderType}', [WorkOrderTypeSettingsController::class, 'updateWorkOrderType']);
         Route::delete('/work-order-types/{workOrderType}', [WorkOrderTypeSettingsController::class, 'destroyWorkOrderType']);

@@ -7,6 +7,7 @@ use App\Models\WorkOrderDocument;
 use App\Models\WorkOrderGroup;
 use App\Models\WorkOrderType;
 use App\Models\Submilestone;
+use App\Models\ProjectMilestoneAssignee;
 
 class WorkOrderGroupController extends Controller
 {
@@ -38,10 +39,11 @@ class WorkOrderGroupController extends Controller
 
         // Get all possible steps (WorkOrderType) ordered by sequence
         $allSteps = WorkOrderType::orderBy('sequence')->get();
-        
+
 
         // Get all submilestones and group them by their work order type ID
-        $allSubmilestones = Submilestone::with('checklists')
+        // Include the project milestone assignees relationship
+        $allSubmilestones = Submilestone::with(['checklists:id,submilestone_id,name,requires_document', 'projectMilestoneAssignees.employee'])
             ->orderBy('work_order_type_id')
             ->orderBy('id')
             ->get()
@@ -78,6 +80,17 @@ class WorkOrderGroupController extends Controller
                         'id' => $sm->id,
                         'name' => $sm->name,
                         'checklists' => $sm->checklists,
+                        // Add milestone assignees data
+                        'milestone_assignees' => $sm->projectMilestoneAssignees->map(function ($assignee) {
+                            return [
+                                'employee_id' => $assignee->employee_id,
+                                'property_name' => $assignee->property_name,
+                                'employee' => $assignee->employee ? [
+                                    'id' => $assignee->employee->id,
+                                    'fullname' => $assignee->employee->fullname,
+                                ] : null,
+                            ];
+                        }),
                     ];
                 })->values()->toArray();
             } else {
