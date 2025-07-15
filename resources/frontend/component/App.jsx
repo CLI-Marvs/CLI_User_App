@@ -59,6 +59,7 @@ import ErrorPage from "@/component/ErrorElement/ErrorPage";
 import MarkupSettingsView from "@/component/views/pages/transactionViews/MarkupSettingsView";
 import ReportsView from "./views/pages/transactionViews/ReportsView";
 import WalkinTransactionHistoryView from "@/component/views/pages/walkinEmojiViews/WalkinTransactionHistoryView";
+import WalkinReportPage from "@/component/layout/inquirypage/WalkinReportPage";
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, children }) => {
     const { hasPermission } = useStateContext();
@@ -262,8 +263,12 @@ const App = () => {
                                     element: <InquiryThreadView />,
                                 },
                                 {
-                                    path: "report",
+                                    path: "report/inquiries",
                                     element: <ReportViews />,
+                                },
+                                {
+                                    path: "report/walk-in",
+                                    element: <WalkinReportPage />,
                                 },
                                 {
                                     path: "walk-in",

@@ -142,8 +142,6 @@ const Sidebar = () => {
                 "/inquirymanagement/report",
                 "/inquirymanagement/report/inquiries",
                 "/inquirymanagement/report/survey",
-                "/inquirymanagement/walk-in",
-                "/inquirymanagement/report/walk-in",
                 "/inquirymanagement/settings",
                 "/inquirymanagement/settings/bannersettings",
                 "/inquirymanagement/settings/autoassign",
@@ -318,18 +316,6 @@ const Sidebar = () => {
                                                     className={`px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen `}
                                                 >
                                                     Survey
-                                                </div>
-                                            </Link>
-                                            <Link
-                                                to="/inquirymanagement/report/walk-in"
-                                                onClick={() =>
-                                                    setShowReportsSubmenu(false)
-                                                }
-                                            >
-                                                <div
-                                                    className={`px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen `}
-                                                >
-                                                    Walk-in
                                                 </div>
                                             </Link>
                                         </div>
