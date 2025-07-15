@@ -8,6 +8,7 @@ use App\Models\WorkOrderGroup;
 use App\Models\WorkOrderType;
 use App\Models\Submilestone;
 use App\Models\ProjectMilestoneAssignee;
+use App\Models\AccountChecklistStatus;
 
 class WorkOrderGroupController extends Controller
 {
@@ -28,12 +29,19 @@ class WorkOrderGroupController extends Controller
             ->get()
             ->groupBy('account_id');
 
-        // Attach the documents back to each account object.
-        // This adds the `uploaded_documents` array that the frontend modal will use.
-        $group->workOrders->each(function ($workOrder) use ($allUploadedDocuments) {
-            $workOrder->accounts->each(function ($account) use ($allUploadedDocuments) {
+        // Fetch all account checklist statuses for these accounts
+        $allAccountChecklistStatuses = AccountChecklistStatus::whereIn('account_id', $accountIds)
+            ->get()
+            ->groupBy('account_id');
+
+        // Attach the documents and checklist statuses back to each account object.
+        // This adds the `uploaded_documents` array and `account_checklist_statuses` that the frontend modal will use.
+        $group->workOrders->each(function ($workOrder) use ($allUploadedDocuments, $allAccountChecklistStatuses) {
+            $workOrder->accounts->each(function ($account) use ($allUploadedDocuments, $allAccountChecklistStatuses) {
                 // Attach the collection of documents, or an empty collection if none exist.
                 $account->uploaded_documents = $allUploadedDocuments->get($account->id, collect());
+                // Attach the collection of checklist statuses, or an empty collection if none exist.
+                $account->account_checklist_statuses = $allAccountChecklistStatuses->get($account->id, collect());
             });
         });
 
@@ -42,8 +50,14 @@ class WorkOrderGroupController extends Controller
 
 
         // Get all submilestones and group them by their work order type ID
-        // Include the project milestone assignees relationship
-        $allSubmilestones = Submilestone::with(['checklists:id,submilestone_id,name,requires_document', 'projectMilestoneAssignees.employee'])
+        // Include the project milestone assignees relationship and checklist status for the current accounts
+        $allSubmilestones = Submilestone::with([
+            'checklists:id,submilestone_id,name,requires_document',
+            'checklists.accountChecklistStatuses' => function ($query) use ($accountIds) {
+                $query->whereIn('account_id', $accountIds);
+            },
+            'projectMilestoneAssignees.employee'
+        ])
             ->orderBy('work_order_type_id')
             ->orderBy('id')
             ->get()

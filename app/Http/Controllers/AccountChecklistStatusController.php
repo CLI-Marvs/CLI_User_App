@@ -60,36 +60,39 @@ class AccountChecklistStatusController extends Controller
     {
         $validated = $request->validate([
             'account_id' => 'required|integer',
-            'file_titles' => 'required|array',
-            'file_titles.*' => 'string',
+            'checklist_ids' => 'required|array',
+            'checklist_ids.*' => 'integer',
             'is_completed' => 'boolean',
             'completed_at' => 'nullable|date',
+        ]);
+
+        Log::info('AccountChecklistStatusController: Bulk store request', [
+            'account_id' => $validated['account_id'],
+            'checklist_ids' => $validated['checklist_ids'],
+            'is_completed' => $validated['is_completed'] ?? false,
         ]);
 
         $now = now();
         $isCompleted = $validated['is_completed'] ?? false;
         $completedAt = $validated['completed_at'] ? Carbon::parse($validated['completed_at']) : null;
 
-        foreach ($validated['file_titles'] as $title) {
-            $checklist = Checklist::where('name', $title)->first();
-            if ($checklist) {
-                AccountChecklistStatus::updateOrCreate(
-                    [
-                        'account_id' => $validated['account_id'],
-                        'checklist_id' => $checklist->id,
-                    ],
-                    [
-                        'is_completed' => $isCompleted,
-                        'completed_at' => $isCompleted ? ($completedAt ?? $now) : null,
-                        'updated_at' => $now,
-                        // 'created_at' => $now,
-                    ]
-                );
-            }
+        foreach ($validated['checklist_ids'] as $checklistId) {
+            AccountChecklistStatus::updateOrCreate(
+                [
+                    'account_id' => $validated['account_id'],
+                    'checklist_id' => $checklistId,
+                ],
+                [
+                    'is_completed' => $isCompleted,
+                    'completed_at' => $isCompleted ? ($completedAt ?? $now) : null,
+                    'updated_at' => $now,
+                    // 'created_at' => $now,
+                ]
+            );
         }
 
-        if (!empty($validated['file_titles'])) {
-            $firstChecklist = Checklist::with('submilestone')->where('name', $validated['file_titles'][0])->first();
+        if (!empty($validated['checklist_ids'])) {
+            $firstChecklist = Checklist::with('submilestone')->find($validated['checklist_ids'][0]);
             if ($firstChecklist && $firstChecklist->submilestone) {
                 $workOrderTypeId = $firstChecklist->submilestone->work_order_type_id;
                 $workOrder = WorkOrder::where('work_order_type_id', $workOrderTypeId)

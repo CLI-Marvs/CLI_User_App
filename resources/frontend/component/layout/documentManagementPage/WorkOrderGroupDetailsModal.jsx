@@ -112,11 +112,24 @@ const WorkOrderGroupDetailsModal = ({
 
                             const uploadedDocs =
                                 account.uploaded_documents || [];
-                            const completedCount = items.filter((item) =>
-                                uploadedDocs.some(
+                            const completedCount = items.filter((item) => {
+                                // Check if item is completed by either uploaded document OR checklist status
+                                const hasUploadedDoc = uploadedDocs.some(
                                     (doc) => doc.file_title === item.name
-                                )
-                            ).length;
+                                );
+
+                                // Check if item is completed via account_checklist_statuses
+                                const accountChecklistStatus = (
+                                    account.account_checklist_statuses || []
+                                ).find(
+                                    (status) => status.checklist_id === item.id
+                                );
+                                const hasCompletedStatus =
+                                    accountChecklistStatus &&
+                                    accountChecklistStatus.is_completed;
+
+                                return hasUploadedDoc || hasCompletedStatus;
+                            }).length;
 
                             return Math.round(
                                 (completedCount / items.length) * 100

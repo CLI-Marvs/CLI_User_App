@@ -412,7 +412,7 @@ const MyWorkOrders = () => {
         setSelectedWorkOrderData(workOrder);
         setSelectedStepName(stepName);
         setIsAddFilesModalOpen(true);
-        handleCloseGroupDetailsModal();
+        // Don't close the group details modal - keep the ChecklistTable visible
     };
 
     const TABLE_HEAD = [
@@ -1369,7 +1369,6 @@ const MyWorkOrders = () => {
                     getStatusBadge={getStatusBadge}
                     showChecklistTable={true}
                     currentUserId={user?.id}
-                    onRefresh={refreshGroupDetails}
                 />
                 {isAddFilesModalOpen &&
                     selectedAccountId &&

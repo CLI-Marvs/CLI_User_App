@@ -12,6 +12,8 @@ const AddNoteModal = ({
     numericWorkOrderId,
     logType,
     currentUserId,
+    checklistId, // Add checklist ID
+    checklistName, // Add checklist name
 }) => {
     const [noteText, setNoteText] = useState("");
     const [attachedFiles, setAttachedFiles] = useState([]);
@@ -270,15 +272,53 @@ const AddNoteModal = ({
                 );
             }
 
+            // Consolidate checklist completion logic using checklist_id
+            const checklistIdsToComplete = [];
             if (attachedFiles.length > 0) {
-                const fileTitles = attachedFiles.map((fw) => fw.title);
-                await apiService.post("/account-checklist-status/bulk", {
-                    account_id: selectedAccountId,
-                    file_titles: fileTitles,
-                    is_completed: true,
-                    completed_at: new Date().toISOString(),
-                });
+                const fileChecklistIds = attachedFiles
+                    .map((fw) => fw.checklist_id)
+                    .filter(Boolean); // Filter out null/undefined IDs
+                checklistIdsToComplete.push(...fileChecklistIds);
             }
+            if (checklistId) {
+                checklistIdsToComplete.push(checklistId);
+            }
+
+            // Remove duplicates and ensure there's something to update
+            const uniqueChecklistIds = [...new Set(checklistIdsToComplete)];
+
+            if (uniqueChecklistIds.length > 0 && selectedAccountId) {
+                try {
+                    console.log(
+                        `AddNoteModal: Marking checklists as complete for account ${selectedAccountId}. Checklist IDs:`,
+                        uniqueChecklistIds
+                    );
+
+                    const payload = {
+                        account_id: selectedAccountId,
+                        checklist_ids: uniqueChecklistIds,
+                        is_completed: true,
+                        completed_at: new Date().toISOString(),
+                    };
+
+                    console.log("AddNoteModal: Sending payload:", payload);
+
+                    const statusResponse = await apiService.post(
+                        "/account-checklist-status/bulk",
+                        payload
+                    );
+
+                    console.log("AddNoteModal: API Response:", statusResponse);
+                    console.log(`AddNoteModal: Checklists marked as complete.`);
+                } catch (error) {
+                    console.error(
+                        "AddNoteModal: Error marking checklist(s) as complete:",
+                        error
+                    );
+                    // Optional: Decide if this should prevent onSaveSuccess()
+                }
+            }
+
             console.log("About to call onSaveSuccess");
             onSaveSuccess();
             console.log("onSaveSuccess called successfully");
@@ -588,6 +628,9 @@ const AddNoteModal = ({
                                                                                 key={`chk-${checklist.id}`}
                                                                                 value={
                                                                                     checklist.name
+                                                                                }
+                                                                                data-checklist-id={
+                                                                                    checklist.id
                                                                                 }
                                                                             >
                                                                                 {

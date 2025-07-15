@@ -63,6 +63,10 @@ const UploadFilesOnlyModal = ({
                         console.log("API Request params:", params.toString());
                         console.log("API Response:", response.data);
                         if (Array.isArray(response.data)) {
+                            console.log(
+                                "Setting submilestone options:",
+                                response.data
+                            );
                             setSubmilestoneOptions(response.data);
                         } else {
                             console.warn(
@@ -86,6 +90,22 @@ const UploadFilesOnlyModal = ({
         }
     }, [isOpen, logType, currentUserId, selectedAccountId, propertyName]);
 
+    // Add escape key handler
+    useEffect(() => {
+        const handleEscape = (e) => {
+            if (e.key === "Escape" && isOpen) {
+                onClose();
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener("keydown", handleEscape);
+            return () => {
+                document.removeEventListener("keydown", handleEscape);
+            };
+        }
+    }, [isOpen, onClose]);
+
     if (!isOpen) return null;
 
     const handleFileChange = (event) => {
@@ -105,6 +125,7 @@ const UploadFilesOnlyModal = ({
                 .substr(2, 9)}`,
             file: file,
             title: "",
+            checklist_id: null,
         }));
         const uniqueNewFiles = newFiles.filter(
             (nf) => !attachedFiles.some((af) => af.id === nf.id)
@@ -131,10 +152,23 @@ const UploadFilesOnlyModal = ({
         }
     };
 
-    const handleTitleChange = (id, newTitle) => {
-        setAttachedFiles((prevFiles) =>
-            prevFiles.map((f) => (f.id === id ? { ...f, title: newTitle } : f))
-        );
+    const handleTitleChange = (id, newTitle, newChecklistId) => {
+        console.log("handleTitleChange called:", {
+            id,
+            newTitle,
+            newChecklistId,
+        });
+
+        setAttachedFiles((prevFiles) => {
+            const updatedFiles = prevFiles.map((f) =>
+                f.id === id
+                    ? { ...f, title: newTitle, checklist_id: newChecklistId }
+                    : f
+            );
+
+            console.log("Updated files:", updatedFiles);
+            return updatedFiles;
+        });
     };
 
     const handleRemoveFile = (idToRemove) => {
@@ -224,12 +258,17 @@ const UploadFilesOnlyModal = ({
             }
 
             const response = await apiService.request(config);
-            const fileTitles = attachedFiles.map((fw) => fw.title);
-            for (const fileWrapper of attachedFiles) {
-                const checklist_id = fileWrapper.checklist_id;
+
+            // Collect all checklist IDs from the uploaded files
+            const checklistIds = attachedFiles
+                .map((fw) => fw.checklist_id)
+                .filter(Boolean); // Filter out null/undefined IDs
+
+            // Mark checklists as complete using the new format
+            if (checklistIds.length > 0) {
                 await apiService.post("/account-checklist-status/bulk", {
                     account_id: selectedAccountId,
-                    file_titles: fileTitles,
+                    checklist_ids: checklistIds,
                     is_completed: true,
                     completed_at: new Date().toISOString(),
                 });
@@ -255,13 +294,19 @@ const UploadFilesOnlyModal = ({
         } finally {
             setIsSaving(false);
         }
-        fetchWorkOrders();
+        // Remove fetchWorkOrders() call - it's causing the ChecklistTable to close
+        // The parent component will handle refreshing through onUploadSuccess callback
     };
 
     return ReactDOM.createPortal(
         <div
-            className="fixed inset-0 z-[60] bg-black bg-opacity-50 flex items-center justify-center p-4"
-            onClick={onClose}
+            className="fixed inset-0 z-[10000] bg-black bg-opacity-50 flex items-center justify-center p-4"
+            onClick={(e) => {
+                // Only close if clicked on the backdrop itself
+                if (e.target === e.currentTarget) {
+                    onClose();
+                }
+            }}
         >
             <div
                 className="bg-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col"
@@ -458,12 +503,34 @@ const UploadFilesOnlyModal = ({
                                               0 ? (
                                                 <select
                                                     value={fileWrapper.title}
-                                                    onChange={(e) =>
+                                                    onChange={(e) => {
+                                                        const selectedValue =
+                                                            e.target.value;
+                                                        const selectedOption =
+                                                            e.target.options[
+                                                                e.target
+                                                                    .selectedIndex
+                                                            ];
+                                                        const checklistId =
+                                                            selectedOption.getAttribute(
+                                                                "data-checklist-id"
+                                                            );
+
+                                                        console.log(
+                                                            "Dropdown changed:",
+                                                            {
+                                                                selectedValue,
+                                                                checklistId,
+                                                                selectedOption,
+                                                            }
+                                                        );
+
                                                         handleTitleChange(
                                                             fileWrapper.id,
-                                                            e.target.value
-                                                        )
-                                                    }
+                                                            selectedValue,
+                                                            checklistId
+                                                        );
+                                                    }}
                                                     className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
                                                     disabled={isSaving}
                                                 >
@@ -471,57 +538,93 @@ const UploadFilesOnlyModal = ({
                                                         Select document type...
                                                     </option>
                                                     {submilestoneOptions.map(
-                                                        (submilestone) =>
-                                                            submilestone.checklists &&
-                                                            submilestone
-                                                                .checklists
-                                                                .length > 0 ? (
+                                                        (submilestone) => {
+                                                            console.log(
+                                                                "Rendering submilestone:",
+                                                                submilestone
+                                                            );
+                                                            return submilestone.checklists &&
+                                                                submilestone.checklists.filter(
+                                                                    (c) =>
+                                                                        c.requires_document ===
+                                                                        true
+                                                                ).length > 0 ? (
                                                                 <optgroup
                                                                     key={`sub-${submilestone.id}`}
                                                                     label={
                                                                         submilestone.name
                                                                     }
                                                                 >
-                                                                    {submilestone.checklists.map(
-                                                                        (
-                                                                            checklist
-                                                                        ) => {
-                                                                            const isCompleted =
+                                                                    {" "}
+                                                                    {submilestone.checklists
+                                                                        .filter(
+                                                                            (
                                                                                 checklist
-                                                                                    .account_checklist_status
-                                                                                    ?.is_completed ||
-                                                                                false;
-                                                                            const displayName =
-                                                                                isCompleted
-                                                                                    ? `${checklist.name} (Already Uploaded)`
-                                                                                    : checklist.name;
+                                                                            ) =>
+                                                                                checklist.requires_document ===
+                                                                                true
+                                                                        )
+                                                                        .map(
+                                                                            (
+                                                                                checklist
+                                                                            ) => {
+                                                                                console.log(
+                                                                                    "Rendering checklist:",
+                                                                                    checklist
+                                                                                );
+                                                                                const isCompleted =
+                                                                                    checklist
+                                                                                        .account_checklist_status
+                                                                                        ?.is_completed ||
+                                                                                    false;
+                                                                                const displayName =
+                                                                                    isCompleted
+                                                                                        ? `${checklist.name} (Already Uploaded)`
+                                                                                        : checklist.name;
 
-                                                                            return (
-                                                                                <option
-                                                                                    key={`chk-${checklist.id}`}
-                                                                                    value={
-                                                                                        checklist.name
-                                                                                    }
-                                                                                    disabled={
-                                                                                        isCompleted
-                                                                                    }
-                                                                                    style={
-                                                                                        isCompleted
-                                                                                            ? {
-                                                                                                  color: "#9CA3AF",
-                                                                                                  backgroundColor:
-                                                                                                      "#F3F4F6",
-                                                                                              }
-                                                                                            : {}
-                                                                                    }
-                                                                                >
+                                                                                console.log(
+                                                                                    "Checklist completion status:",
                                                                                     {
-                                                                                        displayName
+                                                                                        checklistId:
+                                                                                            checklist.id,
+                                                                                        name: checklist.name,
+                                                                                        isCompleted,
+                                                                                        requires_document:
+                                                                                            checklist.requires_document,
+                                                                                        account_checklist_status:
+                                                                                            checklist.account_checklist_status,
                                                                                     }
-                                                                                </option>
-                                                                            );
-                                                                        }
-                                                                    )}
+                                                                                );
+
+                                                                                return (
+                                                                                    <option
+                                                                                        key={`chk-${checklist.id}`}
+                                                                                        value={
+                                                                                            checklist.name
+                                                                                        }
+                                                                                        data-checklist-id={
+                                                                                            checklist.id
+                                                                                        }
+                                                                                        disabled={
+                                                                                            isCompleted
+                                                                                        }
+                                                                                        style={
+                                                                                            isCompleted
+                                                                                                ? {
+                                                                                                      color: "#9CA3AF",
+                                                                                                      backgroundColor:
+                                                                                                          "#F3F4F6",
+                                                                                                  }
+                                                                                                : {}
+                                                                                        }
+                                                                                    >
+                                                                                        {
+                                                                                            displayName
+                                                                                        }
+                                                                                    </option>
+                                                                                );
+                                                                            }
+                                                                        )}
                                                                 </optgroup>
                                                             ) : (
                                                                 <option
@@ -529,12 +632,16 @@ const UploadFilesOnlyModal = ({
                                                                     value={
                                                                         submilestone.name
                                                                     }
+                                                                    data-checklist-id={
+                                                                        submilestone.id
+                                                                    }
                                                                 >
                                                                     {
                                                                         submilestone.name
                                                                     }
                                                                 </option>
-                                                            )
+                                                            );
+                                                        }
                                                     )}
                                                 </select>
                                             ) : (
@@ -547,7 +654,8 @@ const UploadFilesOnlyModal = ({
                                                     onChange={(e) =>
                                                         handleTitleChange(
                                                             fileWrapper.id,
-                                                            e.target.value
+                                                            e.target.value,
+                                                            null
                                                         )
                                                     }
                                                     className="w-full p-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"

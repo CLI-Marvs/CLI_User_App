@@ -50,12 +50,25 @@ function AddFilesModal({
             setLoading(false);
             setPropertyName(null);
         }
-    }, [selectedAccountId, workOrderData?.work_order_id, selectedWorkOrder]);
+    }, [selectedAccountId, selectedWorkOrder]); // Remove workOrderData?.work_order_id from dependencies to prevent re-renders
 
     useEffect(() => {
         setMounted(true);
-        return () => setMounted(false);
-    }, []);
+
+        // Add escape key listener
+        const handleEscape = (e) => {
+            if (e.key === "Escape") {
+                onClose();
+            }
+        };
+
+        document.addEventListener("keydown", handleEscape);
+
+        return () => {
+            setMounted(false);
+            document.removeEventListener("keydown", handleEscape);
+        };
+    }, [onClose]);
 
     const fetchAccountPropertyName = async () => {
         try {
@@ -153,7 +166,10 @@ function AddFilesModal({
 
     const handleUploadSuccess = async () => {
         setIsUploadModalOpen(false);
-        await fetchLogDataWithFiles();
+        // Only refresh files if we have a work order ID
+        if (workOrderData?.work_order_id) {
+            await fetchLogDataWithFiles();
+        }
     };
 
     const handleOpenViewer = (file) => {
@@ -211,8 +227,7 @@ function AddFilesModal({
 
     if (loading && !error) {
         return ReactDOM.createPortal(
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-[70]">
-                {" "}
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex justify-center items-center z-[9999]">
                 <div className="bg-white rounded-lg p-8 w-auto min-w-[200px]">
                     <div className="flex justify-center items-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
@@ -225,14 +240,24 @@ function AddFilesModal({
     }
 
     return ReactDOM.createPortal(
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[60]">
-            {" "}
+        <div
+            className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-[9999]"
+            onClick={(e) => {
+                // Only close if clicked on the backdrop itself
+                if (e.target === e.currentTarget) {
+                    onClose();
+                }
+            }}
+        >
             <div
                 className="bg-white rounded-[10px] w-[449px] max-h-[90vh] overflow-y-auto shadow-xl p-[18px_25px] flex flex-col gap-[10px] relative"
                 onClick={(e) => e.stopPropagation()}
             >
                 <button
-                    onClick={onClose}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onClose();
+                    }}
                     className="absolute top-3 right-4 text-gray-500 hover:text-gray-600 transition-colors text-2xl font-bold z-10"
                 >
                     ×

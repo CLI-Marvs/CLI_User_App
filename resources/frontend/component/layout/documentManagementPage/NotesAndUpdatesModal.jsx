@@ -111,52 +111,17 @@ function NotesAndUpdatesModal({
             setMounted(false);
         };
     }, [fetchData]);
-
     const handleAddNoteSuccess = async () => {
-        console.log("handleAddNoteSuccess called");
-        console.log("checklistId:", checklistId);
-        console.log("checklistName:", checklistName);
-        console.log("selectedAccountId:", selectedAccountId);
-
         setIsAddNoteModalOpen(false);
 
-        // Mark checklist as complete if checklistId is provided
-        if (checklistId && selectedAccountId) {
-            try {
-                console.log(
-                    `Marking checklist ${checklistId} as complete for account ${selectedAccountId}`
-                );
-                await apiService.post("/account-checklist-status/bulk", {
-                    account_id: selectedAccountId,
-                    file_titles: [checklistName], // Use checklist name as file title
-                    is_completed: true,
-                    completed_at: new Date().toISOString(),
-                });
-                console.log(`Checklist ${checklistName} marked as complete`);
-            } catch (error) {
-                console.error("Error marking checklist as complete:", error);
-            }
-        } else {
-            console.log(
-                "Skipping checklist completion - missing checklistId or selectedAccountId"
-            );
-        }
-
-        const paramsToInvalidate = {
-            selectedAccountId,
-            selectedWorkOrder,
-        };
-        if (selectedWorkOrder === "All Steps") {
-            paramsToInvalidate.workOrderGroupId =
-                workOrderData?.work_order_group_id;
-        } else {
-            paramsToInvalidate.workOrderId = workOrderData?.work_order_id;
-        }
-        invalidateNotesAndUpdatesData(paramsToInvalidate);
+        // Refresh the notes and updates within this modal
         await fetchData(true);
 
-        // Call refresh callback if provided to update parent component data
+        // Trigger the refresh callback passed from the parent to update the main view
         if (onRefresh) {
+            console.log(
+                "NotesAndUpdatesModal: Calling onRefresh to update parent component."
+            );
             onRefresh();
         }
     };
@@ -541,6 +506,8 @@ function NotesAndUpdatesModal({
                     numericWorkOrderId={workOrderData?.work_order_id}
                     logType={addNoteLogType || selectedWorkOrder}
                     currentUserId={currentUserId}
+                    checklistId={checklistId}
+                    checklistName={checklistName}
                 />
             )}
             {isViewerOpen && viewingFile && (
