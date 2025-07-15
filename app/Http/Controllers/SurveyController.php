@@ -563,6 +563,7 @@ class SurveyController extends Controller
             // Fetch all surveys (title and link UUID)
             $surveys = DB::table('surveys_list')
                 ->select('survey_title', 'survey_link')
+                ->where('status', true)
                 ->get();
 
             // Dynamically map app.url → survey base URL
