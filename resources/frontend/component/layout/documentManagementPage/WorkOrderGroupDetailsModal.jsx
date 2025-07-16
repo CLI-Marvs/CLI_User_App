@@ -1,5 +1,6 @@
 import React, { useMemo, useState, Fragment } from "react";
 import WorkOrderMilestoneRow from "./WorkOrderMilestoneRow";
+import AccountFilesModal from "./AccountFilesModal";
 import ChecklistTable from "./ChecklistTable";
 import {
     Dialog,
@@ -34,6 +35,56 @@ const WorkOrderGroupDetailsModal = ({
     const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
     const [selectedAccountForNotes, setSelectedAccountForNotes] =
         useState(null);
+    const [filesModalOpen, setFilesModalOpen] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [selectedAccountInfo, setSelectedAccountInfo] = useState({});
+    // Handler to show files modal for an account
+    const handleShowFilesModal = (account) => {
+        const transformedFiles = (account.uploaded_documents || []).map(
+            (doc) => {
+                const transformedDoc = {
+                    ...doc,
+                    uploaded_by:
+                        doc.uploaded_by?.fullname ||
+                        doc.uploaded_by?.name ||
+                        doc.uploaded_by_name ||
+                        doc.uploader ||
+                        doc.uploaded_by ||
+                        "User Name",
+                };
+                return transformedDoc;
+            }
+        );
+        setSelectedFiles(transformedFiles);
+        setSelectedAccountInfo({
+            account_name:
+                account.accountName ||
+                account.account_name ||
+                account.name ||
+                account.account,
+            project_name:
+                group.project_name ||
+                group.project ||
+                group.property_name ||
+                group.property ||
+                null,
+            property_name:
+                account.property_name ||
+                account.property ||
+                account.project_name ||
+                account.project ||
+                null,
+            milestone_name: group.milestone_name || group.milestone || null,
+            group_name: group.name || group.group_name || null,
+            group_id: group.id,
+            account_id: account.id || account.key,
+            account: account, // Pass the full account object
+            group: group, // Pass the full group object
+            currentUser: group.currentUser, // Pass current user info
+            currentUserId: currentUserId, // Pass current user ID
+        });
+        setFilesModalOpen(true);
+    };
 
     const { columnHeaders, tableRows, filteredRows, totalPages, steps } =
         useMemo(() => {
@@ -173,18 +224,21 @@ const WorkOrderGroupDetailsModal = ({
                 return {
                     key: account.id,
                     accountName: account.account_name,
+                    property_name: account.property_name, // Ensure property_name is included
                     stepData,
                     status: overallStatus,
                     remarks: account.remarks,
                     notesData: notesData,
-                    currentSubMilestoneId: account.currentSubMilestoneId, // Add current submilestone ID
-                    onAddFilesClick: () =>
+                    currentSubMilestoneId: account.current_submilestone_id, // Add current submilestone ID
+                    uploaded_documents: account.uploaded_documents || [],
+                    onAddFilesClick: () => {
                         onAddFiles(
                             account.id,
                             account.latestStep.workOrder,
                             account.latestStep.workOrder.work_order_type
                                 ?.type_name
-                        ),
+                        );
+                    },
                 };
             });
 
@@ -522,8 +576,17 @@ const WorkOrderGroupDetailsModal = ({
                                         handleOpenNotesModal={
                                             handleOpenNotesModal
                                         }
+                                        onShowFiles={() =>
+                                            handleShowFilesModal(row)
+                                        }
                                     />
                                 ))}
+                                <AccountFilesModal
+                                    isOpen={filesModalOpen}
+                                    onClose={() => setFilesModalOpen(false)}
+                                    files={selectedFiles}
+                                    accountInfo={selectedAccountInfo}
+                                />
                             </tbody>
                         </table>
 

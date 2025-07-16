@@ -16,7 +16,7 @@ class WorkOrderGroupController extends Controller
     {
         // Find the group and eager load its work orders and related data
         // We no longer need `completedChecklists`, but we do need the accounts.
-        $group = WorkOrderGroup::with(['workOrders.accounts', 'workOrders.workOrderType.submilestones.checklists'])
+        $group = WorkOrderGroup::with(['workOrders.accounts:id,contract_no,account_name,property_name,unit_no,financing,take_out_date,dou_expiry,added_status,checklist_status,current_submilestone_id', 'workOrders.workOrderType.submilestones.checklists'])
             ->findOrFail($groupId);
 
         // Get all unique account IDs from the work order group to fetch their documents efficiently.
@@ -25,7 +25,8 @@ class WorkOrderGroupController extends Controller
         })->unique()->values();
 
         // Fetch all uploaded documents for these accounts in a single query using the correct model.
-        $allUploadedDocuments = WorkOrderDocument::whereIn('account_id', $accountIds)
+        $allUploadedDocuments = WorkOrderDocument::with('uploadedBy')
+            ->whereIn('account_id', $accountIds)
             ->get()
             ->groupBy('account_id');
 

@@ -5,6 +5,7 @@ const WorkOrderMilestoneRow = ({
     steps,
     getStatusBadge,
     handleOpenNotesModal,
+    onShowFiles,
 }) => {
     return (
         <tr
@@ -148,7 +149,7 @@ const WorkOrderMilestoneRow = ({
                     <button
                         type="button"
                         className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs font-medium rounded"
-                        onClick={row.onAddFilesClick}
+                        onClick={onShowFiles}
                     >
                         Files
                     </button>
