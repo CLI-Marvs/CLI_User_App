@@ -33,7 +33,7 @@ const WalkinReportPage = () => {
         },
     });
     const { data: branchesData } = useBranch();
-    console.log("filters", filters);
+
     //Event handlers
     const handleApply = (pendingFilters) => {
         setFilters(pendingFilters);
