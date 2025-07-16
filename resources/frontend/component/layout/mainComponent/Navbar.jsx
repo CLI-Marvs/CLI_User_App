@@ -178,7 +178,7 @@ const Navbar = () => {
 
                 const concernData = navBarData[ticketId] || [];
 
-                console.log("concernData", concernData);
+
                 if (concernData.length === 0) {
                     // Render skeleton while loading
                     return (

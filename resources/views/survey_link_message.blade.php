@@ -130,7 +130,7 @@
 
     <div>
         <img style="margin-top: 5px; max-width: 1000px; height:auto;"
-            src="https://storage.googleapis.com/super-app-storage/concerns/67935544b1cf0.jpg?GoogleAccessId=799945112092-compute%40developer.gserviceaccount.com&Expires=2053241671&Signature=J3R4fy9hxL91OnTkgfd8nTLsPcIvps1tZukmBvhGVfbZEjROqw9vuoDHEBcMuBLB901B%2BCOoDRVpkc8IIzRnmVWnLT21Xw6yo3vwPAGZZ4l%2B3qYcCwZ4dF4XRT%2F%2FQhFUkTHdKZdGYFiMxHY1Lu%2B%2BaikTiNg34ObJuqYhHUD3jsQ3VP64JcKGee9QZWM3MEovqnCJ89jhne7PW2VNK6OrFTtew0tutZsLwXYsBtBoFrIMT3n2AsGhiy8SUYYFhVNozcwdQ3qugaGHHiX5ki%2FIsW4Wmj6qXLvJ6KPtM%2F4fobHDzyCuxrOG2R7wiWGC2Aiq%2BIESG1oJtogLsRXyPrJhjQ%3D%3D"
+            src="https://storage.googleapis.com/super-app-storage/concerns/68773fee685f1.png?GoogleAccessId=super-app-dev-uat%40super-app-anaplan.iam.gserviceaccount.com&Expires=2068178415&Signature=lZThBXMVut6vzcqW5tgcJFr9oBxg210pSK6u6eKqmb14xzcHuwLfghzQDYA%2BE4wGcicDHuBSjBKXuZZmEDTyeIjGz1Pe1LFXXxX3LpDxZ0B1%2BWP2j3Eo4uKOVyjtaaPZJgJqPDT4iipYQZe7FeLeGNacabqOrIHtkjeYPm7yVOiMMVfbQ%2BaKsKh5UvlxXy9PHVnn%2BP2zBCgpoxgcmgzQJUe0qv8d%2BYZoGcbHb0g9N8yjfh4%2BQ5OWwRR%2BEoexnSNbifitSmhxvmOmyzwwBcKgOvCWoCNWinNrqSE2IxglN%2FONlgApcNfN6K80jmFZQLc%2B7CCgAQmkKrlKcazNjUGVFA%3D%3D"
             title="clisignature" />
     </div>
    
