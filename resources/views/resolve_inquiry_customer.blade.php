@@ -141,7 +141,7 @@
     <p style="margin: 0; padding: 0;">CLI - {{$department}}</p>
     <br>
     <img style="margin-top; 5px"
-        src="https://storage.googleapis.com/super-app-storage/concerns/68773fee685f1.png?GoogleAccessId=super-app-dev-uat%40super-app-anaplan.iam.gserviceaccount.com&Expires=2068178415&Signature=lZThBXMVut6vzcqW5tgcJFr9oBxg210pSK6u6eKqmb14xzcHuwLfghzQDYA%2BE4wGcicDHuBSjBKXuZZmEDTyeIjGz1Pe1LFXXxX3LpDxZ0B1%2BWP2j3Eo4uKOVyjtaaPZJgJqPDT4iipYQZe7FeLeGNacabqOrIHtkjeYPm7yVOiMMVfbQ%2BaKsKh5UvlxXy9PHVnn%2BP2zBCgpoxgcmgzQJUe0qv8d%2BYZoGcbHb0g9N8yjfh4%2BQ5OWwRR%2BEoexnSNbifitSmhxvmOmyzwwBcKgOvCWoCNWinNrqSE2IxglN%2FONlgApcNfN6K80jmFZQLc%2B7CCgAQmkKrlKcazNjUGVFA%3D%3D"
+        src="https://storage.googleapis.com/f42e9ac57bfc-storage/n1'296%40t1%7B4PjWhfgt.png"
         title="clisignature" />
 
 </body>

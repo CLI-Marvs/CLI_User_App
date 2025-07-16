@@ -126,11 +126,11 @@
 
 
 <body
-    style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6; background-image: url('https://storage.googleapis.com/super-app-storage/concerns/678f649c89f71.jpg?GoogleAccessId=799945112092-compute%40developer.gserviceaccount.com&Expires=2052983454&Signature=K%2BKq0z98OB3TTiwSnH10AASu1mmkGpRGLr86ywUwKYhVLvIPtFSlRiD8mARqBX4IfaydGrbSfqXrMBK%2B0IVtA8y17SPn4MYdEcyuBLjFqswPosJMgjesfs24gKvL4hYxvG9jUhLz%2FOUPMFDdUUgFKTlQDitUoORINioWQTF1G1KIjmCo7v5EGoVHvVgfQn5oCSFii8A6%2F3h3Kli4xy2uEwLy4%2F%2BHVWGOYqMI%2BLj%2Bfd4A2MK5GNdt5dUmi1UnlP4pmxeE%2FPjSvXdEtyqdVoD%2Fxyyog%2FzC8wlMVt9csQwnBqvYX0RJ7na2KAo9g8ZwHF8hWrO1tsYQ%2B2yrM%2FC1Gu1gOg%3D%3D'); max-width: 1000px; height:auto; background-size: cover; background-position: center; min-height: 100vh; position: bottom;">
+    style="font-family: Arial, sans-serif; font-size: 14px; color: #333; line-height: 1.6; background-image: url('https://storage.googleapis.com/f42e9ac57bfc-storage/-1c0fOQ_06%7D%C2%A35%26Unmx%40d.png'); max-width: 1000px; height:auto; background-size: cover; background-position: center; min-height: 100vh; position: bottom;">
 
     <div>
         <img style="margin-top: 5px; max-width: 1000px; height:auto;"
-            src="https://storage.googleapis.com/super-app-storage/concerns/68773fee685f1.png?GoogleAccessId=super-app-dev-uat%40super-app-anaplan.iam.gserviceaccount.com&Expires=2068178415&Signature=lZThBXMVut6vzcqW5tgcJFr9oBxg210pSK6u6eKqmb14xzcHuwLfghzQDYA%2BE4wGcicDHuBSjBKXuZZmEDTyeIjGz1Pe1LFXXxX3LpDxZ0B1%2BWP2j3Eo4uKOVyjtaaPZJgJqPDT4iipYQZe7FeLeGNacabqOrIHtkjeYPm7yVOiMMVfbQ%2BaKsKh5UvlxXy9PHVnn%2BP2zBCgpoxgcmgzQJUe0qv8d%2BYZoGcbHb0g9N8yjfh4%2BQ5OWwRR%2BEoexnSNbifitSmhxvmOmyzwwBcKgOvCWoCNWinNrqSE2IxglN%2FONlgApcNfN6K80jmFZQLc%2B7CCgAQmkKrlKcazNjUGVFA%3D%3D"
+            src="https://storage.googleapis.com/f42e9ac57bfc-storage/sxNL%3BuL351%3B%24%5C%2Bk.jpg"
             title="clisignature" />
     </div>
    
