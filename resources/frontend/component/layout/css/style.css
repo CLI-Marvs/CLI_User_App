@@ -577,3 +577,16 @@ textarea {
   }
 
 }
+
+body.alert-open .crs-sidebar-blur::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5); 
+    z-index: 50;
+    pointer-events: none;
+    border-radius: inherit;
+}
+body.alert-open .crs-sidebar-blur {
+    position: relative;
+}

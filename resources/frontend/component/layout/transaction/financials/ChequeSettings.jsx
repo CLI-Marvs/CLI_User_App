@@ -160,6 +160,11 @@ const ChequeSettings = ({
                         valueKey="id"
                         labelKey="bank_name"
                     />
+                    {errors["bank_name"] && (
+                        <span className="text-red-500 text-xs mt-1">
+                            {errors["bank_name"]}
+                        </span>
+                    )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {fields.map(renderField)}

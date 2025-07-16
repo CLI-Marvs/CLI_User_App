@@ -191,6 +191,7 @@ const PropertySetting = () => {
                     </div>
                 )}
             </div>
+            
             <div className="py-2 flex justify-end mx-1">
                 {!error && (
                     <Pagination

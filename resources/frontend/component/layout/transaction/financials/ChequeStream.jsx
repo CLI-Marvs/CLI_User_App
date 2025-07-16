@@ -23,11 +23,13 @@ const ChequeStream = () => {
     const [selectedChecks, setSelectedChecks] = useState([]);
     const [allSelected, setAllSelected] = useState(false);
     const [isError, setIsError] = useState(false);
-
+    const [isConfirmAll, setIsConfirmAll] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [confirmIndex, setConfirmIndex] = useState(null);
     const [confirmedChecks, setConfirmedChecks] = useState([]);
+    const [reprintMode, setReprintMode] = useState(false);
+    const [reprintIndex, setReprintIndex] = useState(null);
 
     const { mutateAsync: storePrintedCheck, isPending: isSavePending } =
         useSaveChecks();
@@ -183,10 +185,29 @@ const ChequeStream = () => {
             showToast("Please select at least one check to print.", "info");
             return;
         }
+
+        resetReprintMode();
         setTimeout(() => {
             window.print();
         }, 100);
     };
+
+    const resetReprintMode = () => {
+        setReprintMode(false);
+        setReprintIndex(null);
+    };
+
+    const handleReprint = (index) => {
+        setReprintMode(true);
+        setReprintIndex(index);
+
+        setTimeout(() => {
+            window.print();
+        }, 100);
+    };
+
+    console.log("reprintMode", reprintMode);
+    console.log("reprintIndex", reprintIndex);
 
     const handleCheck = (field, value, index = null) => {
         let cleanedValue = value.replace(/[^0-9.]/g, "");
@@ -282,6 +303,7 @@ const ChequeStream = () => {
 
         const response = await storePrintedCheck(payload);
 
+        setSelectedChecks(selectedChecks.filter((item) => item !== index));
         setConfirmedChecks((prev) => [...prev, index]);
     };
 
@@ -310,15 +332,24 @@ const ChequeStream = () => {
         });
 
         try {
+            setIsConfirmAll(true);
             const response = await storePrintedCheck({ checks: checksArray });
-            if(response.status !== 200) {
-                return showToast("Something went wrong while confirming checks.", "error");
+            if (response.status !== 200) {
+                return showToast(
+                    "Something went wrong while confirming checks.",
+                    "error"
+                );
             } else {
                 showToast("Checks confirmed successfully.", "success");
                 setConfirmedChecks((prev) => [...prev, ...unconfirmedChecks]);
+                setSelectedChecks([]);
+                setAllSelected(false);
             }
         } catch (error) {
+            setIsConfirmAll(false);
             showToast("Something went wrong while confirming checks.", "error");
+        } finally {
+            setIsConfirmAll(false);
         }
     };
 
@@ -363,9 +394,12 @@ const ChequeStream = () => {
             >
                 {checkDates.map((dateObj, index) => {
                     const isSelected = selectedChecks.includes(index);
-                    const shouldPrint =
-                        isSelected && !confirmedChecks.includes(index);
-                    const printPosition = printableChecks.indexOf(index);
+                    const shouldPrint = reprintMode
+                        ? index === reprintIndex
+                        : isSelected && !confirmedChecks.includes(index);
+                    const printPosition = reprintMode
+                        ? 0
+                        : printableChecks.indexOf(index);
                     const isFirstPrintableCheck = printPosition === 0;
                     return (
                         <div
@@ -522,7 +556,7 @@ const ChequeStream = () => {
                                 className="h-[38px] w-auto px-10 gradient-btn5 text-white text-sm montserrat-semibold rounded-[10px] shadow-card"
                                 onClick={confirmAll}
                             >
-                                Confirm All
+                                {isConfirmAll ? <Spinner /> : "Confirm All"}
                             </button>
                         </div>
                         <div className="flex gap-3 items-center my-4 px-4 print:hidden">
@@ -798,8 +832,10 @@ const ChequeStream = () => {
                                                             </button>
                                                             <button
                                                                 className="inline-flex items-center gap-2 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                                                                onClick={
-                                                                    handlePrintSelected
+                                                                onClick={() =>
+                                                                    handleReprint(
+                                                                        index
+                                                                    )
                                                                 }
                                                             >
                                                                 <svg

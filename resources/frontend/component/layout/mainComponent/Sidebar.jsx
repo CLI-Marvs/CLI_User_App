@@ -96,6 +96,8 @@ const Sidebar = () => {
             case "/inquirymanagement/walk-in":
             case "/inquirymanagement/settings":
             case "/inquirymanagement/settings/bannersettings":
+            case "/inquirymanagement/settings/branch-settings":
+
             case "/inquirymanagement/settings/autoassign":
             case "/inquirymanagement/settings/versionlogs":
                 setIsInvoiceOpen(false);
@@ -119,7 +121,7 @@ const Sidebar = () => {
 
     return (
         <>
-            <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pr-[20px] pt-0 rounded-none bg-custom-grayFA relative z-30 overflow-hidden">
+            <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pr-[20px] pt-0 rounded-none bg-custom-grayFA relative z-30 overflow-hidden crs-sidebar-blur">
                 <List className="p-0 gap-0">
                     <Link to="/notification">
                         <ListItem
@@ -193,8 +195,8 @@ const Sidebar = () => {
                                     >
                                         Feedback
                                     </ListItem>
-                            </Link>
-                            <Link to="/inquirymanagement/walk-in">
+                                </Link>
+                                <Link to="/inquirymanagement/walk-in">
                                     <ListItem
                                         className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
                                             location.pathname.startsWith(
