@@ -62,6 +62,7 @@ import ExecutiveDashboardView from "./views/pages/titlingAndRegistration/Executi
 import SettingsView from "./views/pages/titlingAndRegistration/SettingsView";
 import DocumentManagementSidebar from "./layout/mainComponent/sidebars/DocumentManagementSidebar";
 import TakenOutAccountView from "./views/pages/titlingAndRegistration/TakenOutAccountView";
+import FileManagerView from "./views/pages/titlingAndRegistration/FileManagerView";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, children }) => {
@@ -339,6 +340,10 @@ const App = () => {
                                     path: "takenoutaccounts",
                                     element: <TakenOutAccountView />,
                                 },
+                                {
+                                    path: "filemanager",
+                                    element: <FileManagerView />,
+                                }
                             ],
                         },
                         {

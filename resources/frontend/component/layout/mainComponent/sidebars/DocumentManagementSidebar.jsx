@@ -155,6 +155,20 @@ const DocumentManagementSidebar = () => {
                                     </div>
                                 )}
 
+                                                                <Link to="filemanager">
+                                    <ListItem
+                                        className={`h-[39px] w-[160px] mb-[5px] flex justify-start items-center gap-2 rounded-[10px] px-4 ${
+                                            location.pathname.startsWith(
+                                                "/documentmanagement/titleandregistration/filemanager"
+                                            )
+                                                ? "text-[15px] font-semibold bg-white shadow-custom6"
+                                                : " text-[15px] text-[#8A8888]"
+                                        }`}
+                                    >
+                                        File Manager
+                                    </ListItem>
+                                </Link>
+
                                 <Link to="executivedashboard">
                                     <ListItem
                                         className={`h-[59px] w-[160px] mb-[5px] flex justify-start items-center gap-2 rounded-[10px] px-4 ${

@@ -32,6 +32,7 @@ use App\Http\Controllers\WorkOrderTypeSettingsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TeamController;
 use App\Http\Controllers\WorkOrderGroupController;
+use App\Http\Controllers\FileManagerController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -356,4 +357,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/properties/features', [PropertyMasterController::class, 'storePropertyFeatures']);
     });
+
 });
+
+// File Manager API routes (temporary without authentication for testing)
+Route::get('/file-manager/accounts', [FileManagerController::class, 'getAllAccountsWithFiles']);
+Route::get('/file-manager/accounts/search', [FileManagerController::class, 'searchAccounts']);
+Route::get('/file-manager/accounts/{accountId}/files', [FileManagerController::class, 'getAccountFiles']);
+Route::get('/file-manager/accounts/{accountId}/structure', [FileManagerController::class, 'getAccountWithStructure']);
+Route::get('/file-manager/accounts/{accountId}/work-order-type/{workOrderTypeId}/files', [FileManagerController::class, 'getFilesByWorkOrderType']);
+Route::get('/file-manager/accounts/{accountId}/submilestone/{submilestoneId}/files', [FileManagerController::class, 'getFilesBySubmilestone']);
+
+// Test route without authentication
+Route::get('/test-file-manager', [FileManagerController::class, 'getAllAccountsWithFiles']);
