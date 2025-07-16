@@ -10,9 +10,13 @@ import {
     CartesianGrid,
     XAxis,
     YAxis,
+    Legend,
 } from "recharts";
 import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
 import { paginate } from "@/component/layout/inquirypage/component/utils/paginate";
+import EmojiYAxisTick from "@/component/layout/inquirypage/component/WalkinReport/component/EmojiYAxisTick";
+import CustomXAxisTick from "@/component/layout/inquirypage/component/WalkinReport/component/CustomXAxisTick";
+
 const COLORS = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F"];
 
 const ChartsSection = ({ analytics, emojis }) => {
@@ -26,34 +30,6 @@ const ChartsSection = ({ analytics, emojis }) => {
         page: branchPage,
         pageSize: branchesPerPage,
     });
-
-    const EmojiYAxisTick = (props) => {
-        const { x, y, payload } = props;
-        const emojiObj = emojis.find((e) => e.rating === Number(payload.value));
-        return (
-            <g transform={`translate(${x},${y})`}>
-                <text
-                    x={0}
-                    y={0}
-                    dy={6}
-                    textAnchor="end"
-                    fill="#666"
-                    fontSize={12}
-                >
-                    {payload.value}
-                </text>
-                {emojiObj && (
-                    <image
-                        href={emojiObj.src}
-                        x={8}
-                        y={-12}
-                        width={18}
-                        height={18}
-                    />
-                )}
-            </g>
-        );
-    };
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -76,9 +52,32 @@ const ChartsSection = ({ analytics, emojis }) => {
                                     outerRadius={80}
                                     dataKey="value"
                                     labelLine={false}
-                                    label={({ name, percent }) =>
-                                        `${name} ${(percent * 100).toFixed(0)}%`
-                                    }
+                                    label={({ name, percent, x, y }) => {
+                                        const idx =
+                                            analytics.customerTypeData.findIndex(
+                                                (d) => d.name === name
+                                            );
+                                        return (
+                                            <text
+                                                x={x}
+                                                y={y}
+                                                fontSize={14}
+                                                fill={
+                                                    COLORS[idx % COLORS.length]
+                                                }
+                                                textAnchor="middle"
+                                                alignmentBaseline="middle"
+                                                style={{
+                                                    letterSpacing: 1,
+                                                    pointerEvents: "none",
+                                                }}
+                                            >
+                                                {`${name} ${(
+                                                    percent * 100
+                                                ).toFixed(0)}%`}
+                                            </text>
+                                        );
+                                    }}
                                 >
                                     {analytics?.customerTypeData?.map(
                                         (entry, index) => (
@@ -94,6 +93,30 @@ const ChartsSection = ({ analytics, emojis }) => {
                                     )}
                                 </Pie>
                                 <Tooltip />
+                                {/* <Legend
+                                    layout="vertical"
+                                    align="center"
+                                    verticalAlign="middle"
+                                    iconType="circle"
+                                    formatter={(value, entry, index) => {
+                                        const percent =
+                                            analytics.customerTypeData.find(
+                                                (d) => d.name === value
+                                            )?.value;
+                                        const total =
+                                            analytics.customerTypeData.reduce(
+                                                (sum, d) => sum + d.value,
+                                                0
+                                            );
+                                        const percentText = total
+                                            ? ` ${(
+                                                  (percent / total) *
+                                                  100
+                                              ).toFixed(0)}%`
+                                            : "";
+                                        return `${value}${percentText}`;
+                                    }}
+                                /> */}
                             </PieChart>
                         </ResponsiveContainer>
                     ) : (
@@ -115,19 +138,40 @@ const ChartsSection = ({ analytics, emojis }) => {
                     {paginatedBranchData && paginatedBranchData.length > 0 ? (
                         <>
                             <ResponsiveContainer width="100%" height={300}>
-                                <BarChart data={paginatedBranchData}>
+                                <BarChart
+                                    data={paginatedBranchData}
+                                    margin={{
+                                        top: 20,
+                                        right: 40,
+                                        left: 0,
+                                        bottom: 20,
+                                    }}
+                                >
                                     <CartesianGrid
                                         strokeDasharray="3 3"
                                         stroke="#D6E4D1"
                                     />
+                                    {/* <XAxis
+                                        dataKey="name"
+                                        tick={{
+                                            fontSize: 12,
+                                            textAnchor: "middle",
+                                        }}
+                                        interval={0}
+                                    /> */}
                                     <XAxis
                                         dataKey="name"
-                                        tick={{ fontSize: 12 }}
+                                        tick={<CustomXAxisTick />}
+                                        interval={0}
                                     />
+
                                     <YAxis
                                         domain={[0, 5]}
-                                        tick={<EmojiYAxisTick />}
+                                        tick={
+                                            <EmojiYAxisTick emojis={emojis} />
+                                        }
                                         tickCount={6}
+                                        tickMargin={32}
                                     />
                                     <Tooltip
                                         formatter={(value, name) => [
@@ -143,11 +187,14 @@ const ChartsSection = ({ analytics, emojis }) => {
                                         fill="#348017"
                                         radius={[4, 4, 0, 0]}
                                         barSize={
-                                            paginatedBranchData.length === 1
+                                            window.innerWidth < 640
+                                                ? 12
+                                                : paginatedBranchData.length ===
+                                                  1
                                                 ? "100%"
                                                 : paginatedBranchData.length > 5
-                                                ? 18
-                                                : 100
+                                                ? 20
+                                                : 95
                                         }
                                     />
                                 </BarChart>
