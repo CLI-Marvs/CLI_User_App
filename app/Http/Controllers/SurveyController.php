@@ -327,25 +327,36 @@ class SurveyController extends Controller
                         }
                     }
 
-                    // 3. Handle imported answers (match by ticket_id + question text + survey_title)
+                    // Get ticket_ids from experience_ratings matching survey_title
                     $importedTicketIds = DB::table('experience_ratings')
-                        ->where('survey_title', $survey->survey_title)
-                        ->pluck('ticket_id') // e.g. ["Ticket#2500000861"]
+                        ->where('survey_title', trim($survey->survey_title))
+                        ->pluck('ticket_id') 
                         ->map(function ($ticketId) {
-                            return preg_replace('/\D/', '', $ticketId); // remove non-numeric, get "2500000861"
+                            // Strip non-numeric to match how it's saved in survey_answers (if numeric only)
+                            return preg_replace('/\D/', '', $ticketId);
                         })
+                        ->filter()
+                        ->unique()
+                        ->values()
                         ->toArray();
 
+
+
+                    // STEP 2: Check if we have ticket_ids to work with
                     if (!empty($importedTicketIds)) {
+
+                        // STEP 3: Fetch matching answers from survey_answers
                         $importedAnswers = DB::table('survey_answers')
-                            ->whereIn('ticket_id', $importedTicketIds)
-                            ->where('question', $question->question)
+                            ->whereIn(DB::raw("REGEXP_REPLACE(ticket_id, '\\D', '', 'g')"), $importedTicketIds) // Ensures matching even if "Ticket#123"
+                            ->whereRaw('LOWER(question) = ?', [strtolower(trim($question->question))])
                             ->whereNotNull('answer_value')
                             ->select('answer_value')
                             ->get();
 
+                        // STEP 4: Count answers
                         $totalResponses += $importedAnswers->count();
 
+                        // STEP 5: Count option occurrences
                         foreach ($importedAnswers as $answer) {
                             $raw = $answer->answer_value;
 
@@ -405,18 +416,20 @@ class SurveyController extends Controller
 
                     // 3. Get imported ticket IDs based on matching survey_title
                     $importedTicketIds = DB::table('experience_ratings')
-                        ->where('survey_title', $survey->survey_title)
+                        ->where('survey_title', trim($survey->survey_title))
                         ->pluck('ticket_id')
                         ->map(function ($ticketId) {
-                            return preg_replace('/\D/', '', $ticketId);
+                            return preg_replace('/\D/', '', $ticketId); // Keep only numbers
                         })
+                        ->filter()
+                        ->unique()
+                        ->values()
                         ->toArray();
 
-                    // 4. Count imported answers using string matching
                     if (!empty($importedTicketIds)) {
                         $importedAnswers = DB::table('survey_answers')
-                            ->whereIn('ticket_id', $importedTicketIds)
-                            ->where('question', $question->question)
+                            ->whereIn(DB::raw("REGEXP_REPLACE(ticket_id, '\\D', '', 'g')"), $importedTicketIds)
+                            ->where('question', 'ILIKE', '%' . trim($question->question) . '%')
                             ->whereNotNull('answer_value')
                             ->select('answer_value')
                             ->get();
@@ -426,13 +439,15 @@ class SurveyController extends Controller
                         foreach ($importedAnswers as $answer) {
                             $rawAnswer = trim($answer->answer_value);
 
-                            // Safely loop through options and match each one against the full answer_value
-                            foreach ($optionCounts as $optionId => &$option) {
-                                // Match if option exists as a complete value in the answer (case-insensitive, trimmed)
-                                $pattern = '/(^|,\s*)' . preg_quote($option['value'], '/') . '(\s*,|$)/i';
+                            // Split into individual checkbox values
+                            $values = array_map('trim', explode(',', $rawAnswer));
 
-                                if (preg_match($pattern, $rawAnswer)) {
-                                    $option['count']++;
+                            foreach ($values as $value) {
+                                foreach ($optionCounts as $optionId => &$option) {
+                                    // Match checkbox value exactly (case-insensitive)
+                                    if (strcasecmp($option['value'], $value) === 0) {
+                                        $option['count']++;
+                                    }
                                 }
                             }
                         }
@@ -449,8 +464,7 @@ class SurveyController extends Controller
                 } else {
                     $formattedAnswers = [];
                     $totalResponses = 0;
-
-                    // ✅ 1. Get standard answers (question_id + survey_list_id)
+                    
                     $standardAnswers = DB::table('survey_answers')
                         ->where('survey_list_id', $survey_list_id)
                         ->where('question_id', $question->id)
@@ -460,7 +474,7 @@ class SurveyController extends Controller
                     $formattedAnswers = [];
                     foreach ($standardAnswers as $a) {
                         $email = DB::table('experience_ratings')
-                            ->where('id', $a->experience_rating_id) // ✅ join via foreign key
+                            ->where('id', $a->experience_rating_id) 
                             ->value('email');
 
                         $ticketId = DB::table('experience_ratings')
@@ -477,42 +491,43 @@ class SurveyController extends Controller
 
                     $totalResponses += $standardAnswers->count();
 
-                    // ✅ 2. Get imported answers (no question_id, no survey_list_id)
-                    $importedTicketIds = DB::table('experience_ratings')
-                        ->where('survey_title', $survey->survey_title)
-                        ->pluck('ticket_id', 'ticket_id')
-                        ->mapWithKeys(function ($ticketId) {
-                            return [preg_replace('/\D/', '', $ticketId) => $ticketId];
+                    // Get imported answers (no question_id, no survey_list_id)
+                    $rawTicketMap = DB::table('experience_ratings')
+                        ->where('survey_title', trim($survey->survey_title))
+                        ->select('ticket_id', 'email')
+                        ->get()
+                        ->mapWithKeys(function ($row) {
+                            $numeric = preg_replace('/\D/', '', $row->ticket_id);
+                            return [$numeric => ['original' => $row->ticket_id, 'email' => $row->email]];
                         })
-                        ->toArray(); // [numeric_ticket_id => original_ticket_id]
+                        ->toArray();
+
+                    $importedTicketIds = array_keys($rawTicketMap);
 
                     if (!empty($importedTicketIds)) {
                         $importedAnswers = DB::table('survey_answers')
-                            ->whereIn('ticket_id', array_keys($importedTicketIds))
-                            ->where('question', $question->question)
+                            ->whereIn(DB::raw("REGEXP_REPLACE(ticket_id, '\\D', '', 'g')"), $importedTicketIds)
+                            ->where('question', 'ILIKE', '%' . trim($question->question) . '%')
                             ->whereNotNull('answer_value')
                             ->select('ticket_id', 'answer_value')
                             ->get();
 
                         foreach ($importedAnswers as $a) {
-                            $numericTicketId = $a->ticket_id;
-                            $originalTicketId = $importedTicketIds[$numericTicketId] ?? null;
+                            // Normalize again for matching
+                            $numericTicketId = preg_replace('/\D/', '', $a->ticket_id);
 
-                            $email = DB::table('experience_ratings')
-                                ->where('ticket_id', $originalTicketId)
-                                ->value('email');
-
-                            $formattedAnswers[] = [
-                                'ticket_id' => $originalTicketId,
-                                'email' => $email,
-                                'answer_value' => $a->answer_value,
-                            ];
+                            if (isset($rawTicketMap[$numericTicketId])) {
+                                $formattedAnswers[] = [
+                                    'ticket_id' => $rawTicketMap[$numericTicketId]['original'],
+                                    'email' => $rawTicketMap[$numericTicketId]['email'],
+                                    'answer_value' => $a->answer_value,
+                                ];
+                            }
                         }
 
                         $totalResponses += $importedAnswers->count();
                     }
 
-                    // ✅ Final result
                     $questionsResult[] = [
                         'question_id' => $question->id,
                         'question' => $question->question,
