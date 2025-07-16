@@ -9,17 +9,11 @@ import { personTypeService } from "@/component/servicesApi/apiCalls/emojiWalkin/
 import { reportService } from "@/component/servicesApi/apiCalls/emojiWalkin/reportService";
 import emojis from "@/component/layout/inquirypage/constants/emoji";
 import WalkinReportSkeleton from "@/component/layout/inquirypage/component/WalkinReport/skeleton/WalkinReportSkeleton";
+import { useWalkinReportFilters } from "@/context/InquiryManagement/WalkinReportFilterProvider";
 
-const DEFAULT_FILTERS = {
-    dateFrom: "",
-    dateTo: "",
-    branch: "all",
-    personType: "all",
-    sourceType: "all",
-    emojiRating: "all",
-};
+ 
 const WalkinReportPage = () => {
-    const [filters, setFilters] = useState(DEFAULT_FILTERS);
+    const { filters, setFilters, resetFilters } = useWalkinReportFilters();
     const isFirstLoad = useRef(true);
     const { data: personTypes } = useQuery({
         queryKey: ["personTypes"],
@@ -39,15 +33,15 @@ const WalkinReportPage = () => {
         },
     });
     const { data: branchesData } = useBranch();
-
+    console.log("filters", filters);
     //Event handlers
     const handleApply = (pendingFilters) => {
         setFilters(pendingFilters);
     };
 
-    const handleReset = () => {
-        setFilters(DEFAULT_FILTERS);
-    };
+    // const handleReset = () => {
+    //     setFilters(DEFAULT_FILTERS);
+    // };
 
     //Derive analytics/value from reportsData
     //Anaytics object to be used in SummaryCards
@@ -60,14 +54,14 @@ const WalkinReportPage = () => {
             };
         }
         return {
-            overallAverage: isNaN(Number(reportsData.data.total_avg))
+            overallAverage: isNaN(Number(reportsData.data?.total_avg))
                 ? "0.0"
                 : Number(reportsData.data.total_avg).toFixed(1),
-            totalQueueFeedback: reportsData.data.queue_linked_count ?? 0,
-            totalStandaloneFeedback: reportsData.data.standalone_count ?? 0,
+            totalQueueFeedback: reportsData.data?.queue_linked_count ?? 0,
+            totalStandaloneFeedback: reportsData.data?.standalone_count ?? 0,
         };
     }, [reportsData]);
-    
+
     // Feedback data for table and charts
     // This will be used in FeedbackTabs and ChartSection
     const feedbackData = useMemo(() => {
@@ -96,39 +90,46 @@ const WalkinReportPage = () => {
                     personType:
                         personTypes?.find((p) => p.id === item.person_type_id)
                             ?.name || item.person_type_id,
-                    priority: item.priority_level,
-                    emoji: (
-                        <img
-                            src={emojiObj.src}
-                            alt={emojiObj.satifaction_name}
-                            className="w-6 h-6 inline"
-                        />
-                    ),
-                    rating: item.user_rating,
+                    priority: item?.priority_level ?? "",
+                    emoji:
+                        emojiObj?.src && emojiObj?.satifaction_name ? (
+                            <img
+                                src={emojiObj.src}
+                                alt={emojiObj.satifaction_name}
+                                className="w-6 h-6 inline"
+                            />
+                        ) : null,
+                    rating: item.user_rating ?? "",
                     timestamp:
-                        item.created_at?.slice(0, 19).replace("T", " ") || "",
+                        typeof item?.created_at === "string"
+                            ? item.created_at.slice(0, 19).replace("T", " ")
+                            : "",
                 };
             }
         );
 
         // Map stand-alone feedback
         const standalone = (reportsData.data.standalone || []).map((item) => {
-            const emojiObj = getEmojiObj(item.rating_value);
+            const emojiObj = getEmojiObj(item?.rating_value);
             return {
-                id: item.id,
+                id: item?.id ?? "",
                 branch:
-                    branchesData?.find((b) => b.id === item.branch_id)?.name ||
-                    item.branch_id,
-                emoji: (
-                    <img
-                        src={emojiObj.src}
-                        alt={emojiObj.satifaction_name}
-                        className="w-6 h-6 inline"
-                    />
-                ),
-                rating: item.rating_value,
+                    branchesData?.find((b) => b.id === item?.branch_id)?.name ||
+                    item?.branch_id ||
+                    "",
+                emoji:
+                    emojiObj?.src && emojiObj?.satifaction_name ? (
+                        <img
+                            src={emojiObj.src}
+                            alt={emojiObj.satifaction_name}
+                            className="w-6 h-6 inline"
+                        />
+                    ) : null,
+                rating: item?.rating_value ?? "",
                 timestamp:
-                    item.created_at?.slice(0, 19).replace("T", " ") || "",
+                    typeof item?.created_at === "string"
+                        ? item.created_at.slice(0, 19).replace("T", " ")
+                        : "",
             };
         });
 
@@ -151,10 +152,9 @@ const WalkinReportPage = () => {
             };
         }
 
-        // Customer Type Distribution (Queue-linked)
         const customerTypeCounts = {};
-        feedbackData.queueLinked.forEach((fb) => {
-            if (!fb.personType) return;
+        queueLinked.forEach((fb) => {
+            if (!fb?.personType) return;
             customerTypeCounts[fb.personType] =
                 (customerTypeCounts[fb.personType] || 0) + 1;
         });
@@ -165,15 +165,12 @@ const WalkinReportPage = () => {
             })
         );
 
-        // Average Rating by Branch (all feedback)
         const branchRatings = {};
-        [...feedbackData.queueLinked, ...feedbackData.standalone].forEach(
-            (fb) => {
-                if (!fb.branch) return;
-                if (!branchRatings[fb.branch]) branchRatings[fb.branch] = [];
-                branchRatings[fb.branch].push(Number(fb.rating));
-            }
-        );
+        [...queueLinked, ...standalone].forEach((fb) => {
+            if (!fb?.branch) return;
+            if (!branchRatings[fb.branch]) branchRatings[fb.branch] = [];
+            branchRatings[fb.branch].push(Number(fb.rating) || 0);
+        });
         const branchData = Object.entries(branchRatings).map(
             ([name, ratings]) => ({
                 name,
@@ -202,7 +199,7 @@ const WalkinReportPage = () => {
                 <HeaderAndFilters
                     filters={filters}
                     onApply={handleApply}
-                    onReset={handleReset}
+                    onReset={resetFilters}
                     branchesData={branchesData}
                     personTypes={personTypes}
                     emojis={emojis}

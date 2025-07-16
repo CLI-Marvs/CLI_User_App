@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Download, Filter } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Filter } from "lucide-react";
 import { MdCalendarToday } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
@@ -13,10 +13,29 @@ export const HeaderAndFilters = ({
     emojis,
 }) => {
     const [pendingFilters, setPendingFilters] = useState(filters);
+    const [showEmojiDropdown, setShowEmojiDropdown] = useState(false);
+    const emojiDropdownRef = useRef(null);
 
+    //Hooks
     useEffect(() => {
         setPendingFilters(filters);
     }, [filters]);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (
+                emojiDropdownRef.current &&
+                !emojiDropdownRef.current.contains(event.target)
+            ) {
+                setShowEmojiDropdown(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
 
     return (
         <div className="space-y-6">
@@ -115,11 +134,15 @@ export const HeaderAndFilters = ({
                                 className="w-full p-2 border border-custom-gray rounded-md"
                             >
                                 <option value="all">All Branches</option>
-                                {branchesData?.map((branch) => (
-                                    <option key={branch.id} value={branch.id}>
-                                        {branch.name}
-                                    </option>
-                                ))}
+                                {branchesData &&
+                                    branchesData?.map((branch) => (
+                                        <option
+                                            key={branch.id}
+                                            value={branch.id}
+                                        >
+                                            {branch.name}
+                                        </option>
+                                    ))}
                             </select>
                         </div>
 
@@ -139,7 +162,7 @@ export const HeaderAndFilters = ({
                                 className="w-full p-2 border border-custom-gray rounded-md"
                             >
                                 <option value="all">All Types</option>
-                                {personTypes?.map((type) => (
+                                {personTypes && personTypes?.map((type) => (
                                     <option key={type.id} value={type.id}>
                                         {type.name}
                                     </option>
@@ -171,32 +194,98 @@ export const HeaderAndFilters = ({
                         </div>
 
                         {/* Rating */}
-                        <div className="space-y-2">
+                        <div
+                            className="space-y-2 relative"
+                            ref={emojiDropdownRef}
+                        >
                             <label className="text-sm montserrat-medium text-custom-gray12">
                                 Rating
                             </label>
-                            <select
-                                value={pendingFilters.emojiRating}
-                                onChange={(e) =>
-                                    setPendingFilters((prev) => ({
-                                        ...prev,
-                                        emojiRating: e.target.value,
-                                    }))
-                                }
-                                className="w-full p-2 border border-custom-gray rounded-md"
+
+                            <button
+                                type="button"
+                                className="w-full h-[40px] p-2 border border-custom-gray rounded-md flex items-center gap-2 bg-white" // Added h-[40px] for consistent height
+                                onClick={() => setShowEmojiDropdown((v) => !v)}
                             >
-                                <option value="All Ratings">All Ratings</option>
-                                {emojis
-                                    .sort((a, b) => b.rating - a.rating)
-                                    .map((emoji) => (
-                                        <option
-                                            key={emoji.rating}
-                                            value={emoji.rating}
-                                        >
-                                            {emoji.satifaction_name}
-                                        </option>
-                                    ))}
-                            </select>
+                                {pendingFilters.emojiRating ===
+                                "All Ratings" ? (
+                                    <span className="text-custom-gray12 text-base flex-1 text-left">
+                                        All Ratings
+                                    </span> // Ensures alignment and font
+                                ) : (
+                                    (() => {
+                                        const emoji = emojis.find(
+                                            (e) =>
+                                                String(e.rating) ===
+                                                String(
+                                                    pendingFilters.emojiRating
+                                                )
+                                        );
+                                        return emoji ? (
+                                            <span
+                                                className={`w-8 h-8 rounded-full flex items-center justify-center`}
+                                            >
+                                                <img
+                                                    src={emoji.src}
+                                                    alt={emoji.satifaction_name}
+                                                    className="w-6 h-6"
+                                                />
+                                            </span>
+                                        ) : (
+                                            <span className="text-custom-gray12 text-base flex-1 text-left">
+                                                All Ratings
+                                            </span>
+                                        );
+                                    })()
+                                )}
+                            </button>
+
+                            {showEmojiDropdown && (
+                                <div className="absolute z-10 mt-2 w-full bg-white border border-custom-gray rounded-md shadow-lg max-h-60 overflow-auto">
+                                    <div
+                                        className="p-2 hover:bg-custom-grayF1 cursor-pointer"
+                                        onClick={() => {
+                                            setPendingFilters((prev) => ({
+                                                ...prev,
+                                                emojiRating: "All Ratings",
+                                            }));
+                                            setShowEmojiDropdown(false);
+                                        }}
+                                    >
+                                        All Ratings
+                                    </div>
+                                    {emojis
+                                        .sort((a, b) => b.rating - a.rating)
+                                        .map((emoji) => (
+                                            <div
+                                                key={emoji.rating}
+                                                className="flex items-center gap-2 p-2 hover:bg-custom-grayF1 cursor-pointer"
+                                                onClick={() => {
+                                                    setPendingFilters(
+                                                        (prev) => ({
+                                                            ...prev,
+                                                            emojiRating:
+                                                                emoji.rating,
+                                                        })
+                                                    );
+                                                    setShowEmojiDropdown(false);
+                                                }}
+                                            >
+                                                <span
+                                                    className={`w-8 h-8 rounded-full flex items-center justify-center `}
+                                                >
+                                                    <img
+                                                        src={emoji.src}
+                                                        alt={
+                                                            emoji.satifaction_name
+                                                        }
+                                                        className="w-6 h-6"
+                                                    />
+                                                </span>
+                                            </div>
+                                        ))}
+                                </div>
+                            )}
                         </div>
                     </div>
 
