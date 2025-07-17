@@ -130,13 +130,15 @@ const BranchSetting = () => {
                     branch={selectedBranch}
                 />
             </div>
-            <div>
-                <Alert
-                    title="Are you sure you want to delete this branch?"
-                    show={showAlert}
-                    onCancel={handleCancel}
-                    onConfirm={handleConfirm}
-                />
+            <div className="flex justify-center">
+                <div className="w-full max-w-md sm:max-w-xs mx-2">
+                    <Alert
+                        title="Are you sure you want to delete this branch?"
+                        show={showAlert}
+                        onCancel={handleCancel}
+                        onConfirm={handleConfirm}
+                    />
+                </div>
             </div>
         </div>
     );
