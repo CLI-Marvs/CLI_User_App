@@ -31,6 +31,29 @@ const ChartsSection = ({ analytics, emojis }) => {
         pageSize: branchesPerPage,
     });
 
+    //Rendering labels for pie chart
+    const ResponsivePieLabel = ({ name, percent, x, y, index }) => {
+        const fontSize = window.innerWidth < 640 ? 10 : 14;
+        const offset = window.innerWidth < 640 ? 10 : 0;
+        return (
+            <text
+                x={x}
+                y={y - offset}
+                fontSize={fontSize}
+                fill={COLORS[index % COLORS.length]}
+                textAnchor="middle"
+                alignmentBaseline="middle"
+                style={{
+                    letterSpacing: 1,
+                    pointerEvents: "none",
+                    fontWeight: 600,
+                }}
+            >
+                {`${name} ${(percent * 100).toFixed(0)}%`}
+            </text>
+        );
+    };
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Customer Type Distribution */}
@@ -41,35 +64,71 @@ const ChartsSection = ({ analytics, emojis }) => {
                     </h2>
                 </div>
                 <div className="p-6">
-                    {analytics.customerTypeData &&
+                    {!!analytics.customerTypeData &&
                     analytics.customerTypeData.length > 0 ? (
                         <ResponsiveContainer width="100%" height={300}>
-                            <PieChart>
+                            <PieChart width={300} height={300}>
                                 <Pie
                                     data={analytics.customerTypeData}
                                     cx="50%"
                                     cy="50%"
-                                    outerRadius={80}
+                                    outerRadius={
+                                        window.innerWidth < 640 ? 50 : 90
+                                    }
                                     dataKey="value"
-                                    labelLine={false}
-                                    label={({ name, percent, x, y }) => {
-                                        const idx =
-                                            analytics.customerTypeData.findIndex(
-                                                (d) => d.name === name
-                                            );
+                                    labelLine={true}
+                                    label={({
+                                        name,
+                                        percent,
+                                        cx,
+                                        cy,
+                                        midAngle,
+                                        outerRadius,
+                                        index,
+                                    }) => {
+                                        const RADIAN = Math.PI / 180;
+                                        // Keep label closer to the pie
+                                        const labelRadius =
+                                            outerRadius +
+                                            (window.innerWidth < 640 ? 10 : 20);
+                                        const labelX =
+                                            cx +
+                                            labelRadius *
+                                                Math.cos(-midAngle * RADIAN);
+                                        const labelY =
+                                            cy +
+                                            labelRadius *
+                                                Math.sin(-midAngle * RADIAN);
+                                        const fontSize =
+                                            analytics.customerTypeData.length >
+                                            6
+                                                ? window.innerWidth < 640
+                                                    ? 7
+                                                    : 10
+                                                : window.innerWidth < 640
+                                                ? 10
+                                                : 14;
                                         return (
                                             <text
-                                                x={x}
-                                                y={y}
-                                                fontSize={14}
+                                                x={labelX}
+                                                y={labelY}
+                                                fontSize={fontSize}
                                                 fill={
-                                                    COLORS[idx % COLORS.length]
+                                                    COLORS[
+                                                        index % COLORS.length
+                                                    ]
                                                 }
-                                                textAnchor="middle"
+                                                textAnchor={
+                                                    labelX > cx
+                                                        ? "start"
+                                                        : "end"
+                                                }
                                                 alignmentBaseline="middle"
                                                 style={{
                                                     letterSpacing: 1,
                                                     pointerEvents: "none",
+                                                    fontWeight: 600,
+                                                    whiteSpace: "pre",
                                                 }}
                                             >
                                                 {`${name} ${(
@@ -93,36 +152,14 @@ const ChartsSection = ({ analytics, emojis }) => {
                                     )}
                                 </Pie>
                                 <Tooltip />
-                                {/* <Legend
-                                    layout="vertical"
-                                    align="center"
-                                    verticalAlign="middle"
-                                    iconType="circle"
-                                    formatter={(value, entry, index) => {
-                                        const percent =
-                                            analytics.customerTypeData.find(
-                                                (d) => d.name === value
-                                            )?.value;
-                                        const total =
-                                            analytics.customerTypeData.reduce(
-                                                (sum, d) => sum + d.value,
-                                                0
-                                            );
-                                        const percentText = total
-                                            ? ` ${(
-                                                  (percent / total) *
-                                                  100
-                                              ).toFixed(0)}%`
-                                            : "";
-                                        return `${value}${percentText}`;
-                                    }}
-                                /> */}
                             </PieChart>
                         </ResponsiveContainer>
                     ) : (
-                        <p className="text-sm text-gray-500 montserrat-regular">
-                            No customer type data available.
-                        </p>
+                        <div className="">
+                            <p className="text-sm text-gray-500 montserrat-regular">
+                                No customer type data available.
+                            </p>
+                        </div>
                     )}
                 </div>
             </div>
@@ -151,14 +188,6 @@ const ChartsSection = ({ analytics, emojis }) => {
                                         strokeDasharray="3 3"
                                         stroke="#D6E4D1"
                                     />
-                                    {/* <XAxis
-                                        dataKey="name"
-                                        tick={{
-                                            fontSize: 12,
-                                            textAnchor: "middle",
-                                        }}
-                                        interval={0}
-                                    /> */}
                                     <XAxis
                                         dataKey="name"
                                         tick={<CustomXAxisTick />}

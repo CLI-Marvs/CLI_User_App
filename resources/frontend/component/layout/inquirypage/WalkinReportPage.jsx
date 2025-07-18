@@ -11,7 +11,7 @@ import emojis from "@/component/layout/inquirypage/constants/emoji";
 import WalkinReportSkeleton from "@/component/layout/inquirypage/component/WalkinReport/skeleton/WalkinReportSkeleton";
 import { useWalkinReportFilters } from "@/context/InquiryManagement/WalkinReportFilterProvider";
 
- 
+
 const WalkinReportPage = () => {
     const { filters, setFilters, resetFilters } = useWalkinReportFilters();
     const isFirstLoad = useRef(true);
@@ -21,10 +21,14 @@ const WalkinReportPage = () => {
         staleTime: 1000 * 60,
         cacheTime: 1000 * 60 * 5,
     });
-    const { data: reportsData, isLoading } = useQuery({
+    const {
+        data: reportsData,
+        isLoading,
+    } = useQuery({
         queryKey: ["reports", filters],
         queryFn: () => reportService.getReports(filters),
         refetchOnWindowFocus: false,
+        keepPreviousData: true,
         enabled: !!filters,
         staleTime: 1000 * 60,
         cacheTime: 1000 * 60 * 5,
@@ -38,10 +42,6 @@ const WalkinReportPage = () => {
     const handleApply = (pendingFilters) => {
         setFilters(pendingFilters);
     };
-
-    // const handleReset = () => {
-    //     setFilters(DEFAULT_FILTERS);
-    // };
 
     //Derive analytics/value from reportsData
     //Anaytics object to be used in SummaryCards

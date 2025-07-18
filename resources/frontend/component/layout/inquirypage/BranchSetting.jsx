@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { branchService } from "@/component/servicesApi/apiCalls/emojiWalkin/branchService";
 import { showToast } from "@/util/toastUtil";
 import Skeleton from "@/component/Skeletons";
+import { createPortal } from 'react-dom';
 
 const BranchSetting = () => {
     //States
@@ -35,14 +36,6 @@ const BranchSetting = () => {
         onSettled: () => setIsSubmitting(false),
     });
 
-    //Hooks
-    useEffect(() => {
-        if (showAlert) {
-            document.body.classList.add("alert-open");
-        } else {
-            document.body.classList.remove("alert-open");
-        }
-    }, [showAlert]);
 
     //Event handler
     const handleCopyAllLinks = (urls) => {
@@ -130,16 +123,20 @@ const BranchSetting = () => {
                     branch={selectedBranch}
                 />
             </div>
-            <div className="flex justify-center">
-                <div className="w-full max-w-md sm:max-w-xs mx-2">
-                    <Alert
-                        title="Are you sure you want to delete this branch?"
-                        show={showAlert}
-                        onCancel={handleCancel}
-                        onConfirm={handleConfirm}
-                    />
-                </div>
-            </div>
+            {showAlert &&
+                createPortal(
+                    <div className="fixed inset-0 flex items-center justify-center z-[60] px-4">
+                        <div className="w-full max-w-md sm:max-w-xs bg-red-900">
+                            <Alert
+                                title="Are you sure you want to delete this branch?"
+                                show={showAlert}
+                                onCancel={handleCancel}
+                                onConfirm={handleConfirm}
+                            />
+                        </div>
+                    </div>,
+                    document.body
+                )}
         </div>
     );
 };

@@ -41,7 +41,7 @@ const SummaryCards = ({ analytics }) => {
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div>
                         <p className="text-xs md:text-sm montserrat-medium text-custom-gray71 whitespace-pre-line">
-                            Stand-alone{"\n"}Feedback
+                            Stand-alone Feedback
                         </p>
                         <p className="text-2xl md:text-3xl montserrat-bold text-custom-bluegreen">
                             {analytics.totalStandaloneFeedback}

@@ -342,7 +342,6 @@ const EngageFormModal = forwardRef(
 
                         {/*Contract Number*/}
                         <div className="py-1">
-                            {/* TODO: refactor this and move the  validation to 'validateContractNumber util */}
                             <div
                                 className={`flex items-center border rounded-[5px] overflow-hidden ${
                                     formData.contract_number &&

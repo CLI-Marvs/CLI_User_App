@@ -535,7 +535,7 @@ textarea {
     background: black !important;
 }
 
-body.alert-open .crs-sidebar-blur::after {
+/* body.alert-open .crs-sidebar-blur::after {
     content: "";
     position: absolute;
     inset: 0;
@@ -546,4 +546,4 @@ body.alert-open .crs-sidebar-blur::after {
 }
 body.alert-open .crs-sidebar-blur {
     position: relative;
-}
+} */

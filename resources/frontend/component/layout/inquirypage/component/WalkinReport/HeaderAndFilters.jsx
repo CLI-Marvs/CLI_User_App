@@ -3,6 +3,7 @@ import { Filter } from "lucide-react";
 import { MdCalendarToday } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import { format } from "date-fns";
+import { IoMdArrowDropdown } from "react-icons/io";
 
 export const HeaderAndFilters = ({
     filters,
@@ -61,7 +62,7 @@ export const HeaderAndFilters = ({
                     </h2>
                 </div>
                 <div className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 p-2">
                         {/* Date From */}
                         <div className="space-y-2">
                             <label className="text-sm  montserrat-medium text-custom-gray12">
@@ -83,7 +84,7 @@ export const HeaderAndFilters = ({
                                         }))
                                     }
                                     dateFormat="yyyy-MM-dd"
-                                    className="w-full p-2 border border-custom-gray rounded-md pl-10"
+                                    className="w-full px-2 py-2 border border-custom-gray rounded-none sm:rounded-md border-b-2 border-b-custom-gray pl-[35px]"
                                     placeholderText="Select date"
                                 />
                                 <MdCalendarToday className="absolute left-2 top-1/2 -translate-y-1/2 text-custom-gray71 w-5 h-5 pointer-events-none" />
@@ -111,7 +112,7 @@ export const HeaderAndFilters = ({
                                         }))
                                     }
                                     dateFormat="yyyy-MM-dd"
-                                    className="w-full p-2 border border-custom-gray rounded-md pl-10"
+                                    className="w-full px-2 py-2 border border-custom-gray rounded-none sm:rounded-md border-b-2 border-b-custom-gray pl-[35px]"
                                     placeholderText="Select date"
                                 />
                                 <MdCalendarToday className="absolute left-2 top-1/2 -translate-y-1/2 text-custom-gray71 w-5 h-5 pointer-events-none" />
@@ -131,7 +132,7 @@ export const HeaderAndFilters = ({
                                         branch: e.target.value,
                                     }))
                                 }
-                                className="w-full p-2 border border-custom-gray rounded-md"
+                                className="w-full px-2 py-2 border border-custom-gray rounded-none sm:rounded-md border-b-2 border-b-custom-gray"
                             >
                                 <option value="all">All Branches</option>
                                 {branchesData &&
@@ -159,14 +160,15 @@ export const HeaderAndFilters = ({
                                         personType: e.target.value,
                                     }))
                                 }
-                                className="w-full p-2 border border-custom-gray rounded-md"
+                                className="w-full px-2 py-2 border border-custom-gray rounded-none sm:rounded-md border-b-2 border-b-custom-gray"
                             >
                                 <option value="all">All Types</option>
-                                {personTypes && personTypes?.map((type) => (
-                                    <option key={type.id} value={type.id}>
-                                        {type.name}
-                                    </option>
-                                ))}
+                                {personTypes &&
+                                    personTypes?.map((type) => (
+                                        <option key={type.id} value={type.id}>
+                                            {type.name}
+                                        </option>
+                                    ))}
                             </select>
                         </div>
 
@@ -183,7 +185,7 @@ export const HeaderAndFilters = ({
                                         sourceType: e.target.value,
                                     }))
                                 }
-                                className="w-full p-2 border border-custom-gray rounded-md"
+                                className="w-full px-2 py-2 border border-custom-gray rounded-none sm:rounded-md border-b-2 border-b-custom-gray"
                             >
                                 <option value="all">All Sources</option>
                                 <option value="Queue-linked">
@@ -204,7 +206,7 @@ export const HeaderAndFilters = ({
 
                             <button
                                 type="button"
-                                className="w-full h-[40px] p-2 border border-custom-gray rounded-md flex items-center gap-2 bg-white" // Added h-[40px] for consistent height
+                                className="w-full h-[40px] p-2 border border-custom-gray rounded-none sm:rounded-md border-b-2 border-b-custom-gray flex items-center gap-2 bg-white"
                                 onClick={() => setShowEmojiDropdown((v) => !v)}
                             >
                                 {pendingFilters.emojiRating ===

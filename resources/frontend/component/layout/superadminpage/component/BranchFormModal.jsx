@@ -12,6 +12,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { showToast } from "@/util/toastUtil";
 import CustomInput from "@/component/Input/CustomInput";
 import isFormButtonDisabled from "@/util/isFormButtonDisabled";
+import { IoIosCloseCircle } from "react-icons/io";
 
 const initialFormState = {
     branch_name: "",
@@ -98,7 +99,6 @@ const BranchFormModal = forwardRef((props, ref) => {
         onSettled: () => setIsSubmitting(false),
     });
 
-
     // Handle input changes
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -158,6 +158,8 @@ const BranchFormModal = forwardRef((props, ref) => {
         setError(null);
         if (props.mode === "add") {
             setFormData(initialFormState);
+        } else if (props.mode === "edit") {
+            setFormData(initialData);
         }
         dialogRef.current?.close();
     };
@@ -237,17 +239,14 @@ const BranchFormModal = forwardRef((props, ref) => {
                                             />
                                         </div>
                                     </div>
-                                    {/* TODO: changed the UI for this */}
                                     {formData.desks.length > 1 && (
-                                        <button
-                                            type="button"
-                                            className="ml-2 text-red-500"
+                                        <IoIosCloseCircle
+                                            size={24}
                                             onClick={() =>
                                                 handleRemoveDesk(idx)
                                             }
-                                        >
-                                            ✕
-                                        </button>
+                                            className="ml-2 mt-2 text-red-500 h-6 w-6" 
+                                        />
                                     )}
                                 </div>
                             ))}
