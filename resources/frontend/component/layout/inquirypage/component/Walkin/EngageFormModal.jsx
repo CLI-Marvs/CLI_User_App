@@ -123,12 +123,23 @@ const EngageFormModal = forwardRef(
                 // Then update queue status
                 await queueMutation.mutateAsync(queuePayload);
 
-                // Show success toast
-                showToast(
-                    transactionResponse?.message ||
-                        "Walkin transaction details created successfully",
-                    "success"
-                );
+
+                if(actionType === "resolved"){
+                    // Show success toast
+                    showToast(
+                        transactionResponse?.message ||
+                            "Walk-in Transaction Closed Successfully!",
+                        "success"
+                    );
+                }
+                else{
+                    showToast(
+                        transactionResponse?.message ||
+                            "Walk-in Transaction Saved Successfully!",
+                        "success"
+                    );
+                }
+              
 
                 //Refresh the transaction history list
                 queryClient.invalidateQueries({
