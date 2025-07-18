@@ -31,6 +31,7 @@ const CustomInput = ({
     type = "text",
     className = "",
     restrictNumbers,
+    noNumbers,
     inputRef,
     placeholder,
     ...props
@@ -45,6 +46,10 @@ const CustomInput = ({
             if (!/^\d*\.?\d*$/.test(inputValue)) {
                 return; // Ignore invalid input
             }
+        }
+
+        if (noNumbers) {
+            inputValue = inputValue.replace(/[0-9]/g, "");
         }
 
         // Call the onChange handler

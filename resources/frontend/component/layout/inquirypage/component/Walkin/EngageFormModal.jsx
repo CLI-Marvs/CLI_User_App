@@ -298,6 +298,7 @@ const EngageFormModal = forwardRef(
                                     type="text"
                                     value={formData.first_name}
                                     onChange={handleInputChange}
+                                    noNumbers={true}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 />
                             </div>
@@ -316,6 +317,7 @@ const EngageFormModal = forwardRef(
                                     type="text"
                                     value={formData.last_name}
                                     onChange={handleInputChange}
+                                    noNumbers={true}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 />
                             </div>
