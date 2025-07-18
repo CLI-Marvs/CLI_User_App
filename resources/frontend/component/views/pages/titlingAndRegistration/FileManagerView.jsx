@@ -627,14 +627,20 @@ const FileManagerView = () => {
 
     const handleAccountSelect = async (account) => {
         console.log("Selected account:", account); // Debug log
+        console.log("Account steps:", account.steps); // Debug log
 
         // Reset all selections and state when switching accounts
         setSelectedStep(null);
         setSelectedMilestone(null);
         setExpandedSteps({});
 
-        // Check if the account has full structure (steps)
-        const hasFullStructure = account.steps && account.steps.length > 0;
+        // Check if the account has full structure (steps with milestones)
+        const hasFullStructure =
+            account.steps &&
+            account.steps.length > 0 &&
+            account.steps.some(
+                (step) => step.milestones && step.milestones.length > 0
+            );
 
         if (!hasFullStructure) {
             console.log(
@@ -667,26 +673,14 @@ const FileManagerView = () => {
         // Normalize the account structure to ensure consistency
         const normalizedAccount = {
             ...account,
-            steps: account.steps || [],
-        };
-
-        // Ensure each step has proper structure
-        if (normalizedAccount.steps.length > 0) {
-            normalizedAccount.steps = normalizedAccount.steps.map((step) => ({
+            steps: (account.steps || []).map((step) => ({
                 ...step,
-                milestones: step.milestones || [],
-            }));
-
-            // Ensure each milestone has proper structure
-            normalizedAccount.steps.forEach((step) => {
-                if (step.milestones.length > 0) {
-                    step.milestones = step.milestones.map((milestone) => ({
-                        ...milestone,
-                        files: milestone.files || [],
-                    }));
-                }
-            });
-        }
+                milestones: (step.milestones || []).map((milestone) => ({
+                    ...milestone,
+                    files: milestone.files || [],
+                })),
+            })),
+        };
 
         console.log("Normalized selected account:", normalizedAccount); // Debug log
 
@@ -760,167 +754,33 @@ const FileManagerView = () => {
     };
 
     return (
-        <div className="flex h-screen bg-gray-50">
-            {/* Sidebar */}
-            <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
-                {/* Search */}
-                <div className="p-4 border-b border-gray-200">
-                    <div className="relative">
-                        <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        <Input
-                            placeholder="Search accounts..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10"
-                        />
-                    </div>
-                </div>
-
-                {/* Accounts List */}
-                <div className="flex-1 overflow-y-auto p-4">
-                    <Typography variant="h6" className="mb-4 text-gray-800">
-                        Accounts
-                    </Typography>
-
-                    {isLoading ? (
-                        <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                        </div>
-                    ) : error ? (
-                        <div className="text-center py-8">
-                            <Typography
-                                variant="small"
-                                className="text-red-600 mb-2"
-                            >
-                                {error}
-                            </Typography>
-                            <Button
-                                size="sm"
-                                onClick={fetchAllAccounts}
-                                className="bg-blue-600 hover:bg-blue-700"
-                            >
-                                Retry
-                            </Button>
-                        </div>
-                    ) : accounts.length === 0 ? (
-                        <div className="text-center py-8">
-                            <Typography
-                                variant="small"
-                                className="text-gray-600"
-                            >
-                                No accounts found
-                            </Typography>
-                        </div>
-                    ) : (
-                        accounts.map((account) => (
-                            <Card
-                                key={`account-${account.id}`}
-                                className={`mb-3 cursor-pointer transition-colors ${
-                                    selectedAccount?.id === account.id
-                                        ? "bg-blue-50 border-blue-200"
-                                        : "hover:bg-gray-50"
-                                }`}
-                                onClick={() => handleAccountSelect(account)}
-                            >
-                                <CardBody className="p-3">
-                                    <Typography
-                                        variant="h6"
-                                        className="text-sm font-semibold"
-                                    >
-                                        {account.account_name}
-                                    </Typography>
-                                    <Typography
-                                        variant="small"
-                                        className="text-gray-600"
-                                    >
-                                        {account.property_name ||
-                                            "No property name"}
-                                    </Typography>
-                                    {account.contract_no && (
-                                        <Typography
-                                            variant="small"
-                                            className="text-gray-500"
-                                        >
-                                            Contract: {account.contract_no}
-                                        </Typography>
-                                    )}
-                                </CardBody>
-                            </Card>
-                        ))
-                    )}
-                </div>
-
-                {/* Steps and Milestones */}
-                {selectedAccount && (
-                    <div className="border-t border-gray-200 p-4 max-h-96 overflow-y-auto">
-                        <Typography variant="h6" className="mb-4 text-gray-800">
-                            Steps & Milestones
+        <div className="flex flex-col h-screen bg-gray-50">
+            {/* Top Header */}
+            <div className="bg-white border-b border-gray-200 p-4">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <Typography
+                            variant="h4"
+                            className="text-gray-800 font-semibold"
+                        >
+                            File Manager
                         </Typography>
-
-                        {(() => {
-                            console.log(
-                                "Rendering steps for account:",
-                                selectedAccount.id,
-                                "Steps:",
-                                selectedAccount.steps
-                            ); // Debug log
-
-                            if (
-                                !selectedAccount.steps ||
-                                selectedAccount.steps.length === 0
-                            ) {
-                                return (
-                                    <Typography
-                                        variant="small"
-                                        className="text-gray-500"
-                                    >
-                                        No steps available for this account
-                                    </Typography>
-                                );
-                            }
-
-                            return selectedAccount.steps.map((step) => {
-                                console.log(
-                                    "Rendering step:",
-                                    step.id,
-                                    step.name
-                                ); // Debug log
-                                return (
-                                    <SidebarStep
-                                        key={`step-${selectedAccount.id}-${step.id}`}
-                                        step={step}
-                                        isSelected={
-                                            selectedStep?.id === step.id
-                                        }
-                                        onClick={() => handleStepSelect(step)}
-                                        isExpanded={expandedSteps[step.id]}
-                                        onToggle={() =>
-                                            toggleStepExpansion(step.id)
-                                        }
-                                        selectedMilestone={selectedMilestone}
-                                    />
-                                );
-                            });
-                        })()}
+                        <Typography variant="small" className="text-gray-600">
+                            Browse and manage account files
+                        </Typography>
                     </div>
-                )}
-            </div>
 
-            {/* Main Content */}
-            <div className="flex-1 flex flex-col">
-                {/* Header */}
-                <div className="bg-white border-b border-gray-200 p-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <Typography variant="h5" className="text-gray-800">
-                                {getHeaderTitle()}
-                            </Typography>
-                            <Typography
-                                variant="small"
-                                className="text-gray-600"
-                            >
-                                {currentFiles.length} files found
-                            </Typography>
+                    {/* Search Bar */}
+                    <div className="flex items-center gap-4">
+                        <div className="relative w-80">
+                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            <Input
+                                placeholder="Search accounts..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-10"
+                                size="lg"
+                            />
                         </div>
 
                         {selectedAccount && (
@@ -992,107 +852,321 @@ const FileManagerView = () => {
                         )}
                     </div>
                 </div>
+            </div>
 
-                {/* Files Content */}
-                <div className="flex-1 overflow-y-auto p-6">
-                    {!selectedAccount ? (
-                        <div className="flex items-center justify-center h-full">
-                            <div className="text-center">
-                                <FolderIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                                <Typography
-                                    variant="h6"
-                                    className="text-gray-600 mb-2"
-                                >
-                                    Select an Account
-                                </Typography>
+            {/* Main Content Area */}
+            <div className="flex flex-1 overflow-hidden">
+                {/* Left Panel - File Tree */}
+                <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+                    {/* Accounts Section */}
+                    <div className="border-b border-gray-200 p-4 max-h-60 overflow-y-auto">
+                        <Typography
+                            variant="h6"
+                            className="mb-3 text-gray-800 font-semibold"
+                        >
+                            Accounts
+                        </Typography>
+
+                        {isLoading ? (
+                            <div className="flex items-center justify-center py-8">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            </div>
+                        ) : error ? (
+                            <div className="text-center py-8">
                                 <Typography
                                     variant="small"
-                                    className="text-gray-500"
+                                    className="text-red-600 mb-2"
                                 >
-                                    Choose an account from the sidebar to view
-                                    its files
+                                    {error}
                                 </Typography>
+                                <Button
+                                    size="sm"
+                                    onClick={fetchAllAccounts}
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                >
+                                    Retry
+                                </Button>
                             </div>
-                        </div>
-                    ) : currentFiles.length === 0 ? (
-                        <div className="flex items-center justify-center h-full">
-                            <div className="text-center">
-                                <DocumentIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                                <Typography
-                                    variant="h6"
-                                    className="text-gray-600 mb-2"
-                                >
-                                    No Files Found
-                                </Typography>
+                        ) : accounts.length === 0 ? (
+                            <div className="text-center py-8">
                                 <Typography
                                     variant="small"
-                                    className="text-gray-500"
+                                    className="text-gray-600"
                                 >
-                                    No files have been uploaded for this
-                                    selection
+                                    No accounts found
                                 </Typography>
                             </div>
-                        </div>
-                    ) : viewType === "grid" ? (
-                        <div className="flex flex-wrap gap-4 justify-start">
-                            {currentFiles.map((file, index) => (
-                                <FileCard
-                                    key={`file-${selectedAccount?.id}-${file.document_id}-${index}`}
-                                    file={file}
-                                    onClick={handleFileClick}
-                                />
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="space-y-2">
-                            {currentFiles.map((file, index) => (
-                                <div
-                                    key={`file-list-${selectedAccount?.id}-${file.document_id}-${index}`}
-                                    className="flex items-center p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-                                    onClick={() => handleFileClick(file)}
-                                >
-                                    <div className="w-10 h-10 flex items-center justify-center mr-3">
-                                        {
-                                            getFileType(
-                                                (file.file_name || "")
-                                                    .split(".")
-                                                    .pop()
-                                                    ?.toLowerCase()
-                                            ).icon
+                        ) : (
+                            <div className="space-y-2">
+                                {accounts.map((account) => (
+                                    <div
+                                        key={`account-${account.id}`}
+                                        className={`p-3 rounded-lg cursor-pointer transition-colors border ${
+                                            selectedAccount?.id === account.id
+                                                ? "bg-blue-50 border-blue-200 text-blue-700"
+                                                : "hover:bg-gray-50 border-transparent"
+                                        }`}
+                                        onClick={() =>
+                                            handleAccountSelect(account)
                                         }
+                                    >
+                                        <div className="flex items-center">
+                                            <FolderIcon className="w-5 h-5 mr-3 text-gray-500" />
+                                            <div className="flex-1 min-w-0">
+                                                <Typography
+                                                    variant="small"
+                                                    className="font-semibold truncate"
+                                                >
+                                                    {account.account_name}
+                                                </Typography>
+                                                <Typography
+                                                    variant="small"
+                                                    className="text-gray-500 truncate"
+                                                >
+                                                    {account.property_name ||
+                                                        "No property name"}
+                                                </Typography>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div className="flex-1">
-                                        <Typography
-                                            variant="small"
-                                            className="font-medium"
-                                        >
-                                            {file.file_title || file.file_name}
-                                        </Typography>
-                                        <Typography
-                                            variant="small"
-                                            className="text-gray-500"
-                                        >
-                                            {file.uploaded_by?.fullname ||
-                                                file.uploaded_by ||
-                                                "Unknown User"}
-                                        </Typography>
-                                    </div>
-                                    <div className="text-right">
-                                        <Typography
-                                            variant="small"
-                                            className="text-gray-500"
-                                        >
-                                            {file.created_at
-                                                ? new Date(
-                                                      file.created_at
-                                                  ).toLocaleDateString()
-                                                : "Unknown Date"}
-                                        </Typography>
-                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Steps and Milestones Tree */}
+                    <div className="flex-1 overflow-y-auto p-4">
+                        <Typography
+                            variant="h6"
+                            className="mb-3 text-gray-800 font-semibold"
+                        >
+                            File Structure
+                        </Typography>
+
+                        {!selectedAccount ? (
+                            <div className="text-center py-8">
+                                <FolderIcon className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+                                <Typography
+                                    variant="small"
+                                    className="text-gray-500"
+                                >
+                                    Select an account to view its file structure
+                                </Typography>
+                            </div>
+                        ) : (
+                            <div className="space-y-1">
+                                {/* Account Root */}
+                                <div
+                                    className={`flex items-center p-2 rounded-lg cursor-pointer transition-colors ${
+                                        !selectedStep && !selectedMilestone
+                                            ? "bg-blue-100 text-blue-700"
+                                            : "hover:bg-gray-100"
+                                    }`}
+                                    onClick={() => {
+                                        setSelectedStep(null);
+                                        setSelectedMilestone(null);
+                                    }}
+                                >
+                                    <FolderIcon className="w-4 h-4 mr-2" />
+                                    <Typography
+                                        variant="small"
+                                        className="font-medium"
+                                    >
+                                        {selectedAccount.account_name}
+                                    </Typography>
                                 </div>
-                            ))}
+
+                                {/* Steps Tree */}
+                                {(() => {
+                                    console.log(
+                                        "Rendering steps for account:",
+                                        selectedAccount.id,
+                                        "Steps:",
+                                        selectedAccount.steps
+                                    );
+
+                                    if (
+                                        !selectedAccount.steps ||
+                                        selectedAccount.steps.length === 0
+                                    ) {
+                                        return (
+                                            <div className="ml-6 py-4">
+                                                <Typography
+                                                    variant="small"
+                                                    className="text-gray-500"
+                                                >
+                                                    No steps available for this
+                                                    account
+                                                </Typography>
+                                            </div>
+                                        );
+                                    }
+
+                                    return selectedAccount.steps.map((step) => {
+                                        console.log(
+                                            "Rendering step:",
+                                            step.id,
+                                            step.name
+                                        );
+                                        return (
+                                            <div
+                                                key={`step-${selectedAccount.id}-${step.id}`}
+                                                className="ml-4"
+                                            >
+                                                <SidebarStep
+                                                    step={step}
+                                                    isSelected={
+                                                        selectedStep?.id ===
+                                                        step.id
+                                                    }
+                                                    onClick={() =>
+                                                        handleStepSelect(step)
+                                                    }
+                                                    isExpanded={
+                                                        expandedSteps[step.id]
+                                                    }
+                                                    onToggle={() =>
+                                                        toggleStepExpansion(
+                                                            step.id
+                                                        )
+                                                    }
+                                                    selectedMilestone={
+                                                        selectedMilestone
+                                                    }
+                                                />
+                                            </div>
+                                        );
+                                    });
+                                })()}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                {/* Right Panel - File Display */}
+                <div className="flex-1 flex flex-col">
+                    {/* Breadcrumb Header */}
+                    <div className="bg-white border-b border-gray-200 p-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2 text-sm text-gray-600">
+                                <Typography
+                                    variant="small"
+                                    className="font-medium"
+                                >
+                                    {getHeaderTitle()}
+                                </Typography>
+                                <Typography
+                                    variant="small"
+                                    className="text-gray-500"
+                                >
+                                    • {currentFiles.length} files
+                                </Typography>
+                            </div>
                         </div>
-                    )}
+                    </div>
+
+                    {/* Files Content */}
+                    <div className="flex-1 overflow-y-auto p-6">
+                        {!selectedAccount ? (
+                            <div className="flex items-center justify-center h-full">
+                                <div className="text-center">
+                                    <FolderIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                                    <Typography
+                                        variant="h6"
+                                        className="text-gray-600 mb-2"
+                                    >
+                                        Select an Account
+                                    </Typography>
+                                    <Typography
+                                        variant="small"
+                                        className="text-gray-500"
+                                    >
+                                        Choose an account from the left panel to
+                                        view its files
+                                    </Typography>
+                                </div>
+                            </div>
+                        ) : currentFiles.length === 0 ? (
+                            <div className="flex items-center justify-center h-full">
+                                <div className="text-center">
+                                    <DocumentIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                                    <Typography
+                                        variant="h6"
+                                        className="text-gray-600 mb-2"
+                                    >
+                                        No Files Found
+                                    </Typography>
+                                    <Typography
+                                        variant="small"
+                                        className="text-gray-500"
+                                    >
+                                        No files have been uploaded for this
+                                        selection
+                                    </Typography>
+                                </div>
+                            </div>
+                        ) : viewType === "grid" ? (
+                            <div className="flex flex-wrap gap-4">
+                                {currentFiles.map((file, index) => (
+                                    <FileCard
+                                        key={`file-${selectedAccount?.id}-${file.document_id}-${index}`}
+                                        file={file}
+                                        onClick={handleFileClick}
+                                    />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                {currentFiles.map((file, index) => (
+                                    <div
+                                        key={`file-list-${selectedAccount?.id}-${file.document_id}-${index}`}
+                                        className="flex items-center p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
+                                        onClick={() => handleFileClick(file)}
+                                    >
+                                        <div className="w-10 h-10 flex items-center justify-center mr-3">
+                                            {
+                                                getFileType(
+                                                    (file.file_name || "")
+                                                        .split(".")
+                                                        .pop()
+                                                        ?.toLowerCase()
+                                                ).icon
+                                            }
+                                        </div>
+                                        <div className="flex-1">
+                                            <Typography
+                                                variant="small"
+                                                className="font-medium"
+                                            >
+                                                {file.file_title ||
+                                                    file.file_name}
+                                            </Typography>
+                                            <Typography
+                                                variant="small"
+                                                className="text-gray-500"
+                                            >
+                                                {file.uploaded_by?.fullname ||
+                                                    file.uploaded_by ||
+                                                    "Unknown User"}
+                                            </Typography>
+                                        </div>
+                                        <div className="text-right">
+                                            <Typography
+                                                variant="small"
+                                                className="text-gray-500"
+                                            >
+                                                {file.created_at
+                                                    ? new Date(
+                                                          file.created_at
+                                                      ).toLocaleDateString()
+                                                    : "Unknown Date"}
+                                            </Typography>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

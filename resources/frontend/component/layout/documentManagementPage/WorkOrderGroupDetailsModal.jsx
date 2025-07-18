@@ -13,6 +13,7 @@ import {
     Option,
     Input,
     IconButton,
+    Tooltip,
 } from "@material-tailwind/react";
 import EnhancedControlBar from "./EnhancedControlBar";
 import NotesAndUpdatesModal from "./NotesAndUpdatesModal";
@@ -205,6 +206,86 @@ const WorkOrderGroupDetailsModal = ({
                     );
                 });
 
+                // Find current submilestone information
+                let currentChecklistInfo = null;
+                if (account.currentSubMilestoneId) {
+                    // Find the current submilestone across all steps
+                    for (const step of steps) {
+                        const currentSubmilestone = step.subMilestones.find(
+                            (sub) => sub.id === account.currentSubMilestoneId
+                        );
+                        if (currentSubmilestone) {
+                            const checklists =
+                                currentSubmilestone.checklists || [];
+                            const uploadedDocs =
+                                account.uploaded_documents || [];
+
+                            // Find current/next checklist item and collect completed items
+                            let currentChecklistItem = null;
+                            let completedCount = 0;
+                            const completedChecklists = [];
+                            const pendingChecklists = [];
+
+                            for (const checklist of checklists) {
+                                const hasUploadedDoc = uploadedDocs.some(
+                                    (doc) => doc.file_title === checklist.name
+                                );
+                                const accountChecklistStatus = (
+                                    account.account_checklist_statuses || []
+                                ).find(
+                                    (status) =>
+                                        status.checklist_id === checklist.id
+                                );
+                                const hasCompletedStatus =
+                                    accountChecklistStatus &&
+                                    accountChecklistStatus.is_completed;
+
+                                if (hasUploadedDoc || hasCompletedStatus) {
+                                    completedCount++;
+                                    completedChecklists.push({
+                                        ...checklist,
+                                        completedVia: hasUploadedDoc
+                                            ? "document"
+                                            : "status",
+                                        completedDate: hasUploadedDoc
+                                            ? uploadedDocs.find(
+                                                  (doc) =>
+                                                      doc.file_title ===
+                                                      checklist.name
+                                              )?.created_at
+                                            : accountChecklistStatus?.updated_at,
+                                    });
+                                } else {
+                                    pendingChecklists.push(checklist);
+                                    if (!currentChecklistItem) {
+                                        // This is the first uncompleted checklist item
+                                        currentChecklistItem = checklist;
+                                    }
+                                }
+                            }
+
+                            currentChecklistInfo = {
+                                stepName: step.stepName,
+                                milestoneName: currentSubmilestone.name,
+                                totalChecklists: checklists.length,
+                                completedCount: completedCount,
+                                currentChecklistItem: currentChecklistItem,
+                                completedChecklists: completedChecklists,
+                                pendingChecklists: pendingChecklists,
+                                progressPercentage:
+                                    checklists.length > 0
+                                        ? Math.round(
+                                              (completedCount /
+                                                  checklists.length) *
+                                                  100
+                                          )
+                                        : 0,
+                            };
+                            break;
+                        }
+                    }
+                }
+
                 // Determine the overall status based on whether all checklists for the account are complete.
                 const overallStatus = account.checklist_status
                     ? "Completed"
@@ -230,6 +311,7 @@ const WorkOrderGroupDetailsModal = ({
                     remarks: account.remarks,
                     notesData: notesData,
                     currentSubMilestoneId: account.current_submilestone_id, // Add current submilestone ID
+                    currentChecklistInfo: currentChecklistInfo, // Add current checklist information
                     uploaded_documents: account.uploaded_documents || [],
                     onAddFilesClick: () => {
                         onAddFiles(
@@ -578,6 +660,9 @@ const WorkOrderGroupDetailsModal = ({
                                         }
                                         onShowFiles={() =>
                                             handleShowFilesModal(row)
+                                        }
+                                        currentChecklistInfo={
+                                            row.currentChecklistInfo
                                         }
                                     />
                                 ))}

@@ -204,8 +204,12 @@ class FileManagerController extends Controller
                 'financing'
             ])->findOrFail($accountId);
 
-            // Get all work order types (steps)
-            $workOrderTypes = WorkOrderType::all();
+            // Get all work order types (steps) ordered by sequence
+            $workOrderTypes = WorkOrderType::with([
+                'submilestones' => function ($query) {
+                    $query->orderBy('sequence');
+                }
+            ])->orderBy('sequence')->get();
 
             // Get all documents for this account directly using account_id
             $documents = WorkOrderDocument::with([
@@ -217,17 +221,12 @@ class FileManagerController extends Controller
             $steps = $workOrderTypes->map(function ($workOrderType) use ($documents) {
                 // Get documents for this work order type
                 $stepDocuments = $documents->filter(function ($doc) use ($workOrderType) {
-                    return $doc->workOrder && $doc->workOrder->workOrderType &&
-                        $doc->workOrder->workOrderType->work_order_type_id === $workOrderType->work_order_type_id;
+                    return $doc->workOrder && $doc->workOrder->work_order_type_id === $workOrderType->id;
                 });
 
-                // Get submilestones for this work order type
-                $submilestones = Submilestone::where('work_order_type_id', $workOrderType->work_order_type_id)->get();
-
                 // Transform submilestones into milestones with their files
-                $milestones = $submilestones->map(function ($submilestone) use ($stepDocuments) {
-                    // For now, we'll put all step documents in each milestone
-                    // In a real application, you'd filter by specific submilestone criteria
+                $milestones = $workOrderType->submilestones->map(function ($submilestone) use ($stepDocuments) {
+                    // Get documents for this milestone (documents that belong to work orders of this type)
                     $milestoneFiles = $stepDocuments->map(function ($doc) {
                         return [
                             'document_id' => $doc->document_id,
@@ -245,19 +244,24 @@ class FileManagerController extends Controller
                             'work_order_id' => $doc->work_order_id,
                             'account_id' => $doc->account_id
                         ];
-                    });
+                    })->values();
 
                     return [
-                        'id' => $submilestone->submilestone_id,
-                        'name' => $submilestone->submilestone_name,
-                        'files' => $milestoneFiles->toArray()
+                        'id' => $submilestone->id,
+                        'name' => $submilestone->name,
+                        'description' => $submilestone->description ?? null,
+                        'sequence' => $submilestone->sequence,
+                        'files' => $milestoneFiles,
+                        'work_order_type_id' => $submilestone->work_order_type_id
                     ];
                 });
 
                 return [
-                    'id' => $workOrderType->work_order_type_id,
-                    'name' => $workOrderType->work_order_type_name,
-                    'milestones' => $milestones->toArray()
+                    'id' => $workOrderType->id,
+                    'name' => $workOrderType->type_name,
+                    'description' => $workOrderType->description,
+                    'sequence' => $workOrderType->sequence,
+                    'milestones' => $milestones
                 ];
             });
 
@@ -268,7 +272,7 @@ class FileManagerController extends Controller
                 'property_name' => $account->property_name,
                 'unit_no' => $account->unit_no,
                 'financing' => $account->financing,
-                'steps' => $steps->toArray()
+                'steps' => $steps
             ];
 
             return response()->json([
@@ -314,8 +318,12 @@ class FileManagerController extends Controller
 
             // Transform accounts to include hierarchical structure like getAllAccountsWithFiles
             $transformedAccounts = $accounts->map(function ($account) {
-                // Get all work order types (steps)
-                $workOrderTypes = WorkOrderType::all();
+                // Get all work order types (steps) ordered by sequence
+                $workOrderTypes = WorkOrderType::with([
+                    'submilestones' => function ($query) {
+                        $query->orderBy('sequence');
+                    }
+                ])->orderBy('sequence')->get();
 
                 // Get all documents for this account directly using account_id
                 $documents = WorkOrderDocument::with([
@@ -327,17 +335,12 @@ class FileManagerController extends Controller
                 $steps = $workOrderTypes->map(function ($workOrderType) use ($documents) {
                     // Get documents for this work order type
                     $stepDocuments = $documents->filter(function ($doc) use ($workOrderType) {
-                        return $doc->workOrder && $doc->workOrder->workOrderType &&
-                            $doc->workOrder->workOrderType->work_order_type_id === $workOrderType->work_order_type_id;
+                        return $doc->workOrder && $doc->workOrder->work_order_type_id === $workOrderType->id;
                     });
 
-                    // Get submilestones for this work order type
-                    $submilestones = Submilestone::where('work_order_type_id', $workOrderType->work_order_type_id)->get();
-
                     // Transform submilestones into milestones with their files
-                    $milestones = $submilestones->map(function ($submilestone) use ($stepDocuments) {
-                        // For now, we'll put all step documents in each milestone
-                        // In a real application, you'd filter by specific submilestone criteria
+                    $milestones = $workOrderType->submilestones->map(function ($submilestone) use ($stepDocuments) {
+                        // Get documents for this milestone (documents that belong to work orders of this type)
                         $milestoneFiles = $stepDocuments->map(function ($doc) {
                             return [
                                 'document_id' => $doc->document_id,
@@ -355,19 +358,24 @@ class FileManagerController extends Controller
                                 'work_order_id' => $doc->work_order_id,
                                 'account_id' => $doc->account_id
                             ];
-                        });
+                        })->values();
 
                         return [
-                            'id' => $submilestone->submilestone_id,
-                            'name' => $submilestone->submilestone_name,
-                            'files' => $milestoneFiles->toArray()
+                            'id' => $submilestone->id,
+                            'name' => $submilestone->name,
+                            'description' => $submilestone->description ?? null,
+                            'sequence' => $submilestone->sequence,
+                            'files' => $milestoneFiles,
+                            'work_order_type_id' => $submilestone->work_order_type_id
                         ];
                     });
 
                     return [
-                        'id' => $workOrderType->work_order_type_id,
-                        'name' => $workOrderType->work_order_type_name,
-                        'milestones' => $milestones->toArray()
+                        'id' => $workOrderType->id,
+                        'name' => $workOrderType->type_name,
+                        'description' => $workOrderType->description,
+                        'sequence' => $workOrderType->sequence,
+                        'milestones' => $milestones
                     ];
                 });
 
@@ -378,7 +386,7 @@ class FileManagerController extends Controller
                     'property_name' => $account->property_name,
                     'unit_no' => $account->unit_no,
                     'financing' => $account->financing,
-                    'steps' => $steps->toArray()
+                    'steps' => $steps
                 ];
             });
 
