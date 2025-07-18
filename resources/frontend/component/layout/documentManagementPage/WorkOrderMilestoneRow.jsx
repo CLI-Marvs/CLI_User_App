@@ -8,6 +8,7 @@ const WorkOrderMilestoneRow = ({
     handleOpenNotesModal,
     onShowFiles,
     currentChecklistInfo,
+    onMilestoneProgression,
 }) => {
     const [showTooltip, setShowTooltip] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -189,7 +190,7 @@ const WorkOrderMilestoneRow = ({
                     </div>
                 </td>
                 <td className="px-2 py-2 border-l border-gray-200">
-                    <div className="flex justify-center">
+                    <div className="flex justify-center gap-1">
                         <button
                             type="button"
                             className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs font-medium rounded"
@@ -197,6 +198,20 @@ const WorkOrderMilestoneRow = ({
                         >
                             Files
                         </button>
+                        {currentChecklistInfo &&
+                            currentChecklistInfo.progressPercentage === 100 && (
+                                <button
+                                    type="button"
+                                    className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 text-xs font-medium rounded"
+                                    onClick={() =>
+                                        onMilestoneProgression &&
+                                        onMilestoneProgression(row.key)
+                                    }
+                                    title="Progress to next milestone"
+                                >
+                                    Next
+                                </button>
+                            )}
                     </div>
                 </td>
             </tr>

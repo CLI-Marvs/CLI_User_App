@@ -6,6 +6,7 @@ const ChecklistTable = ({
     onAddFiles,
     handleOpenNotesModal,
     currentUserId, // Add current user ID prop
+    onRefresh, // Add refresh callback prop
 }) => {
     // Filter steps to only show milestones assigned to the current user for specific properties
     const filteredSteps = steps
@@ -405,7 +406,8 @@ const ChecklistTable = ({
                                                                         onAddFiles(
                                                                             account.id,
                                                                             step.workOrder,
-                                                                            step.stepName
+                                                                            step.stepName,
+                                                                            onRefresh // Pass refresh callback
                                                                         )
                                                                     }
                                                                 >
@@ -451,6 +453,7 @@ const ChecklistTable = ({
                                                                                     checklist.id,
                                                                                 checklistName:
                                                                                     checklist.name,
+                                                                                onRefresh, // Pass refresh callback
                                                                             }
                                                                         )
                                                                     }

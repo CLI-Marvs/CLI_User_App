@@ -19,6 +19,8 @@ import {
     Squares2X2Icon,
     ListBulletIcon,
 } from "@heroicons/react/24/outline";
+import FileViewerModal from "../../../layout/documentManagementPage/FileViewerModal";
+import apiService from "../../../servicesApi/apiService";
 
 // File type configuration - same as AccountFilesModal
 const getFileType = (extension) => {
@@ -390,39 +392,36 @@ const FileManagerView = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // Modal state
+    const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+
     // Fetch all accounts with their files structure
     const fetchAllAccounts = async () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await fetch("/api/file-manager/accounts", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    // Remove Authorization header since we moved the routes outside auth middleware
-                },
-            });
+            const response = await apiService.get("/file-manager/accounts");
 
-            if (!response.ok) {
-                throw new Error("Failed to fetch accounts");
-            }
-
-            const data = await response.json();
-            console.log("API Response:", data); // Debug log
-            if (data.success) {
+            console.log("API Response:", response.data); // Debug log
+            if (response.data.success) {
                 // Ensure each account has proper structure
-                const normalizedAccounts = data.data.map((account) => ({
-                    ...account,
-                    steps: account.steps || [],
-                    milestones: account.milestones || [],
-                }));
+                const normalizedAccounts = response.data.data.map(
+                    (account) => ({
+                        ...account,
+                        steps: account.steps || [],
+                        milestones: account.milestones || [],
+                    })
+                );
                 console.log("Normalized accounts:", normalizedAccounts); // Debug log
                 setAccounts(normalizedAccounts);
             } else {
-                throw new Error(data.message || "Failed to fetch accounts");
+                throw new Error(
+                    response.data.message || "Failed to fetch accounts"
+                );
             }
         } catch (err) {
-            setError(err.message);
+            setError(err.message || "Failed to fetch accounts");
             console.error("Error fetching accounts:", err);
         } finally {
             setIsLoading(false);
@@ -439,38 +438,31 @@ const FileManagerView = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await fetch(
-                `/api/file-manager/accounts/search?search=${encodeURIComponent(
+            const response = await apiService.get(
+                `/file-manager/accounts/search?search=${encodeURIComponent(
                     searchQuery
-                )}`,
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                }
+                )}`
             );
 
-            if (!response.ok) {
-                throw new Error("Failed to search accounts");
-            }
-
-            const data = await response.json();
-            console.log("Search API Response:", data); // Debug log
-            if (data.success) {
+            console.log("Search API Response:", response.data); // Debug log
+            if (response.data.success) {
                 // Ensure each account has proper structure
-                const normalizedAccounts = data.data.map((account) => ({
-                    ...account,
-                    steps: account.steps || [],
-                    milestones: account.milestones || [],
-                }));
+                const normalizedAccounts = response.data.data.map(
+                    (account) => ({
+                        ...account,
+                        steps: account.steps || [],
+                        milestones: account.milestones || [],
+                    })
+                );
                 console.log("Normalized search accounts:", normalizedAccounts); // Debug log
                 setAccounts(normalizedAccounts);
             } else {
-                throw new Error(data.message || "Failed to search accounts");
+                throw new Error(
+                    response.data.message || "Failed to search accounts"
+                );
             }
         } catch (err) {
-            setError(err.message);
+            setError(err.message || "Failed to search accounts");
             console.error("Error searching accounts:", err);
         } finally {
             setIsLoading(false);
@@ -480,23 +472,11 @@ const FileManagerView = () => {
     // Fetch files for a specific account and step
     const fetchStepFiles = async (accountId, workOrderTypeId) => {
         try {
-            const response = await fetch(
-                `/api/file-manager/accounts/${accountId}/work-order-type/${workOrderTypeId}/files`,
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        // Remove Authorization header since we moved the routes outside auth middleware
-                    },
-                }
+            const response = await apiService.get(
+                `/file-manager/accounts/${accountId}/work-order-type/${workOrderTypeId}/files`
             );
 
-            if (!response.ok) {
-                throw new Error("Failed to fetch step files");
-            }
-
-            const data = await response.json();
-            return data.success ? data.data.files : [];
+            return response.data.success ? response.data.data.files : [];
         } catch (err) {
             console.error("Error fetching step files:", err);
             return [];
@@ -506,23 +486,11 @@ const FileManagerView = () => {
     // Fetch files for a specific milestone
     const fetchMilestoneFiles = async (accountId, submilestoneId) => {
         try {
-            const response = await fetch(
-                `/api/file-manager/accounts/${accountId}/submilestone/${submilestoneId}/files`,
-                {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        // Remove Authorization header since we moved the routes outside auth middleware
-                    },
-                }
+            const response = await apiService.get(
+                `/file-manager/accounts/${accountId}/submilestone/${submilestoneId}/files`
             );
 
-            if (!response.ok) {
-                throw new Error("Failed to fetch milestone files");
-            }
-
-            const data = await response.json();
-            return data.success ? data.data.files : [];
+            return response.data.success ? response.data.data.files : [];
         } catch (err) {
             console.error("Error fetching milestone files:", err);
             return [];
@@ -647,23 +615,14 @@ const FileManagerView = () => {
                 "Account lacks full structure - fetching from structure API"
             ); // Debug log
             try {
-                const response = await fetch(
-                    `/api/file-manager/accounts/${account.id}/structure`,
-                    {
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    }
+                const response = await apiService.get(
+                    `/file-manager/accounts/${account.id}/structure`
                 );
 
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success) {
-                        console.log("Fresh account structure:", data.data); // Debug log
-                        setSelectedAccount(data.data);
-                        return;
-                    }
+                if (response.data.success) {
+                    console.log("Fresh account structure:", response.data.data); // Debug log
+                    setSelectedAccount(response.data.data);
+                    return;
                 }
             } catch (err) {
                 console.error("Error fetching account structure:", err);
@@ -738,8 +697,14 @@ const FileManagerView = () => {
     };
 
     const handleFileClick = (file) => {
-        // Handle file click - open file viewer
-        window.open(file.file_path, "_blank");
+        // Handle file click - open file viewer modal
+        setSelectedFile(file);
+        setIsFileViewerOpen(true);
+    };
+
+    const handleCloseFileViewer = () => {
+        setIsFileViewerOpen(false);
+        setSelectedFile(null);
     };
 
     const getHeaderTitle = () => {
@@ -785,24 +750,35 @@ const FileManagerView = () => {
 
                         {selectedAccount && (
                             <div className="flex items-center gap-3">
-                                {/* Sort Dropdown */}
-                                <div className="flex items-center gap-2">
-                                    <Typography
-                                        variant="small"
-                                        className="text-gray-600 font-medium"
+                                {/* Sort Dropdown - Compact Version */}
+                                <div className="inline-flex items-center gap-3 bg-white rounded-lg px-4 py-2 shadow-md border border-gray-100 hover:shadow-lg transition-all duration-200">
+                                    <svg
+                                        className="w-4 h-4 text-gray-500"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
                                     >
-                                        Sort by:
-                                    </Typography>
-                                    <Select
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"
+                                        />
+                                    </svg>
+                                    <span className="text-sm font-medium text-gray-600">
+                                        Sort:
+                                    </span>
+                                    <select
                                         value={sortBy}
-                                        onChange={(value) => setSortBy(value)}
-                                        className="w-28"
-                                        size="sm"
+                                        onChange={(e) =>
+                                            setSortBy(e.target.value)
+                                        }
+                                        className="bg-transparent border-none outline-none text-sm font-semibold text-gray-800 cursor-pointer"
                                     >
-                                        <Option value="name">Name</Option>
-                                        <Option value="date">Date</Option>
-                                        <Option value="type">Type</Option>
-                                    </Select>
+                                        <option value="name">Name</option>
+                                        <option value="date">Date</option>
+                                        <option value="type">Type</option>
+                                    </select>
                                 </div>
 
                                 {/* View Type Toggle */}
@@ -1169,6 +1145,13 @@ const FileManagerView = () => {
                     </div>
                 </div>
             </div>
+
+            {/* File Viewer Modal */}
+            <FileViewerModal
+                isOpen={isFileViewerOpen}
+                onClose={handleCloseFileViewer}
+                file={selectedFile}
+            />
         </div>
     );
 };

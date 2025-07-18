@@ -474,7 +474,24 @@ class WorkOrderController extends Controller
             ]);
             Log::info('Work order log entry created:', ['log_id' => $workOrderLog->id]);
             if ($request->hasFile('files')) {
-                $uploadedFilesData = $this->_uploadFilesToGCS($request->file('files'));
+                // Get context for structured folder organization
+                $account = null;
+                $submilestone = null;
+                $workOrder = WorkOrder::find($validatedData['work_order_id']);
+
+                if ($validatedData['account_id']) {
+                    $account = TakenOutAccount::find($validatedData['account_id']);
+                    if ($account && $account->current_submilestone_id) {
+                        $submilestone = Submilestone::find($account->current_submilestone_id);
+                    }
+                }
+
+                $uploadedFilesData = $this->_uploadFilesToGCS(
+                    $request->file('files'),
+                    $account,
+                    $submilestone,
+                    $workOrder
+                );
                 $fileTitles = $request->input('file_titles', []);
 
                 $uploaderUserId = $validatedData['created_by_user_id'];
@@ -505,13 +522,17 @@ class WorkOrderController extends Controller
             return response()->json(['message' => 'Failed to add note.', 'error' => $e->getMessage()], 500);
         }
     }
-    private function _uploadFilesToGCS(array $files): array
+    private function _uploadFilesToGCS(array $files, $account = null, $submilestone = null, $workOrder = null): array
     {
         $uploadedFilesData = [];
         if (empty($files) || !$this->gcsKeyJson || !$this->gcsBucket) {
             Log::warning('GCS not configured or no files to upload.');
             return $uploadedFilesData;
         }
+
+        // Build structured folder path
+        $structuredPath = $this->buildStructuredPath($account, $submilestone, $workOrder);
+
         $keyArray = json_decode($this->gcsKeyJson, true);
         $storage = new StorageClient(['keyFile' => $keyArray]);
         $bucket = $storage->bucket($this->gcsBucket);
@@ -519,7 +540,7 @@ class WorkOrderController extends Controller
             if ($file->isValid()) {
                 $originalFileName = $file->getClientOriginalName();
                 $fileName = uniqid() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $originalFileName);
-                $filePath = rtrim($this->gcsFolderName, '/') . '/' . $fileName;
+                $filePath = rtrim($this->gcsFolderName, '/') . '/' . $structuredPath . '/' . $fileName;
                 $bucket->upload(
                     fopen($file->getPathname(), 'r'),
                     [
@@ -576,7 +597,7 @@ class WorkOrderController extends Controller
         return response()->json(['message' => 'Work Order status is already Completed.', 'work_order' => $workOrder]);
     }
 
- public function advanceSubmilestoneIfComplete($accountId)
+    public function advanceSubmilestoneIfComplete($accountId)
     {
         $account = TakenOutAccount::findOrFail($accountId);
 
@@ -617,5 +638,99 @@ class WorkOrderController extends Controller
         }
     }
 
+    /**
+     * Build structured folder path for GCS uploads
+     * Structure: Projects/{property_name}/Accounts/{account_name}/Milestones/{milestone_name}
+     */
+    private function buildStructuredPath($account = null, $submilestone = null, $workOrder = null): string
+    {
+        $pathParts = [];
 
+        // Projects level - use property name from account or work order
+        if ($account && $account->property_name) {
+            $projectName = $this->sanitizePathComponent($account->property_name);
+            $pathParts[] = "Projects/{$projectName}";
+        } elseif ($workOrder && $workOrder->accounts()->first()) {
+            $firstAccount = $workOrder->accounts()->first();
+            if ($firstAccount->property_name) {
+                $projectName = $this->sanitizePathComponent($firstAccount->property_name);
+                $pathParts[] = "Projects/{$projectName}";
+            }
+        } else {
+            $pathParts[] = "Projects/General";
+        }
+
+        // Accounts level - use account name
+        if ($account && $account->account_name) {
+            $accountName = $this->sanitizePathComponent($account->account_name);
+            $pathParts[] = "Accounts/{$accountName}";
+        } else {
+            $pathParts[] = "Accounts/General";
+        }
+
+        // Milestones level - use submilestone name
+        if ($submilestone && $submilestone->name) {
+            $milestoneName = $this->sanitizePathComponent($submilestone->name);
+            $pathParts[] = "Milestones/{$milestoneName}";
+        } else {
+            $pathParts[] = "Milestones/General";
+        }
+
+        // Files level
+        $pathParts[] = "Files";
+
+        return implode('/', $pathParts);
+    }
+
+    /**
+     * Sanitize a path component for use in GCS folder names
+     */
+    private function sanitizePathComponent($component): string
+    {
+        // Remove or replace characters that are problematic in file paths
+        $sanitized = preg_replace('/[^A-Za-z0-9\s\-_]/', '', $component);
+        // Replace spaces with underscores
+        $sanitized = str_replace(' ', '_', $sanitized);
+        // Remove multiple consecutive underscores
+        $sanitized = preg_replace('/_+/', '_', $sanitized);
+        // Trim underscores from start and end
+        $sanitized = trim($sanitized, '_');
+        // Ensure it's not empty
+        return empty($sanitized) ? 'Unknown' : $sanitized;
+    }
+
+    /**
+     * Get work order groups with their statuses for the WorkOrderView component
+     */
+    public function getWorkOrderGroups(Request $request)
+    {
+        Log::info('Received request for work order groups with query parameters:', $request->all());
+
+        $query = WorkOrderGroup::with([
+            'workOrders' => function ($query) {
+                $query->with([
+                    'team:id,name',
+                    'workOrderType:id,type_name',
+                    'accounts:id,account_name,contract_no,checklist_status'
+                ]);
+            }
+        ]);
+
+        // Apply filters if provided
+        if ($request->has('status')) {
+            $query->where('status', $request->input('status'));
+            Log::info('Filtering by status:', ['status' => $request->input('status')]);
+        }
+
+        // Sort by creation date
+        $query->orderBy('created_at', 'desc');
+
+        $perPage = $request->input('per_page', 100);
+        $perPage = max(1, min(100, (int) $perPage));
+        $workOrderGroups = $query->paginate($perPage);
+
+        Log::info('Retrieved work order groups:', ['current_count' => $workOrderGroups->count(), 'total' => $workOrderGroups->total()]);
+
+        return response()->json($workOrderGroups);
+    }
 }

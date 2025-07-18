@@ -159,6 +159,17 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
+    const fetchWorkOrderGroups = async () => {
+        try {
+            const response = await apiService.get(
+                "/work-orders/get-work-order-groups"
+            );
+            setWorkOrders(response.data);
+        } catch (error) {
+            console.error("Failed to fetch work order groups:", error);
+        }
+    };
+
     const fetchWorkOrderTypes = async () => {
         try {
             const response = await apiService.get(
@@ -1520,6 +1531,7 @@ export const ContextProvider = ({ children }) => {
                 workOrderTypes,
                 workOrders,
                 fetchWorkOrders,
+                fetchWorkOrderGroups,
                 fetchAccounts,
                 canWrite,
             }}

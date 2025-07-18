@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\WorkOrder;
+use App\Models\WorkOrderGroup;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
@@ -11,176 +12,156 @@ class ExecutiveDashboardController extends Controller
 {
     public function getExecutiveDashboardData(Request $request)
     {
-        $totalWorkOrders = WorkOrder::count();
-        $completedWorkOrders = WorkOrder::where('status', 'Complete')->count();
-        $pendingWorkOrders = WorkOrder::whereIn('status', ['Pending', 'In Progress', 'Assigned'])->count();
-        $overdueWorkOrders = WorkOrder::where('work_order_deadline', '<', Carbon::now())
-            ->whereNotIn('status', ['Completed', 'Cancelled'])
-            ->count();
+        // Get all Work Order Groups with their work orders
+        $workOrderGroups = WorkOrderGroup::with([
+            'workOrders' => function ($query) {
+                $query->with(['workOrderType', 'accounts', 'assignee']);
+            }
+        ])->get();
 
-        $avgCompletionTime = WorkOrder::whereNotNull('completed_at')
-            ->whereNotNull('created_at')
-            ->select(DB::raw('AVG(EXTRACT(EPOCH FROM (completed_at - created_at))) / 60 as avg_minutes'))
-            ->first()
-            ->avg_minutes ?? 0;
+        // Calculate Group-based KPIs using the status field
+        $totalWorkOrderGroups = $workOrderGroups->count();
+        $completedWorkOrderGroups = $workOrderGroups->where('status', WorkOrderGroup::STATUS_COMPLETE)->count();
+        $pendingWorkOrderGroups = $workOrderGroups->where('status', WorkOrderGroup::STATUS_PENDING)->count();
+        $inProgressWorkOrderGroups = $workOrderGroups->where('status', WorkOrderGroup::STATUS_IN_PROGRESS)->count();
+        $overdueWorkOrderGroups = $workOrderGroups->where('status', WorkOrderGroup::STATUS_OVERDUE)->count();
 
+        // Calculate average completion time for completed groups
+        $completedGroups = $workOrderGroups->where('status', WorkOrderGroup::STATUS_COMPLETE)
+            ->whereNotNull('completed_at')
+            ->whereNotNull('created_at');
+
+        $avgCompletionTime = 0;
+        if ($completedGroups->count() > 0) {
+            $totalCompletionTime = $completedGroups->sum(function ($group) {
+                return Carbon::parse($group->created_at)
+                    ->diffInMinutes(Carbon::parse($group->completed_at));
+            });
+
+            $avgCompletionTime = $totalCompletionTime / $completedGroups->count();
+        }
+
+        // Monthly growth calculation
         $currentMonthStart = Carbon::now()->startOfMonth();
         $lastMonthStart = Carbon::now()->subMonth()->startOfMonth();
         $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
 
-        $totalCurrentMonth = WorkOrder::where('created_at', '>=', $currentMonthStart)->count();
-        $totalLastMonth = WorkOrder::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])->count();
+        $totalCurrentMonth = WorkOrderGroup::where('created_at', '>=', $currentMonthStart)->count();
+        $totalLastMonth = WorkOrderGroup::whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])->count();
 
         $monthlyGrowth = 0;
         if ($totalLastMonth > 0) {
             $monthlyGrowth = (($totalCurrentMonth - $totalLastMonth) / $totalLastMonth) * 100;
         }
 
-        $workOrdersByStatusRaw = WorkOrder::select('status', DB::raw('count(*) as value'))
-            ->groupBy('status')
-            ->get();
-        $workOrdersByStatus = $workOrdersByStatusRaw->map(function ($item) {
-            $color = '#9E9E9E';
-            switch ($item->status) {
-                case 'Complete':
-                case 'Completed':
-                    $color = '#4CAF50';
-                    break;
-                case 'In Progress':
-                case 'Assigned':
-                    $color = '#2196F3';
-                    break;
-                case 'Pending':
-                    $color = '#FF9800';
-                    break;
-                case 'Cancelled':
-                    $color = '#F44336';
-                    break;
-                default:
-                    break;
-            }
-            return ['name' => $item->status, 'value' => $item->value, 'color' => $color];
-        })->toArray();
+        // Work Order Groups by Status - using the status field
+        $workOrderGroupsByStatus = $workOrderGroups->groupBy('status')
+            ->map(function ($statusGroup, $status) {
+                $color = '#9E9E9E';
+                switch ($status) {
+                    case WorkOrderGroup::STATUS_COMPLETE:
+                        $color = '#4CAF50';
+                        break;
+                    case WorkOrderGroup::STATUS_IN_PROGRESS:
+                        $color = '#2196F3';
+                        break;
+                    case WorkOrderGroup::STATUS_PENDING:
+                        $color = '#FF9800';
+                        break;
+                    case WorkOrderGroup::STATUS_OVERDUE:
+                        $color = '#F44336';
+                        break;
+                }
+                return ['name' => $status, 'value' => $statusGroup->count(), 'color' => $color];
+            })->values()->toArray();
 
-        $workOrdersByStatus[] = ['name' => 'Overdue', 'value' => $overdueWorkOrders, 'color' => '#F44336'];
+        // Work Order Groups by Type (based on the primary work order type)
+        $workOrderGroupsByTypeRaw = $workOrderGroups->groupBy(function ($group) {
+            // Get the work order type with the lowest sequence (primary type)
+            $primaryWorkOrder = $group->workOrders->sortBy('workOrderType.sequence')->first();
+            return $primaryWorkOrder ? $primaryWorkOrder->workOrderType->type_name : 'Unknown';
+        })->map(function ($typeGroup, $typeName) {
+            $completedCount = $typeGroup->where('status', WorkOrderGroup::STATUS_COMPLETE)->count();
 
-        // Consolidate 'In Progress' and 'Assigned' if they should be shown as one category in the pie chart
-        $consolidatedStatus = [];
-        $inProgressValue = 0;
-        $completedValue = 0;
-        foreach ($workOrdersByStatus as $entry) {
-            if ($entry['name'] === 'In Progress' || $entry['name'] === 'Assigned') {
-                $inProgressValue += $entry['value'];
-            } elseif ($entry['name'] === 'Complete' || $entry['name'] === 'Completed') {
-                $completedValue += $entry['value'];
-            } else {
-                $consolidatedStatus[] = $entry;
-            }
-        }
-        // Add the consolidated 'In Progress' entry, ensuring it's not duplicated if it already exists
-        $foundInProgress = false;
-        foreach ($consolidatedStatus as &$entry) {
-            if ($entry['name'] === 'In Progress') {
-                $entry['value'] = $inProgressValue;
-                $foundInProgress = true;
-                break;
-            }
-        }
-        if (!$foundInProgress && $inProgressValue > 0) {
-            $consolidatedStatus[] = ['name' => 'In Progress', 'value' => $inProgressValue, 'color' => '#2196F3'];
-        }
-        // Add the consolidated 'Completed' entry
-        $foundCompleted = false;
-        foreach ($consolidatedStatus as &$entry) {
-            if ($entry['name'] === 'Complete') {
-                $entry['value'] = $completedValue;
-                $foundCompleted = true;
-                break;
-            }
-        }
-        if (!$foundCompleted && $completedValue > 0) {
-            $consolidatedStatus[] = ['name' => 'Complete', 'value' => $completedValue, 'color' => '#4CAF50'];
-        }
-        $workOrdersByStatus = $consolidatedStatus;
-
-        // Work Orders by Type
-        $workOrdersByTypeRaw = WorkOrder::select(
-            'work_order_types.type_name as type',
-            DB::raw('count(work_orders.work_order_id) as count'),
-            DB::raw('count(CASE WHEN work_orders.status = \'Complete\' THEN 1 ELSE NULL END) as completed')
-        )
-            ->join('work_order_types', 'work_orders.work_order_type_id', '=', 'work_order_types.id')
-            ->groupBy('work_order_types.type_name')
-            ->get();
-        $workOrdersByType = $workOrdersByTypeRaw->toArray();
-
-        //Monthly Performance Trends (last 6 months)
-        $monthlyTrendsRaw = WorkOrder::select(
-            DB::raw('TO_CHAR(created_at, \'Mon\') as month'),
-            DB::raw('EXTRACT(MONTH FROM created_at) as month_num'),
-            DB::raw('count(*) as created'),
-            DB::raw('count(CASE WHEN status = \'Complete\' THEN 1 ELSE NULL END) as completed')
-        )
-            ->where('created_at', '>=', Carbon::now()->subMonths(6)->startOfMonth())
-            ->groupBy(DB::raw('TO_CHAR(created_at, \'Mon\')'), DB::raw('EXTRACT(MONTH FROM created_at)'))
-            ->orderBy('month_num')
-            ->get();
-
-        $monthlyTrends = $monthlyTrendsRaw->map(function ($item) {
-            $efficiency = ($item->created > 0) ? round(($item->completed / $item->created) * 100, 1) : 0;
             return [
-                'month' => $item->month,
-                'created' => $item->created,
-                'complete' => $item->completed,
-                'efficiency' => $efficiency
+                'type' => $typeName,
+                'count' => $typeGroup->count(),
+                'completed' => $completedCount,
+                'efficiency' => $typeGroup->count() > 0 ? round(($completedCount / $typeGroup->count()) * 100, 1) : 0
             ];
-        })->toArray();
+        })->values()->toArray();
 
-        // Recent Work Orders (top 5 most recent)
-        $recentWorkOrders = WorkOrder::with(['workOrderType', 'accounts', 'assignee'])
+        // Monthly Performance Trends (last 6 months) - based on groups
+        $monthlyTrends = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $monthStart = Carbon::now()->subMonths($i)->startOfMonth();
+            $monthEnd = Carbon::now()->subMonths($i)->endOfMonth();
+
+            $monthlyGroups = WorkOrderGroup::whereBetween('created_at', [$monthStart, $monthEnd])->get();
+            $monthlyCompleted = $monthlyGroups->where('status', WorkOrderGroup::STATUS_COMPLETE)->count();
+
+            $monthlyTrends[] = [
+                'month' => $monthStart->format('M'),
+                'created' => $monthlyGroups->count(),
+                'completed' => $monthlyCompleted,
+                'efficiency' => $monthlyGroups->count() > 0 ? round(($monthlyCompleted / $monthlyGroups->count()) * 100, 1) : 0
+            ];
+        }
+
+        // Recent Work Order Groups (top 5 most recent)
+        $recentWorkOrderGroups = WorkOrderGroup::with(['workOrders.workOrderType', 'workOrders.accounts', 'workOrders.assignee'])
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get()
-            ->map(function ($wo) {
-                $accountName = $wo->accounts->isNotEmpty() ? $wo->accounts->first()->account_name : 'N/A';
-                $assigneeName = $wo->assignee ? $wo->assignee->name : 'Unassigned';
-                $daysOpen = $wo->created_at ? Carbon::parse($wo->created_at)->diffInDays(Carbon::now()) : 0;
+            ->map(function ($group) {
+                $primaryWorkOrder = $group->workOrders->sortBy('workOrderType.sequence')->first();
+                $accountNames = $group->workOrders->flatMap(function ($wo) {
+                    return $wo->accounts->pluck('account_name');
+                })->unique()->take(3)->implode(', ');
+
+                $assigneeNames = $group->workOrders->map(function ($wo) {
+                    return $wo->assignee ? $wo->assignee->fullname : 'Unassigned';
+                })->unique()->take(2)->implode(', ');
+
+                $groupStatus = $group->status; // Use the status field directly
+    
+                $daysOpen = $group->created_at ? Carbon::parse($group->created_at)->diffInDays(Carbon::now()) : 0;
+
                 return [
-                    'workOrderId' => $wo->work_order_id,
-                    'type' => $wo->workOrderType->type_name ?? 'N/A',
-                    'account' => $accountName,
-                    'status' => $wo->status,
-                    'assignee' => $assigneeName,
-                    'priority' => $wo->priority,
+                    'workOrderId' => $group->id,
+                    'type' => $primaryWorkOrder ? $primaryWorkOrder->workOrderType->type_name : 'Mixed',
+                    'account' => $accountNames ?: 'N/A',
+                    'status' => $groupStatus,
+                    'assignee' => $assigneeNames ?: 'Unassigned',
+                    'priority' => $primaryWorkOrder ? $primaryWorkOrder->priority : 'Medium',
                     'daysOpen' => $daysOpen,
                 ];
             })->toArray();
 
-        // System Alerts (simplified: recent overdue work orders)
-        $systemAlerts = WorkOrder::where('work_order_deadline', '<', Carbon::now())
-            ->whereNotIn('status', ['Completed', 'Cancelled'])
-            ->orderBy('work_order_deadline', 'asc')
-            ->limit(3)
-            ->get()
-            ->map(function ($wo, $index) {
+        // System Alerts (based on overdue groups)
+        $systemAlerts = $workOrderGroups->where('status', WorkOrderGroup::STATUS_OVERDUE)
+            ->take(3)->map(function ($group, $index) {
+                $primaryWorkOrder = $group->workOrders->sortBy('workOrderType.sequence')->first();
+                $oldestDeadline = $group->workOrders->min('work_order_deadline');
+
                 return [
                     'id' => $index + 1,
-                    'workOrderId' => $wo->work_order_id,
+                    'workOrderId' => $group->id,
                     'type' => 'warning',
-                    'title' => 'Overdue Work Order: ' . $wo->work_order_number,
-                    'message' => 'Deadline was ' . Carbon::parse($wo->work_order_deadline)->format('M d, Y'),
-                    'timestamp' => Carbon::parse($wo->work_order_deadline)->addDays(1)->toDateTimeString(), // When it became overdue
+                    'title' => 'Overdue Work Order Group: WO-' . str_pad($group->id, 6, '0', STR_PAD_LEFT),
+                    'message' => 'Earliest deadline was ' . Carbon::parse($oldestDeadline)->format('M d, Y'),
+                    'timestamp' => Carbon::parse($oldestDeadline)->addDays(1)->toDateTimeString(),
                 ];
-            })->toArray();
+            })->values()->toArray();
 
-        // Add a generic "high workload" alert if total work orders exceed a threshold
-        if ($totalWorkOrders > 500) {
+        // Add a generic "high workload" alert if total groups exceed a threshold
+        if ($totalWorkOrderGroups > 100) {
             $systemAlerts[] = [
                 'id' => count($systemAlerts) + 1,
                 'workOrderId' => null,
                 'type' => 'info',
                 'title' => 'High Workload Detected',
-                'message' => 'Total work orders are currently high, consider resource allocation.',
+                'message' => 'Total work order groups are currently high, consider resource allocation.',
                 'timestamp' => Carbon::now()->toDateTimeString(),
             ];
         }
@@ -188,17 +169,17 @@ class ExecutiveDashboardController extends Controller
         // Combine all data into a single response
         $dashboardData = [
             'kpis' => [
-                'totalWorkOrders' => $totalWorkOrders,
-                'completedWorkOrders' => $completedWorkOrders,
-                'pendingWorkOrders' => $pendingWorkOrders,
-                'overdueWorkOrders' => $overdueWorkOrders,
+                'totalWorkOrders' => $totalWorkOrderGroups, // Now represents groups
+                'completedWorkOrders' => $completedWorkOrderGroups,
+                'pendingWorkOrders' => $pendingWorkOrderGroups + $inProgressWorkOrderGroups, // Combine pending and in progress
+                'overdueWorkOrders' => $overdueWorkOrderGroups,
                 'averageCompletionTime' => round($avgCompletionTime, 1),
                 'monthlyGrowth' => round($monthlyGrowth, 1),
             ],
-            'workOrdersByStatus' => $workOrdersByStatus,
-            'workOrdersByType' => $workOrdersByType,
+            'workOrdersByStatus' => $workOrderGroupsByStatus,
+            'workOrdersByType' => $workOrderGroupsByTypeRaw,
             'monthlyTrends' => $monthlyTrends,
-            'recentWorkOrders' => $recentWorkOrders,
+            'recentWorkOrders' => $recentWorkOrderGroups, // Now represents groups
             'systemAlerts' => $systemAlerts,
         ];
 

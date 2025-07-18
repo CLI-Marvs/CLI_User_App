@@ -101,7 +101,8 @@ const WorkOrderView = () => {
         useState(null);
     const toggleFilterBox = () => setIsFilterVisible((prev) => !prev);
     const [tableRowsData, setTableRowsData] = useState([]);
-    const { workOrders, fetchWorkOrders } = useStateContext();
+    const { workOrders, fetchWorkOrders, fetchWorkOrderGroups } =
+        useStateContext();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [selectedWorkOrderForEdit, setSelectedWorkOrderForEdit] =
         useState(null);
@@ -119,30 +120,33 @@ const WorkOrderView = () => {
     const [isGroupDetailsLoading, setIsGroupDetailsLoading] = useState(false);
 
     useEffect(() => {
+        fetchWorkOrderGroups();
+    }, []);
+
+    useEffect(() => {
         const TABLE_ROWS = async () => {
             if (!workOrders?.data) return;
 
-            const data = workOrders.data.map((row) => ({
-                workOrder: row.work_order,
-                workOrderId: row.work_order_id,
-                team: row.team?.name || "No Team Assigned",
-                status: row.status,
-                dateCreated: new Date(row.created_at)
+            const data = workOrders.data.map((group) => ({
+                groupId: group.id,
+                workOrders: group.work_orders || [],
+                status: group.status || "Pending",
+                dateCreated: new Date(group.created_at)
                     .toISOString()
                     .slice(0, 10),
-                dueDate: new Date(row.work_order_deadline)
-                    .toISOString()
-                    .slice(0, 10),
-                groupId: row.work_order_group_id,
-                steps: row.steps || [],
-                accounts: row.accounts || [],
+                dueDate: group.due_date
+                    ? new Date(group.due_date).toISOString().slice(0, 10)
+                    : "-",
+                completedAt: group.completed_at
+                    ? new Date(group.completed_at).toISOString().slice(0, 10)
+                    : null,
             }));
             setTableRowsData(data);
-            console.log("DATA", data);
+            console.log("GROUP DATA", data);
         };
 
         TABLE_ROWS();
-    }, [workOrders, fetchWorkOrders]);
+    }, [workOrders, fetchWorkOrderGroups]);
 
     const handleRefreshAndClearFilters = () => {
         setSearchQuery("");
@@ -151,7 +155,7 @@ const WorkOrderView = () => {
         setWorkOrderFilterOption("All");
         setIsFilterVisible(false);
         setCurrentPage(1);
-        fetchWorkOrders();
+        fetchWorkOrderGroups();
     };
 
     useEffect(() => {
@@ -169,38 +173,17 @@ const WorkOrderView = () => {
         };
     }, []);
 
-    // Group work orders by group ID
-    const groupedByGroupId = workOrders?.data
-        ? workOrders.data.reduce((acc, wo) => {
-              const groupId = wo.work_order_group_id;
-              if (!acc[groupId]) {
-                  acc[groupId] = {
-                      groupId,
-                      workOrders: [],
-                      // Get the earliest date and latest due date for the group
-                      dateCreated: new Date(wo.created_at)
-                          .toISOString()
-                          .slice(0, 10),
-                      dueDate: new Date(wo.work_order_deadline)
-                          .toISOString()
-                          .slice(0, 10),
-                      // You might want to determine group status based on individual work order statuses
-                      status: wo.status, // This might need logic to determine overall group status
-                  };
-              }
-              acc[groupId].workOrders.push(wo);
-              return acc;
-          }, {})
-        : {};
+    // Since we're now getting work order groups directly, we don't need to group them
+    const workOrderGroups = workOrders?.data || [];
 
     // Filter groups based on search and filter criteria
-    const filteredGroups = Object.values(groupedByGroupId).filter((group) => {
-        const groupIdString = String(group.groupId || "");
+    const filteredGroups = workOrderGroups.filter((group) => {
+        const groupIdString = String(group.id || "");
 
         const searchMatch =
             searchQuery === "" ||
             groupIdString.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            group.workOrders.some((wo) =>
+            (group.work_orders || []).some((wo) =>
                 wo.work_order.toLowerCase().includes(searchQuery.toLowerCase())
             );
 
@@ -237,18 +220,17 @@ const WorkOrderView = () => {
 
     const handleCloseCreateModal = () => {
         setIsCreateModalOpen(false);
-        fetchWorkOrders();
+        fetchWorkOrderGroups();
     };
 
     const handleCreateWorkOrder = () => {
         console.log("New Work Order to be created:");
     };
 
-    const handleOpenViewModal = (workOrderFromTable) => {
-        const fullWorkOrder = workOrders?.data?.find(
-            (wo) => wo.work_order_id === workOrderFromTable.workOrderId
-        );
-        setSelectedWorkOrderForView(fullWorkOrder || workOrderFromTable);
+    const handleOpenViewModal = (workOrderGroup) => {
+        // Get the first work order from the group for the view modal
+        const firstWorkOrder = workOrderGroup.work_orders?.[0];
+        setSelectedWorkOrderForView(firstWorkOrder);
         setIsViewModalOpen(true);
     };
 
@@ -264,7 +246,7 @@ const WorkOrderView = () => {
             console.log(
                 `Work order ${workOrderId} soft deleted successfully. Reason: ${reason}`
             );
-            fetchWorkOrders();
+            fetchWorkOrderGroups();
         } catch (error) {
             console.error("Failed to soft delete work order:", error);
             alert(
@@ -311,7 +293,7 @@ const WorkOrderView = () => {
         setGroupDetailsData(null);
         try {
             const response = await apiService.get(
-                `/work-order-groups/${group.groupId}/details`
+                `/work-order-groups/${group.id}/details`
             );
             setGroupDetailsData(response.data);
             console.log("Group details response:", response.data);
@@ -619,7 +601,7 @@ const WorkOrderView = () => {
                     </thead>
                     <tbody className="divide-y divide-gray-100">
                         {currentData.map((group, idx) => (
-                            <React.Fragment key={group.groupId}>
+                            <React.Fragment key={group.id}>
                                 {/* Main Group Row */}
                                 <tr
                                     className={`transition-all duration-200 ease-in-out ${
@@ -635,7 +617,7 @@ const WorkOrderView = () => {
                                         <div className="flex items-center space-x-2">
                                             <div className="w-2 h-2 bg-blue-500 rounded-full opacity-70"></div>
                                             <span className="font-mono tracking-wide">
-                                                {String(group.groupId).padStart(
+                                                {String(group.id).padStart(
                                                     7,
                                                     "1000-"
                                                 )}
@@ -647,10 +629,15 @@ const WorkOrderView = () => {
                                             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                                             <span
                                                 className={`font-medium px-2 py-1 rounded-full text-xs ${
-                                                    group.status ===
-                                                    "In Progress"
+                                                    group.status === "Complete"
+                                                        ? "bg-green-100 text-green-800"
+                                                        : group.status ===
+                                                          "In Progress"
                                                         ? "bg-yellow-100 text-yellow-800"
-                                                        : "bg-green-100 text-green-800"
+                                                        : group.status ===
+                                                          "Overdue"
+                                                        ? "bg-red-100 text-red-800"
+                                                        : "bg-gray-100 text-gray-800"
                                                 }`}
                                             >
                                                 {group.status}
@@ -661,7 +648,9 @@ const WorkOrderView = () => {
                                         <div className="flex items-center space-x-1">
                                             <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                                             <span className="font-medium">
-                                                {group.dateCreated}
+                                                {new Date(group.created_at)
+                                                    .toISOString()
+                                                    .slice(0, 10)}
                                             </span>
                                         </div>
                                     </td>
@@ -669,7 +658,11 @@ const WorkOrderView = () => {
                                         <div className="flex items-center space-x-1">
                                             <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                                             <span className="font-medium">
-                                                {group.dueDate}
+                                                {group.due_date
+                                                    ? new Date(group.due_date)
+                                                          .toISOString()
+                                                          .slice(0, 10)
+                                                    : "-"}
                                             </span>
                                         </div>
                                     </td>
@@ -678,9 +671,7 @@ const WorkOrderView = () => {
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleOpenViewModal(
-                                                        group.workOrders[0]
-                                                    );
+                                                    handleOpenViewModal(group);
                                                 }}
                                                 className="p-1 text-slate-500 hover:text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-lg transition-all duration-200"
                                                 title="View Details"
@@ -691,7 +682,7 @@ const WorkOrderView = () => {
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     setSelectedWorkOrderForEdit(
-                                                        group.workOrders[0]
+                                                        group.work_orders?.[0]
                                                     );
                                                     setIsEditModalOpen(true);
                                                 }}
@@ -704,7 +695,7 @@ const WorkOrderView = () => {
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleOpenDeleteModal(
-                                                        group.workOrders[0]
+                                                        group.work_orders?.[0]
                                                     );
                                                 }}
                                                 disabled={isDeleting}
@@ -728,7 +719,7 @@ const WorkOrderView = () => {
                         workOrder={selectedWorkOrderForEdit}
                         onWorkOrderUpdated={() => {
                             setIsEditModalOpen(false);
-                            fetchWorkOrders();
+                            fetchWorkOrderGroups();
                         }}
                     />
                 )}

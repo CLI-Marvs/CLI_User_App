@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use App\Models\AccountChecklistStatus;
 use App\Models\WorkOrder;
+use App\Models\WorkOrderGroup;
 use App\Models\WorkOrderLog;
 use App\Models\WorkOrderType;
 use App\Models\Checklist;
@@ -174,6 +175,9 @@ class AccountChecklistStatusController extends Controller
                 $account->checklist_status = true;
                 $account->save();
                 Log::info("Account checklist_status set to true for account ID: {$accountId} (no checklists defined for associated work order types).");
+
+                // Check if all accounts in work order groups are completed
+                $this->_checkWorkOrderGroupCompletion($accountId);
             }
             return;
         }
@@ -189,6 +193,9 @@ class AccountChecklistStatusController extends Controller
             $account->checklist_status = true;
             $account->save();
             Log::info("Account checklist_status set to true for account ID: {$accountId} (all required checklists completed).");
+
+            // Check if all accounts in work order groups are completed
+            $this->_checkWorkOrderGroupCompletion($accountId);
         } elseif (!$allRequiredCompleted && $account->checklist_status) {
             $account->checklist_status = false;
             $account->save();
@@ -357,6 +364,33 @@ class AccountChecklistStatusController extends Controller
                 $account->save();
 
                 Log::info("Account {$accountId} advanced to Submilestone ID {$nextSubmilestone->id}");
+            }
+        }
+    }
+
+    /**
+     * Check if all accounts in the work order groups are completed
+     * and update the group status accordingly.
+     */
+    private function _checkWorkOrderGroupCompletion($accountId)
+    {
+        $account = TakenOutAccount::find($accountId);
+        if (!$account) {
+            return;
+        }
+
+        // Get all work order groups this account belongs to
+        $workOrderGroups = $account->workOrders()
+            ->with('workOrderGroup')
+            ->get()
+            ->pluck('workOrderGroup')
+            ->unique('id')
+            ->filter();
+
+        // Check completion for each work order group
+        foreach ($workOrderGroups as $group) {
+            if ($group) {
+                $group->checkAllAccountsCompleted();
             }
         }
     }

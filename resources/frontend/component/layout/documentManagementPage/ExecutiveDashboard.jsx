@@ -69,6 +69,24 @@ import {
 } from "./service/dashboardDataService.jsx";
 import "react-loading-skeleton/dist/skeleton.css";
 
+/**
+ * ExecutiveDashboard Component - Work Order Groups Overview
+ *
+ * This dashboard displays metrics and visualizations for Work Order Groups rather than individual Work Orders.
+ *
+ * Key Logic:
+ * - A Work Order Group contains multiple Work Orders organized by sequence
+ * - A Group is "Complete" only when ALL Work Orders within it are complete
+ * - A Group is "In Progress" if any Work Order is in progress or assigned
+ * - A Group is "Overdue" if any Work Order within it is overdue
+ *
+ * The dashboard shows:
+ * - Total number of Work Order Groups
+ * - Completion status based on group completion logic
+ * - Distribution by primary work order type (first in sequence)
+ * - Recent group activity and system alerts
+ */
+
 const ExecutiveDashboard = () => {
     const theme = useTheme();
     const [loading, setLoading] = useState(true);
@@ -289,20 +307,21 @@ const ExecutiveDashboard = () => {
         );
     };
 
-    const workOrderColumns = [
+    // Work Order Group Columns for the data table
+    const workOrderGroupColumns = [
         {
             field: "workOrderId",
-            headerName: "WO ID",
+            headerName: "Group ID",
             width: 100,
             renderCell: (params) => (
                 <Typography variant="body2" fontWeight={500}>
-                    #{params.value}
+                    WO-{String(params.value).padStart(6, "0")}
                 </Typography>
             ),
         },
         {
             field: "type",
-            headerName: "Type",
+            headerName: "Primary Type",
             width: 180,
             renderCell: (params) => (
                 <Chip
@@ -318,17 +337,25 @@ const ExecutiveDashboard = () => {
         },
         {
             field: "account",
-            headerName: "Account",
-            width: 140,
+            headerName: "Accounts",
+            width: 200,
             renderCell: (params) => (
-                <Typography variant="body2" fontWeight={500}>
+                <Typography
+                    variant="body2"
+                    fontWeight={500}
+                    sx={{
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                    }}
+                >
                     {params.value}
                 </Typography>
             ),
         },
         {
             field: "status",
-            headerName: "Status",
+            headerName: "Group Status",
             width: 130,
             renderCell: (params) => (
                 <Chip
@@ -340,8 +367,7 @@ const ExecutiveDashboard = () => {
                         backgroundColor:
                             params.value === "Complete"
                                 ? `${theme.palette.success.light}20`
-                                : params.value === "In Progress" ||
-                                  params.value === "Assigned"
+                                : params.value === "In Progress"
                                 ? `${theme.palette.primary.light}20`
                                 : params.value === "Pending"
                                 ? `${theme.palette.warning.light}20`
@@ -349,8 +375,7 @@ const ExecutiveDashboard = () => {
                         color:
                             params.value === "Complete"
                                 ? theme.palette.success.dark
-                                : params.value === "In Progress" ||
-                                  params.value === "Assigned"
+                                : params.value === "In Progress"
                                 ? theme.palette.primary.dark
                                 : params.value === "Pending"
                                 ? theme.palette.warning.dark
@@ -361,7 +386,7 @@ const ExecutiveDashboard = () => {
         },
         {
             field: "assignee",
-            headerName: "Assignee",
+            headerName: "Assignees",
             width: 150,
             renderCell: (params) => (
                 <Box display="flex" alignItems="center" gap={1}>
@@ -369,17 +394,28 @@ const ExecutiveDashboard = () => {
                         sx={{
                             width: 24,
                             height: 24,
-                            fontSize: "0.75rem",
+                            fontSize: "0.65rem",
                             backgroundColor: theme.palette.grey[300],
                             color: theme.palette.text.primary,
                         }}
                     >
                         {params.value
+                            .split(",")[0]
                             .split(" ")
                             .map((n) => n[0])
-                            .join("")}
+                            .join("")
+                            .slice(0, 2)}
                     </Avatar>
-                    <Typography variant="body2">{params.value}</Typography>
+                    <Typography
+                        variant="body2"
+                        sx={{
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        {params.value}
+                    </Typography>
                 </Box>
             ),
         },
@@ -643,44 +679,43 @@ const ExecutiveDashboard = () => {
                     <KPICard
                         title="Total Work Orders"
                         value={dashboardData.kpis.totalWorkOrders}
-                        subtitle="Currently active"
+                        subtitle="Active work orders"
                         icon={DocumentTextIcon}
-                        trend={dashboardData.kpis.monthlyGrowth}
                         color="primary"
                     />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                     <KPICard
-                        title="Completion Rate"
-                        value={`${(
-                            (dashboardData.kpis.completedWorkOrders /
-                                dashboardData.kpis.totalWorkOrders) *
-                            100
-                        ).toFixed(1)}`}
-                        subtitle="Orders completed"
+                        title="Completed Work Orders"
+                        value={dashboardData.kpis.completedWorkOrders}
+                        subtitle="All work orders completed"
                         icon={CheckCircleIcon}
-                        trend={5.2}
                         color="success"
+                        trend={
+                            dashboardData.kpis.completedWorkOrders > 0 ? 12 : 0
+                        }
                     />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                     <KPICard
-                        title="Avg. Completion"
-                        value={`${dashboardData.kpis.averageCompletionTime}`}
-                        subtitle="Days on average"
+                        title="Work Orders in Progress"
+                        value={dashboardData.kpis.pendingWorkOrders}
+                        subtitle="Contains pending work orders"
                         icon={ClockIcon}
-                        trend={-12.1}
                         color="warning"
+                        trend={
+                            dashboardData.kpis.pendingWorkOrders > 0 ? -5 : 0
+                        }
                     />
                 </Grid>
                 <Grid item xs={12} sm={6} md={3}>
                     <KPICard
-                        title="Overdue Orders"
+                        title="Overdue Work Orders"
                         value={dashboardData.kpis.overdueWorkOrders}
-                        subtitle="Require attention"
+                        subtitle="Contains overdue work orders"
                         icon={ExclamationTriangleIcon}
-                        trend={-23.5}
                         color="error"
+                        trend={dashboardData.kpis.overdueWorkOrders > 0 ? 8 : 0}
                     />
                 </Grid>
             </Grid>
@@ -1070,16 +1105,20 @@ const ExecutiveDashboard = () => {
                                             id: row.id || index,
                                         })
                                     )}
-                                    columns={workOrderColumns.map((col) => ({
-                                        ...col,
-                                        // Ensure consistent alignment
-                                        headerAlign: col.headerAlign || "left",
-                                        align: col.align || "left",
-                                        // Add minimum width if not specified
-                                        minWidth: col.minWidth || 100,
-                                        // Ensure flex property for responsive columns
-                                        flex: col.flex || (col.width ? 0 : 1),
-                                    }))}
+                                    columns={workOrderGroupColumns.map(
+                                        (col) => ({
+                                            ...col,
+                                            // Ensure consistent alignment
+                                            headerAlign:
+                                                col.headerAlign || "left",
+                                            align: col.align || "left",
+                                            // Add minimum width if not specified
+                                            minWidth: col.minWidth || 100,
+                                            // Ensure flex property for responsive columns
+                                            flex:
+                                                col.flex || (col.width ? 0 : 1),
+                                        })
+                                    )}
                                     pageSize={5}
                                     rowsPerPageOptions={[5]}
                                     disableSelectionOnClick

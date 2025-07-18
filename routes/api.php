@@ -92,6 +92,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('get-assignee', [WorkOrderController::class, 'getAssignee']);
         Route::get('assignee/{id}', [WorkOrderController::class, 'getAssigneeById']);
         Route::get('get-work-orders', [WorkOrderController::class, 'getWorkOrders']);
+        Route::get('get-work-order-groups', [WorkOrderController::class, 'getWorkOrderGroups']);
         Route::get('work-order-types', [WorkOrderController::class, 'getWorkOrderTypes']);
         Route::post('notes/add', [WorkOrderController::class, 'addNoteWithAttachments']);
         Route::post('{work_order}/updates', [WorkOrderController::class, 'addUpdate']);
@@ -194,6 +195,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/projects/{projectName}/milestones/{submilestone}/assignees/{employee}', [ProjectAssigneeController::class, 'removeAssignee'])->where('projectName', '.*');
     //for workorder group
     Route::get('/work-order-groups/{groupId}/details', [WorkOrderGroupController::class, 'showDetails']);
+    Route::post('/work-order-groups/{id}/update-status', [WorkOrderGroupController::class, 'updateStatus']);
+    Route::post('/work-order-groups/update-all-status', [WorkOrderGroupController::class, 'updateAllStatus']);
+    Route::get('/work-order-groups/status-summary', [WorkOrderGroupController::class, 'getStatusSummary']);
+    Route::post('/work-order-groups/{id}/check-accounts-completion', [WorkOrderGroupController::class, 'checkAccountsCompletion']);
 });
 
 //* For Sap 
@@ -360,13 +365,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
-// File Manager API routes (temporary without authentication for testing)
-Route::get('/file-manager/accounts', [FileManagerController::class, 'getAllAccountsWithFiles']);
-Route::get('/file-manager/accounts/search', [FileManagerController::class, 'searchAccounts']);
-Route::get('/file-manager/accounts/{accountId}/files', [FileManagerController::class, 'getAccountFiles']);
-Route::get('/file-manager/accounts/{accountId}/structure', [FileManagerController::class, 'getAccountWithStructure']);
-Route::get('/file-manager/accounts/{accountId}/work-order-type/{workOrderTypeId}/files', [FileManagerController::class, 'getFilesByWorkOrderType']);
-Route::get('/file-manager/accounts/{accountId}/submilestone/{submilestoneId}/files', [FileManagerController::class, 'getFilesBySubmilestone']);
 
-// Test route without authentication
-Route::get('/test-file-manager', [FileManagerController::class, 'getAllAccountsWithFiles']);
+// File Manager API routes (now require authentication)
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/file-manager/accounts', [FileManagerController::class, 'getAllAccountsWithFiles']);
+    Route::get('/file-manager/accounts/search', [FileManagerController::class, 'searchAccounts']);
+    Route::get('/file-manager/accounts/{accountId}/files', [FileManagerController::class, 'getAccountFiles']);
+    Route::get('/file-manager/accounts/{accountId}/structure', [FileManagerController::class, 'getAccountWithStructure']);
+    Route::get('/file-manager/accounts/{accountId}/work-order-type/{workOrderTypeId}/files', [FileManagerController::class, 'getFilesByWorkOrderType']);
+    Route::get('/file-manager/accounts/{accountId}/submilestone/{submilestoneId}/files', [FileManagerController::class, 'getFilesBySubmilestone']);
+    // Test route
+    Route::get('/test-file-manager', [FileManagerController::class, 'getAllAccountsWithFiles']);
+});

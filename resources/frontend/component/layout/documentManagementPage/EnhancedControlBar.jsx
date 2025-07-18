@@ -7,6 +7,8 @@ const EnhancedControlBar = ({
     onItemsPerPageChange,
     statusFilter,
     onStatusFilterChange,
+    onRefresh,
+    isRefreshing,
 }) => {
     const [viewMode, setViewMode] = useState("grid");
     const [showFilters, setShowFilters] = useState(false);
@@ -94,6 +96,41 @@ const EnhancedControlBar = ({
                             </svg>
                             Filters
                         </button>
+
+                        {/* Refresh Button */}
+                        {onRefresh && (
+                            <button
+                                onClick={onRefresh}
+                                disabled={isRefreshing}
+                                className={`relative flex items-center justify-center w-10 h-10 rounded-lg border border-gray-300 bg-white transition-all duration-300 ease-in-out transform hover:scale-110 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:hover:shadow-none ${
+                                    isRefreshing
+                                        ? "bg-blue-50 border-blue-300 shadow-sm animate-refresh-glow"
+                                        : "hover:bg-gray-50 hover:border-gray-400"
+                                }`}
+                                title="Refresh data"
+                            >
+                                <svg
+                                    className={`h-4 w-4 text-gray-600 transition-all duration-300 ${
+                                        isRefreshing
+                                            ? "animate-spin text-blue-600"
+                                            : "hover:text-gray-800"
+                                    }`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                    />
+                                </svg>
+                                {isRefreshing && (
+                                    <div className="absolute inset-0 rounded-lg border-2 border-blue-400 opacity-30 animate-refresh-pulse"></div>
+                                )}
+                            </button>
+                        )}
                     </div>
 
                     {/* Right Section - View Controls and Actions */}
@@ -188,8 +225,38 @@ const EnhancedControlBar = ({
                     }
                 }
 
+                @keyframes refreshPulse {
+                    0%,
+                    100% {
+                        transform: scale(1);
+                        opacity: 1;
+                    }
+                    50% {
+                        transform: scale(1.05);
+                        opacity: 0.8;
+                    }
+                }
+
+                @keyframes refreshGlow {
+                    0%,
+                    100% {
+                        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+                    }
+                    50% {
+                        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+                    }
+                }
+
                 .animate-fadeIn {
                     animation: fadeIn 0.2s ease-out;
+                }
+
+                .animate-refresh-pulse {
+                    animation: refreshPulse 1.5s ease-in-out infinite;
+                }
+
+                .animate-refresh-glow {
+                    animation: refreshGlow 2s ease-in-out infinite;
                 }
             `}</style>
         </div>

@@ -119,4 +119,126 @@ class WorkOrderGroupController extends Controller
             'submilestonesByType' => $submilestonesByType,
         ]);
     }
+
+    /**
+     * Update status for a specific work order group
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        try {
+            $group = WorkOrderGroup::findOrFail($id);
+            $oldStatus = $group->status;
+
+            $group->updateStatus();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Group status updated successfully',
+                'data' => [
+                    'group_id' => $group->id,
+                    'old_status' => $oldStatus,
+                    'new_status' => $group->status,
+                    'completion_percentage' => $group->getCompletionPercentage(),
+                    'started_at' => $group->started_at,
+                    'completed_at' => $group->completed_at,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update group status',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update status for all work order groups
+     */
+    public function updateAllStatus()
+    {
+        try {
+            $groups = WorkOrderGroup::with('workOrders')->get();
+            $updated = 0;
+
+            foreach ($groups as $group) {
+                $oldStatus = $group->status;
+                $group->updateStatus();
+
+                if ($oldStatus !== $group->status) {
+                    $updated++;
+                }
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'All group statuses updated successfully',
+                'data' => [
+                    'total_groups' => $groups->count(),
+                    'updated_groups' => $updated,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to update group statuses',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get group status summary
+     */
+    public function getStatusSummary()
+    {
+        try {
+            $summary = WorkOrderGroup::selectRaw('status, COUNT(*) as count')
+                ->groupBy('status')
+                ->get()
+                ->pluck('count', 'status')
+                ->toArray();
+
+            return response()->json([
+                'success' => true,
+                'data' => $summary
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get status summary',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Check if all accounts in a group are completed and update group status
+     */
+    public function checkAccountsCompletion($id)
+    {
+        try {
+            $group = WorkOrderGroup::with('workOrders.accounts')->findOrFail($id);
+
+            $allAccountsCompleted = $group->checkAllAccountsCompleted();
+
+            return response()->json([
+                'success' => true,
+                'message' => $allAccountsCompleted ? 'All accounts completed - group status updated' : 'Some accounts are still pending',
+                'data' => [
+                    'group_id' => $group->id,
+                    'all_accounts_completed' => $allAccountsCompleted,
+                    'current_status' => $group->status,
+                    'completion_percentage' => $group->getCompletionPercentage(),
+                    'completed_at' => $group->completed_at,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to check accounts completion',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

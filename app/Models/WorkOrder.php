@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\WorkOrderStatusUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -49,6 +50,24 @@ class WorkOrder extends Model
     public function group()
     {
         return $this->belongsTo(WorkOrderGroup::class, 'work_order_group_id');
+    }
+
+    public function workOrderGroup()
+    {
+        return $this->belongsTo(WorkOrderGroup::class, 'work_order_group_id');
+    }
+
+    /**
+     * Fire event when work order status is updated
+     */
+    protected static function booted()
+    {
+        static::updated(function ($workOrder) {
+            // Check if status was changed
+            if ($workOrder->isDirty('status')) {
+                event(new WorkOrderStatusUpdated($workOrder));
+            }
+        });
     }
 
     public function account()

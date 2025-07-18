@@ -17,6 +17,7 @@ import {
 } from "@material-tailwind/react";
 import EnhancedControlBar from "./EnhancedControlBar";
 import NotesAndUpdatesModal from "./NotesAndUpdatesModal";
+import apiService from "../../../../frontend/component/servicesApi/apiService";
 
 const WorkOrderGroupDetailsModal = ({
     isOpen,
@@ -39,6 +40,79 @@ const WorkOrderGroupDetailsModal = ({
     const [filesModalOpen, setFilesModalOpen] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [selectedAccountInfo, setSelectedAccountInfo] = useState({});
+    const [progressionStatus, setProgressionStatus] = useState({
+        isProgressing: false,
+        message: "",
+        type: "info", // 'info', 'success', 'error'
+    });
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // Milestone progression logic - moved before useMemo to avoid temporal dead zone
+    const checkMilestoneProgression = (account, steps) => {
+        const currentStep = steps.find((step) =>
+            step.subMilestones.some(
+                (sub) => sub.id === account.currentSubMilestoneId
+            )
+        );
+
+        if (!currentStep) return null;
+
+        // Check if DOCKETING milestone is completed in current step
+        const docketingMilestone = currentStep.subMilestones.find((sub) =>
+            sub.name.toLowerCase().includes("docketing")
+        );
+
+        if (docketingMilestone) {
+            const isDocketingCompleted = checkMilestoneCompletion(
+                account,
+                docketingMilestone
+            );
+
+            if (isDocketingCompleted) {
+                // Check if all other milestones in current step are completed
+                const allMilestonesCompleted = currentStep.subMilestones.every(
+                    (milestone) => checkMilestoneCompletion(account, milestone)
+                );
+
+                if (allMilestonesCompleted) {
+                    // Find next step
+                    const currentStepIndex = steps.findIndex(
+                        (s) => s.id === currentStep.id
+                    );
+                    const nextStep = steps[currentStepIndex + 1];
+
+                    if (nextStep && nextStep.subMilestones.length > 0) {
+                        // Move to first milestone of next step
+                        return nextStep.subMilestones[0].id;
+                    }
+                }
+            }
+        }
+
+        return null;
+    };
+
+    // Helper function to check if a milestone is completed
+    const checkMilestoneCompletion = (account, milestone) => {
+        const checklists = milestone.checklists || [];
+        if (checklists.length === 0) return false;
+
+        const uploadedDocs = account.uploaded_documents || [];
+        const completedCount = checklists.filter((checklist) => {
+            const hasUploadedDoc = uploadedDocs.some(
+                (doc) => doc.file_title === checklist.name
+            );
+            const accountChecklistStatus = (
+                account.account_checklist_statuses || []
+            ).find((status) => status.checklist_id === checklist.id);
+            const hasCompletedStatus =
+                accountChecklistStatus && accountChecklistStatus.is_completed;
+            return hasUploadedDoc || hasCompletedStatus;
+        }).length;
+
+        return completedCount === checklists.length;
+    };
+
     // Handler to show files modal for an account
     const handleShowFilesModal = (account) => {
         const transformedFiles = (account.uploaded_documents || []).map(
@@ -286,9 +360,30 @@ const WorkOrderGroupDetailsModal = ({
                     }
                 }
 
+                // Check for milestone progression after setting currentChecklistInfo
+                if (
+                    currentChecklistInfo &&
+                    currentChecklistInfo.progressPercentage === 100
+                ) {
+                    const nextSubmilestoneId = checkMilestoneProgression(
+                        account,
+                        steps
+                    );
+                    if (
+                        nextSubmilestoneId &&
+                        nextSubmilestoneId !== account.currentSubMilestoneId
+                    ) {
+                        // Auto-progress to next milestone
+                        updateMilestoneProgression(
+                            account.id,
+                            nextSubmilestoneId
+                        );
+                    }
+                }
+
                 // Determine the overall status based on whether all checklists for the account are complete.
                 const overallStatus = account.checklist_status
-                    ? "Completed"
+                    ? "Complete"
                     : "In Progress";
 
                 const notesData = {
@@ -389,6 +484,171 @@ const WorkOrderGroupDetailsModal = ({
         setSelectedAccountForNotes(null);
     };
 
+    const handleMilestoneProgression = async (accountId) => {
+        try {
+            // Find the account in the current data
+            const account = paginatedData.find((row) => row.key === accountId);
+            if (account) {
+                const nextSubmilestoneId = checkMilestoneProgression(
+                    account,
+                    steps
+                );
+                if (nextSubmilestoneId) {
+                    await updateMilestoneProgression(
+                        accountId,
+                        nextSubmilestoneId
+                    );
+                }
+            }
+        } catch (error) {
+            console.error("Error in milestone progression:", error);
+            // Error handling is done through progressionStatus state
+        }
+    };
+
+    // API function to update milestone progression
+    const updateMilestoneProgression = async (accountId, newSubmilestoneId) => {
+        try {
+            setProgressionStatus({
+                isProgressing: true,
+                message: "Updating milestone progression...",
+                type: "info",
+            });
+
+            await apiService.put(
+                `/accounts/${accountId}/milestone-progression`,
+                {
+                    current_submilestone_id: newSubmilestoneId,
+                }
+            );
+
+            // Refresh data after update
+            if (onRefresh) {
+                await onRefresh();
+            }
+
+            setProgressionStatus({
+                isProgressing: false,
+                message: "Milestone progression updated successfully!",
+                type: "success",
+            });
+
+            // Check if all accounts are now completed after this update
+            setTimeout(async () => {
+                await checkGroupCompletion();
+            }, 1000);
+
+            setTimeout(
+                () =>
+                    setProgressionStatus({
+                        isProgressing: false,
+                        message: "",
+                        type: "info",
+                    }),
+                3000
+            );
+        } catch (error) {
+            console.error("Error updating milestone progression:", error);
+            setProgressionStatus({
+                isProgressing: false,
+                message:
+                    "Failed to update milestone progression. Please try again.",
+                type: "error",
+            });
+            setTimeout(
+                () =>
+                    setProgressionStatus({
+                        isProgressing: false,
+                        message: "",
+                        type: "info",
+                    }),
+                5000
+            );
+        }
+    };
+
+    // Handle refresh button click
+    const handleRefresh = async () => {
+        if (isRefreshing || !onRefresh) return;
+
+        setIsRefreshing(true);
+        try {
+            await onRefresh();
+            setProgressionStatus({
+                isProgressing: false,
+                message: "Data refreshed successfully!",
+                type: "success",
+            });
+            setTimeout(
+                () =>
+                    setProgressionStatus({
+                        isProgressing: false,
+                        message: "",
+                        type: "info",
+                    }),
+                3000
+            );
+        } catch (error) {
+            console.error("Error refreshing data:", error);
+            setProgressionStatus({
+                isProgressing: false,
+                message: "Failed to refresh data. Please try again.",
+                type: "error",
+            });
+            setTimeout(
+                () =>
+                    setProgressionStatus({
+                        isProgressing: false,
+                        message: "",
+                        type: "info",
+                    }),
+                5000
+            );
+        } finally {
+            setIsRefreshing(false);
+        }
+    };
+
+    // Check if all accounts in the group are completed and update group status
+    const checkGroupCompletion = async () => {
+        if (!group?.id) return;
+
+        try {
+            const response = await apiService.post(
+                `/work-order-groups/${group.id}/check-accounts-completion`
+            );
+
+            if (
+                response.data.success &&
+                response.data.data.all_accounts_completed
+            ) {
+                setProgressionStatus({
+                    isProgressing: false,
+                    message:
+                        "🎉 All accounts completed! Work Order Group status updated to Complete.",
+                    type: "success",
+                });
+
+                // Refresh the data to show updated status
+                if (onRefresh) {
+                    await onRefresh();
+                }
+
+                setTimeout(
+                    () =>
+                        setProgressionStatus({
+                            isProgressing: false,
+                            message: "",
+                            type: "info",
+                        }),
+                    5000
+                );
+            }
+        } catch (error) {
+            console.error("Error checking group completion:", error);
+        }
+    };
+
     if (!isOpen) return null;
 
     return (
@@ -451,7 +711,31 @@ const WorkOrderGroupDetailsModal = ({
                 onItemsPerPageChange={handleItemsPerPageChange}
                 statusFilter={statusFilter}
                 onStatusFilterChange={handleStatusFilterChange}
+                onRefresh={handleRefresh}
+                isRefreshing={isRefreshing}
             />
+
+            {/* Milestone Progression Notification */}
+            {progressionStatus.message && (
+                <div
+                    className={`mx-4 mb-4 p-3 rounded-lg border ${
+                        progressionStatus.type === "success"
+                            ? "bg-green-50 border-green-200 text-green-800"
+                            : progressionStatus.type === "error"
+                            ? "bg-red-50 border-red-200 text-red-800"
+                            : "bg-blue-50 border-blue-200 text-blue-800"
+                    }`}
+                >
+                    <div className="flex items-center">
+                        {progressionStatus.isProgressing && (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-2"></div>
+                        )}
+                        <span className="text-sm font-medium">
+                            {progressionStatus.message}
+                        </span>
+                    </div>
+                </div>
+            )}
 
             {/* Table Content */}
             <DialogBody className="p-0 flex-1 overflow-hidden">
@@ -500,6 +784,7 @@ const WorkOrderGroupDetailsModal = ({
                             onAddFiles={onAddFiles}
                             handleOpenNotesModal={handleOpenNotesModal}
                             currentUserId={currentUserId}
+                            onRefresh={onRefresh}
                         />
                     </div>
                 ) : paginatedData.length > 0 ? (
@@ -663,6 +948,9 @@ const WorkOrderGroupDetailsModal = ({
                                         }
                                         currentChecklistInfo={
                                             row.currentChecklistInfo
+                                        }
+                                        onMilestoneProgression={
+                                            handleMilestoneProgression
                                         }
                                     />
                                 ))}
