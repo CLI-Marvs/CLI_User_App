@@ -6,6 +6,7 @@ const SelectInput = ({
     options = [],
     value,
     onChange,
+    onBlur,
     placeholder = "Select...",
     name,
     getOptionClassName = () => "",
@@ -15,7 +16,7 @@ const SelectInput = ({
     const [search, setSearch] = useState("");
     const [showOptions, setShowOptions] = useState(false);
 
-    const wrapperRef = useRef(null); // 👈 ref for outer container
+    const wrapperRef = useRef(null); 
 
     const selectedOption = options.find((opt) => opt[valueKey] === value);
 
@@ -39,6 +40,9 @@ const SelectInput = ({
                 !wrapperRef.current.contains(event.target)
             ) {
                 setShowOptions(false);
+                if (onBlur) {
+                    onBlur();
+                }
             }
         };
 
@@ -46,7 +50,7 @@ const SelectInput = ({
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, []);
+    }, [onBlur]);
 
     return (
         <div ref={wrapperRef} className="relative w-full">

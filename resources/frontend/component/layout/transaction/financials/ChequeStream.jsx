@@ -206,9 +206,6 @@ const ChequeStream = () => {
         }, 100);
     };
 
-    console.log("reprintMode", reprintMode);
-    console.log("reprintIndex", reprintIndex);
-
     const handleCheck = (field, value, index = null) => {
         let cleanedValue = value.replace(/[^0-9.]/g, "");
         const floatValue = parseFloat(cleanedValue);
