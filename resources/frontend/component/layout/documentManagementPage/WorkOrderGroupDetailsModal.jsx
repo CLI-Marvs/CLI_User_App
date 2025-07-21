@@ -788,7 +788,7 @@ const WorkOrderGroupDetailsModal = ({
                         />
                     </div>
                 ) : paginatedData.length > 0 ? (
-                    <div className="h-full overflow-auto">
+                    <div className="h-full overflow-x-auto">
                         <table className="w-full text-left border-collapse bg-white">
                             <thead className="sticky top-0 z-10">
                                 {/* Row 1: Step headers */}

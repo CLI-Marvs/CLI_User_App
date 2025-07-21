@@ -563,19 +563,18 @@ class WorkOrderController extends Controller
         return $uploadedFilesData;
     }
 
-    public function softDelete(WorkOrder $workOrder): \Illuminate\Http\JsonResponse
+    public function softDelete($groupId)
     {
-        $workOrderIdForLogging = $workOrder->getKey();
-        try {
-            $workOrder->delete();
-            return response()->json(['message' => 'Work order soft deleted successfully.'], 200);
-        } catch (\Exception $e) {
-            Log::error("Soft delete failed for work order ID {$workOrderIdForLogging}: " . $e->getMessage(), [
-                'exception_class' => get_class($e),
-                'exception_trace' => $e->getTraceAsString(),
-            ]);
-            return response()->json(['message' => 'Failed to soft delete work order.', 'error' => $e->getMessage(), 'exception_class' => get_class($e)], 500);
+        $group = WorkOrderGroup::with('workOrders')->findOrFail($groupId);
+
+        foreach ($group->workOrders as $workOrder) {
+            $workOrder->delete(); 
         }
+
+        // Optionally, soft delete the group itself
+        $group->delete();
+
+        return response()->json(['message' => 'Work order group and its work orders soft deleted successfully.'], 200);
     }
 
     public function updateStatusToComplete(Request $request, $workOrderId)

@@ -142,7 +142,7 @@ const EditWorkOrderModal = ({
                             </h2>
                             {workOrder?.work_order_id && (
                                 <div className="mt-1 bg-[#067AC5] text-white font-normal text-xs inline-block px-4 py-1 rounded-full">
-                                    Order No. {workOrder.work_order_id}
+                                    Order No. 1000{workOrder.work_order_group_id}
                                 </div>
                             )}
                         </div>
@@ -156,55 +156,6 @@ const EditWorkOrderModal = ({
                     </div>
 
                     <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-                        <div className="flex items-center mb-2 justify-between">
-                            <label
-                                htmlFor="work-order-type"
-                                className="block text-sm ml-4 font-semibold text-custom-bluegreen w-1/4"
-                            >
-                                Work Order:
-                            </label>
-                            <div className="w-2/3">
-                                <SearchableDropdown
-                                    options={workOrderTypes}
-                                    selectedOptions={
-                                        selectedWorkOrderType
-                                            ? [selectedWorkOrderType]
-                                            : []
-                                    }
-                                    setSelectedOptions={(newOptionsArray) => {
-                                        if (newOptionsArray.length === 0) {
-                                            setSelectedWorkOrderType(null);
-                                        } else if (
-                                            newOptionsArray.length === 1
-                                        ) {
-                                            setSelectedWorkOrderType(
-                                                newOptionsArray[0]
-                                            );
-                                        } else {
-                                            const newSelectedItem =
-                                                newOptionsArray.find(
-                                                    (opt) =>
-                                                        opt.id !==
-                                                        selectedWorkOrderType?.id
-                                                );
-                                            setSelectedWorkOrderType(
-                                                newSelectedItem ||
-                                                    newOptionsArray[
-                                                        newOptionsArray.length -
-                                                            1
-                                                    ]
-                                            );
-                                        }
-                                    }}
-                                    optionKey="id"
-                                    optionLabel="type_name"
-                                    placeholder="Select Work Order Type"
-                                    showCheckbox={false}
-                                    showSelectedTags={false}
-                                    hideInputValue={false}
-                                />
-                            </div>
-                        </div>
 
                         <div className="flex items-center mb-2 justify-between">
                             <label
@@ -233,63 +184,6 @@ const EditWorkOrderModal = ({
                                     showCheckbox={true}
                                     showSelectedTags={true}
                                     hideInputValue={true}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex items-center mb-2 justify-between">
-                            <label
-                                htmlFor="assignee"
-                                className="block text-sm ml-4 font-semibold text-custom-bluegreen w-1/4"
-                            >
-                                Assignee:
-                            </label>
-                            <div className="w-2/3">
-                                <SearchableDropdown
-                                    options={assignee}
-                                    selectedOptions={
-                                        selectedAssignee
-                                            ? [selectedAssignee]
-                                            : []
-                                    }
-                                    setSelectedOptions={(newOptionsArray) => {
-                                        if (newOptionsArray.length === 0) {
-                                            setSelectedAssignee(null);
-                                        } else if (
-                                            newOptionsArray.length === 1
-                                        ) {
-                                            setSelectedAssignee(
-                                                newOptionsArray[0]
-                                            );
-                                        } else {
-                                            const newSelectedItem =
-                                                newOptionsArray.find(
-                                                    (opt) =>
-                                                        opt.id !==
-                                                        selectedAssignee?.id
-                                                );
-                                            if (newSelectedItem) {
-                                                setSelectedAssignee(
-                                                    newSelectedItem
-                                                );
-                                            } else {
-                                                setSelectedAssignee(
-                                                    newOptionsArray[
-                                                        newOptionsArray.length -
-                                                            1
-                                                    ]
-                                                );
-                                            }
-                                        }
-                                    }}
-                                    optionKey="id"
-                                    getOptionLabel={(a) =>
-                                        `${a.firstname} ${a.lastname}`
-                                    }
-                                    placeholder="Select Assignee"
-                                    showCheckbox={false}
-                                    showSelectedTags={false}
-                                    hideInputValue={false}
                                 />
                             </div>
                         </div>

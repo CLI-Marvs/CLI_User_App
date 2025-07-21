@@ -1,27 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-    CardContent,
-    Typography,
-    Grid,
-    Box,
-    Chip,
-    IconButton,
-    Container,
-    Avatar,
-    List,
-    ListItem,
-    ListItemText,
-    ListItemIcon,
-    Divider,
-    useTheme,
-    Paper,
-    Tabs,
-    Tab,
-    Stack,
-    LinearProgress,
-} from "@mui/material";
-import { DataGrid, gridClasses } from "@mui/x-data-grid";
-import {
     BarChart,
     Bar,
     XAxis,
@@ -59,7 +37,6 @@ import {
 import CountUp from "react-countup";
 import { format } from "date-fns";
 import { toast } from "react-toastify";
-import Skeleton from "react-loading-skeleton";
 import "react-toastify/dist/ReactToastify.css";
 import {
     getDashboardData,
@@ -67,34 +44,138 @@ import {
     revalidateDashboardData,
     invalidateDashboardData,
 } from "./service/dashboardDataService.jsx";
-import "react-loading-skeleton/dist/skeleton.css";
+import EmployeeEvaluationModal from "./EmployeeEvaluationModal";
 
-/**
- * ExecutiveDashboard Component - Work Order Groups Overview
- *
- * This dashboard displays metrics and visualizations for Work Order Groups rather than individual Work Orders.
- *
- * Key Logic:
- * - A Work Order Group contains multiple Work Orders organized by sequence
- * - A Group is "Complete" only when ALL Work Orders within it are complete
- * - A Group is "In Progress" if any Work Order is in progress or assigned
- * - A Group is "Overdue" if any Work Order within it is overdue
- *
- * The dashboard shows:
- * - Total number of Work Order Groups
- * - Completion status based on group completion logic
- * - Distribution by primary work order type (first in sequence)
- * - Recent group activity and system alerts
- */
+// Color constants
+const COLORS = {
+    primary: "#3b82f6",
+    success: "#10b981",
+    warning: "#f59e0b",
+    error: "#ef4444",
+    info: "#06b6d4",
+};
+
+const STATUS_COLORS = {
+    Complete: "#10b981",
+    "In Progress": "#3b82f6",
+    Pending: "#f59e0b",
+    Overdue: "#ef4444",
+    Assigned: "#06b6d4",
+};
+
+const PRIORITY_COLORS = {
+    Critical: "#ef4444",
+    High: "#f59e0b",
+    Medium: "#06b6d4",
+    Low: "#10b981",
+};
+
+const KPICard = ({
+    title,
+    value,
+    subtitle,
+    icon: Icon,
+    trend,
+    color = "primary",
+    loading: cardLoading,
+    onClick,
+}) => {
+    const colorMap = {
+        primary: COLORS.primary,
+        success: COLORS.success,
+        warning: COLORS.warning,
+        error: COLORS.error,
+        info: COLORS.info,
+    };
+
+    if (cardLoading) {
+        return (
+            <div className="p-4 h-full">
+                <div className="animate-pulse h-36 rounded-md bg-gray-200" />
+            </div>
+        );
+    }
+
+    return (
+        <div
+            onClick={onClick}
+            className="relative p-4 h-full bg-white rounded-lg shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer overflow-hidden"
+            style={{ borderLeft: `4px solid ${colorMap[color]}` }}
+        >
+            <div className="flex flex-col justify-between h-full">
+                <div className="flex items-center gap-3 mb-3">
+                    <div
+                        className="flex items-center justify-center w-10 h-10 rounded-full"
+                        style={{
+                            backgroundColor: `${colorMap[color]}20`,
+                            color: colorMap[color],
+                        }}
+                    >
+                        <Icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <p className="text-sm font-medium text-gray-500">
+                            {title}
+                        </p>
+                        <p className="text-2xl font-bold text-gray-800">
+                            <CountUp
+                                end={
+                                    typeof value === "string"
+                                        ? parseFloat(value)
+                                        : value
+                                }
+                                duration={1.5}
+                                decimals={
+                                    value.toString().includes(".") ? 1 : 0
+                                }
+                                suffix={
+                                    typeof value === "string" &&
+                                    value.includes("%")
+                                        ? "%"
+                                        : ""
+                                }
+                                formattingFn={(value) =>
+                                    typeof value === "number" && value >= 1000
+                                        ? `${(value / 1000).toFixed(1)}k`
+                                        : value.toString()
+                                }
+                            />
+                        </p>
+                    </div>
+                </div>
+                <div className="flex justify-between items-end">
+                    <p className="text-xs text-gray-500">{subtitle}</p>
+                    {trend !== undefined && (
+                        <div className="flex items-center space-x-1">
+                            {trend > 0 ? (
+                                <ArrowUpSolid className="w-3.5 h-3.5 text-green-500" />
+                            ) : (
+                                <ArrowDownSolid className="w-3.5 h-3.5 text-red-500" />
+                            )}
+                            <span
+                                className={`text-xs font-medium ${
+                                    trend > 0
+                                        ? "text-green-500"
+                                        : "text-red-500"
+                                }`}
+                            >
+                                {Math.abs(trend)}%
+                            </span>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const ExecutiveDashboard = () => {
-    const theme = useTheme();
     const [loading, setLoading] = useState(true);
     const [dashboardData, setDashboardData] = useState(null);
     const [error, setError] = useState(null);
-    const [activeTab, setActiveTab] = useState(0);
     const [timeRange, setTimeRange] = useState("week");
     const [searchQuery, setSearchQuery] = useState("");
+    const [evalOpen, setEvalOpen] = useState(false);
 
     useEffect(() => {
         let isMounted = true;
@@ -161,335 +242,6 @@ const ExecutiveDashboard = () => {
         }
     };
 
-    const KPICard = ({
-        title,
-        value,
-        subtitle,
-        icon: Icon,
-        trend,
-        color = "primary",
-        loading: cardLoading,
-        onClick,
-    }) => {
-        const colorMap = {
-            primary: theme.palette.primary.main,
-            success: theme.palette.success.main,
-            warning: theme.palette.warning.main,
-            error: theme.palette.error.main,
-            info: theme.palette.info.main,
-        };
-
-        if (cardLoading) {
-            return (
-                <Paper elevation={0} sx={{ p: 2, height: "100%" }}>
-                    <Skeleton height={140} />
-                </Paper>
-            );
-        }
-
-        return (
-            <Paper
-                elevation={2}
-                sx={{
-                    p: 2,
-                    height: "100%",
-                    borderLeft: `4px solid ${colorMap[color]}`,
-                    transition: "all 0.3s ease",
-                    "&:hover": {
-                        transform: "translateY(-4px)",
-                        boxShadow: theme.shadows[6],
-                        cursor: "pointer",
-                    },
-                }}
-                onClick={onClick}
-            >
-                <Box
-                    display="flex"
-                    flexDirection="column"
-                    justifyContent="space-between"
-                    height="100%"
-                >
-                    <Box display="flex" alignItems="center" gap={2} mb={2}>
-                        <Avatar
-                            sx={{
-                                bgcolor: `${colorMap[color]}20`,
-                                color: colorMap[color],
-                            }}
-                        >
-                            <Icon style={{ width: 20, height: 20 }} />
-                        </Avatar>
-                        <Box>
-                            <Typography
-                                variant="subtitle2"
-                                color="text.secondary"
-                                fontWeight={500}
-                            >
-                                {title}
-                            </Typography>
-                            <Typography
-                                variant="h4"
-                                fontWeight={700}
-                                color="text.primary"
-                            >
-                                <CountUp
-                                    end={
-                                        typeof value === "string"
-                                            ? parseFloat(value)
-                                            : value
-                                    }
-                                    duration={1.5}
-                                    decimals={
-                                        value.toString().includes(".") ? 1 : 0
-                                    }
-                                    suffix={
-                                        typeof value === "string" &&
-                                        value.includes("%")
-                                            ? "%"
-                                            : ""
-                                    }
-                                    formattingFn={(value) =>
-                                        typeof value === "number" &&
-                                        value >= 1000
-                                            ? `${(value / 1000).toFixed(1)}k`
-                                            : value.toString()
-                                    }
-                                />
-                            </Typography>
-                        </Box>
-                    </Box>
-                    <Box
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="flex-end"
-                    >
-                        <Typography variant="caption" color="text.secondary">
-                            {subtitle}
-                        </Typography>
-                        {trend !== undefined && (
-                            <Stack
-                                direction="row"
-                                alignItems="center"
-                                spacing={0.5}
-                            >
-                                {trend > 0 ? (
-                                    <ArrowUpSolid
-                                        style={{
-                                            width: 14,
-                                            height: 14,
-                                            color: theme.palette.success.main,
-                                        }}
-                                    />
-                                ) : (
-                                    <ArrowDownSolid
-                                        style={{
-                                            width: 14,
-                                            height: 14,
-                                            color: theme.palette.error.main,
-                                        }}
-                                    />
-                                )}
-                                <Typography
-                                    variant="caption"
-                                    color={
-                                        trend > 0
-                                            ? "success.main"
-                                            : "error.main"
-                                    }
-                                    fontWeight={500}
-                                >
-                                    {Math.abs(trend)}%
-                                </Typography>
-                            </Stack>
-                        )}
-                    </Box>
-                </Box>
-            </Paper>
-        );
-    };
-
-    // Work Order Group Columns for the data table
-    const workOrderGroupColumns = [
-        {
-            field: "workOrderId",
-            headerName: "Group ID",
-            width: 100,
-            renderCell: (params) => (
-                <Typography variant="body2" fontWeight={500}>
-                    WO-{String(params.value).padStart(6, "0")}
-                </Typography>
-            ),
-        },
-        {
-            field: "type",
-            headerName: "Primary Type",
-            width: 180,
-            renderCell: (params) => (
-                <Chip
-                    label={params.value}
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                        borderWidth: "1.5px",
-                        fontWeight: 500,
-                    }}
-                />
-            ),
-        },
-        {
-            field: "account",
-            headerName: "Accounts",
-            width: 200,
-            renderCell: (params) => (
-                <Typography
-                    variant="body2"
-                    fontWeight={500}
-                    sx={{
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                    }}
-                >
-                    {params.value}
-                </Typography>
-            ),
-        },
-        {
-            field: "status",
-            headerName: "Group Status",
-            width: 130,
-            renderCell: (params) => (
-                <Chip
-                    label={params.value}
-                    size="small"
-                    sx={{
-                        fontWeight: 600,
-                        textTransform: "capitalize",
-                        backgroundColor:
-                            params.value === "Complete"
-                                ? `${theme.palette.success.light}20`
-                                : params.value === "In Progress"
-                                ? `${theme.palette.primary.light}20`
-                                : params.value === "Pending"
-                                ? `${theme.palette.warning.light}20`
-                                : `${theme.palette.error.light}20`,
-                        color:
-                            params.value === "Complete"
-                                ? theme.palette.success.dark
-                                : params.value === "In Progress"
-                                ? theme.palette.primary.dark
-                                : params.value === "Pending"
-                                ? theme.palette.warning.dark
-                                : theme.palette.error.dark,
-                    }}
-                />
-            ),
-        },
-        {
-            field: "assignee",
-            headerName: "Assignees",
-            width: 150,
-            renderCell: (params) => (
-                <Box display="flex" alignItems="center" gap={1}>
-                    <Avatar
-                        sx={{
-                            width: 24,
-                            height: 24,
-                            fontSize: "0.65rem",
-                            backgroundColor: theme.palette.grey[300],
-                            color: theme.palette.text.primary,
-                        }}
-                    >
-                        {params.value
-                            .split(",")[0]
-                            .split(" ")
-                            .map((n) => n[0])
-                            .join("")
-                            .slice(0, 2)}
-                    </Avatar>
-                    <Typography
-                        variant="body2"
-                        sx={{
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                        }}
-                    >
-                        {params.value}
-                    </Typography>
-                </Box>
-            ),
-        },
-        {
-            field: "priority",
-            headerName: "Priority",
-            width: 110,
-            renderCell: (params) => (
-                <Chip
-                    label={params.value}
-                    variant="filled"
-                    size="small"
-                    sx={{
-                        fontWeight: 600,
-                        backgroundColor:
-                            params.value === "Critical"
-                                ? theme.palette.error.main
-                                : params.value === "High"
-                                ? theme.palette.warning.main
-                                : params.value === "Medium"
-                                ? theme.palette.info.main
-                                : theme.palette.success.main,
-                        color: theme.palette.common.white,
-                    }}
-                />
-            ),
-        },
-        {
-            field: "daysOpen",
-            headerName: "Days Open",
-            type: "number",
-            width: 120,
-            renderCell: (params) => (
-                <Box width="100%">
-                    <Typography variant="body2" fontWeight={500} mb={0.5}>
-                        {params.value}d
-                    </Typography>
-                    <LinearProgress
-                        variant="determinate"
-                        value={Math.min(params.value * 10, 100)}
-                        sx={{
-                            height: 4,
-                            borderRadius: 2,
-                            backgroundColor: theme.palette.grey[200],
-                            "& .MuiLinearProgress-bar": {
-                                backgroundColor:
-                                    params.value > 14
-                                        ? theme.palette.error.main
-                                        : params.value > 7
-                                        ? theme.palette.warning.main
-                                        : theme.palette.success.main,
-                            },
-                        }}
-                    />
-                </Box>
-            ),
-        },
-    ];
-
-    const statusColors = {
-        Complete: theme.palette.success.main,
-        "In Progress": theme.palette.primary.main,
-        Pending: theme.palette.warning.main,
-        Overdue: theme.palette.error.main,
-        Assigned: theme.palette.info.main,
-    };
-
-    const priorityColors = {
-        Critical: theme.palette.error.main,
-        High: theme.palette.warning.main,
-        Medium: theme.palette.info.main,
-        Low: theme.palette.success.main,
-    };
-
     const renderCustomizedLabel = ({
         cx,
         cy,
@@ -521,65 +273,49 @@ const ExecutiveDashboard = () => {
 
     if (loading) {
         return (
-            <Container maxWidth="xl" sx={{ py: 4 }}>
-                <Box mb={4}>
-                    <Skeleton height={40} width="30%" />
-                    <Skeleton height={20} width="50%" />
-                </Box>
-                <Grid container spacing={3}>
+            <div className="container max-w-screen-xl mx-auto py-8 px-4">
+                <div className="mb-8">
+                    <div className="animate-pulse h-10 w-1/3 bg-gray-200 rounded mb-2"></div>
+                    <div className="animate-pulse h-5 w-1/2 bg-gray-200 rounded"></div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[1, 2, 3, 4].map((i) => (
-                        <Grid item xs={12} sm={6} md={3} key={i}>
-                            <Skeleton height={140} />
-                        </Grid>
+                        <div
+                            key={i}
+                            className="animate-pulse h-36 bg-gray-200 rounded-lg"
+                        ></div>
                     ))}
-                    <Grid item xs={12} md={6}>
-                        <Skeleton height={350} />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                        <Skeleton height={350} />
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Skeleton height={400} />
-                    </Grid>
-                    <Grid item xs={12} md={8}>
-                        <Skeleton height={450} />
-                    </Grid>
-                    <Grid item xs={12} md={4}>
-                        <Skeleton height={450} />
-                    </Grid>
-                </Grid>
-            </Container>
+                </div>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                    <div className="animate-pulse h-80 bg-gray-200 rounded-lg"></div>
+                    <div className="animate-pulse h-80 bg-gray-200 rounded-lg"></div>
+                </div>
+                <div className="animate-pulse h-96 bg-gray-200 rounded-lg mt-6"></div>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                    <div className="animate-pulse h-96 bg-gray-200 rounded-lg lg:col-span-2"></div>
+                    <div className="animate-pulse h-96 bg-gray-200 rounded-lg"></div>
+                </div>
+            </div>
         );
     }
 
     if (error) {
         return (
-            <Container maxWidth="xl" sx={{ py: 4 }}>
-                <Paper elevation={0} sx={{ p: 4, textAlign: "center" }}>
-                    <ExclamationTriangleSolid
-                        style={{
-                            width: 48,
-                            height: 48,
-                            color: theme.palette.error.main,
-                            marginBottom: 16,
-                        }}
-                    />
-                    <Typography variant="h5" color="error" gutterBottom>
+            <div className="container max-w-screen-xl mx-auto py-8 px-4">
+                <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                    <ExclamationTriangleSolid className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                    <h2 className="text-xl font-bold text-red-500 mb-2">
                         Error loading dashboard
-                    </Typography>
-                    <Typography
-                        variant="body1"
-                        color="text.secondary"
-                        paragraph
-                    >
+                    </h2>
+                    <p className="text-gray-600 mb-4">
                         {error.message || "An unknown error occurred"}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
+                    </p>
+                    <p className="text-sm text-gray-500">
                         Please try again later or contact support if the problem
                         persists.
-                    </Typography>
-                </Paper>
-            </Container>
+                    </p>
+                </div>
+            </div>
         );
     }
 
@@ -596,847 +332,594 @@ const ExecutiveDashboard = () => {
     );
 
     return (
-        <Container maxWidth="xl" sx={{ py: 4 }}>
-            <Box
-                mb={4}
-                display="flex"
-                justifyContent="space-between"
-                alignItems="flex-start"
-                flexWrap="wrap"
-                gap={2}
-            >
-                <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
-                    <Tabs
-                        value={timeRange}
-                        onChange={(e, newValue) => setTimeRange(newValue)}
-                        sx={{
-                            "& .MuiTabs-indicator": {
-                                height: 3,
-                                borderRadius: 3,
-                            },
-                        }}
-                    >
-                        <Tab
-                            value="week"
-                            label="Week"
-                            sx={{
-                                minHeight: 36,
-                                minWidth: 80,
-                                fontSize: "0.75rem",
-                                fontWeight: 600,
-                            }}
-                        />
-                        <Tab
-                            value="month"
-                            label="Month"
-                            sx={{
-                                minHeight: 36,
-                                minWidth: 80,
-                                fontSize: "0.75rem",
-                                fontWeight: 600,
-                            }}
-                        />
-                        <Tab
-                            value="quarter"
-                            label="Quarter"
-                            sx={{
-                                minHeight: 36,
-                                minWidth: 80,
-                                fontSize: "0.75rem",
-                                fontWeight: 600,
-                            }}
-                        />
-                    </Tabs>
-                    <Chip
-                        icon={
-                            <CalendarIcon style={{ width: 16, height: 16 }} />
-                        }
-                        label={`Last updated: ${format(
-                            new Date(),
-                            "MMM dd, hh:mm a"
-                        )}`}
-                        variant="outlined"
-                        sx={{
-                            borderColor: theme.palette.divider,
-                            color: theme.palette.text.secondary,
-                        }}
-                    />
-                    <IconButton
-                        sx={{
-                            backgroundColor: theme.palette.action.hover,
-                            "&:hover": {
-                                backgroundColor: theme.palette.action.selected,
-                            },
-                        }}
-                    >
-                        <BellIcon style={{ width: 20, height: 20 }} />
-                    </IconButton>
-                </Box>
-            </Box>
-
-            <Grid container spacing={3} mb={4}>
-                <Grid item xs={12} sm={6} md={3}>
-                    <KPICard
-                        title="Total Work Orders"
-                        value={dashboardData.kpis.totalWorkOrders}
-                        subtitle="Active work orders"
-                        icon={DocumentTextIcon}
-                        color="primary"
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                    <KPICard
-                        title="Completed Work Orders"
-                        value={dashboardData.kpis.completedWorkOrders}
-                        subtitle="All work orders completed"
-                        icon={CheckCircleIcon}
-                        color="success"
-                        trend={
-                            dashboardData.kpis.completedWorkOrders > 0 ? 12 : 0
-                        }
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                    <KPICard
-                        title="Work Orders in Progress"
-                        value={dashboardData.kpis.pendingWorkOrders}
-                        subtitle="Contains pending work orders"
-                        icon={ClockIcon}
-                        color="warning"
-                        trend={
-                            dashboardData.kpis.pendingWorkOrders > 0 ? -5 : 0
-                        }
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3}>
-                    <KPICard
-                        title="Overdue Work Orders"
-                        value={dashboardData.kpis.overdueWorkOrders}
-                        subtitle="Contains overdue work orders"
-                        icon={ExclamationTriangleIcon}
-                        color="error"
-                        trend={dashboardData.kpis.overdueWorkOrders > 0 ? 8 : 0}
-                    />
-                </Grid>
-            </Grid>
-
-            <Grid container spacing={3} mb={4}>
-                <Grid item xs={12} md={6}>
-                    <Paper elevation={2} sx={{ height: "100%" }}>
-                        <CardContent>
-                            <Box
-                                display="flex"
-                                justifyContent="space-between"
-                                alignItems="center"
-                                mb={2}
+        <div className="container max-w-screen-xl mx-auto py-8 px-4">
+            <div className="flex flex-wrap justify-between items-start gap-4 mb-8">
+                <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex border-b border-gray-200">
+                        {["week", "month", "quarter"].map((range) => (
+                            <button
+                                key={range}
+                                onClick={() => setTimeRange(range)}
+                                className={`px-4 py-2 text-xs font-medium ${
+                                    timeRange === range
+                                        ? "text-blue-600 border-b-2 border-blue-600"
+                                        : "text-gray-500 hover:text-gray-700"
+                                }`}
                             >
-                                <Typography variant="h6" fontWeight={600}>
-                                    Work Orders by Status
-                                </Typography>
-                                <IconButton size="small">
-                                    <ChartPieIcon
-                                        style={{ width: 18, height: 18 }}
-                                    />
-                                </IconButton>
-                            </Box>
-                            <Box height={300}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie
-                                            data={
-                                                dashboardData.workOrdersByStatus
-                                            }
-                                            cx="50%"
-                                            cy="50%"
-                                            innerRadius={70}
-                                            outerRadius={100}
-                                            paddingAngle={2}
-                                            dataKey="value"
-                                            label={renderCustomizedLabel}
-                                            labelLine={false}
-                                        >
-                                            {dashboardData.workOrdersByStatus.map(
-                                                (entry, index) => (
-                                                    <Cell
-                                                        key={`cell-${index}`}
-                                                        fill={
-                                                            statusColors[
-                                                                entry.name
-                                                            ] ||
-                                                            theme.palette
-                                                                .grey[500]
-                                                        }
-                                                    />
-                                                )
-                                            )}
-                                        </Pie>
-                                        <RechartsTooltip
-                                            formatter={(value, name, props) => [
-                                                value,
-                                                `${name}: ${(
-                                                    props.payload.percent * 100
-                                                ).toFixed(1)}%`,
-                                            ]}
-                                        />
-                                        <Legend
-                                            layout="horizontal"
-                                            verticalAlign="bottom"
-                                            align="center"
-                                            formatter={(
-                                                value,
-                                                entry,
-                                                index
-                                            ) => (
-                                                <span
-                                                    style={{
-                                                        color: theme.palette
-                                                            .text.primary,
-                                                        fontSize: "0.75rem",
-                                                        marginLeft: 4,
-                                                    }}
-                                                >
-                                                    {value}
-                                                </span>
-                                            )}
-                                        />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </Box>
-                        </CardContent>
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                    <Paper elevation={2} sx={{ height: "100%" }}>
-                        <CardContent>
-                            <Box
-                                display="flex"
-                                justifyContent="space-between"
-                                alignItems="center"
-                                mb={2}
-                            >
-                                <Typography variant="h6" fontWeight={600}>
-                                    Work Orders by Type
-                                </Typography>
-                                <IconButton size="small">
-                                    <ChartBarIcon
-                                        style={{ width: 18, height: 18 }}
-                                    />
-                                </IconButton>
-                            </Box>
-                            <Box height={300}>
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <BarChart
-                                        data={dashboardData.workOrdersByType}
-                                        margin={{
-                                            top: 20,
-                                            right: 20,
-                                            left: 0,
-                                            bottom: 20,
-                                        }}
-                                    >
-                                        <CartesianGrid
-                                            strokeDasharray="3 3"
-                                            vertical={false}
-                                        />
-                                        <XAxis
-                                            dataKey="type"
-                                            tickLine={false}
-                                            axisLine={false}
-                                            tick={{ fontSize: 12 }}
-                                        />
-                                        <YAxis
-                                            tickLine={false}
-                                            axisLine={false}
-                                            tick={{ fontSize: 12 }}
-                                        />
-                                        <RechartsTooltip
-                                            cursor={{
-                                                fill: theme.palette.action
-                                                    .hover,
-                                            }}
-                                            contentStyle={{
-                                                borderRadius: 8,
-                                                border: "none",
-                                                boxShadow: theme.shadows[3],
-                                                backgroundColor:
-                                                    theme.palette.background
-                                                        .paper,
-                                            }}
-                                        />
-                                        <Legend
-                                            layout="horizontal"
-                                            verticalAlign="bottom"
-                                            align="center"
-                                        />
-                                        <Bar
-                                            dataKey="count"
-                                            name="Total"
-                                            radius={[4, 4, 0, 0]}
-                                            fill={theme.palette.primary.main}
-                                        />
-                                        <Bar
-                                            dataKey="completed"
-                                            name="Complete"
-                                            radius={[4, 4, 0, 0]}
-                                            fill={theme.palette.success.main}
-                                        />
-                                    </BarChart>
-                                </ResponsiveContainer>
-                            </Box>
-                        </CardContent>
-                    </Paper>
-                </Grid>
-            </Grid>
-
-            <Paper elevation={2} sx={{ mb: 4, borderRadius: 2 }}>
-                <CardContent>
-                    <Box
-                        display="flex"
-                        justifyContent="space-between"
-                        alignItems="center"
-                        mb={2}
+                                {range.charAt(0).toUpperCase() + range.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                    <div className="flex items-center border border-gray-300 rounded-full px-3 py-1 text-sm text-gray-600">
+                        <CalendarIcon className="w-4 h-4 mr-1" />
+                        <span>
+                            Last updated:{" "}
+                            {format(new Date(), "MMM dd, hh:mm a")}
+                        </span>
+                    </div>
+                    <button className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors">
+                        <BellIcon className="w-5 h-5 text-gray-600" />
+                    </button>
+                    <button
+                        onClick={() => setEvalOpen(true)}
+                        className="gradient-btn5 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
                     >
-                        <Typography variant="h6" fontWeight={600}>
-                            Monthly Performance Trends
-                        </Typography>
-                        <Stack direction="row" spacing={1}>
-                            <Chip
-                                label="Created"
-                                size="small"
-                                variant="outlined"
-                                icon={
-                                    <ArrowUpSolid
-                                        style={{
-                                            width: 14,
-                                            height: 14,
-                                            color: theme.palette.primary.main,
-                                        }}
-                                    />
-                                }
-                            />
-                            <Chip
-                                label="Completed"
-                                size="small"
-                                variant="outlined"
-                                icon={
-                                    <CheckCircleSolid
-                                        style={{
-                                            width: 14,
-                                            height: 14,
-                                            color: theme.palette.success.main,
-                                        }}
-                                    />
-                                }
-                            />
-                            <Chip
-                                label="Efficiency"
-                                size="small"
-                                variant="outlined"
-                                icon={
-                                    <ArrowPathIcon
-                                        style={{
-                                            width: 14,
-                                            height: 14,
-                                            color: theme.palette.warning.main,
-                                        }}
-                                    />
-                                }
-                            />
-                        </Stack>
-                    </Box>
-                    <Box height={350}>
+                        Employee Evaluation
+                    </button>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <KPICard
+                    title="Total WOs"
+                    value={dashboardData.kpis.totalWorkOrders}
+                    subtitle="Active work orders"
+                    icon={DocumentTextIcon}
+                    color="primary"
+                    loading={loading}
+                />
+                <KPICard
+                    title="Completed WOs"
+                    value={dashboardData.kpis.completedWorkOrders}
+                    subtitle="All work orders completed"
+                    icon={CheckCircleIcon}
+                    color="success"
+                    trend={dashboardData.kpis.completedWorkOrders > 0 ? 12 : 0}
+                    loading={loading}
+                />
+                <KPICard
+                    title="WOs in Progress"
+                    value={dashboardData.kpis.pendingWorkOrders}
+                    subtitle="Contains pending work orders"
+                    icon={ClockIcon}
+                    color="warning"
+                    trend={dashboardData.kpis.pendingWorkOrders > 0 ? -5 : 0}
+                    loading={loading}
+                />
+                <KPICard
+                    title="Overdue WOs"
+                    value={dashboardData.kpis.overdueWorkOrders}
+                    subtitle="Contains overdue work orders"
+                    icon={ExclamationTriangleIcon}
+                    color="error"
+                    trend={dashboardData.kpis.overdueWorkOrders > 0 ? 8 : 0}
+                    loading={loading}
+                />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="px-5 pt-5 pb-2 flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                            Work Orders by Status
+                        </h3>
+                        <button className="p-1 text-gray-500 hover:text-gray-700">
+                            <ChartPieIcon className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="h-80 p-2">
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart
-                                data={dashboardData.monthlyTrends}
+                            <PieChart>
+                                <Pie
+                                    data={dashboardData.workOrdersByStatus}
+                                    cx="50%"
+                                    cy="50%"
+                                    innerRadius={70}
+                                    outerRadius={100}
+                                    paddingAngle={2}
+                                    dataKey="value"
+                                    label={renderCustomizedLabel}
+                                    labelLine={false}
+                                >
+                                    {dashboardData.workOrdersByStatus.map(
+                                        (entry, index) => (
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={
+                                                    STATUS_COLORS[entry.name] ||
+                                                    "#9ca3af"
+                                                }
+                                            />
+                                        )
+                                    )}
+                                </Pie>
+                                <RechartsTooltip
+                                    formatter={(value, name, props) => [
+                                        value,
+                                        `${name}: ${(
+                                            props.payload.percent * 100
+                                        ).toFixed(1)}%`,
+                                    ]}
+                                />
+                                <Legend
+                                    layout="horizontal"
+                                    verticalAlign="bottom"
+                                    align="center"
+                                    formatter={(value, entry, index) => (
+                                        <span className="text-xs text-gray-700 ml-1">
+                                            {value}
+                                        </span>
+                                    )}
+                                />
+                            </PieChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="px-5 pt-5 pb-2 flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                            Work Orders by Type
+                        </h3>
+                        <button className="p-1 text-gray-500 hover:text-gray-700">
+                            <ChartBarIcon className="w-5 h-5" />
+                        </button>
+                    </div>
+                    <div className="h-80 p-2">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <BarChart
+                                data={dashboardData.workOrdersByType}
                                 margin={{
-                                    top: 10,
+                                    top: 20,
                                     right: 20,
                                     left: 0,
-                                    bottom: 0,
+                                    bottom: 20,
                                 }}
                             >
-                                <defs>
-                                    <linearGradient
-                                        id="colorCreated"
-                                        x1="0"
-                                        y1="0"
-                                        x2="0"
-                                        y2="1"
-                                    >
-                                        <stop
-                                            offset="5%"
-                                            stopColor={
-                                                theme.palette.primary.main
-                                            }
-                                            stopOpacity={0.8}
-                                        />
-                                        <stop
-                                            offset="95%"
-                                            stopColor={
-                                                theme.palette.primary.main
-                                            }
-                                            stopOpacity={0}
-                                        />
-                                    </linearGradient>
-                                    <linearGradient
-                                        id="colorCompleted"
-                                        x1="0"
-                                        y1="0"
-                                        x2="0"
-                                        y2="1"
-                                    >
-                                        <stop
-                                            offset="5%"
-                                            stopColor={
-                                                theme.palette.success.main
-                                            }
-                                            stopOpacity={0.8}
-                                        />
-                                        <stop
-                                            offset="95%"
-                                            stopColor={
-                                                theme.palette.success.main
-                                            }
-                                            stopOpacity={0}
-                                        />
-                                    </linearGradient>
-                                </defs>
                                 <CartesianGrid
                                     strokeDasharray="3 3"
                                     vertical={false}
-                                    stroke={theme.palette.divider}
                                 />
                                 <XAxis
-                                    dataKey="month"
+                                    dataKey="type"
                                     tickLine={false}
                                     axisLine={false}
-                                    tick={{ fontSize: 12 }}
                                 />
-                                <YAxis
-                                    yAxisId="left"
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tick={{ fontSize: 12 }}
-                                />
-                                <YAxis
-                                    yAxisId="right"
-                                    orientation="right"
-                                    tickLine={false}
-                                    axisLine={false}
-                                    tick={{ fontSize: 12 }}
-                                />
+                                <YAxis tickLine={false} axisLine={false} />
                                 <RechartsTooltip
+                                    cursor={{
+                                        fill: "rgba(243, 244, 246, 0.5)",
+                                    }}
                                     contentStyle={{
-                                        borderRadius: 8,
+                                        borderRadius: "0.5rem",
                                         border: "none",
-                                        boxShadow: theme.shadows[3],
-                                        backgroundColor:
-                                            theme.palette.background.paper,
+                                        boxShadow:
+                                            "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                                        backgroundColor: "#fff",
                                     }}
                                 />
-                                <Area
-                                    yAxisId="left"
-                                    type="monotone"
-                                    dataKey="created"
-                                    stroke={theme.palette.primary.main}
-                                    fillOpacity={1}
-                                    fill="url(#colorCreated)"
-                                    activeDot={{ r: 6, strokeWidth: 0 }}
+                                <Legend
+                                    layout="horizontal"
+                                    verticalAlign="bottom"
+                                    align="center"
                                 />
-                                <Area
-                                    yAxisId="left"
-                                    type="monotone"
-                                    dataKey="complete"
-                                    stroke={theme.palette.success.main}
-                                    fillOpacity={1}
-                                    fill="url(#colorCompleted)"
-                                    activeDot={{ r: 6, strokeWidth: 0 }}
+                                <Bar
+                                    dataKey="count"
+                                    name="Total"
+                                    radius={[4, 4, 0, 0]}
+                                    fill={COLORS.primary}
                                 />
-                                <Line
-                                    yAxisId="right"
-                                    type="monotone"
-                                    connectNulls={true}
-                                    dataKey="efficiency"
-                                    stroke={theme.palette.warning.main}
-                                    strokeWidth={2}
-                                    dot={{ r: 3 }}
-                                    activeDot={{ r: 5 }}
+                                <Bar
+                                    dataKey="completed"
+                                    name="Complete"
+                                    radius={[4, 4, 0, 0]}
+                                    fill={COLORS.success}
                                 />
-                            </AreaChart>
+                            </BarChart>
                         </ResponsiveContainer>
-                    </Box>
-                </CardContent>
-            </Paper>
+                    </div>
+                </div>
+            </div>
 
-            <Grid container spacing={3}>
-                <Grid item xs={12} md={8}>
-                    <Paper
-                        elevation={2}
-                        sx={{ height: "100%", borderRadius: 2 }}
-                    >
-                        <CardContent>
-                            <Box
-                                display="flex"
-                                justifyContent="space-between"
-                                alignItems="center"
-                                mb={2}
+            <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+                <div className="px-5 pt-5 pb-2 flex justify-between items-center">
+                    <h3 className="text-lg font-semibold text-gray-900">
+                        Monthly Performance Trends
+                    </h3>
+                    <div className="flex gap-2">
+                        {["Created", "Completed", "Efficiency"].map((label) => (
+                            <div
+                                key={label}
+                                className="flex items-center border border-gray-300 rounded-full px-3 py-1 text-xs"
                             >
-                                <Typography variant="h6" fontWeight={600}>
-                                    Recent Work Orders
-                                </Typography>
-                                <Stack direction="row" spacing={1}>
-                                    <IconButton size="small">
-                                        <FunnelIcon
-                                            style={{ width: 16, height: 16 }}
-                                        />
-                                    </IconButton>
-                                    <IconButton size="small">
-                                        <ArrowPathIcon
-                                            style={{ width: 16, height: 16 }}
-                                        />
-                                    </IconButton>
-                                </Stack>
-                            </Box>
-                            <Box height={400}>
-                                <DataGrid
-                                    rows={dashboardData.recentWorkOrders.map(
-                                        (row, index) => ({
-                                            ...row,
-                                            id: row.id || index,
-                                        })
-                                    )}
-                                    columns={workOrderGroupColumns.map(
-                                        (col) => ({
-                                            ...col,
-                                            // Ensure consistent alignment
-                                            headerAlign:
-                                                col.headerAlign || "left",
-                                            align: col.align || "left",
-                                            // Add minimum width if not specified
-                                            minWidth: col.minWidth || 100,
-                                            // Ensure flex property for responsive columns
-                                            flex:
-                                                col.flex || (col.width ? 0 : 1),
-                                        })
-                                    )}
-                                    pageSize={5}
-                                    rowsPerPageOptions={[5]}
-                                    disableSelectionOnClick
-                                    getRowId={(row) => row.id}
-                                    autoHeight={false}
-                                    sx={{
-                                        border: "none",
-                                        height: "100%",
-                                        "& .MuiDataGrid-root": {
-                                            border: "none",
-                                        },
-                                        "& .MuiDataGrid-main": {
-                                            border: "none",
-                                        },
-                                        "& .MuiDataGrid-columnHeaders": {
-                                            backgroundColor:
-                                                theme.palette.grey[100],
-                                            borderRadius: 1,
-                                            minHeight: "48px !important",
-                                            maxHeight: "48px !important",
-                                        },
-                                        "& .MuiDataGrid-columnHeader": {
-                                            padding: "0 16px",
-                                            "&:focus, &:focus-within": {
-                                                outline: "none",
-                                            },
-                                        },
-                                        "& .MuiDataGrid-columnHeaderTitle": {
-                                            fontWeight: 600,
-                                            fontSize: "0.875rem",
-                                        },
-                                        "& .MuiDataGrid-cell": {
-                                            borderBottom: `1px solid ${theme.palette.divider}`,
-                                            padding: "0 16px",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            minHeight: "52px !important",
-                                            maxHeight: "52px !important",
-                                            "&:focus, &:focus-within": {
-                                                outline: "none",
-                                            },
-                                        },
-                                        "& .MuiDataGrid-row": {
-                                            minHeight: "52px !important",
-                                            maxHeight: "52px !important",
-                                            "&:hover": {
-                                                backgroundColor:
-                                                    theme.palette.action.hover,
-                                            },
-                                            "&.Mui-selected": {
-                                                backgroundColor: "transparent",
-                                                "&:hover": {
-                                                    backgroundColor:
-                                                        theme.palette.action
-                                                            .hover,
-                                                },
-                                            },
-                                        },
-                                        "& .MuiDataGrid-virtualScroller": {
-                                            // Ensure consistent scrolling behavior
-                                            overflowX: "auto",
-                                        },
-                                        "& .MuiDataGrid-footerContainer": {
-                                            borderTop: `1px solid ${theme.palette.divider}`,
-                                            minHeight: "52px",
-                                        },
-                                        // Remove alternating row colors that might cause alignment issues
-                                        [`& .${gridClasses.row}.even`]: {
-                                            backgroundColor: "transparent",
-                                            "&:hover": {
-                                                backgroundColor:
-                                                    theme.palette.action.hover,
-                                            },
-                                        },
-                                    }}
-                                    components={{
-                                        NoRowsOverlay: () => (
-                                            <Stack
-                                                height="100%"
-                                                alignItems="center"
-                                                justifyContent="center"
-                                            >
-                                                <Typography
-                                                    variant="body2"
-                                                    color="text.secondary"
-                                                >
-                                                    No work orders found
-                                                </Typography>
-                                            </Stack>
-                                        ),
-                                    }}
-                                    disableColumnMenu
-                                    disableColumnFilter
-                                    disableColumnSelector
-                                    disableDensitySelector
-                                />
-                            </Box>
-                        </CardContent>
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <Paper
-                        elevation={2}
-                        sx={{ height: "100%", borderRadius: 2 }}
-                    >
-                        <CardContent>
-                            <Box
-                                display="flex"
-                                justifyContent="space-between"
-                                alignItems="center"
-                                mb={2}
-                            >
-                                <Typography variant="h6" fontWeight={600}>
-                                    System Alerts
-                                </Typography>
-                                <Box display="flex" alignItems="center" gap={1}>
-                                    <Paper
-                                        elevation={0}
-                                        sx={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            px: 1,
-                                            py: 0.5,
-                                            backgroundColor:
-                                                theme.palette.grey[100],
-                                            borderRadius: 1,
-                                        }}
-                                    >
-                                        <MagnifyingGlassIcon
-                                            style={{
-                                                width: 16,
-                                                height: 16,
-                                                color: theme.palette.text
-                                                    .secondary,
-                                            }}
-                                        />
-                                        <input
-                                            type="text"
-                                            placeholder="Search alerts..."
-                                            value={searchQuery}
-                                            onChange={(e) =>
-                                                setSearchQuery(e.target.value)
-                                            }
-                                            style={{
-                                                border: "none",
-                                                background: "transparent",
-                                                outline: "none",
-                                                fontSize: "0.875rem",
-                                                padding: "0 4px",
-                                                width: 120,
-                                            }}
-                                        />
-                                    </Paper>
-                                    <IconButton size="small">
-                                        <ArrowPathIcon
-                                            style={{ width: 16, height: 16 }}
-                                        />
-                                    </IconButton>
-                                </Box>
-                            </Box>
-                            <Box height={400} overflow="auto">
-                                {filteredAlerts.length > 0 ? (
-                                    <List dense disablePadding>
-                                        {filteredAlerts.map((alert) => (
-                                            <React.Fragment key={alert.id}>
-                                                <ListItem
-                                                    alignItems="flex-start"
-                                                    sx={{
-                                                        transition: "all 0.2s",
-                                                        "&:hover": {
-                                                            backgroundColor:
-                                                                theme.palette
-                                                                    .action
-                                                                    .hover,
-                                                            borderRadius: 1,
-                                                        },
-                                                    }}
-                                                >
-                                                    <ListItemIcon
-                                                        sx={{ minWidth: 36 }}
-                                                    >
-                                                        {alert.type ===
-                                                        "success" ? (
-                                                            <CheckCircleSolid
-                                                                style={{
-                                                                    width: 18,
-                                                                    height: 18,
-                                                                    color: theme
-                                                                        .palette
-                                                                        .success
-                                                                        .main,
-                                                                }}
-                                                            />
-                                                        ) : (
-                                                            <ExclamationTriangleSolid
-                                                                style={{
-                                                                    width: 18,
-                                                                    height: 18,
-                                                                    color:
-                                                                        alert.type ===
-                                                                        "warning"
-                                                                            ? theme
-                                                                                  .palette
-                                                                                  .warning
-                                                                                  .main
-                                                                            : theme
-                                                                                  .palette
-                                                                                  .info
-                                                                                  .main,
-                                                                }}
-                                                            />
-                                                        )}
-                                                    </ListItemIcon>
-                                                    <ListItemText
-                                                        primary={
-                                                            <Typography
-                                                                variant="body2"
-                                                                fontWeight={600}
-                                                                sx={{
-                                                                    display:
-                                                                        "flex",
-                                                                    alignItems:
-                                                                        "center",
-                                                                    gap: 1,
-                                                                }}
-                                                            >
-                                                                {alert.workOrderId && (
-                                                                    <Chip
-                                                                        label={`WO: ${alert.workOrderId}`}
-                                                                        size="small"
-                                                                        variant="outlined"
-                                                                        sx={{
-                                                                            height: 20,
-                                                                            fontSize:
-                                                                                "0.65rem",
-                                                                            fontWeight: 700,
-                                                                        }}
-                                                                    />
-                                                                )}
-                                                                {alert.title}
-                                                            </Typography>
-                                                        }
-                                                        secondary={
-                                                            <>
-                                                                <Typography
-                                                                    variant="body2"
-                                                                    color="text.secondary"
-                                                                    sx={{
-                                                                        mt: 0.5,
-                                                                    }}
-                                                                >
-                                                                    {
-                                                                        alert.message
-                                                                    }
-                                                                </Typography>
-                                                                <Typography
-                                                                    variant="caption"
-                                                                    color="text.secondary"
-                                                                    sx={{
-                                                                        display:
-                                                                            "block",
-                                                                        mt: 0.5,
-                                                                    }}
-                                                                >
-                                                                    {format(
-                                                                        new Date(
-                                                                            alert.timestamp
-                                                                        ),
-                                                                        "MMM dd, hh:mm a"
-                                                                    )}
-                                                                </Typography>
-                                                            </>
-                                                        }
-                                                        sx={{ my: 0 }}
-                                                    />
-                                                </ListItem>
-                                                <Divider sx={{ my: 1 }} />
-                                            </React.Fragment>
-                                        ))}
-                                    </List>
-                                ) : (
-                                    <Box
-                                        display="flex"
-                                        flexDirection="column"
-                                        alignItems="center"
-                                        justifyContent="center"
-                                        height="100%"
-                                        textAlign="center"
-                                        p={2}
-                                    >
-                                        <MagnifyingGlassIcon
-                                            style={{
-                                                width: 48,
-                                                height: 48,
-                                                color: theme.palette.grey[400],
-                                                marginBottom: 2,
-                                            }}
-                                        />
-                                        <Typography
-                                            variant="body1"
-                                            color="text.secondary"
-                                        >
-                                            No alerts found
-                                        </Typography>
-                                        <Typography
-                                            variant="caption"
-                                            color="text.secondary"
-                                        >
-                                            Try adjusting your search query
-                                        </Typography>
-                                    </Box>
+                                {label === "Created" && (
+                                    <ArrowUpSolid className="w-3.5 h-3.5 text-blue-500 mr-1" />
                                 )}
-                            </Box>
-                        </CardContent>
-                    </Paper>
-                </Grid>
-            </Grid>
-        </Container>
+                                {label === "Completed" && (
+                                    <CheckCircleSolid className="w-3.5 h-3.5 text-green-500 mr-1" />
+                                )}
+                                {label === "Efficiency" && (
+                                    <ArrowPathIcon className="w-3.5 h-3.5 text-yellow-500 mr-1" />
+                                )}
+                                {label}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="h-96 p-4">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart
+                            data={dashboardData.monthlyTrends}
+                            margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+                        >
+                            <defs>
+                                <linearGradient
+                                    id="colorCreated"
+                                    x1="0"
+                                    y1="0"
+                                    x2="0"
+                                    y2="1"
+                                >
+                                    <stop
+                                        offset="5%"
+                                        stopColor={COLORS.primary}
+                                        stopOpacity={0.8}
+                                    />
+                                    <stop
+                                        offset="95%"
+                                        stopColor={COLORS.primary}
+                                        stopOpacity={0}
+                                    />
+                                </linearGradient>
+                                <linearGradient
+                                    id="colorCompleted"
+                                    x1="0"
+                                    y1="0"
+                                    x2="0"
+                                    y2="1"
+                                >
+                                    <stop
+                                        offset="5%"
+                                        stopColor={COLORS.success}
+                                        stopOpacity={0.8}
+                                    />
+                                    <stop
+                                        offset="95%"
+                                        stopColor={COLORS.success}
+                                        stopOpacity={0}
+                                    />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid
+                                strokeDasharray="3 3"
+                                vertical={false}
+                                stroke="#e5e7eb"
+                            />
+                            <XAxis
+                                dataKey="month"
+                                tickLine={false}
+                                axisLine={false}
+                            />
+                            <YAxis
+                                yAxisId="left"
+                                tickLine={false}
+                                axisLine={false}
+                            />
+                            <YAxis
+                                yAxisId="right"
+                                orientation="right"
+                                tickLine={false}
+                                axisLine={false}
+                            />
+                            <RechartsTooltip
+                                contentStyle={{
+                                    borderRadius: "0.5rem",
+                                    border: "none",
+                                    boxShadow:
+                                        "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                                    backgroundColor: "#fff",
+                                }}
+                            />
+                            <Area
+                                yAxisId="left"
+                                type="monotone"
+                                dataKey="created"
+                                stroke={COLORS.primary}
+                                fillOpacity={1}
+                                fill="url(#colorCreated)"
+                                activeDot={{ r: 6, strokeWidth: 0 }}
+                            />
+                            <Area
+                                yAxisId="left"
+                                type="monotone"
+                                dataKey="complete"
+                                stroke={COLORS.success}
+                                fillOpacity={1}
+                                fill="url(#colorCompleted)"
+                                activeDot={{ r: 6, strokeWidth: 0 }}
+                            />
+                            <Line
+                                yAxisId="right"
+                                type="monotone"
+                                connectNulls={true}
+                                dataKey="efficiency"
+                                stroke={COLORS.warning}
+                                strokeWidth={2}
+                                dot={{ r: 3 }}
+                                activeDot={{ r: 5 }}
+                            />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="px-5 pt-5 pb-2 flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                            Recent Work Orders
+                        </h3>
+                        <div className="flex gap-1">
+                            <button className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded">
+                                <FunnelIcon className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={handleRefresh}
+                                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+                            >
+                                <ArrowPathIcon className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="px-4 pb-4">
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Work Order
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            STEP
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Accounts
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Status
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Assignees
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Priority
+                                        </th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            Days Open
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {dashboardData.recentWorkOrders.map(
+                                        (row) => (
+                                            <tr
+                                                key={row.id}
+                                                className="hover:bg-gray-50 transition-colors"
+                                            >
+                                                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                    1
+                                                    {String(
+                                                        row.workOrderId
+                                                    ).padStart(5, "0")}
+                                                </td>
+                                                <td className="px-4 py-4 whitespace-nowrap">
+                                                    <span className="px-2 py-1 text-xs font-medium border border-gray-300 rounded-full">
+                                                        {row.type}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 max-w-xs truncate">
+                                                    {row.account}
+                                                </td>
+                                                <td className="px-4 py-4 whitespace-nowrap">
+                                                    <span
+                                                        className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${
+                                                            row.status ===
+                                                            "Complete"
+                                                                ? "bg-green-100 text-green-800"
+                                                                : row.status ===
+                                                                  "In Progress"
+                                                                ? "bg-blue-100 text-blue-800"
+                                                                : row.status ===
+                                                                  "Pending"
+                                                                ? "bg-yellow-100 text-yellow-800"
+                                                                : "bg-red-100 text-red-800"
+                                                        }`}
+                                                    >
+                                                        {row.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        <div className="flex-shrink-0 w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs text-gray-700">
+                                                            {row.assignee
+                                                                .split(",")[0]
+                                                                .split(" ")
+                                                                .map(
+                                                                    (n) => n[0]
+                                                                )
+                                                                .join("")
+                                                                .slice(0, 2)}
+                                                        </div>
+                                                        <div className="ml-2 text-sm text-gray-700 truncate max-w-xs">
+                                                            {row.assignee}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-4 py-4 whitespace-nowrap">
+                                                    <span
+                                                        className={`px-2 py-1 text-xs font-semibold text-white rounded-full ${
+                                                            row.priority ===
+                                                            "Critical"
+                                                                ? "bg-red-500"
+                                                                : row.priority ===
+                                                                  "High"
+                                                                ? "bg-yellow-500"
+                                                                : row.priority ===
+                                                                  "Medium"
+                                                                ? "bg-cyan-500"
+                                                                : "bg-green-500"
+                                                        }`}
+                                                    >
+                                                        {row.priority}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-4 whitespace-nowrap">
+                                                    <div className="w-28">
+                                                        <div className="text-sm font-medium text-gray-900 mb-1">
+                                                            {row.daysOpen.toFixed(
+                                                                2
+                                                            )}
+                                                            d
+                                                        </div>
+                                                        <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                                            <div
+                                                                className={`h-1.5 rounded-full ${
+                                                                    row.daysOpen >
+                                                                    14
+                                                                        ? "bg-red-500"
+                                                                        : row.daysOpen >
+                                                                          7
+                                                                        ? "bg-yellow-500"
+                                                                        : "bg-green-500"
+                                                                }`}
+                                                                style={{
+                                                                    width: `${Math.min(
+                                                                        row.daysOpen *
+                                                                            10,
+                                                                        100
+                                                                    )}%`,
+                                                                }}
+                                                            ></div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="px-5 pt-5 pb-3 flex justify-between items-center">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                            System Alerts
+                        </h3>
+                        <div className="flex items-center gap-2">
+                            <div className="flex items-center bg-gray-100 rounded-lg px-3 py-1.5">
+                                <MagnifyingGlassIcon className="w-4 h-4 text-gray-500" />
+                                <input
+                                    type="text"
+                                    placeholder="Search alerts..."
+                                    value={searchQuery}
+                                    onChange={(e) =>
+                                        setSearchQuery(e.target.value)
+                                    }
+                                    className="bg-transparent border-none focus:outline-none text-sm ml-2 w-28"
+                                />
+                            </div>
+                            <button
+                                onClick={handleRefresh}
+                                className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded"
+                            >
+                                <ArrowPathIcon className="w-4 h-4" />
+                            </button>
+                        </div>
+                    </div>
+                    <div className="h-[32rem] overflow-y-auto p-4">
+                        {filteredAlerts.length > 0 ? (
+                            <div className="space-y-4">
+                                {filteredAlerts.map((alert) => (
+                                    <div
+                                        key={alert.id}
+                                        className="p-4 hover:bg-gray-50 rounded-lg transition-colors"
+                                    >
+                                        <div className="flex items-start">
+                                            <div className="flex-shrink-0 mt-1">
+                                                {alert.type === "success" ? (
+                                                    <CheckCircleSolid className="w-5 h-5 text-green-500" />
+                                                ) : (
+                                                    <ExclamationTriangleSolid
+                                                        className={`w-5 h-5 ${
+                                                            alert.type ===
+                                                            "warning"
+                                                                ? "text-yellow-500"
+                                                                : "text-blue-500"
+                                                        }`}
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="ml-3">
+                                                <div className="flex items-center flex-wrap gap-2 mb-1">
+                                                    {alert.workOrderId && (
+                                                        <span className="px-2 py-0.5 text-xs font-bold border border-gray-300 rounded-full">
+                                                            WO:{" "}
+                                                            {alert.workOrderId}
+                                                        </span>
+                                                    )}
+                                                    <h4 className="text-sm font-semibold text-gray-900">
+                                                        {alert.title}
+                                                    </h4>
+                                                </div>
+                                                <p className="text-sm text-gray-600 mb-2">
+                                                    {alert.message}
+                                                </p>
+                                                <p className="text-xs text-gray-500">
+                                                    {format(
+                                                        new Date(
+                                                            alert.timestamp
+                                                        ),
+                                                        "MMM dd, hh:mm a"
+                                                    )}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="h-full flex flex-col items-center justify-center text-center p-8">
+                                <MagnifyingGlassIcon className="w-12 h-12 text-gray-400 mb-4" />
+                                <p className="text-gray-600 mb-1">
+                                    No alerts found
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                    Try adjusting your search query
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            <EmployeeEvaluationModal
+                open={evalOpen}
+                onClose={() => setEvalOpen(false)}
+                fullScreen={true}
+            />
+        </div>
     );
 };
 

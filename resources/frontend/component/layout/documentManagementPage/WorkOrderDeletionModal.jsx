@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import Profile from "../../../../../public/Images/Profile2.svg";
 import IconNotes from "../../../../../public/Images/Icon_Notes.svg";
 import Attachment from "../../../../../public/Images/ATTCHMT.svg";
-import CheckmarkIcon from '../../../../../public/Images/round_check.svg';
+import CheckmarkIcon from "../../../../../public/Images/round_check.svg";
 
 export default function WorkOrderDeletionModal({
     isOpen,
@@ -15,7 +15,6 @@ export default function WorkOrderDeletionModal({
 }) {
     const [reason, setReason] = useState("");
     const [isSubmitted, setIsSubmitted] = useState(false);
-
 
     useEffect(() => {
         const handleEsc = (e) => {
@@ -41,7 +40,7 @@ export default function WorkOrderDeletionModal({
 
         try {
             await onSubmit(reason);
-            setIsSubmitted(true); 
+            setIsSubmitted(true);
         } catch (error) {
             console.error("Error during submission in modal:", error);
         }
@@ -50,12 +49,14 @@ export default function WorkOrderDeletionModal({
     if (!isOpen) return null;
 
     return ReactDOM.createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+        <div
+            className="fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center bg-black/40 p-4"
+            style={{ position: "fixed", inset: 0 }}
             onClick={onClose}
         >
             <div
                 className="bg-white rounded-[10px] shadow-xl w-[630px] max-w-2xl max-h-[90vh] overflow-y-auto relative"
-                onClick={(e) => e.stopPropagation()} 
+                onClick={(e) => e.stopPropagation()}
             >
                 <button
                     onClick={onClose}
@@ -70,10 +71,14 @@ export default function WorkOrderDeletionModal({
                         <img
                             src={CheckmarkIcon}
                             alt="Success"
-                            className="mx-auto mb-4 w-16 h-16" 
+                            className="mx-auto mb-4 w-16 h-16"
                         />
                         <p className="text-xl mb-8">
-                            Your Work Order <span className="text-red-600">deletion request</span> has been submitted for approval.
+                            Your Work Order{" "}
+                            <span className="text-red-600">
+                                deletion request
+                            </span>{" "}
+                            has been submitted for approval.
                         </p>
                         <button
                             onClick={onClose}
@@ -110,14 +115,13 @@ export default function WorkOrderDeletionModal({
                                 </span>
                                 <span className="text-custom-bluegreen font-normal text-base">
                                     {workOrderDetails?.created_at
-                                        ? new Date(
-                                              workOrderDetails.created_at
-                                          ).toLocaleDateString("en-GB", {
-                                              day: "2-digit",
-                                              month: "short",
-                                              year: "numeric",
-                                          })
-                                          .replace(/ /g, "-")
+                                        ? new Date(workOrderDetails.created_at)
+                                              .toLocaleDateString("en-GB", {
+                                                  day: "2-digit",
+                                                  month: "short",
+                                                  year: "numeric",
+                                              })
+                                              .replace(/ /g, "-")
                                         : "N/A"}
                                 </span>
                             </div>
@@ -128,32 +132,37 @@ export default function WorkOrderDeletionModal({
                                 <span
                                     className={`font-normal text-base ml-1 ${
                                         workOrderDetails?.work_order_deadline &&
-                                        new Date(workOrderDetails.work_order_deadline) < new Date() &&
-                                        workOrderDetails.status?.toLowerCase() !== "completed"
-                                            ? "text-orange-500" 
+                                        new Date(
+                                            workOrderDetails.work_order_deadline
+                                        ) < new Date() &&
+                                        workOrderDetails.status?.toLowerCase() !==
+                                            "completed"
+                                            ? "text-orange-500"
                                             : "text-custom-bluegreen"
                                     }`}
                                 >
                                     {workOrderDetails?.work_order_deadline
                                         ? new Date(
                                               workOrderDetails.work_order_deadline
-                                          ).toLocaleDateString("en-GB", {
-                                              day: "2-digit",
-                                              month: "short",
-                                              year: "numeric",
-                                          })
-                                          .replace(/ /g, "-")
+                                          )
+                                              .toLocaleDateString("en-GB", {
+                                                  day: "2-digit",
+                                                  month: "short",
+                                                  year: "numeric",
+                                              })
+                                              .replace(/ /g, "-")
                                         : "N/A"}
                                 </span>
                                 {workOrderDetails?.work_order_deadline &&
-                                    new Date(workOrderDetails.work_order_deadline) <
-                                        new Date() &&
+                                    new Date(
+                                        workOrderDetails.work_order_deadline
+                                    ) < new Date() &&
                                     workOrderDetails.status?.toLowerCase() !==
                                         "completed" && (
                                         <span className="ml-1 text-orange-500">
                                             ⚠️
                                         </span>
-                                )}
+                                    )}
                             </div>
                         </div>
 
@@ -172,7 +181,10 @@ export default function WorkOrderDeletionModal({
                                                 className="w-6 h-6 mr-2"
                                             />
                                             <span className="text-custom-bluegreen font-normal text-sm">
-                                                {workOrderDetails.assignee.fullname}
+                                                {
+                                                    workOrderDetails.assignee
+                                                        .fullname
+                                                }
                                             </span>
                                         </div>
                                     ) : (
@@ -271,13 +283,15 @@ export default function WorkOrderDeletionModal({
                             <button
                                 onClick={handleSubmit}
                                 className={`bg-red-500 text-white px-6 py-2 rounded hover:bg-red-600 transition font-medium ${
-                                    isDeleting // This prop comes from parent, indicates API call in progress
+                                    isDeleting
                                         ? "opacity-50 cursor-not-allowed"
                                         : ""
                                 }`}
                                 disabled={isDeleting}
                             >
-                                {isDeleting ? "Submitting..." : "Submit Request"}
+                                {isDeleting
+                                    ? "Submitting..."
+                                    : "Submit Request"}
                             </button>
                         </div>
                     </div>

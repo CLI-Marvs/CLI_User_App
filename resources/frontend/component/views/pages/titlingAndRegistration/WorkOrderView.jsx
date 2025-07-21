@@ -20,7 +20,6 @@ import Delete from "../../../../../../public/Images/Trash_light.svg";
 import Profile from "../../../../../../public/Images/Profile.svg";
 import { useStateContext } from "../../../../context/contextprovider";
 import CreateWorkOrderModal from "../../../layout/documentManagementPage/CreateWorkOrders";
-import ViewWorkOrderModal from "../../../layout/documentManagementPage/ViewWorkOrderModal";
 import apiService from "../../../../component/servicesApi/apiService";
 import EditWorkOrderModal from "../../../layout/documentManagementPage/EditWorkOrderModal";
 import WorkOrderDeletionModal from "../../../layout/documentManagementPage/WorkOrderDeletionModal";
@@ -62,10 +61,6 @@ const RefreshIcon = ({ onClick }) => (
 
 const FileIcon = () => {
     return <img src={File} className="size-5" />;
-};
-
-const ViewIcon = () => {
-    return <img src={View} className="h-[15px] w-[26.65]" />;
 };
 
 const EditIcon = () => {
@@ -110,8 +105,6 @@ const WorkOrderView = () => {
     const [selectedWorkOrderForDelete, setSelectedWorkOrderForDelete] =
         useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
-
-    // State for WorkOrderGroupDetailsModal
     const [isGroupDetailsModalOpen, setIsGroupDetailsModalOpen] =
         useState(false);
     const [selectedGroupForDetails, setSelectedGroupForDetails] =
@@ -173,7 +166,6 @@ const WorkOrderView = () => {
         };
     }, []);
 
-    // Since we're now getting work order groups directly, we don't need to group them
     const workOrderGroups = workOrders?.data || [];
 
     // Filter groups based on search and filter criteria
@@ -260,8 +252,35 @@ const WorkOrderView = () => {
         }
     };
 
-    const handleOpenDeleteModal = (workOrderData) => {
-        setSelectedWorkOrderForDelete(workOrderData);
+    // Soft delete entire work order group
+    const handleSoftDeleteWorkOrderGroup = async (groupId, reason) => {
+        setIsDeleting(true);
+        try {
+            await apiService.patch(
+                `/work-orders/work-order-groups/${groupId}/soft-delete`,
+                {
+                    reason,
+                }
+            );
+            console.log(
+                `Work order group ${groupId} soft deleted successfully. Reason: ${reason}`
+            );
+            fetchWorkOrderGroups();
+        } catch (error) {
+            console.error("Failed to soft delete work order group:", error);
+            alert(
+                `Failed to delete work order group: ${
+                    error.message || "Please try again."
+                }`
+            );
+            throw error;
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleOpenDeleteModal = (groupData) => {
+        setSelectedWorkOrderForDelete(groupData);
         setIsDeleteModalOpen(true);
     };
 
@@ -273,9 +292,8 @@ const WorkOrderView = () => {
     const confirmDeleteHandler = async (reason) => {
         if (selectedWorkOrderForDelete) {
             try {
-                await handleSoftDeleteWorkOrder(
-                    selectedWorkOrderForDelete.work_order_id ||
-                        selectedWorkOrderForDelete.workOrderId,
+                await handleSoftDeleteWorkOrderGroup(
+                    selectedWorkOrderForDelete.id,
                     reason
                 );
             } catch (error) {
@@ -342,9 +360,7 @@ const WorkOrderView = () => {
             "Step:",
             stepName
         );
-        // Implement your file upload logic here
-        // You might want to open a file upload modal here
-        handleCloseGroupDetailsModal(); // Close the details modal when opening file upload
+        handleCloseGroupDetailsModal();
     };
 
     return (
@@ -507,16 +523,6 @@ const WorkOrderView = () => {
                 />
             )}
 
-            <ViewWorkOrderModal
-                isOpen={isViewModalOpen}
-                onClose={handleCloseViewModal}
-                workOrderData={selectedWorkOrderForView}
-                onInitiateDelete={(dataToDelete) => {
-                    handleCloseViewModal();
-                    handleOpenDeleteModal(dataToDelete);
-                }}
-            />
-
             {selectedWorkOrderForDelete && (
                 <WorkOrderDeletionModal
                     isOpen={isDeleteModalOpen}
@@ -671,16 +677,6 @@ const WorkOrderView = () => {
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    handleOpenViewModal(group);
-                                                }}
-                                                className="p-1 text-slate-500 hover:text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-lg transition-all duration-200"
-                                                title="View Details"
-                                            >
-                                                <ViewIcon />
-                                            </button>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
                                                     setSelectedWorkOrderForEdit(
                                                         group.work_orders?.[0]
                                                     );
@@ -695,12 +691,12 @@ const WorkOrderView = () => {
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleOpenDeleteModal(
-                                                        group.work_orders?.[0]
+                                                        group
                                                     );
                                                 }}
                                                 disabled={isDeleting}
                                                 className="p-1 text-slate-500 hover:text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                title="Delete Work Order"
+                                                title="Delete Work Order Group"
                                             >
                                                 <DeleteIcon />
                                             </button>
@@ -735,7 +731,7 @@ const WorkOrderView = () => {
                 </CardFooter>
             </Card>
 
-            {/* Delete Confirmation Modal */}
+            {/* Delete Confirmation Modal
             {isDeleteModalOpen && selectedWorkOrderForDelete && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                     <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
@@ -771,7 +767,7 @@ const WorkOrderView = () => {
                         </div>
                     </div>
                 </div>
-            )}
+            )} */}
 
             {/* Work Order Group Details Modal */}
             {isGroupDetailsModalOpen && (
