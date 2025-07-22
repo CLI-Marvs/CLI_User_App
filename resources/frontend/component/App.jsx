@@ -115,7 +115,7 @@ const App = () => {
         return (
             <div className="bg-white relative max-h-screen flex flex-col h-screen">
                 <Navbar />
-                <div className="flex flex-1 overflow-hidden z-30">
+                <div className="relative flex flex-1 overflow-hidden z-30">
                     <Sidebar />
                     <div className="flex-1 overflow-y-auto bg-custom-grayFA z-20">
                         <Outlet />

@@ -590,3 +590,10 @@ body.alert-open .crs-sidebar-blur::after {
 body.alert-open .crs-sidebar-blur {
     position: relative;
 }
+
+.portal-submenu {
+  position: fixed;
+  z-index: 9999;
+  top: var(--submenu-top);
+  left: var(--submenu-left);
+}
