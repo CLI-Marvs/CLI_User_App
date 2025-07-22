@@ -19,8 +19,8 @@ if (rootElement) {
         /*  <React.StrictMode> */
         <QueryClientProvider client={queryClient}>
             <ContextProvider>
-                <SurveyProvider>
-                    <WalkinSelectionProvider>
+                <WalkinSelectionProvider>
+                    <SurveyProvider>
                         <PropertyPricingProvider>
                             <RoleManagementProvider>
                                 <TransactionProvider>
@@ -34,10 +34,10 @@ if (rootElement) {
                                 </TransactionProvider>
                             </RoleManagementProvider>
                         </PropertyPricingProvider>
-                    </WalkinSelectionProvider>
-                </SurveyProvider>
+                    </SurveyProvider>
+                </WalkinSelectionProvider>
             </ContextProvider>
-        </QueryClientProvider>
+        </QueryClientProvider >
         /*   </React.StrictMode> */
     );
 }

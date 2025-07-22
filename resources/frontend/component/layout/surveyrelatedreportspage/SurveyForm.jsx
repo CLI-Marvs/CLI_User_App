@@ -163,6 +163,7 @@ const SurveyForm = () => {
           : survey
       )
     );
+    showToast("Question Deleted Sucessfully!", "success");
   };
 
   const addOption = (sectionIndex, questionIndex) => {
@@ -403,11 +404,11 @@ const SurveyForm = () => {
       setLoading1(true);
       if (surveyId) {
         await apiService.put(`/surveys/${surveyId}`, { surveyData });
-        showToast("Data updated successfully!", "success");
+        showToast("Survey Saved Successfully!", "success");
       } else {
         const response = await apiService.post('/surveys', { surveyData });
         setSurveyId(response.data.survey_id);
-        showToast("Data created successfully!", "success");
+        showToast("Survey Saved Successfully!", "success");
         
       }
     } catch (error) {
@@ -428,16 +429,20 @@ const SurveyForm = () => {
         idx === 0 ? { ...survey, status: !survey.status } : survey
       );
 
-      setSurveyData(updatedSurveyData); // Update state
+      setSurveyData(updatedSurveyData); 
 
       try {
         if (surveyId) {
           await apiService.put(`/surveys/${surveyId}`, { surveyData: updatedSurveyData });
-          showToast("Data updated successfully!", "success");
+          if(updatedSurveyData[0].status) {
+            showToast("Survey Published Sucessfully!", "success");
+          } else {
+            showToast("Survey Unpublished Sucessfully!", "success");
+          }
         } else {
           const response = await apiService.post('/surveys', { surveyData: updatedSurveyData });
           setSurveyId(response.data.survey_id);
-          showToast("Data created successfully!", "success");
+          showToast("Survey Published Sucessfully!", "success");
         }
       } catch (error) {
         showToast("Error saving survey!", "error");
