@@ -323,7 +323,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/scan-file', [UnitController::class, 'scanFile']);
     });
 
-
     /* Price Versioning */
     Route::prefix('/price-version')->group(function () {
         Route::post('/', [PriceVersionController::class, 'store']);
@@ -342,7 +341,6 @@ Route::middleware('auth:sanctum')->group(function () {
     //Features
     Route::get('/get-features', [FeatureController::class, 'index']);
 
-
     //Department Feature Permission
     Route::get('/get-departments-with-permissions', [DepartmentFeaturePermissionController::class, 'index']);
     Route::post('/departments-assign-feature-permissions', [DepartmentFeaturePermissionController::class, 'store']);
@@ -356,7 +354,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/update-employee-status', [EmployeeFeaturePermissionController::class, 'updateStatus']);
     Route::patch('/update-employees-feature-permissions', [EmployeeFeaturePermissionController::class, 'updatePermissions']);
     Route::get('/get-user-access-data', [EmployeeFeaturePermissionController::class, 'getUserAccessData']);
-
 
     /*Property feature setting*/
     Route::prefix('/property-feature-settings')->group(function () {
