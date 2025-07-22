@@ -5,10 +5,12 @@ import apiService from '../../../servicesApi/apiService';
 import ListImage from './ListImage';
 import { HiDotsVertical } from "react-icons/hi";
 import SurveyEditModal from './SurveyEditModal';
+import SurveyDeleteModal from './SurveyDeleteModal';
 
 export const SurveyList = ({ data, handleDelete , handleUpdateTitle }) => {
 
     const modalRef = useRef(null);
+    const modalRef2 = useRef(null);
     const menuRef = useRef(null);
 
     const [isOpen, setIsOpen] = useState(false);
@@ -37,6 +39,23 @@ export const SurveyList = ({ data, handleDelete , handleUpdateTitle }) => {
         if (modalRef.current) {
             modalRef.current.close();
         }
+    };
+    
+    const openModal2 = () => {
+        if (modalRef2.current) {
+            modalRef2.current.showModal();
+        }
+    };
+
+    const closeModal2 = () => {
+        if (modalRef2.current) {
+            modalRef2.current.close();
+        }
+    };
+
+     const handleDeletebtn = () => {
+        handleDelete(data.id);
+        closeModal2();
     };
 
 
@@ -94,9 +113,7 @@ export const SurveyList = ({ data, handleDelete , handleUpdateTitle }) => {
                                     Rename
                                 </button>
                                 <button
-                                    onClick={() => {
-                                        handleDelete(data.id);
-                                    }}
+                                    onClick={openModal2}
                                     className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                                 >
                                     Delete
@@ -108,6 +125,9 @@ export const SurveyList = ({ data, handleDelete , handleUpdateTitle }) => {
             </div>
             <div>
                 <SurveyEditModal modalRef={modalRef} surveyData={data} handleCloseModal={closeModal} handleUpdateTitle={handleUpdateTitle} />
+            </div>
+            <div>
+                <SurveyDeleteModal modalRef={modalRef2} handleDelete={handleDeletebtn} />
             </div>
         </div>
     );

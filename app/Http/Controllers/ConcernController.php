@@ -1923,6 +1923,7 @@ class ConcernController extends Controller
 
             $this->inquiryResolveLogs($request, 'resolve');
 
+
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
             
             if (
@@ -1938,6 +1939,11 @@ class ConcernController extends Controller
                 );
             }
             
+
+
+            if ($selectedSurveyType['surveyName'] !== 'N/A') {
+                SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'resolve', $modifiedTicketId);
+            }
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -2462,7 +2468,7 @@ class ConcernController extends Controller
         }
 
         $concerns = $query->groupBy('details_concern')->get();
- 
+
         return response()->json($concerns);
     }
 

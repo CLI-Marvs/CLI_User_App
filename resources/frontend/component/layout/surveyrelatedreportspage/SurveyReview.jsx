@@ -19,20 +19,25 @@ const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
             className="modal fixed inset-0 w-screen min-h-screen h-auto rounded-none backdrop:bg-[#E0FFE6] overflow-auto"
             ref={modalRef}
         >
-            <div
-                className="absolute left-[47px] top-[32px] "
-            >
-                <button
-                    className="flex justify-center items-center border-[0.5px] border-[#A5A5A5] w-[75px] h-[42px] rounded-[10px] bg-white text-sm text-[#696969] shadow-custom4 hover:shadow-custom5 gap-[7px]"
-                    onClick={handleCloseModal}
-                >
-                    <IoCaretBackOutline /> Back
-                </button>
+            <div className="absolute left-[47px] top-[32px]">
+                <div className="relative group w-fit">
+                    <button
+                        className="flex justify-center items-center border-[0.5px] border-[#A5A5A5] w-[75px] h-[42px] rounded-[10px] bg-white text-sm text-[#696969] shadow-custom4 hover:shadow-custom5 gap-[7px]"
+                        onClick={handleCloseModal}
+                    >
+                        <IoCaretBackOutline /> Back
+                    </button>
+
+                    {/* Tooltip */}
+                    <div className="absolute -top-7 left-1/2 -translate-x-1/2 px-2 py-[5px] bg-gray-500 text-white text-[11px] rounded opacity-0 group-hover:opacity-100 transition duration-200 whitespace-nowrap z-10">
+                        Close preview and edit
+                    </div>
+                </div>
             </div>
             <div className="flex w-full h-auto  justify-center px-[150px] bg-[#E0FFE6]">
                 <div className="flex w-full max-w-[1165px] justify-center mt-[20px]">
                     <div className="flex flex-col w-full">
-                        <p className="mb-[31px] font-bold text-[36px]">Preview</p>
+                        <p className="mb-[31px] font-bold text-[36px]">Preview mode</p>
                         <div className="flex flex-col  w-full max-w-[1165px] overflow-hidden bg-white rounded-[10px]">
                             <div className='relative'>
                                 <img src={AskCli} alt="AskCLI" className="w-full h-[259px] object-cover object-top" />
