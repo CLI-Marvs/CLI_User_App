@@ -16,7 +16,7 @@ const SurveyReports = () => {
     useEffect(() => {
         fetchSurveys();
     }, []);
-    
+
     const fetchSurveys = () => {
         apiService.get("/fetch-surveys")
             .then((response) => {
@@ -45,14 +45,14 @@ const SurveyReports = () => {
     };
 
     const handleDelete = async (id) => {
-            try {
-                await apiService.delete(`/surveys/${id}`);
-                showToast("Survey deleted successfully!", "success");
-                fetchSurveys();
-            } catch (error) {
-                showToast("Error deleting survey!", "error");
-                console.error("Error deleting survey:", error);
-            }
+        try {
+            await apiService.delete(`/surveys/${id}`);
+            showToast("Survey deleted successfully!", "success");
+            fetchSurveys();
+        } catch (error) {
+            showToast("Error deleting survey!", "error");
+            console.error("Error deleting survey:", error);
+        }
     };
 
     return (
@@ -64,9 +64,16 @@ const SurveyReports = () => {
                         className='flex justify-center items-center w-[321.21px] h-[227px] border-1 rounded-[10px] border-[#E2E2E2] hover:border-black cursor-pointer'>
                         <div className='size-[50px] gradient-btn2 rounded-full flex justify-center items-center'><IoIosAdd className='text-white size-9' /></div>
                     </div>
-                    {[...surveys].reverse().map((survey, index) => (
-                        <SurveyList key={index} data={survey} handleDelete={handleDelete} handleUpdateTitle={handleUpdateTitle}  />
-                    ))}
+                    {[...surveys]
+                        .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                        .map((survey, index) => (
+                            <SurveyList
+                                key={survey.id} 
+                                data={survey}
+                                handleDelete={handleDelete}
+                                handleUpdateTitle={handleUpdateTitle}
+                            />
+                        ))}
                 </div>
             </div>
         </div>
