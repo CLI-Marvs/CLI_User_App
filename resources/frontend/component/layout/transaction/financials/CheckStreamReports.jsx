@@ -27,6 +27,7 @@ const CheckStreamReports = () => {
     const fields = [
         { name: "check_number", label: "Check Number" },
         { name: "date_range", type: "date_range", label: "Check Date" },
+        { name: "printed_date", type: "printed_date", label: "Printed Date" },
     ];
 
     const columns = [
@@ -100,9 +101,11 @@ const CheckStreamReports = () => {
 
     const exportToExcel = async () => {
         try {
+            if(printedChecks?.data.length === 0) return showToast("No data to export", "info");
             const payload = {
                 filter: printedChecks?.filters,
             };
+
             const response = await exxportChecks({ data: payload });
 
             if (response.status !== 200)

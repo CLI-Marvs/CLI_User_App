@@ -24,7 +24,7 @@ class CheckStreamController extends Controller
     public function index(Request $request)
     {
         try {
-            $filter = $request->only('start_date', 'end_date', 'check_number');
+            $filter = $request->only('start_date', 'end_date', 'check_number', 'printed_start_date', 'printed_end_date');
 
             $query = $this->checkService->getPrintedChecks($filter);
 
