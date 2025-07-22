@@ -16,6 +16,7 @@ const ColumnModal = ({ subFeatureId, views }) => {
     const [selectedFields, setSelectedFields] = useState({});
     const [message, setMessage] = useState({ success: "", error: "" });
     const [isView, setIsView] = useState(true);
+    const [isMaster, setIsMaster] = useState(false);
     const [viewName, setViewName] = useState("");
     const modalRef = useRef(null);
 
@@ -77,8 +78,33 @@ const ColumnModal = ({ subFeatureId, views }) => {
         });
     };
 
-    const viewChange = (e) => {
+    /*   const viewChange = (e) => {
         setSelectedView(Number(e.target.value));
+        setIsView(false);
+        setHasManuallySelected(false);
+        setMessage({ success: "", error: "" });
+        setViewName("");
+    }; */
+
+    const viewChange = (e) => {
+        const value = e.target.value;
+
+        if (value === "master") {
+            setIsMaster(true);
+            setSelectedView("master");
+            const allFields = {};
+            columnData.forEach((group) => {
+                group.fields.forEach((field) => {
+                    allFields[field] = true;
+                });
+            });
+            setIsView(false);
+            setSelectedFields(allFields);
+            return;
+        }
+        
+        setIsMaster(false);
+        setSelectedView(Number(value));
         setIsView(false);
         setHasManuallySelected(false);
         setMessage({ success: "", error: "" });
@@ -115,6 +141,7 @@ const ColumnModal = ({ subFeatureId, views }) => {
         setHasManuallySelected(true);
         setMessage({ success: "", error: "" });
     };
+
     const handleSetDefault = async () => {
         if (isView) {
             if (messageFunc()) {
@@ -135,7 +162,7 @@ const ColumnModal = ({ subFeatureId, views }) => {
             });
             clearFields();
             setDefaultColumns(response?.columns);
-            
+
             showToast("Default view saved successfully", "success");
         }
     };
@@ -160,6 +187,13 @@ const ColumnModal = ({ subFeatureId, views }) => {
                 }
             }
         } else {
+            if (isMaster) {
+                setHasManuallySelected(true);
+                setMessage({ success: "", error: "" });
+                setDefaultColumns([]);
+                setOpenColumn(false);
+                return;
+            }
             setDefaultColumns(renderColumns);
             setOpenColumn(false);
         }
@@ -213,6 +247,25 @@ const ColumnModal = ({ subFeatureId, views }) => {
                         )}
 
                         <div className="w-full flex justify-end items-start gap-2">
+                            {/*  <select
+                                className="w-full sm:w-48 px-4 py-2 text-sm rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-custom-solidgreen focus:border-transparent"
+                                onChange={viewChange}
+                                value={selectedView || ""}
+                            >
+                                <option value="" disabled>
+                                    {views && views.length > 0
+                                        ? "Select a view"
+                                        : "No views created yet"}
+                                </option>
+                                {views &&
+                                    views.map((item, index) => (
+                                        <option key={index} value={item.id}>
+                                            {item.name}{" "}
+                                            {item.is_default ? "(default)" : ""}
+                                        </option>
+                                    ))}
+                            </select> */}
+
                             <select
                                 className="w-full sm:w-48 px-4 py-2 text-sm rounded-xl border border-gray-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-custom-solidgreen focus:border-transparent"
                                 onChange={viewChange}
@@ -223,6 +276,8 @@ const ColumnModal = ({ subFeatureId, views }) => {
                                         ? "Select a view"
                                         : "No views created yet"}
                                 </option>
+                                <option value="master">Master View</option>{" "}
+                                {/* ✅ add this */}
                                 {views &&
                                     views.map((item, index) => (
                                         <option key={index} value={item.id}>

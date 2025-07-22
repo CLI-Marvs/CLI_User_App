@@ -71,6 +71,7 @@ const TransactionCom = () => {
             .filter(Boolean);
     };
 
+
     const dynamicColumns = generateDynamicColumns(defaultColumns);
 
     const baseColumns = [
@@ -198,6 +199,7 @@ const TransactionCom = () => {
             ? dynamicColumns
             : baseColumns
         : [];
+
 
     const isDynamicColumnsLoading = !isSuccess;
 
