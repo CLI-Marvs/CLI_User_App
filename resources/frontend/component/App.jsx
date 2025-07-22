@@ -40,6 +40,8 @@ import BankStatementView from "./views/pages/transactionViews/BankStatementView"
 import AutoAssignView from "./views/pages/raiseaconcernViews/AutoAssignView";
 import UserRightsAndPermissionsView from "./views/pages/userrightsandpermissionsViews/UserRightsAndPermissionsView";
 import PropertySettingViews from "@/component/views/pages/propertySettingViews/propertySettingView";
+import BranchSetting from "@/component/layout/inquirypage/BranchSetting";
+
 import FallbackLoader from "./FallbackLoader";
 import PreloadWrapper from "./PreloadWrapper";
 import BannerSettingsView from "./views/pages/bannersettingsViews/BannerSettingsView";
@@ -324,6 +326,10 @@ const App = () => {
                                         {
                                             path: "bannersettings",
                                             element: <BannerSettingsView />,
+                                        },
+                                        {
+                                            path: "branch-settings",
+                                            element: <BranchSetting />,
                                         },
                                         {
                                             path: "versionlogs",

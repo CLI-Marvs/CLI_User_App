@@ -7,6 +7,7 @@ import { SurveyProvider } from "../context/Survey/SurveyContext";
 import { RoleManagementProvider } from "@/context/RoleManagement/RoleManagementContext";
 import { PropertyPricingProvider } from "@/context/PropertyPricing/PropertyPricingContext";
 import { TransactionProvider } from "@/context/Transaction/TransactionContext";
+import { WalkinSelectionProvider } from "@/context/InquiryManagement/WalkinSelectionContext";
 import ErrorBoundary from "@/component/ErrorElement/ErrorBoundary";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -19,19 +20,21 @@ if (rootElement) {
         <QueryClientProvider client={queryClient}>
             <ContextProvider>
                 <SurveyProvider>
-                    <PropertyPricingProvider>
-                        <RoleManagementProvider>
-                            <TransactionProvider>
-                                <ToastContainer
-                                    position="top-right"
-                                    style={{ zIndex: 9999, position: "fixed" }}
-                                />
-                                <ErrorBoundary>
-                                    <App />
-                                </ErrorBoundary>
-                            </TransactionProvider>
-                        </RoleManagementProvider>
-                    </PropertyPricingProvider>
+                    <WalkinSelectionProvider>
+                        <PropertyPricingProvider>
+                            <RoleManagementProvider>
+                                <TransactionProvider>
+                                    <ToastContainer
+                                        position="top-right"
+                                        style={{ zIndex: 9999, position: "fixed" }}
+                                    />
+                                    <ErrorBoundary>
+                                        <App />
+                                    </ErrorBoundary>
+                                </TransactionProvider>
+                            </RoleManagementProvider>
+                        </PropertyPricingProvider>
+                    </WalkinSelectionProvider>
                 </SurveyProvider>
             </ContextProvider>
         </QueryClientProvider>
