@@ -1,43 +1,51 @@
 import { useState } from "react";
 
 export default function useValidation(initialErrors = {}) {
-  const [errors, setErrors] = useState(initialErrors);
+    const [errors, setErrors] = useState(initialErrors);
 
-  const validateField = (field, value) => {
-    let message = "";
+    const validateField = (field, value) => {
+        let stringValue = "";
 
-    if (!value || value.trim() === "") {
-      message = "This field is required.";
-    }
+        if (typeof value === "string") {
+            stringValue = value.trim();
+        } else if (value !== null && value !== undefined) {
+            stringValue = value.toString().trim();
+        }
 
-    setErrors((prev) => ({ ...prev, [field]: message }));
-    return message === "";
-  };
+        const isEmpty = stringValue === "";
 
-  const validateAll = (fields) => {
-    const newErrors = {};
-    let isValid = true;
+        setErrors((prev) => ({
+            ...prev,
+            [field]: isEmpty ? "This field is required." : "",
+        }));
 
-    Object.keys(fields).forEach((field) => {
-      if (!fields[field] || fields[field].toString().trim() === "") {
-        newErrors[field] = "This field is required.";
-        isValid = false;
-      }
-    });
+        return !isEmpty;
+    };
 
-    setErrors(newErrors);
-    return isValid;
-  };
+    const validateAll = (fields) => {
+        const newErrors = {};
+        let isValid = true;
 
-  const clearError = (field) => {
-    setErrors((prev) => ({ ...prev, [field]: "" }));
-  };
+        Object.keys(fields).forEach((field) => {
+            if (!fields[field] || fields[field].toString().trim() === "") {
+                newErrors[field] = "This field is required.";
+                isValid = false;
+            }
+        });
 
-  return {
-    errors,
-    validateField,
-    validateAll,
-    clearError,
-    setErrors,
-  };
+        setErrors(newErrors);
+        return isValid;
+    };
+
+    const clearError = (field) => {
+        setErrors((prev) => ({ ...prev, [field]: "" }));
+    };
+
+    return {
+        errors,
+        validateField,
+        validateAll,
+        clearError,
+        setErrors,
+    };
 }
