@@ -39,11 +39,11 @@ const Navbar = () => {
 
     useEffect(() => {
         if (id) {
-          fetchSurveyTitle(id);
+            fetchSurveyTitle(id);
         }
-      }, [id]);
+    }, [id]);
 
-      
+
     useEffect(() => {
         if (isOpen) {
             document.addEventListener("mousedown", handleClickOutside);
@@ -160,6 +160,14 @@ const Navbar = () => {
 
             if (value.toLowerCase() === "report") {
                 breadcrumbLabel = "Reports";
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
             }
 
             if (value.toLowerCase() === "sales") {
@@ -227,13 +235,13 @@ const Navbar = () => {
                 );
             }
 
-            
+
             if (id && value === id) {
                 return (
                     <span key={routeTo} className="text-custom-solidgreen cursor-default">
-                      {survey_loading ? <Skeleton width={200} /> : (survey_title || id)}
+                        {survey_loading ? <Skeleton width={200} /> : (survey_title || id)}
                     </span>
-                  );
+                );
             }
 
             if (value.toLowerCase() === "payment-scheme") {
@@ -269,6 +277,9 @@ const Navbar = () => {
             }
             if (value.toLowerCase() === "bank-statements") {
                 breadcrumbLabel = "Bank Statements";
+            }
+              if (value.toLowerCase() === "check-generator") {
+                breadcrumbLabel = "Check Generator";
             }
 
             if (value.toLowerCase() === "receivables") {
@@ -317,8 +328,7 @@ const Navbar = () => {
                     >
                         {
                             /* capitalizeWords()*/
-                            `${concernData?.buyer_firstname || ""} ${
-                                concernData?.buyer_middlename || ""
+                            `${concernData?.buyer_firstname || ""} ${concernData?.buyer_middlename || ""
                             } ${concernData?.buyer_lastname || ""}`
                         }{" "}
                         {/* capitalizeWords()*/ concernData?.suffix_name || ""}{" "}
@@ -373,7 +383,7 @@ const Navbar = () => {
 
     return (
         <>
-            <div className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
+            <nav className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
                 <div className="flex w-full">
                     <div className="flex">
                         <div className="flex justify-center items-center">
@@ -484,7 +494,7 @@ const Navbar = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </nav>
             <div>
                 <FeedbackModal modalRef={modalRef} />
             </div>

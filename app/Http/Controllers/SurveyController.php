@@ -605,7 +605,6 @@ class SurveyController extends Controller
     {
         $survey = DB::table('surveys_list')
             ->where('id', $id)
-            ->where('status', 'true')
             ->value('survey_title');
 
         if (!$survey) {
