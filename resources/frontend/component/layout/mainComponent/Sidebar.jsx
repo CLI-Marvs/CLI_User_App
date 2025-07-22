@@ -135,22 +135,15 @@ const Sidebar = () => {
                 setSuperAdminOpen(false);
                 setIsSalesOpen(false);
                 break;
+            case "/inquirymanagement/inquirylist":
+            case "/inquirymanagement/report":
+            case "/inquirymanagement/walk-in":
+            case "/inquirymanagement/settings":
+            case "/inquirymanagement/settings/bannersettings":
+            case "/inquirymanagement/settings/branch-settings":
 
-            // Inquiry Management
-            case [
-                "/inquirymanagement/inquirylist",
-                "/inquirymanagement/report",
-                "/inquirymanagement/report/inquiries",
-                "/inquirymanagement/report/survey",
-                "/inquirymanagement/settings",
-                "/inquirymanagement/settings/bannersettings",
-                "/inquirymanagement/settings/autoassign",
-                "/inquirymanagement/settings/versionlogs",
-                "/inquirymanagement/settings/surveysettings",
-                "/inquirymanagement/settings/surveysettings/surveyreview",
-            ].includes(pathname) ||
-                isSurveyForm ||
-                isSurveyReport:
+            case "/inquirymanagement/settings/autoassign":
+            case "/inquirymanagement/settings/versionlogs":
                 setIsInvoiceOpen(false);
                 setInquiryOpen(true);
                 setSuperAdminOpen(false);
@@ -176,7 +169,7 @@ const Sidebar = () => {
     }, [location.pathname]);
     return (
         <>
-            <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pr-[20px] pt-0 rounded-none bg-custom-grayFA relative z-30 ">
+            <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pr-[20px] pt-0 rounded-none bg-custom-grayFA relative z-30 overflow-hidden crs-sidebar-blur">
                 <List className="p-0 gap-0">
                     <Link to="/notification">
                         <ListItem

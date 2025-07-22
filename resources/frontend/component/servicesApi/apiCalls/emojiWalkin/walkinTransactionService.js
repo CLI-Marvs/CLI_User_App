@@ -6,12 +6,17 @@ export const walkinTransactionService = {
      * @returns {Promise<Object>} A promise that resolves to the response containing all walkin transactions.
      * @throws {Error} If the request fails.
      */
-    getQueuedWalkinTransactions: async (page = 1, perPage = 10) => {
+    getQueuedWalkinTransactions: async (
+        page = 1,
+        perPage = 10,
+        selectedBranch
+    ) => {
         try {
             const queryParams = new URLSearchParams({
                 page,
                 per_page: perPage,
                 status: "queue",
+                slug: selectedBranch,
             }).toString();
             const response = await walkinFeedbackService.get(
                 `/admin/transactions/queue?${queryParams}`
@@ -30,7 +35,7 @@ export const walkinTransactionService = {
      * @param {number} perPage - Items per page
      * @param {Object} activeSearch - Search filters
      */
-    getWalkinTransactionsHistory: async (page = 1, perPage = 10, filters) => {
+    getWalkinTransactionsHistory: async (page = 1, perPage = 10, filters, slug) => {
         try {
             const cleanFilters = Object.fromEntries(
                 Object.entries(filters || {}).filter(
@@ -43,6 +48,7 @@ export const walkinTransactionService = {
                 page,
                 per_page: perPage,
                 // ...cleanFilters,
+                slug
             }).toString();
 
             const response = await walkinFeedbackService.get(
