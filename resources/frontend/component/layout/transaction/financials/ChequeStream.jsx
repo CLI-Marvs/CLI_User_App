@@ -262,12 +262,28 @@ const ChequeStream = () => {
         setData(updatedData);
     };
 
+    const getValidMonth = (date, count) => {
+        const defaultDay = date.getDate();
+        const newDate = new Date(date);
+
+        newDate.setDate(1);
+        newDate.setMonth(newDate.getMonth() + count);
+
+        const lastDay = new Date(
+            newDate.getFullYear(),
+            newDate.getMonth() + 1,
+            0
+        ).getDate();
+        newDate.setDate(Math.min(defaultDay, lastDay));
+
+        return newDate;
+    };
+
     const generateMonthlyDates = (start, count) => {
         const result = [];
         const baseDate = new Date(start);
         for (let i = 0; i < count; i++) {
-            const nextDate = new Date(baseDate);
-            nextDate.setMonth(baseDate.getMonth() + i);
+            const nextDate = getValidMonth(baseDate, i);
             result.push(nextDate);
         }
         return result;
