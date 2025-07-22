@@ -578,6 +578,7 @@ class SurveyController extends Controller
             // Fetch all surveys (title and link UUID)
             $surveys = DB::table('surveys_list')
                 ->select('survey_title', 'survey_link')
+                ->where('status', true)
                 ->get();
 
             // Dynamically map app.url → survey base URL
@@ -619,7 +620,6 @@ class SurveyController extends Controller
     {
         $survey = DB::table('surveys_list')
             ->where('id', $id)
-            ->where('status', 'true')
             ->value('survey_title');
 
         if (!$survey) {
@@ -632,6 +632,7 @@ class SurveyController extends Controller
     public function getSurveysWithRatingCounts()
     {
         $surveys = Survey_list::select('id', 'survey_title', 'survey_link')
+            ->where('status', true)
             ->get()
             ->map(function ($survey) {
                 $respondentsCount = ExperienceRating::where('survey_link', $survey->survey_link)->count();

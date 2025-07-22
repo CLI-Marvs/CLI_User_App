@@ -40,6 +40,8 @@ import BankStatementView from "./views/pages/transactionViews/BankStatementView"
 import AutoAssignView from "./views/pages/raiseaconcernViews/AutoAssignView";
 import UserRightsAndPermissionsView from "./views/pages/userrightsandpermissionsViews/UserRightsAndPermissionsView";
 import PropertySettingViews from "@/component/views/pages/propertySettingViews/propertySettingView";
+import BranchSetting from "@/component/layout/inquirypage/BranchSetting";
+
 import FallbackLoader from "./FallbackLoader";
 import PreloadWrapper from "./PreloadWrapper";
 import BannerSettingsView from "./views/pages/bannersettingsViews/BannerSettingsView";
@@ -56,13 +58,16 @@ import AutoPostingView from "./views/pages/transactionViews/AutoPostingView";
 import ErrorPage from "@/component/ErrorElement/ErrorPage";
 import MarkupSettingsView from "@/component/views/pages/transactionViews/MarkupSettingsView";
 import ReportsView from "./views/pages/transactionViews/ReportsView";
+import WalkinTransactionHistoryView from '@/component/views/pages/walkinEmojiViews/WalkinTransactionHistoryView';
+import FinancialToolsView from "./views/pages/transactionViews/FinancialToolsView";
+import CheckStreamReportsView from "./views/pages/transactionViews/CheckStreamReportsView";
+
 import SurveyReportsView from "./views/pages/surveyrelatedreportsViews/SurveyReportsView";
 import SurveyMainView from "./views/pages/surveyrelatedreportsViews/SurveyMainView";
 import SurveyReviewView from "./views/pages/surveyrelatedreportsViews/SurveyReviewView";
 import SurveyMainReportView from "./views/pages/surveyrelatedreportsViews/SurveyMainReportView";
 import SurveySummaryView from "./views/pages/surveyrelatedreportsViews/SurveySummaryView";
 
-import WalkinTransactionHistoryView from '@/component/views/pages/walkinEmojiViews/WalkinTransactionHistoryView';
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, children }) => {
     const { hasPermission } = useStateContext();
@@ -249,6 +254,20 @@ const App = () => {
                                         },
                                     ],
                                 },
+                                {
+                                    path: "tools",
+                                    element: <TransactionLayout />,
+                                    children: [
+                                        {
+                                            path: "check-generator",
+                                            element: <FinancialToolsView />,
+                                        },
+                                         {
+                                            path: "reports",
+                                            element: <CheckStreamReportsView />,
+                                        },
+                                    ],
+                                },
                             ],
                         },
                         {
@@ -324,6 +343,10 @@ const App = () => {
                                         {
                                             path: "bannersettings",
                                             element: <BannerSettingsView />,
+                                        },
+                                        {
+                                            path: "branch-settings",
+                                            element: <BranchSetting />,
                                         },
                                         {
                                             path: "versionlogs",

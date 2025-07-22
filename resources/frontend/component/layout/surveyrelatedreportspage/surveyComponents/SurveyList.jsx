@@ -5,10 +5,12 @@ import apiService from '../../../servicesApi/apiService';
 import ListImage from './ListImage';
 import { HiDotsVertical } from "react-icons/hi";
 import SurveyEditModal from './SurveyEditModal';
+import SurveyDeleteModal from './SurveyDeleteModal';
 
-export const SurveyList = ({ data, handleDelete , handleUpdateTitle }) => {
+export const SurveyList = ({ data, handleDelete, handleUpdateTitle }) => {
 
     const modalRef = useRef(null);
+    const modalRef2 = useRef(null);
     const menuRef = useRef(null);
 
     const [isOpen, setIsOpen] = useState(false);
@@ -27,6 +29,29 @@ export const SurveyList = ({ data, handleDelete , handleUpdateTitle }) => {
         navigate(`/inquirymanagement/settings/surveysettings/surveyform/${data.id}`);
     };
 
+    function getFormattedEditedTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+
+        const isToday =
+            date.getDate() === now.getDate() &&
+            date.getMonth() === now.getMonth() &&
+            date.getFullYear() === now.getFullYear();
+
+        const time = date.toLocaleTimeString([], {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+        }).toLowerCase();
+
+        if (isToday) {
+            return `Edited today at ${time}`;
+        } else {
+            const formattedDate = date.toLocaleDateString('en-US'); 
+            return `Last edited ${formattedDate} | ${time}`;
+        }
+    }
+
     const openModal = () => {
         if (modalRef.current) {
             modalRef.current.showModal();
@@ -37,6 +62,23 @@ export const SurveyList = ({ data, handleDelete , handleUpdateTitle }) => {
         if (modalRef.current) {
             modalRef.current.close();
         }
+    };
+    
+    const openModal2 = () => {
+        if (modalRef2.current) {
+            modalRef2.current.showModal();
+        }
+    };
+
+    const closeModal2 = () => {
+        if (modalRef2.current) {
+            modalRef2.current.close();
+        }
+    };
+
+     const handleDeletebtn = () => {
+        handleDelete(data.id);
+        closeModal2();
     };
 
 
@@ -72,11 +114,9 @@ export const SurveyList = ({ data, handleDelete , handleUpdateTitle }) => {
                             {data.survey_title}
                         </p>
                         <p className='text-sm text-[#696969]'>
-                            Edited <span>{new Date(data.updated_at).toLocaleTimeString()}</span>
+                            {getFormattedEditedTime(data.updated_at)}
                         </p>
                     </div>
-
-
                     <div className="relative delete-button pointer-events-auto">
                         <button
                             onClick={toggleMenu}
@@ -94,9 +134,7 @@ export const SurveyList = ({ data, handleDelete , handleUpdateTitle }) => {
                                     Rename
                                 </button>
                                 <button
-                                    onClick={() => {
-                                        handleDelete(data.id);
-                                    }}
+                                    onClick={openModal2}
                                     className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                                 >
                                     Delete
@@ -108,6 +146,9 @@ export const SurveyList = ({ data, handleDelete , handleUpdateTitle }) => {
             </div>
             <div>
                 <SurveyEditModal modalRef={modalRef} surveyData={data} handleCloseModal={closeModal} handleUpdateTitle={handleUpdateTitle} />
+            </div>
+            <div>
+                <SurveyDeleteModal modalRef={modalRef2} handleDelete={handleDeletebtn} />
             </div>
         </div>
     );
