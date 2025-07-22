@@ -12,6 +12,8 @@ import Button from "@/component/layout/inquirypage/component/ui/button";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa6";
 import WalkinTransactionModal from "@/component/layout/inquirypage/component/Walkin/WalkinTransactionModal";
+import { useWalkinSelection } from "@/context/InquiryManagement/WalkinSelectionContext";
+
 const INITIAL_SEARCH_STATE = {
     property_name: "",
     priority_number: "",
@@ -28,22 +30,28 @@ const WalkinTransactionHistoryPage = () => {
     const [activeSearch, setActiveSearch] = useState(searchValues);
     const [page, setPage] = useState(1);
     const PAGE_SIZE = 10;
+    const { selectedBranch } = useWalkinSelection();
     const {
         data: transactionHistory,
         isLoading,
         isError,
         refetch,
     } = useQuery({
-        queryKey: ["walkinTransactionHistory", page, activeSearch],
+        queryKey: ["walkinTransactionHistory", page, activeSearch, selectedBranch.slug],
         queryFn: () =>
             walkinTransactionService.getWalkinTransactionsHistory(
                 page,
                 PAGE_SIZE,
-                activeSearch
+                activeSearch,
+                selectedBranch.slug
             ),
+        enabled: !!selectedBranch.slug,
         keepPreviousData: true,
         staleTime: 1000 * 60,
         cacheTime: 1000 * 60 * 5,
+        refetchInterval: 10000, // refetch every 10 seconds
+        refetchIntervalInBackground: false, // pause interval when tab is not focused
+        refetchOnWindowFocus: true, // refetch once when tab regains focus
     });
     const { data: categoriesData } = useCategories();
     const fields = [

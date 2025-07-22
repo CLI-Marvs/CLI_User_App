@@ -163,10 +163,14 @@ export const ContextProvider = ({ children }) => {
                 allPermissions[perm.name] = perm.pivot;
             });
 
+            // userAccessData.departmentPermissions?.forEach((perm) => {
+            //     allPermissions[perm.name] = perm.pivot;
+            // });
             userAccessData.departmentPermissions?.forEach((perm) => {
-                allPermissions[perm.name] = perm.pivot;
+                if (!allPermissions[perm.name]) {
+                    allPermissions[perm.name] = perm.pivot;
+                }
             });
-
             setPermissions(allPermissions);
         }
     }, [userAccessData]);
