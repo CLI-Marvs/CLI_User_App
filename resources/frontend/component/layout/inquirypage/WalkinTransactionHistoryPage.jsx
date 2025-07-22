@@ -15,7 +15,7 @@ import WalkinTransactionModal from "@/component/layout/inquirypage/component/Wal
 import { useWalkinSelection } from "@/context/InquiryManagement/WalkinSelectionContext";
 
 const INITIAL_SEARCH_STATE = {
-    property_name: "",
+    full_name: "",
     priority_number: "",
     inquiry_type: "",
     status: "",
@@ -36,8 +36,14 @@ const WalkinTransactionHistoryPage = () => {
         isLoading,
         isError,
         refetch,
+        isFetching
     } = useQuery({
-        queryKey: ["walkinTransactionHistory", page, activeSearch, selectedBranch.slug],
+        queryKey: [
+            "walkinTransactionHistory",
+            page,
+            activeSearch,
+            selectedBranch.slug,
+        ],
         queryFn: () =>
             walkinTransactionService.getWalkinTransactionsHistory(
                 page,
@@ -55,7 +61,7 @@ const WalkinTransactionHistoryPage = () => {
     });
     const { data: categoriesData } = useCategories();
     const fields = [
-        { name: "property_name", label: "Full Name" },
+        { name: "full_name", label: "Full Name" },
         { name: "priority_number", label: "Priority Number" },
         {
             name: "inquiry_type",
@@ -67,7 +73,7 @@ const WalkinTransactionHistoryPage = () => {
                 ...(categoriesData
                     ? categoriesData.map((item) => ({
                           label: item?.name,
-                          value: item?.name,
+                          value: item?.id,
                       }))
                     : []),
             ],
@@ -81,6 +87,7 @@ const WalkinTransactionHistoryPage = () => {
                 { label: "Select Status", value: "" },
                 { label: "Save", value: "save" },
                 { label: "Resolved", value: "resolved" },
+                { label: "Rated", value: "rated" },
             ],
         },
     ];
@@ -157,7 +164,7 @@ const WalkinTransactionHistoryPage = () => {
             </div>
 
             <div className="mt-3 mx-1 py-4">
-                {isLoading ? (
+                {isLoading && !isFetching ? (
                     <div className="text-center py-4">
                         <Skeleton height={140} className="my-1" />
                         <Skeleton height={140} className="my-1" />

@@ -105,7 +105,7 @@ const TransactionSearchBar = ({
                         </svg>
                     </div>
                     {openSearch && (
-                        <div className="absolute right-0 left-0 bg-white border border-gray-300 mt-[10px] w-[604px] h-auto rounded-lg py-5 px-5">
+                        <div className="absolute right-0 left-0 bg-white border border-gray-300 mt-[10px] w-[604px] h-auto rounded-lg py-5 px-5 ">
                             {fields.map((item, index) => {
                                 return (
                                     <div

@@ -27,9 +27,9 @@ export const WALKIN_COLUMNS = [
 ];
 
 export const WALKIN_HISTORY_COLUMNS = [
-    { label: "Full Name", width: "w-[200px]" },
-    { label: "Priority Number", width: "w-[250px]" },
-    { label: "Inquiry Type", width: "w-[150px]" },
+    { label: "Full Name", width: "w-[250px]" },
+    { label: "Priority Number", width: "w-[0px]" },
+    { label: "Inquiry Type", width: "w-[300px]" },
     { label: "Status", width: "w-[200px]" },
     { label: "Date", width: "w-[150px]" },
 ];
