@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useParams } from 'react-router-dom';
 import CLILogo from "../../../../../public/Images/CLILogo.png";
 import Kent from "../../../../../public/Images/kent.png";
 import apiService from "../../servicesApi/apiService";
@@ -12,12 +13,17 @@ import { startsWith } from "lodash";
 import Alert from "@mui/material/Alert";
 import { MdOutlineMail } from "react-icons/md";
 import FeedbackModal from "./FeedbackModal";
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
+import { useSurvey } from "../../../context/Survey/SurveyContext";
 
 const Navbar = () => {
-    const { data, ticketId, navBarData, loading, user, getNavBarData } =
-        useStateContext();
+
+    const { id } = useParams();
+
+
+    const { data, ticketId, navBarData, loading, user, getNavBarData } = useStateContext();
+    const { survey_title, fetchSurveyTitle, survey_loading } = useSurvey();
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
     const modalRef = useRef(null);
@@ -31,6 +37,13 @@ const Navbar = () => {
         }
     };
 
+    useEffect(() => {
+        if (id) {
+          fetchSurveyTitle(id);
+        }
+      }, [id]);
+
+      
     useEffect(() => {
         if (isOpen) {
             document.addEventListener("mousedown", handleClickOutside);
@@ -196,6 +209,31 @@ const Navbar = () => {
                 value.toLowerCase() === "basic-pricing"
             ) {
                 breadcrumbLabel = "Price List";
+            }
+
+            if (value.toLowerCase() === "surveysettings") {
+                breadcrumbLabel = "Survey Settings";
+            }
+
+            if (value.toLowerCase() === "surveyform") {
+                breadcrumbLabel = "Survey Form";
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            
+            if (id && value === id) {
+                return (
+                    <span key={routeTo} className="text-custom-solidgreen cursor-default">
+                      {survey_loading ? <Skeleton width={200} /> : (survey_title || id)}
+                    </span>
+                  );
             }
 
             if (value.toLowerCase() === "payment-scheme") {

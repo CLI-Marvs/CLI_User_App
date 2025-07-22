@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { ContextProvider } from "../context/contextprovider";
 import { ToastContainer } from "react-toastify";
+import { SurveyProvider } from "../context/Survey/SurveyContext";
 import { RoleManagementProvider } from "@/context/RoleManagement/RoleManagementContext";
 import { PropertyPricingProvider } from "@/context/PropertyPricing/PropertyPricingContext";
 import { TransactionProvider } from "@/context/Transaction/TransactionContext";
@@ -19,22 +20,13 @@ if (rootElement) {
         <QueryClientProvider client={queryClient}>
             <ContextProvider>
                 <WalkinSelectionProvider>
+                <SurveyProvider>
                     <PropertyPricingProvider>
                         <RoleManagementProvider>
                             <TransactionProvider>
                                 <ToastContainer
                                     position="top-right"
                                     style={{ zIndex: 9999, position: "fixed" }}
-                                    // containerStyle={{
-                                    //     zIndex: "10000  !important",
-                                    // }}
-                                    // toastOptions={{
-                                    //     className: "react-hot-toast",
-                                    //     style: {
-                                    //         zIndex: "10000  !important",
-                                    //     },import ErrorBoundary from './ErrorElement/ErrorBoundary';
-
-                                    // }}
                                 />
                                 <ErrorBoundary>
                                     <App />
@@ -42,6 +34,7 @@ if (rootElement) {
                             </TransactionProvider>
                         </RoleManagementProvider>
                     </PropertyPricingProvider>
+                </SurveyProvider>
                 </WalkinSelectionProvider>
             </ContextProvider>
         </QueryClientProvider>
