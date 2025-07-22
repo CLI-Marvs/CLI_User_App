@@ -9,6 +9,7 @@ use App\Http\Controllers\SapController;
 
 use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CheckStreamController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\ConcernController;
 use App\Http\Controllers\FeatureController;
@@ -125,11 +126,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/store-view-and-columns', 'storeViewAndColumns');
         Route::put('/set-default-view', 'setDefaultView');
     });
+    
     Route::apiResource('markup-settings', MarkupSettignsController::class);
-
+    Route::apiResource('check-stream', CheckStreamController::class);
+    
     Route::controller(MarkupSettignsController::class)->group(function () {
         Route::get('/card/fee', 'retrieveCardMarkupDetails');
         Route::put('/card/fee/{id}', 'updateCardSettings');
+    });
+
+    Route::controller(CheckStreamController::class)->group(function () {
+        Route::get('/check-stream-banks', 'getCheckStreamBanks');
+        Route::post('/checks-export', 'exportChecks');
     });
 
     Route::controller(ConcernController::class)->group(function () {

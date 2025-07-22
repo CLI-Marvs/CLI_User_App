@@ -22,6 +22,7 @@ import {
 } from "../hooks/useTransactionQueries";
 import useRouteSections from "@/hooks/useRouteSections";
 import ColumnModal from "../component/ColumnModal";
+import { showToast } from "@/util/toastUtil";
 
 const TransactionCom = () => {
     const { subSection } = useRouteSections();
@@ -211,10 +212,9 @@ const TransactionCom = () => {
 
                 filter: transactions?.filters,
             };
-
             const response = await exportTransactions({data: payload});
 
-            if (response.status !== 200) throw new Error("Export failed");
+            if (response.status !== 200) return showToast("Export failed. Please try again later.", "error");
 
             const blob = response.data;
             const url = window.URL.createObjectURL(blob);
@@ -225,8 +225,9 @@ const TransactionCom = () => {
             document.body.appendChild(link);
             link.click();
             link.remove();
+            showToast("Exported successfully", "success");
         } catch (error) {
-            console.error("Error exporting file:", error);
+            showToast("Export failed. Please try again later.", "error");
         }
     };
 

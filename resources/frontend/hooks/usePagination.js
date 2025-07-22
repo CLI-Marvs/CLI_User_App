@@ -10,7 +10,9 @@ const usePagination = (fetchData, contextState, contextSetter) => {
                 ...prev,
                 data: response?.data,
                 totalPages: response?.last_page,
-                loading: false
+                loading: false,
+                totalRecords: response?.total || 0,
+                totalCheckAmount: response?.totalCheckAmount || 0,
             }));
         } catch (error) {
             console.error("Failed to fetch data:", error);
