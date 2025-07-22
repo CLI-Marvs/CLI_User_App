@@ -7,7 +7,7 @@ import { HiDotsVertical } from "react-icons/hi";
 import SurveyEditModal from './SurveyEditModal';
 import SurveyDeleteModal from './SurveyDeleteModal';
 
-export const SurveyList = ({ data, handleDelete , handleUpdateTitle }) => {
+export const SurveyList = ({ data, handleDelete, handleUpdateTitle }) => {
 
     const modalRef = useRef(null);
     const modalRef2 = useRef(null);
@@ -28,6 +28,29 @@ export const SurveyList = ({ data, handleDelete , handleUpdateTitle }) => {
         if (event.target.closest(".delete-button")) return;
         navigate(`/inquirymanagement/settings/surveysettings/surveyform/${data.id}`);
     };
+
+    function getFormattedEditedTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+
+        const isToday =
+            date.getDate() === now.getDate() &&
+            date.getMonth() === now.getMonth() &&
+            date.getFullYear() === now.getFullYear();
+
+        const time = date.toLocaleTimeString([], {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true,
+        }).toLowerCase();
+
+        if (isToday) {
+            return `Edited today at ${time}`;
+        } else {
+            const formattedDate = date.toLocaleDateString('en-US'); 
+            return `Last edited ${formattedDate} | ${time}`;
+        }
+    }
 
     const openModal = () => {
         if (modalRef.current) {
@@ -91,11 +114,9 @@ export const SurveyList = ({ data, handleDelete , handleUpdateTitle }) => {
                             {data.survey_title}
                         </p>
                         <p className='text-sm text-[#696969]'>
-                            Edited <span>{new Date(data.updated_at).toLocaleTimeString()}</span>
+                            {getFormattedEditedTime(data.updated_at)}
                         </p>
                     </div>
-
-
                     <div className="relative delete-button pointer-events-auto">
                         <button
                             onClick={toggleMenu}
