@@ -1,3 +1,4 @@
+import Spinner from "@/util/Spinner";
 import React, { useRef } from "react";
 import { AiFillInfoCircle } from "react-icons/ai";
 
@@ -12,6 +13,7 @@ const Alert = ({
     show,
     confirmText = "Yes",
     cancelText = "Cancel",
+    isLoading = false,
 }) => {
     if (!show) return null; // Only render if `show` is true
     return (
@@ -37,9 +39,10 @@ const Alert = ({
                         </button>
                         <button
                             onClick={onConfirm}
+                            disabled={isLoading}
                             className="gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold"
                         >
-                            {confirmText}
+                            {isLoading ? <Spinner  color="inherit"/> : confirmText}
                         </button>
                     </div>
                 </div>
