@@ -37,7 +37,7 @@ if (rootElement) {
                     </SurveyProvider>
                 </WalkinSelectionProvider>
             </ContextProvider>
-        </QueryClientProvider>
+        </QueryClientProvider >
         /*   </React.StrictMode> */
     );
 }
