@@ -70,6 +70,7 @@ const TransactionCom = () => {
             .filter(Boolean);
     };
 
+
     const dynamicColumns = generateDynamicColumns(defaultColumns);
 
     const baseColumns = [
@@ -198,6 +199,7 @@ const TransactionCom = () => {
             : baseColumns
         : [];
 
+
     const isDynamicColumnsLoading = !isSuccess;
 
     const exportToExcel = async () => {
@@ -209,7 +211,7 @@ const TransactionCom = () => {
 
                 filter: transactions?.filters,
             };
-            console.log("payload", payload);
+
             const response = await exportTransactions({data: payload});
 
             if (response.status !== 200) throw new Error("Export failed");
