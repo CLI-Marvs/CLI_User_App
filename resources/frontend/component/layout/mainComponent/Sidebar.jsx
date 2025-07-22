@@ -96,6 +96,15 @@ const Sidebar = () => {
 
     useEffect(() => {
         const pathname = location.pathname;
+        
+        // Dynamic path checks (regex)
+        const isSurveyForm =
+            /^\/inquirymanagement\/settings\/surveysettings\/surveyform\/[\w-]+$/.test(
+                pathname
+            );
+        const isSurveyReport =
+            /^\/inquirymanagement\/report\/survey\/[\w-]+$/.test(pathname);
+
         // Fixed switch statement logic
         if (pathname === "/superadmin/userrightsandpermissions" ||
             pathname === "/super-admin/user-rights-and-permissions" ||

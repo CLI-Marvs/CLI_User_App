@@ -20,24 +20,24 @@ if (rootElement) {
         <QueryClientProvider client={queryClient}>
             <ContextProvider>
                 <WalkinSelectionProvider>
-                <SurveyProvider>
-                    <PropertyPricingProvider>
-                        <RoleManagementProvider>
-                            <TransactionProvider>
-                                <ToastContainer
-                                    position="top-right"
-                                    style={{ zIndex: 9999, position: "fixed" }}
-                                />
-                                <ErrorBoundary>
-                                    <App />
-                                </ErrorBoundary>
-                            </TransactionProvider>
-                        </RoleManagementProvider>
-                    </PropertyPricingProvider>
-                </SurveyProvider>
+                    <SurveyProvider>
+                        <PropertyPricingProvider>
+                            <RoleManagementProvider>
+                                <TransactionProvider>
+                                    <ToastContainer
+                                        position="top-right"
+                                        style={{ zIndex: 9999, position: "fixed" }}
+                                    />
+                                    <ErrorBoundary>
+                                        <App />
+                                    </ErrorBoundary>
+                                </TransactionProvider>
+                            </RoleManagementProvider>
+                        </PropertyPricingProvider>
+                    </SurveyProvider>
                 </WalkinSelectionProvider>
             </ContextProvider>
-        </QueryClientProvider>
+        </QueryClientProvider >
         /*   </React.StrictMode> */
     );
 }
