@@ -358,6 +358,7 @@ const EngageFormModal = forwardRef(
                         <div className="py-1">
                             <div
                                 className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                    formData.contract_number.length > 0 &&
                                     contractNumberError
                                         ? "border-red-500"
                                         : formData.contract_number.length === 13
@@ -383,6 +384,7 @@ const EngageFormModal = forwardRef(
                             </div>
                             <span
                                 className={`flex justify-end text-xs ${
+                                    formData.contract_number.length > 0 &&
                                     contractNumberError
                                         ? "text-red-500"
                                         : formData.contract_number.length === 13
