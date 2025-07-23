@@ -145,6 +145,20 @@ const Navbar = () => {
                 );
             }
 
+            if (value.toLowerCase() === "branch-settings") {
+                breadcrumbLabel = "Branch Settings";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+
             if (value.toLowerCase() === "transaction") {
                 breadcrumbLabel = "Transaction Management";
                 // Non-linkable
@@ -206,6 +220,7 @@ const Navbar = () => {
                     </span>
                 );
             }
+
             if (value.toLowerCase() === "property-pricing") {
                 breadcrumbLabel = "Property Pricing";
             }
