@@ -48,7 +48,7 @@ const CloseModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         setIsCommunicationTypeRequired(false);
     };
 
- 
+
     /**
      * Function to handle marking a ticket as closed
      */
@@ -153,7 +153,7 @@ const CloseModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                             isSurveyRequired && (
                                 <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
                                     <p className="flex text-[#C42E2E] ">
-                                        Please select a survey type.
+                                        Please select a survey to be sent.
                                     </p>
                                 </div>
                             )

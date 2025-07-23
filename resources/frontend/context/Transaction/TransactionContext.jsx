@@ -56,6 +56,16 @@ export const TransactionProvider = ({ children }) => {
         loading: true,
     });
 
+    const [printedChecks, setPrintedChecks] = useState({
+        data: [],
+        currentPage: 0,
+        totalPages: 0,
+        filters: {},
+        loading: true,
+        totalCheckAmount: 0,
+        totalRecords: 0
+    });
+
     return (
         <TransactionContext.Provider
             value={{
@@ -83,6 +93,8 @@ export const TransactionProvider = ({ children }) => {
                 setEnabled,
                 defaultColumns,
                 setDefaultColumns,
+                printedChecks,
+                setPrintedChecks
             }}
         >
             {children}
