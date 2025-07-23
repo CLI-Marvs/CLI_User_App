@@ -31,6 +31,7 @@ const CustomInput = ({
     type = "text",
     className = "",
     restrictNumbers,
+    noNumbers,
     inputRef,
     placeholder,
     ...props
@@ -38,6 +39,11 @@ const CustomInput = ({
     // Handle input to validate against patterns
     const handleInputChange = (e) => {
         let inputValue = e.target.value;
+        const inputName = e.target.name;
+        
+        if (inputName === "email") {
+            inputValue = inputValue.replace(/\s/g, ""); // Remove all spaces
+        }
 
         // Apply number restriction if enabled
         if (type === "number" || restrictNumbers) {
@@ -45,6 +51,10 @@ const CustomInput = ({
             if (!/^\d*\.?\d*$/.test(inputValue)) {
                 return; // Ignore invalid input
             }
+        }
+
+        if (noNumbers) {
+            inputValue = inputValue.replace(/[0-9]/g, "");
         }
 
         // Call the onChange handler
