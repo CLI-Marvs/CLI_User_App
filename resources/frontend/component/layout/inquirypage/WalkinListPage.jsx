@@ -201,7 +201,7 @@ const WalkinListPage = () => {
                     </div>
                 </div>
 
-                {/* Table */}
+                {/* Table */} 
                 <div className="mt-3 mx-1 py-4">
                     {!selectedBranch.id || !selectedBranch.id ? (
                         <div className="text-center py-4 text-custom-bluegreen montserrat-medium">
