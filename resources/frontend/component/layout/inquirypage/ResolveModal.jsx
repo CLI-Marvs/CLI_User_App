@@ -19,6 +19,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const [communicationType, setCommunicationType] = useState("");
     const [selectedSurveyType, setSelectedSurveyType] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [surveyLinks, setSurveyLinks] = useState([]);
 
     /**
      *  Set initial communication type when dataRef changes
@@ -28,6 +29,22 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
             setCommunicationType(dataRef.communication_type);
         }
     }, [dataRef])
+
+
+    useEffect(() => {
+        const fetchSurveyLinks = async () => {
+            try {
+                const response = await apiService.get('/survey-links'); // your API endpoint
+                setSurveyLinks(response.data);
+            } catch (err) {
+                setError('Failed to fetch survey links');
+                console.error(err);
+            }
+        };
+
+        fetchSurveyLinks();
+    }, []);
+
 
     /**
      *Memoized function to fetch all concerns
@@ -175,7 +192,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                             isSurveyRequired && (
                                 <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
                                     <p className="flex text-[#C42E2E] ">
-                                        Please select a survey type.
+                                        Please select a survey to be sent.
                                     </p>
                                 </div>
                             )
@@ -250,7 +267,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                             className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                         >
                             <option value="">(Select)</option>
-                            {SURVEY_LINKS.map((item, index) => (
+                            {Array.isArray(surveyLinks) && surveyLinks.map((item, index) => (
                                 <option key={index} value={JSON.stringify(item)}>
                                     {item.surveyName}
                                 </option>

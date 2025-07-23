@@ -58,7 +58,16 @@ import AutoPostingView from "./views/pages/transactionViews/AutoPostingView";
 import ErrorPage from "@/component/ErrorElement/ErrorPage";
 import MarkupSettingsView from "@/component/views/pages/transactionViews/MarkupSettingsView";
 import ReportsView from "./views/pages/transactionViews/ReportsView";
-import WalkinTransactionHistoryView from "@/component/views/pages/walkinEmojiViews/WalkinTransactionHistoryView";
+import WalkinTransactionHistoryView from '@/component/views/pages/walkinEmojiViews/WalkinTransactionHistoryView';
+import FinancialToolsView from "./views/pages/transactionViews/FinancialToolsView";
+import CheckStreamReportsView from "./views/pages/transactionViews/CheckStreamReportsView";
+
+import SurveyReportsView from "./views/pages/surveyrelatedreportsViews/SurveyReportsView";
+import SurveyMainView from "./views/pages/surveyrelatedreportsViews/SurveyMainView";
+import SurveyReviewView from "./views/pages/surveyrelatedreportsViews/SurveyReviewView";
+import SurveyMainReportView from "./views/pages/surveyrelatedreportsViews/SurveyMainReportView";
+import SurveySummaryView from "./views/pages/surveyrelatedreportsViews/SurveySummaryView";
+
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, children }) => {
     const { hasPermission } = useStateContext();
@@ -106,9 +115,9 @@ const App = () => {
         return (
             <div className="bg-white relative max-h-screen flex flex-col h-screen">
                 <Navbar />
-                <div className="flex flex-1 overflow-hidden">
+                <div className="flex flex-1 overflow-hidden z-30">
                     <Sidebar />
-                    <div className="flex-1 overflow-y-auto bg-custom-grayFA ">
+                    <div className="flex-1 overflow-y-auto bg-custom-grayFA z-20">
                         <Outlet />
                     </div>
                 </div>
@@ -120,7 +129,7 @@ const App = () => {
         return (
             <>
                 <div className="flex bg-white relative h-full">
-                    <div className="fixed h-full z-50">
+                    <div className="fixed h-full z-20">
                         <CrsSettingsSidebar />
                     </div>
                     <div className="relative flex-1 ml-[230px] z-10">
@@ -245,6 +254,20 @@ const App = () => {
                                         },
                                     ],
                                 },
+                                {
+                                    path: "tools",
+                                    element: <TransactionLayout />,
+                                    children: [
+                                        {
+                                            path: "check-generator",
+                                            element: <FinancialToolsView />,
+                                        },
+                                         {
+                                            path: "reports",
+                                            element: <CheckStreamReportsView />,
+                                        },
+                                    ],
+                                },
                             ],
                         },
                         {
@@ -258,12 +281,24 @@ const App = () => {
                                     element: <InquiryListView />,
                                 },
                                 {
+                                    path: "inquirylist/:filter",
+                                    element: <InquiryListView />,
+                                },
+                                {
                                     path: "thread/:id",
                                     element: <InquiryThreadView />,
                                 },
                                 {
-                                    path: "report",
+                                    path: "report/inquiries",
                                     element: <ReportViews />,
+                                },
+                                {
+                                    path: "report/survey",
+                                    element: <SurveyMainReportView />,
+                                },
+                                {
+                                    path: "report/survey/:id?",
+                                    element: <SurveySummaryView />,
                                 },
                                 {
                                     path: "walk-in",
@@ -290,6 +325,22 @@ const App = () => {
                                             element: <AutoAssignView />,
                                         },
                                         {
+                                            path: "surveysettings",
+                                            element: <SurveyReportsView />,
+                                        },
+                                        {
+                                            path: "surveysettings/surveyform",
+                                            element: <SurveyMainView />,
+                                        },
+                                        {
+                                            path: "surveysettings/surveyform/:id?",
+                                            element: <SurveyMainView />,
+                                        },
+                                        {
+                                            path: "surveysettings/surveyreview",
+                                            element: <SurveyReviewView />,
+                                        },
+                                        {
                                             path: "bannersettings",
                                             element: <BannerSettingsView />,
                                         },
@@ -299,7 +350,7 @@ const App = () => {
                                         },
                                         {
                                             path: "versionlogs",
-                                            element: <VersionLogsView />,
+                                            element: <VersionLogsView/>,
                                         },
                                     ],
                                 },

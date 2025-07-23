@@ -79,7 +79,6 @@ export const transaction = {
 
     exportTransactions: async (data) => {
         try {
-            console.log("data", data);
             const payload = {
                 columns: data.columns,
                 filter: data.filter,
@@ -113,7 +112,7 @@ export const transaction = {
         try {
             const params = { ...subFeatureId };
             const response = await apiService.get("transaction-columns", {
-                params
+                params,
             });
 
             return response?.data.data;
@@ -124,7 +123,10 @@ export const transaction = {
 
     storeViewAndColumns: async (data) => {
         try {
-            const response = await apiService.post("store-view-and-columns", data);
+            const response = await apiService.post(
+                "store-view-and-columns",
+                data
+            );
 
             return response?.data.data;
         } catch (error) {
@@ -138,6 +140,74 @@ export const transaction = {
             return response?.data.data;
         } catch (error) {
             console.log("error", error);
+        }
+    },
+
+    retrieveCheckStreamBanks: async () => {
+        try {
+            const response = await apiService.get("check-stream-banks");
+
+            return response?.data.data;
+        } catch (error) {
+            console.log("error", error);
+        }
+    },
+
+    storePrintedCheck: async (data) => {
+        try {
+            const response = await apiService.post("check-stream", data);
+
+            return response;
+        } catch (error) {
+            console.log("error", error);
+        }
+    },
+
+    updatePrintedCheck: async (id, data) => {
+        try {
+            const response = await apiService.put(`check-stream/${id}`, data);
+            return response;
+        } catch (error) {
+            console.log("error", error);
+        }
+    },
+
+    deletePrintedCheck: async (id) => {
+        try {
+            const response = await apiService.delete(`check-stream/${id}`);
+            return response?.data;
+        } catch (error) {
+            console.log("error", error);
+        }
+    },
+
+    retrievePrintedChecks: async (currentPage, filter = {}) => {
+        try {
+            const params = { page: currentPage + 1, ...filter };
+
+            const response = await apiService.get("check-stream", {
+                params,
+            });
+
+            return response?.data.data;
+        } catch (error) {
+            console.log("error", error);
+        }
+    },
+
+    exportChecks: async (data) => {
+        try {
+            const payload = {
+                filter: data.filter,
+            };
+            const response = await apiService.post("checks-export", payload, {
+                responseType: "blob",
+            });
+
+            return response;
+        } catch (error) {
+            console.log("error", error);
+            throw error;
         }
     },
 };
