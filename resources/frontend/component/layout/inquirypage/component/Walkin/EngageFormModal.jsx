@@ -220,11 +220,11 @@ const EngageFormModal = forwardRef(
                             </h1>
                         </div>
 
-                        {/* Inquiry Type */}
+                        {/* Category Type */}
                         <div className="py-2">
                             <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden ">
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[200px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
-                                    Inquiry Type
+                                    Category Type
                                 </span>
                                 <div className="relative w-full">
                                     <select

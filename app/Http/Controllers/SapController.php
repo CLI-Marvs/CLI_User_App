@@ -34,7 +34,6 @@ class SapController extends Controller
         return response()->json(['error' => 'SAP Server Error'], 500);
        }
         
-        /*  Tomorrowbytogether2019 */
     }
 
 

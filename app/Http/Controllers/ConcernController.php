@@ -1146,9 +1146,9 @@ class ConcernController extends Controller
             if ($searchParams['departments'] !== "Unassigned") {
                 $departments = $searchParams['departments'];
 
-            if (!is_array($departments)) {
-                $departments = explode(',', $departments);
-            }
+                if (!is_array($departments)) {
+                    $departments = explode(',', $departments);
+                }
 
                 foreach ($departments as $department) {
                     $query->whereJsonContains('assign_to', [['department' => $department]]);
@@ -1925,6 +1925,20 @@ class ConcernController extends Controller
 
 
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
+            
+            if (
+                isset($selectedSurveyType['surveyName']) && 
+                strtolower($selectedSurveyType['surveyName']) !== 'n/a'
+            ) {
+                SendSurveyLinkEmailJob::dispatch(
+                    $buyerEmail,
+                    $request->buyer_name,
+                    $selectedSurveyType,
+                    'resolve',
+                    $modifiedTicketId
+                );
+            }
+            
 
 
             if ($selectedSurveyType['surveyName'] !== 'N/A') {

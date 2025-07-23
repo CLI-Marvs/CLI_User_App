@@ -205,7 +205,7 @@ const WalkinListPage = () => {
                 <div className="mt-3 mx-1 py-4">
                     {!selectedBranch.id || !selectedBranch.id ? (
                         <div className="text-center py-4 text-custom-bluegreen montserrat-medium">
-                            Please select a branch and desk first to show walkin
+                            Please select a branch and desk first to show walk-in
                             transactions.
                         </div>
                     ) : isLoading ? (
@@ -218,7 +218,7 @@ const WalkinListPage = () => {
                       Array.isArray(walkinData?.data) &&
                       walkinData?.data.length === 0 ? (
                         <div className="text-center py-4 text-custom-bluegreen">
-                            No walkin transaction data
+                            No walk-in transaction data
                         </div>
                     ) : walkinData &&
                       Array.isArray(walkinData.data) &&
@@ -244,7 +244,7 @@ const WalkinListPage = () => {
                         />
                     ) : (
                         <div className="text-center py-4 text-custom-bluegreen">
-                            No walkin transaction data
+                            No walk-in transaction data
                         </div>
                     )}
 
