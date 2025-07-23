@@ -2,6 +2,7 @@ import React, { useMemo, useState, Fragment } from "react";
 import WorkOrderMilestoneRow from "./WorkOrderMilestoneRow";
 import AccountFilesModal from "./AccountFilesModal";
 import ChecklistTable from "./ChecklistTable";
+import AddFilesModal from "./AddFilesModal";
 import {
     Dialog,
     DialogHeader,
@@ -23,7 +24,6 @@ const WorkOrderGroupDetailsModal = ({
     isOpen,
     onClose,
     group,
-    onAddFiles,
     getStatusBadge,
     isLoading,
     showChecklistTable = false, // Add this prop
@@ -46,6 +46,22 @@ const WorkOrderGroupDetailsModal = ({
         type: "info", // 'info', 'success', 'error'
     });
     const [isRefreshing, setIsRefreshing] = useState(false);
+
+    // AddFilesModal state
+    const [isAddFilesModalOpen, setIsAddFilesModalOpen] = useState(false);
+    const [selectedAccountId, setSelectedAccountId] = useState(null);
+    const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
+    const [selectedStepName, setSelectedStepName] = useState(null);
+    const [selectedChecklist, setSelectedChecklist] = useState(null);
+
+    // Local handler for opening AddFilesModal
+    const handleAddFiles = (accountId, workOrder, stepName, checklist) => {
+        setSelectedAccountId(accountId);
+        setSelectedWorkOrder(workOrder);
+        setSelectedStepName(stepName);
+        setSelectedChecklist(checklist);
+        setIsAddFilesModalOpen(true);
+    };
 
     // Milestone progression logic - moved before useMemo to avoid temporal dead zone
     const checkMilestoneProgression = (account, steps) => {
@@ -153,10 +169,10 @@ const WorkOrderGroupDetailsModal = ({
             group_name: group.name || group.group_name || null,
             group_id: group.id,
             account_id: account.id || account.key,
-            account: account, // Pass the full account object
-            group: group, // Pass the full group object
-            currentUser: group.currentUser, // Pass current user info
-            currentUserId: currentUserId, // Pass current user ID
+            account: account,
+            group: group, 
+            currentUser: group.currentUser, 
+            currentUserId: currentUserId,
         });
         setFilesModalOpen(true);
     };
@@ -271,6 +287,7 @@ const WorkOrderGroupDetailsModal = ({
             });
 
             const tableRows = Object.values(accountMap).map((account) => {
+                // Build stepData as before
                 const stepData = steps.map((step) => {
                     return (
                         account.milestoneData[step.id] ||
@@ -280,10 +297,73 @@ const WorkOrderGroupDetailsModal = ({
                     );
                 });
 
+                // Build checklistInfos: array of info for each submilestone cell (in step order)
+                const checklistInfos = [];
+                steps.forEach((step) => {
+                    step.subMilestones.forEach((sub) => {
+                        const checklists = sub.checklists || [];
+                        const uploadedDocs = account.uploaded_documents || [];
+                        let currentChecklistItem = null;
+                        let completedCount = 0;
+                        const completedChecklists = [];
+                        const pendingChecklists = [];
+                        for (const checklist of checklists) {
+                            const hasUploadedDoc = uploadedDocs.some(
+                                (doc) => doc.file_title === checklist.name
+                            );
+                            const accountChecklistStatus = (
+                                account.account_checklist_statuses || []
+                            ).find(
+                                (status) => status.checklist_id === checklist.id
+                            );
+                            const hasCompletedStatus =
+                                accountChecklistStatus &&
+                                accountChecklistStatus.is_completed;
+                            if (hasUploadedDoc || hasCompletedStatus) {
+                                completedCount++;
+                                completedChecklists.push({
+                                    ...checklist,
+                                    completedVia: hasUploadedDoc
+                                        ? "document"
+                                        : "status",
+                                    completedDate: hasUploadedDoc
+                                        ? uploadedDocs.find(
+                                              (doc) =>
+                                                  doc.file_title ===
+                                                  checklist.name
+                                          )?.created_at
+                                        : accountChecklistStatus?.updated_at,
+                                });
+                            } else {
+                                pendingChecklists.push(checklist);
+                                if (!currentChecklistItem) {
+                                    currentChecklistItem = checklist;
+                                }
+                            }
+                        }
+                        checklistInfos.push({
+                            stepName: step.stepName,
+                            milestoneName: sub.name,
+                            totalChecklists: checklists.length,
+                            completedCount: completedCount,
+                            currentChecklistItem: currentChecklistItem,
+                            completedChecklists: completedChecklists,
+                            pendingChecklists: pendingChecklists,
+                            progressPercentage:
+                                checklists.length > 0
+                                    ? Math.round(
+                                          (completedCount / checklists.length) *
+                                              100
+                                      )
+                                    : 0,
+                            subMilestoneId: sub.id,
+                        });
+                    });
+                });
+
                 // Find current submilestone information
                 let currentChecklistInfo = null;
                 if (account.currentSubMilestoneId) {
-                    // Find the current submilestone across all steps
                     for (const step of steps) {
                         const currentSubmilestone = step.subMilestones.find(
                             (sub) => sub.id === account.currentSubMilestoneId
@@ -293,13 +373,10 @@ const WorkOrderGroupDetailsModal = ({
                                 currentSubmilestone.checklists || [];
                             const uploadedDocs =
                                 account.uploaded_documents || [];
-
-                            // Find current/next checklist item and collect completed items
                             let currentChecklistItem = null;
                             let completedCount = 0;
                             const completedChecklists = [];
                             const pendingChecklists = [];
-
                             for (const checklist of checklists) {
                                 const hasUploadedDoc = uploadedDocs.some(
                                     (doc) => doc.file_title === checklist.name
@@ -313,7 +390,6 @@ const WorkOrderGroupDetailsModal = ({
                                 const hasCompletedStatus =
                                     accountChecklistStatus &&
                                     accountChecklistStatus.is_completed;
-
                                 if (hasUploadedDoc || hasCompletedStatus) {
                                     completedCount++;
                                     completedChecklists.push({
@@ -332,12 +408,10 @@ const WorkOrderGroupDetailsModal = ({
                                 } else {
                                     pendingChecklists.push(checklist);
                                     if (!currentChecklistItem) {
-                                        // This is the first uncompleted checklist item
                                         currentChecklistItem = checklist;
                                     }
                                 }
                             }
-
                             currentChecklistInfo = {
                                 stepName: step.stepName,
                                 milestoneName: currentSubmilestone.name,
@@ -373,7 +447,6 @@ const WorkOrderGroupDetailsModal = ({
                         nextSubmilestoneId &&
                         nextSubmilestoneId !== account.currentSubMilestoneId
                     ) {
-                        // Auto-progress to next milestone
                         updateMilestoneProgression(
                             account.id,
                             nextSubmilestoneId
@@ -391,7 +464,7 @@ const WorkOrderGroupDetailsModal = ({
                     workOrder: account.latestStep.workOrder,
                     workOrderType: "All Steps",
                     addNoteLogType:
-                        account.latestStep.workOrder.work_order_type?.type_name, // For adding new notes
+                        account.latestStep.workOrder.work_order_type?.type_name,
                     assignee: account.latestStep.workOrder.assignee,
                     currentUser: group.currentUser,
                     workOrderGroupId: group.id,
@@ -400,22 +473,15 @@ const WorkOrderGroupDetailsModal = ({
                 return {
                     key: account.id,
                     accountName: account.account_name,
-                    property_name: account.property_name, // Ensure property_name is included
+                    property_name: account.property_name,
                     stepData,
                     status: overallStatus,
                     remarks: account.remarks,
                     notesData: notesData,
-                    currentSubMilestoneId: account.current_submilestone_id, // Add current submilestone ID
-                    currentChecklistInfo: currentChecklistInfo, // Add current checklist information
+                    currentSubMilestoneId: account.current_submilestone_id,
+                    currentChecklistInfo: currentChecklistInfo,
                     uploaded_documents: account.uploaded_documents || [],
-                    onAddFilesClick: () => {
-                        onAddFiles(
-                            account.id,
-                            account.latestStep.workOrder,
-                            account.latestStep.workOrder.work_order_type
-                                ?.type_name
-                        );
-                    },
+                    checklistInfos,
                 };
             });
 
@@ -448,7 +514,7 @@ const WorkOrderGroupDetailsModal = ({
                 totalPages,
                 steps,
             };
-        }, [group, onAddFiles, searchTerm, itemsPerPage, statusFilter]);
+        }, [group, handleAddFiles, searchTerm, itemsPerPage, statusFilter]);
 
     const paginatedData = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -781,11 +847,21 @@ const WorkOrderGroupDetailsModal = ({
                                     return acc;
                                 }, {})
                             )}
-                            onAddFiles={onAddFiles}
+                            onAddFiles={handleAddFiles}
                             handleOpenNotesModal={handleOpenNotesModal}
                             currentUserId={currentUserId}
                             onRefresh={onRefresh}
                         />
+
+                        {isAddFilesModalOpen && (
+                            <AddFilesModal
+                                selectedAccountId={selectedAccountId}
+                                selectedWorkOrder={selectedStepName}
+                                workOrderData={selectedWorkOrder}
+                                selectedChecklist={selectedChecklist}
+                                onClose={() => setIsAddFilesModalOpen(false)}
+                            />
+                        )}
                     </div>
                 ) : paginatedData.length > 0 ? (
                     <div className="h-full overflow-x-auto">
@@ -968,7 +1044,7 @@ const WorkOrderGroupDetailsModal = ({
                             <div className="mt-4">
                                 <ChecklistTable
                                     workOrders={group.work_orders}
-                                    onAddFiles={onAddFiles}
+                                    onAddFiles={handleAddFiles}
                                     getStatusBadge={getStatusBadge}
                                     currentUserId={currentUserId}
                                 />

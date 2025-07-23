@@ -14,6 +14,7 @@ function AddFilesModal({
     onClose,
     selectedWorkOrder,
     workOrderData,
+    selectedChecklist,
     // selectedAssignee,
 }) {
     const { user } = useStateContext(); // Get user from context
@@ -448,6 +449,7 @@ function AddFilesModal({
                     logType={selectedWorkOrder}
                     currentUserId={user?.id}
                     propertyName={propertyName}
+                    selectedChecklist={selectedChecklist}
                 />
             )}
             {isViewerOpen && viewingFile && (

@@ -12,18 +12,21 @@ const WorkOrderMilestoneRow = ({
 }) => {
     const [showTooltip, setShowTooltip] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
+    const [hoveredChecklistInfo, setHoveredChecklistInfo] = useState(null);
 
-    const handleMouseEnter = (e) => {
+    const handleMouseEnter = (e, checklistInfo) => {
         const rect = e.currentTarget.getBoundingClientRect();
         setTooltipPosition({
             x: rect.left + rect.width / 2,
             y: rect.top - 10,
         });
+        setHoveredChecklistInfo(checklistInfo);
         setShowTooltip(true);
     };
 
     const handleMouseLeave = () => {
         setShowTooltip(false);
+        setHoveredChecklistInfo(null);
     };
     return (
         <>
@@ -41,118 +44,145 @@ const WorkOrderMilestoneRow = ({
                         </span>
                     </div>
                 </td>
-                {row.stepData.map((step, i) => {
-                    const currentStep = steps[i];
-                    const isCurrentStep =
-                        currentStep &&
-                        currentStep.subMilestones.some(
-                            (sub) => sub.id === row.currentSubMilestoneId
-                        );
-                    return step.map((completion, j) => {
-                        const currentSubmilestone =
-                            currentStep?.subMilestones[j];
-                        const isCurrent =
-                            isCurrentStep &&
-                            currentSubmilestone &&
-                            currentSubmilestone.id ===
-                                row.currentSubMilestoneId;
+                {Array.isArray(row.stepData) &&
+                    row.stepData.map((step, i) => {
+                        const currentStep = steps[i];
+                        const isCurrentStep =
+                            currentStep &&
+                            currentStep.subMilestones.some(
+                                (sub) => sub.id === row.currentSubMilestoneId
+                            );
+                        return step.map((completion, j) => {
+                            const currentSubmilestone =
+                                currentStep?.subMilestones[j];
+                            const isCurrent =
+                                isCurrentStep &&
+                                currentSubmilestone &&
+                                currentSubmilestone.id ===
+                                    row.currentSubMilestoneId;
 
-                        const cellContent = (
-                            <td
-                                className={`px-0 py-0 relative ${
-                                    isCurrentStep
-                                        ? "border-2 border-blue-600 shadow-lg ring-2 ring-blue-300 ring-opacity-50"
-                                        : "border border-gray-200"
-                                }`}
-                                colSpan={2}
-                                style={{
-                                    backgroundColor: isCurrentStep
-                                        ? "#dbeafe"
-                                        : "inherit",
-                                }}
-                                onMouseEnter={
-                                    isCurrent && currentChecklistInfo
-                                        ? handleMouseEnter
-                                        : undefined
-                                }
-                                onMouseLeave={
-                                    isCurrent && currentChecklistInfo
-                                        ? handleMouseLeave
-                                        : undefined
-                                }
-                            >
-                                <div
-                                    className={`absolute inset-0 ${
+                            // Show tooltip for all CURRENT cells in the step
+                            // Instead of using the same currentChecklistInfo for all, use the correct info for the hovered cell
+                            let checklistInfoForCell = null;
+                            if (
+                                isCurrentStep &&
+                                row.checklistInfos &&
+                                Array.isArray(row.checklistInfos)
+                            ) {
+                                // Try to find the checklist info for this submilestone
+                                checklistInfoForCell = row.checklistInfos.find(
+                                    (info) =>
+                                        info &&
+                                        info.subMilestoneId ===
+                                            currentSubmilestone?.id
+                                );
+                            } else if (isCurrentStep && currentChecklistInfo) {
+                                checklistInfoForCell = currentChecklistInfo;
+                            }
+
+                            const attachTooltip =
+                                isCurrentStep && checklistInfoForCell;
+
+                            const cellContent = (
+                                <td
+                                    className={`px-0 py-0 relative ${
                                         isCurrentStep
-                                            ? "opacity-30"
-                                            : "opacity-20"
-                                    } ${
-                                        completion === 100
-                                            ? "bg-green-500"
-                                            : completion > 0
-                                            ? "bg-amber-500"
-                                            : "bg-gray-200"
+                                            ? "border-2 border-blue-600 shadow-lg ring-2 ring-blue-300 ring-opacity-50"
+                                            : "border border-gray-200"
                                     }`}
-                                    style={{ width: `${completion}%` }}
-                                ></div>
-                                <div className="flex relative z-10">
-                                    <div className="flex-1 px-2 py-2 text-center border-r border-gray-100">
-                                        <span
-                                            className={`text-xs ${
-                                                isCurrentStep
-                                                    ? "text-blue-800 font-semibold"
-                                                    : "text-gray-600"
-                                            }`}
-                                        >
-                                            {new Date().toLocaleDateString(
-                                                "en-US",
-                                                {
-                                                    month: "2-digit",
-                                                    day: "2-digit",
-                                                    year: "2-digit",
-                                                }
-                                            )}
-                                        </span>
-                                    </div>
-                                    <div className="flex-1 px-2 py-2 text-center">
-                                        <span
-                                            className={`text-xs ${
-                                                isCurrentStep
-                                                    ? "text-blue-800 font-semibold"
-                                                    : "text-gray-600"
-                                            }`}
-                                        >
-                                            {completion > 0
-                                                ? new Date().toLocaleDateString(
-                                                      "en-US",
-                                                      {
-                                                          month: "2-digit",
-                                                          day: "2-digit",
-                                                          year: "2-digit",
-                                                      }
+                                    colSpan={2}
+                                    style={{
+                                        backgroundColor: isCurrentStep
+                                            ? "#dbeafe"
+                                            : "inherit",
+                                    }}
+                                    onMouseEnter={
+                                        attachTooltip
+                                            ? (e) =>
+                                                  handleMouseEnter(
+                                                      e,
+                                                      checklistInfoForCell
                                                   )
-                                                : "-"}
-                                        </span>
-                                    </div>
-                                </div>
-                                {isCurrentStep && (
-                                    <>
-                                        <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-blue-600 rounded-full animate-pulse border border-white shadow-sm"></div>
-                                        <div className="absolute top-0.5 right-0.5 px-1 py-0.5 bg-blue-600 text-white text-[8px] rounded font-bold shadow-sm leading-none">
-                                            CURRENT
+                                            : undefined
+                                    }
+                                    onMouseLeave={
+                                        attachTooltip
+                                            ? handleMouseLeave
+                                            : undefined
+                                    }
+                                >
+                                    <div
+                                        className={`absolute inset-0 ${
+                                            isCurrentStep
+                                                ? "opacity-30"
+                                                : "opacity-20"
+                                        } ${
+                                            completion === 100
+                                                ? "bg-green-500"
+                                                : completion > 0
+                                                ? "bg-amber-500"
+                                                : "bg-gray-200"
+                                        }`}
+                                        style={{ width: `${completion}%` }}
+                                    ></div>
+                                    <div className="flex relative z-10">
+                                        <div className="flex-1 px-2 py-2 text-center border-r border-gray-100">
+                                            <span
+                                                className={`text-xs ${
+                                                    isCurrentStep
+                                                        ? "text-blue-800 font-semibold"
+                                                        : "text-gray-600"
+                                                }`}
+                                            >
+                                                {new Date().toLocaleDateString(
+                                                    "en-US",
+                                                    {
+                                                        month: "2-digit",
+                                                        day: "2-digit",
+                                                        year: "2-digit",
+                                                    }
+                                                )}
+                                            </span>
                                         </div>
-                                    </>
-                                )}
-                            </td>
-                        );
+                                        <div className="flex-1 px-2 py-2 text-center">
+                                            <span
+                                                className={`text-xs ${
+                                                    isCurrentStep
+                                                        ? "text-blue-800 font-semibold"
+                                                        : "text-gray-600"
+                                                }`}
+                                            >
+                                                {completion > 0
+                                                    ? new Date().toLocaleDateString(
+                                                          "en-US",
+                                                          {
+                                                              month: "2-digit",
+                                                              day: "2-digit",
+                                                              year: "2-digit",
+                                                          }
+                                                      )
+                                                    : "-"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    {isCurrentStep && (
+                                        <>
+                                            <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-blue-600 rounded-full animate-pulse border border-white shadow-sm"></div>
+                                            <div className="absolute top-0.5 right-0.5 px-1 py-0.5 bg-blue-600 text-white text-[8px] rounded font-bold shadow-sm leading-none">
+                                                CURRENT
+                                            </div>
+                                        </>
+                                    )}
+                                </td>
+                            );
 
-                        return (
-                            <React.Fragment key={`${i}-${j}`}>
-                                {cellContent}
-                            </React.Fragment>
-                        );
-                    });
-                })}
+                            return (
+                                <React.Fragment key={`${i}-${j}`}>
+                                    {cellContent}
+                                </React.Fragment>
+                            );
+                        });
+                    })}
                 <td className="px-2 py-2 text-center border-l border-gray-200">
                     <div className="flex justify-center">
                         {getStatusBadge(row.status)}
@@ -217,121 +247,207 @@ const WorkOrderMilestoneRow = ({
             </tr>
 
             {/* Custom Tooltip */}
-            {showTooltip && currentChecklistInfo && (
+            {showTooltip && hoveredChecklistInfo && (
                 <div
-                    className="fixed z-50 pointer-events-none"
+                    className="fixed z-50 pointer-events-none animate-in fade-in-0 zoom-in-95 duration-200"
                     style={{
                         left: tooltipPosition.x,
                         top: tooltipPosition.y,
-                        transform: "translate(-50%, -100%)",
+                        transform:
+                            tooltipPosition.y < window.innerHeight / 2
+                                ? "translate(-50%, 75px)"
+                                : "translate(-50%, -100%)",
                     }}
                 >
-                    <div className="bg-gray-900 text-white p-3 rounded-lg shadow-xl border border-gray-700 max-w-sm">
-                        <div className="text-sm font-semibold mb-2">
-                            {currentChecklistInfo.stepName} -{" "}
-                            {currentChecklistInfo.milestoneName}
-                        </div>
-
-                        <div className="mb-3">
-                            <div className="flex justify-between items-center mb-1">
-                                <span className="text-xs text-gray-300">
-                                    Progress:
-                                </span>
-                                <span className="text-xs text-white font-medium">
-                                    {currentChecklistInfo.progressPercentage}%
-                                </span>
-                            </div>
-                            <div className="w-full bg-gray-600 rounded-full h-1.5">
-                                <div
-                                    className="bg-green-400 h-1.5 rounded-full transition-all duration-300"
-                                    style={{
-                                        width: `${currentChecklistInfo.progressPercentage}%`,
-                                    }}
-                                ></div>
-                            </div>
-                        </div>
-
-                        {currentChecklistInfo.completedChecklists &&
-                            currentChecklistInfo.completedChecklists.length >
-                                0 && (
-                                <div className="mb-3">
-                                    <div className="text-sm font-medium mb-2">
-                                        Completed Checklists (
-                                        {
-                                            currentChecklistInfo
-                                                .completedChecklists.length
-                                        }
-                                        ):
-                                    </div>
-                                    <div className="space-y-1 max-h-32 overflow-y-auto">
-                                        {currentChecklistInfo.completedChecklists.map(
-                                            (checklist, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="flex items-start gap-2"
-                                                >
-                                                    <div className="w-2 h-2 bg-green-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                                    <div className="flex-1">
-                                                        <div className="text-gray-200 text-xs">
-                                                            {checklist.name}
-                                                        </div>
-                                                        <div className="text-gray-400 text-xs">
-                                                            {checklist.completedVia ===
-                                                            "document"
-                                                                ? "Document uploaded"
-                                                                : "Manually completed"}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            )
-                                        )}
+                    <div className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-4 rounded-xl shadow-2xl border border-slate-600/50 backdrop-blur-sm max-w-sm min-w-72">
+                        {/* Header Section */}
+                        <div className="mb-4 pb-3 border-b border-slate-600/30">
+                            <div className="flex items-start justify-between gap-3">
+                                <div className="flex-1">
+                                    <h3 className="text-sm font-bold text-white leading-tight mb-1">
+                                        {hoveredChecklistInfo.stepName}
+                                    </h3>
+                                    <p className="text-xs text-slate-300 font-medium">
+                                        {hoveredChecklistInfo.milestoneName}
+                                    </p>
+                                </div>
+                                <div className="flex-shrink-0">
+                                    <div className="inline-flex items-center px-2.5 py-1 bg-slate-700/50 rounded-full border border-slate-600/30">
+                                        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full mr-1.5 animate-pulse"></div>
+                                        <span className="text-xs font-semibold text-emerald-400">
+                                            {
+                                                hoveredChecklistInfo.progressPercentage
+                                            }
+                                            %
+                                        </span>
                                     </div>
                                 </div>
-                            )}
+                            </div>
+                        </div>
 
-                        {currentChecklistInfo.pendingChecklists &&
-                            currentChecklistInfo.pendingChecklists.length >
+                        {/* Progress Section */}
+                        <div className="mb-4">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-xs font-medium text-slate-300">
+                                    Overall Progress
+                                </span>
+                                <span className="text-xs text-slate-400">
+                                    {hoveredChecklistInfo.completedChecklists
+                                        ?.length || 0}{" "}
+                                    /{" "}
+                                    {(hoveredChecklistInfo.completedChecklists
+                                        ?.length || 0) +
+                                        (hoveredChecklistInfo.pendingChecklists
+                                            ?.length || 0)}{" "}
+                                    tasks
+                                </span>
+                            </div>
+                            <div className="relative w-full bg-slate-700/50 rounded-full h-2 overflow-hidden">
+                                <div
+                                    className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-full rounded-full transition-all duration-500 ease-out relative overflow-hidden"
+                                    style={{
+                                        width: `${hoveredChecklistInfo.progressPercentage}%`,
+                                    }}
+                                >
+                                    <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Completed Checklists Section */}
+                        {hoveredChecklistInfo.completedChecklists &&
+                            hoveredChecklistInfo.completedChecklists.length >
                                 0 && (
-                                <div className="border-t border-gray-600 pt-2">
-                                    <div className="text-sm font-medium mb-1">
-                                        Pending Checklists (
-                                        {
-                                            currentChecklistInfo
-                                                .pendingChecklists.length
-                                        }
-                                        ):
+                                <div className="mb-4">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="w-4 h-4 bg-emerald-500/20 rounded-full flex items-center justify-center">
+                                            <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
+                                        </div>
+                                        <h4 className="text-sm font-semibold text-emerald-400">
+                                            Completed (
+                                            {
+                                                hoveredChecklistInfo
+                                                    .completedChecklists.length
+                                            }
+                                            )
+                                        </h4>
                                     </div>
-                                    <div className="space-y-1 max-h-24 overflow-y-auto">
-                                        {currentChecklistInfo.pendingChecklists
-                                            .slice(0, 3)
+                                    <div className="space-y-1">
+                                        {hoveredChecklistInfo.completedChecklists
+                                            .slice(0, 4)
                                             .map((checklist, index) => (
                                                 <div
                                                     key={index}
-                                                    className="flex items-start gap-2"
+                                                    className="flex items-center gap-2 p-1 bg-slate-800/30 rounded border border-slate-700/30"
                                                 >
-                                                    <div className="w-2 h-2 bg-yellow-400 rounded-full mt-1.5 flex-shrink-0"></div>
-                                                    <div className="text-gray-300 text-xs">
-                                                        {checklist.name}
+                                                    <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full flex-shrink-0"></div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="text-slate-200 text-xs truncate">
+                                                            {checklist.name}
+                                                        </div>
+                                                    </div>
+                                                    <div
+                                                        className={`text-xs px-1.5 py-0.5 rounded-full text-white font-medium ${
+                                                            checklist.completedVia ===
+                                                            "document"
+                                                                ? "bg-blue-500/80"
+                                                                : "bg-purple-500/80"
+                                                        }`}
+                                                    >
+                                                        {checklist.completedVia ===
+                                                        "document"
+                                                            ? "Docs Upload"
+                                                            : "Remarks"}
                                                     </div>
                                                 </div>
                                             ))}
-                                        {currentChecklistInfo.pendingChecklists
-                                            .length > 3 && (
-                                            <div className="text-gray-400 text-xs ml-4">
-                                                ... and{" "}
-                                                {currentChecklistInfo
-                                                    .pendingChecklists.length -
-                                                    3}{" "}
-                                                more
+                                        {hoveredChecklistInfo
+                                            .completedChecklists.length > 4 && (
+                                            <div className="text-slate-400 text-xs text-center py-1 bg-slate-800/20 rounded border border-slate-700/20">
+                                                +
+                                                {hoveredChecklistInfo
+                                                    .completedChecklists
+                                                    .length - 4}{" "}
+                                                more completed
                                             </div>
                                         )}
                                     </div>
                                 </div>
                             )}
 
-                        {/* Tooltip Arrow */}
-                        <div className="absolute top-full left-1/2 transform -translate-x-1/2">
-                            <div className="border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-gray-900"></div>
+                        {/* Pending Checklists Section */}
+                        {hoveredChecklistInfo.pendingChecklists &&
+                            hoveredChecklistInfo.pendingChecklists.length >
+                                0 && (
+                                <div className="border-t border-slate-600/30 pt-4">
+                                    <div className="flex items-center gap-2 mb-3">
+                                        <div className="w-4 h-4 bg-amber-500/20 rounded-full flex items-center justify-center">
+                                            <div className="w-2 h-2 bg-amber-400 rounded-full animate-pulse"></div>
+                                        </div>
+                                        <h4 className="text-sm font-semibold text-amber-400">
+                                            Pending (
+                                            {
+                                                hoveredChecklistInfo
+                                                    .pendingChecklists.length
+                                            }
+                                            )
+                                        </h4>
+                                    </div>
+                                    <div className="space-y-1">
+                                        {hoveredChecklistInfo.pendingChecklists
+                                            .slice(0, 3)
+                                            .map((checklist, index) => (
+                                                <div
+                                                    key={index}
+                                                    className="flex items-center gap-2 p-1 bg-slate-800/20 rounded border border-slate-700/20"
+                                                >
+                                                    <div className="w-1.5 h-1.5 bg-amber-400/70 rounded-full flex-shrink-0"></div>
+                                                    <div className="text-slate-300 text-xs truncate">
+                                                        {checklist.name}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        {hoveredChecklistInfo.pendingChecklists
+                                            .length > 3 && (
+                                            <div className="text-slate-400 text-xs text-center py-1 bg-slate-800/10 rounded border border-slate-700/10">
+                                                +
+                                                {hoveredChecklistInfo
+                                                    .pendingChecklists.length -
+                                                    3}{" "}
+                                                more pending
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                        {/* Dynamic Tooltip Arrow */}
+                        <div
+                            className={`absolute left-1/2 transform -translate-x-1/2 ${
+                                tooltipPosition.y < window.innerHeight / 2
+                                    ? "-top-[6px]"
+                                    : "top-full -mt-px"
+                            }`}
+                        >
+                            <div className="relative">
+                                {tooltipPosition.y < window.innerHeight / 2 ? (
+                                    // Arrow pointing up (tooltip below cursor)
+                                    <>
+                                        <div className="border-l-[6px] border-r-[6px] border-b-[6px] border-l-transparent border-r-transparent border-b-slate-800"></div>
+                                        <div className="absolute -bottom-[7px] left-1/2 transform -translate-x-1/2">
+                                            <div className="border-l-[7px] border-r-[7px] border-b-[7px] border-l-transparent border-r-transparent border-b-slate-600/50"></div>
+                                        </div>
+                                    </>
+                                ) : (
+                                    // Arrow pointing down (tooltip above cursor)
+                                    <>
+                                        <div className="border-l-[6px] border-r-[6px] border-t-[6px] border-l-transparent border-r-transparent border-t-slate-800"></div>
+                                        <div className="absolute -top-[7px] left-1/2 transform -translate-x-1/2">
+                                            <div className="border-l-[7px] border-r-[7px] border-t-[7px] border-l-transparent border-r-transparent border-t-slate-600/50"></div>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>

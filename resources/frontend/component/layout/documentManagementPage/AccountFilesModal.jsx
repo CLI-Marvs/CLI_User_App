@@ -293,7 +293,7 @@ const AccountFilesModal = ({
     const [viewerOpen, setViewerOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [modalOpen, setModalOpen] = useState(isOpen);
-    const [viewType, setViewType] = useState("grid"); // 'grid' or 'list'
+    const [viewType, setViewType] = useState("grid");
     const [sortBy, setSortBy] = useState("name");
     const [searchTerm, setSearchTerm] = useState("");
     const [draggedFile, setDraggedFile] = useState(null);
@@ -611,7 +611,7 @@ const AccountFilesModal = ({
 
         return (
             <div
-                className="flex items-center space-x-4 p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                className="flex items-center bg-white space-x-4 p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
                 onClick={() => onClick(file)}
             >
                 <div className="flex items-center space-x-3 flex-1 min-w-0">

@@ -1,3 +1,5 @@
+// ...existing code...
+
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { useStateContext } from "../../../../../resources/frontend/context/contextprovider";
@@ -12,8 +14,17 @@ const UploadFilesOnlyModal = ({
     logType,
     currentUserId,
     propertyName,
+    selectedChecklist,
 }) => {
     const [attachedFiles, setAttachedFiles] = useState([]);
+    const [defaultChecklistId, setDefaultChecklistId] = useState(null);
+    useEffect(() => {
+        // Set default checklist id from prop when modal opens
+        if (isOpen && selectedChecklist && selectedChecklist.id) {
+            setDefaultChecklistId(selectedChecklist.id);
+        }
+    }, [isOpen, selectedChecklist]);
+
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState(null);
     const [submilestoneOptions, setSubmilestoneOptions] = useState([]);
@@ -108,10 +119,28 @@ const UploadFilesOnlyModal = ({
 
     if (!isOpen) return null;
 
+    // Handles file input change and sets default checklist if provided
     const handleFileChange = (event) => {
         const files = event.target.files || event.dataTransfer?.files;
         if (files) {
-            processFiles(Array.from(files));
+            const filesArr = Array.from(files);
+            // If defaultChecklistId and selectedChecklist are set, use checklist name as title
+            const checklistName =
+                selectedChecklist && selectedChecklist.name
+                    ? selectedChecklist.name
+                    : "";
+            const newFiles = filesArr.map((file) => ({
+                id: `${file.name}-${file.lastModified}-${
+                    file.size
+                }-${Math.random().toString(36).substr(2, 9)}`,
+                file: file,
+                title: checklistName,
+                checklist_id: defaultChecklistId || null,
+            }));
+            const uniqueNewFiles = newFiles.filter(
+                (nf) => !attachedFiles.some((af) => af.id === nf.id)
+            );
+            setAttachedFiles((prevFiles) => [...prevFiles, ...uniqueNewFiles]);
         }
         if (event.target.value !== undefined) {
             event.target.value = null;

@@ -5,8 +5,8 @@ const ChecklistTable = ({
     accounts,
     onAddFiles,
     handleOpenNotesModal,
-    currentUserId, // Add current user ID prop
-    onRefresh, // Add refresh callback prop
+    currentUserId,
+    onRefresh,
 }) => {
     // Filter steps to only show milestones assigned to the current user for specific properties
     const filteredSteps = steps
@@ -82,7 +82,7 @@ const ChecklistTable = ({
                 return isAssigned;
             }),
         }))
-        .filter((step) => step.subMilestones.length > 0); // Remove steps with no assigned milestones
+        .filter((step) => step.subMilestones.length > 0);
 
     console.log("Filtered steps:", filteredSteps);
     console.log("Original steps:", steps);
@@ -97,6 +97,72 @@ const ChecklistTable = ({
             ),
         0
     );
+
+    // Filter accounts to show if:
+    // - The account is currently on a submilestone assigned to the user, OR
+    // - The account has completed all checklists for a submilestone assigned to the user
+    const filteredAccounts = accounts.filter((account) => {
+        let show = false;
+        for (const step of filteredSteps) {
+            for (const sub of step.subMilestones) {
+                // Check if submilestone is assigned to the user
+                let assignedToUser = false;
+                const hasAssignees = sub.milestone_assignees;
+                if (hasAssignees && hasAssignees.length > 0) {
+                    assignedToUser = hasAssignees.some(
+                        (assignee) => assignee.employee_id === currentUserId
+                    );
+                } else {
+                    assignedToUser =
+                        sub.assigned_to === currentUserId ||
+                        (sub.assignees?.includes &&
+                            sub.assignees.includes(currentUserId)) ||
+                        (sub.assigned_users?.some &&
+                            sub.assigned_users.some(
+                                (user) =>
+                                    user.id === currentUserId ||
+                                    user === currentUserId
+                            )) ||
+                        sub.assignee_id === currentUserId ||
+                        sub.user_id === currentUserId ||
+                        sub.assigned_user_id === currentUserId;
+                }
+                if (!assignedToUser) continue;
+
+                // 1. Show if account is currently on this submilestone
+                if (account.current_submilestone_id === sub.id) {
+                    show = true;
+                    break;
+                }
+
+                // 2. Show if account has completed all checklists for this submilestone
+                const checklists = sub.checklists || [];
+                if (checklists.length > 0) {
+                    const uploadedDocs = account.uploaded_documents || [];
+                    const completedCount = checklists.filter((checklist) => {
+                        const hasUploadedDoc = uploadedDocs.some(
+                            (doc) => doc.file_title === checklist.name
+                        );
+                        const accountChecklistStatus = (
+                            account.account_checklist_statuses || []
+                        ).find(
+                            (status) => status.checklist_id === checklist.id
+                        );
+                        const hasCompletedStatus =
+                            accountChecklistStatus &&
+                            accountChecklistStatus.is_completed;
+                        return hasUploadedDoc || hasCompletedStatus;
+                    }).length;
+                    if (completedCount === checklists.length) {
+                        show = true;
+                        break;
+                    }
+                }
+            }
+            if (show) break;
+        }
+        return show;
+    });
 
     // Build a flat list of all checklists under each milestone (step)
     // For each account, show a row for each checklist under each milestone
@@ -281,7 +347,7 @@ const ChecklistTable = ({
                         </tr>
                     </thead>
                     <tbody>
-                        {accounts.map((account, rowIdx) => (
+                        {filteredAccounts.map((account, rowIdx) => (
                             <tr
                                 key={account.id}
                                 className={`${
@@ -300,10 +366,61 @@ const ChecklistTable = ({
                                     </div>
                                 </td>
                                 {filteredSteps.map((step, stepIdx) =>
-                                    step.subMilestones.map((sub) =>
-                                        (sub.checklists || []).map(
+                                    step.subMilestones.map((sub) => {
+                                        // For STEP 1 (first step), always show action buttons
+                                        let showActionButtons = false;
+                                        if (stepIdx === 0) {
+                                            showActionButtons = true;
+                                        } else if (
+                                            account.current_submilestone_id ===
+                                            sub.id
+                                        ) {
+                                            showActionButtons = true;
+                                        } else {
+                                            const checklistsArr =
+                                                sub.checklists || [];
+                                            if (checklistsArr.length > 0) {
+                                                const uploadedDocsArr =
+                                                    account.uploaded_documents ||
+                                                    [];
+                                                const completedCount =
+                                                    checklistsArr.filter(
+                                                        (cl) => {
+                                                            const hasUploadedDoc =
+                                                                uploadedDocsArr.some(
+                                                                    (doc) =>
+                                                                        doc.file_title ===
+                                                                        cl.name
+                                                                );
+                                                            const accountChecklistStatus =
+                                                                (
+                                                                    account.account_checklist_statuses ||
+                                                                    []
+                                                                ).find(
+                                                                    (status) =>
+                                                                        status.checklist_id ===
+                                                                        cl.id
+                                                                );
+                                                            const hasCompletedStatus =
+                                                                accountChecklistStatus &&
+                                                                accountChecklistStatus.is_completed;
+                                                            return (
+                                                                hasUploadedDoc ||
+                                                                hasCompletedStatus
+                                                            );
+                                                        }
+                                                    ).length;
+                                                if (
+                                                    completedCount ===
+                                                    checklistsArr.length
+                                                ) {
+                                                    showActionButtons = true;
+                                                }
+                                            }
+                                        }
+                                        return (sub.checklists || []).map(
                                             (checklist) => {
-                                                // Find uploaded doc for this checklist (if any)
+                                                // ...existing code...
                                                 const uploadedDoc = (
                                                     account.uploaded_documents ||
                                                     []
@@ -312,8 +429,6 @@ const ChecklistTable = ({
                                                         doc.file_title ===
                                                         checklist.name
                                                 );
-
-                                                // Find the account-specific checklist status
                                                 const accountChecklistStatus = (
                                                     account.account_checklist_statuses ||
                                                     []
@@ -322,36 +437,25 @@ const ChecklistTable = ({
                                                         status.checklist_id ===
                                                         checklist.id
                                                 );
-
-                                                // Check if checklist is complete
-                                                // A checklist is complete if:
-                                                // 1. It has an uploaded document (for any checklist type), OR
-                                                // 2. It's marked as complete in account_checklist_status (for any checklist type)
                                                 const isComplete =
                                                     uploadedDoc ||
                                                     (accountChecklistStatus &&
                                                         accountChecklistStatus.is_completed);
-
-                                                // Find remarks for this checklist (if any)
                                                 const checklistRemark =
                                                     (account.remarks_by_checklist ||
                                                         {})[checklist.id] ||
                                                     "-";
-                                                // Find date for this checklist (if any)
                                                 const checklistDate =
                                                     uploadedDoc
                                                         ? uploadedDoc.updated_at ||
                                                           uploadedDoc.created_at
                                                         : accountChecklistStatus?.completed_at;
-
-                                                // Enhanced color scheme
                                                 const baseColor =
                                                     stepIdx % 2 === 0
                                                         ? "blue"
                                                         : "teal";
                                                 const dateColumnBgColor = `bg-${baseColor}-50`;
                                                 const remarksColumnBgColor = `bg-${baseColor}-100`;
-
                                                 return [
                                                     <td
                                                         key={`date-${checklist.id}`}
@@ -393,97 +497,102 @@ const ChecklistTable = ({
                                                         }`}
                                                     >
                                                         <div className="flex items-center justify-center">
-                                                            {/* Show Files button only if checklist requires document */}
-                                                            {checklist.requires_document && (
-                                                                <button
-                                                                    type="button"
-                                                                    className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-blue-200 hover:border-blue-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm ${
-                                                                        isComplete
-                                                                            ? "text-green-700 bg-green-100 border border-green-300"
-                                                                            : "text-blue-700 bg-blue-100 border-blue-300"
-                                                                    }`}
-                                                                    onClick={() =>
-                                                                        onAddFiles(
-                                                                            account.id,
-                                                                            step.workOrder,
-                                                                            step.stepName,
-                                                                            onRefresh // Pass refresh callback
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    {isComplete ? (
-                                                                        <span className="inline-flex items-center justify-center w-3 h-3 bg-green-500 text-white text-xs font-bold rounded-sm mr-1">
-                                                                            ✓
-                                                                        </span>
-                                                                    ) : (
-                                                                        <svg
-                                                                            className="w-2.5 h-2.5 mr-0.5"
-                                                                            fill="currentColor"
-                                                                            viewBox="0 0 20 20"
-                                                                        >
-                                                                            <path
-                                                                                fillRule="evenodd"
-                                                                                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
-                                                                                clipRule="evenodd"
-                                                                            />
-                                                                        </svg>
-                                                                    )}
-                                                                    Files
-                                                                </button>
-                                                            )}
-                                                            {/* Show Notes button only if checklist does not require document */}
-                                                            {!checklist.requires_document && (
-                                                                <button
-                                                                    type="button"
-                                                                    className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-gray-200 hover:border-gray-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 shadow-sm ${
-                                                                        isComplete
-                                                                            ? "text-green-700 bg-green-100 border border-green-300"
-                                                                            : "text-gray-700 bg-gray-100 border-gray-300"
-                                                                    }`}
-                                                                    onClick={() =>
-                                                                        handleOpenNotesModal(
-                                                                            {
-                                                                                accountId:
+                                                            {showActionButtons && (
+                                                                <>
+                                                                    {/* Show Files button only if checklist requires document */}
+                                                                    {checklist.requires_document && (
+                                                                        <button
+                                                                            type="button"
+                                                                            className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-blue-200 hover:border-blue-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm ${
+                                                                                isComplete
+                                                                                    ? "text-green-700 bg-green-100 border border-green-300"
+                                                                                    : "text-blue-700 bg-blue-100 border-blue-300"
+                                                                            }`}
+                                                                            onClick={() =>
+                                                                                onAddFiles(
                                                                                     account.id,
-                                                                                workOrder:
                                                                                     step.workOrder,
-                                                                                workOrderType:
                                                                                     step.stepName,
-                                                                                checklistId:
-                                                                                    checklist.id,
-                                                                                checklistName:
-                                                                                    checklist.name,
-                                                                                onRefresh, // Pass refresh callback
+                                                                                    checklist, // Pass the checklist object
+                                                                                    onRefresh // Pass refresh callback
+                                                                                )
                                                                             }
-                                                                        )
-                                                                    }
-                                                                >
-                                                                    {isComplete ? (
-                                                                        <span className="inline-flex items-center justify-center w-3 h-3 bg-green-500 text-white text-xs font-bold rounded-sm mr-1">
-                                                                            ✓
-                                                                        </span>
-                                                                    ) : (
-                                                                        <svg
-                                                                            className="w-2.5 h-2.5 mr-0.5"
-                                                                            fill="currentColor"
-                                                                            viewBox="0 0 20 20"
                                                                         >
-                                                                            <path
-                                                                                fillRule="evenodd"
-                                                                                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                                                                clipRule="evenodd"
-                                                                            />
-                                                                        </svg>
+                                                                            {isComplete ? (
+                                                                                <span className="inline-flex items-center justify-center w-3 h-3 bg-green-500 text-white text-xs font-bold rounded-sm mr-1">
+                                                                                    ✓
+                                                                                </span>
+                                                                            ) : (
+                                                                                <svg
+                                                                                    className="w-2.5 h-2.5 mr-0.5"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 20 20"
+                                                                                >
+                                                                                    <path
+                                                                                        fillRule="evenodd"
+                                                                                        d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                                                                        clipRule="evenodd"
+                                                                                    />
+                                                                                </svg>
+                                                                            )}
+                                                                            Files
+                                                                        </button>
                                                                     )}
-                                                                    Notes
-                                                                </button>
+                                                                    {/* Show Notes button only if checklist does not require document */}
+                                                                    {!checklist.requires_document && (
+                                                                        <button
+                                                                            type="button"
+                                                                            className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-gray-200 hover:border-gray-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 shadow-sm ${
+                                                                                isComplete
+                                                                                    ? "text-green-700 bg-green-100 border border-green-300"
+                                                                                    : "text-gray-700 bg-gray-100 border-gray-300"
+                                                                            }`}
+                                                                            onClick={() =>
+                                                                                handleOpenNotesModal(
+                                                                                    {
+                                                                                        accountId:
+                                                                                            account.id,
+                                                                                        workOrder:
+                                                                                            step.workOrder,
+                                                                                        workOrderType:
+                                                                                            step.stepName,
+                                                                                        checklistId:
+                                                                                            checklist.id,
+                                                                                        checklistName:
+                                                                                            checklist.name,
+                                                                                        onRefresh, // Pass refresh callback
+                                                                                    }
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            {isComplete ? (
+                                                                                <span className="inline-flex items-center justify-center w-3 h-3 bg-green-500 text-white text-xs font-bold rounded-sm mr-1">
+                                                                                    ✓
+                                                                                </span>
+                                                                            ) : (
+                                                                                <svg
+                                                                                    className="w-2.5 h-2.5 mr-0.5"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 20 20"
+                                                                                >
+                                                                                    <path
+                                                                                        fillRule="evenodd"
+                                                                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                                                                        clipRule="evenodd"
+                                                                                    />
+                                                                                </svg>
+                                                                            )}
+                                                                            Notes
+                                                                        </button>
+                                                                    )}
+                                                                </>
                                                             )}
                                                         </div>
                                                     </td>,
                                                 ];
                                             }
-                                        )
-                                    )
+                                        );
+                                    })
                                 )}
                             </tr>
                         ))}

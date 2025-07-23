@@ -1321,15 +1321,9 @@ const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
                     <div className="flex gap-2">
                         <button
                             type="button"
-                            className="rounded-md border border-custom-solidgreen text-custom-solidgreen bg-white hover:bg-blue-50 text-xs px-2 py-1 min-w-0 transition-colors duration-150"
-                        >
-                            Export CSV
-                        </button>
-                        <button
-                            type="button"
                             className="rounded-md gradient-btn5 text-white hover:bg-blue-700 text-xs px-3 py-1 min-w-0 transition-colors duration-150 shadow"
                         >
-                            Save Report
+                            Export CSV
                         </button>
                     </div>
                 </div>

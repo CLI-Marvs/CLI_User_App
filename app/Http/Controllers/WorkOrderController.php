@@ -73,14 +73,14 @@ class WorkOrderController extends Controller
                         ->join('work_order_types as wot', 'wot.id', '=', 'sm.work_order_type_id')
                         ->where(function ($condition) use ($user) {
                             $condition
-                                // ✅ Step 1: show if current submilestone belongs to step 1 AND user assigned to ANY milestone in step 1
+                        
                                 ->where(function ($inner) use ($user) {
                                     $inner->where('wot.sequence', 1)
                                         ->whereColumn('sm.work_order_type_id', '=', DB::raw('wot.id'))
                                         ->whereColumn('pma.property_name', '=', 'taken_out_accounts.property_name')
                                         ->where('pma.employee_id', $user->id);
                                 })
-                                // ✅ Steps >1: show only if user is assigned to the exact current submilestone
+                                
                                 ->orWhere(function ($inner) use ($user) {
                                     $inner->whereColumn('pma.submilestone_id', '=', 'taken_out_accounts.current_submilestone_id')
                                         ->whereColumn('pma.property_name', '=', 'taken_out_accounts.property_name')
