@@ -158,14 +158,9 @@ const InquiryThread = () => {
                   .map((item) => {
                       let formattedItem = formatFunc(item);
 
-                      // Apply the formatting function
-                      formattedItem = formatFunc(formattedItem);
-
-                      // Split and clean each word
+                      // Capitalize each word in the string
                       formattedItem = formattedItem
                           .split(" ")
-                          .map((word) => word.trim()) // Trim each word
-                          .filter((word) => word.length > 0) // Remove empty strings
                           .map((word) => {
                               // Check for specific words that need to be fully capitalized
                               if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
@@ -830,6 +825,48 @@ const InquiryThread = () => {
                                                             </option>
                                                         )
                                                     )}
+                                                <option value="Unassigned">
+                                                    {" "}
+                                                    Unassigned
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Property
+                                        </label>
+                                        <div className="fle justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                onChange={handleSelectProperty}
+                                                value={selectedProperty}
+                                            >
+                                                <option value="">
+                                                    Select Property
+                                                </option>
+                                                {formattedPropertyNames.map(
+                                                    (item, index) => {
+                                                        return (
+                                                            <option
+                                                                key={index}
+                                                                value={item}
+                                                            >
+                                                                {item}
+                                                            </option>
+                                                        );
+                                                    }
+                                                )}
                                             </select>
                                         </div>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
@@ -961,11 +998,13 @@ const InquiryThread = () => {
                                                 <select
                                                     className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
                                                     value={selectedYear}
-                                                    onChange={(e) =>
+                                                    onChange={(e) => {
                                                         setSelectedYear(
                                                             e.target.value
-                                                        )
-                                                    }
+                                                        );
+                                                        setStartDate(null);
+                                                        setEndDate(null);
+                                                    }}
                                                 >
                                                     <option value="">
                                                         {" "}

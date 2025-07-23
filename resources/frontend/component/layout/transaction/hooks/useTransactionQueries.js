@@ -88,3 +88,36 @@ export const useTransactionReports = ({ activeTab, dateRange }) => {
 };
 
 
+export const useCheckStreamBanks = () => {
+    return useQuery({
+        queryKey: ["check-stream-banks"],
+        queryFn: async () => {
+            return await transaction.retrieveCheckStreamBanks();
+        },
+        staleTime: 5 * 60 * 1000,
+    });
+};
+
+
+export const useSaveChecks = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (payload) => {
+            return await transaction.storePrintedCheck(payload);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries();
+        },
+    });
+};
+
+
+export const useChecksExport = () => {
+    return useMutation({
+        mutationFn: async ({ data }) => {
+            return await transaction.exportChecks(data);
+        },
+    })
+};
+
+

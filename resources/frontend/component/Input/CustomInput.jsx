@@ -39,6 +39,11 @@ const CustomInput = ({
     // Handle input to validate against patterns
     const handleInputChange = (e) => {
         let inputValue = e.target.value;
+        const inputName = e.target.name;
+        
+        if (inputName === "email") {
+            inputValue = inputValue.replace(/\s/g, ""); // Remove all spaces
+        }
 
         // Apply number restriction if enabled
         if (type === "number" || restrictNumbers) {

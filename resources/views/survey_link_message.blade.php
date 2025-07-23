@@ -121,6 +121,21 @@
         .button-border {
             border-color: #3D3D3D;
         }
+
+        .emoji-button {
+            display: inline-block;
+            height: 50px;
+            width: 50px;
+            margin: 6px;
+            /* 12px total gap between elements */
+            font-weight: 600;
+            font-size: 28px;
+            /* bigger emoji */
+            text-align: center;
+            line-height: 50px;
+            /* center vertically */
+            text-decoration: none;
+        }
     </style>
 </head>
 
@@ -133,14 +148,14 @@
             src="https://storage.googleapis.com/f42e9ac57bfc-storage/sxNL%3BuL351%3B%24%5C%2Bk.jpg"
             title="clisignature" />
     </div>
-   
+
     <p style="color:#404B52; font-size: 20px;">Dear {{ ucwords($buyer_name) }},</p>
     <p style="color:#404B52; font-size: 20px;">
         Thank you for reaching out to us. We're glad we could assist you with your concern, and we hope everything has
         been @if ($status === 'resolve')
-        resolved
+            resolved
         @else
-        closed
+            closed
         @endif
         to your satisfaction.
     </p>
@@ -152,14 +167,17 @@
     </p>
 
     <p style="color:#404B52; font-size: 20px;">
-        Please click the link below to access the survey: <br>
-        <a href="{{ $selectedSurveyType['surveyLink']}}={{ $modifiedTicketId }}"
-            style="  height: 50px; width: 225px;  margin-top: 5px; font-weight: 600; font-size: 18px;"
-            class="button">
-            Click Here! 👈
-        </a>
-        
+        Please rate your experience with us: <br>
+
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/5" class="emoji-button">😃</a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/4" class="emoji-button">😊</a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/3" class="emoji-button">😐</a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/2" class="emoji-button">😒</a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/1" class="emoji-button">😠</a>
+
     </p>
+
+
 
     <p style="color:#404B52; font-weight:500; font-size: 20px;">
         Thank you for your time and for being a valued customer. If you need any further assistance, feel free to reach
