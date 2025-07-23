@@ -229,8 +229,8 @@ const BranchFormModal = forwardRef((props, ref) => {
                                 />
                             </div>
                         </div>
+                        
                         {/* Desks */}
-
                         <div className="py-2">
                             {formData &&
                                 formData.desks?.map((desk, idx) => (
