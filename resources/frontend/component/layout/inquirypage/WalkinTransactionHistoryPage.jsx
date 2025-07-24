@@ -55,7 +55,7 @@ const WalkinTransactionHistoryPage = () => {
         keepPreviousData: true,
         staleTime: 1000 * 60,
         cacheTime: 1000 * 60 * 5,
-        refetchInterval: 10000, // refetch every 10 seconds
+        refetchInterval: 15000, // refetch every 10 seconds
         refetchIntervalInBackground: false, // pause interval when tab is not focused
         refetchOnWindowFocus: true, // refetch once when tab regains focus
     });
@@ -85,7 +85,7 @@ const WalkinTransactionHistoryPage = () => {
             defaultValue: "",
             options: [
                 { label: "Select Status", value: "" },
-                { label: "Save", value: "save" },
+                { label: "Saved", value: "saved" },
                 { label: "Resolved", value: "resolved" },
                 { label: "Rated", value: "rated" },
             ],
