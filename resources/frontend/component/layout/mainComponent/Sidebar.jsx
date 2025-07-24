@@ -154,11 +154,12 @@ const Sidebar = () => {
                 <List className="p-0 gap-0">
                     <Link to="/notification">
                         <ListItem
-                            className={`flex text-sm items-center w-[185px] h-[36px] pl-[12px] pr-[60px] gap-2 rounded-[10px] ${activeItem === "notification" &&
+                            className={`flex text-sm items-center w-[185px] h-[36px] pl-[12px] pr-[60px] gap-2 rounded-[10px] ${
+                                activeItem === "notification" &&
                                 location.pathname.startsWith("/notification")
-                                ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold shadow-custom4"
-                                : " hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                }`}
+                                    ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold shadow-custom4"
+                                    : " hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                            }`}
                             onClick={() => handleItemClick("notification")}
                         >
                             Notifications
@@ -176,22 +177,25 @@ const Sidebar = () => {
                     <Link to="inquirymanagement/inquirylist">
                         <ListItem
                             className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out z-10 
-                  ${activeItem === "inquiry" ||
-                                    location.pathname.startsWith("/inquirymanagement")
-                                    ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold shadow-custom5"
-                                    : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                }
-                    ${isInquiryOpen
-                                    ? "rounded-[10px] rounded-b-none"
-                                    : "rounded-[10px]"
-                                }`}
+                  ${
+                      activeItem === "inquiry" ||
+                      location.pathname.startsWith("/inquirymanagement")
+                          ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold shadow-custom5"
+                          : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                  }
+                    ${
+                        isInquiryOpen
+                            ? "rounded-[10px] rounded-b-none"
+                            : "rounded-[10px]"
+                    }`}
                             onClick={handleInquiryDropdownClick}
                         >
                             Customer Relations
                             <ListItemSuffix>
                                 <IoIosArrowDown
-                                    className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${isInquiryOpen ? "rotate-180" : ""
-                                        }`}
+                                    className={`text-custom-solidgreen  transition-transform duration-200 ease-in-out ${
+                                        isInquiryOpen ? "rotate-180" : ""
+                                    }`}
                                 />
                             </ListItemSuffix>
                         </ListItem>
@@ -200,15 +204,16 @@ const Sidebar = () => {
                         <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] z-20 shadow-custom5  bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
                             <Link to="/inquirymanagement/inquirylist">
                                 <ListItem
-                                    className={`h-[32px] w-full py-[8px] px-[18px]  text-sm rounded-[50px] ${location.pathname.startsWith(
-                                        "/inquirymanagement/inquirylist"
-                                    ) ||
+                                    className={`h-[32px] w-full py-[8px] px-[18px]  text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/inquirymanagement/inquirylist"
+                                        ) ||
                                         location.pathname.startsWith(
                                             "/inquirymanagement/thread"
                                         )
-                                        ? "bg-white text-custom-solidgreen font-semibold"
-                                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
                                     onClick={() =>
                                         handleItemClick(
                                             "/inquirymanagement/inquirylist"
@@ -220,15 +225,14 @@ const Sidebar = () => {
                             </Link>
                             <Link to="/inquirymanagement/walk-in">
                                 <ListItem
-                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
-                                        "/inquirymanagement/walk-in"
-                                    )
-                                        ? "bg-white text-custom-solidgreen font-semibold"
-                                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
-                                    onClick={() =>
-                                        handleItemClick("/walk-in")
-                                    }
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/inquirymanagement/walk-in"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
+                                    onClick={() => handleItemClick("/walk-in")}
                                 >
                                     Walk-in
                                 </ListItem>
@@ -238,12 +242,13 @@ const Sidebar = () => {
                                 <div ref={reportsButtonRef}>
                                     <ListItem
                                         className={`flex justify-between h-[32px] w-full py-[8px] pl-[18px] text-sm rounded-[50px] 
-                          ${location.pathname.startsWith(
-                                            "/inquirymanagement/report"
-                                        )
-                                                ? "bg-white text-custom-solidgreen font-semibold"
-                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
-                                            }`}
+                          ${
+                              location.pathname.startsWith(
+                                  "/inquirymanagement/report"
+                              )
+                                  ? "bg-white text-custom-solidgreen font-semibold"
+                                  : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
+                          }`}
                                         onClick={handleReportsClick}
                                     >
                                         <div>Reports</div>
@@ -261,7 +266,9 @@ const Sidebar = () => {
                                         >
                                             <Link
                                                 to="/inquirymanagement/report/inquiries"
-                                                onClick={() => setShowReportsSubmenu(false)}
+                                                onClick={() =>
+                                                    setShowReportsSubmenu(false)
+                                                }
                                             >
                                                 <div className="px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen">
                                                     Inquiries
@@ -269,27 +276,38 @@ const Sidebar = () => {
                                             </Link>
                                             <Link
                                                 to="/inquirymanagement/report/survey"
-                                                onClick={() => setShowReportsSubmenu(false)}
+                                                onClick={() =>
+                                                    setShowReportsSubmenu(false)
+                                                }
                                             >
                                                 <div className="px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen">
                                                     Survey
                                                 </div>
                                             </Link>
+                                            <Link
+                                                to="/inquirymanagement/report/walk-in"
+                                                onClick={() =>
+                                                    setShowReportsSubmenu(false)
+                                                }
+                                            >
+                                                <div className="px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen">
+                                                    Walk-in
+                                                </div>
+                                            </Link>
                                         </div>,
-                                        document.getElementById('portal-root')
+                                        document.getElementById("portal-root")
                                     )}
                             </div>
                             <Link to="/inquirymanagement/settings/bannersettings">
                                 <ListItem
-                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px]  ${location.pathname.startsWith(
-                                        "/inquirymanagement/settings"
-                                    )
-                                        ? "bg-white text-custom-solidgreen font-semibold"
-                                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
-                                    onClick={() =>
-                                        handleItemClick("/settings")
-                                    }
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px]  ${
+                                        location.pathname.startsWith(
+                                            "/inquirymanagement/settings"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
+                                    onClick={() => handleItemClick("/settings")}
                                 >
                                     Settings
                                 </ListItem>
@@ -299,21 +317,24 @@ const Sidebar = () => {
                     <Link to="/transaction/bank-monitoring/bank-statements">
                         <ListItem
                             className={`h-[35px] w-[185px] text-sm pl-[12px] py-7 transition-all duration-300 ease-in-out 
-            ${location.pathname.startsWith("/transaction")
-                                    ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
-                                    : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                }
-              ${isInvoiceOpen
-                                    ? "rounded-[10px] rounded-b-none"
-                                    : "rounded-[10px]"
-                                }`}
+            ${
+                location.pathname.startsWith("/transaction")
+                    ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
+                    : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+            }
+              ${
+                  isInvoiceOpen
+                      ? "rounded-[10px] rounded-b-none"
+                      : "rounded-[10px]"
+              }`}
                             onClick={handleInvoiceDropdownClick}
                         >
                             Transaction Management
                             <ListItemSuffix>
                                 <IoIosArrowDown
-                                    className={`text-custom-solidgreen transition-transform duration-200 ease-in-out ${isInvoiceOpen ? "rotate-180" : ""
-                                        }`}
+                                    className={`text-custom-solidgreen transition-transform duration-200 ease-in-out ${
+                                        isInvoiceOpen ? "rotate-180" : ""
+                                    }`}
                                 />
                             </ListItemSuffix>
                         </ListItem>
@@ -322,12 +343,13 @@ const Sidebar = () => {
                         <div className="px-[10px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
                             <Link to="/transaction/bank-monitoring/bank-statements">
                                 <ListItem
-                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
-                                        "/transaction/bank-monitoring/bank-statements"
-                                    )
-                                        ? "bg-white text-custom-solidgreen font-semibold"
-                                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/transaction/bank-monitoring/bank-statements"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
                                     onClick={() =>
                                         handleItemTransactionClick(
                                             "/transaction/bank-monitoring/bank-statements"
@@ -339,12 +361,13 @@ const Sidebar = () => {
                             </Link>
                             <Link to="/transaction/receivables/transactions">
                                 <ListItem
-                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
-                                        "/transaction/receivables"
-                                    )
-                                        ? "bg-white text-custom-solidgreen font-semibold"
-                                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/transaction/receivables"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
                                     onClick={() =>
                                         handleItemTransactionClick(
                                             "/transaction/receivables/transactions"
@@ -356,12 +379,13 @@ const Sidebar = () => {
                             </Link>
                             <Link to="/transaction/settings/markup">
                                 <ListItem
-                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
-                                        "/transaction/settings"
-                                    )
-                                        ? "bg-white text-custom-solidgreen font-semibold"
-                                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/transaction/settings"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
                                     onClick={() =>
                                         handleItemTransactionClick(
                                             "/transaction/settings/markup"
@@ -373,12 +397,13 @@ const Sidebar = () => {
                             </Link>
                             <Link to="/transaction/tools/check-generator">
                                 <ListItem
-                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
-                                        "/transaction/tools"
-                                    )
-                                        ? "bg-white text-custom-solidgreen font-semibold"
-                                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/transaction/tools"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
                                     onClick={() =>
                                         handleItemTransactionClick(
                                             "/transaction/tools/check-generator"
@@ -394,12 +419,13 @@ const Sidebar = () => {
                         <div className="px-[12px] py-[20px] w-[210px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
                             <Link to="/sales/customer">
                                 <ListItem
-                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${location.pathname.startsWith(
-                                        "/sales/customer"
-                                    )
-                                        ? "bg-white text-custom-solidgreen font-semibold"
-                                        : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/sales/customer"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
                                     onClick={() =>
                                         handleItemSalesClick("/customer")
                                     }
@@ -431,22 +457,25 @@ const Sidebar = () => {
                         <Link to="/super-admin/user-rights-and-permissions">
                             <ListItem
                                 className={`h-[35px] w-[185px] text-sm pl-[12px] transition-all duration-300 ease-in-out 
-                                ${activeItem === "super-admin" ||
-                                        location.pathname.startsWith("/super-admin")
+                                ${
+                                    activeItem === "super-admin" ||
+                                    location.pathname.startsWith("/super-admin")
                                         ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold"
                                         : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                    }
-                                ${isSuperAdminOpen
+                                }
+                                ${
+                                    isSuperAdminOpen
                                         ? "rounded-[10px] rounded-b-none"
                                         : "rounded-[10px]"
-                                    }`}
+                                }`}
                                 onClick={handleSuperAdminDropdownClick}
                             >
                                 Admin Settings
                                 <ListItemSuffix>
                                     <IoIosArrowDown
-                                        className={`text-custom-solidgreen transition-transform duration-200 ease-in-out ${isSuperAdminOpen ? "rotate-180" : ""
-                                            }`}
+                                        className={`text-custom-solidgreen transition-transform duration-200 ease-in-out ${
+                                            isSuperAdminOpen ? "rotate-180" : ""
+                                        }`}
                                     />
                                 </ListItemSuffix>
                             </ListItem>
@@ -458,12 +487,13 @@ const Sidebar = () => {
                             <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
                                 <Link to="/super-admin/user-rights-and-permissions">
                                     <ListItem
-                                        className={`h-[48px] w-full py-[8px] px-[18px] text-sm rounded-[25px] ${location.pathname.startsWith(
-                                            "/super-admin/user-rights-and-permissions"
-                                        )
-                                            ? "bg-white text-custom-solidgreen font-semibold"
-                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
-                                            }`}
+                                        className={`h-[48px] w-full py-[8px] px-[18px] text-sm rounded-[25px] ${
+                                            location.pathname.startsWith(
+                                                "/super-admin/user-rights-and-permissions"
+                                            )
+                                                ? "bg-white text-custom-solidgreen font-semibold"
+                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
+                                        }`}
                                         onClick={() =>
                                             handleItemClick(
                                                 "user-rights-and-permissions"
@@ -475,12 +505,13 @@ const Sidebar = () => {
                                 </Link>
                                 <Link to="/super-admin/property-settings">
                                     <ListItem
-                                        className={`h-[48px] w-full py-[8px] px-[18px] text-sm rounded-[25px] ${location.pathname.startsWith(
-                                            "/super-admin/property-settings"
-                                        )
-                                            ? "bg-white text-custom-solidgreen font-semibold"
-                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
-                                            }`}
+                                        className={`h-[48px] w-full py-[8px] px-[18px] text-sm rounded-[25px] ${
+                                            location.pathname.startsWith(
+                                                "/super-admin/property-settings"
+                                            )
+                                                ? "bg-white text-custom-solidgreen font-semibold"
+                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
+                                        }`}
                                         onClick={() =>
                                             handleItemClick("property-settings")
                                         }
