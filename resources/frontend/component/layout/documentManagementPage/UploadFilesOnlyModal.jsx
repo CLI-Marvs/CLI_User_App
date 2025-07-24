@@ -9,6 +9,7 @@ const UploadFilesOnlyModal = ({
     isOpen,
     onClose,
     onUploadSuccess,
+    onRefresh, // <-- add this prop
     selectedAccountId,
     numericWorkOrderId,
     logType,
@@ -303,7 +304,8 @@ const UploadFilesOnlyModal = ({
                 });
             }
 
-            onUploadSuccess();
+            if (onUploadSuccess) onUploadSuccess();
+            if (onRefresh) onRefresh();
             onClose();
         } catch (err) {
             console.error("Failed to upload files:", err);
@@ -323,15 +325,12 @@ const UploadFilesOnlyModal = ({
         } finally {
             setIsSaving(false);
         }
-        // Remove fetchWorkOrders() call - it's causing the ChecklistTable to close
-        // The parent component will handle refreshing through onUploadSuccess callback
     };
 
     return ReactDOM.createPortal(
         <div
             className="fixed inset-0 z-[10000] bg-black bg-opacity-50 flex items-center justify-center p-4"
             onClick={(e) => {
-                // Only close if clicked on the backdrop itself
                 if (e.target === e.currentTarget) {
                     onClose();
                 }
@@ -348,7 +347,7 @@ const UploadFilesOnlyModal = ({
                         </h2>
                         <p className="text-sm text-gray-600 mt-1">
                             {logType
-                                ? `${logType} - Work Order No. ${numericWorkOrderId}`
+                                ? `${logType}`
                                 : `Work Order No. ${numericWorkOrderId}`}
                         </p>
                     </div>

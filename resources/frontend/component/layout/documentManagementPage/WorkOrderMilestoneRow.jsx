@@ -28,13 +28,15 @@ const WorkOrderMilestoneRow = ({
         setShowTooltip(false);
         setHoveredChecklistInfo(null);
     };
+    // Determine if this row should have a bottom border
+    // You can adjust this logic as needed (e.g., pass a prop like isLastRow)
+    const hasBottomBorder = !row.isLastRow; // Example: set row.isLastRow=true for last row
+    const stickyTdClass = `px-3 py-2 font-medium text-gray-900 sticky left-0 bg-white z-20 border-r border-gray-200`;
+
     return (
         <>
-            <tr
-                key={row.key}
-                className={`border-b border-gray-100 hover:bg-blue-50 transition-colors`}
-            >
-                <td className="px-3 py-2 font-medium text-gray-900 sticky left-0 bg-white z-20 border-r border-gray-200">
+            <tr key={row.key} className={`transition-colors`}>
+                <td className={stickyTdClass}>
                     <div className="flex items-center gap-2">
                         <span
                             className="text-sm font-medium text-gray-900 truncate"
@@ -83,18 +85,30 @@ const WorkOrderMilestoneRow = ({
                             const attachTooltip =
                                 isCurrentStep && checklistInfoForCell;
 
+                            // Apply green background only to step cells if complete
+                            const isRowComplete =
+                                row.status &&
+                                row.status.toLowerCase() === "complete";
+
                             const cellContent = (
                                 <td
                                     className={`px-0 py-0 relative ${
-                                        isCurrentStep
+                                        isCurrentStep && !isRowComplete
                                             ? "border-2 border-blue-600 shadow-lg ring-2 ring-blue-300 ring-opacity-50"
                                             : "border border-gray-200"
+                                    } ${
+                                        isRowComplete
+                                            ? "bg-green-500 bg-opacity-20"
+                                            : ""
                                     }`}
                                     colSpan={2}
                                     style={{
-                                        backgroundColor: isCurrentStep
-                                            ? "#dbeafe"
-                                            : "inherit",
+                                        backgroundColor:
+                                            isCurrentStep && !isRowComplete
+                                                ? "#dbeafe"
+                                                : isRowComplete
+                                                ? ""
+                                                : "inherit",
                                     }}
                                     onMouseEnter={
                                         attachTooltip
@@ -117,7 +131,11 @@ const WorkOrderMilestoneRow = ({
                                                 ? "opacity-30"
                                                 : "opacity-20"
                                         } ${
-                                            completion === 100
+                                            row.status &&
+                                            row.status.toLowerCase() ===
+                                                "complete"
+                                                ? ""
+                                                : completion === 100
                                                 ? "bg-green-500"
                                                 : completion > 0
                                                 ? "bg-amber-500"
@@ -129,7 +147,10 @@ const WorkOrderMilestoneRow = ({
                                         <div className="flex-1 px-2 py-2 text-center border-r border-gray-100">
                                             <span
                                                 className={`text-xs ${
-                                                    isCurrentStep
+                                                    isCurrentStep &&
+                                                    (!row.status ||
+                                                        row.status.toLowerCase() !==
+                                                            "complete")
                                                         ? "text-blue-800 font-semibold"
                                                         : "text-gray-600"
                                                 }`}
@@ -147,7 +168,10 @@ const WorkOrderMilestoneRow = ({
                                         <div className="flex-1 px-2 py-2 text-center">
                                             <span
                                                 className={`text-xs ${
-                                                    isCurrentStep
+                                                    isCurrentStep &&
+                                                    (!row.status ||
+                                                        row.status.toLowerCase() !==
+                                                            "complete")
                                                         ? "text-blue-800 font-semibold"
                                                         : "text-gray-600"
                                                 }`}
@@ -165,14 +189,17 @@ const WorkOrderMilestoneRow = ({
                                             </span>
                                         </div>
                                     </div>
-                                    {isCurrentStep && (
-                                        <>
-                                            <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-blue-600 rounded-full animate-pulse border border-white shadow-sm"></div>
-                                            <div className="absolute top-0.5 right-0.5 px-1 py-0.5 bg-blue-600 text-white text-[8px] rounded font-bold shadow-sm leading-none">
-                                                CURRENT
-                                            </div>
-                                        </>
-                                    )}
+                                    {isCurrentStep &&
+                                        (!row.status ||
+                                            row.status.toLowerCase() !==
+                                                "complete") && (
+                                            <>
+                                                <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-blue-600 rounded-full animate-pulse border border-white shadow-sm"></div>
+                                                <div className="absolute top-0.5 right-0.5 px-1 py-0.5 bg-blue-600 text-white text-[8px] rounded font-bold shadow-sm leading-none">
+                                                    CURRENT
+                                                </div>
+                                            </>
+                                        )}
                                 </td>
                             );
 
@@ -183,12 +210,12 @@ const WorkOrderMilestoneRow = ({
                             );
                         });
                     })}
-                <td className="px-2 py-2 text-center border-l border-gray-200">
+                <td className="px-2 py-2 text-center border-l border-b border-gray-200">
                     <div className="flex justify-center">
                         {getStatusBadge(row.status)}
                     </div>
                 </td>
-                <td className="px-2 py-2 text-xs text-gray-600 border-l border-gray-200">
+                <td className="px-2 py-2 text-xs text-gray-600 border-l border-b border-gray-200">
                     <div className="flex items-center gap-1 max-w-[150px]">
                         <span className="truncate" title={row.remarks}>
                             {row.remarks}
@@ -219,7 +246,7 @@ const WorkOrderMilestoneRow = ({
                         </button>
                     </div>
                 </td>
-                <td className="px-2 py-2 border-l border-gray-200">
+                <td className="px-2 py-2 border-l border-b border-gray-200">
                     <div className="flex justify-center gap-1">
                         <button
                             type="button"
@@ -228,7 +255,7 @@ const WorkOrderMilestoneRow = ({
                         >
                             Files
                         </button>
-                        {currentChecklistInfo &&
+                        {/* {currentChecklistInfo &&
                             currentChecklistInfo.progressPercentage === 100 && (
                                 <button
                                     type="button"
@@ -241,7 +268,7 @@ const WorkOrderMilestoneRow = ({
                                 >
                                     Next
                                 </button>
-                            )}
+                            )} */}
                     </div>
                 </td>
             </tr>

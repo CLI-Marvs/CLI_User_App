@@ -15,6 +15,7 @@ function AddFilesModal({
     selectedWorkOrder,
     workOrderData,
     selectedChecklist,
+    onRefresh = () => {}, // Make onRefresh optional and default to noop
     // selectedAssignee,
 }) {
     const { user } = useStateContext(); // Get user from context
@@ -450,6 +451,7 @@ function AddFilesModal({
                     currentUserId={user?.id}
                     propertyName={propertyName}
                     selectedChecklist={selectedChecklist}
+                    onRefresh={onRefresh}
                 />
             )}
             {isViewerOpen && viewingFile && (

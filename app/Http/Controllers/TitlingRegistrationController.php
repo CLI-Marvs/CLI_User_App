@@ -49,7 +49,7 @@ class TitlingRegistrationController extends Controller
         $allAccountCompletedChecklistIds = AccountChecklistStatus::where('account_id', $account->id)
             ->where('is_completed', true)
             ->pluck('checklist_id')
-            ->flip(); 
+            ->flip();
 
         $finalResponseData = $definedSteps->map(function ($workOrderType) use ($workOrdersMappedByStepName, $allAccountCompletedChecklistIds) {
             $definedStepName = $workOrderType->type_name;
@@ -79,9 +79,9 @@ class TitlingRegistrationController extends Controller
                     return 'In Progress';
                 });
 
-                if ($allSubmilestoneStatuses->every(fn ($s) => $s === 'Complete')) {
+                if ($allSubmilestoneStatuses->every(fn($s) => $s === 'Complete')) {
                     $stepStatus = 'Complete';
-                } elseif ($allSubmilestoneStatuses->every(fn ($s) => $s === 'Pending')) {
+                } elseif ($allSubmilestoneStatuses->every(fn($s) => $s === 'Pending')) {
                     $stepStatus = 'Pending';
                 } elseif ($allSubmilestoneStatuses->contains('In Progress') || $allSubmilestoneStatuses->contains('Complete')) {
                     $stepStatus = 'In Progress';
@@ -94,37 +94,39 @@ class TitlingRegistrationController extends Controller
                     $assigneeName = $workOrderForStep->assignee->fullname ?? trim($workOrderForStep->assignee->firstname . ' ' . $workOrderForStep->assignee->lastname);
                 }
                 return [
-                    'stepName'         => $definedStepName,
-                    'workOrder'        => $workOrderForStep->work_order,
-                    'workOrderId'      => $workOrderForStep->work_order_id,
-                    'assigneeName'     => $assigneeName,
-                    'status'           => $stepStatus,
-                    'description'      => $workOrderForStep->description,
-                    'priority'         => $workOrderForStep->priority,
-                    'dueDate'          => $workOrderForStep->work_order_deadline ? $workOrderForStep->work_order_deadline->toDateString() : null,
-                    'completed_at'     => $workOrderForStep->completed_at ? $workOrderForStep->completed_at->toDateTimeString() : null,
+                    'stepName' => $definedStepName,
+                    'workOrder' => $workOrderForStep->work_order,
+                    'workOrderId' => $workOrderForStep->work_order_id,
+                    'workOrderGroupId' => $workOrderForStep->work_order_group_id,
+                    'assigneeName' => $assigneeName,
+                    'status' => $stepStatus,
+                    'description' => $workOrderForStep->description,
+                    'priority' => $workOrderForStep->priority,
+                    'dueDate' => $workOrderForStep->work_order_deadline ? $workOrderForStep->work_order_deadline->toDateString() : null,
+                    'completed_at' => $workOrderForStep->completed_at ? $workOrderForStep->completed_at->toDateTimeString() : null,
                     'completion_notes' => $workOrderForStep->completion_notes,
-                    'notesCount'       => $workOrderForStep->notesCount,
-                    'filesCount'       => $workOrderForStep->filesCount,
-                    'created_at'       => $workOrderForStep->created_at ? $workOrderForStep->created_at->toDateTimeString() : null,
-                    'updated_at'       => $workOrderForStep->updated_at ? $workOrderForStep->updated_at->toDateTimeString() : null,
+                    'notesCount' => $workOrderForStep->notesCount,
+                    'filesCount' => $workOrderForStep->filesCount,
+                    'created_at' => $workOrderForStep->created_at ? $workOrderForStep->created_at->toDateTimeString() : null,
+                    'updated_at' => $workOrderForStep->updated_at ? $workOrderForStep->updated_at->toDateTimeString() : null,
                 ];
             }
             return [
-                'stepName'         => $definedStepName,
-                'workOrder'        => null,
-                'workOrderId'      => null,
-                'assigneeName'     => null,
-                'status'           => $stepStatus,
-                'description'      => null,
-                'priority'         => null,
-                'dueDate'          => null,
-                'completed_at'     => null,
+                'stepName' => $definedStepName,
+                'workOrder' => null,
+                'workOrderId' => null,
+                'workOrderGroupId' => null,
+                'assigneeName' => null,
+                'status' => $stepStatus,
+                'description' => null,
+                'priority' => null,
+                'dueDate' => null,
+                'completed_at' => null,
                 'completion_notes' => null,
-                'notesCount'       => 0,
-                'filesCount'       => 0,
-                'created_at'       => null,
-                'updated_at'       => null,
+                'notesCount' => 0,
+                'filesCount' => 0,
+                'created_at' => null,
+                'updated_at' => null,
             ];
         });
 

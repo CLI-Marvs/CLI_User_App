@@ -1351,6 +1351,7 @@ const MyWorkOrders = () => {
                     getStatusBadge={getStatusBadge}
                     showChecklistTable={true}
                     currentUserId={user?.id}
+                    onRefresh={refreshGroupDetails}
                 />
                 {isAddFilesModalOpen &&
                     selectedAccountId &&

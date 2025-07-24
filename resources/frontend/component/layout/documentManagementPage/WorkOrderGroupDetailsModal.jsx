@@ -170,8 +170,8 @@ const WorkOrderGroupDetailsModal = ({
             group_id: group.id,
             account_id: account.id || account.key,
             account: account,
-            group: group, 
-            currentUser: group.currentUser, 
+            group: group,
+            currentUser: group.currentUser,
             currentUserId: currentUserId,
         });
         setFilesModalOpen(true);
@@ -640,20 +640,6 @@ const WorkOrderGroupDetailsModal = ({
         setIsRefreshing(true);
         try {
             await onRefresh();
-            setProgressionStatus({
-                isProgressing: false,
-                message: "Data refreshed successfully!",
-                type: "success",
-            });
-            setTimeout(
-                () =>
-                    setProgressionStatus({
-                        isProgressing: false,
-                        message: "",
-                        type: "info",
-                    }),
-                3000
-            );
         } catch (error) {
             console.error("Error refreshing data:", error);
             setProgressionStatus({
@@ -837,16 +823,40 @@ const WorkOrderGroupDetailsModal = ({
                     <div className="h-full overflow-auto">
                         <ChecklistTable
                             steps={steps}
-                            accounts={Object.values(
-                                steps.reduce((acc, step) => {
-                                    (step.workOrder.accounts || []).forEach(
-                                        (account) => {
-                                            acc[account.id] = account;
-                                        }
-                                    );
-                                    return acc;
-                                }, {})
-                            )}
+                            accounts={(() => {
+                                // Gather all original account objects
+                                const allAccounts = Object.values(
+                                    steps.reduce((acc, step) => {
+                                        (step.workOrder.accounts || []).forEach(
+                                            (account) => {
+                                                acc[account.id] = account;
+                                            }
+                                        );
+                                        return acc;
+                                    }, {})
+                                );
+                                // Filter using the same logic as filteredRows
+                                return allAccounts.filter((account) => {
+                                    const searchMatch =
+                                        searchTerm === "" ||
+                                        (account.account_name &&
+                                            account.account_name
+                                                .toLowerCase()
+                                                .includes(
+                                                    searchTerm.toLowerCase()
+                                                )) ||
+                                        (account.remarks &&
+                                            account.remarks
+                                                .toLowerCase()
+                                                .includes(
+                                                    searchTerm.toLowerCase()
+                                                ));
+                                    // You may want to add more fields to search if needed
+                                    // For status, you may need to compute status as in filteredRows
+                                    // For now, skip status filter for simplicity
+                                    return searchMatch;
+                                });
+                            })()}
                             onAddFiles={handleAddFiles}
                             handleOpenNotesModal={handleOpenNotesModal}
                             currentUserId={currentUserId}
@@ -860,6 +870,7 @@ const WorkOrderGroupDetailsModal = ({
                                 workOrderData={selectedWorkOrder}
                                 selectedChecklist={selectedChecklist}
                                 onClose={() => setIsAddFilesModalOpen(false)}
+                                onRefresh={onRefresh}
                             />
                         )}
                     </div>

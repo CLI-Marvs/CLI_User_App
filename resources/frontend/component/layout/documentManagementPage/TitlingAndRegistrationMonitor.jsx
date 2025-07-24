@@ -50,6 +50,7 @@ export default function TitlingAndRegistrationMonitor({
     propertyName,
     unitNumber,
     id,
+    workOrderGroupId,
 }) {
     const [monitoringData, setMonitoringData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -75,6 +76,7 @@ export default function TitlingAndRegistrationMonitor({
                     `/titling-registration/monitor/${contractNumber}`
                 );
                 const data = response.data;
+                console.log("Fetched titling-registration/monitor data:", data);
                 if (!Array.isArray(data)) {
                     throw new Error(
                         "Unexpected API response: expected an array in response.data"
@@ -84,6 +86,7 @@ export default function TitlingAndRegistrationMonitor({
                 const transformedData = data.map((item) => ({
                     step: item.stepName,
                     workOrderId: item.workOrderId || "TBD",
+                    workOrderGroupId: item.workOrderGroupId || null,
                     assignee: item.assigneeName
                         ? { name: item.assigneeName }
                         : null,
@@ -178,8 +181,7 @@ export default function TitlingAndRegistrationMonitor({
                     <thead>
                         <tr className="bg-[#5B9BD5] text-white text-left">
                             <th className="p-2 text-center"> </th>
-                            <th className="p-2">Work Order No.</th>
-                            <th className="p-2 text-center">Assignee</th>
+                            <th className="p-2 text-center">Work Order No.</th>
                             <th className="p-2 text-center">Status</th>
                             <th className="p-2 text-center">Due Date</th>
                             <th className="p-2 text-center">Notes</th>
@@ -209,27 +211,8 @@ export default function TitlingAndRegistrationMonitor({
                                         <td className="p-2 text-base text-[#175D5F] font-semibold pl-10">
                                             {item.step}
                                         </td>
-                                        <td className="p-2 text-base font-normal text-[#A5A5A5]">
-                                            {item.workOrderId}
-                                        </td>
-                                        <td className="p-2 text-sm text-gray-700 align-middle">
-                                            <div className="flex items-center gap-1">
-                                                {item.assignee ? (
-                                                    <>
-                                                        <PersonIcon className="w-4 h-4 text-gray-600" />
-                                                        <span>
-                                                            {item.assignee
-                                                                .name ||
-                                                                item.assignee}
-                                                        </span>
-                                                    </>
-                                                ) : (
-                                                    <span className="flex items-center gap-1 text-xs text-gray-500">
-                                                        <PersonIcon className="w-4 h-4 text-gray-400" />
-                                                        TBD
-                                                    </span>
-                                                )}
-                                            </div>
+                                        <td className="p-2 text-base font-normal text-[#A5A5A5] text-center">
+                                            1000{item.workOrderGroupId ?? "-"}
                                         </td>
                                         <td className="p-2 text-center align-middle">
                                             <span

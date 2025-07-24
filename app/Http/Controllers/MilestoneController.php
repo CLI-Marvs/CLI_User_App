@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\WorkOrderLog;
 use Illuminate\Http\Request;
 use App\Models\TakenOutAccount;
 use App\Models\WorkOrderType;
@@ -79,12 +80,6 @@ class MilestoneController extends Controller
             $takenOutAccount = TakenOutAccount::find($accountId);
             if ($takenOutAccount) {
                 Log::info('TakenOutAccount found', ['account_id' => $takenOutAccount->id, 'milestoneName_to_check' => $milestoneName]);
-                // Assumption: The TakenOutAccount model has an attribute 'milestone_statuses'
-                // (e.g., a JSON column, or an accessor that returns an array).
-                // This attribute should store statuses keyed by milestoneName,
-                // for example: {"Docketing": "In Progress", "DOA": "Pending"}
-                // Ensure this attribute is properly cast to an array in the TakenOutAccount model
-                // if it's a JSON column, or handle JSON decoding here if it's a raw string.
                 $statuses = $takenOutAccount->milestone_statuses;
                 Log::info('Raw milestone_statuses from model', [
                     'statuses_raw' => $statuses,
