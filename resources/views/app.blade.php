@@ -42,6 +42,7 @@
             style="display:none;visibility:hidden"></iframe></noscript>
     <!-- End Google Tag Manager (noscript) -->
     <div id="root"></div>
+    <div id="portal-root"></div>
 
     @viteReactRefresh
     @vite('resources/frontend/app.js')

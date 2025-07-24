@@ -330,7 +330,7 @@ class SurveyController extends Controller
                     // Get ticket_ids from experience_ratings matching survey_title
                     $importedTicketIds = DB::table('experience_ratings')
                         ->where('survey_title', trim($survey->survey_title))
-                        ->pluck('ticket_id') 
+                        ->pluck('ticket_id')
                         ->map(function ($ticketId) {
                             // Strip non-numeric to match how it's saved in survey_answers (if numeric only)
                             return preg_replace('/\D/', '', $ticketId);
@@ -464,7 +464,7 @@ class SurveyController extends Controller
                 } else {
                     $formattedAnswers = [];
                     $totalResponses = 0;
-                    
+
                     $standardAnswers = DB::table('survey_answers')
                         ->where('survey_list_id', $survey_list_id)
                         ->where('question_id', $question->id)
@@ -474,7 +474,7 @@ class SurveyController extends Controller
                     $formattedAnswers = [];
                     foreach ($standardAnswers as $a) {
                         $email = DB::table('experience_ratings')
-                            ->where('id', $a->experience_rating_id) 
+                            ->where('id', $a->experience_rating_id)
                             ->value('email');
 
                         $ticketId = DB::table('experience_ratings')
@@ -651,11 +651,12 @@ class SurveyController extends Controller
 
     public function getSurveysWithRatingBreakdown()
     {
-        $surveys = Survey_list::select('id', 'survey_title', 'survey_link')->get();
+        $surveys = Survey_list::select('id', 'survey_title', 'survey_link')->where('status', true)->get();
 
         $result = $surveys->map(function ($survey) {
             // Fetch counts of each rating (1-5) for this survey_link
             $ratingCounts = ExperienceRating::where('survey_link', $survey->survey_link)
+                
                 ->select('rating', DB::raw('COUNT(*) as total'))
                 ->groupBy('rating')
                 ->pluck('total', 'rating'); // [rating => count]
