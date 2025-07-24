@@ -116,6 +116,7 @@ export const ContextProvider = ({ children }) => {
     const [endDateValue, setEndDateValue] = useState(null);
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
+    const [survey_title, setSurveyTitle] = useState("");
 
     const [customerData, setCustomerData] = useState([]);
     const [customerDetails, setCustomerDetails] = useState([]);
@@ -787,48 +788,6 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    // const getUserAccessData = async () => {
-    //     try {
-    //         const response = await apiService.get("get-user-access-data", { token });
-
-    //         // Get existing data from sessionStorage
-    //         const storedData = sessionStorage.getItem("userAccessData");
-    //         const existingData = storedData ? JSON.parse(storedData) : {};
-
-    //         // Merge the new data with the existing data
-    //         const updatedData = {
-    //             ...existingData, // Include existing data
-    //             employeePermissions: [
-    //                 ...(existingData.employeePermissions || []),
-    //                 ...(response.data.employeePermissions || []),
-    //             ],
-    //             departmentPermissions: [
-    //                 ...(existingData.departmentPermissions || []),
-    //                 ...(response.data.departmentPermissions || []),
-    //             ],
-    //         };
-
-    //         // Remove duplicates based on IDs (optional, for clean data)
-    //         const uniqueById = (arr, key) =>
-    //             [...new Map(arr.map((item) => [item[key], item])).values()];
-    //         updatedData.employeePermissions = uniqueById(
-    //             updatedData.employeePermissions,
-    //             "id"
-    //         );
-    //         updatedData.departmentPermissions = uniqueById(
-    //             updatedData.departmentPermissions,
-    //             "id"
-    //         );
-
-    //         // Save the updated data to sessionStorage
-    //         sessionStorage.setItem("userAccessData", JSON.stringify(updatedData));
-
-    //         // Update the state
-    //         setUserAccessData(updatedData);
-    //     } catch (error) {
-    //         console.log("error", error);
-    //     }
-    // };
     useEffect(() => {
         getCategories();
     }, []);
@@ -1132,12 +1091,12 @@ export const ContextProvider = ({ children }) => {
                 setStartDate,
                 endDate,
                 setEndDate,
+                categories,
                 setAssignedToMeActive,
                 assignedToMeActive,
                 setSpecificAssigneeCsr,
                 specificAssigneeCsr,
                 canWrite,
-                categories,
             }}
         >
             {children}
