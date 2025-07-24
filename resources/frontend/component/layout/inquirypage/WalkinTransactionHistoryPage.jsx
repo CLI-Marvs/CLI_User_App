@@ -65,11 +65,11 @@ const WalkinTransactionHistoryPage = () => {
         { name: "priority_number", label: "Priority Number" },
         {
             name: "inquiry_type",
-            label: "Inquiry Type",
+            label: "Category",
             type: "select",
             defaultValue: "",
             options: [
-                { label: "Select Inquiry Type", value: "" },
+                { label: "Select Category", value: "" },
                 ...(categoriesData
                     ? categoriesData.map((item) => ({
                           label: item?.name,
@@ -173,7 +173,7 @@ const WalkinTransactionHistoryPage = () => {
                 ) : Array.isArray(transactionHistory?.data) &&
                   transactionHistory.data.length === 0 ? (
                     <div className="text-center py-4 text-custom-bluegreen">
-                        No data available
+                        No data available.
                     </div>
                 ) : Array.isArray(transactionHistory?.data) &&
                   transactionHistory.data.length > 0 ? (
@@ -193,7 +193,7 @@ const WalkinTransactionHistoryPage = () => {
                     />
                 ) : (
                     <div className="text-center py-4 text-custom-bluegreen">
-                        No data available
+                        No data available.
                     </div>
                 )}
 
