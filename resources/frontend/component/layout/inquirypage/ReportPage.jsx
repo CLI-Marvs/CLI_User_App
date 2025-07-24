@@ -94,11 +94,11 @@ const ReportPage = () => {
         setStartDateValue,
         endDateValue,
         setEndDateValue,
+        categories,
         setDaysFilter,
         setActiveDayButton,
         setSpecificAssigneeCsr,
         setAssignedToMeActive,
-        categories,
     } = useStateContext();
 
     const [searchSummary, setSearchSummary] = useState([]);

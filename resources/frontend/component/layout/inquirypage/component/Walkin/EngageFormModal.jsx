@@ -136,6 +136,24 @@ const EngageFormModal = forwardRef(
                 // Then update queue status
                 await queueMutation.mutateAsync(queuePayload);
 
+
+                if(actionType === "resolved"){
+                    // Show success toast
+                    showToast(
+                        transactionResponse?.message ||
+                            "Walk-in Transaction Closed Successfully!",
+                        "success"
+                    );
+                }
+                else{
+                    showToast(
+                        transactionResponse?.message ||
+                            "Walk-in Transaction Saved Successfully!",
+                        "success"
+                    );
+                }
+              
+
                 //Refresh the transaction history list
                 queryClient.invalidateQueries({
                     queryKey: ["walkinTransactionHistory"],
@@ -234,11 +252,11 @@ const EngageFormModal = forwardRef(
                             </h1>
                         </div>
 
-                        {/* Inquiry Type */}
+                        {/* Category Type */}
                         <div className="py-2">
                             <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden ">
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[200px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
-                                    Inquiry Type
+                                    Category Type
                                 </span>
                                 <div className="relative w-full">
                                     <select
@@ -302,7 +320,7 @@ const EngageFormModal = forwardRef(
                         {/*First name */}
                         <div className="py-1">
                             <div
-                                className={`flex items-center border rounded-[5px] overflow-hidden  `}
+                                className={`flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden  `}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     First Name
@@ -312,6 +330,7 @@ const EngageFormModal = forwardRef(
                                     type="text"
                                     value={formData.first_name}
                                     onChange={handleInputChange}
+                                    noNumbers={true}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 />
                             </div>
@@ -320,7 +339,7 @@ const EngageFormModal = forwardRef(
                         {/*Last name */}
                         <div className="py-1">
                             <div
-                                className={`flex items-center border rounded-[5px] overflow-hidden  `}
+                                className={`flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden  `}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     Last Name
@@ -330,6 +349,7 @@ const EngageFormModal = forwardRef(
                                     type="text"
                                     value={formData.last_name}
                                     onChange={handleInputChange}
+                                    noNumbers={true}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 />
                             </div>
@@ -338,7 +358,7 @@ const EngageFormModal = forwardRef(
                         {/*Contact Number */}
                         <div className="py-1">
                             <div
-                                className={`flex items-center border rounded-[5px] overflow-hidden  `}
+                                className={`flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden  `}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     Mobile Number
@@ -399,7 +419,7 @@ const EngageFormModal = forwardRef(
                         {/*Email*/}
                         <div className="py-1">
                             <div
-                                className={`flex items-center border rounded-[5px] overflow-hidden  `}
+                                className={`flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden  `}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     Email
@@ -416,10 +436,10 @@ const EngageFormModal = forwardRef(
 
                         {/* Detailed notes */}
                         <div
-                            className={`  rounded-[5px] bg-custom-lightestgreen border mt-1`}
+                            className={`  rounded-[5px] border-custom-bluegreen border mt-1`}
                         >
-                            <div className="flex items-center justify-between">
-                                <p className="text-custom-bluegreen text-sm bg-custom-lightestgreen pl-3  flex-grow mobile:text-xs mobile:w-[170px]">
+                            <div className="flex items-center justify-between h-full bg-custom-lightestgreen rounded-t-[5px]">
+                                <p className="text-custom-bluegreen text-sm  pl-3  flex-grow mobile:text-xs mobile:w-[170px]">
                                     Detailed Notes
                                 </p>
                                 <span className="bg-white text-sm2 text-gray-400 font-normal py-2 border-l border-custom-bluegreen pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">

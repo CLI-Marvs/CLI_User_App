@@ -35,7 +35,12 @@ export const walkinTransactionService = {
      * @param {number} perPage - Items per page
      * @param {Object} activeSearch - Search filters
      */
-    getWalkinTransactionsHistory: async (page = 1, perPage = 10, filters, slug) => {
+    getWalkinTransactionsHistory: async (
+        page = 1,
+        perPage = 10,
+        filters,
+        slug
+    ) => {
         try {
             const cleanFilters = Object.fromEntries(
                 Object.entries(filters || {}).filter(
@@ -47,10 +52,10 @@ export const walkinTransactionService = {
             const queryParams = new URLSearchParams({
                 page,
                 per_page: perPage,
-                // ...cleanFilters,
-                slug
+                ...cleanFilters,
+                slug,
             }).toString();
-
+           
             const response = await walkinFeedbackService.get(
                 `/admin/transactions/history?${queryParams}`
             );
