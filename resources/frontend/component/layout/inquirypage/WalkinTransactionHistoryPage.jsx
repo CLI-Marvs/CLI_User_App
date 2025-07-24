@@ -55,7 +55,7 @@ const WalkinTransactionHistoryPage = () => {
         keepPreviousData: true,
         staleTime: 1000 * 60,
         cacheTime: 1000 * 60 * 5,
-        refetchInterval: 10000, // refetch every 10 seconds
+        refetchInterval: 15000, // refetch every 10 seconds
         refetchIntervalInBackground: false, // pause interval when tab is not focused
         refetchOnWindowFocus: true, // refetch once when tab regains focus
     });
@@ -65,11 +65,11 @@ const WalkinTransactionHistoryPage = () => {
         { name: "priority_number", label: "Priority Number" },
         {
             name: "inquiry_type",
-            label: "Inquiry Type",
+            label: "Category",
             type: "select",
             defaultValue: "",
             options: [
-                { label: "Select Inquiry Type", value: "" },
+                { label: "Select Category", value: "" },
                 ...(categoriesData
                     ? categoriesData.map((item) => ({
                           label: item?.name,
@@ -85,7 +85,7 @@ const WalkinTransactionHistoryPage = () => {
             defaultValue: "",
             options: [
                 { label: "Select Status", value: "" },
-                { label: "Save", value: "save" },
+                { label: "Saved", value: "saved" },
                 { label: "Resolved", value: "resolved" },
                 { label: "Rated", value: "rated" },
             ],
@@ -173,7 +173,7 @@ const WalkinTransactionHistoryPage = () => {
                 ) : Array.isArray(transactionHistory?.data) &&
                   transactionHistory.data.length === 0 ? (
                     <div className="text-center py-4 text-custom-bluegreen">
-                        No data available
+                        No data available.
                     </div>
                 ) : Array.isArray(transactionHistory?.data) &&
                   transactionHistory.data.length > 0 ? (
@@ -193,7 +193,7 @@ const WalkinTransactionHistoryPage = () => {
                     />
                 ) : (
                     <div className="text-center py-4 text-custom-bluegreen">
-                        No data available
+                        No data available.
                     </div>
                 )}
 
