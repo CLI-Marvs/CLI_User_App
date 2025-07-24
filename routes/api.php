@@ -7,7 +7,9 @@ use App\Models\PropertyMaster;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SapController;
 
+use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CheckStreamController;
 use App\Http\Controllers\UnitController;
 use App\Http\Controllers\ConcernController;
 use App\Http\Controllers\FeatureController;
@@ -124,12 +126,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/store-view-and-columns', 'storeViewAndColumns');
         Route::put('/set-default-view', 'setDefaultView');
     });
+    
     Route::apiResource('markup-settings', MarkupSettignsController::class);
+    Route::apiResource('check-stream', CheckStreamController::class);
     
     Route::controller(MarkupSettignsController::class)->group(function () {
         Route::get('/card/fee', 'retrieveCardMarkupDetails');
         Route::put('/card/fee/{id}', 'updateCardSettings');
+    });
 
+    Route::controller(CheckStreamController::class)->group(function () {
+        Route::get('/check-stream-banks', 'getCheckStreamBanks');
+        Route::post('/checks-export', 'exportChecks');
     });
 
     Route::controller(ConcernController::class)->group(function () {
@@ -210,6 +218,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-banner', [DynamicBannerController::class, 'getBanner']);
     Route::delete('/banner/{id}', [DynamicBannerController::class, 'deleteBanner']);
     Route::post('/update-banner', [DynamicBannerController::class, 'updateBanner']);
+
+
+    Route::post('/surveys', [SurveyController::class, 'store']);
+    Route::put('/surveys/{id}', [SurveyController::class, 'update']);
+    Route::get('/fetch-surveys', [SurveyController::class, 'fetchSurveys']);
+    Route::get('/fetch-survey/{id}', [SurveyController::class, 'fetchSurvey']);
+    Route::delete('/surveys/{id}', [SurveyController::class, 'delete']);
+    Route::get('/survey-summary/{survey_list_id}', [SurveyController::class, 'getSurveyStats']);
+    Route::put('/surveys/{id}/update-title', [SurveyController::class, 'updateTitle']);
+    Route::get('/survey-links', [SurveyController::class, 'getSurveyLinks']);
+    Route::get('/survey-title/{survey_list_id}', [SurveyController::class, 'getSurveyTitle']);
+    Route::get('/experience-ratings/count/{id}', [SurveyController::class, 'countRatings']);
+    Route::get('/surveys-count/respondents', [SurveyController::class, 'getSurveysWithRatingCounts']);
+    Route::get('/surveys-count/ratings', [SurveyController::class, 'getSurveysWithRatingBreakdown']);
+    Route::get('/survey-rating-details/{id}', [SurveyController::class, 'getSurveyRatingDetails']);
 
     //Employee Department
     Route::get('/get-employees-departments', [EmployeeDepartmentController::class, 'index']);

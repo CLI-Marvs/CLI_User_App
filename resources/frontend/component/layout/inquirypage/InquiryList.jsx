@@ -282,51 +282,44 @@ const InquiryList = () => {
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
 
-       const formattedPropertyNames = [
-           "N/A",
-           ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
-               ? propertyNamesList
-                     .filter((item) => !item.toLowerCase().includes("phase"))
-                     .map((item) => {
-                         // First trim to remove any whitespace or \n
-                         let formattedItem = item.trim();
+    const formattedPropertyNames = [
+        "N/A",
+        ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
+            ? propertyNamesList
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => {
+                      let formattedItem = formatFunc(item);
 
-                         // Apply the formatting function
-                         formattedItem = formatFunc(formattedItem);
+                      // Capitalize each word in the string
+                      formattedItem = formattedItem
+                          .split(" ")
+                          .map((word) => {
+                              // Check for specific words that need to be fully capitalized
+                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                  return word.toUpperCase();
+                              }
+                              // Capitalize the first letter of all other words
+                              return (
+                                  word.charAt(0).toUpperCase() +
+                                  word.slice(1).toLowerCase()
+                              );
+                          })
+                          .join(" ");
 
-                         // Split and clean each word
-                         formattedItem = formattedItem
-                             .split(" ")
-                             .map((word) => word.trim()) // Trim each word
-                             .filter((word) => word.length > 0) // Remove empty strings
-                             .map((word) => {
-                                 // Check for specific words that need to be fully capitalized
-                                 if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                     return word.toUpperCase();
-                                 }
-                                 // Capitalize the first letter of all other words
-                                 return (
-                                     word.charAt(0).toUpperCase() +
-                                     word.slice(1).toLowerCase()
-                                 );
-                             })
-                             .join(" ");
+                      // Replace specific names if needed
+                      if (formattedItem === "Casamira South") {
+                          formattedItem = "Casa Mira South";
+                      }
 
-                         // Replace specific names if needed
-                         if (formattedItem === "Casamira South") {
-                             formattedItem = "Casa Mira South";
-                         }
-
-                         // Final trim to ensure no leftover spaces
-                         return formattedItem.trim();
-                     })
-                     .sort((a, b) => {
-                         if (a === "N/A") return -1;
-                         if (b === "N/A") return 1;
-                         return a.localeCompare(b);
-                     })
-               : []),
-       ];
+                      return formattedItem;
+                  })
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
+            : []),
+    ];
 
     const monthNames = {
         "01": "January",
@@ -515,6 +508,38 @@ const InquiryList = () => {
                 if (departmentParam)
                     summaryParts.push(`Department: ${departmentParam}`);
                 if (ticket) summaryParts.push(`Ticket: ${ticket}`);
+                if (startDate)
+                    summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+                if (propertyParam)
+                    summaryParts.push(`Property: ${propertyParam}`);
+                if (yearParam) summaryParts.push(`Year: ${yearParam}`);
+                if (monthParam)
+                    summaryParts.push(`Month: ${formatMonth(monthParam)}`);
+                if (hasAttachments) summaryParts.push(`Attachments: Yes`);
+
+            if (categoryParam)
+                summaryParts.push(`Category: ${categoryParam}`);
+            if (statusParam) {
+                const displayStatus =
+                    statusParam === "unresolved" ? "Unresolved" : statusParam;
+                summaryParts.push(`Status: ${displayStatus}`);
+            }
+            if (name) summaryParts.push(`Name: ${name}`);
+            if (typeParam) summaryParts.push(`Type: ${typeParam}`);
+            if (email) summaryParts.push(`Email: ${email}`);
+            if (channelsParam) {
+                // Format 'Walk in' to 'Walk-in'
+                const formattedChannel =
+                    channelsParam === "Walk in"
+                        ? "Walk-in"
+                        : channelsParam === "Social media"
+                            ? "Social Media"
+                            : channelsParam;
+                    summaryParts.push(`Channel: ${formattedChannel}`);
+                }
+                if (departmentParam)
+                    summaryParts.push(`Department: ${departmentParam}`);
+                if (ticket) summaryParts.push(`Ticket: ${ticket}`);
                 if (startDateParam && endDateParam) {
                     summaryParts.push(
                         `Start Date: ${formatDate(startDateParam)}`
@@ -587,7 +612,7 @@ const InquiryList = () => {
 
     return (
         <>
-            <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">
+            <div className="relative h-screen max-w-full bg-custom-grayFA px-[20px] z-10">
                 <div className="bg-custom-grayFA">
                     <div className="relative flex justify-start gap-3 pt-1">
                         {canWrite && (

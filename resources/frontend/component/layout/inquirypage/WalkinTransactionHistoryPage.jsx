@@ -15,7 +15,7 @@ import WalkinTransactionModal from "@/component/layout/inquirypage/component/Wal
 import { useWalkinSelection } from "@/context/InquiryManagement/WalkinSelectionContext";
 
 const INITIAL_SEARCH_STATE = {
-    property_name: "",
+    full_name: "",
     priority_number: "",
     inquiry_type: "",
     status: "",
@@ -36,6 +36,7 @@ const WalkinTransactionHistoryPage = () => {
         isLoading,
         isError,
         refetch,
+        isFetching
     } = useQuery({
         queryKey: [
             "walkinTransactionHistory",
@@ -54,25 +55,25 @@ const WalkinTransactionHistoryPage = () => {
         keepPreviousData: true,
         staleTime: 1000 * 60,
         cacheTime: 1000 * 60 * 5,
-        refetchInterval: 10000, // refetch every 10 seconds
+        refetchInterval: 15000, // refetch every 10 seconds
         refetchIntervalInBackground: false, // pause interval when tab is not focused
         refetchOnWindowFocus: true, // refetch once when tab regains focus
     });
     const { data: categoriesData } = useCategories();
     const fields = [
-        { name: "property_name", label: "Full Name" },
+        { name: "full_name", label: "Full Name" },
         { name: "priority_number", label: "Priority Number" },
         {
             name: "inquiry_type",
-            label: "Inquiry Type",
+            label: "Category",
             type: "select",
             defaultValue: "",
             options: [
-                { label: "Select Inquiry Type", value: "" },
+                { label: "Select Category", value: "" },
                 ...(categoriesData
                     ? categoriesData.map((item) => ({
                           label: item?.name,
-                          value: item?.name,
+                          value: item?.id,
                       }))
                     : []),
             ],
@@ -84,8 +85,9 @@ const WalkinTransactionHistoryPage = () => {
             defaultValue: "",
             options: [
                 { label: "Select Status", value: "" },
-                { label: "Save", value: "save" },
+                { label: "Saved", value: "saved" },
                 { label: "Resolved", value: "resolved" },
+                { label: "Rated", value: "rated" },
             ],
         },
     ];
@@ -162,7 +164,7 @@ const WalkinTransactionHistoryPage = () => {
             </div>
 
             <div className="mt-3 mx-1 py-4">
-                {isLoading ? (
+                {isLoading && !isFetching ? (
                     <div className="text-center py-4">
                         <Skeleton height={140} className="my-1" />
                         <Skeleton height={140} className="my-1" />
@@ -171,7 +173,7 @@ const WalkinTransactionHistoryPage = () => {
                 ) : Array.isArray(transactionHistory?.data) &&
                   transactionHistory.data.length === 0 ? (
                     <div className="text-center py-4 text-custom-bluegreen">
-                        No data available
+                        No data available.
                     </div>
                 ) : Array.isArray(transactionHistory?.data) &&
                   transactionHistory.data.length > 0 ? (
@@ -191,7 +193,7 @@ const WalkinTransactionHistoryPage = () => {
                     />
                 ) : (
                     <div className="text-center py-4 text-custom-bluegreen">
-                        No data available
+                        No data available.
                     </div>
                 )}
 

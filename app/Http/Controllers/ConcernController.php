@@ -1146,9 +1146,9 @@ class ConcernController extends Controller
             if ($searchParams['departments'] !== "Unassigned") {
                 $departments = $searchParams['departments'];
 
-            if (!is_array($departments)) {
-                $departments = explode(',', $departments);
-            }
+                if (!is_array($departments)) {
+                    $departments = explode(',', $departments);
+                }
 
                 foreach ($departments as $department) {
                     $query->whereJsonContains('assign_to', [['department' => $department]]);
@@ -1923,9 +1923,27 @@ class ConcernController extends Controller
 
             $this->inquiryResolveLogs($request, 'resolve');
 
+
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
             
-            SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'resolve', $modifiedTicketId);
+            if (
+                isset($selectedSurveyType['surveyName']) && 
+                strtolower($selectedSurveyType['surveyName']) !== 'n/a'
+            ) {
+                SendSurveyLinkEmailJob::dispatch(
+                    $buyerEmail,
+                    $request->buyer_name,
+                    $selectedSurveyType,
+                    'resolve',
+                    $modifiedTicketId
+                );
+            }
+            
+
+
+            if ($selectedSurveyType['surveyName'] !== 'N/A') {
+                SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'resolve', $modifiedTicketId);
+            }
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -2450,7 +2468,7 @@ class ConcernController extends Controller
         }
 
         $concerns = $query->groupBy('details_concern')->get();
- 
+
         return response()->json($concerns);
     }
 

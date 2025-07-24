@@ -13,10 +13,11 @@ import { showToast } from "@/util/toastUtil";
 import CustomInput from "@/component/Input/CustomInput";
 import isFormButtonDisabled from "@/util/isFormButtonDisabled";
 import { IoIosCloseCircle } from "react-icons/io";
+import { id } from "date-fns/locale";
 
 const initialFormState = {
     branch_name: "",
-    desks: [""],
+    desks: [{ name: "" }],
 };
 
 const BranchFormModal = forwardRef((props, ref) => {
@@ -32,7 +33,12 @@ const BranchFormModal = forwardRef((props, ref) => {
         if (props.mode === "edit" && props.branch) {
             const editData = {
                 branch_name: props.branch.name || "",
-                desks: props.branch.desks?.map((d) => d.name) || [""],
+                desks: props.branch.desks?.map((d) => {
+                    return {
+                        name: d.name,
+                        id: d.id,
+                    };
+                }) || [""],
             };
             setFormData(editData);
             setInitialData(editData);
@@ -85,8 +91,8 @@ const BranchFormModal = forwardRef((props, ref) => {
     // Mutation for updating branch
     const updateBranchMutation = useMutation({
         mutationFn: ({ id, data }) => branchService.updateBranch(id, data),
-        onSuccess: () => {
-            showToast("Branch updated successfully!", "success");
+        onSuccess: (response) => {
+            showToast(response?.message, "success");
             queryClient.invalidateQueries({ queryKey: ["branches"] });
             setError(null);
             dialogRef.current?.close();
@@ -111,8 +117,9 @@ const BranchFormModal = forwardRef((props, ref) => {
     // Handle desk label changes
     const handleDeskChange = (idx, value) => {
         setFormData((prev) => {
-            const desks = [...prev.desks];
-            desks[idx] = value;
+            const desks = prev.desks.map((desk, i) =>
+                i === idx ? { ...desk, name: value } : desk
+            );
             return { ...prev, desks };
         });
     };
@@ -121,7 +128,7 @@ const BranchFormModal = forwardRef((props, ref) => {
     const handleAddDesk = () => {
         setFormData((prev) => ({
             ...prev,
-            desks: [...prev.desks, ""],
+            desks: [...prev.desks, { name: "" }],
         }));
     };
 
@@ -137,14 +144,12 @@ const BranchFormModal = forwardRef((props, ref) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsSubmitting(true);
-
         const payload = {
             name: formData.branch_name,
             desks: formData.desks
-                .filter((d) => d.trim() !== "")
-                .map((d) => ({ name: d })),
+                .filter((d) => d.name.trim() !== "")
+                .map((d) => ({ name: d.name, id: d.id })),
         };
-
         if (props.mode === "edit" && props.branch) {
             updateBranchMutation.mutate({ id: props.branch.id, data: payload });
         } else {
@@ -158,8 +163,17 @@ const BranchFormModal = forwardRef((props, ref) => {
         setError(null);
         if (props.mode === "add") {
             setFormData(initialFormState);
-        } else if (props.mode === "edit") {
-            setFormData(initialData);
+            setInitialData(initialFormState);
+        } else if (props.mode === "edit" && props.branch) {
+            const editData = {
+                branch_name: props.branch.name || "",
+                desks: props.branch.desks?.map((d) => ({
+                    name: d.name,
+                    id: d.id,
+                })) || [{ name: "" }],
+            };
+            setFormData(editData);
+            setInitialData(editData);
         }
         dialogRef.current?.close();
     };
@@ -216,40 +230,42 @@ const BranchFormModal = forwardRef((props, ref) => {
                                 />
                             </div>
                         </div>
-                        {/* Desks */}
 
+                        {/* Desks */}
                         <div className="py-2">
-                            {formData.desks.map((desk, idx) => (
-                                <div key={idx} className="flex mb-2 w-full">
-                                    <div className="py-1 w-full">
-                                        <div className="flex items-center border rounded-[5px] overflow-hidden">
-                                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
-                                                Desk
-                                            </span>
-                                            <CustomInput
-                                                type="text"
-                                                value={desk}
-                                                onChange={(e) =>
-                                                    handleDeskChange(
-                                                        idx,
-                                                        e.target.value
-                                                    )
-                                                }
-                                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
-                                            />
+                            {formData &&
+                                formData.desks?.map((desk, idx) => (
+                                    <div key={idx} className="flex mb-2 w-full">
+                                        <div className="py-1 w-full">
+                                            <div className="flex items-center border rounded-[5px] overflow-hidden">
+                                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
+                                                    Desk
+                                                </span>
+                                                <CustomInput
+                                                    type="text"
+                                                    value={desk.name}
+                                                    onChange={(e) =>
+                                                        handleDeskChange(
+                                                            idx,
+                                                            e.target.value
+                                                        )
+                                                    }
+                                                    className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                                />
+                                            </div>
                                         </div>
+
+                                        {formData.desks.length > 1 && (
+                                            <IoIosCloseCircle
+                                                size={24}
+                                                onClick={() =>
+                                                    handleRemoveDesk(idx)
+                                                }
+                                                className="ml-2 mt-2 text-red-500 h-6 w-6"
+                                            />
+                                        )}
                                     </div>
-                                    {formData.desks.length > 1 && (
-                                        <IoIosCloseCircle
-                                            size={24}
-                                            onClick={() =>
-                                                handleRemoveDesk(idx)
-                                            }
-                                            className="ml-2 mt-2 text-red-500 h-6 w-6" 
-                                        />
-                                    )}
-                                </div>
-                            ))}
+                                ))}
                             <button
                                 type="button"
                                 className="mt-1 text-custom-bluegreen underline montserrat-regular text-sm underline-offset-2"
