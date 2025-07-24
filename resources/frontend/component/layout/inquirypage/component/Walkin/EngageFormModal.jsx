@@ -126,15 +126,13 @@ const EngageFormModal = forwardRef(
 
                 if(actionType === "resolved"){
                     // Show success toast
-                    showToast(
-                        transactionResponse?.message ||
+                    showToast(   
                             "Walk-in Transaction Closed Successfully!",
                         "success"
                     );
                 }
                 else{
                     showToast(
-                        transactionResponse?.message ||
                             "Walk-in Transaction Saved Successfully!",
                         "success"
                     );
