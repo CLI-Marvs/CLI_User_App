@@ -330,7 +330,15 @@ class AccountChecklistStatusController extends Controller
         }
 
         // Create a log entry for the automated action
-        $logEntry = WorkOrderLog::create(['work_order_id' => $workOrderForProcessing->work_order_id, 'log_type' => $nextWorkOrderType->type_name, 'log_message' => "Account '{$completedAccount->account_name}' automatically {$logMessageAction} this step upon completion of the previous one.", 'created_by_user_id' => auth()->id(), 'note_type' => 'System Generated']);
+        // Get previous step name
+        $previousStepName = $currentWorkOrderType ? $currentWorkOrderType->type_name : 'Previous Step';
+        $logEntry = WorkOrderLog::create([
+            'work_order_id' => $workOrderForProcessing->work_order_id,
+            'log_type' => $nextWorkOrderType->type_name,
+            'log_message' => "Account '{$completedAccount->account_name}' automatically {$logMessageAction} this step ('{$nextWorkOrderType->type_name}') upon completion of previous step ('{$previousStepName}').",
+            'created_by_user_id' => auth()->id(),
+            'note_type' => 'System Generated'
+        ]);
         $logEntry->accounts()->sync([$completedAccount->id]);
 
         Log::info("Automation: Account {$completedAccount->id} was {$logMessageAction} work order {$workOrderForProcessing->work_order_id} ('{$nextWorkOrderType->type_name}').");

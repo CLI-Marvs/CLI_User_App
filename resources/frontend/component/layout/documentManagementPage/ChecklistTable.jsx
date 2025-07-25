@@ -98,12 +98,11 @@ const ChecklistTable = ({
         0
     );
 
-    // Filter accounts to show if:
-    // - The account is currently on a submilestone assigned to the user, OR
-    // - The account has completed all checklists for a submilestone assigned to the user
+    // For STEP 1, show all accounts assigned to any milestone in parallel
     const filteredAccounts = accounts.filter((account) => {
         let show = false;
-        for (const step of filteredSteps) {
+        for (let stepIdx = 0; stepIdx < filteredSteps.length; stepIdx++) {
+            const step = filteredSteps[stepIdx];
             for (const sub of step.subMilestones) {
                 // Check if submilestone is assigned to the user
                 let assignedToUser = false;
@@ -129,6 +128,13 @@ const ChecklistTable = ({
                 }
                 if (!assignedToUser) continue;
 
+                if (stepIdx === 0) {
+                    // STEP 1: Show all accounts assigned to any milestone
+                    show = true;
+                    break;
+                }
+
+                // For other steps, keep original logic
                 // 1. Show if account is currently on this submilestone
                 if (account.current_submilestone_id === sub.id) {
                     show = true;

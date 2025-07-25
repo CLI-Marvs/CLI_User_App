@@ -132,7 +132,10 @@ const WorkOrderView = () => {
                     .toISOString()
                     .slice(0, 10),
                 dueDate: group.due_date
-                    ? new Date(group.due_date).toISOString().slice(0, 10)
+                    ? typeof group.due_date === "string" &&
+                      /^\d{4}-\d{2}-\d{2}$/.test(group.due_date)
+                        ? group.due_date
+                        : new Date(group.due_date).toISOString().slice(0, 10)
                     : "-",
                 completedAt: group.completed_at
                     ? new Date(group.completed_at).toISOString().slice(0, 10)
@@ -156,7 +159,7 @@ const WorkOrderView = () => {
         try {
             await fetchWorkOrderGroups();
         } finally {
-            setTimeout(() => setIsRefreshing(false), 600); // add a slight delay for smooth UX
+            setTimeout(() => setIsRefreshing(false), 600);
         }
     };
 
@@ -567,7 +570,7 @@ const WorkOrderView = () => {
                                         variant="small"
                                         className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
                                     >
-                                        Work Order Group
+                                        Work Order No.
                                     </Typography>
                                 </div>
                             </th>

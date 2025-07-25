@@ -100,7 +100,11 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
 
         let formattedDueDate = null;
         if (dueDate) {
-            formattedDueDate = dueDate.toISOString().slice(0, 10);
+            // Format as local date string (YYYY-MM-DD)
+            const year = dueDate.getFullYear();
+            const month = String(dueDate.getMonth() + 1).padStart(2, "0");
+            const day = String(dueDate.getDate()).padStart(2, "0");
+            formattedDueDate = `${year}-${month}-${day}`;
         }
 
         if (
