@@ -258,7 +258,7 @@ const Sidebar = () => {
                                     createPortal(
                                         <div
                                             ref={reportsMenuRef}
-                                            className="fixed z-[9999] bg-white shadow-lg border rounded-md w-48 py-2"
+                                            className="fixed z-[9999] bg-white shadow-custom3 border rounded-md w-[120px] py-2"
                                         >
                                             <Link
                                                 to="/inquirymanagement/report/inquiries"
