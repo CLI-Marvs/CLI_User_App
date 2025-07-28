@@ -58,7 +58,8 @@ import AutoPostingView from "./views/pages/transactionViews/AutoPostingView";
 import ErrorPage from "@/component/ErrorElement/ErrorPage";
 import MarkupSettingsView from "@/component/views/pages/transactionViews/MarkupSettingsView";
 import ReportsView from "./views/pages/transactionViews/ReportsView";
-import WalkinTransactionHistoryView from '@/component/views/pages/walkinEmojiViews/WalkinTransactionHistoryView';
+import WalkinTransactionHistoryView from "@/component/views/pages/walkinEmojiViews/WalkinTransactionHistoryView";
+import WalkinReportPage from "@/component/layout/inquirypage/WalkinReportPage";
 import FinancialToolsView from "./views/pages/transactionViews/FinancialToolsView";
 import CheckStreamReportsView from "./views/pages/transactionViews/CheckStreamReportsView";
 
@@ -262,7 +263,7 @@ const App = () => {
                                             path: "check-generator",
                                             element: <FinancialToolsView />,
                                         },
-                                         {
+                                        {
                                             path: "reports",
                                             element: <CheckStreamReportsView />,
                                         },
@@ -291,6 +292,10 @@ const App = () => {
                                 {
                                     path: "report/inquiries",
                                     element: <ReportViews />,
+                                },
+                                {
+                                    path: "report/walk-in",
+                                    element: <WalkinReportPage />,
                                 },
                                 {
                                     path: "report/survey",
@@ -350,7 +355,7 @@ const App = () => {
                                         },
                                         {
                                             path: "versionlogs",
-                                            element: <VersionLogsView/>,
+                                            element: <VersionLogsView />,
                                         },
                                     ],
                                 },

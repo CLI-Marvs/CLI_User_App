@@ -12,6 +12,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { showToast } from "@/util/toastUtil";
 import CustomInput from "@/component/Input/CustomInput";
 import isFormButtonDisabled from "@/util/isFormButtonDisabled";
+import { IoIosCloseCircle } from "react-icons/io";
 import { id } from "date-fns/locale";
 
 const initialFormState = {
@@ -229,7 +230,7 @@ const BranchFormModal = forwardRef((props, ref) => {
                                 />
                             </div>
                         </div>
-                        
+
                         {/* Desks */}
                         <div className="py-2">
                             {formData &&
@@ -253,17 +254,15 @@ const BranchFormModal = forwardRef((props, ref) => {
                                                 />
                                             </div>
                                         </div>
-                                        {/* TODO: changed the UI for this */}
+
                                         {formData.desks.length > 1 && (
-                                            <button
-                                                type="button"
-                                                className="ml-2 text-red-500"
+                                            <IoIosCloseCircle
+                                                size={24}
                                                 onClick={() =>
                                                     handleRemoveDesk(idx)
                                                 }
-                                            >
-                                                ✕
-                                            </button>
+                                                className="ml-2 mt-2 text-red-500 h-6 w-6"
+                                            />
                                         )}
                                     </div>
                                 ))}

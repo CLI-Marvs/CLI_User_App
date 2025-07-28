@@ -2,8 +2,8 @@ import React, { useRef, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
 import { WALKIN_COLUMNS } from "@/constant/data/tableColumns";
-import WalkinTableRow from "@/component/layout/inquirypage/component/Walkin/WalkinTableRow";
-import EngageFormModal from "@/component/layout/inquirypage/component/Walkin/EngageFormModal";
+import WalkinTableRow from "@/component/layout/inquirypage/component/WalkinList/WalkinTableRow";
+import EngageFormModal from "@/component/layout/inquirypage/component/WalkinList/EngageFormModal";
 import { walkinTransactionService } from "@/component/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
 import { queueService } from "@/component/servicesApi/apiCalls/emojiWalkin/queueService";
 import { showToast } from "@/util/toastUtil";
@@ -201,7 +201,7 @@ const WalkinListPage = () => {
                     </div>
                 </div>
 
-                {/* Table */}
+                {/* Table */} 
                 <div className="mt-3 mx-1 py-4">
                     {!selectedBranch.id || !selectedBranch.id ? (
                         <div className="text-center py-4 text-custom-bluegreen montserrat-medium">

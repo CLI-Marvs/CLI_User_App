@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
 import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
-import WalkinHistoryTableRow from "@/component/layout/inquirypage/component/Walkin/WalkinHistoryTableRow";
+import WalkinHistoryTableRow from "@/component/layout/inquirypage/component/WalkinList/WalkinHistoryTableRow";
 import Skeleton from "@/component/Skeletons";
 import { WALKIN_HISTORY_COLUMNS } from "@/constant/data/tableColumns";
 import { useQuery } from "@tanstack/react-query";
@@ -11,7 +11,7 @@ import Pagination from "@/component/layout/propertyandpricingpage/component/Pagi
 import Button from "@/component/layout/inquirypage/component/ui/button";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa6";
-import WalkinTransactionModal from "@/component/layout/inquirypage/component/Walkin/WalkinTransactionModal";
+import WalkinTransactionModal from "@/component/layout/inquirypage/component/WalkinList/WalkinTransactionModal";
 import { useWalkinSelection } from "@/context/InquiryManagement/WalkinSelectionContext";
 
 const INITIAL_SEARCH_STATE = {
