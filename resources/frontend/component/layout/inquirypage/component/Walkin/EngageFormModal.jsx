@@ -139,15 +139,13 @@ const EngageFormModal = forwardRef(
 
                 if(actionType === "resolved"){
                     // Show success toast
-                    showToast(
-                        transactionResponse?.message ||
+                    showToast(   
                             "Walk-in Transaction Closed Successfully!",
                         "success"
                     );
                 }
                 else{
                     showToast(
-                        transactionResponse?.message ||
                             "Walk-in Transaction Saved Successfully!",
                         "success"
                     );
@@ -464,7 +462,7 @@ const EngageFormModal = forwardRef(
                         <div className="mt-10 flex justify-end gap-3">
                             <Button
                                 type="submit"
-                                onClick={(e) => handleSubmit(e, "save")}
+                                onClick={(e) => handleSubmit(e, "saved")}
                                 disabled={
                                     isPropertyButtonDisabled || isSubmitting
                                 }
@@ -476,7 +474,7 @@ const EngageFormModal = forwardRef(
                             >
                                 {isSubmitting &&
                                 transactionMutation.variables?.status ===
-                                    "save" ? (
+                                    "saved" ? (
                                     <CircularProgress className="spinnerSize" />
                                 ) : (
                                     <>Save</>

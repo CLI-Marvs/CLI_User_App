@@ -806,7 +806,9 @@ const InquiryThread = () => {
                                                                     department !==
                                                                         undefined &&
                                                                     department !==
-                                                                        "NULL"
+                                                                        "NULL" &&
+                                                                    department !== "IT" &&
+                                                                    department !== "Digital Innovation"
                                                             )
                                                     ),
                                                 ]
