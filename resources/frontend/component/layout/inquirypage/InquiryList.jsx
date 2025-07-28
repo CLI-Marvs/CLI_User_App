@@ -785,8 +785,9 @@ const InquiryList = () => {
                                                                         null &&
                                                                     department !==
                                                                         undefined &&
-                                                                    department !==
-                                                                        "NULL"
+                                                                    department !== "NULL" &&
+                                                                    department !== "IT" &&
+                                                                    department !== "Digital Innovation"
                                                             )
                                                     ),
                                                 ]
