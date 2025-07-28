@@ -15,6 +15,7 @@ import isButtonDisabled from "@/util/isFormButtonDisabled";
 import CustomInput from "@/component/Input/CustomInput";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import validateContractNumber from "@/component/layout/inquirypage/utils/validateContractNumber";
 
 const formDataInitialState = {
     category_id: "",
@@ -33,23 +34,36 @@ const EngageFormModal = forwardRef(
         const dialogRef = React.useRef(null);
         //States
         const [formData, setFormData] = useState(formDataInitialState);
+        const [error, setError] = useState(null);
         //Hooks
         const { propertyNamesList } = useProperty();
         const queryClient = useQueryClient();
         // Form validation
-        const isPropertyButtonDisabled = isButtonDisabled(
-            formData,
-            Object.keys(formDataInitialState).filter(
-                (key) => key !== "details_message"
-            )
+        const contractNumberError = validateContractNumber(
+            formData.contract_number
         );
+        const isPropertyButtonDisabled =
+            isButtonDisabled(
+                formData,
+                Object.keys(formDataInitialState).filter(
+                    (key) => key !== "details_message"
+                )
+            ) || !!contractNumberError;
+
         // Mutations
         const transactionMutation = useMutation({
             mutationFn: walkinTransactionService.createWalkinTransactionDetail,
             onSuccess: () => {
+                showToast(
+                    "Walkin transaction details created successfully.",
+                    "success"
+                );
                 queryClient.invalidateQueries({
                     queryKey: ["queueWalkinTransactions"],
                 });
+            },
+            onError: (error) => {
+                setError(error?.response?.data?.message);
             },
         });
         const queueMutation = useMutation({
@@ -117,18 +131,26 @@ const EngageFormModal = forwardRef(
 
             try {
                 // Submit transaction first
-                const transactionResponse =
-                    await transactionMutation.mutateAsync(transactionPayload);
+                await transactionMutation.mutateAsync(transactionPayload);
 
                 // Then update queue status
                 await queueMutation.mutateAsync(queuePayload);
 
-                // Show success toast
-                showToast(
-                    transactionResponse?.message ||
-                        "Walkin transaction details created successfully",
-                    "success"
-                );
+
+                if(actionType === "resolved"){
+                    // Show success toast
+                    showToast(   
+                            "Walk-in Transaction Closed Successfully!",
+                        "success"
+                    );
+                }
+                else{
+                    showToast(
+                            "Walk-in Transaction Saved Successfully!",
+                        "success"
+                    );
+                }
+              
 
                 //Refresh the transaction history list
                 queryClient.invalidateQueries({
@@ -140,10 +162,9 @@ const EngageFormModal = forwardRef(
                 dialogRef.current?.close();
                 setSelectedItem(null);
             } catch (error) {
-                showToast(
-                    error?.message ||
-                        "An error occurred while processing the request",
-                    "error"
+                setError(
+                    error?.response?.data?.message ||
+                        "An error occurred while processing the request"
                 );
             }
         };
@@ -160,18 +181,17 @@ const EngageFormModal = forwardRef(
         // Handle modal close
         const handleCloseModal = async () => {
             try {
-                // Close the modal dialog first
                 dialogRef.current?.close();
 
                 // Create a single transaction for all updates
                 await Promise.all([
-                    // Update queue status
+                    // Update queue status in firebase
                     queueMutation.mutateAsync({
                         priority_number: itemData?.priority_number,
                         status: "queue",
                     }),
 
-                    // Update transaction status
+                    // Update transaction status in postgres
                     walkinTransactionService.updateWalkinTransactionStatus({
                         walkin_transaction_id: itemData?.id,
                         status: "queue",
@@ -185,6 +205,7 @@ const EngageFormModal = forwardRef(
 
                 // Reset selected item
                 setSelectedItem(null);
+                setError(null);
             } catch (error) {
                 showToast("Error closing the form", "error");
             }
@@ -210,8 +231,17 @@ const EngageFormModal = forwardRef(
                     </div>
 
                     {/* Modal content */}
+                    <div>
+                        {error && (
+                            <div className="w-full flex justify-center items-center h-12 bg-red-100  rounded-lg mt-10">
+                                <p className="flex text-[#C42E2E] montserrat-regular">
+                                    {error}
+                                </p>
+                            </div>
+                        )}
+                    </div>
                     <div className=" ">
-                        <div className="mt-10">
+                        <div className="mt-8">
                             <h1 className="montserrat-bold ">
                                 Priority Number :{" "}
                                 <span className="montserrat-regular">
@@ -220,11 +250,11 @@ const EngageFormModal = forwardRef(
                             </h1>
                         </div>
 
-                        {/* Inquiry Type */}
+                        {/* Category Type */}
                         <div className="py-2">
                             <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden ">
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[200px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
-                                    Inquiry Type
+                                    Category Type
                                 </span>
                                 <div className="relative w-full">
                                     <select
@@ -288,7 +318,7 @@ const EngageFormModal = forwardRef(
                         {/*First name */}
                         <div className="py-1">
                             <div
-                                className={`flex items-center border rounded-[5px] overflow-hidden  `}
+                                className={`flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden  `}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     First Name
@@ -298,6 +328,7 @@ const EngageFormModal = forwardRef(
                                     type="text"
                                     value={formData.first_name}
                                     onChange={handleInputChange}
+                                    noNumbers={true}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 />
                             </div>
@@ -306,7 +337,7 @@ const EngageFormModal = forwardRef(
                         {/*Last name */}
                         <div className="py-1">
                             <div
-                                className={`flex items-center border rounded-[5px] overflow-hidden  `}
+                                className={`flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden  `}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     Last Name
@@ -316,6 +347,7 @@ const EngageFormModal = forwardRef(
                                     type="text"
                                     value={formData.last_name}
                                     onChange={handleInputChange}
+                                    noNumbers={true}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 />
                             </div>
@@ -324,7 +356,7 @@ const EngageFormModal = forwardRef(
                         {/*Contact Number */}
                         <div className="py-1">
                             <div
-                                className={`flex items-center border rounded-[5px] overflow-hidden  `}
+                                className={`flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden  `}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     Mobile Number
@@ -342,15 +374,14 @@ const EngageFormModal = forwardRef(
 
                         {/*Contract Number*/}
                         <div className="py-1">
-                            {/* TODO: refactor this and move the  validation to 'validateContractNumber util */}
                             <div
                                 className={`flex items-center border rounded-[5px] overflow-hidden ${
-                                    formData.contract_number &&
-                                    formData.contract_number.length !== 13
+                                    formData.contract_number.length > 0 &&
+                                    contractNumberError
                                         ? "border-red-500"
                                         : formData.contract_number.length === 13
-                                        ? "border-green-500"
-                                        : " "
+                                        ? "border-custom-bluegreen"
+                                        : ""
                                 }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
@@ -358,7 +389,6 @@ const EngageFormModal = forwardRef(
                                 </span>
                                 <CustomInput
                                     name="contract_number"
-                                    type="number"
                                     value={formData.contract_number}
                                     onChange={(e) => {
                                         if (e.target.value.length <= 13) {
@@ -372,25 +402,22 @@ const EngageFormModal = forwardRef(
                             </div>
                             <span
                                 className={`flex justify-end text-xs ${
-                                    formData.contract_number &&
-                                    formData.contract_number.length !== 13
+                                    formData.contract_number.length > 0 &&
+                                    contractNumberError
                                         ? "text-red-500"
                                         : formData.contract_number.length === 13
-                                        ? "text-green-500"
+                                        ? "text-custom-bluegreen"
                                         : "text-gray-400"
                                 }`}
                             >
                                 {formData?.contract_number.length} /13
-                                {formData.contract_number &&
-                                    formData.contract_number.length !== 13 &&
-                                    " (Must be 13 digits)"}
                             </span>
                         </div>
 
                         {/*Email*/}
                         <div className="py-1">
                             <div
-                                className={`flex items-center border rounded-[5px] overflow-hidden  `}
+                                className={`flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden  `}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
                                     Email
@@ -407,10 +434,10 @@ const EngageFormModal = forwardRef(
 
                         {/* Detailed notes */}
                         <div
-                            className={`  rounded-[5px] bg-custom-lightestgreen border mt-1`}
+                            className={`  rounded-[5px] border-custom-bluegreen border mt-1`}
                         >
-                            <div className="flex items-center justify-between">
-                                <p className="text-custom-bluegreen text-sm bg-custom-lightestgreen pl-3  flex-grow mobile:text-xs mobile:w-[170px]">
+                            <div className="flex items-center justify-between h-full bg-custom-lightestgreen rounded-t-[5px]">
+                                <p className="text-custom-bluegreen text-sm  pl-3  flex-grow mobile:text-xs mobile:w-[170px]">
                                     Detailed Notes
                                 </p>
                                 <span className="bg-white text-sm2 text-gray-400 font-normal py-2 border-l border-custom-bluegreen pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">
@@ -435,7 +462,7 @@ const EngageFormModal = forwardRef(
                         <div className="mt-10 flex justify-end gap-3">
                             <Button
                                 type="submit"
-                                onClick={(e) => handleSubmit(e, "save")}
+                                onClick={(e) => handleSubmit(e, "saved")}
                                 disabled={
                                     isPropertyButtonDisabled || isSubmitting
                                 }
@@ -447,7 +474,7 @@ const EngageFormModal = forwardRef(
                             >
                                 {isSubmitting &&
                                 transactionMutation.variables?.status ===
-                                    "save" ? (
+                                    "saved" ? (
                                     <CircularProgress className="spinnerSize" />
                                 ) : (
                                     <>Save</>

@@ -105,7 +105,7 @@ const TransactionSearchBar = ({
                         </svg>
                     </div>
                     {openSearch && (
-                        <div className="absolute right-0 left-0 bg-white border border-gray-300 mt-[10px] w-[604px] h-auto rounded-lg py-5 px-5">
+                        <div className="absolute right-0 left-0 bg-white border border-gray-300 mt-[10px] w-[604px] h-auto rounded-lg py-5 px-5 ">
                             {fields.map((item, index) => {
                                 return (
                                     <div
@@ -122,7 +122,7 @@ const TransactionSearchBar = ({
                                                 item.name
                                             )
                                         ) : item.type === "date_range" ? (
-                                            <div className="relative flex border-b w-max rounded-[5px] z-10 mt-3">
+                                            <div className="relative flex border-b w-max rounded-[5px] z-50 mt-3">
                                                 <span className="text-custom-bluegreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
                                                     From
                                                 </span>
@@ -200,7 +200,86 @@ const TransactionSearchBar = ({
                                                 <img src={DateLogo} className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 pointer-events-none cursor-pointer">
                                                 </img>
                                             </div>
-                                        ) : (
+                                        ) : item.type === "printed_date" ?
+                                             <div className="relative flex border-b w-max rounded-[5px] z-10 mt-3">
+                                                <span className="text-custom-bluegreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
+                                                    From
+                                                </span>
+                                                <div className="relative flex items-center bg-white">
+                                                    <DatePicker
+                                                        className="outline-none h-full text-sm px-2 cursor-pointer"
+                                                        calendarClassName="custom-calendar"
+                                                        name="start_date"
+                                                        onChange={(date) => {
+                                                            if (date) {
+                                                                const formattedDate =
+                                                                    moment(
+                                                                        date
+                                                                    ).format(
+                                                                        "YYYY-MM-DD"
+                                                                    );
+
+                                                                setSearchValues(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        printed_start_date:
+                                                                            formattedDate,
+                                                                    })
+                                                                );
+                                                            }
+                                                        }}
+                                                        selected={
+                                                            searchValues.printed_start_date
+                                                                ? moment(
+                                                                      searchValues.printed_start_date
+                                                                  ).toDate()
+                                                                : null
+                                                        }
+                                                    />
+                                                </div>
+                                                <span className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 bg-[#3A3A3A] pointer-events-none">
+                                                    <MdCalendarToday />
+                                                </span>
+
+                                                <span className="text-custom-bluegreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
+                                                    To
+                                                </span>
+                                                <div className="relative flex items-center bg-white">
+                                                    <DatePicker
+                                                        className="outline-none h-full text-sm px-2 cursor-pointer"
+                                                        calendarClassName="custom-calendar"
+                                                        name="end_date"
+                                                        onChange={(date) => {
+                                                            if (date) {
+                                                                const formattedDate =
+                                                                    moment(
+                                                                        date
+                                                                    ).format(
+                                                                        "YYYY-MM-DD"
+                                                                    );
+
+                                                                setSearchValues(
+                                                                    (prev) => ({
+                                                                        ...prev,
+                                                                        printed_end_date:
+                                                                            formattedDate,
+                                                                    })
+                                                                );
+                                                            }
+                                                        }}
+                                                        selected={
+                                                            searchValues.printed_end_date
+                                                                ? moment(
+                                                                      searchValues.printed_end_date
+                                                                  ).toDate()
+                                                                : null
+                                                        }
+                                                    />
+                                                </div>
+                                                <img src={DateLogo} className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 pointer-events-none cursor-pointer">
+                                                </img>
+                                            </div>
+                                        : (
                                             <input
                                                 type="text"
                                                 className="w-full h-full border-b border-custom-gray outline-none text-xs border-opacity-30"

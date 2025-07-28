@@ -229,7 +229,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                                 maxLength={500}
                                 value={
                                     item.walkin_transaction_detail
-                                        ?.details_message ||
+                                        ?.detailed_notes ||
                                     "No message provided."
                                 }
                                 className={`border-custom-bluegreen rounded-b-[5px] border-t w-full pl-2 outline-none montserrat-regular py-4`}

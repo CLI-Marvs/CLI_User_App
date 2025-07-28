@@ -30,7 +30,6 @@ class CheckStreamRepository
         $response = null;
 
         foreach ($checks as $check) {
-
             $response = $this->model::create([
                 'check_no' => $check['check_no'],
                 'check_date' => $check['check_date'],

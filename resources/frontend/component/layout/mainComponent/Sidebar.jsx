@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
+import { createPortal } from 'react-dom';
 import { IoIosArrowDown } from "react-icons/io";
 import { MdChevronRight } from "react-icons/md";
 import { GoPlus } from "react-icons/go";
@@ -51,6 +52,17 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
+        if (showReportsSubmenu && reportsButtonRef.current && reportsMenuRef.current) {
+            const buttonRect = reportsButtonRef.current.getBoundingClientRect();
+            const menu = reportsMenuRef.current;
+
+            menu.style.position = 'fixed';
+            menu.style.top = `${buttonRect.top}px`;
+            menu.style.left = `${buttonRect.right + 8}px`;
+        }
+    }, [showReportsSubmenu]);
+
+    useEffect(() => {
         const handleClickOutside = (event) => {
             if (
                 reportsMenuRef.current &&
@@ -96,7 +108,7 @@ const Sidebar = () => {
 
     useEffect(() => {
         const pathname = location.pathname;
-        
+
         // Dynamic path checks (regex)
         const isSurveyForm =
             /^\/inquirymanagement\/settings\/surveysettings\/surveyform\/[\w-]+$/.test(
@@ -136,10 +148,9 @@ const Sidebar = () => {
             setIsSalesOpen(false);
         }
     }, [location.pathname]);
-
     return (
         <>
-            <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pr-[20px] pt-0 rounded-none bg-custom-grayFA relative z-30 overflow-hidden crs-sidebar-blur">
+            <Card className="shadow-none w-[230px] max-w-[230px] p-[25px] pr-[20px] pt-0 rounded-none bg-custom-grayFA relative z-50 overflow-hidden crs-sidebar-blur">
                 <List className="p-0 gap-0">
                     <Link to="/notification">
                         <ListItem
@@ -190,49 +201,47 @@ const Sidebar = () => {
                         </ListItem>
                     </Link>
                     {isInquiryOpen && (
-                            <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] z-20 shadow-custom5  bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
-                                <Link to="/inquirymanagement/inquirylist">
+                        <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] z-20 shadow-custom5  bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+                            <Link to="/inquirymanagement/inquirylist">
+                                <ListItem
+                                    className={`h-[32px] w-full py-[8px] px-[18px]  text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/inquirymanagement/inquirylist"
+                                        ) ||
+                                        location.pathname.startsWith(
+                                            "/inquirymanagement/thread"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
+                                    onClick={() =>
+                                        handleItemClick(
+                                            "/inquirymanagement/inquirylist"
+                                        )
+                                    }
+                                >
+                                    Feedback
+                                </ListItem>
+                            </Link>
+                            <Link to="/inquirymanagement/walk-in">
+                                <ListItem
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/inquirymanagement/walk-in"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
+                                    onClick={() => handleItemClick("/walk-in")}
+                                >
+                                    Walk-in
+                                </ListItem>
+                            </Link>
+                            <div className="relative">
+                                {/* Reports Toggle Button */}
+                                <div ref={reportsButtonRef}>
                                     <ListItem
-                                        className={`h-[32px] w-full py-[8px] px-[18px]  text-sm rounded-[50px] ${
-                                            location.pathname.startsWith(
-                                                "/inquirymanagement/inquirylist"
-                                            ) ||
-                                            location.pathname.startsWith(
-                                                "/inquirymanagement/thread"
-                                            )
-                                                ? "bg-white text-custom-solidgreen font-semibold"
-                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
-                                        onClick={() =>
-                                            handleItemClick(
-                                                "/inquirymanagement/inquirylist"
-                                            )
-                                        }
-                                    >
-                                        Feedback
-                                    </ListItem>
-                                </Link>
-                                <Link to="/inquirymanagement/walk-in">
-                                    <ListItem
-                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
-                                            location.pathname.startsWith(
-                                                "/inquirymanagement/walk-in"
-                                            )
-                                                ? "bg-white text-custom-solidgreen font-semibold"
-                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
-                                        onClick={() =>
-                                            handleItemClick("/walk-in")
-                                        }
-                                    >
-                                        Walk-in
-                                    </ListItem>
-                                </Link>
-                                <div className="relative">
-                                    {/* Reports Toggle Button */}
-                                    <div ref={reportsButtonRef}>
-                                        <ListItem
-                                            className={`flex justify-between h-[32px] w-full py-[8px] pl-[18px] text-sm rounded-[50px] 
+                                        className={`flex justify-between h-[32px] w-full py-[8px] pl-[18px] text-sm rounded-[50px] 
                           ${
                               location.pathname.startsWith(
                                   "/inquirymanagement/report"
@@ -240,19 +249,20 @@ const Sidebar = () => {
                                   ? "bg-white text-custom-solidgreen font-semibold"
                                   : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
                           }`}
-                                            onClick={handleReportsClick}
-                                        >
-                                            <div>Reports</div>
-                                            <div className="text-custom-solidgreen group-hover:text-custom-solidgreen">
-                                                <MdChevronRight />
-                                            </div>
-                                        </ListItem>
-                                    </div>
-                                    {/* Floating submenu */}
-                                    {showReportsSubmenu && (
+                                        onClick={handleReportsClick}
+                                    >
+                                        <div>Reports</div>
+                                        <div className="text-custom-solidgreen group-hover:text-custom-solidgreen">
+                                            <MdChevronRight />
+                                        </div>
+                                    </ListItem>
+                                </div>
+                                {/* Floating submenu */}
+                                {showReportsSubmenu &&
+                                    createPortal(
                                         <div
                                             ref={reportsMenuRef}
-                                            className="absolute left-full top-0 ml-2 bg-white shadow-lg border rounded-md w-48 py-2 z-50"
+                                            className="fixed z-[9999] bg-white shadow-custom3 border rounded-md w-[120px] py-2"
                                         >
                                             <Link
                                                 to="/inquirymanagement/report/inquiries"
@@ -260,9 +270,7 @@ const Sidebar = () => {
                                                     setShowReportsSubmenu(false)
                                                 }
                                             >
-                                                <div
-                                                    className={`px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen`}
-                                                >
+                                                <div className="px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen">
                                                     Inquiries
                                                 </div>
                                             </Link>
@@ -272,33 +280,40 @@ const Sidebar = () => {
                                                     setShowReportsSubmenu(false)
                                                 }
                                             >
-                                                <div
-                                                    className={`px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen`}
-                                                >
+                                                <div className="px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen">
                                                     Survey
                                                 </div>
                                             </Link>
-                                        </div>
+                                            <Link
+                                                to="/inquirymanagement/report/walk-in"
+                                                onClick={() =>
+                                                    setShowReportsSubmenu(false)
+                                                }
+                                            >
+                                                <div className="px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen">
+                                                    Walk-in
+                                                </div>
+                                            </Link>
+                                        </div>,
+                                        document.getElementById("portal-root")
                                     )}
-                                </div>
-                                <Link to="/inquirymanagement/settings/bannersettings">
-                                    <ListItem
-                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px]  ${
-                                            location.pathname.startsWith(
-                                                "/inquirymanagement/settings"
-                                            )
-                                                ? "bg-white text-custom-solidgreen font-semibold"
-                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
-                                        onClick={() =>
-                                            handleItemClick("/settings")
-                                        }
-                                    >
-                                        Settings
-                                    </ListItem>
-                                </Link>
                             </div>
-                        )}
+                            <Link to="/inquirymanagement/settings/bannersettings">
+                                <ListItem
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px]  ${
+                                        location.pathname.startsWith(
+                                            "/inquirymanagement/settings"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
+                                    onClick={() => handleItemClick("/settings")}
+                                >
+                                    Settings
+                                </ListItem>
+                            </Link>
+                        </div>
+                    )}
                     <Link to="/transaction/bank-monitoring/bank-statements">
                         <ListItem
                             className={`h-[35px] w-[185px] text-sm pl-[12px] py-7 transition-all duration-300 ease-in-out 
@@ -325,81 +340,81 @@ const Sidebar = () => {
                         </ListItem>
                     </Link>
                     {isInvoiceOpen && (
-                            <div className="px-[10px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
-                                <Link to="/transaction/bank-monitoring/bank-statements">
-                                    <ListItem
-                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
-                                            location.pathname.startsWith(
-                                                "/transaction/bank-monitoring/bank-statements"
-                                            )
-                                                ? "bg-white text-custom-solidgreen font-semibold"
-                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
-                                        onClick={() =>
-                                            handleItemTransactionClick(
-                                                "/transaction/bank-monitoring/bank-statements"
-                                            )
-                                        }
-                                    >
-                                        Bank Monitoring
-                                    </ListItem>
-                                </Link>
-                                <Link to="/transaction/receivables/transactions">
-                                    <ListItem
-                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
-                                            location.pathname.startsWith(
-                                                "/transaction/receivables"
-                                            )
-                                                ? "bg-white text-custom-solidgreen font-semibold"
-                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
-                                        onClick={() =>
-                                            handleItemTransactionClick(
-                                                "/transaction/receivables/transactions"
-                                            )
-                                        }
-                                    >
-                                        Receivables/Incoming
-                                    </ListItem>
-                                </Link>
-                                <Link to="/transaction/settings/markup">
-                                    <ListItem
-                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
-                                            location.pathname.startsWith(
-                                                "/transaction/settings"
-                                            )
-                                                ? "bg-white text-custom-solidgreen font-semibold"
-                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
-                                        onClick={() =>
-                                            handleItemTransactionClick(
-                                                "/transaction/settings/markup"
-                                            )
-                                        }
-                                    >
-                                        Settings
-                                    </ListItem>
-                                </Link>
-                                  <Link to="/transaction/tools/check-generator">
-                                    <ListItem
-                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
-                                            location.pathname.startsWith(
-                                                "/transaction/tools"
-                                            )
-                                                ? "bg-white text-custom-solidgreen font-semibold"
-                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                        }`}
-                                        onClick={() =>
-                                            handleItemTransactionClick(
-                                                "/transaction/tools/check-generator"
-                                            )
-                                        }
-                                    >
-                                        Tools
-                                    </ListItem>
-                                </Link>
-                            </div>
-                        )}
+                        <div className="px-[10px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+                            <Link to="/transaction/bank-monitoring/bank-statements">
+                                <ListItem
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/transaction/bank-monitoring/bank-statements"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
+                                    onClick={() =>
+                                        handleItemTransactionClick(
+                                            "/transaction/bank-monitoring/bank-statements"
+                                        )
+                                    }
+                                >
+                                    Bank Monitoring
+                                </ListItem>
+                            </Link>
+                            <Link to="/transaction/receivables/transactions">
+                                <ListItem
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/transaction/receivables"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
+                                    onClick={() =>
+                                        handleItemTransactionClick(
+                                            "/transaction/receivables/transactions"
+                                        )
+                                    }
+                                >
+                                    Receivables/Incoming
+                                </ListItem>
+                            </Link>
+                            <Link to="/transaction/settings/markup">
+                                <ListItem
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/transaction/settings"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
+                                    onClick={() =>
+                                        handleItemTransactionClick(
+                                            "/transaction/settings/markup"
+                                        )
+                                    }
+                                >
+                                    Settings
+                                </ListItem>
+                            </Link>
+                            <Link to="/transaction/tools/check-generator">
+                                <ListItem
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/transaction/tools"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                    }`}
+                                    onClick={() =>
+                                        handleItemTransactionClick(
+                                            "/transaction/tools/check-generator"
+                                        )
+                                    }
+                                >
+                                    Tools
+                                </ListItem>
+                            </Link>
+                        </div>
+                    )}
                     {isSalesOpen && location.pathname.startsWith("/sales") && (
                         <div className="px-[12px] py-[20px] w-[210px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
                             <Link to="/sales/customer">

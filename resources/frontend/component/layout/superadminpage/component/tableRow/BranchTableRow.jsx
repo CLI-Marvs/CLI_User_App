@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState,useEffect } from "react";
 import { HiPencil } from "react-icons/hi";
 import { MdDelete, MdContentCopy } from "react-icons/md";
 import CustomToolTip from "@/component/CustomToolTip";
@@ -15,49 +15,68 @@ const BranchTableRow = ({ item, onCopyAll, onEdit, onDelete }) => {
     return (
         <tr className="text-center border-b border-gray-200 hover:bg-gray-100 transition-colors">
             <td className="montserrat-medium py-2">{item?.name}</td>
-            <td className="montserrat-regular py-2 h-auto flex flex-col gap-1">
-                {item?.url &&
-                    Object.keys(item.url).map((key) => {
-                        return (
-                            <div className="flex items-center justify-center gap-x-3">
-                                <div>{linkLabels[key] || key} &rarr;</div>
-                                <a
-                                    href={item.url[key]}
+            <td className="montserrat-regular py-2">
+                <div className="flex flex-col gap-2">
+                    {item?.url &&
+                        Object.keys(item.url).map((key) => {
+                            return (
+                                <div
                                     key={key}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="block text-blue-600 hover:text-blue-800"
+                                    className="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-1 sm:gap-3"
                                 >
-                                    <div className="underline-offset-4 underline cursor-pointer ">
-                                        {item.url[key]}
+                                    {/* Label with arrow - keeps together on small screens */}
+                                    <div className="flex items-center justify-center gap-1 text-sm sm:text-base whitespace-nowrap">
+                                        <span>{linkLabels[key] || key}</span>
+                                        <span className="text-gray-500">
+                                            &rarr;
+                                        </span>
                                     </div>
-                                </a>
-                            </div>
-                        );
-                    })}
+
+                                    {/* Link - breaks properly on small screens */}
+                                    <a
+                                        href={item.url[key]}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="block text-blue-600 hover:text-blue-800 underline underline-offset-4 cursor-pointer text-sm sm:text-base break-all sm:break-normal max-w-full"
+                                    >
+                                        {item.url[key]}
+                                    </a>
+                                </div>
+                            );
+                        })}
+                </div>
             </td>
             <td className="py-2 montserrat-regular">
                 <div className="flex justify-center items-center gap-x-2">
                     <CustomToolTip text="Copy all links" position="top">
-                        <button onClick={() => onCopyAll(item.url)}>
-                            <MdContentCopy className="w-6 h-6 text-custom-bluegreen cursor-pointer" />
+                        <button
+                            onClick={() => onCopyAll(item.url)}
+                            className="p-1 rounded hover:bg-gray-200 transition-colors"
+                        >
+                            <MdContentCopy className="w-5 h-5 sm:w-6 sm:h-6 text-custom-bluegreen cursor-pointer" />
                         </button>
                     </CustomToolTip>
 
                     <CustomToolTip text="Edit branch" position="top">
-                        <button onClick={() => onEdit(item)}>
-                            <HiPencil className="w-5 h-5 text-custom-bluegreen cursor-pointer" />
+                        <button
+                            onClick={() => onEdit(item)}
+                            className="p-1 rounded hover:bg-gray-200 transition-colors"
+                        >
+                            <HiPencil className="w-4 h-4 sm:w-5 sm:h-5 text-custom-bluegreen cursor-pointer" />
                         </button>
                     </CustomToolTip>
 
-                    <CustomToolTip text="Delete branch" position="top">
-                        <button onClick={() => onDelete(item)}>
-                            <MdDelete className="w-6 h-6 text-red-500 cursor-pointer" />
+                    <CustomToolTip
+                        text="Delete branch"
+                        position="left"
+                    >
+                        <button
+                            onClick={() => onDelete(item)}
+                            className="p-1 rounded hover:bg-red-100 transition-colors"
+                        >
+                            <MdDelete className="w-5 h-5 sm:w-6 sm:h-6 text-red-500 cursor-pointer" />
                         </button>
                     </CustomToolTip>
-                    {/* <button onClick={() => onDelete(item)}>
-                        <MdDelete className="w-6 h-6 text-red-500 cursor-pointer" />
-                    </button> */}
                 </div>
             </td>
         </tr>

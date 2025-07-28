@@ -25,24 +25,31 @@ class PrintedCheck extends Model
 
     public function scopeFilter(Builder $query, array $filters)
     {
+        $checkStartDate = $filters['start_date'] ?? null;
+        $checkEndDate = $filters['end_date'] ?? null;
+        $printedStartDate = $filters['printed_start_date'] ?? null;
+        $printedEndDate = $filters['printed_end_date'] ?? null;
 
-        $startDate = $filters['start_date'] ?? null;
-        $endDate = $filters['end_date'] ?? null;
+        if ($checkStartDate && $checkEndDate) {
+            $query->whereBetween('check_date', [$checkStartDate, $checkEndDate]);
+        } elseif ($checkStartDate) {
+            $query->whereDate('check_date', $checkStartDate);
+        } elseif ($checkEndDate) {
+            $query->whereDate('check_date', $checkEndDate);
+        }
 
-        $query
-            ->when($startDate && $endDate, function ($q) use ($startDate, $endDate) {
-                $q->whereBetween('check_date', [$startDate, $endDate]);
-            })
-
-            ->when($startDate && !$endDate, function ($q) use ($startDate) {
-                $q->whereDate('check_date', $startDate);
-            })
-            ->when($endDate && !$startDate, function ($q) use ($endDate) {
-                $q->whereDate('check_date', $endDate);
-            });
+        if ($printedStartDate && $printedEndDate) {
+            $query->whereBetween('created_at', [$printedStartDate, $printedEndDate]);
+        } elseif ($printedStartDate) {
+            $query->whereDate('created_at', $printedStartDate);
+        } elseif ($printedEndDate) {
+            $query->whereDate('created_at', $printedEndDate);
+        }
 
         if (!empty($filters['check_number'])) {
             $query->where('check_no', $filters['check_number']);
         }
+
+        return $query;
     }
 }

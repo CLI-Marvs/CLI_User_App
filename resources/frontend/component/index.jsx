@@ -8,6 +8,8 @@ import { RoleManagementProvider } from "@/context/RoleManagement/RoleManagementC
 import { PropertyPricingProvider } from "@/context/PropertyPricing/PropertyPricingContext";
 import { TransactionProvider } from "@/context/Transaction/TransactionContext";
 import { WalkinSelectionProvider } from "@/context/InquiryManagement/WalkinSelectionContext";
+import { WalkinReportFilterProvider } from "@/context/InquiryManagement/WalkinReportFilterProvider";
+
 import ErrorBoundary from "@/component/ErrorElement/ErrorBoundary";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -20,24 +22,29 @@ if (rootElement) {
         <QueryClientProvider client={queryClient}>
             <ContextProvider>
                 <WalkinSelectionProvider>
-                    <SurveyProvider>
-                        <PropertyPricingProvider>
-                            <RoleManagementProvider>
-                                <TransactionProvider>
-                                    <ToastContainer
-                                        position="top-right"
-                                        style={{ zIndex: 9999, position: "fixed" }}
-                                    />
-                                    <ErrorBoundary>
-                                        <App />
-                                    </ErrorBoundary>
-                                </TransactionProvider>
-                            </RoleManagementProvider>
-                        </PropertyPricingProvider>
-                    </SurveyProvider>
+                    <WalkinReportFilterProvider>
+                        <SurveyProvider>
+                            <PropertyPricingProvider>
+                                <RoleManagementProvider>
+                                    <TransactionProvider>
+                                        <ToastContainer
+                                            position="top-right"
+                                            style={{
+                                                zIndex: 9999,
+                                                position: "fixed",
+                                            }}
+                                        />
+                                        <ErrorBoundary>
+                                            <App />
+                                        </ErrorBoundary>
+                                    </TransactionProvider>
+                                </RoleManagementProvider>
+                            </PropertyPricingProvider>
+                        </SurveyProvider>
+                    </WalkinReportFilterProvider>
                 </WalkinSelectionProvider>
             </ContextProvider>
-        </QueryClientProvider >
+        </QueryClientProvider>
         /*   </React.StrictMode> */
     );
 }
