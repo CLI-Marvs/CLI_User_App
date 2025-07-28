@@ -15,6 +15,7 @@ import isButtonDisabled from "@/util/isFormButtonDisabled";
 import CustomInput from "@/component/Input/CustomInput";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import validateContractNumber from "@/component/layout/inquirypage/utils/validateContractNumber";
 
 const formDataInitialState = {
     category_id: "",
@@ -33,23 +34,36 @@ const EngageFormModal = forwardRef(
         const dialogRef = React.useRef(null);
         //States
         const [formData, setFormData] = useState(formDataInitialState);
+        const [error, setError] = useState(null);
         //Hooks
         const { propertyNamesList } = useProperty();
         const queryClient = useQueryClient();
         // Form validation
-        const isPropertyButtonDisabled = isButtonDisabled(
-            formData,
-            Object.keys(formDataInitialState).filter(
-                (key) => key !== "details_message"
-            )
+        const contractNumberError = validateContractNumber(
+            formData.contract_number
         );
+        const isPropertyButtonDisabled =
+            isButtonDisabled(
+                formData,
+                Object.keys(formDataInitialState).filter(
+                    (key) => key !== "details_message"
+                )
+            ) || !!contractNumberError;
+
         // Mutations
         const transactionMutation = useMutation({
             mutationFn: walkinTransactionService.createWalkinTransactionDetail,
             onSuccess: () => {
+                showToast(
+                    "Walkin transaction details created successfully.",
+                    "success"
+                );
                 queryClient.invalidateQueries({
                     queryKey: ["queueWalkinTransactions"],
                 });
+            },
+            onError: (error) => {
+                setError(error?.response?.data?.message);
             },
         });
         const queueMutation = useMutation({
@@ -117,8 +131,7 @@ const EngageFormModal = forwardRef(
 
             try {
                 // Submit transaction first
-                const transactionResponse =
-                    await transactionMutation.mutateAsync(transactionPayload);
+                await transactionMutation.mutateAsync(transactionPayload);
 
                 // Then update queue status
                 await queueMutation.mutateAsync(queuePayload);
@@ -149,10 +162,9 @@ const EngageFormModal = forwardRef(
                 dialogRef.current?.close();
                 setSelectedItem(null);
             } catch (error) {
-                showToast(
-                    error?.message ||
-                        "An error occurred while processing the request",
-                    "error"
+                setError(
+                    error?.response?.data?.message ||
+                        "An error occurred while processing the request"
                 );
             }
         };
@@ -169,18 +181,17 @@ const EngageFormModal = forwardRef(
         // Handle modal close
         const handleCloseModal = async () => {
             try {
-                // Close the modal dialog first
                 dialogRef.current?.close();
 
                 // Create a single transaction for all updates
                 await Promise.all([
-                    // Update queue status
+                    // Update queue status in firebase
                     queueMutation.mutateAsync({
                         priority_number: itemData?.priority_number,
                         status: "queue",
                     }),
 
-                    // Update transaction status
+                    // Update transaction status in postgres
                     walkinTransactionService.updateWalkinTransactionStatus({
                         walkin_transaction_id: itemData?.id,
                         status: "queue",
@@ -194,6 +205,7 @@ const EngageFormModal = forwardRef(
 
                 // Reset selected item
                 setSelectedItem(null);
+                setError(null);
             } catch (error) {
                 showToast("Error closing the form", "error");
             }
@@ -219,8 +231,17 @@ const EngageFormModal = forwardRef(
                     </div>
 
                     {/* Modal content */}
+                    <div>
+                        {error && (
+                            <div className="w-full flex justify-center items-center h-12 bg-red-100  rounded-lg mt-10">
+                                <p className="flex text-[#C42E2E] montserrat-regular">
+                                    {error}
+                                </p>
+                            </div>
+                        )}
+                    </div>
                     <div className=" ">
-                        <div className="mt-10">
+                        <div className="mt-8">
                             <h1 className="montserrat-bold ">
                                 Priority Number :{" "}
                                 <span className="montserrat-regular">
@@ -354,13 +375,13 @@ const EngageFormModal = forwardRef(
                         {/*Contract Number*/}
                         <div className="py-1">
                             <div
-                                className={`flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden ${
-                                    formData.contract_number &&
-                                    formData.contract_number.length !== 13
+                                className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                    formData.contract_number.length > 0 &&
+                                    contractNumberError
                                         ? "border-red-500"
                                         : formData.contract_number.length === 13
-                                        ? "border-green-500"
-                                        : " "
+                                        ? "border-custom-bluegreen"
+                                        : ""
                                 }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
@@ -368,7 +389,6 @@ const EngageFormModal = forwardRef(
                                 </span>
                                 <CustomInput
                                     name="contract_number"
-                                    type="number"
                                     value={formData.contract_number}
                                     onChange={(e) => {
                                         if (e.target.value.length <= 13) {
@@ -382,18 +402,15 @@ const EngageFormModal = forwardRef(
                             </div>
                             <span
                                 className={`flex justify-end text-xs ${
-                                    formData.contract_number &&
-                                    formData.contract_number.length !== 13
+                                    formData.contract_number.length > 0 &&
+                                    contractNumberError
                                         ? "text-red-500"
                                         : formData.contract_number.length === 13
-                                        ? "text-green-500"
+                                        ? "text-custom-bluegreen"
                                         : "text-gray-400"
                                 }`}
                             >
                                 {formData?.contract_number.length} /13
-                                {formData.contract_number &&
-                                    formData.contract_number.length !== 13 &&
-                                    " (Must be 13 digits)"}
                             </span>
                         </div>
 
