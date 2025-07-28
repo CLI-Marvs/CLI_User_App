@@ -558,7 +558,9 @@ const ReportPage = () => {
                               (department) =>
                                   department !== null &&
                                   department !== undefined &&
-                                  department !== "PM"
+                                  department !== "PM" &&
+                                  department !== "IT" &&
+                                  department !== "Digital Innovation"
                           )
                   )
               ),
