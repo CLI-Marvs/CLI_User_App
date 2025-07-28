@@ -1928,6 +1928,7 @@ class ConcernController extends Controller
             
             if (
                 isset($selectedSurveyType['surveyName']) && 
+                $selectedSurveyType['surveyName'] !== 'N/A' ||
                 strtolower($selectedSurveyType['surveyName']) !== 'n/a'
             ) {
                 SendSurveyLinkEmailJob::dispatch(
@@ -1939,11 +1940,6 @@ class ConcernController extends Controller
                 );
             }
             
-
-
-            if ($selectedSurveyType['surveyName'] !== 'N/A') {
-                SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'resolve', $modifiedTicketId);
-            }
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
