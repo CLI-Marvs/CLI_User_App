@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import CheckGeneratorDropdown from "./financials/CheckGeneratorDropdown";
 
 const TransactionSidebar = () => {
     const { pathname } = useLocation();
@@ -10,9 +11,12 @@ const TransactionSidebar = () => {
                 name: "Transactions",
                 path: "/transaction/receivables/transactions",
             },
-            /*   { name: "Invoices", path: "/transaction/receivables/invoices" },
+            {
+                name: "Reports",
+                path: "/transaction/receivables/reports",
+            },
+              /* { name: "Invoices", path: "/transaction/receivables/invoices" },
             { name: "Auto Posting", path: "/transaction/receivables/posting" }, */
-            { name: "Reports", path: "/transaction/receivables/reports" },
         ],
         "/transaction/bank-monitoring": [
             {
@@ -21,11 +25,16 @@ const TransactionSidebar = () => {
             },
         ],
         "/transaction/settings": [
-            { name: "Markup Settings", path: "/transaction/settings/markup" },
+            {
+                name: "Markup Settings",
+                path: "/transaction/settings/markup",
+            },
         ],
         "/transaction/tools": [
-            { name: "Check Generator", path: "/transaction/tools/check-generator" },
-            { name: "Reports", path: "/transaction/tools/reports" },
+            {
+                name: "Check Generator Dropdown",
+                component: <CheckGeneratorDropdown />,
+            },
         ],
     };
 
@@ -36,8 +45,13 @@ const TransactionSidebar = () => {
 
     return (
         <div className="group px-3 py-5 rounded-[10px] bg-[#EFEFEF] transition-all duration-300 w-[189px] h-full space-y-3">
-            {currentMenu.map(({ name, path }) => {
+            {currentMenu.map(({ name, path, component }) => {
+                if (component) {
+                    return <div key={name}>{component}</div>;
+                }
+
                 const isActive = pathname === path;
+
                 return (
                     <Link to={path} key={path}>
                         <div

@@ -32,13 +32,13 @@ const AssignSidePanel = ({ ticketId }) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const userLoggedInEmail = user?.employee_email;
- 
 
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
-
+    console.log("selectedOptions:", selectedOptions);
+    console.log("assigneesPersonnel", assigneesPersonnel);
     const employeeOptions = allEmployees.map((employee) => ({
         name: `${employee.firstname} ${employee.lastname}`,
         email: employee.employee_email,
@@ -371,13 +371,40 @@ const AssignSidePanel = ({ ticketId }) => {
                         )}
                         {isConfirmModalOpen && (
                             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-                                <div className="bg-white p-[20px] rounded-[10px] shadow-custom5 w-[467px] h-[228]">
+                                <div className="bg-white p-[20px] rounded-[10px] shadow-custom5 w-auto h-[228]">
                                     <div className="flex justify-center items-center mt-[14px] ">
                                         <AiFillInfoCircle className="size-[37px] text-[#5B9BD5]" />
                                     </div>
                                     <div className="flex justify-center mt-[30px]">
                                         <p className="montserrat-medium text-[20px]">
-                                            Are you sure assigning this user?
+                                            You are about to assign
+                                            <div className="ml-6 mt-2">
+                                                {selectedOptions
+                                                    .filter(
+                                                        (option) =>
+                                                            !assigneesPersonnel[
+                                                                ticketId
+                                                            ]?.some(
+                                                                (assignee) =>
+                                                                    assignee.employee_email ===
+                                                                        option.email ||
+                                                                    assignee.email ===
+                                                                        option.email
+                                                            )
+                                                    )
+                                                    .map((option) => (
+                                                        <div
+                                                            key={
+                                                                option.employee_email ||
+                                                                option.email
+                                                            }
+                                                        >
+                                                            - {option.name} (
+                                                            {option.department})
+                                                        </div>
+                                                    ))}
+                                            </div>
+                                            to this ticket.
                                         </p>
                                     </div>
                                     <div className="flex justify-center mt-[26px] space-x-[19px]">
