@@ -8,6 +8,7 @@ import UploadFilesOnlyModal from "./UploadFilesOnlyModal";
 import apiService from "../../../component/servicesApi/apiService";
 import FileViewerModal from "./FileViewerModal"; // Import the FileViewerModal
 import { useStateContext } from "../../../../../resources/frontend/context/contextprovider";
+import { useDocumentManagementContext } from "../../../../../resources/frontend/context/DocumentManagement/DocumentManagementContext";
 
 function AddFilesModal({
     selectedAccountId,
@@ -19,6 +20,7 @@ function AddFilesModal({
     // selectedAssignee,
 }) {
     const { user } = useStateContext(); // Get user from context
+    const docMgmt = useDocumentManagementContext();
     const [logsWithFiles, setLogsWithFiles] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);

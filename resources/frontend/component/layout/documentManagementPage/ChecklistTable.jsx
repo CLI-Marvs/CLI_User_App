@@ -8,7 +8,33 @@ const ChecklistTable = ({
     currentUserId,
     onRefresh,
 }) => {
-    // Filter steps to only show milestones assigned to the current user for specific properties
+    // Local state to optimistically update completed checklists
+    const [optimisticCompleted, setOptimisticCompleted] = React.useState({});
+
+    // Helper to check if a checklist is complete (from backend or optimistic state)
+    // For checklists that do NOT require a document, only the checkbox marks as complete (not notes)
+    const isChecklistComplete = (
+        accountId,
+        checklistId,
+        uploadedDoc,
+        accountChecklistStatus,
+        requiresDocument
+    ) => {
+        if (optimisticCompleted[`${accountId}_${checklistId}`]) return true;
+        if (requiresDocument) {
+            // For document-required checklists, uploading a document OR status marks as complete
+            return (
+                uploadedDoc ||
+                (accountChecklistStatus && accountChecklistStatus.is_completed)
+            );
+        } else {
+            // For notes-only checklists, ONLY the status (set by checkbox) marks as complete
+            return (
+                accountChecklistStatus && accountChecklistStatus.is_completed
+            );
+        }
+    };
+
     const filteredSteps = steps
         .map((step) => ({
             ...step,
@@ -444,9 +470,13 @@ const ChecklistTable = ({
                                                         checklist.id
                                                 );
                                                 const isComplete =
-                                                    uploadedDoc ||
-                                                    (accountChecklistStatus &&
-                                                        accountChecklistStatus.is_completed);
+                                                    isChecklistComplete(
+                                                        account.id,
+                                                        checklist.id,
+                                                        uploadedDoc,
+                                                        accountChecklistStatus,
+                                                        checklist.requires_document
+                                                    );
                                                 const checklistRemark =
                                                     (account.remarks_by_checklist ||
                                                         {})[checklist.id] ||
@@ -546,50 +576,102 @@ const ChecklistTable = ({
                                                                     )}
                                                                     {/* Show Notes button only if checklist does not require document */}
                                                                     {!checklist.requires_document && (
-                                                                        <button
-                                                                            type="button"
-                                                                            className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-gray-200 hover:border-gray-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 shadow-sm ${
-                                                                                isComplete
-                                                                                    ? "text-green-700 bg-green-100 border border-green-300"
-                                                                                    : "text-gray-700 bg-gray-100 border-gray-300"
-                                                                            }`}
-                                                                            onClick={() =>
-                                                                                handleOpenNotesModal(
-                                                                                    {
-                                                                                        accountId:
-                                                                                            account.id,
-                                                                                        workOrder:
-                                                                                            step.workOrder,
-                                                                                        workOrderType:
-                                                                                            step.stepName,
-                                                                                        checklistId:
-                                                                                            checklist.id,
-                                                                                        checklistName:
-                                                                                            checklist.name,
-                                                                                        onRefresh, // Pass refresh callback
+                                                                        <div className="flex items-center gap-2">
+                                                                            <button
+                                                                                type="button"
+                                                                                className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-gray-200 hover:border-gray-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 shadow-sm ${
+                                                                                    isComplete
+                                                                                        ? "text-green-700 bg-green-100 border border-green-300"
+                                                                                        : "text-gray-700 bg-gray-100 border-gray-300"
+                                                                                }`}
+                                                                                onClick={() =>
+                                                                                    handleOpenNotesModal(
+                                                                                        {
+                                                                                            accountId:
+                                                                                                account.id,
+                                                                                            workOrder:
+                                                                                                step.workOrder,
+                                                                                            workOrderType:
+                                                                                                step.stepName,
+                                                                                            checklistId:
+                                                                                                checklist.id,
+                                                                                            checklistName:
+                                                                                                checklist.name,
+                                                                                            onRefresh,
+                                                                                        }
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                <input
+                                                                                    type="checkbox"
+                                                                                    checked={
+                                                                                        !!isComplete
                                                                                     }
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            {isComplete ? (
-                                                                                <span className="inline-flex items-center justify-center w-3 h-3 bg-green-500 text-white text-xs font-bold rounded-sm mr-1">
-                                                                                    ✓
-                                                                                </span>
-                                                                            ) : (
-                                                                                <svg
-                                                                                    className="w-2.5 h-2.5 mr-0.5"
-                                                                                    fill="currentColor"
-                                                                                    viewBox="0 0 20 20"
-                                                                                >
-                                                                                    <path
-                                                                                        fillRule="evenodd"
-                                                                                        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
-                                                                                        clipRule="evenodd"
-                                                                                    />
-                                                                                </svg>
-                                                                            )}
-                                                                            Notes
-                                                                        </button>
+                                                                                    disabled={
+                                                                                        !!isComplete
+                                                                                    }
+                                                                                    onChange={async (
+                                                                                        e
+                                                                                    ) => {
+                                                                                        if (
+                                                                                            e
+                                                                                                .target
+                                                                                                .checked &&
+                                                                                            !isComplete
+                                                                                        ) {
+                                                                                            setOptimisticCompleted(
+                                                                                                (
+                                                                                                    prev
+                                                                                                ) => ({
+                                                                                                    ...prev,
+                                                                                                    [`${account.id}_${checklist.id}`]: true,
+                                                                                                })
+                                                                                            );
+                                                                                            try {
+                                                                                                const apiService =
+                                                                                                    await import(
+                                                                                                        "../../servicesApi/apiService"
+                                                                                                    );
+                                                                                                await apiService.default.post(
+                                                                                                    "/account-checklist-status",
+                                                                                                    {
+                                                                                                        account_id:
+                                                                                                            account.id,
+                                                                                                        checklist_id:
+                                                                                                            checklist.id,
+                                                                                                        is_completed: true,
+                                                                                                    }
+                                                                                                );
+                                                                                                if (
+                                                                                                    onRefresh
+                                                                                                )
+                                                                                                    onRefresh();
+                                                                                            } catch (err) {
+                                                                                                alert(
+                                                                                                    "Failed to mark checklist as complete."
+                                                                                                );
+                                                                                                setOptimisticCompleted(
+                                                                                                    (
+                                                                                                        prev
+                                                                                                    ) => {
+                                                                                                        const copy =
+                                                                                                            {
+                                                                                                                ...prev,
+                                                                                                            };
+                                                                                                        delete copy[
+                                                                                                            `${account.id}_${checklist.id}`
+                                                                                                        ];
+                                                                                                        return copy;
+                                                                                                    }
+                                                                                                );
+                                                                                            }
+                                                                                        }
+                                                                                    }}
+                                                                                    className="form-checkbox h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer mr-1"
+                                                                                />
+                                                                                Notes
+                                                                            </button>
+                                                                        </div>
                                                                     )}
                                                                 </>
                                                             )}

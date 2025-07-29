@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { useStateContext } from "../../../../../resources/frontend/context/contextprovider";
+import { useDocumentManagementContext } from "../../../../../resources/frontend/context/DocumentManagement/DocumentManagementContext";
 import apiService from "../../../component/servicesApi/apiService";
 
 const UploadFilesOnlyModal = ({
@@ -31,7 +32,8 @@ const UploadFilesOnlyModal = ({
     const [submilestoneOptions, setSubmilestoneOptions] = useState([]);
     const [loadingSubmilestones, setLoadingSubmilestones] = useState(false);
     const [dragActive, setDragActive] = useState(false);
-    const { user, fetchWorkOrders } = useStateContext();
+    const { user } = useStateContext();
+    const docMgmt = useDocumentManagementContext();
 
     useEffect(() => {
         if (isOpen) {

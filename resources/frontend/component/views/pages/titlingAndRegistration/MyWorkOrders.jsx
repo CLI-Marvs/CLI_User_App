@@ -17,18 +17,28 @@ import _ from "lodash";
 import AddFilesModal from "../../../layout/documentManagementPage/AddFilesModal";
 import WorkOrderGroupDetailsModal from "../../../layout/documentManagementPage/WorkOrderGroupDetailsModal";
 import { useStateContext } from "../../../../context/contextprovider";
+import { useDocumentManagementContext } from "../../../../context/DocumentManagement/DocumentManagementContext";
 
 const MyWorkOrders = () => {
     const { user } = useStateContext(); // Get current user from context
-    const [workOrderGroups, setWorkOrderGroups] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [perPage, setPerPage] = useState(6);
-    const [totalWorkOrders, setTotalWorkOrders] = useState(0);
+    // Work order state from context
+    const {
+        workOrderGroups,
+        setWorkOrderGroups,
+        workOrdersLoading,
+        workOrdersError,
+        workOrdersCurrentPage,
+        setWorkOrdersCurrentPage,
+        workOrdersPerPage,
+        setWorkOrdersPerPage,
+        workOrdersTotal,
+        workOrdersSortBy,
+        setWorkOrdersSortBy,
+        workOrdersSortOrder,
+        setWorkOrdersSortOrder,
+        fetchWorkOrders,
+    } = useDocumentManagementContext();
     const [statusFilter, setStatusFilter] = useState("");
-    const [sortBy, setSortBy] = useState("created_at");
-    const [sortOrder, setSortOrder] = useState("desc");
     const [viewMode, setViewMode] = useState("table");
     const [isProcessModalOpen, setIsProcessModalOpen] = useState(false);
     const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
@@ -48,61 +58,22 @@ const MyWorkOrders = () => {
     const [dueDateFilter, setDueDateFilter] = useState("");
     const [lastUpdatedFilter, setLastUpdatedFilter] = useState("");
 
-    useEffect(() => {
-        const fetchWorkOrders = async () => {
-            setLoading(true);
-            setError(null);
-            try {
-                const response = await apiService.get("/my-workorders", {
-                    params: {
-                        page: currentPage,
-                        per_page: perPage,
-                        sortBy: sortBy,
-                        sortOrder: sortOrder,
-                    },
-                });
-                console.log(response.data);
-                // Group by work_order_group_id
-                const grouped = Object.values(
-                    (response.data.data || []).reduce((acc, wo) => {
-                        const groupId = wo.work_order_group_id || "ungrouped";
-                        if (!acc[groupId]) {
-                            acc[groupId] = {
-                                id: groupId,
-                                work_orders: [],
-                            };
-                        }
-                        acc[groupId].work_orders.push(wo);
-                        return acc;
-                    }, {})
-                );
-                setWorkOrderGroups(grouped);
-                setTotalWorkOrders(response.data.total);
-                setLoading(false);
-            } catch (err) {
-                console.error("Error fetching work orders:", err);
-                setError("Failed to fetch work orders. Please try again.");
-                setLoading(false);
-            }
-        };
-
-        fetchWorkOrders();
-    }, [currentPage, perPage, sortBy, sortOrder]);
+    // Removed local fetching effect, use context fetcher if needed
 
     const handlePageChange = (newPage) => {
-        setCurrentPage(newPage);
+        setWorkOrdersCurrentPage(newPage);
     };
 
     const handleStatusFilterChange = (e) => {
         setStatusFilter(e.target.value);
-        setCurrentPage(1);
+        setWorkOrdersCurrentPage(1);
     };
 
     const handleSortChange = (e) => {
         const [newSortBy, newSortOrder] = e.target.value.split(":");
-        setSortBy(newSortBy);
-        setSortOrder(newSortOrder);
-        setCurrentPage(1);
+        setWorkOrdersSortBy(newSortBy);
+        setWorkOrdersSortOrder(newSortOrder);
+        setWorkOrdersCurrentPage(1);
     };
 
     const handleWorkOrderNoFilterChange = (e) => {
@@ -127,9 +98,9 @@ const MyWorkOrders = () => {
         setProjectFilter("");
         setDueDateFilter("");
         setLastUpdatedFilter("");
-        setSortBy("created_at");
-        setSortOrder("desc");
-        setCurrentPage(1);
+        setWorkOrdersSortBy("created_at");
+        setWorkOrdersSortOrder("desc");
+        setWorkOrdersCurrentPage(1);
     };
 
     const hasActiveFilters = () => {
@@ -304,7 +275,7 @@ const MyWorkOrders = () => {
 
             let comparison = 0;
 
-            switch (sortBy) {
+            switch (workOrdersSortBy) {
                 case "created_at":
                     const createdA = latestWO_A?.created_at
                         ? new Date(latestWO_A.created_at)
@@ -348,7 +319,7 @@ const MyWorkOrders = () => {
             }
 
             // Apply sort order (asc or desc)
-            return sortOrder === "desc" ? -comparison : comparison;
+            return workOrdersSortOrder === "desc" ? -comparison : comparison;
         });
 
         return filtered;
@@ -980,7 +951,8 @@ const MyWorkOrders = () => {
                 color="blue-gray"
                 className="font-normal"
             >
-                Page {currentPage} of {Math.ceil(totalWorkOrders / perPage)}
+                Page {workOrdersCurrentPage} of{" "}
+                {Math.ceil(workOrdersTotal / workOrdersPerPage)}
             </Typography>
             <ReactPaginate
                 previousLabel={
@@ -988,11 +960,11 @@ const MyWorkOrders = () => {
                 }
                 nextLabel={<MdKeyboardArrowRight className="text-[#404B52]" />}
                 breakLabel={"..."}
-                pageCount={Math.ceil(totalWorkOrders / perPage)}
+                pageCount={Math.ceil(workOrdersTotal / workOrdersPerPage)}
                 marginPagesDisplayed={2}
                 pageRangeDisplayed={2}
                 onPageChange={(data) => {
-                    handlePageChange(data.selected + 1);
+                    setWorkOrdersCurrentPage(data.selected + 1);
                 }}
                 containerClassName={"flex gap-2"}
                 previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
@@ -1002,7 +974,7 @@ const MyWorkOrders = () => {
                 pageLinkClassName="w-full h-full flex justify-center items-center"
                 activeLinkClassName="w-full h-full flex justify-center items-center"
                 disabledLinkClassName="text-gray-300 cursor-not-allowed"
-                forcePage={currentPage - 1}
+                forcePage={workOrdersCurrentPage - 1}
             />
         </CardFooter>
     );
@@ -1177,7 +1149,7 @@ const MyWorkOrders = () => {
                                 Sort:
                             </label>
                             <select
-                                value={`${sortBy}:${sortOrder}`}
+                                value={`${workOrdersSortBy}:${workOrdersSortOrder}`}
                                 onChange={handleSortChange}
                                 className="text-xs border-none outline-none bg-transparent cursor-pointer"
                             >
@@ -1218,7 +1190,7 @@ const MyWorkOrders = () => {
                 </div>
 
                 {/* Loading State */}
-                {loading && workOrderGroups.length === 0 && (
+                {workOrdersLoading && workOrderGroups.length === 0 && (
                     <SkeletonTheme baseColor="#f3f4f6" highlightColor="#e5e7eb">
                         {viewMode === "grid" ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -1243,9 +1215,11 @@ const MyWorkOrders = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {[...Array(perPage)].map((_, i) => (
-                                                <SkeletonTableRow key={i} />
-                                            ))}
+                                            {[...Array(workOrdersPerPage)].map(
+                                                (_, i) => (
+                                                    <SkeletonTableRow key={i} />
+                                                )
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>
@@ -1255,18 +1229,18 @@ const MyWorkOrders = () => {
                 )}
 
                 {/* Error State */}
-                {error && (
+                {workOrdersError && (
                     <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
                         <div className="text-red-600 font-medium">Error</div>
-                        <p className="text-red-600 mt-1">{error}</p>
+                        <p className="text-red-600 mt-1">{workOrdersError}</p>
                     </div>
                 )}
 
                 {/* Empty State */}
-                {!loading &&
-                    !error &&
+                {!workOrdersLoading &&
+                    !workOrdersError &&
                     getFilteredWorkOrderGroups().length === 0 &&
-                    workOrderGroups.length > 0 && (
+                    (workOrderGroups || []).length > 0 && (
                         <div className="text-center py-12">
                             <svg
                                 className="mx-auto h-12 w-12 text-gray-400"
@@ -1302,29 +1276,31 @@ const MyWorkOrders = () => {
                     )}
 
                 {/* No Data State */}
-                {!loading && !error && workOrderGroups.length === 0 && (
-                    <div className="text-center py-12">
-                        <svg
-                            className="mx-auto h-12 w-12 text-gray-400"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                            />
-                        </svg>
-                        <h3 className="mt-4 text-lg font-medium text-gray-900">
-                            No work orders found
-                        </h3>
-                        <p className="mt-2 text-gray-600">
-                            You have no work orders assigned to you.
-                        </p>
-                    </div>
-                )}
+                {!workOrdersLoading &&
+                    !workOrdersError &&
+                    (workOrderGroups || []).length === 0 && (
+                        <div className="text-center py-12">
+                            <svg
+                                className="mx-auto h-12 w-12 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                            </svg>
+                            <h3 className="mt-4 text-lg font-medium text-gray-900">
+                                No work orders found
+                            </h3>
+                            <p className="mt-2 text-gray-600">
+                                You have no work orders assigned to you.
+                            </p>
+                        </div>
+                    )}
 
                 {/* Content */}
                 {getFilteredWorkOrderGroups().length > 0 && (

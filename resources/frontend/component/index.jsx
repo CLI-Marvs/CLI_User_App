@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { ContextProvider } from "../context/contextprovider";
+import { DocumentManagementProvider } from "../context/DocumentManagement/DocumentManagementContext";
 import { ToastContainer } from "react-toastify";
 import { RoleManagementProvider } from "@/context/RoleManagement/RoleManagementContext";
 import { PropertyPricingProvider } from "@/context/PropertyPricing/PropertyPricingContext";
@@ -14,9 +15,10 @@ const queryClient = new QueryClient();
 
 if (rootElement) {
     ReactDOM.createRoot(rootElement).render(
-       /*  <React.StrictMode> */
-            <QueryClientProvider client={queryClient}>
-                <ContextProvider>
+        /*  <React.StrictMode> */
+        <QueryClientProvider client={queryClient}>
+            <ContextProvider>
+                <DocumentManagementProvider>
                     <PropertyPricingProvider>
                         <RoleManagementProvider>
                             <TransactionProvider>
@@ -40,8 +42,9 @@ if (rootElement) {
                             </TransactionProvider>
                         </RoleManagementProvider>
                     </PropertyPricingProvider>
-                </ContextProvider>
-            </QueryClientProvider>
-      /*   </React.StrictMode> */
+                </DocumentManagementProvider>
+            </ContextProvider>
+        </QueryClientProvider>
+        /*   </React.StrictMode> */
     );
 }

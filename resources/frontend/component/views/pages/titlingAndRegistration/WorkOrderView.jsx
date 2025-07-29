@@ -19,6 +19,7 @@ import Edit from "../../../../../../public/Images/Subtract.svg";
 import Delete from "../../../../../../public/Images/Trash_light.svg";
 import Profile from "../../../../../../public/Images/Profile.svg";
 import { useStateContext } from "../../../../context/contextprovider";
+import { useDocumentManagementContext } from "../../../../context/DocumentManagement/DocumentManagementContext";
 import CreateWorkOrderModal from "../../../layout/documentManagementPage/CreateWorkOrders";
 import apiService from "../../../../component/servicesApi/apiService";
 import EditWorkOrderModal from "../../../layout/documentManagementPage/EditWorkOrderModal";
@@ -101,6 +102,7 @@ const WorkOrderView = () => {
     const [tableRowsData, setTableRowsData] = useState([]);
     const { workOrders, fetchWorkOrders, fetchWorkOrderGroups } =
         useStateContext();
+    const docMgmt = useDocumentManagementContext();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [selectedWorkOrderForEdit, setSelectedWorkOrderForEdit] =

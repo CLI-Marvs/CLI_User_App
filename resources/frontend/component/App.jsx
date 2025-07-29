@@ -65,21 +65,37 @@ import TakenOutAccountView from "./views/pages/titlingAndRegistration/TakenOutAc
 import FileManagerView from "./views/pages/titlingAndRegistration/FileManagerView";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
-const PrivateRoute = ({ requiredPermission, children }) => {
-    const { hasPermission } = useStateContext();
+const PrivateRoute = ({ requiredPermission, adminOnly, children }) => {
+    const { hasPermission, user } = useStateContext();
 
     // Check for authentication token
     const authToken = localStorage.getItem("authToken");
+
+    // Admin check
+    const isAdmin =
+        user &&
+        (user.email === "metoh@cebulandmasters.com" ||
+            user.employee_email === "metoh@cebulandmasters.com");
 
     // Redirect to login page if not authenticated
     if (!authToken) {
         return <Navigate to="/" replace />;
     }
 
+    // Restrict to admin only if needed
+    if (adminOnly && !isAdmin) {
+        return (
+            <Navigate
+                to="/documentmanagement/titleandregistration/masterlist"
+                replace
+            />
+        );
+    }
+
     // Check for required permissions
     if (requiredPermission && !hasPermission(requiredPermission)) {
         return (
-            <div className="w-full h-full flex justify-center   text-custom-bluegreen text-lg">
+            <div className="w-full h-full flex justify-center text-custom-bluegreen text-lg">
                 You do not have permission to view this page.
             </div>
         );
@@ -322,7 +338,11 @@ const App = () => {
                                 },
                                 {
                                     path: "workorders",
-                                    element: <WorkOrderView />,
+                                    element: (
+                                        <PrivateRoute adminOnly>
+                                            <WorkOrderView />
+                                        </PrivateRoute>
+                                    ),
                                 },
                                 {
                                     path: "myworkorders",
@@ -330,11 +350,19 @@ const App = () => {
                                 },
                                 {
                                     path: "executivedashboard",
-                                    element: <ExecutiveDashboardView />,
+                                    element: (
+                                        <PrivateRoute adminOnly>
+                                            <ExecutiveDashboardView />
+                                        </PrivateRoute>
+                                    ),
                                 },
                                 {
                                     path: "settings",
-                                    element: <SettingsView />,
+                                    element: (
+                                        <PrivateRoute adminOnly>
+                                            <SettingsView />
+                                        </PrivateRoute>
+                                    ),
                                 },
                                 {
                                     path: "takenoutaccounts",
@@ -342,8 +370,12 @@ const App = () => {
                                 },
                                 {
                                     path: "filemanager",
-                                    element: <FileManagerView />,
-                                }
+                                    element: (
+                                        <PrivateRoute adminOnly>
+                                            <FileManagerView />
+                                        </PrivateRoute>
+                                    ),
+                                },
                             ],
                         },
                         {

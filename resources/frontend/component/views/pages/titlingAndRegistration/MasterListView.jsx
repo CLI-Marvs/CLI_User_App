@@ -25,6 +25,7 @@ import DateLogo from "../../../../../../public/Images/Date_range.svg";
 import DatePicker from "react-datepicker";
 import apiService from "../../../../component/servicesApi/apiService";
 import { useStateContext } from "../../../../context/contextprovider";
+import { useDocumentManagementContext } from "../../../../context/DocumentManagement/DocumentManagementContext";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate } from "react-router-dom";
@@ -307,6 +308,7 @@ export default function PaginatedTable() {
         { label: "Finished", value: "finished" },
         { label: "Unfinished", value: "unfinished" },
     ];
+    const docMgmt = useDocumentManagementContext();
     const {
         setTakenOutMasterListTableRows,
         masterListFilteredRows,
@@ -319,7 +321,7 @@ export default function PaginatedTable() {
         takenOutMasterListSearchQuery,
         setTakenOutMasterListSearchQuery,
         fetchMasterList,
-    } = useStateContext();
+    } = docMgmt;
     const [sortColumn, setSortColumn] = useState("accountname");
     const [sortDirection, setSortDirection] = useState("asc");
     const navigate = useNavigate();

@@ -20,7 +20,7 @@ import {
     ListBulletIcon,
 } from "@heroicons/react/24/outline";
 import FileViewerModal from "../../../layout/documentManagementPage/FileViewerModal";
-import apiService from "../../../servicesApi/apiService";
+import { useDocumentManagementContext } from "../../../../context/DocumentManagement/DocumentManagementContext";
 
 // File type configuration - same as AccountFilesModal
 const getFileType = (extension) => {
@@ -387,87 +387,25 @@ const FileManagerView = () => {
     const [viewType, setViewType] = useState("grid");
     const [sortBy, setSortBy] = useState("name");
     const [expandedSteps, setExpandedSteps] = useState({});
-    const [accounts, setAccounts] = useState([]);
     const [workOrderGroups, setWorkOrderGroups] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const {
+        accounts,
+        setAccounts,
+        isAccountsLoading,
+        setIsAccountsLoading,
+        accountsError,
+        setAccountsError,
+        fetchAllAccounts,
+        searchAccounts,
+    } = useDocumentManagementContext();
+    const isLoading = isAccountsLoading;
+    const error = accountsError;
 
     // Modal state
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
 
-    // Fetch all accounts with their files structure
-    const fetchAllAccounts = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const response = await apiService.get("/file-manager/accounts");
-
-            console.log("API Response:", response.data); // Debug log
-            if (response.data.success) {
-                // Ensure each account has proper structure
-                const normalizedAccounts = response.data.data.map(
-                    (account) => ({
-                        ...account,
-                        steps: account.steps || [],
-                        milestones: account.milestones || [],
-                    })
-                );
-                console.log("Normalized accounts:", normalizedAccounts); // Debug log
-                setAccounts(normalizedAccounts);
-            } else {
-                throw new Error(
-                    response.data.message || "Failed to fetch accounts"
-                );
-            }
-        } catch (err) {
-            setError(err.message || "Failed to fetch accounts");
-            console.error("Error fetching accounts:", err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    // Search accounts
-    const searchAccounts = async (searchQuery) => {
-        if (!searchQuery.trim()) {
-            fetchAllAccounts();
-            return;
-        }
-
-        setIsLoading(true);
-        setError(null);
-        try {
-            const response = await apiService.get(
-                `/file-manager/accounts/search?search=${encodeURIComponent(
-                    searchQuery
-                )}`
-            );
-
-            console.log("Search API Response:", response.data); // Debug log
-            if (response.data.success) {
-                // Ensure each account has proper structure
-                const normalizedAccounts = response.data.data.map(
-                    (account) => ({
-                        ...account,
-                        steps: account.steps || [],
-                        milestones: account.milestones || [],
-                    })
-                );
-                console.log("Normalized search accounts:", normalizedAccounts); // Debug log
-                setAccounts(normalizedAccounts);
-            } else {
-                throw new Error(
-                    response.data.message || "Failed to search accounts"
-                );
-            }
-        } catch (err) {
-            setError(err.message || "Failed to search accounts");
-            console.error("Error searching accounts:", err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // ...existing code...
 
     // Fetch files for a specific account and step
     const fetchStepFiles = async (accountId, workOrderTypeId) => {
@@ -497,23 +435,25 @@ const FileManagerView = () => {
         }
     };
 
-    // Initialize component
+    // Initialize component: only fetch if accounts are not loaded
     useEffect(() => {
-        fetchAllAccounts();
-    }, []);
+        if (!Array.isArray(accounts) || accounts.length === 0) {
+            fetchAllAccounts();
+        }
+    }, [fetchAllAccounts, accounts]);
 
     // Handle search with debouncing
     useEffect(() => {
         const timeoutId = setTimeout(() => {
             if (searchTerm.trim()) {
                 searchAccounts(searchTerm);
-            } else {
+            } else if (!Array.isArray(accounts) || accounts.length === 0) {
                 fetchAllAccounts();
             }
+            // else do nothing, accounts already loaded
         }, 500);
-
         return () => clearTimeout(timeoutId);
-    }, [searchTerm]);
+    }, [searchTerm, searchAccounts, fetchAllAccounts]);
 
     // Reset selections when search term changes
     useEffect(() => {
@@ -863,7 +803,8 @@ const FileManagerView = () => {
                                     Retry
                                 </Button>
                             </div>
-                        ) : accounts.length === 0 ? (
+                        ) : (Array.isArray(accounts) ? accounts.length : 0) ===
+                          0 ? (
                             <div className="text-center py-8">
                                 <Typography
                                     variant="small"
@@ -874,38 +815,41 @@ const FileManagerView = () => {
                             </div>
                         ) : (
                             <div className="space-y-2">
-                                {accounts.map((account) => (
-                                    <div
-                                        key={`account-${account.id}`}
-                                        className={`p-3 rounded-lg cursor-pointer transition-colors border ${
-                                            selectedAccount?.id === account.id
-                                                ? "bg-custom-lightestgreen text-custom-solidgreen"
-                                                : "hover:bg-gray-50 border-transparent"
-                                        }`}
-                                        onClick={() =>
-                                            handleAccountSelect(account)
-                                        }
-                                    >
-                                        <div className="flex items-center">
-                                            <FolderIcon className="w-5 h-5 mr-3 text-gray-500" />
-                                            <div className="flex-1 min-w-0">
-                                                <Typography
-                                                    variant="small"
-                                                    className="font-semibold truncate"
-                                                >
-                                                    {account.account_name}
-                                                </Typography>
-                                                <Typography
-                                                    variant="small"
-                                                    className="text-gray-500 truncate"
-                                                >
-                                                    {account.property_name ||
-                                                        "No property name"}
-                                                </Typography>
+                                {(Array.isArray(accounts) ? accounts : []).map(
+                                    (account) => (
+                                        <div
+                                            key={`account-${account.id}`}
+                                            className={`p-3 rounded-lg cursor-pointer transition-colors border ${
+                                                selectedAccount?.id ===
+                                                account.id
+                                                    ? "bg-custom-lightestgreen text-custom-solidgreen"
+                                                    : "hover:bg-gray-50 border-transparent"
+                                            }`}
+                                            onClick={() =>
+                                                handleAccountSelect(account)
+                                            }
+                                        >
+                                            <div className="flex items-center">
+                                                <FolderIcon className="w-5 h-5 mr-3 text-gray-500" />
+                                                <div className="flex-1 min-w-0">
+                                                    <Typography
+                                                        variant="small"
+                                                        className="font-semibold truncate"
+                                                    >
+                                                        {account.account_name}
+                                                    </Typography>
+                                                    <Typography
+                                                        variant="small"
+                                                        className="text-gray-500 truncate"
+                                                    >
+                                                        {account.property_name ||
+                                                            "No property name"}
+                                                    </Typography>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    )
+                                )}
                             </div>
                         )}
                     </div>

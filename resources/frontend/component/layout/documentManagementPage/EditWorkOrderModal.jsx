@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import apiService from "../../../component/servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
+import { useDocumentManagementContext } from "../../../context/DocumentManagement/DocumentManagementContext";
 import DatePicker from "react-datepicker";
 import SearchableDropdown from "./SearchableDropdown";
 
@@ -24,6 +25,7 @@ const EditWorkOrderModal = ({
         fetchWorkOrders,
         user,
     } = useStateContext();
+    const docMgmt = useDocumentManagementContext();
 
     useEffect(() => {
         fetchAccounts();
@@ -142,7 +144,8 @@ const EditWorkOrderModal = ({
                             </h2>
                             {workOrder?.work_order_id && (
                                 <div className="mt-1 bg-[#067AC5] text-white font-normal text-xs inline-block px-4 py-1 rounded-full">
-                                    Order No. 1000{workOrder.work_order_group_id}
+                                    Order No. 1000
+                                    {workOrder.work_order_group_id}
                                 </div>
                             )}
                         </div>
@@ -156,7 +159,6 @@ const EditWorkOrderModal = ({
                     </div>
 
                     <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-
                         <div className="flex items-center mb-2 justify-between">
                             <label
                                 htmlFor="account"

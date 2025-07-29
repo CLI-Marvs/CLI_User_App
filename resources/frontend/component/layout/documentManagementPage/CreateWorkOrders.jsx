@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import ReactDOM from "react-dom";
 import apiService from "../../../component/servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
+import { useDocumentManagementContext } from "../../../context/DocumentManagement/DocumentManagementContext";
 import DatePicker from "react-datepicker";
 import SearchableDropdown from "./SearchableDropdown";
 import WorkOrderCreatedModal from "./WorkOrderCreatedModal";
@@ -24,6 +25,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
         fetchWorkOrders,
         user,
     } = useStateContext();
+    const docMgmt = useDocumentManagementContext();
 
     useEffect(() => {
         fetchAccounts();
