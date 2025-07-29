@@ -37,7 +37,8 @@ const AssignSidePanel = ({ ticketId }) => {
     const dropdownRef = useRef(null);
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
-
+    console.log("selectedOptions:", selectedOptions);
+    console.log("assigneesPersonnel", assigneesPersonnel);
     const employeeOptions = allEmployees.map((employee) => ({
         name: `${employee.firstname} ${employee.lastname}`,
         email: employee.employee_email,
@@ -378,9 +379,21 @@ const AssignSidePanel = ({ ticketId }) => {
                                         <p className="montserrat-medium text-[20px]">
                                             You are about to assign
                                             <div className="ml-6 mt-2">
-                                                {selectedOptions.map(
-                                                    (option) => (
-                                                        <p
+                                                {selectedOptions
+                                                    .filter(
+                                                        (option) =>
+                                                            !assigneesPersonnel[
+                                                                ticketId
+                                                            ]?.some(
+                                                                (assignee) =>
+                                                                    assignee.employee_email ===
+                                                                        option.email ||
+                                                                    assignee.email ===
+                                                                        option.email
+                                                            )
+                                                    )
+                                                    .map((option) => (
+                                                        <div
                                                             key={
                                                                 option.employee_email ||
                                                                 option.email
@@ -388,9 +401,8 @@ const AssignSidePanel = ({ ticketId }) => {
                                                         >
                                                             - {option.name} (
                                                             {option.department})
-                                                        </p>
-                                                    )
-                                                )}
+                                                        </div>
+                                                    ))}
                                             </div>
                                             to this ticket.
                                         </p>
