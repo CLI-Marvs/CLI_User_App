@@ -10,7 +10,7 @@ import { reportService } from "@/component/servicesApi/apiCalls/emojiWalkin/repo
 import emojis from "@/component/layout/inquirypage/constants/emoji";
 import WalkinReportSkeleton from "@/component/layout/inquirypage/component/WalkinReport/skeleton/WalkinReportSkeleton";
 import { useWalkinReportFilters } from "@/context/InquiryManagement/WalkinReportFilterProvider";
-
+import moment from "moment";
 
 const WalkinReportPage = () => {
     const { filters, setFilters, resetFilters } = useWalkinReportFilters();
@@ -21,10 +21,7 @@ const WalkinReportPage = () => {
         staleTime: 1000 * 60,
         cacheTime: 1000 * 60 * 5,
     });
-    const {
-        data: reportsData,
-        isLoading,
-    } = useQuery({
+    const { data: reportsData, isLoading } = useQuery({
         queryKey: ["reports", filters],
         queryFn: () => reportService.getReports(filters),
         refetchOnWindowFocus: false,
@@ -102,7 +99,9 @@ const WalkinReportPage = () => {
                     rating: item.user_rating ?? "",
                     timestamp:
                         typeof item?.created_at === "string"
-                            ? item.created_at.slice(0, 19).replace("T", " ")
+                            ? moment(item.created_at).format(
+                                  "YYYY-MM-DD hh:mm:ss A"
+                              )
                             : "",
                 };
             }
@@ -128,7 +127,9 @@ const WalkinReportPage = () => {
                 rating: item?.rating_value ?? "",
                 timestamp:
                     typeof item?.created_at === "string"
-                        ? item.created_at.slice(0, 19).replace("T", " ")
+                        ? moment(item.created_at).format(
+                              "YYYY-MM-DD hh:mm:ss A"
+                          )
                         : "",
             };
         });
