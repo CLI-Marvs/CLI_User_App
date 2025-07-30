@@ -174,6 +174,8 @@ function AddFilesModal({
         if (workOrderData?.work_order_id) {
             await fetchLogDataWithFiles();
         }
+        // Close the AddFilesModal after upload
+        onClose();
     };
 
     const handleOpenViewer = (file) => {

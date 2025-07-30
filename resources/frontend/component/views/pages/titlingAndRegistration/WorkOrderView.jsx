@@ -34,17 +34,6 @@ const TABLE_HEAD = [
     { head: "Actions" },
 ];
 
-const FilterSearchIcon = ({ onClick }) => {
-    return (
-        <img
-            src={FilterIcon}
-            alt="Filter Icon"
-            className="size-5 cursor-pointer"
-            onClick={onClick}
-        />
-    );
-};
-
 const RefreshIcon = ({ onClick, isRefreshing }) => (
     <svg
         onClick={isRefreshing ? undefined : onClick}
@@ -411,7 +400,7 @@ const WorkOrderView = () => {
                                 </svg>
                             </Button>
                         </MenuHandler>
-                        <MenuList className="z-50 flex flex-col justify-center min-h-[120px]">
+                        <MenuList className="z-50 flex flex-col justify-center min-h-[120px] min-w-[100px]">
                             {workOrderFilterOptions.map((option) => (
                                 <MenuItem
                                     key={option.value}
@@ -458,7 +447,6 @@ const WorkOrderView = () => {
                     />
 
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                        <FilterSearchIcon onClick={toggleFilterBox} />
                         <RefreshIcon
                             onClick={handleRefreshAndClearFilters}
                             isRefreshing={isRefreshing}
@@ -693,15 +681,55 @@ const WorkOrderView = () => {
                                         <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
                                             <div className="flex items-center space-x-1">
                                                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                                <span className="font-medium">
-                                                    {group.due_date
-                                                        ? new Date(
-                                                              group.due_date
-                                                          )
-                                                              .toISOString()
-                                                              .slice(0, 10)
-                                                        : "-"}
-                                                </span>
+                                                {(() => {
+                                                    console.log(
+                                                        "Due Date Raw:",
+                                                        group.due_date,
+                                                        "Type:",
+                                                        typeof group.due_date
+                                                    );
+                                                    return (
+                                                        <span className="font-medium">
+                                                            {group.due_date
+                                                                ? typeof group.due_date ===
+                                                                  "string"
+                                                                    ? group.due_date.slice(
+                                                                          0,
+                                                                          10
+                                                                      )
+                                                                    : (() => {
+                                                                          // Add 1 day to counteract timezone offset
+                                                                          const d =
+                                                                              new Date(
+                                                                                  group.due_date
+                                                                              );
+                                                                          d.setDate(
+                                                                              d.getDate() +
+                                                                                  1
+                                                                          );
+                                                                          const year =
+                                                                              d.getFullYear();
+                                                                          const month =
+                                                                              String(
+                                                                                  d.getMonth() +
+                                                                                      1
+                                                                              ).padStart(
+                                                                                  2,
+                                                                                  "0"
+                                                                              );
+                                                                          const day =
+                                                                              String(
+                                                                                  d.getDate()
+                                                                              ).padStart(
+                                                                                  2,
+                                                                                  "0"
+                                                                              );
+                                                                          return `${year}-${month}-${day}`;
+                                                                      })()
+                                                                : "-"}
+                                                        </span>
+                                                    );
+                                                })()}
                                             </div>
                                         </td>
                                         <td className="px-3 py-2 text-center">
@@ -761,8 +789,32 @@ const WorkOrderView = () => {
                         color="blue-gray"
                         className="font-normal"
                     >
-                        Showing {filteredGroups.length} work order groups
+                        Page {currentPage} of {totalPages}
                     </Typography>
+                    <ReactPaginate
+                        previousLabel={
+                            <MdKeyboardArrowLeft className="text-[#404B52]" />
+                        }
+                        nextLabel={
+                            <MdKeyboardArrowRight className="text-[#404B52]" />
+                        }
+                        breakLabel={"..."}
+                        pageCount={totalPages}
+                        marginPagesDisplayed={2}
+                        pageRangeDisplayed={2}
+                        onPageChange={(data) =>
+                            setCurrentPage(data.selected + 1)
+                        }
+                        containerClassName={"flex gap-2"}
+                        previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
+                        nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
+                        pageClassName="border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
+                        activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-white rounded-[4px] text-[12px]"
+                        pageLinkClassName="w-full h-full flex justify-center items-center"
+                        activeLinkClassName="w-full h-full flex justify-center items-center"
+                        disabledLinkClassName="text-gray-300 cursor-not-allowed"
+                        forcePage={currentPage - 1}
+                    />
                 </CardFooter>
             </Card>
 

@@ -113,11 +113,13 @@ class WorkOrderGroupController extends Controller
             }
         }
 
-        return response()->json([
-            'id' => $group->id,
-            'work_orders' => $workOrdersForResponse,
-            'submilestonesByType' => $submilestonesByType,
-        ]);
+    return response()->json([
+        'id' => $group->id,
+        'due_date' => $group->due_date,
+        'status' => $group->status,   
+        'work_orders' => $workOrdersForResponse,
+        'submilestonesByType' => $submilestonesByType,
+    ]);
     }
 
     /**

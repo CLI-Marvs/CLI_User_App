@@ -22,7 +22,8 @@ class WorkOrderGroup extends Model
     protected $casts = [
         'completed_at' => 'datetime',
         'started_at' => 'datetime',
-        'due_date' => 'date',
+        'due_date' => 'date:Y-m-d',
+        'updated_at' => 'datetime',
     ];
 
     // Status constants

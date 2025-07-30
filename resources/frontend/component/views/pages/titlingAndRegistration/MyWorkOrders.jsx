@@ -19,7 +19,36 @@ import WorkOrderGroupDetailsModal from "../../../layout/documentManagementPage/W
 import { useStateContext } from "../../../../context/contextprovider";
 import { useDocumentManagementContext } from "../../../../context/DocumentManagement/DocumentManagementContext";
 
+const RefreshIcon = ({ onClick, isRefreshing }) => (
+    <svg
+        onClick={isRefreshing ? undefined : onClick}
+        stroke="currentColor"
+        fill="currentColor"
+        strokeWidth="0"
+        viewBox="0 0 24 24"
+        className={`size-5 text-gray-600 hover:text-gray-800 cursor-pointer ${
+            isRefreshing ? "animate-spin" : ""
+        }`}
+        style={{ transition: "color 0.2s" }}
+        xmlns="http://www.w3.org/2000/svg"
+        title="Refresh"
+    >
+        <path fill="none" d="M0 0h24v24H0z"></path>
+        <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"></path>
+    </svg>
+);
+
 const MyWorkOrders = () => {
+    const [isRefreshing, setIsRefreshing] = useState(false);
+
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        try {
+            await fetchWorkOrders();
+        } finally {
+            setIsRefreshing(false);
+        }
+    };
     const { user } = useStateContext(); // Get current user from context
     // Work order state from context
     const {
@@ -507,6 +536,8 @@ const MyWorkOrders = () => {
         );
     };
 
+    console.log("Work Order Groups:", workOrderGroups);
+
     const formatDate = (dateString) => {
         if (!dateString) return "N/A";
         return new Date(dateString).toLocaleDateString("en-US", {
@@ -636,6 +667,17 @@ const MyWorkOrders = () => {
             toggleGroup(groupId);
         };
 
+        // Pagination logic
+        const rowsPerPage = workOrdersPerPage || 10;
+        const currentPage = workOrdersCurrentPage || 1;
+        const totalPages = Math.max(
+            1,
+            Math.ceil(filteredGroups.length / rowsPerPage)
+        );
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+        const currentData = filteredGroups.slice(startIndex, endIndex);
+
         return (
             <Card className="w-full overflow-hidden rounded-md border-0 bg-white backdrop-blur-sm">
                 <table className="w-full table-fixed bg-white rounded-md shadow-inner">
@@ -706,7 +748,9 @@ const MyWorkOrders = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {filteredGroups.map((group, idx) => {
+                        {currentData.map((group, idx) => {
+                            // Use group.updated_at (group-level) for 'Last Updated' column
+                            const groupLastUpdated = group.updated_at || null;
                             // Find the latest work order in the group (by updated_at or sequence)
                             const latestWO = (group.work_orders || [])
                                 .slice()
@@ -859,11 +903,12 @@ const MyWorkOrders = () => {
                                             <div className="flex items-center space-x-1">
                                                 <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                                                 <span className="font-medium">
-                                                    {latestWO?.work_order_deadline
-                                                        ? formatDate(
-                                                              latestWO.work_order_deadline
+                                                    {group.due_date
+                                                        ? group.due_date.slice(
+                                                              0,
+                                                              10
                                                           )
-                                                        : "N/A"}
+                                                        : "-"}
                                                 </span>
                                             </div>
                                         </td>
@@ -871,10 +916,12 @@ const MyWorkOrders = () => {
                                             <div className="flex items-center space-x-1">
                                                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                                                 <span className="font-medium">
-                                                    {latestWO?.updated_at
-                                                        ? formatDate(
-                                                              latestWO.updated_at
+                                                    {group.updated_at
+                                                        ? new Date(
+                                                              group.updated_at
                                                           )
+                                                              .toISOString()
+                                                              .slice(0, 10)
                                                         : "N/A"}
                                                 </span>
                                             </div>
@@ -940,6 +987,40 @@ const MyWorkOrders = () => {
                         })}
                     </tbody>
                 </table>
+                {/* Pagination Footer */}
+                <div className="flex items-center justify-between border-t border-blue-gray-50 p-4 mt-4">
+                    <span className="font-normal text-sm text-blue-gray-700">
+                        Page {currentPage} of {totalPages}
+                    </span>
+                    <ReactPaginate
+                        previousLabel={
+                            <span className="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen">
+                                &#60;
+                            </span>
+                        }
+                        nextLabel={
+                            <span className="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen">
+                                &#62;
+                            </span>
+                        }
+                        breakLabel={"..."}
+                        pageCount={totalPages}
+                        marginPagesDisplayed={2}
+                        pageRangeDisplayed={2}
+                        onPageChange={(data) =>
+                            setWorkOrdersCurrentPage(data.selected + 1)
+                        }
+                        containerClassName={"flex gap-2"}
+                        previousClassName=""
+                        nextClassName=""
+                        pageClassName="border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
+                        activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-white rounded-[4px] text-[12px]"
+                        pageLinkClassName="w-full h-full flex justify-center items-center"
+                        activeLinkClassName="w-full h-full flex justify-center items-center"
+                        disabledLinkClassName="text-gray-300 cursor-not-allowed"
+                        forcePage={currentPage - 1}
+                    />
+                </div>
             </Card>
         );
     };
@@ -993,52 +1074,12 @@ const MyWorkOrders = () => {
                                 Manage and track your assigned work orders
                             </p>
                         </div>
-                        <div className="flex items-center space-x-4">
-                            <div className="flex items-center space-x-2">
-                                <button
-                                    onClick={() => setViewMode("grid")}
-                                    className={`p-2 rounded-md ${
-                                        viewMode === "grid"
-                                            ? "bg-indigo-100 text-indigo-600"
-                                            : "text-gray-400 hover:text-gray-500"
-                                    }`}
-                                >
-                                    <svg
-                                        className="w-5 h-5"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                                    </svg>
-                                </button>
-                                <button
-                                    onClick={() => setViewMode("table")}
-                                    className={`p-2 rounded-md ${
-                                        viewMode === "table"
-                                            ? "bg-indigo-100 text-indigo-600"
-                                            : "text-gray-400 hover:text-gray-500"
-                                    }`}
-                                >
-                                    <svg
-                                        className="w-5 h-5"
-                                        fill="currentColor"
-                                        viewBox="0 0 20 20"
-                                    >
-                                        <path
-                                            fillRule="evenodd"
-                                            d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V8zm0 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1v-2z"
-                                            clipRule="evenodd"
-                                        />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
                 {/* Enhanced Inline Filters */}
                 <div className="bg-gradient-to-r from-white to-blue-50/30 rounded-xl shadow-sm border border-gray-200/60 mb-4 p-2.5">
-                    <div className="flex items-center gap-1.5 text-sm overflow-x-auto">
+                    <div className="flex items-center gap-1.5 text-sm flex-wrap relative">
                         {/* Work Order No Filter */}
                         <div className="flex items-center space-x-1 bg-white rounded-lg px-2 py-1 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 flex-shrink-0">
                             <MdSearch className="text-gray-400 text-sm" />
@@ -1174,7 +1215,7 @@ const MyWorkOrders = () => {
                             </select>
                         </div>
 
-                        {/* Clear Filter Action */}
+                        {/* Clear Filter Action & Refresh Button */}
                         <div className="flex items-center space-x-2 ml-auto">
                             {hasActiveFilters() && (
                                 <button
@@ -1185,6 +1226,11 @@ const MyWorkOrders = () => {
                                     <span>Clear</span>
                                 </button>
                             )}
+                            {/* Refresh Button Aligned with Filters */}
+                            <RefreshIcon
+                                onClick={handleRefresh}
+                                isRefreshing={isRefreshing}
+                            />
                         </div>
                     </div>
                 </div>
@@ -1308,8 +1354,6 @@ const MyWorkOrders = () => {
                         {viewMode === "grid"
                             ? renderGridView()
                             : renderTableView()}
-
-                        {renderPagination()}
                     </>
                 )}
 
@@ -1343,5 +1387,4 @@ const MyWorkOrders = () => {
         </div>
     );
 };
-
 export default MyWorkOrders;

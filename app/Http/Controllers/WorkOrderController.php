@@ -61,7 +61,9 @@ class WorkOrderController extends Controller
             'assignees:id,fullname',
             'workOrderType:id,type_name,sequence',
             'accounts:id,account_name,property_name,current_submilestone_id',
-            'createdBy:id,fullname'
+            'createdBy:id,fullname',
+            // Eager load updated_at in workOrderGroup
+            'workOrderGroup:id,due_date,status,updated_at',
         ]);
 
         $query->whereHas('accounts', function ($q) use ($user) {
@@ -73,14 +75,14 @@ class WorkOrderController extends Controller
                         ->join('work_order_types as wot', 'wot.id', '=', 'sm.work_order_type_id')
                         ->where(function ($condition) use ($user) {
                             $condition
-                        
+
                                 ->where(function ($inner) use ($user) {
                                     $inner->where('wot.sequence', 1)
                                         ->whereColumn('sm.work_order_type_id', '=', DB::raw('wot.id'))
                                         ->whereColumn('pma.property_name', '=', 'taken_out_accounts.property_name')
                                         ->where('pma.employee_id', $user->id);
                                 })
-                                
+
                                 ->orWhere(function ($inner) use ($user) {
                                     $inner->whereColumn('pma.submilestone_id', '=', 'taken_out_accounts.current_submilestone_id')
                                         ->whereColumn('pma.property_name', '=', 'taken_out_accounts.property_name')
@@ -118,6 +120,16 @@ class WorkOrderController extends Controller
 
         $perPage = $request->input('per_page', 10);
         $workOrders = $query->paginate($perPage);
+
+        $workOrders->getCollection()->transform(function ($wo) {
+            $arr = $wo->toArray();
+            $arr['group_due_date'] = $wo->workOrderGroup && $wo->workOrderGroup->due_date
+                ? Carbon::parse($wo->workOrderGroup->due_date)->format('Y-m-d')
+                : null;
+            $arr['group_status'] = $wo->workOrderGroup ? $wo->workOrderGroup->status : null;
+            $arr['group_updated_at'] = $wo->workOrderGroup ? $wo->workOrderGroup->updated_at : null;
+            return $arr;
+        });
 
         return response()->json($workOrders);
     }
@@ -514,6 +526,16 @@ class WorkOrderController extends Controller
                 }
                 Log::info('Attached documents to work order log. Uploader employee ID:', ['log_id' => $workOrderLog->id, 'uploader_employee_id' => $uploaderUserId, 'file_count' => count($uploadedFilesData)]);
             }
+
+            // PATCH: Update work_order_groups.updated_at after successful file upload
+            $workOrder = WorkOrder::find($validatedData['work_order_id']);
+            if ($workOrder && $workOrder->work_order_group_id) {
+                $workOrderGroup = WorkOrderGroup::find($workOrder->work_order_group_id);
+                if ($workOrderGroup) {
+                    $workOrderGroup->touch(); // This updates the updated_at field
+                }
+            }
+
             DB::commit();
             return response()->json(['message' => 'Note and attachments added successfully.', 'log_id' => $workOrderLog->id], 201);
         } catch (\Exception $e) {
@@ -568,7 +590,7 @@ class WorkOrderController extends Controller
         $group = WorkOrderGroup::with('workOrders')->findOrFail($groupId);
 
         foreach ($group->workOrders as $workOrder) {
-            $workOrder->delete(); 
+            $workOrder->delete();
         }
 
         // Optionally, soft delete the group itself
@@ -727,6 +749,15 @@ class WorkOrderController extends Controller
         $perPage = $request->input('per_page', 100);
         $perPage = max(1, min(100, (int) $perPage));
         $workOrderGroups = $query->paginate($perPage);
+
+
+        // Ensure all group fields (including updated_at) are present in the response
+        $workOrderGroups->getCollection()->transform(function ($group) {
+            $arr = $group->toArray();
+            // workOrders relation is camelCase in Eloquent, but you want work_orders in API
+            $arr['work_orders'] = $arr['work_orders'] ?? ($group->workOrders ? $group->workOrders->toArray() : []);
+            return $arr;
+        });
 
         Log::info('Retrieved work order groups:', ['current_count' => $workOrderGroups->count(), 'total' => $workOrderGroups->total()]);
 

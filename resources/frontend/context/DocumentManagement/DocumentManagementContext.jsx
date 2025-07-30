@@ -7,6 +7,7 @@ import React, {
     useCallback,
 } from "react";
 import apiService from "../../component/servicesApi/apiService";
+import { update } from "lodash";
 
 const DocumentManagementContext = createContext({});
 
@@ -368,6 +369,9 @@ export const DocumentManagementProvider = ({ children }) => {
                         if (!acc[groupId]) {
                             acc[groupId] = {
                                 id: groupId,
+                                due_date: wo.group_due_date,
+                                status: wo.group_status, 
+                                updated_at: wo.group_updated_at,
                                 work_orders: [],
                             };
                         }
@@ -376,6 +380,7 @@ export const DocumentManagementProvider = ({ children }) => {
                     }, {})
                 );
                 setWorkOrderGroups(grouped);
+                console.log("Work Order Groups:", grouped);
                 setWorkOrdersTotal(response.data.total);
                 setWorkOrdersLoading(false);
             } catch (err) {

@@ -853,7 +853,7 @@ export default function PaginatedTable() {
                                         <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-500" />
                                     </Button>
                                 </MenuHandler>
-                                <MenuList className="z-50 flex flex-col justify-center min-h-[120px]">
+                                <MenuList className="z-50 flex flex-col justify-center min-h-[120px] min-w-[100px]">
                                     {filterOptions.map((option) => (
                                         <MenuItem
                                             key={option.value}
