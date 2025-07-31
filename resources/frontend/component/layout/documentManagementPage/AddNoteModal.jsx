@@ -291,11 +291,6 @@ const AddNoteModal = ({
 
             if (uniqueChecklistIds.length > 0 && selectedAccountId) {
                 try {
-                    console.log(
-                        `AddNoteModal: Marking checklists as complete for account ${selectedAccountId}. Checklist IDs:`,
-                        uniqueChecklistIds
-                    );
-
                     const payload = {
                         account_id: selectedAccountId,
                         checklist_ids: uniqueChecklistIds,
@@ -303,15 +298,10 @@ const AddNoteModal = ({
                         completed_at: new Date().toISOString(),
                     };
 
-                    console.log("AddNoteModal: Sending payload:", payload);
-
                     const statusResponse = await apiService.post(
                         "/account-checklist-status/bulk",
                         payload
                     );
-
-                    console.log("AddNoteModal: API Response:", statusResponse);
-                    console.log(`AddNoteModal: Checklists marked as complete.`);
                 } catch (error) {
                     console.error(
                         "AddNoteModal: Error marking checklist(s) as complete:",
@@ -321,11 +311,8 @@ const AddNoteModal = ({
                 }
             }
 
-            console.log("About to call onSaveSuccess");
             onSaveSuccess();
-            console.log("onSaveSuccess called successfully");
         } catch (err) {
-            console.error("Failed to save note:", err);
 
             let errorMessage = "Failed to save note. Please try again.";
             if (

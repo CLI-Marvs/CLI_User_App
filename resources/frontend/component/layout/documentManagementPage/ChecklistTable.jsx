@@ -39,18 +39,14 @@ const ChecklistTable = ({
         .map((step) => ({
             ...step,
             subMilestones: step.subMilestones.filter((milestone) => {
-                console.log("Current user ID:", currentUserId);
-                console.log("Milestone data:", milestone);
 
                 // If no currentUserId is provided, show all milestones
                 if (!currentUserId) {
-                    console.log("No currentUserId, showing all milestones");
                     return true;
                 }
 
                 // Check if milestone has assignees data (from project_milestone_assignees table)
                 const hasAssignees = milestone.milestone_assignees;
-                console.log("Milestone assignees:", hasAssignees);
 
                 if (hasAssignees && hasAssignees.length > 0) {
                     // Get all property names from the current accounts
@@ -63,11 +59,6 @@ const ChecklistTable = ({
                         )
                         .filter(Boolean);
 
-                    console.log(
-                        "Account property names:",
-                        accountPropertyNames
-                    );
-
                     // Check if current user is assigned to this milestone for any of the current properties
                     const isAssigned = hasAssignees.some((assignee) => {
                         const userMatches =
@@ -76,17 +67,9 @@ const ChecklistTable = ({
                             assignee.property_name
                         );
 
-                        console.log(
-                            `Checking assignee: employee_id=${assignee.employee_id}, property_name=${assignee.property_name}, userMatches=${userMatches}, propertyMatches=${propertyMatches}`
-                        );
-
                         return userMatches && propertyMatches;
                     });
 
-                    console.log(
-                        "Is assigned via milestone_assignees:",
-                        isAssigned
-                    );
                     return isAssigned;
                 }
 
@@ -102,16 +85,11 @@ const ChecklistTable = ({
                     milestone.user_id === currentUserId ||
                     milestone.assigned_user_id === currentUserId;
 
-                console.log("Is assigned via other fields:", isAssigned);
-
                 // Return false if no assignment found (proper filtering)
                 return isAssigned;
             }),
         }))
         .filter((step) => step.subMilestones.length > 0);
-
-    console.log("Filtered steps:", filteredSteps);
-    console.log("Original steps:", steps);
 
     // Calculate total columns to prevent unnecessary stretching
     const totalColumns = filteredSteps.reduce(

@@ -279,13 +279,6 @@ const SidebarStep = ({
     onToggle,
     selectedMilestone,
 }) => {
-    console.log(
-        "SidebarStep render:",
-        step.id,
-        step.name,
-        "Milestones:",
-        step.milestones?.length || 0
-    ); // Debug log
 
     return (
         <div className="mb-1">
@@ -325,11 +318,6 @@ const SidebarStep = ({
                 <Collapse open={isExpanded}>
                     <div className="ml-4 mt-1">
                         {step.milestones.map((milestone) => {
-                            console.log(
-                                "Rendering milestone:",
-                                milestone.id,
-                                milestone.name
-                            ); // Debug log
                             return (
                                 <SidebarMilestone
                                     key={`milestone-${step.id}-${milestone.id}`}
@@ -351,13 +339,6 @@ const SidebarStep = ({
 // Sidebar Milestone Component
 const SidebarMilestone = ({ milestone, isSelected, onClick }) => {
     const fileCount = milestone.files ? milestone.files.length : 0;
-    console.log(
-        "SidebarMilestone render:",
-        milestone.id,
-        milestone.name,
-        "Files:",
-        fileCount
-    ); // Debug log
 
     return (
         <div
@@ -457,7 +438,6 @@ const FileManagerView = () => {
 
     // Reset selections when search term changes
     useEffect(() => {
-        console.log("Search term changed, resetting selections"); // Debug log
         setSelectedAccount(null);
         setSelectedStep(null);
         setSelectedMilestone(null);
@@ -466,11 +446,6 @@ const FileManagerView = () => {
 
     // Get files for current selection
     const currentFiles = useMemo(() => {
-        console.log("Computing currentFiles for:", {
-            selectedAccount: selectedAccount?.id,
-            selectedStep: selectedStep?.id,
-            selectedMilestone: selectedMilestone?.id,
-        }); // Debug log
 
         if (!selectedAccount) return [];
 
@@ -479,7 +454,6 @@ const FileManagerView = () => {
         if (selectedMilestone) {
             // Show files for specific milestone
             files = selectedMilestone.files ? [...selectedMilestone.files] : [];
-            console.log("Files from milestone:", files.length); // Debug log
         } else if (selectedStep) {
             // Show files for all milestones in the step
             if (selectedStep.milestones) {
@@ -489,7 +463,6 @@ const FileManagerView = () => {
                     }
                 });
             }
-            console.log("Files from step:", files.length); // Debug log
         } else {
             // Show all files for the account
             if (selectedAccount.steps && selectedAccount.steps.length > 0) {
@@ -503,7 +476,6 @@ const FileManagerView = () => {
                     }
                 });
             }
-            console.log("Files from account:", files.length); // Debug log
         }
 
         // Remove duplicates by document_id
@@ -512,8 +484,6 @@ const FileManagerView = () => {
                 index ===
                 self.findIndex((f) => f.document_id === file.document_id)
         );
-
-        console.log("Unique files:", uniqueFiles.length); // Debug log
 
         return uniqueFiles.sort((a, b) => {
             switch (sortBy) {
@@ -534,9 +504,6 @@ const FileManagerView = () => {
     }, [selectedAccount, selectedStep, selectedMilestone, sortBy]);
 
     const handleAccountSelect = async (account) => {
-        console.log("Selected account:", account); // Debug log
-        console.log("Account steps:", account.steps); // Debug log
-
         // Reset all selections and state when switching accounts
         setSelectedStep(null);
         setSelectedMilestone(null);
@@ -551,16 +518,12 @@ const FileManagerView = () => {
             );
 
         if (!hasFullStructure) {
-            console.log(
-                "Account lacks full structure - fetching from structure API"
-            ); // Debug log
             try {
                 const response = await apiService.get(
                     `/file-manager/accounts/${account.id}/structure`
                 );
 
                 if (response.data.success) {
-                    console.log("Fresh account structure:", response.data.data); // Debug log
                     setSelectedAccount(response.data.data);
                     return;
                 }
@@ -581,14 +544,11 @@ const FileManagerView = () => {
             })),
         };
 
-        console.log("Normalized selected account:", normalizedAccount); // Debug log
-
         // Set the selected account with normalized data
         setSelectedAccount(normalizedAccount);
     };
 
     const handleStepSelect = async (step, milestone = null) => {
-        console.log("Step selected:", step, "Milestone:", milestone); // Debug log
 
         // Reset milestone selection when selecting a new step
         if (!milestone) {
@@ -898,12 +858,6 @@ const FileManagerView = () => {
 
                                 {/* Steps Tree */}
                                 {(() => {
-                                    console.log(
-                                        "Rendering steps for account:",
-                                        selectedAccount.id,
-                                        "Steps:",
-                                        selectedAccount.steps
-                                    );
 
                                     if (
                                         !selectedAccount.steps ||
@@ -923,11 +877,6 @@ const FileManagerView = () => {
                                     }
 
                                     return selectedAccount.steps.map((step) => {
-                                        console.log(
-                                            "Rendering step:",
-                                            step.id,
-                                            step.name
-                                        );
                                         return (
                                             <div
                                                 key={`step-${selectedAccount.id}-${step.id}`}

@@ -76,7 +76,6 @@ export default function TitlingAndRegistrationMonitor({
                     `/titling-registration/monitor/${contractNumber}`
                 );
                 const data = response.data;
-                console.log("Fetched titling-registration/monitor data:", data);
                 if (!Array.isArray(data)) {
                     throw new Error(
                         "Unexpected API response: expected an array in response.data"
@@ -212,7 +211,7 @@ export default function TitlingAndRegistrationMonitor({
                                             {item.step}
                                         </td>
                                         <td className="p-2 text-base font-normal text-[#A5A5A5] text-center">
-                                            1000{item.workOrderGroupId ?? "-"}
+                                            {item.workOrderGroupId}
                                         </td>
                                         <td className="p-2 text-center align-middle">
                                             <span

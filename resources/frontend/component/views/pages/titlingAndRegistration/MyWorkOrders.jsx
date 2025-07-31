@@ -157,7 +157,7 @@ const MyWorkOrders = () => {
                                 .toLowerCase()
                                 .includes(workOrderNoFilter.toLowerCase()) ||
                             String(wo.work_order_group_id || "")
-                                .padStart(7, "1000-")
+                                .padStart(7)
                                 .toLowerCase()
                                 .includes(workOrderNoFilter.toLowerCase())
                     ) ||
@@ -166,7 +166,7 @@ const MyWorkOrders = () => {
                         .toLowerCase()
                         .includes(workOrderNoFilter.toLowerCase()) ||
                     String(group.id)
-                        .padStart(7, "1000-")
+                        .padStart(7)
                         .toLowerCase()
                         .includes(workOrderNoFilter.toLowerCase())
                 );
@@ -376,7 +376,6 @@ const MyWorkOrders = () => {
                 `/work-order-groups/${group.id}/details`
             );
             setGroupDetailsData(response.data);
-            console.log("response", response.data);
         } catch (err) {
             console.error("Error fetching group details:", err);
         } finally {
@@ -650,23 +649,6 @@ const MyWorkOrders = () => {
     const renderTableView = () => {
         const filteredGroups = getFilteredWorkOrderGroups();
 
-        const toggleGroup = (groupId) => {
-            setExpandedGroup((prev) => (prev === groupId ? null : groupId));
-        };
-
-        // Helper to prevent row click when clicking on action buttons
-        const handleRowClick = (e, groupId) => {
-            // Prevent toggle if clicking on a button or its child
-            if (
-                e.target.closest("button") ||
-                e.target.closest("a") ||
-                e.target.closest(".ignore-row-toggle")
-            ) {
-                return;
-            }
-            toggleGroup(groupId);
-        };
-
         // Pagination logic
         const rowsPerPage = workOrdersPerPage || 10;
         const currentPage = workOrdersCurrentPage || 1;
@@ -759,89 +741,6 @@ const MyWorkOrders = () => {
                                         new Date(b.updated_at) -
                                         new Date(a.updated_at)
                                 )[0];
-                            // --- Restore stepRows for expanded dropdown ---
-                            // 1. Gather all steps (work orders) and sort by sequence
-                            const steps = (group.work_orders || [])
-                                .map((wo) => ({
-                                    ...wo,
-                                    sequence: wo.work_order_type?.sequence ?? 0,
-                                }))
-                                .sort((a, b) => a.sequence - b.sequence);
-
-                            // 2. Build a map: accountId -> step with highest sequence
-                            const accountLatestStep = {};
-                            steps.forEach((step) => {
-                                (step.accounts || []).forEach((acc) => {
-                                    if (
-                                        !accountLatestStep[acc.id] ||
-                                        step.sequence >
-                                            accountLatestStep[acc.id].sequence
-                                    ) {
-                                        accountLatestStep[acc.id] = {
-                                            stepId: step.work_order_id,
-                                            sequence: step.sequence,
-                                            stepName:
-                                                step.work_order_type
-                                                    ?.type_name ||
-                                                step.work_order,
-                                            workOrder: step,
-                                            account: acc,
-                                        };
-                                    }
-                                });
-                            });
-
-                            // 3. For each step, filter accounts to only show those whose latest step is this step
-                            const stepRows = steps.map((step) => {
-                                const filteredAccounts = (
-                                    step.accounts || []
-                                ).filter(
-                                    (acc) =>
-                                        accountLatestStep[acc.id]?.stepId ===
-                                        step.work_order_id
-                                );
-                                if (filteredAccounts.length === 0) return null;
-                                return filteredAccounts.map((account) => (
-                                    <tr
-                                        key={account.id}
-                                        className="hover:bg-slate-50 transition-colors duration-150"
-                                    >
-                                        <td className="px-2 py-1.5 font-medium text-gray-900 text-sm">
-                                            {account.account_name}
-                                        </td>
-                                        <td className="px-2 py-1.5 text-gray-700 text-sm">
-                                            {step.work_order_type?.type_name ||
-                                                step.work_order}
-                                        </td>
-                                        <td className="px-2 py-1.5">
-                                            {getStatusBadge(step.status)}
-                                        </td>
-                                        <td className="px-2 py-1.5 text-center">
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedAccountId(
-                                                        account.id
-                                                    );
-                                                    setSelectedWorkOrderData(
-                                                        step
-                                                    );
-                                                    setSelectedStepName(
-                                                        step.work_order_type
-                                                            ?.type_name ||
-                                                            step.work_order
-                                                    );
-                                                    setIsAddFilesModalOpen(
-                                                        true
-                                                    );
-                                                }}
-                                                className="px-2 py-1 text-xs font-semibold rounded-lg text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-sm hover:shadow-md transition-all duration-200 transform hover:scale-105"
-                                            >
-                                                Add Files
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ));
-                            });
 
                             return (
                                 <React.Fragment key={group.id}>
@@ -853,23 +752,13 @@ const MyWorkOrders = () => {
                                                 ? "bg-gradient-to-r from-slate-50 to-gray-50"
                                                 : "bg-white"
                                         } hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 group cursor-pointer`}
-                                        style={{
-                                            boxShadow:
-                                                expandedGroup === group.id
-                                                    ? "0 8px 25px 0 rgba(59, 130, 246, 0.15)"
-                                                    : undefined,
-                                        }}
-                                        onClick={(e) =>
-                                            handleRowClick(e, group.id)
-                                        }
                                     >
                                         <td className="px-3 py-2 font-bold text-base text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
                                             <div className="flex items-center space-x-2">
                                                 <div className="w-2 h-2 bg-blue-500 rounded-full opacity-70"></div>
                                                 <span className="font-mono tracking-wide">
                                                     {String(group.id).padStart(
-                                                        7,
-                                                        "1000-"
+                                                        7
                                                     )}
                                                 </span>
                                             </div>
@@ -945,43 +834,6 @@ const MyWorkOrders = () => {
                                             </div>
                                         </td>
                                     </tr>
-                                    {expandedGroup === group.id && (
-                                        <tr>
-                                            <td
-                                                colSpan={5}
-                                                className="px-3 py-2 bg-gradient-to-r from-blue-50 to-indigo-50"
-                                            >
-                                                <div className="rounded-md border border-gray-200 overflow-hidden bg-white">
-                                                    <table className="w-full table-auto text-left">
-                                                        <thead>
-                                                            <tr className="border-b border-gray-200 bg-white">
-                                                                <th className="px-2 py-1 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                                                                    Account Name
-                                                                </th>
-                                                                <th className="px-2 py-1 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                                                                    Current Step
-                                                                </th>
-                                                                <th className="px-2 py-1 text-xs font-bold text-slate-600 uppercase tracking-wider">
-                                                                    Overall
-                                                                    Status
-                                                                </th>
-                                                                <th className="px-2 py-1 text-xs font-bold text-slate-600 uppercase tracking-wider text-center">
-                                                                    Action
-                                                                </th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody className="divide-y divide-gray-100">
-                                                            {stepRows
-                                                                .flat()
-                                                                .filter(
-                                                                    Boolean
-                                                                )}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    )}
                                 </React.Fragment>
                             );
                         })}
@@ -1386,5 +1238,5 @@ const MyWorkOrders = () => {
             </div>
         </div>
     );
-};
+}
 export default MyWorkOrders;

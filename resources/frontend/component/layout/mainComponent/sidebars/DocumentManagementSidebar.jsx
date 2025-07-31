@@ -8,7 +8,6 @@ import { set } from "lodash";
 const DocumentManagementSidebar = () => {
     const location = useLocation();
     const { user } = useStateContext();
-    console.log("Sidebar user:", user, "user.email:", user && user.email);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [isWorkOrderPopUpOpen, setIsWorkOrderPopUpOpen] = useState(false);
     const [isAccountMasterActive, setIsAccountMasterActive] = useState(false);

@@ -44,13 +44,7 @@ const UploadFilesOnlyModal = ({
 
             if (logType) {
                 const fetchSubmilestones = async () => {
-                    setLoadingSubmilestones(true);
-                    console.log("UploadFilesOnlyModal - Props:", {
-                        currentUserId,
-                        selectedAccountId,
-                        propertyName,
-                        logType,
-                    });
+                    setLoadingSubmilestones(true);                   
                     try {
                         const params = new URLSearchParams({
                             work_order_type_name: logType,
@@ -74,13 +68,7 @@ const UploadFilesOnlyModal = ({
                         const response = await apiService.get(
                             `/submilestones-details?${params.toString()}`
                         );
-                        console.log("API Request params:", params.toString());
-                        console.log("API Response:", response.data);
                         if (Array.isArray(response.data)) {
-                            console.log(
-                                "Setting submilestone options:",
-                                response.data
-                            );
                             setSubmilestoneOptions(response.data);
                         } else {
                             console.warn(
@@ -185,11 +173,6 @@ const UploadFilesOnlyModal = ({
     };
 
     const handleTitleChange = (id, newTitle, newChecklistId) => {
-        console.log("handleTitleChange called:", {
-            id,
-            newTitle,
-            newChecklistId,
-        });
 
         setAttachedFiles((prevFiles) => {
             const updatedFiles = prevFiles.map((f) =>
@@ -198,7 +181,6 @@ const UploadFilesOnlyModal = ({
                     : f
             );
 
-            console.log("Updated files:", updatedFiles);
             return updatedFiles;
         });
     };
@@ -546,15 +528,6 @@ const UploadFilesOnlyModal = ({
                                                                 "data-checklist-id"
                                                             );
 
-                                                        console.log(
-                                                            "Dropdown changed:",
-                                                            {
-                                                                selectedValue,
-                                                                checklistId,
-                                                                selectedOption,
-                                                            }
-                                                        );
-
                                                         handleTitleChange(
                                                             fileWrapper.id,
                                                             selectedValue,
@@ -569,10 +542,6 @@ const UploadFilesOnlyModal = ({
                                                     </option>
                                                     {submilestoneOptions.map(
                                                         (submilestone) => {
-                                                            console.log(
-                                                                "Rendering submilestone:",
-                                                                submilestone
-                                                            );
                                                             return submilestone.checklists &&
                                                                 submilestone.checklists.filter(
                                                                     (c) =>
@@ -598,10 +567,7 @@ const UploadFilesOnlyModal = ({
                                                                             (
                                                                                 checklist
                                                                             ) => {
-                                                                                console.log(
-                                                                                    "Rendering checklist:",
-                                                                                    checklist
-                                                                                );
+
                                                                                 const isCompleted =
                                                                                     checklist
                                                                                         .account_checklist_status
@@ -611,20 +577,6 @@ const UploadFilesOnlyModal = ({
                                                                                     isCompleted
                                                                                         ? `${checklist.name} (Already Uploaded)`
                                                                                         : checklist.name;
-
-                                                                                console.log(
-                                                                                    "Checklist completion status:",
-                                                                                    {
-                                                                                        checklistId:
-                                                                                            checklist.id,
-                                                                                        name: checklist.name,
-                                                                                        isCompleted,
-                                                                                        requires_document:
-                                                                                            checklist.requires_document,
-                                                                                        account_checklist_status:
-                                                                                            checklist.account_checklist_status,
-                                                                                    }
-                                                                                );
 
                                                                                 return (
                                                                                     <option

@@ -732,7 +732,7 @@ const WorkOrderGroupDetailsModal = ({
                                 variant="h5"
                                 className="text-gray-800 font-semibold"
                             >
-                                Work Order No. 1000{group?.id}
+                                Work Order No. {group?.id}
                             </Typography>
                         </div>
                     </div>

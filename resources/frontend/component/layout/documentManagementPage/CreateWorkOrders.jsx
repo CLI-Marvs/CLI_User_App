@@ -168,7 +168,6 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             created_by_user_id: user.id,
             account_assignments: accountAssignments,
         };
-        console.log("Submitting work order:", formData);
         try {
             const response = await apiService.post(
                 "/work-orders/create-work-order",
@@ -176,11 +175,8 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             );
 
             if (response.status === 201) {
-                console.log("Full response data:", response.data);
                 const newWorkOrderId = response.data.data.work_order_id;
                 const workOrderGroupId = response.data.data.work_order_group_id;
-                console.log("Work Order ID:", newWorkOrderId);
-                console.log("Work Order Group ID:", workOrderGroupId);
                 setWorkOrderId(workOrderGroupId || newWorkOrderId);
                 setIsModalOpen(true);
                 fetchWorkOrders();

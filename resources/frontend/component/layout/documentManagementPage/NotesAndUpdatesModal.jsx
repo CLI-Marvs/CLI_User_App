@@ -54,7 +54,6 @@ function NotesAndUpdatesModal({
             } else {
                 params.workOrderId = workOrderData?.work_order_id;
             }
-            console.log("SelectedWorkOrder", selectedWorkOrder);
             const cachedData = getCachedNotesAndUpdatesData(params);
             if (cachedData) {
                 setLogs(
@@ -119,9 +118,6 @@ function NotesAndUpdatesModal({
 
         // Trigger the refresh callback passed from the parent to update the main view
         if (onRefresh) {
-            console.log(
-                "NotesAndUpdatesModal: Calling onRefresh to update parent component."
-            );
             onRefresh();
         }
     };
