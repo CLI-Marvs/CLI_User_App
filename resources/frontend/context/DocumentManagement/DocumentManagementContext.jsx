@@ -43,6 +43,7 @@ export const DocumentManagementProvider = ({ children }) => {
         date: "",
     });
     const rowsPerPage = 5;
+    
 
     // --- Fetchers ---
     const fetchTakenOutAccounts = async () => {
@@ -402,6 +403,44 @@ export const DocumentManagementProvider = ({ children }) => {
         fetchWorkOrders();
     }, [fetchWorkOrders]);
 
+    // --- Additional Work Order/Account Fetchers ---
+    // These are defined here for context consumers
+    const fetchWorkOrderGroups = useCallback(async () => {
+        try {
+            const response = await apiService.get("/work-orders/get-work-order-groups");
+            setWorkOrderGroups(response.data);
+        } catch (error) {
+            console.error("Failed to fetch work order groups:", error);
+        }
+    }, []);
+
+    const fetchWorkOrderTypes = useCallback(async () => {
+        try {
+            const response = await apiService.get("/work-orders/work-order-types");
+            setWorkOrderTypes(response.data.data);
+        } catch (error) {
+            console.error("Failed to fetch work order types:", error);
+        }
+    }, []);
+
+    const fetchAccounts = useCallback(async () => {
+        try {
+            const response = await apiService.get("/taken-out-accounts/get-masterlist");
+            setAccounts(response.data);
+        } catch (error) {
+            console.error("Failed to fetch accounts:", error);
+        }
+    }, []);
+
+    const getAssignee = useCallback(async () => {
+        try {
+            const response = await apiService.get("/work-orders/get-assignee");
+            setAssignee(response.data);
+        } catch (error) {
+            console.error("Failed to fetch employees:", error);
+        }
+    }, []);
+
     return (
         <DocumentManagementContext.Provider
             value={{
@@ -463,6 +502,10 @@ export const DocumentManagementProvider = ({ children }) => {
                 workOrdersSortOrder,
                 setWorkOrdersSortOrder,
                 fetchWorkOrders,
+                fetchWorkOrderGroups,
+                fetchWorkOrderTypes,
+                fetchAccounts,
+                getAssignee,
             }}
         >
             {children}

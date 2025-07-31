@@ -133,6 +133,7 @@ const WorkOrderView = () => {
                     : null,
             }));
             setTableRowsData(data);
+            console.log("GROUP DATA", data);
         };
 
         TABLE_ROWS();
@@ -237,6 +238,9 @@ const WorkOrderView = () => {
         setIsDeleting(true);
         try {
             await apiService.patch(`/work-orders/${workOrderId}/soft-delete`);
+            console.log(
+                `Work order ${workOrderId} soft deleted successfully. Reason: ${reason}`
+            );
             fetchWorkOrderGroups();
         } catch (error) {
             console.error("Failed to soft delete work order:", error);
@@ -260,6 +264,9 @@ const WorkOrderView = () => {
                 {
                     reason,
                 }
+            );
+            console.log(
+                `Work order group ${groupId} soft deleted successfully. Reason: ${reason}`
             );
             fetchWorkOrderGroups();
         } catch (error) {
@@ -310,6 +317,7 @@ const WorkOrderView = () => {
                 `/work-order-groups/${group.id}/details`
             );
             setGroupDetailsData(response.data);
+            console.log("Group details response:", response.data);
         } catch (err) {
             console.error("Error fetching group details:", err);
         } finally {
@@ -347,6 +355,14 @@ const WorkOrderView = () => {
 
     // Placeholder function for adding files (required by WorkOrderGroupDetailsModal)
     const handleAddFiles = (accountId, workOrder, stepName) => {
+        console.log(
+            "Add files for account:",
+            accountId,
+            "Work Order:",
+            workOrder,
+            "Step:",
+            stepName
+        );
         handleCloseGroupDetailsModal();
     };
 
@@ -621,7 +637,7 @@ const WorkOrderView = () => {
                                                 <div className="w-2 h-2 bg-blue-500 rounded-full opacity-70"></div>
                                                 <span className="font-mono tracking-wide">
                                                     {String(group.id).padStart(
-                                                        7,
+                                                        7
                                                     )}
                                                 </span>
                                             </div>
@@ -665,6 +681,12 @@ const WorkOrderView = () => {
                                             <div className="flex items-center space-x-1">
                                                 <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                                                 {(() => {
+                                                    console.log(
+                                                        "Due Date Raw:",
+                                                        group.due_date,
+                                                        "Type:",
+                                                        typeof group.due_date
+                                                    );
                                                     return (
                                                         <span className="font-medium">
                                                             {group.due_date

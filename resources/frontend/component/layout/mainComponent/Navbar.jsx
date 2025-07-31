@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useParams } from 'react-router-dom';
 import CLILogo from "../../../../../public/Images/CLILogo.png";
 // import Kent from "../../../../../public/Images/kent.png";
 import apiService from "../../servicesApi/apiService";
@@ -12,12 +13,17 @@ import Stack from "@mui/material/Stack";
 // import Alert from "@mui/material/Alert";
 // import { MdOutlineMail } from "react-icons/md";
 import FeedbackModal from "./FeedbackModal";
-import Skeleton from "react-loading-skeleton";
-import "react-loading-skeleton/dist/skeleton.css";
+import Skeleton from 'react-loading-skeleton'
+import 'react-loading-skeleton/dist/skeleton.css'
+import { useSurvey } from "../../../context/Survey/SurveyContext";
 
 const Navbar = () => {
-    const { data, ticketId, navBarData, loading, user, getNavBarData } =
-        useStateContext();
+
+    const { id } = useParams();
+
+
+    const { data, ticketId, navBarData, loading, user, getNavBarData } = useStateContext();
+    const { survey_title, fetchSurveyTitle, survey_loading } = useSurvey();
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
     const modalRef = useRef(null);
@@ -30,6 +36,13 @@ const Navbar = () => {
             modalRef.current.showModal();
         }
     };
+
+    useEffect(() => {
+        if (id) {
+            fetchSurveyTitle(id);
+        }
+    }, [id]);
+
 
     useEffect(() => {
         if (isOpen) {
@@ -197,6 +210,20 @@ const Navbar = () => {
                 );
             }
 
+            if (value.toLowerCase() === "branch-settings") {
+                breadcrumbLabel = "Branch Settings";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+
             if (value.toLowerCase() === "transaction") {
                 breadcrumbLabel = "Transaction Management";
                 // Non-linkable
@@ -212,6 +239,14 @@ const Navbar = () => {
 
             if (value.toLowerCase() === "report") {
                 breadcrumbLabel = "Reports";
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
             }
 
             if (value.toLowerCase() === "sales") {
@@ -250,6 +285,7 @@ const Navbar = () => {
                     </span>
                 );
             }
+
             if (value.toLowerCase() === "property-pricing") {
                 breadcrumbLabel = "Property Pricing";
             }
@@ -261,6 +297,31 @@ const Navbar = () => {
                 value.toLowerCase() === "basic-pricing"
             ) {
                 breadcrumbLabel = "Price List";
+            }
+
+            if (value.toLowerCase() === "surveysettings") {
+                breadcrumbLabel = "Survey Settings";
+            }
+
+            if (value.toLowerCase() === "surveyform") {
+                breadcrumbLabel = "Survey Form";
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+
+            if (id && value === id) {
+                return (
+                    <span key={routeTo} className="text-custom-solidgreen cursor-default">
+                        {survey_loading ? <Skeleton width={200} /> : (survey_title || id)}
+                    </span>
+                );
             }
 
             if (value.toLowerCase() === "payment-scheme") {
@@ -296,6 +357,9 @@ const Navbar = () => {
             }
             if (value.toLowerCase() === "bank-statements") {
                 breadcrumbLabel = "Bank Statements";
+            }
+              if (value.toLowerCase() === "check-generator") {
+                breadcrumbLabel = "Check Generator";
             }
 
             if (value.toLowerCase() === "receivables") {
@@ -344,8 +408,7 @@ const Navbar = () => {
                     >
                         {
                             /* capitalizeWords()*/
-                            `${concernData?.buyer_firstname || ""} ${
-                                concernData?.buyer_middlename || ""
+                            `${concernData?.buyer_firstname || ""} ${concernData?.buyer_middlename || ""
                             } ${concernData?.buyer_lastname || ""}`
                         }{" "}
                         {/* capitalizeWords()*/ concernData?.suffix_name || ""}{" "}
@@ -400,7 +463,7 @@ const Navbar = () => {
 
     return (
         <>
-            <div className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
+            <nav className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
                 <div className="flex w-full">
                     <div className="flex">
                         <div className="flex justify-center items-center">
@@ -511,7 +574,7 @@ const Navbar = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </nav>
             <div>
                 <FeedbackModal modalRef={modalRef} />
             </div>

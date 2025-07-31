@@ -100,7 +100,7 @@ const InquiryList = () => {
     const [selectedYear, setSelectedYear] = useState("");
     const [selectedMonth, setSelectedMonth] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
-    const { propertyNamesList } = useStateContext();
+    const { propertyNamesList,categories } = useStateContext();
 
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -383,7 +383,7 @@ const InquiryList = () => {
     };
 
     const handleSearch = () => {
-        setResultSearchActive(true);
+        
         let summaryParts = []; // Array to hold each part of the summary
 
         if (category) summaryParts.push(`Category: ${category}`);
@@ -423,6 +423,12 @@ const InquiryList = () => {
 
         setSearchSummary(summaryParts);
 
+        if (summaryParts.length > 0) {
+            setResultSearchActive(true);
+        } else {
+            setResultSearchActive(false);
+        }
+
         setSearchFilter({
             name,
             category,
@@ -460,96 +466,7 @@ const InquiryList = () => {
         setEndDate(null);
     };
 
-    useEffect(
-        () => {
-            /*   console.log("categoryParam", categoryParam);
-          console.log("statusParam", statusParam);
-          console.log("monthParam", monthParam);
-          console.log("yearParam", yearParam);
-          console.log("departmentParam", departmentParam);
-          console.log("channelsParam", channelsParam);
-   */
-
-            if (
-                propertyParam ||
-                statusParam ||
-                monthParam ||
-                yearParam ||
-                departmentParam ||
-                channelsParam ||
-                categoryParam
-            ) {
-                setResultSearchActive(true);
-
-                let summaryParts = []; // Array to hold each part of the summary
-
-                if (categoryParam)
-                    summaryParts.push(`Category: ${categoryParam}`);
-                if (statusParam) {
-                    const displayStatus =
-                        statusParam === "unresolved"
-                            ? "Unresolved"
-                            : statusParam;
-                    summaryParts.push(`Status: ${displayStatus}`);
-                }
-                if (name) summaryParts.push(`Name: ${name}`);
-                if (typeParam) summaryParts.push(`Type: ${typeParam}`);
-                if (email) summaryParts.push(`Email: ${email}`);
-                if (channelsParam) {
-                    // Format 'Walk in' to 'Walk-in'
-                    const formattedChannel =
-                        channelsParam === "Walk in"
-                            ? "Walk-in"
-                            : channelsParam === "Social media"
-                            ? "Social Media"
-                            : channelsParam;
-                    summaryParts.push(`Channel: ${formattedChannel}`);
-                }
-                if (departmentParam)
-                    summaryParts.push(`Department: ${departmentParam}`);
-                if (ticket) summaryParts.push(`Ticket: ${ticket}`);
-                if (startDateParam && endDateParam) {
-                    summaryParts.push(
-                        `Start Date: ${formatDate(startDateParam)}`
-                    );
-                    summaryParts.push(`End Date: ${formatDate(endDateParam)}`);
-                } else if (startDateParam) {
-                    summaryParts.push(
-                        `Start Date: ${formatDate(startDateParam)}`
-                    );
-                } else if (endDateParam) {
-                    summaryParts.push(`End Date: ${formatDate(endDateParam)}`);
-                }
-                if (propertyParam)
-                    summaryParts.push(`Property: ${propertyParam}`);
-                if (yearParam) summaryParts.push(`Year: ${yearParam}`);
-                if (monthParam)
-                    summaryParts.push(`Month: ${formatMonth(monthParam)}`);
-                if (hasAttachments) summaryParts.push(`Attachments: Yes`);
-
-                setSearchSummary(summaryParts);
-
-                /*   setSearchFilter({
-              name,
-              category: categoryParam,
-              type: typeParam,
-              status: statusParam,
-              email,
-              channels: channelsParam,
-              departments: departmentParam,
-              ticket,
-              pickDate,
-              selectedProperty: propertyParam,
-              hasAttachments,
-              selectedMonth: monthParam,
-              selectedYear: yearParam,
-          }); */
-            }
-        },
-        [
-            /* propertyParam, statusParam, departmentParam, monthParam, yearParam */
-        ]
-    );
+   
 
     useEffect(() => {
         if (isFilterVisible) {
@@ -580,7 +497,7 @@ const InquiryList = () => {
 
     return (
         <>
-            <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">
+            <div className="relative h-screen max-w-full bg-custom-grayFA px-[20px] z-10">
                 <div className="bg-custom-grayFA">
                     <div className="relative flex justify-start gap-3 pt-1">
                         {canWrite && (
@@ -677,34 +594,15 @@ const InquiryList = () => {
                                                 <option value=" ">
                                                     Select Category
                                                 </option>
-                                                <option value="Reservation Documents">
-                                                    Reservation Documents
-                                                </option>
-                                                <option value="Payment Issues">
-                                                    Payment Issues
-                                                </option>
-                                                <option value="SOA/ Buyer's Ledger">
-                                                    SOA/ Buyer's Ledger
-                                                </option>
-                                                <option value="Turn Over Status">
-                                                    Turn Over Status
-                                                </option>
-                                                <option value="Unit Status">
-                                                    Unit Status
-                                                </option>
-                                                <option value="Loan Application">
-                                                    Loan Application
-                                                </option>
-                                                <option value="Title and Other Registration Documents">
-                                                    Title and Other Registration
-                                                    Documents
-                                                </option>
-                                                <option value="Commissions">
-                                                    Commissions
-                                                </option>
-                                                <option value="Other Concerns">
-                                                    Other Concerns
-                                                </option>
+                                                {categories && categories.map(
+                                                    (category) => (
+                                                        <option
+                                                            key={category.id}
+                                                        >
+                                                            {category.name}
+                                                        </option>
+                                                    )
+                                                )}
                                             </select>
                                         </div>
 
@@ -887,8 +785,9 @@ const InquiryList = () => {
                                                                         null &&
                                                                     department !==
                                                                         undefined &&
-                                                                    department !==
-                                                                        "NULL"
+                                                                    department !== "NULL" &&
+                                                                    department !== "IT" &&
+                                                                    department !== "Digital Innovation"
                                                             )
                                                     ),
                                                 ]

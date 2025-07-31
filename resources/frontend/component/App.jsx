@@ -19,6 +19,7 @@ import InquiryListView from "./views/pages/raiseaconcernViews/InquiryListView";
 import InquiryThreadView from "./views/pages/raiseaconcernViews/InquiryThreadView";
 import CallBackView from "./views/pages/callback/CallBackView";
 import ReportViews from "./views/pages/raiseaconcernViews/ReportViews";
+import WalkinView from "@/component/views/pages/walkinEmojiViews/WalkinView";
 import PropertyAndPricingLayout from "./views/layout/PropertyAndPricingLayout";
 import PricingMasterListView from "./views/pages/PropertyAndPricingViews/PricingMasterListView";
 import WorkFlowNotificationView from "./views/pages/PropertyAndPricingViews/WorkFlowNotificationView";
@@ -39,6 +40,8 @@ import BankStatementView from "./views/pages/transactionViews/BankStatementView"
 import AutoAssignView from "./views/pages/raiseaconcernViews/AutoAssignView";
 import UserRightsAndPermissionsView from "./views/pages/userrightsandpermissionsViews/UserRightsAndPermissionsView";
 import PropertySettingViews from "@/component/views/pages/propertySettingViews/propertySettingView";
+import BranchSetting from "@/component/layout/inquirypage/BranchSetting";
+
 import FallbackLoader from "./FallbackLoader";
 import PreloadWrapper from "./PreloadWrapper";
 import BannerSettingsView from "./views/pages/bannersettingsViews/BannerSettingsView";
@@ -63,6 +66,15 @@ import SettingsView from "./views/pages/titlingAndRegistration/SettingsView";
 import DocumentManagementSidebar from "./layout/mainComponent/sidebars/DocumentManagementSidebar";
 import TakenOutAccountView from "./views/pages/titlingAndRegistration/TakenOutAccountView";
 import FileManagerView from "./views/pages/titlingAndRegistration/FileManagerView";
+import WalkinTransactionHistoryView from "@/component/views/pages/walkinEmojiViews/WalkinTransactionHistoryView";
+import WalkinReportPage from "@/component/layout/inquirypage/WalkinReportPage";
+import FinancialToolsView from "./views/pages/transactionViews/FinancialToolsView";
+import CheckStreamReportsView from "./views/pages/transactionViews/CheckStreamReportsView";
+import SurveyReportsView from "./views/pages/surveyrelatedreportsViews/SurveyReportsView";
+import SurveyMainView from "./views/pages/surveyrelatedreportsViews/SurveyMainView";
+import SurveyReviewView from "./views/pages/surveyrelatedreportsViews/SurveyReviewView";
+import SurveyMainReportView from "./views/pages/surveyrelatedreportsViews/SurveyMainReportView";
+import SurveySummaryView from "./views/pages/surveyrelatedreportsViews/SurveySummaryView";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, adminOnly, children }) => {
@@ -127,9 +139,9 @@ const App = () => {
         return (
             <div className="bg-white relative max-h-screen flex flex-col h-screen">
                 <Navbar />
-                <div className="flex flex-1 overflow-hidden">
+                <div className="relative flex flex-1 overflow-hidden z-30">
                     <Sidebar />
-                    <div className="flex-1 overflow-y-auto bg-custom-grayFA ">
+                    <div className="flex-1 overflow-y-auto bg-custom-grayFA z-20">
                         <Outlet />
                     </div>
                 </div>
@@ -141,7 +153,7 @@ const App = () => {
         return (
             <>
                 <div className="flex bg-white relative h-full">
-                    <div className="fixed h-full z-50">
+                    <div className="fixed h-full z-20">
                         <CrsSettingsSidebar />
                     </div>
                     <div className="relative flex-1 ml-[230px] z-10">
@@ -281,6 +293,20 @@ const App = () => {
                                         },
                                     ],
                                 },
+                                {
+                                    path: "tools",
+                                    element: <TransactionLayout />,
+                                    children: [
+                                        {
+                                            path: "check-generator",
+                                            element: <FinancialToolsView />,
+                                        },
+                                        {
+                                            path: "reports",
+                                            element: <CheckStreamReportsView />,
+                                        },
+                                    ],
+                                },
                             ],
                         },
                         {
@@ -294,12 +320,40 @@ const App = () => {
                                     element: <InquiryListView />,
                                 },
                                 {
+                                    path: "inquirylist/:filter",
+                                    element: <InquiryListView />,
+                                },
+                                {
                                     path: "thread/:id",
                                     element: <InquiryThreadView />,
                                 },
                                 {
-                                    path: "report",
+                                    path: "report/inquiries",
                                     element: <ReportViews />,
+                                },
+                                {
+                                    path: "report/walk-in",
+                                    element: <WalkinReportPage />,
+                                },
+                                {
+                                    path: "report/survey",
+                                    element: <SurveyMainReportView />,
+                                },
+                                {
+                                    path: "report/survey/:id?",
+                                    element: <SurveySummaryView />,
+                                },
+                                {
+                                    path: "walk-in",
+                                    element: <WalkinView />,
+                                    children: [
+                                        {
+                                            path: "history",
+                                            element: (
+                                                <WalkinTransactionHistoryView />
+                                            ),
+                                        },
+                                    ],
                                 },
                                 {
                                     path: "autoassign",
@@ -314,8 +368,28 @@ const App = () => {
                                             element: <AutoAssignView />,
                                         },
                                         {
+                                            path: "surveysettings",
+                                            element: <SurveyReportsView />,
+                                        },
+                                        {
+                                            path: "surveysettings/surveyform",
+                                            element: <SurveyMainView />,
+                                        },
+                                        {
+                                            path: "surveysettings/surveyform/:id?",
+                                            element: <SurveyMainView />,
+                                        },
+                                        {
+                                            path: "surveysettings/surveyreview",
+                                            element: <SurveyReviewView />,
+                                        },
+                                        {
                                             path: "bannersettings",
                                             element: <BannerSettingsView />,
+                                        },
+                                        {
+                                            path: "branch-settings",
+                                            element: <BranchSetting />,
                                         },
                                         {
                                             path: "versionlogs",

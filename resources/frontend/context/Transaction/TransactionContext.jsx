@@ -12,6 +12,8 @@ export const TransactionProvider = ({ children }) => {
     const [totalPagePosting, setTotalPagePosting] = useState(0);
     const [activeItemTransaction, setActiveItemTransaction] = useState("Cleared");
     const [banks, setBanks] = useState([]);
+    const [enabled, setEnabled] = useState(false);
+    const [defaultColumns, setDefaultColumns] = useState([]);
     
     const [transactions, setTransactions] = useState({
         data: [],
@@ -54,6 +56,16 @@ export const TransactionProvider = ({ children }) => {
         loading: true,
     });
 
+    const [printedChecks, setPrintedChecks] = useState({
+        data: [],
+        currentPage: 0,
+        totalPages: 0,
+        filters: {},
+        loading: true,
+        totalCheckAmount: 0,
+        totalRecords: 0
+    });
+
     return (
         <TransactionContext.Provider
             value={{
@@ -77,6 +89,12 @@ export const TransactionProvider = ({ children }) => {
                 setCardMarkupDetails,
                 banks,
                 setBanks,
+                enabled,
+                setEnabled,
+                defaultColumns,
+                setDefaultColumns,
+                printedChecks,
+                setPrintedChecks
             }}
         >
             {children}

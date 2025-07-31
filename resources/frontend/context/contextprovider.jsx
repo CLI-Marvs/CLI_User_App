@@ -2,8 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
 // import { DocumentManagementProvider } from "./DocumentManagement/DocumentManagementContext";
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
-import { set } from "lodash";
-import { json } from "react-router-dom";
+import { get, set } from "lodash";
 
 const StateContext = createContext({
     user: null,
@@ -47,6 +46,7 @@ export const ContextProvider = ({ children }) => {
     const [dataSet, setDataSet] = useState([]);
     const [currentPageCustomer, setCurrentPageCustomer] = useState(0);
     const [totalPagesCustomer, setTotalPagesCustomer] = useState(0);
+    const [categories, setCategories] = useState([]);
     const [department, setDepartment] = useState("All");
     const [project, setProject] = useState("All");
     const [month, setMonth] = useState("All");
@@ -107,6 +107,11 @@ export const ContextProvider = ({ children }) => {
     const [endDateValue, setEndDateValue] = useState(null);
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
+    const [survey_title, setSurveyTitle] = useState("");
+    const [customerData, setCustomerData] = useState([]);
+    const [customerDetails, setCustomerDetails] = useState([]);
+    const [messageData, setMessageData] = useState([]);
+    const [isTotalPages, setIsTotalPages] = useState(false);
     const [assignee, setAssignee] = useState([]);
     const [accounts, setAccounts] = useState([]);
     const [workOrderTypes, setWorkOrderTypes] = useState([]);
@@ -172,11 +177,6 @@ export const ContextProvider = ({ children }) => {
         fetchWorkOrders();
     }, []);
 
-    const [customerData, setCustomerData] = useState([]);
-    const [customerDetails, setCustomerDetails] = useState([]);
-    const [messageData, setMessageData] = useState([]);
-    const [isTotalPages, setIsTotalPages] = useState(false);
-
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
             setDepartment(
@@ -217,10 +217,14 @@ export const ContextProvider = ({ children }) => {
                 allPermissions[perm.name] = perm.pivot;
             });
 
+            // userAccessData.departmentPermissions?.forEach((perm) => {
+            //     allPermissions[perm.name] = perm.pivot;
+            // });
             userAccessData.departmentPermissions?.forEach((perm) => {
-                allPermissions[perm.name] = perm.pivot;
+                if (!allPermissions[perm.name]) {
+                    allPermissions[perm.name] = perm.pivot;
+                }
             });
-
             setPermissions(allPermissions);
         }
     }, [userAccessData]);
@@ -232,14 +236,19 @@ export const ContextProvider = ({ children }) => {
 
     //Check if the user has permission to write
     const canWrite = (permissionName) => {
-        const inquiryPermissions =
-            userAccessData?.employeePermissions?.find(
-                (perm) => perm.name === permissionName
-            ) ||
-            userAccessData?.departmentPermissions?.find(
-                (perm) => perm.name === permissionName
-            );
-        return inquiryPermissions?.pivot?.can_write || false;
+        // Check for employee-specific permission first
+        const empPerm = userAccessData?.employeePermissions?.find(
+            (perm) => perm.name === permissionName
+        );
+        if (empPerm) {
+            // Always use employee permission if it exists
+            return empPerm.pivot?.can_write || false;
+        }
+        // Only check department if employee permission does not exist
+        const deptPerm = userAccessData?.departmentPermissions?.find(
+            (perm) => perm.name === permissionName
+        );
+        return deptPerm?.pivot?.can_write || false;
     };
 
     const getAllConcerns = async () => {
@@ -332,43 +341,60 @@ export const ContextProvider = ({ children }) => {
     };
 
     const fetchCategory = async () => {
-        try {
-            const response = await apiService.get("category-monthly", {
-                params: {
-                    department: department,
-                    property: project,
-                    month: month,
-                    year: year,
-                    startDate: startDate,
-                    endDate: endDate,
-                },
-            });
-            const result = response.data;
+        if (token) {
+            try {
+                const response = await apiService.get("category-monthly", {
+                    params: {
+                        department: department,
+                        property: project,
+                        month: month,
+                        year: year,
+                        startDate: startDate,
+                        endDate: endDate,
+                    },
+                });
+                const result = response.data;
 
-            // Aggregate data into a single "Other Concerns" entry for null or "Other Concerns"
-            const aggregatedData = result.reduce((acc, item) => {
-                const name = item.details_concern || "Other Concerns"; // Replace null with "Other Concerns"
-                const existingIndex = acc.findIndex(
-                    (entry) => entry.name === name
-                );
+                // Aggregate data into a single "Other Concerns" entry for null or "Other Concerns"
+                const aggregatedData = result.reduce((acc, item) => {
+                    const name = item.details_concern || "Other Concerns"; // Replace null with "Other Concerns"
+                    const existingIndex = acc.findIndex(
+                        (entry) => entry.name === name
+                    );
 
-                if (existingIndex > -1) {
-                    // If "Other Concerns" already exists, add to its value
-                    acc[existingIndex].value += item.total;
-                } else {
-                    // Otherwise, create a new entry
-                    acc.push({
-                        name: name,
-                        value: item.total,
-                    });
-                }
+                    if (existingIndex > -1) {
+                        // If "Other Concerns" already exists, add to its value
+                        acc[existingIndex].value += item.total;
+                    } else {
+                        // Otherwise, create a new entry
+                        acc.push({
+                            name: name,
+                            value: item.total,
+                        });
+                    }
 
-                return acc;
-            }, []);
+                    return acc;
+                }, []);
 
-            setDataCategory(aggregatedData);
-        } catch (error) {
-            console.log("Error retrieving data", error);
+                setDataCategory(aggregatedData);
+            } catch (error) {
+                console.log("Error retrieving data", error);
+            }
+        }
+    };
+
+    /* Fetch categories or concern regarding (e.g.  'Reservation Documents',
+            'Account / Payment Issues',
+            'Turn Over Status',
+            'Unit Status', etc... */
+    const getCategories = async () => {
+        if (token) {
+            try {
+                const response = await apiService.get("categories");
+                setCategories(response.data);
+            } catch (error) {
+                console.log("Error retrieving data", error);
+            }
         }
     };
 
@@ -384,130 +410,47 @@ export const ContextProvider = ({ children }) => {
     };
 
     const fetchDataReport = async () => {
-        try {
-            const response = await apiService.get("report-monthly", {
-                params: {
-                    department: department,
-                    property: project,
-                    month: month,
-                    year: year,
-                    startDate: startDate,
-                    endDate: endDate,
-                },
-            });
-            const result = response.data;
+        if (token) {
+            try {
+                const response = await apiService.get("report-monthly", {
+                    params: {
+                        department: department,
+                        property: project,
+                        month: month,
+                        year: year,
+                        startDate: startDate,
+                        endDate: endDate,
+                    },
+                });
+                const result = response.data;
 
-            const filteredResult = result.filter(
-                (item) =>
-                    item.resolved !== 0 ||
-                    item.unresolved !== 0 ||
-                    item.closed !== 0
-            );
+                const filteredResult = result.filter(
+                    (item) =>
+                        item.resolved !== 0 ||
+                        item.unresolved !== 0 ||
+                        item.closed !== 0
+                );
 
-            const formattedData = filteredResult.map((item) => ({
-                name: `${item.month.toString().padStart(2, "0")}/${item.year
-                    .toString()
-                    .slice(-2)}`,
-                Resolved: item.resolved,
-                Unresolved: item.unresolved,
-                Closed: item.closed,
-            }));
+                const formattedData = filteredResult.map((item) => ({
+                    name: `${item.month.toString().padStart(2, "0")}/${item.year
+                        .toString()
+                        .slice(-2)}`,
+                    Resolved: item.resolved,
+                    Unresolved: item.unresolved,
+                    Closed: item.closed,
+                }));
 
-            setDataSet(formattedData);
-        } catch (error) {
-            console.error("Error fetching data:", error);
+                setDataSet(formattedData);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
         }
     };
 
     const getInquiriesPerProperty = async () => {
-        try {
-            const response = await apiService.get("inquiries-property", {
-                params: {
-                    month: month,
-                    property: project,
-                    department: department,
-                    year: year,
-                    startDate: startDate,
-                    endDate: endDate,
-                },
-            });
-            const result = response.data;
-            const formattedData = result.reduce((acc, item) => {
-                const propertyName = item.property ? item.property : "N/A";
-                const existingProperty = acc.find(
-                    (entry) => entry.name === propertyName
-                );
-                if (existingProperty) {
-                    existingProperty.resolved += item.resolved;
-                    existingProperty.unresolved += item.unresolved;
-                    existingProperty.closed += item.closed;
-                } else {
-                    acc.push({
-                        name: propertyName,
-                        resolved: item.resolved,
-                        unresolved: item.unresolved,
-                        closed: item.closed,
-                    });
-                }
-                return acc;
-            }, []);
-
-            setDataPropery(formattedData);
-        } catch (error) {
-            console.log("error retrieving", error);
-        }
-    };
-
-    const getInquiriesPerDepartment = async () => {
-        try {
-            const response = await apiService.get("inquiries-department", {
-                params: {
-                    month: month,
-                    property: project,
-                    department: department,
-                    year: year,
-                    startDate: startDate,
-                    endDate: endDate,
-                },
-            });
-
-            const departments = response.data.departments;
-            const unassignedData = response.data.totalUnassigned;
-
-            const formattedData = departments.map((item) => ({
-                name: item.department,
-                resolved: item.resolved,
-                unresolved: item.unresolved,
-                closed: item.closed,
-            }));
-
-            let concatData = [...formattedData];
-
-            // Only push "Unassigned" data if it was requested explicitly
-            if (
-                unassignedData &&
-                (department === "Unassigned" || department === "All")
-            ) {
-                const formattedDataUnassigned = {
-                    name: "Unassigned",
-                    resolved: unassignedData.total_resolved,
-                    unresolved: unassignedData.total_unresolved,
-                    closed: unassignedData.total_closed,
-                };
-                concatData.push(formattedDataUnassigned);
-            }
-
-            setDataDepartment(concatData);
-        } catch (error) {
-            console.log("error retrieving", error);
-        }
-    };
-
-    const getCommunicationTypePerProperty = async () => {
-        try {
-            const response = await apiService.get(
-                "communication-type-property",
-                {
+        if (token) {
+            try {
+                const response = await apiService.get("inquiries-property", {
                     params: {
                         month: month,
                         property: project,
@@ -516,50 +459,143 @@ export const ContextProvider = ({ children }) => {
                         startDate: startDate,
                         endDate: endDate,
                     },
+                });
+                const result = response.data;
+                const formattedData = result.reduce((acc, item) => {
+                    const propertyName = item.property ? item.property : "N/A";
+                    const existingProperty = acc.find(
+                        (entry) => entry.name === propertyName
+                    );
+                    if (existingProperty) {
+                        existingProperty.resolved += item.resolved;
+                        existingProperty.unresolved += item.unresolved;
+                        existingProperty.closed += item.closed;
+                    } else {
+                        acc.push({
+                            name: propertyName,
+                            resolved: item.resolved,
+                            unresolved: item.unresolved,
+                            closed: item.closed,
+                        });
+                    }
+                    return acc;
+                }, []);
+
+                setDataPropery(formattedData);
+            } catch (error) {
+                console.log("error retrieving", error);
+            }
+        }
+    };
+
+    const getInquiriesPerDepartment = async () => {
+        if (token) {
+            try {
+                const response = await apiService.get("inquiries-department", {
+                    params: {
+                        month: month,
+                        property: project,
+                        department: department,
+                        year: year,
+                        startDate: startDate,
+                        endDate: endDate,
+                    },
+                });
+
+                const departments = response.data.departments;
+                const unassignedData = response.data.totalUnassigned;
+
+                const formattedData = departments.map((item) => ({
+                    name: item.department,
+                    resolved: item.resolved,
+                    unresolved: item.unresolved,
+                    closed: item.closed,
+                }));
+
+                let concatData = [...formattedData];
+
+                // Only push "Unassigned" data if it was requested explicitly
+                if (
+                    unassignedData &&
+                    (department === "Unassigned" || department === "All")
+                ) {
+                    const formattedDataUnassigned = {
+                        name: "Unassigned",
+                        resolved: unassignedData.total_resolved,
+                        unresolved: unassignedData.total_unresolved,
+                        closed: unassignedData.total_closed,
+                    };
+                    concatData.push(formattedDataUnassigned);
                 }
-            );
-            const result = response.data;
-            const formattedData = result.reduce((acc, item) => {
-                const name = item.communication_type || "No Type";
-                const existing = acc.find((entry) => entry.name === name);
 
-                if (existing) {
-                    existing.value += item.total;
-                } else {
-                    acc.push({ name, value: item.total });
-                }
+                setDataDepartment(concatData);
+            } catch (error) {
+                console.log("error retrieving", error);
+            }
+        }
+    };
 
-                return acc;
-            }, []);
+    const getCommunicationTypePerProperty = async () => {
+        if (token) {
+            try {
+                const response = await apiService.get(
+                    "communication-type-property",
+                    {
+                        params: {
+                            month: month,
+                            property: project,
+                            department: department,
+                            year: year,
+                            startDate: startDate,
+                            endDate: endDate,
+                        },
+                    }
+                );
+                const result = response.data;
+                const formattedData = result.reduce((acc, item) => {
+                    const name = item.communication_type || "No Type";
+                    const existing = acc.find((entry) => entry.name === name);
 
-            setCommunicationTypeData(formattedData);
-        } catch (error) {
-            console.log("Error retrieving communication types:", error);
+                    if (existing) {
+                        existing.value += item.total;
+                    } else {
+                        acc.push({ name, value: item.total });
+                    }
+
+                    return acc;
+                }, []);
+
+                setCommunicationTypeData(formattedData);
+            } catch (error) {
+                console.log("Error retrieving communication types:", error);
+            }
         }
     };
 
     const getInquiriesPerChannel = async () => {
-        try {
-            const response = await apiService.get("inquiries-channel", {
-                params: {
-                    month: month,
-                    property: project,
-                    department: department,
-                    year: year,
-                    startDate: startDate,
-                    endDate: endDate,
-                },
-            });
-            const result = response.data;
+        if (token) {
+            try {
+                const response = await apiService.get("inquiries-channel", {
+                    params: {
+                        month: month,
+                        property: project,
+                        department: department,
+                        year: year,
+                        startDate: startDate,
+                        endDate: endDate,
+                    },
+                });
+                const result = response.data;
 
-            const formattedData = result.map((item) => ({
-                name: item.channels || "No Channel",
-                value: item.total,
-            }));
+                const formattedData = result.map((item) => ({
+                    name: item.channels || "No Channel",
+                    value: item.total,
+                }));
 
-            setInquriesPerChannelData(formattedData);
-        } catch (error) {
-            console.error("Error fetching data:", error);
+                setInquriesPerChannelData(formattedData);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
         }
     };
     const getSpecificInquiry = async () => {
@@ -805,48 +841,9 @@ export const ContextProvider = ({ children }) => {
         }
     };
 
-    // const getUserAccessData = async () => {
-    //     try {
-    //         const response = await apiService.get("get-user-access-data", { token });
-
-    //         // Get existing data from sessionStorage
-    //         const storedData = sessionStorage.getItem("userAccessData");
-    //         const existingData = storedData ? JSON.parse(storedData) : {};
-
-    //         // Merge the new data with the existing data
-    //         const updatedData = {
-    //             ...existingData, // Include existing data
-    //             employeePermissions: [
-    //                 ...(existingData.employeePermissions || []),
-    //                 ...(response.data.employeePermissions || []),
-    //             ],
-    //             departmentPermissions: [
-    //                 ...(existingData.departmentPermissions || []),
-    //                 ...(response.data.departmentPermissions || []),
-    //             ],
-    //         };
-
-    //         // Remove duplicates based on IDs (optional, for clean data)
-    //         const uniqueById = (arr, key) =>
-    //             [...new Map(arr.map((item) => [item[key], item])).values()];
-    //         updatedData.employeePermissions = uniqueById(
-    //             updatedData.employeePermissions,
-    //             "id"
-    //         );
-    //         updatedData.departmentPermissions = uniqueById(
-    //             updatedData.departmentPermissions,
-    //             "id"
-    //         );
-
-    //         // Save the updated data to sessionStorage
-    //         sessionStorage.setItem("userAccessData", JSON.stringify(updatedData));
-
-    //         // Update the state
-    //         setUserAccessData(updatedData);
-    //     } catch (error) {
-    //         console.log("error", error);
-    //     }
-    // };
+    useEffect(() => {
+        getCategories();
+    }, []);
 
     // useEffect(() => {
     //     getPropertyUnits(towerPhaseId, selectedFloor);
@@ -1144,6 +1141,7 @@ export const ContextProvider = ({ children }) => {
                 setStartDate,
                 endDate,
                 setEndDate,
+                categories,
                 setAssignedToMeActive,
                 assignedToMeActive,
                 setSpecificAssigneeCsr,

@@ -4,8 +4,20 @@ use App\Http\Controllers\ExecutiveDashboardController;
 use App\Http\Controllers\MilestoneProgressionController;
 use App\Http\Controllers\ProjectAssigneeController;
 use Illuminate\Http\Request;
+
+use App\Models\DynamicBanner;
+use App\Models\PropertyMaster;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SapController;
+
+use App\Http\Controllers\SurveyController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CheckStreamController;
+use App\Http\Controllers\UnitController;
 use App\Http\Controllers\ConcernController;
+use App\Http\Controllers\FeatureController;
+use App\Http\Controllers\PriceVersionController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DynamicBannerController;
 use App\Http\Controllers\PaymentSchemeController;
 use App\Http\Controllers\PriceBasicDetailController;
@@ -13,14 +25,8 @@ use App\Http\Controllers\TakenOutAccountController;
 use App\Http\Controllers\PriceListMasterController;
 use App\Http\Controllers\TitlingRegistrationController;
 use App\Http\Controllers\PropertyMasterController;
-use App\Http\Controllers\SapController;
-use App\Http\Controllers\UnitController;
 use App\Http\Controllers\WorkOrderController;
 use App\Http\Controllers\AccountLogController;
-use App\Models\DynamicBanner;
-use App\Models\PropertyMaster;
-use App\Http\Controllers\FeatureController;
-use App\Http\Controllers\PriceVersionController;
 use App\Http\Controllers\EmployeeDepartmentController;
 use App\Http\Controllers\EmployeeFeaturePermissionController;
 use App\Http\Controllers\DepartmentFeaturePermissionController;
@@ -232,6 +238,7 @@ Route::post('bank/statement', [TransactionController::class, 'clearedBankStateme
 Route::post('/posting-invoices', [SapController::class, 'retrieveInvoicesFromSap']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/categories', [CategoryController::class, 'index']);
     Route::get('/get-transaction-bank', [SapController::class, 'getTransactionByBankName']);
     Route::post('/upload-notepad', [SapController::class, 'uploadNotepad']);
 
@@ -248,13 +255,24 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/bank-statements-store', 'storeBankStatements');
         Route::get('/retrieve-banks', 'retrieveBanks');
         Route::get('/transaction-reports', 'transactionReports');
+        Route::post('/export-transactions', 'exportTransactions');
+        Route::get('/sub-feature-id', 'retrieveSubFeatureId');
+        Route::get('/transaction-columns', 'getTransactionColumns');
+        Route::post('/store-view-and-columns', 'storeViewAndColumns');
+        Route::put('/set-default-view', 'setDefaultView');
     });
+    
     Route::apiResource('markup-settings', MarkupSettignsController::class);
-
+    Route::apiResource('check-stream', CheckStreamController::class);
+    
     Route::controller(MarkupSettignsController::class)->group(function () {
         Route::get('/card/fee', 'retrieveCardMarkupDetails');
         Route::put('/card/fee/{id}', 'updateCardSettings');
+    });
 
+    Route::controller(CheckStreamController::class)->group(function () {
+        Route::get('/check-stream-banks', 'getCheckStreamBanks');
+        Route::post('/checks-export', 'exportChecks');
     });
 
     Route::controller(ConcernController::class)->group(function () {
@@ -334,6 +352,21 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/get-banner', [DynamicBannerController::class, 'getBanner']);
     Route::delete('/banner/{id}', [DynamicBannerController::class, 'deleteBanner']);
     Route::post('/update-banner', [DynamicBannerController::class, 'updateBanner']);
+
+
+    Route::post('/surveys', [SurveyController::class, 'store']);
+    Route::put('/surveys/{id}', [SurveyController::class, 'update']);
+    Route::get('/fetch-surveys', [SurveyController::class, 'fetchSurveys']);
+    Route::get('/fetch-survey/{id}', [SurveyController::class, 'fetchSurvey']);
+    Route::delete('/surveys/{id}', [SurveyController::class, 'delete']);
+    Route::get('/survey-summary/{survey_list_id}', [SurveyController::class, 'getSurveyStats']);
+    Route::put('/surveys/{id}/update-title', [SurveyController::class, 'updateTitle']);
+    Route::get('/survey-links', [SurveyController::class, 'getSurveyLinks']);
+    Route::get('/survey-title/{survey_list_id}', [SurveyController::class, 'getSurveyTitle']);
+    Route::get('/experience-ratings/count/{id}', [SurveyController::class, 'countRatings']);
+    Route::get('/surveys-count/respondents', [SurveyController::class, 'getSurveysWithRatingCounts']);
+    Route::get('/surveys-count/ratings', [SurveyController::class, 'getSurveysWithRatingBreakdown']);
+    Route::get('/survey-rating-details/{id}', [SurveyController::class, 'getSurveyRatingDetails']);
 
     //Employee Department
     Route::get('/get-employees-departments', [EmployeeDepartmentController::class, 'index']);
