@@ -875,13 +875,13 @@ const WorkOrderGroupDetailsModal = ({
                         )}
                     </div>
                 ) : paginatedData.length > 0 ? (
-                    <div className="h-full overflow-x-auto">
+                    <div className="h-full overflow-auto">
                         <table className="w-full text-left border-collapse bg-white">
-                            <thead className="sticky top-0 z-10">
+                            <thead className="sticky top-0 z-50 bg-custom-bluegreen">
                                 {/* Row 1: Step headers */}
                                 <tr className="bg-custom-bluegreen text-white">
                                     <th
-                                        className="px-3 py-2 font-medium sticky left-0 bg-custom-bluegreen z-20 border-r border-white min-w-[180px]"
+                                        className="px-3 py-2 font-medium sticky left-0 bg-custom-bluegreen z-50 border-r border-white min-w-[180px]"
                                         rowSpan={3}
                                     >
                                         <div className="flex items-center gap-2">
@@ -903,7 +903,7 @@ const WorkOrderGroupDetailsModal = ({
                                             colSpan={
                                                 col.subMilestones.length * 2
                                             }
-                                            className="text-center px-2 py-2 font-medium border-x border-white min-w-[100px]"
+                                            className="text-center px-2 py-2 font-medium border-x border-white min-w-[100px] bg-custom-bluegreen"
                                         >
                                             <span className="text-xs font-semibold uppercase tracking-wide">
                                                 {col.stepName}
@@ -911,7 +911,7 @@ const WorkOrderGroupDetailsModal = ({
                                         </th>
                                     ))}
                                     <th
-                                        className="px-2 py-2 font-medium border-l border-white min-w-[80px]"
+                                        className="px-2 py-2 font-medium border-l border-white min-w-[80px] bg-custom-bluegreen"
                                         rowSpan={3}
                                     >
                                         <div className="flex items-center justify-center gap-1">
@@ -931,7 +931,7 @@ const WorkOrderGroupDetailsModal = ({
                                         </div>
                                     </th>
                                     <th
-                                        className="px-2 py-2 font-medium border-l border-white min-w-[120px]"
+                                        className="px-2 py-2 font-medium border-l border-white min-w-[120px] bg-custom-bluegreen"
                                         rowSpan={3}
                                     >
                                         <div className="flex items-center justify-center gap-1">
@@ -951,7 +951,7 @@ const WorkOrderGroupDetailsModal = ({
                                         </div>
                                     </th>
                                     <th
-                                        className="px-2 py-2 font-medium border-l border-white min-w-[80px]"
+                                        className="px-2 py-2 font-medium border-l border-white min-w-[80px] bg-custom-bluegreen"
                                         rowSpan={3}
                                     >
                                         <div className="flex items-center justify-center gap-1">
@@ -977,7 +977,7 @@ const WorkOrderGroupDetailsModal = ({
                                                 <th
                                                     key={`${idx}-${i}`}
                                                     colSpan={2}
-                                                    className="text-center px-2 py-1 font-medium border-x border-y border-white min-w-[180px]"
+                                                    className="text-center px-2 py-1 font-medium border-x border-y border-white min-w-[180px] bg-custom-bluegreen"
                                                 >
                                                     <span
                                                         className="text-xs font-medium truncate block"
@@ -1004,12 +1004,12 @@ const WorkOrderGroupDetailsModal = ({
                                                 <React.Fragment
                                                     key={`${idx}-${i}-dates`}
                                                 >
-                                                    <th className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px]">
+                                                    <th className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px] bg-custom-bluegreen">
                                                         <span className="text-xs font-medium">
                                                             Date Created
                                                         </span>
                                                     </th>
-                                                    <th className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px]">
+                                                    <th className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px] bg-custom-bluegreen">
                                                         <span className="text-xs font-medium">
                                                             Date Updated
                                                         </span>

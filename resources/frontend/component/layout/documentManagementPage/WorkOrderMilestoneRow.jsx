@@ -31,7 +31,7 @@ const WorkOrderMilestoneRow = ({
     // Determine if this row should have a bottom border
     // You can adjust this logic as needed (e.g., pass a prop like isLastRow)
     const hasBottomBorder = !row.isLastRow; // Example: set row.isLastRow=true for last row
-    const stickyTdClass = `px-3 py-2 font-medium text-gray-900 sticky left-0 bg-white z-20 border-r border-gray-200`;
+    const stickyTdClass = `px-3 py-2 font-medium text-gray-900 sticky left-0 bg-white z-40 border-r border-gray-200`;
 
     return (
         <>
@@ -94,7 +94,7 @@ const WorkOrderMilestoneRow = ({
                                 <td
                                     className={`px-0 py-0 relative ${
                                         isCurrentStep && !isRowComplete
-                                            ? "border-2 border-blue-600 shadow-lg ring-2 ring-blue-300 ring-opacity-50"
+                                            ? "border-2 border-blue-600 shadow-lg ring-2 ring-blue-300 ring-opacity-50 z-30"
                                             : "border border-gray-200"
                                     } ${
                                         isRowComplete
@@ -143,7 +143,7 @@ const WorkOrderMilestoneRow = ({
                                         }`}
                                         style={{ width: `${completion}%` }}
                                     ></div>
-                                    <div className="flex relative z-10">
+                                    <div className="flex relative z-20">
                                         <div className="flex-1 px-2 py-2 text-center border-r border-gray-100">
                                             <span
                                                 className={`text-xs ${
@@ -276,7 +276,7 @@ const WorkOrderMilestoneRow = ({
             {/* Custom Tooltip */}
             {showTooltip && hoveredChecklistInfo && (
                 <div
-                    className="fixed z-50 pointer-events-none animate-in fade-in-0 zoom-in-95 duration-200"
+                    className="fixed z-[9999] pointer-events-none animate-in fade-in-0 zoom-in-95 duration-200"
                     style={{
                         left: tooltipPosition.x,
                         top: tooltipPosition.y,

@@ -39,7 +39,6 @@ const ChecklistTable = ({
         .map((step) => ({
             ...step,
             subMilestones: step.subMilestones.filter((milestone) => {
-
                 // If no currentUserId is provided, show all milestones
                 if (!currentUserId) {
                     return true;
@@ -179,15 +178,15 @@ const ChecklistTable = ({
     return (
         <div className="w-full">
             <div
-                className={`overflow-x-auto shadow-lg rounded-lg border border-gray-200 bg-white ${
+                className={`shadow-lg rounded-lg border border-gray-200 bg-white overflow-auto max-h-screen ${
                     totalColumns <= 4 ? "max-w-fit" : ""
                 }`}
             >
-                <table className="text-left border-collapse bg-white table-auto">
-                    <thead>
+                <table className="text-left border-collapse bg-white table-auto w-full">
+                    <thead className="sticky top-0 z-50 bg-custom-bluegreen">
                         {/* Row 1: Steps */}
                         <tr className="bg-custom-bluegreen text-white">
-                            <th className="px-4 py-2.5 font-bold sticky left-0 bg-custom-bluegreen z-20 border-r border-white border-opacity-30 min-w-[220px] max-w-[220px] text-center shadow-lg"></th>
+                            <th className="px-4 py-2.5 font-bold sticky left-0 bg-custom-bluegreen z-60 border-r border-white border-opacity-30 min-w-[220px] max-w-[220px] text-center shadow-lg"></th>
                             {filteredSteps.map((step, idx) => (
                                 <th
                                     key={idx}
@@ -218,7 +217,7 @@ const ChecklistTable = ({
                         <tr className="bg-custom-bluegreen text-white">
                             <th
                                 rowSpan={2}
-                                className="px-4 py-2.5 font-bold sticky left-0 bg-custom-bluegreen z-20 border-r border-white border-opacity-30 min-w-[220px] max-w-[220px] text-center align-middle text-sm shadow-lg"
+                                className="px-4 py-2.5 font-bold sticky left-0 bg-custom-bluegreen z-60 border-r border-white border-opacity-30 min-w-[220px] max-w-[220px] text-center align-middle text-sm shadow-lg"
                             >
                                 <div className="flex items-center justify-center">
                                     <span className="font-bold tracking-wide text-white">
@@ -295,7 +294,7 @@ const ChecklistTable = ({
 
                         {/* Row 4: Date and Remarks/Files */}
                         <tr className="bg-custom-bluegreen text-white">
-                            <th className="px-4 py-1.5 font-medium sticky left-0 bg-custom-bluegreen z-20 border-r border-white border-opacity-30 shadow-lg"></th>
+                            <th className="px-4 py-1.5 font-medium sticky left-0 bg-custom-bluegreen z-60 border-r border-white border-opacity-30 shadow-lg"></th>
                             {filteredSteps.map((step, stepIdx) =>
                                 step.subMilestones.map((sub, subIdx) =>
                                     (sub.checklists || []).map(
@@ -364,7 +363,7 @@ const ChecklistTable = ({
                                     rowIdx % 2 === 0 ? "bg-white" : "bg-gray-50"
                                 } hover:bg-blue-50 transition-colors duration-150 border-b border-gray-100`}
                             >
-                                <td className="px-4 py-1.5 font-semibold text-gray-900 sticky left-0 bg-inherit z-10 border-r border-gray-200 shadow-sm min-w-[220px] max-w-[220px]">
+                                <td className="px-4 py-1.5 font-semibold text-gray-900 sticky left-0 bg-inherit z-40 border-r border-gray-200 shadow-sm min-w-[220px] max-w-[220px]">
                                     <div className="flex items-center">
                                         <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2 flex-shrink-0"></div>
                                         <span
