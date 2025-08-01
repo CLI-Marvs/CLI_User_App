@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\ChecksExport;
 use App\Http\Requests\StoreChequeRequest;
 use App\Models\CheckStreamBanks;
+use App\Models\Entity;
 use App\Models\PrintedCheck;
 use App\Services\CheckStreamService;
 use Illuminate\Http\Request;
@@ -92,7 +93,7 @@ class CheckStreamController extends Controller
                 'check_date' => $data['check_date'],
                 'check_amount' => $data['check_amount'],
                 'drawee_bank_id' => $data['drawee_bank_id'],
-                'beneficiary_name' => $data['beneficiary_name'],
+                'entity_id' => $data['entity_id'],
                 'payor_name' => $data['payor_name'],
                 'remarks' => $data['remarks'],
                 'last_updated_by' => $userId,
@@ -130,17 +131,6 @@ class CheckStreamController extends Controller
                 'error' => $e->getMessage()
             ], 500);
         }
-    }
-
-
-
-    public function getCheckStreamBanks()
-    {
-        $response = CheckStreamBanks::select('id', 'bank_name')->get();
-        return response()->json([
-            'response_message' => 'Data retrieved successfully',
-            'data' => $response
-        ]);
     }
 
     public function exportChecks(Request $request)

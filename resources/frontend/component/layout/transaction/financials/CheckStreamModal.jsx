@@ -3,7 +3,7 @@ import { transaction } from "@/component/servicesApi/apiCalls/transactions";
 import Spinner from "@/util/Spinner";
 import { showToast } from "@/util/toastUtil";
 import React, { useEffect, useState } from "react";
-import { useCheckStreamBanks } from "../hooks/useTransactionQueries";
+import { useCheckEntities, useCheckStreamBanks } from "../hooks/useTransactionQueries";
 import SelectInput from "@/component/shared/components/SelectInput";
 
 const FIELDS = [
@@ -12,13 +12,14 @@ const FIELDS = [
     { name: "check_date", label: "Check Date:" },
     { name: "payor_name", label: "Payor Name:" },
     { name: "drawee_bank_id", label: "Drawee Bank:" },
-    { name: "beneficiary_name", label: "Beneficiary Name:" },
+    { name: "entity_id", label: "Beneficiary Name:" },
     { name: "remarks", label: "Remarks:" },
 ];
 const CheckStreamModal = ({ settingsRef, refetchData, selectedData }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [validationErrors, setValidationErrors] = useState({});
     const { data: checkStreamBanks } = useCheckStreamBanks();
+    const { data: checkStreamEntities } = useCheckEntities();
 
     const [formData, setFormData] = useState({
         check_no: "",
@@ -26,7 +27,7 @@ const CheckStreamModal = ({ settingsRef, refetchData, selectedData }) => {
         check_date: "",
         payor_name: "",
         drawee_bank_id: "",
-        beneficiary_name: "",
+        entity_id: "",
         remarks: "",
     });
 
@@ -37,6 +38,7 @@ const CheckStreamModal = ({ settingsRef, refetchData, selectedData }) => {
                 drawee_bank_id:
                     selectedData?.drawee_bank_id ||
                     selectedData?.check_stream_bank?.id,
+                entity_id: selectedData?.entity_id || selectedData?.check_entities.id,
             });
         }
     }, [selectedData]);
@@ -130,6 +132,7 @@ const CheckStreamModal = ({ settingsRef, refetchData, selectedData }) => {
             setValidationErrors({});
         }
     };
+
     return (
         <dialog
             className="modal w-[700px] rounded-[10px] shadow-custom5 backdrop:bg-black/50 outline-none transaction-scrollbar p-10"
@@ -160,12 +163,27 @@ const CheckStreamModal = ({ settingsRef, refetchData, selectedData }) => {
                                     onChange={(val) =>
                                         setFormData((prev) => ({
                                             ...prev,
-                                            drawee_bank_id: val,
+                                            drawee_bank_id: val.id,
                                         }))
                                     }
                                     options={checkStreamBanks || []}
                                     valueKey="id"
                                     labelKey="bank_name"
+                                />
+                            ) : item.name === "entity_id" ? (
+                                  <SelectInput
+                                    label=""
+                                    name="entity_id"
+                                    value={formData.entity_id}
+                                    onChange={(val) =>
+                                        setFormData((prev) => ({
+                                            ...prev,
+                                            entity_id: val.id,
+                                        }))
+                                    }
+                                    options={checkStreamEntities || []}
+                                    valueKey="id"
+                                    labelKey="payTo"
                                 />
                             ) : (
                                 <CustomInput

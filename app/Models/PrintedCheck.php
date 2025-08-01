@@ -17,6 +17,11 @@ class PrintedCheck extends Model
         return $this->belongsTo(CheckStreamBanks::class, 'drawee_bank_id');
     }
 
+    public function checkEntities()
+    {
+        return $this->belongsTo(Entity::class, 'entity_id');
+    }
+
     public function scopeActive($query)
     {
         return $query->where('status', 'active');

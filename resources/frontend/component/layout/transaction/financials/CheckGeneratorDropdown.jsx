@@ -14,7 +14,7 @@ const submenuItems = [
     },
     {
         label: "Admin Settings",
-        to: "/transaction/tools/reports",
+        to: "/transaction/tools/admin-settings",
     },
 ];
 

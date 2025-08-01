@@ -14,6 +14,7 @@ export const useChequeData = () => {
         contract_number: "",
         payor_name: "",
         bank_name: "",
+        entity_id: "",
     });
 
     const handleCheck = (field, value, index = null) => {

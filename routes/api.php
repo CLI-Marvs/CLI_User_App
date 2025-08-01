@@ -15,6 +15,9 @@ use App\Http\Controllers\ConcernController;
 use App\Http\Controllers\FeatureController;
 use App\Http\Controllers\PriceVersionController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CheckStreamAdminSettingsController;
+use App\Http\Controllers\CheckStreamBanksController;
+use App\Http\Controllers\CheckStreamEntitiesController;
 use App\Http\Controllers\DynamicBannerController;
 use App\Http\Controllers\PaymentSchemeController;
 use App\Http\Controllers\PropertyMasterController;
@@ -129,6 +132,9 @@ Route::middleware('auth:sanctum')->group(function () {
     
     Route::apiResource('markup-settings', MarkupSettignsController::class);
     Route::apiResource('check-stream', CheckStreamController::class);
+    Route::apiResource('check-stream-banks', CheckStreamBanksController::class);
+    Route::apiResource('check-stream-entities', CheckStreamEntitiesController::class);
+    Route::apiResource('check-stream-admin', CheckStreamAdminSettingsController::class);
     
     Route::controller(MarkupSettignsController::class)->group(function () {
         Route::get('/card/fee', 'retrieveCardMarkupDetails');
@@ -136,7 +142,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::controller(CheckStreamController::class)->group(function () {
-        Route::get('/check-stream-banks', 'getCheckStreamBanks');
         Route::post('/checks-export', 'exportChecks');
     });
 

@@ -3,7 +3,10 @@ import DatePicker from "react-datepicker";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
 import moment from "moment";
 import SelectInput from "@/component/shared/components/SelectInput";
-import { useCheckStreamBanks } from "../hooks/useTransactionQueries";
+import {
+    useCheckEntities,
+    useCheckStreamBanks,
+} from "../hooks/useTransactionQueries";
 import CustomInput from "@/component/Input/CustomInput";
 import useValidation from "../hooks/useValidation";
 
@@ -19,6 +22,7 @@ const requiredKeys = [
     "startDate",
 ];
 
+
 const ChequeSettings = ({
     handleCheck,
     data,
@@ -27,27 +31,23 @@ const ChequeSettings = ({
     setIsError,
 }) => {
     const { data: checkStreamBanks } = useCheckStreamBanks();
+    const { data: checkStreamEntities } = useCheckEntities();
     const { errors, validateField, validateAll, clearError } = useValidation();
-    
+
     const handlePreviewChecks = () => {
         const fieldsToValidate = {};
-        requiredKeys.forEach(key => {
+        requiredKeys.forEach((key) => {
             fieldsToValidate[key] = data[key];
         });
-        
+
         const isValid = validateAll(fieldsToValidate);
         if (isValid) {
             setIsError(true);
-        } 
+        }
     };
 
+
     const fields = [
-        {
-            label: "Pay to the Order of (Beneficiary Name):",
-            type: "text",
-            key: "payTo",
-            placeholder: "Enter beneficiary name",
-        },
         {
             label: "Payor Name:",
             type: "text",
@@ -144,50 +144,89 @@ const ChequeSettings = ({
     return (
         <div className="flex justify-center">
             <div className="bg-white p-6 rounded-lg shadow-lg mb-8 print:hidden w-full max-w-4xl space-y-4 montserrat-regular">
-               <div className="flex justify-between">
-                 <h2 className="text-xl font-semibold mb-2">
-                    Fill Check Settings
-                </h2>
-                <button
-                    type="button"
-                    onClick={handlePreviewChecks}
-                    className="h-[38px] w-auto px-10 gradient-btn5 text-white text-sm montserrat-semibold rounded-[10px] shadow-card"
-                >
-                    Preview Checks
-                </button>
-               </div>
-                <div className="w-full max-w-md">
-                    <SelectInput
-                        label="Drawee Bank:"
-                        options={checkStreamBanks}
-                        value={data.bank_name}
-                        onChange={(val) => {
-                            clearError("bank_name");
-                            const updatedData = { ...data, bank_name: val };
-                            setData(updatedData);
-                            const allFieldsFilled = requiredKeys.every(
-                                (fieldKey) =>
-                                    updatedData[fieldKey]?.toString().trim() !==
-                                    ""
-                            );
-                            setIsError(allFieldsFilled);
-                        }}
-                        onBlur={() =>
-                            validateField("bank_name", data.bank_name)
-                        }
-                        valueKey="id"
-                        labelKey="bank_name"
-                        className={`${
-                            errors["bank_name"]
-                                ? "border-red-500 focus:ring-2 focus:ring-red-300"
-                                : ""
-                        }`}
-                    />
-                    {errors["bank_name"] && (
-                        <span className="text-red-500 text-xs mt-1">
-                            {errors["bank_name"]}
-                        </span>
-                    )}
+                <div className="flex justify-between">
+                    <h2 className="text-xl font-semibold mb-2">
+                        Fill Check Settings
+                    </h2>
+                    <button
+                        type="button"
+                        onClick={handlePreviewChecks}
+                        className="h-[38px] w-auto px-10 gradient-btn5 text-white text-sm montserrat-semibold rounded-[10px] shadow-card"
+                    >
+                        Preview Checks
+                    </button>
+                </div>
+                <div className="w-full flex gap-4">
+                    <div className="flex-1 flex-col">
+                        <SelectInput
+                            label="Drawee Bank:"
+                            options={checkStreamBanks}
+                            value={data.bank_name}
+                            onChange={(val) => {
+                                clearError("bank_name");
+                                const updatedData = { ...data, bank_name: val.id };
+                                setData(updatedData);
+                                const allFieldsFilled = requiredKeys.every(
+                                    (fieldKey) =>
+                                        updatedData[fieldKey]
+                                            ?.toString()
+                                            .trim() !== ""
+                                );
+                                setIsError(allFieldsFilled);
+                            }}
+                            onBlur={() =>
+                                validateField("bank_name", data.bank_name)
+                            }
+                            valueKey="id"
+                            labelKey="bank_name"
+                            className={`${
+                                errors["bank_name"]
+                                    ? "border-red-500 focus:ring-2 focus:ring-red-300"
+                                    : ""
+                            }`}
+                        />
+                        {errors["bank_name"] && (
+                            <span className="text-red-500 text-xs mt-1">
+                                {errors["bank_name"]}
+                            </span>
+                        )}
+                    </div>
+                    <div className="flex-1 flex-col">
+                        <SelectInput
+                            label="Pay to the Order of (Beneficiary Name):"
+                            options={checkStreamEntities}
+                            value={data.entity_id}
+                            onChange={(val) => {
+                                clearError("payTo");
+                                const updatedData = { 
+                                    ...data, 
+                                    payTo: val.payTo,
+                                    entity_id: val.id
+                                };
+                                setData(updatedData);
+                                const allFieldsFilled = requiredKeys.every(
+                                    (fieldKey) =>
+                                        updatedData[fieldKey]
+                                            ?.toString()
+                                            .trim() !== ""
+                                );
+                                setIsError(allFieldsFilled);
+                            }}
+                            onBlur={() => validateField("payTo", data.payTo)}
+                            valueKey="id"
+                            labelKey="payTo"
+                            className={`${
+                                errors["payTo"]
+                                    ? "border-red-500 focus:ring-2 focus:ring-red-300"
+                                    : ""
+                            }`}
+                        />
+                        {errors["payTo"] && (
+                            <span className="text-red-500 text-xs mt-1">
+                                {errors["payTo"]}
+                            </span>
+                        )}
+                    </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {fields.map(renderField)}
@@ -249,11 +288,11 @@ const ChequeSettings = ({
                                         className="absolute right-3 top-1/2 -translate-y-1/2 w-[30px]"
                                     />
                                 </div>
-                                  {errors["startDate"] && (
-                                        <span className="text-red-500 text-xs mt-1">
-                                            {errors["startDate"]}
-                                        </span>
-                                    )}
+                                {errors["startDate"] && (
+                                    <span className="text-red-500 text-xs mt-1">
+                                        {errors["startDate"]}
+                                    </span>
+                                )}
                             </div>
                             {/* End Date */}
                             <div className="w-full">

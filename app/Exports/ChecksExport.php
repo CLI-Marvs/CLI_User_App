@@ -35,10 +35,11 @@ class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMap
                 'printed_check.check_date',
                 'printed_check.payor_name',
                 'check_stream_banks.bank_name',
-                'printed_check.beneficiary_name',
+                'entities.name as entity_name',
                 'printed_check.remarks'
             )
             ->join('check_stream_banks', 'check_stream_banks.id', '=', 'printed_check.drawee_bank_id')
+            ->join('entities', 'entities.id', '=', 'printed_check.entity_id')
             ->orderByDesc('printed_check.created_at')
             ->active()
             ->filter($this->filters['filter']);
@@ -50,6 +51,7 @@ class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMap
             BeforeSheet::class => function (BeforeSheet $event) {
                 $query = PrintedCheck::query()
                     ->join('check_stream_banks', 'check_stream_banks.id', '=', 'printed_check.drawee_bank_id')
+                    ->join('entities', 'entities.id', '=', 'printed_check.entity_id')
                     ->active()
                     ->filter($this->filters['filter']);
 
@@ -87,7 +89,7 @@ class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMap
             $row->check_date ? Carbon::parse($row->check_date)->format('m/d/Y') : '',
             $row->payor_name,
             $row->bank_name,
-            $row->beneficiary_name,
+            $row->entity_name,
             "\t" . $row->remarks,
         ];
     }

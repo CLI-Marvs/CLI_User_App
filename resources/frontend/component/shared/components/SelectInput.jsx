@@ -16,9 +16,12 @@ const SelectInput = ({
     const [search, setSearch] = useState("");
     const [showOptions, setShowOptions] = useState(false);
 
-    const wrapperRef = useRef(null); 
+    const wrapperRef = useRef(null);
 
-    const selectedOption = options.find((opt) => opt[valueKey] === value);
+    const selectedOption =
+        typeof value === "object"
+            ? value
+            : options.find((opt) => opt[valueKey] === value);
 
     const filteredOptions = useMemo(() => {
         return options.filter((opt) =>
@@ -27,7 +30,7 @@ const SelectInput = ({
     }, [search, options, labelKey]);
 
     const handleSelect = (option) => {
-        onChange(option[valueKey]);
+        onChange(option);
         setShowOptions(false);
         setSearch("");
     };

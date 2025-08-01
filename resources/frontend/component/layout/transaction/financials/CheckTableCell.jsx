@@ -30,6 +30,14 @@ const CheckTableCell = ({
         );
     }
 
+     if (type === "beneficiary_name") {
+        return (
+            <span className="montserrat-regular text-[13px] break-all">
+                {row.check_entities.entity_name}
+            </span>
+        );
+    }
+
     if (type === "check_date") {
         const formatDate = row.check_date
             ? (() => {

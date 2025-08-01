@@ -15,7 +15,7 @@ class CheckStreamRepository
 
     public function getPrintedChecks(array $filter)
     {
-        return $this->model::with('checkStreamBank:id,bank_name')
+        return $this->model::with('checkStreamBank:id,bank_name', 'checkEntities:id,name as entity_name')
             ->active()
             ->orderBy('created_at', 'desc')
             ->orderBy('id', 'desc')
@@ -35,7 +35,7 @@ class CheckStreamRepository
                 'check_date' => $check['check_date'],
                 'check_amount' => $check['amount'],
                 'drawee_bank_id' => $check['bank_name'],
-                'beneficiary_name' => $check['payTo'],
+                'entity_id' => $check['entity_id'],
                 'payor_name' => $check['payor_name'],
                 'remarks' => $check['contract_number'],
                 'status' => 'active',
