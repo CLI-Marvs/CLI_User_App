@@ -302,6 +302,9 @@ const Navbar = () => {
             if (value.toLowerCase() === "admin-settings") {
                 breadcrumbLabel = "Admin Settings";
             }
+              if (value.toLowerCase() === "check-writer") {
+                breadcrumbLabel = "Check Writer";
+            }
 
             if (value.toLowerCase() === "receivables") {
                 breadcrumbLabel = "Receivables/Incoming";

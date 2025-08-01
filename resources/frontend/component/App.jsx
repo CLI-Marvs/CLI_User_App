@@ -261,15 +261,15 @@ const App = () => {
                                     element: <TransactionLayout />,
                                     children: [
                                         {
-                                            path: "check-generator",
+                                            path: "check-generator/check-writer",
                                             element: <FinancialToolsView />,
                                         },
                                         {
-                                            path: "reports",
+                                            path: "check-generator/reports",
                                             element: <CheckStreamReportsView />,
                                         },
                                         {
-                                             path: "admin-settings",
+                                             path: "check-generator/admin-settings",
                                              element: <AdminSettingsView />,
                                         }
                                     ],

@@ -6,15 +6,15 @@ import { createPortal } from "react-dom";
 const submenuItems = [
     {
         label: "Check Writer",
-        to: "/transaction/tools/check-generator",
+        to: "/transaction/tools/check-generator/check-writer",
     },
     {
         label: "Reports",
-        to: "/transaction/tools/reports",
+        to: "/transaction/tools/check-generator/reports",
     },
     {
         label: "Admin Settings",
-        to: "/transaction/tools/admin-settings",
+        to: "/transaction/tools/check-generator/admin-settings",
     },
 ];
 
