@@ -18,7 +18,6 @@ import View from "../../../../../../public/Images/view.svg";
 import Edit from "../../../../../../public/Images/Subtract.svg";
 import Delete from "../../../../../../public/Images/Trash_light.svg";
 import Profile from "../../../../../../public/Images/Profile.svg";
-import { useStateContext } from "../../../../context/contextprovider";
 import { useDocumentManagementContext } from "../../../../context/DocumentManagement/DocumentManagementContext";
 import CreateWorkOrderModal from "../../../layout/documentManagementPage/CreateWorkOrders";
 import apiService from "../../../../component/servicesApi/apiService";
@@ -89,9 +88,13 @@ const WorkOrderView = () => {
         useState(null);
     const toggleFilterBox = () => setIsFilterVisible((prev) => !prev);
     const [tableRowsData, setTableRowsData] = useState([]);
-    const { workOrders, fetchWorkOrders, fetchWorkOrderGroups } =
-        useStateContext();
-    const docMgmt = useDocumentManagementContext();
+    // Use DocumentManagementContext for work order functionality
+    const {
+        workOrderGroups,
+        fetchWorkOrderGroups,
+        workOrders,
+        fetchWorkOrders,
+    } = useDocumentManagementContext();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const [selectedWorkOrderForEdit, setSelectedWorkOrderForEdit] =
@@ -108,36 +111,45 @@ const WorkOrderView = () => {
     const [isGroupDetailsLoading, setIsGroupDetailsLoading] = useState(false);
 
     useEffect(() => {
+        console.log("Fetching work order groups...");
         fetchWorkOrderGroups();
-    }, []);
+    }, [fetchWorkOrderGroups]);
 
     useEffect(() => {
-        const TABLE_ROWS = async () => {
-            if (!workOrders?.data) return;
+        console.log("workOrderGroups from context:", workOrderGroups);
+        console.log("workOrderGroups type:", typeof workOrderGroups);
+        console.log(
+            "workOrderGroups is array:",
+            Array.isArray(workOrderGroups)
+        );
 
-            const data = workOrders.data.map((group) => ({
-                groupId: group.id,
-                workOrders: group.work_orders || [],
-                status: group.status || "Pending",
-                dateCreated: new Date(group.created_at)
-                    .toISOString()
-                    .slice(0, 10),
-                dueDate: group.due_date
-                    ? typeof group.due_date === "string" &&
-                      /^\d{4}-\d{2}-\d{2}$/.test(group.due_date)
-                        ? group.due_date
-                        : new Date(group.due_date).toISOString().slice(0, 10)
-                    : "-",
-                completedAt: group.completed_at
-                    ? new Date(group.completed_at).toISOString().slice(0, 10)
-                    : null,
-            }));
-            setTableRowsData(data);
-            console.log("GROUP DATA", data);
-        };
+        // Handle different possible data structures
+        let processedData = [];
 
-        TABLE_ROWS();
-    }, [workOrders, fetchWorkOrderGroups]);
+        if (Array.isArray(workOrderGroups)) {
+            processedData = workOrderGroups;
+        } else if (
+            workOrderGroups &&
+            workOrderGroups.data &&
+            Array.isArray(workOrderGroups.data)
+        ) {
+            processedData = workOrderGroups.data;
+        } else if (workOrderGroups && typeof workOrderGroups === "object") {
+            // If it's an object, try to extract array data
+            const keys = Object.keys(workOrderGroups);
+            if (keys.length > 0) {
+                // Try common data property names
+                if (workOrderGroups.groups)
+                    processedData = workOrderGroups.groups;
+                else if (workOrderGroups.workOrderGroups)
+                    processedData = workOrderGroups.workOrderGroups;
+                else processedData = Object.values(workOrderGroups);
+            }
+        }
+
+        console.log("Processed data:", processedData);
+        setTableRowsData(processedData);
+    }, [workOrderGroups]);
 
     const handleRefreshAndClearFilters = async () => {
         setIsRefreshing(true);
@@ -169,22 +181,25 @@ const WorkOrderView = () => {
         };
     }, []);
 
-    const workOrderGroups = workOrders?.data || [];
-
     // Filter groups based on search and filter criteria
-    const filteredGroups = workOrderGroups.filter((group) => {
+    const filteredGroups = (
+        Array.isArray(tableRowsData) ? tableRowsData : []
+    ).filter((group) => {
+        console.log("Filtering group:", group); // Debug log
         const groupIdString = String(group.id || "");
 
         const searchMatch =
             searchQuery === "" ||
             groupIdString.toLowerCase().includes(searchQuery.toLowerCase()) ||
             (group.work_orders || []).some((wo) =>
-                wo.work_order.toLowerCase().includes(searchQuery.toLowerCase())
+                (wo.work_order || "")
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase())
             );
 
         const statusFilterMatch =
             workOrderFilterOption === "All" ||
-            group.status.toLowerCase().replace(/\s+/g, "_") ===
+            (group.status || "").toLowerCase().replace(/\s+/g, "_") ===
                 workOrderFilterOption.toLowerCase().replace(/\s+/g, "_");
 
         return searchMatch && statusFilterMatch;
@@ -193,6 +208,10 @@ const WorkOrderView = () => {
     const startIndex = (currentPage - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
     const currentData = filteredGroups.slice(startIndex, endIndex);
+
+    console.log("filteredGroups:", filteredGroups);
+    console.log("currentData:", currentData);
+    console.log("currentData length:", currentData.length);
 
     const totalPages = Math.max(
         1,

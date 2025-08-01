@@ -732,7 +732,7 @@ class WorkOrderController extends Controller
                 $query->with([
                     'team:id,name',
                     'workOrderType:id,type_name',
-                    'accounts:id,account_name,contract_no,checklist_status'
+                    'accounts:id,account_name,contract_no,checklist_status,property_name'
                 ]);
             }
         ]);

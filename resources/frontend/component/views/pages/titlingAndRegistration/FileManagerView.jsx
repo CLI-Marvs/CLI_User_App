@@ -279,7 +279,6 @@ const SidebarStep = ({
     onToggle,
     selectedMilestone,
 }) => {
-
     return (
         <div className="mb-1">
             <div
@@ -428,10 +427,9 @@ const FileManagerView = () => {
         const timeoutId = setTimeout(() => {
             if (searchTerm.trim()) {
                 searchAccounts(searchTerm);
-            } else if (!Array.isArray(accounts) || accounts.length === 0) {
+            } else {
                 fetchAllAccounts();
             }
-            // else do nothing, accounts already loaded
         }, 500);
         return () => clearTimeout(timeoutId);
     }, [searchTerm, searchAccounts, fetchAllAccounts]);
@@ -446,7 +444,6 @@ const FileManagerView = () => {
 
     // Get files for current selection
     const currentFiles = useMemo(() => {
-
         if (!selectedAccount) return [];
 
         let files = [];
@@ -549,7 +546,6 @@ const FileManagerView = () => {
     };
 
     const handleStepSelect = async (step, milestone = null) => {
-
         // Reset milestone selection when selecting a new step
         if (!milestone) {
             setSelectedMilestone(null);
@@ -858,7 +854,6 @@ const FileManagerView = () => {
 
                                 {/* Steps Tree */}
                                 {(() => {
-
                                     if (
                                         !selectedAccount.steps ||
                                         selectedAccount.steps.length === 0

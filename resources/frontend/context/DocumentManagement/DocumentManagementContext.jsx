@@ -43,7 +43,6 @@ export const DocumentManagementProvider = ({ children }) => {
         date: "",
     });
     const rowsPerPage = 5;
-    
 
     // --- Fetchers ---
     const fetchTakenOutAccounts = async () => {
@@ -336,6 +335,10 @@ export const DocumentManagementProvider = ({ children }) => {
         },
         [fetchAllAccounts]
     );
+    // --- Work Order State ---
+    const [assignee, setAssignee] = useState([]);
+    const [workOrderTypes, setWorkOrderTypes] = useState([]);
+    const [workOrders, setWorkOrders] = useState([]);
     const [workOrderGroups, setWorkOrderGroups] = useState([]);
     const [workOrdersLoading, setWorkOrdersLoading] = useState(true);
     const [workOrdersError, setWorkOrdersError] = useState(null);
@@ -345,7 +348,73 @@ export const DocumentManagementProvider = ({ children }) => {
     const [workOrdersSortBy, setWorkOrdersSortBy] = useState("created_at");
     const [workOrdersSortOrder, setWorkOrdersSortOrder] = useState("desc");
 
-    const fetchWorkOrders = useCallback(
+    // --- Work Order Fetchers ---
+    const fetchWorkOrders = useCallback(async () => {
+        try {
+            const response = await apiService.get(
+                "/work-orders/get-work-orders"
+            );
+            setWorkOrders(response.data);
+        } catch (error) {
+            console.error("Failed to fetch work orders:", error);
+        }
+    }, []);
+
+    const fetchWorkOrderGroups = useCallback(async () => {
+        try {
+            const response = await apiService.get(
+                "/work-orders/get-work-order-groups"
+            );
+            // Extract the actual data array from the paginated response
+            setWorkOrderGroups(response.data.data || []);
+        } catch (error) {
+            console.error("Failed to fetch work order groups:", error);
+            setWorkOrderGroups([]);
+        }
+    }, []);
+
+    const fetchWorkOrderTypes = useCallback(async () => {
+        try {
+            const response = await apiService.get(
+                "/work-orders/work-order-types"
+            );
+            setWorkOrderTypes(response.data.data);
+        } catch (error) {
+            console.error("Failed to fetch work order types:", error);
+        }
+    }, []);
+
+    const fetchAccounts = useCallback(async () => {
+        try {
+            const response = await apiService.get(
+                "/taken-out-accounts/get-masterlist"
+            );
+            setAccounts(response.data);
+        } catch (error) {
+            console.error("Failed to fetch accounts:", error);
+        }
+    }, []);
+
+    const getAssignee = useCallback(async () => {
+        try {
+            const response = await apiService.get("/work-orders/get-assignee");
+            setAssignee(response.data);
+        } catch (error) {
+            console.error("Failed to fetch employees:", error);
+        }
+    }, []);
+
+    // Initialize work order data
+    useEffect(() => {
+        getAssignee();
+        fetchAccounts();
+        fetchWorkOrderTypes();
+        fetchWorkOrders();
+    }, [getAssignee, fetchAccounts, fetchWorkOrderTypes, fetchWorkOrders]);
+
+    // --- Additional Work Order/Account Fetchers ---
+    // Paginated work order fetcher for advanced use cases
+    const fetchWorkOrdersPaginated = useCallback(
         async (
             page = workOrdersCurrentPage,
             perPage = workOrdersPerPage,
@@ -371,7 +440,7 @@ export const DocumentManagementProvider = ({ children }) => {
                             acc[groupId] = {
                                 id: groupId,
                                 due_date: wo.group_due_date,
-                                status: wo.group_status, 
+                                status: wo.group_status,
                                 updated_at: wo.group_updated_at,
                                 work_orders: [],
                             };
@@ -398,48 +467,6 @@ export const DocumentManagementProvider = ({ children }) => {
             workOrdersSortOrder,
         ]
     );
-
-    useEffect(() => {
-        fetchWorkOrders();
-    }, [fetchWorkOrders]);
-
-    // --- Additional Work Order/Account Fetchers ---
-    // These are defined here for context consumers
-    const fetchWorkOrderGroups = useCallback(async () => {
-        try {
-            const response = await apiService.get("/work-orders/get-work-order-groups");
-            setWorkOrderGroups(response.data);
-        } catch (error) {
-            console.error("Failed to fetch work order groups:", error);
-        }
-    }, []);
-
-    const fetchWorkOrderTypes = useCallback(async () => {
-        try {
-            const response = await apiService.get("/work-orders/work-order-types");
-            setWorkOrderTypes(response.data.data);
-        } catch (error) {
-            console.error("Failed to fetch work order types:", error);
-        }
-    }, []);
-
-    const fetchAccounts = useCallback(async () => {
-        try {
-            const response = await apiService.get("/taken-out-accounts/get-masterlist");
-            setAccounts(response.data);
-        } catch (error) {
-            console.error("Failed to fetch accounts:", error);
-        }
-    }, []);
-
-    const getAssignee = useCallback(async () => {
-        try {
-            const response = await apiService.get("/work-orders/get-assignee");
-            setAssignee(response.data);
-        } catch (error) {
-            console.error("Failed to fetch employees:", error);
-        }
-    }, []);
 
     return (
         <DocumentManagementContext.Provider
@@ -506,6 +533,14 @@ export const DocumentManagementProvider = ({ children }) => {
                 fetchWorkOrderTypes,
                 fetchAccounts,
                 getAssignee,
+                fetchWorkOrdersPaginated,
+                // Work Order state
+                assignee,
+                setAssignee,
+                workOrderTypes,
+                setWorkOrderTypes,
+                workOrders,
+                setWorkOrders,
             }}
         >
             {children}

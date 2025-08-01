@@ -44,7 +44,7 @@ const MyWorkOrders = () => {
     const handleRefresh = async () => {
         setIsRefreshing(true);
         try {
-            await fetchWorkOrders();
+            await fetchWorkOrderGroups();
         } finally {
             setIsRefreshing(false);
         }
@@ -66,6 +66,7 @@ const MyWorkOrders = () => {
         workOrdersSortOrder,
         setWorkOrdersSortOrder,
         fetchWorkOrders,
+        fetchWorkOrderGroups,
     } = useDocumentManagementContext();
     const [statusFilter, setStatusFilter] = useState("");
     const [viewMode, setViewMode] = useState("table");
@@ -87,7 +88,12 @@ const MyWorkOrders = () => {
     const [dueDateFilter, setDueDateFilter] = useState("");
     const [lastUpdatedFilter, setLastUpdatedFilter] = useState("");
 
-    // Removed local fetching effect, use context fetcher if needed
+    // Fetch work order groups on component mount
+    useEffect(() => {
+        if (fetchWorkOrderGroups) {
+            fetchWorkOrderGroups();
+        }
+    }, [fetchWorkOrderGroups]);
 
     const handlePageChange = (newPage) => {
         setWorkOrdersCurrentPage(newPage);
@@ -144,7 +150,11 @@ const MyWorkOrders = () => {
 
     // Client-side filtering function
     const getFilteredWorkOrderGroups = () => {
-        let filtered = [...workOrderGroups];
+        // Ensure workOrderGroups is always an array
+        const safeWorkOrderGroups = Array.isArray(workOrderGroups)
+            ? workOrderGroups
+            : [];
+        let filtered = [...safeWorkOrderGroups];
 
         // Filter by work order number (work order group id)
         if (workOrderNoFilter) {
@@ -186,7 +196,7 @@ const MyWorkOrders = () => {
                 if (!latestWO?.accounts) return false;
 
                 return latestWO.accounts.some((acc) =>
-                    (acc.property_name || acc.project || acc.account_name || "")
+                    (acc.property_name || "")
                         .toLowerCase()
                         .includes(projectFilter.toLowerCase())
                 );
@@ -536,6 +546,8 @@ const MyWorkOrders = () => {
     };
 
     console.log("Work Order Groups:", workOrderGroups);
+    console.log("Work Order Groups type:", typeof workOrderGroups);
+    console.log("Work Order Groups is array:", Array.isArray(workOrderGroups));
 
     const formatDate = (dateString) => {
         if (!dateString) return "N/A";
@@ -773,9 +785,7 @@ const MyWorkOrders = () => {
                                                               .map(
                                                                   (acc) =>
                                                                       acc.property_name ||
-                                                                      acc.project ||
-                                                                      acc.account_name ||
-                                                                      "No Property"
+                                                                      "No Project"
                                                               )
                                                               .filter(
                                                                   (v, i, a) =>
@@ -784,7 +794,7 @@ const MyWorkOrders = () => {
                                                                       ) === i
                                                               )
                                                               .join(", ")
-                                                        : "No Property"}
+                                                        : "No Project"}
                                                 </span>
                                             </div>
                                         </td>
@@ -1238,5 +1248,5 @@ const MyWorkOrders = () => {
             </div>
         </div>
     );
-}
+};
 export default MyWorkOrders;

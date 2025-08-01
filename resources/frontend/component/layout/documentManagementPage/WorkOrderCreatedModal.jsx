@@ -18,7 +18,7 @@ const WorkOrderCreatedModal = ({ isOpen, workOrderGroupId, onClose }) => {
                 <div className="text-center rounded-3xl mb-2 px-8 py-1 bg-[#067AC5]">
                     <div className="text-s font-thin text-white">
                         Work Order No.{" "}
-                        {workOrderGroupId ? `1000${workOrderGroupId}` : "N/A"}
+                        {workOrderGroupId ? `${workOrderGroupId}` : "N/A"}
                     </div>
                 </div>
                 <div className="text-center mb-6">

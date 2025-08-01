@@ -112,70 +112,8 @@ export const ContextProvider = ({ children }) => {
     const [customerDetails, setCustomerDetails] = useState([]);
     const [messageData, setMessageData] = useState([]);
     const [isTotalPages, setIsTotalPages] = useState(false);
-    const [assignee, setAssignee] = useState([]);
-    const [accounts, setAccounts] = useState([]);
-    const [workOrderTypes, setWorkOrderTypes] = useState([]);
-    const [workOrders, setWorkOrders] = useState([]);
-
-    const fetchWorkOrders = async () => {
-        try {
-            const response = await apiService.get(
-                "/work-orders/get-work-orders"
-            );
-            setWorkOrders(response.data);
-        } catch (error) {
-            console.error("Failed to fetch work orders:", error);
-        }
-    };
-
-    const fetchWorkOrderGroups = async () => {
-        try {
-            const response = await apiService.get(
-                "/work-orders/get-work-order-groups"
-            );
-            setWorkOrders(response.data);
-        } catch (error) {
-            console.error("Failed to fetch work order groups:", error);
-        }
-    };
-
-    const fetchWorkOrderTypes = async () => {
-        try {
-            const response = await apiService.get(
-                "/work-orders/work-order-types"
-            );
-            setWorkOrderTypes(response.data.data);
-        } catch (error) {
-            console.error("Failed to fetch work order types:", error);
-        }
-    };
-
-    const fetchAccounts = async () => {
-        try {
-            const response = await apiService.get(
-                "/taken-out-accounts/get-masterlist"
-            );
-            setAccounts(response.data);
-        } catch (error) {
-            console.error("Failed to fetch accounts:", error);
-        }
-    };
-
-    const getAssignee = async () => {
-        try {
-            const response = await apiService.get("/work-orders/get-assignee");
-            setAssignee(response.data);
-        } catch (error) {
-            console.error("Failed to fetch employees:", error);
-        }
-    };
-
-    useEffect(() => {
-        getAssignee();
-        fetchAccounts();
-        fetchWorkOrderTypes();
-        fetchWorkOrders();
-    }, []);
+    // Work order/account state and fetchers have been moved to DocumentManagementContext.
+    // Please use useDocumentManagementContext() to access work order, account, and assignee state and fetchers.
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -1146,15 +1084,6 @@ export const ContextProvider = ({ children }) => {
                 assignedToMeActive,
                 setSpecificAssigneeCsr,
                 specificAssigneeCsr,
-                assignee,
-                setAssignee,
-                accounts,
-                fetchWorkOrderTypes,
-                workOrderTypes,
-                workOrders,
-                fetchWorkOrders,
-                fetchWorkOrderGroups,
-                fetchAccounts,
                 canWrite,
             }}
         >

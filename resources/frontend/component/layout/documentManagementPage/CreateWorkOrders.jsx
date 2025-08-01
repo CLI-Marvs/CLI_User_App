@@ -17,18 +17,13 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     const [projectMilestoneStructure, setProjectMilestoneStructure] = useState(
         []
     );
-    const {
-        accounts,
-        assignee,
-        workOrderTypes,
-        fetchAccounts,
-        fetchWorkOrders,
-        user,
-    } = useStateContext();
-    const docMgmt = useDocumentManagementContext();
+    const { user } = useStateContext();
+    const { accounts, workOrderTypes, fetchWorkOrderGroups } =
+        useDocumentManagementContext();
 
     useEffect(() => {
-        fetchAccounts();
+        // Since accounts and workOrderTypes are managed by DocumentManagementContext,
+        // we don't need to fetch them separately here
     }, []);
 
     useEffect(() => {
@@ -76,7 +71,6 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
         if (!workOrderTypes || workOrderTypes.length === 0) {
             return null;
         }
-        // Assuming workOrderTypes are already sorted by sequence from the context/API
         return workOrderTypes[0];
     }, [workOrderTypes]);
 
@@ -179,7 +173,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                 const workOrderGroupId = response.data.data.work_order_group_id;
                 setWorkOrderId(workOrderGroupId || newWorkOrderId);
                 setIsModalOpen(true);
-                fetchWorkOrders();
+                if (fetchWorkOrderGroups) {
+                    fetchWorkOrderGroups();
+                }
 
                 if (response.status === 201) {
                     const newWorkOrderId = response.data.data.work_order_id;
@@ -187,7 +183,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                         response.data.data.work_order_group_id;
                     setWorkOrderId(workOrderGroupId || newWorkOrderId);
                     setIsModalOpen(true);
-                    fetchWorkOrders();
+                    if (fetchWorkOrderGroups) {
+                        fetchWorkOrderGroups();
+                    }
 
                     // LOG FEATURE: Create a log entry for the new work order
                     const logData = {
