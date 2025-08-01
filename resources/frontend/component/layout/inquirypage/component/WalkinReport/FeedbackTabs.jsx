@@ -2,21 +2,32 @@ import React, { useState, useEffect } from "react";
 import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
 import { paginate } from "@/component/layout/inquirypage/component/utils/paginate";
 
-const FeedbackTabs = ({ filteredData }) => {
+const FeedbackTabs = ({ filteredData, filters, activeTab, setActiveTab }) => {
     //States
-    const [activeTab, setActiveTab] = useState("queue-linked");
     const [standalonePage, setStandalonePage] = useState(1);
     const [queuePage, setQueuePage] = useState(1);
     const perPage = 5;
 
     //Hooks
-    // Inside your component, after state declarations:
+   //Manual switching of tabs
     useEffect(() => {
         if (activeTab === "queue-linked") setQueuePage(1);
         if (activeTab === "standalone") setStandalonePage(1);
         // eslint-disable-next-line
     }, [activeTab]);
-    
+
+    //Dynamic switching of tabs based on filters
+    useEffect(() => {
+        if (
+            filters?.sourceType === "Stand-alone" &&
+            activeTab !== "standalone"
+        ) {
+            setActiveTab("standalone");
+        } else {
+            setActiveTab("queue-linked");
+        }
+    }, [filters?.sourceType]);
+
     // Config object for tabs
     const tabConfig = {
         "queue-linked": {

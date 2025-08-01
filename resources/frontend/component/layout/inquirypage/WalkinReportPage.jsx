@@ -10,10 +10,11 @@ import { reportService } from "@/component/servicesApi/apiCalls/emojiWalkin/repo
 import emojis from "@/component/layout/inquirypage/constants/emoji";
 import WalkinReportSkeleton from "@/component/layout/inquirypage/component/WalkinReport/skeleton/WalkinReportSkeleton";
 import { useWalkinReportFilters } from "@/context/InquiryManagement/WalkinReportFilterProvider";
-
+import moment from "moment";
 
 const WalkinReportPage = () => {
     const { filters, setFilters, resetFilters } = useWalkinReportFilters();
+    const [activeTab, setActiveTab] = useState("queue-linked");
     const isFirstLoad = useRef(true);
     const { data: personTypes } = useQuery({
         queryKey: ["personTypes"],
@@ -21,10 +22,7 @@ const WalkinReportPage = () => {
         staleTime: 1000 * 60,
         cacheTime: 1000 * 60 * 5,
     });
-    const {
-        data: reportsData,
-        isLoading,
-    } = useQuery({
+    const { data: reportsData, isLoading } = useQuery({
         queryKey: ["reports", filters],
         queryFn: () => reportService.getReports(filters),
         refetchOnWindowFocus: false,
@@ -39,8 +37,15 @@ const WalkinReportPage = () => {
     const { data: branchesData } = useBranch();
 
     //Event handlers
+    //Handle apply filters
     const handleApply = (pendingFilters) => {
         setFilters(pendingFilters);
+    };
+
+    //Handle reset filters
+    const handleReset = () => {
+        resetFilters();
+        setActiveTab("queue-linked");
     };
 
     //Derive analytics/value from reportsData
@@ -102,7 +107,9 @@ const WalkinReportPage = () => {
                     rating: item.user_rating ?? "",
                     timestamp:
                         typeof item?.created_at === "string"
-                            ? item.created_at.slice(0, 19).replace("T", " ")
+                            ? moment(item.created_at).format(
+                                  "YYYY-MM-DD hh:mm:ss A"
+                              )
                             : "",
                 };
             }
@@ -128,7 +135,9 @@ const WalkinReportPage = () => {
                 rating: item?.rating_value ?? "",
                 timestamp:
                     typeof item?.created_at === "string"
-                        ? item.created_at.slice(0, 19).replace("T", " ")
+                        ? moment(item.created_at).format(
+                              "YYYY-MM-DD hh:mm:ss A"
+                          )
                         : "",
             };
         });
@@ -195,18 +204,23 @@ const WalkinReportPage = () => {
 
     return (
         <div className="min-h-screen bg-custombg p-6">
-            <div className="  mx-auto space-y-6">
+            <div className="mx-auto space-y-6">
                 <HeaderAndFilters
                     filters={filters}
                     onApply={handleApply}
-                    onReset={resetFilters}
+                    onReset={handleReset}
                     branchesData={branchesData}
                     personTypes={personTypes}
                     emojis={emojis}
                 />
                 <SummaryCards analytics={analytics || []} />
                 <ChartSection analytics={chartAnalytics} emojis={emojis} />
-                <FeedbackTabs filteredData={feedbackData} />
+                <FeedbackTabs
+                    filteredData={feedbackData}
+                    filters={filters}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                />
             </div>
         </div>
     );

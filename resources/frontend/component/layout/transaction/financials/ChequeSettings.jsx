@@ -244,16 +244,16 @@ const ChequeSettings = ({
                                             )
                                         }
                                     />
-                                    {errors["startDate"] && (
-                                        <span className="text-red-500 text-xs mt-1">
-                                            {errors["startDate"]}
-                                        </span>
-                                    )}
                                     <img
                                         src={DateLogo}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 w-[30px]"
                                     />
                                 </div>
+                                  {errors["startDate"] && (
+                                        <span className="text-red-500 text-xs mt-1">
+                                            {errors["startDate"]}
+                                        </span>
+                                    )}
                             </div>
                             {/* End Date */}
                             <div className="w-full">
