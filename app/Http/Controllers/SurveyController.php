@@ -373,6 +373,8 @@ class SurveyController extends Controller
                         }
                     }
 
+                    usort($optionCounts, fn($a, $b) => $a['id'] <=> $b['id']);
+
                     // 4. Final result
                     $questionsResult[] = [
                         'question_id' => $question->id,
@@ -452,6 +454,8 @@ class SurveyController extends Controller
                             }
                         }
                     }
+
+                    usort($optionCounts, fn($a, $b) => $a['id'] <=> $b['id']);
 
                     // 5. Store final result
                     $questionsResult[] = [
