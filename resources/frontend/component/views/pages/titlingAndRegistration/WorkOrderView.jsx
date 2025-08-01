@@ -94,6 +94,7 @@ const WorkOrderView = () => {
         fetchWorkOrderGroups,
         workOrders,
         fetchWorkOrders,
+        workOrdersLoading,
     } = useDocumentManagementContext();
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
@@ -111,18 +112,10 @@ const WorkOrderView = () => {
     const [isGroupDetailsLoading, setIsGroupDetailsLoading] = useState(false);
 
     useEffect(() => {
-        console.log("Fetching work order groups...");
         fetchWorkOrderGroups();
     }, [fetchWorkOrderGroups]);
 
     useEffect(() => {
-        console.log("workOrderGroups from context:", workOrderGroups);
-        console.log("workOrderGroups type:", typeof workOrderGroups);
-        console.log(
-            "workOrderGroups is array:",
-            Array.isArray(workOrderGroups)
-        );
-
         // Handle different possible data structures
         let processedData = [];
 
@@ -147,7 +140,6 @@ const WorkOrderView = () => {
             }
         }
 
-        console.log("Processed data:", processedData);
         setTableRowsData(processedData);
     }, [workOrderGroups]);
 
@@ -185,7 +177,6 @@ const WorkOrderView = () => {
     const filteredGroups = (
         Array.isArray(tableRowsData) ? tableRowsData : []
     ).filter((group) => {
-        console.log("Filtering group:", group); // Debug log
         const groupIdString = String(group.id || "");
 
         const searchMatch =
@@ -208,10 +199,6 @@ const WorkOrderView = () => {
     const startIndex = (currentPage - 1) * rowsPerPage;
     const endIndex = startIndex + rowsPerPage;
     const currentData = filteredGroups.slice(startIndex, endIndex);
-
-    console.log("filteredGroups:", filteredGroups);
-    console.log("currentData:", currentData);
-    console.log("currentData length:", currentData.length);
 
     const totalPages = Math.max(
         1,
@@ -257,9 +244,6 @@ const WorkOrderView = () => {
         setIsDeleting(true);
         try {
             await apiService.patch(`/work-orders/${workOrderId}/soft-delete`);
-            console.log(
-                `Work order ${workOrderId} soft deleted successfully. Reason: ${reason}`
-            );
             fetchWorkOrderGroups();
         } catch (error) {
             console.error("Failed to soft delete work order:", error);
@@ -283,9 +267,6 @@ const WorkOrderView = () => {
                 {
                     reason,
                 }
-            );
-            console.log(
-                `Work order group ${groupId} soft deleted successfully. Reason: ${reason}`
             );
             fetchWorkOrderGroups();
         } catch (error) {
@@ -336,7 +317,6 @@ const WorkOrderView = () => {
                 `/work-order-groups/${group.id}/details`
             );
             setGroupDetailsData(response.data);
-            console.log("Group details response:", response.data);
         } catch (err) {
             console.error("Error fetching group details:", err);
         } finally {
@@ -374,14 +354,6 @@ const WorkOrderView = () => {
 
     // Placeholder function for adding files (required by WorkOrderGroupDetailsModal)
     const handleAddFiles = (accountId, workOrder, stepName) => {
-        console.log(
-            "Add files for account:",
-            accountId,
-            "Work Order:",
-            workOrder,
-            "Step:",
-            stepName
-        );
         handleCloseGroupDetailsModal();
     };
 
@@ -630,162 +602,190 @@ const WorkOrderView = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {currentData
-                            .filter(
-                                (group) =>
-                                    group &&
-                                    typeof group === "object" &&
-                                    group.id !== undefined &&
-                                    group.id !== null
-                            )
-                            .map((group, idx) => (
-                                <React.Fragment key={group.id}>
-                                    {/* Main Group Row */}
-                                    <tr
-                                        className={`transition-all duration-200 ease-in-out ${
-                                            idx % 2 === 0
-                                                ? "bg-gradient-to-r from-slate-50 to-gray-50"
-                                                : "bg-white"
-                                        } hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 group cursor-pointer`}
-                                        onClick={() =>
-                                            handleOpenGroupDetailsModal(group)
-                                        }
-                                    >
-                                        <td className="px-3 py-2 font-bold text-base text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
-                                            <div className="flex items-center space-x-2">
-                                                <div className="w-2 h-2 bg-blue-500 rounded-full opacity-70"></div>
-                                                <span className="font-mono tracking-wide">
-                                                    {String(group.id).padStart(
-                                                        7
-                                                    )}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
-                                            <div className="flex items-center space-x-1">
-                                                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                                                <span
-                                                    className={`font-medium px-2 py-1 rounded-full text-xs ${
-                                                        group.status ===
-                                                        "Complete"
-                                                            ? "bg-green-100 text-green-800"
-                                                            : group.status ===
-                                                              "In Progress"
-                                                            ? "bg-yellow-100 text-yellow-800"
-                                                            : group.status ===
-                                                              "Overdue"
-                                                            ? "bg-red-100 text-red-800"
-                                                            : "bg-gray-100 text-gray-800"
-                                                    }`}
-                                                >
-                                                    {group.status}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
-                                            <div className="flex items-center space-x-1">
-                                                <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
-                                                <span className="font-medium">
-                                                    {group.created_at
-                                                        ? new Date(
-                                                              group.created_at
-                                                          )
-                                                              .toISOString()
-                                                              .slice(0, 10)
-                                                        : "-"}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
-                                            <div className="flex items-center space-x-1">
-                                                <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                                {(() => {
-                                                    console.log(
-                                                        "Due Date Raw:",
-                                                        group.due_date,
-                                                        "Type:",
-                                                        typeof group.due_date
-                                                    );
-                                                    return (
-                                                        <span className="font-medium">
-                                                            {group.due_date
-                                                                ? typeof group.due_date ===
-                                                                  "string"
-                                                                    ? group.due_date.slice(
-                                                                          0,
-                                                                          10
-                                                                      )
-                                                                    : (() => {
-                                                                          // Add 1 day to counteract timezone offset
-                                                                          const d =
-                                                                              new Date(
-                                                                                  group.due_date
-                                                                              );
-                                                                          d.setDate(
-                                                                              d.getDate() +
-                                                                                  1
-                                                                          );
-                                                                          const year =
-                                                                              d.getFullYear();
-                                                                          const month =
-                                                                              String(
-                                                                                  d.getMonth() +
+                        {!workOrdersLoading && currentData.length === 0 ? (
+                            <tr>
+                                <td
+                                    colSpan="9"
+                                    className="px-6 py-12 text-center text-gray-500"
+                                >
+                                    <div className="flex flex-col items-center justify-center">
+                                        <svg
+                                            className="w-12 h-12 text-gray-300 mb-4"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={1.5}
+                                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                            />
+                                        </svg>
+                                        <p className="text-lg font-medium text-gray-400">
+                                            No work orders found
+                                        </p>
+                                        <p className="text-sm text-gray-400">
+                                            Create a new work order to get
+                                            started
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : (
+                            currentData
+                                .filter(
+                                    (group) =>
+                                        group &&
+                                        typeof group === "object" &&
+                                        group.id !== undefined &&
+                                        group.id !== null
+                                )
+                                .map((group, idx) => (
+                                    <React.Fragment key={group.id}>
+                                        {/* Main Group Row */}
+                                        <tr
+                                            className={`transition-all duration-200 ease-in-out ${
+                                                idx % 2 === 0
+                                                    ? "bg-gradient-to-r from-slate-50 to-gray-50"
+                                                    : "bg-white"
+                                            } hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 group cursor-pointer`}
+                                            onClick={() =>
+                                                handleOpenGroupDetailsModal(
+                                                    group
+                                                )
+                                            }
+                                        >
+                                            <td className="px-3 py-2 font-bold text-base text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
+                                                <div className="flex items-center space-x-2">
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full opacity-70"></div>
+                                                    <span className="font-mono tracking-wide">
+                                                        {String(
+                                                            group.id
+                                                        ).padStart(7)}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                                <div className="flex items-center space-x-1">
+                                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                    <span
+                                                        className={`font-medium px-2 py-1 rounded-full text-xs ${
+                                                            group.status ===
+                                                            "Complete"
+                                                                ? "bg-green-100 text-green-800"
+                                                                : group.status ===
+                                                                  "In Progress"
+                                                                ? "bg-yellow-100 text-yellow-800"
+                                                                : group.status ===
+                                                                  "Overdue"
+                                                                ? "bg-red-100 text-red-800"
+                                                                : "bg-gray-100 text-gray-800"
+                                                        }`}
+                                                    >
+                                                        {group.status}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                                <div className="flex items-center space-x-1">
+                                                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                                                    <span className="font-medium">
+                                                        {group.created_at
+                                                            ? new Date(
+                                                                  group.created_at
+                                                              )
+                                                                  .toISOString()
+                                                                  .slice(0, 10)
+                                                            : "-"}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                                <div className="flex items-center space-x-1">
+                                                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                                    {(() => {
+                                                        return (
+                                                            <span className="font-medium">
+                                                                {group.due_date
+                                                                    ? typeof group.due_date ===
+                                                                      "string"
+                                                                        ? group.due_date.slice(
+                                                                              0,
+                                                                              10
+                                                                          )
+                                                                        : (() => {
+                                                                              // Add 1 day to counteract timezone offset
+                                                                              const d =
+                                                                                  new Date(
+                                                                                      group.due_date
+                                                                                  );
+                                                                              d.setDate(
+                                                                                  d.getDate() +
                                                                                       1
-                                                                              ).padStart(
-                                                                                  2,
-                                                                                  "0"
                                                                               );
-                                                                          const day =
-                                                                              String(
-                                                                                  d.getDate()
-                                                                              ).padStart(
-                                                                                  2,
-                                                                                  "0"
-                                                                              );
-                                                                          return `${year}-${month}-${day}`;
-                                                                      })()
-                                                                : "-"}
-                                                        </span>
-                                                    );
-                                                })()}
-                                            </div>
-                                        </td>
-                                        <td className="px-3 py-2 text-center">
-                                            <div className="flex items-center justify-center gap-2">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        setSelectedWorkOrderForEdit(
-                                                            group
-                                                                .work_orders?.[0]
+                                                                              const year =
+                                                                                  d.getFullYear();
+                                                                              const month =
+                                                                                  String(
+                                                                                      d.getMonth() +
+                                                                                          1
+                                                                                  ).padStart(
+                                                                                      2,
+                                                                                      "0"
+                                                                                  );
+                                                                              const day =
+                                                                                  String(
+                                                                                      d.getDate()
+                                                                                  ).padStart(
+                                                                                      2,
+                                                                                      "0"
+                                                                                  );
+                                                                              return `${year}-${month}-${day}`;
+                                                                          })()
+                                                                    : "-"}
+                                                            </span>
                                                         );
-                                                        setIsEditModalOpen(
-                                                            true
-                                                        );
-                                                    }}
-                                                    className="p-1 text-slate-500 hover:text-green-600 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-300 rounded-lg transition-all duration-200"
-                                                    title="Edit Work Order"
-                                                >
-                                                    <EditIcon />
-                                                </button>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleOpenDeleteModal(
-                                                            group
-                                                        );
-                                                    }}
-                                                    disabled={isDeleting}
-                                                    className="p-1 text-slate-500 hover:text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    title="Delete Work Order Group"
-                                                >
-                                                    <DeleteIcon />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </React.Fragment>
-                            ))}
+                                                    })()}
+                                                </div>
+                                            </td>
+                                            <td className="px-3 py-2 text-center">
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setSelectedWorkOrderForEdit(
+                                                                group
+                                                                    .work_orders?.[0]
+                                                            );
+                                                            setIsEditModalOpen(
+                                                                true
+                                                            );
+                                                        }}
+                                                        className="p-1 text-slate-500 hover:text-green-600 hover:bg-green-50 focus:outline-none focus:ring-2 focus:ring-green-300 rounded-lg transition-all duration-200"
+                                                        title="Edit Work Order"
+                                                    >
+                                                        <EditIcon />
+                                                    </button>
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handleOpenDeleteModal(
+                                                                group
+                                                            );
+                                                        }}
+                                                        disabled={isDeleting}
+                                                        className="p-1 text-slate-500 hover:text-red-600 hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-300 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        title="Delete Work Order Group"
+                                                    >
+                                                        <DeleteIcon />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </React.Fragment>
+                                ))
+                        )}
                     </tbody>
                 </table>
 

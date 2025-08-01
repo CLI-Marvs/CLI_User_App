@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\TakenOutAccountsImport;
+use App\Imports\FlexibleTakenOutAccountsImport;
 
 class TakenOutAccountController extends Controller
 {
@@ -51,7 +52,7 @@ class TakenOutAccountController extends Controller
     public function uploadTakenOutAccounts(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'file' => 'required|mimes:xlsx,xls',
+            'file' => 'required|mimes:xlsx,xls,csv',
         ]);
 
         \Log::info('Uploaded File MIME Type:', ['mime' => $request->file('file')->getMimeType()]);
@@ -64,8 +65,25 @@ class TakenOutAccountController extends Controller
         try {
             $file = $request->file('file');
 
-            Excel::import(new TakenOutAccountsImport, $file);
-            return response()->json(['message' => 'Data uploaded successfully!'], 200);
+            // Use the flexible import class
+            $import = new FlexibleTakenOutAccountsImport();
+            Excel::import($import, $file);
+
+            // Get import statistics
+            $stats = $import->getImportStats();
+
+            $message = "Data uploaded successfully! ";
+            $message .= "Imported: {$stats['imported']} records";
+
+            if ($stats['errors'] > 0) {
+                $message .= ", Errors: {$stats['errors']} records";
+                \Log::warning('Import completed with errors', $stats);
+            }
+
+            return response()->json([
+                'message' => $message,
+                'stats' => $stats
+            ], 200);
 
         } catch (\Exception $e) {
             \Log::error('Failed to upload data:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);

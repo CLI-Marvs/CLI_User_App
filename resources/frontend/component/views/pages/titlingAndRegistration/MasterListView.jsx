@@ -19,7 +19,10 @@ import CheckboxSvg from "../../../../../../public/Images/checkbox.svg";
 import Checkbox1Svg from "../../../../../../public/Images/CheckBox1.svg";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import {
+    ChevronDownIcon,
+    InformationCircleIcon,
+} from "@heroicons/react/24/outline";
 import Filter from "../../../../../../public/Images/filterIcon.svg";
 import DateLogo from "../../../../../../public/Images/Date_range.svg";
 import DatePicker from "react-datepicker";
@@ -384,6 +387,21 @@ export default function PaginatedTable() {
             toast.error("No file selected.");
             return;
         }
+
+        // Validate file type
+        const allowedTypes = [
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // .xlsx
+            "application/vnd.ms-excel", // .xls
+            "text/csv", // .csv
+        ];
+
+        if (!allowedTypes.includes(file.type)) {
+            toast.error(
+                "Please upload a valid Excel (.xlsx, .xls) or CSV file."
+            );
+            return;
+        }
+
         setIsFileUploading(true);
 
         try {
@@ -400,7 +418,21 @@ export default function PaginatedTable() {
             );
 
             if (response.status === 200) {
-                toast.success("Data uploaded successfully!");
+                const { message, stats } = response.data;
+
+                // Show success message with statistics
+                toast.success(message);
+
+                // Show additional info if there were errors
+                if (stats && stats.errors > 0) {
+                    setTimeout(() => {
+                        toast.warn(
+                            `${stats.errors} records had issues and were skipped. Check the logs for details.`,
+                            { autoClose: 5000 }
+                        );
+                    }, 1000);
+                }
+
                 await fetchMasterList();
                 // await fetchLocalMasterListData();
             } else {
@@ -412,11 +444,11 @@ export default function PaginatedTable() {
             }
         } catch (error) {
             console.error("File upload error:", error);
-            toast.error(
-                `Failed to upload data: ${
-                    error.response?.data?.message || "Unknown error"
-                }`
-            );
+            const errorMessage =
+                error.response?.data?.error ||
+                error.response?.data?.message ||
+                "Unknown error occurred";
+            toast.error(`Failed to upload data: ${errorMessage}`);
         } finally {
             setIsFileUploading(false);
             if (event.target) event.target.value = null;
@@ -1151,7 +1183,7 @@ export default function PaginatedTable() {
                             <input
                                 id="masterListFileUpload"
                                 type="file"
-                                accept=".xlsx, .xls"
+                                accept=".xlsx, .xls, .csv"
                                 onChange={handleFileUpload}
                                 className="hidden"
                             />
