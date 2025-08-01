@@ -12,23 +12,24 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\BeforeSheet;
 
-
-
 class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMapping, WithEvents
-
 {
     use Exportable;
 
     protected $filters;
+    protected $userId;
+    protected $isAdmin;
 
-    public function __construct(array $filters = [])
+    public function __construct(array $filters = [], bool $isAdmin, int $userId)
     {
         $this->filters = $filters;
+        $this->userId = $userId;
+        $this->isAdmin = $isAdmin;
     }
 
     public function query()
     {
-        return PrintedCheck::query()
+        $query = PrintedCheck::query()
             ->select(
                 'printed_check.check_no',
                 'printed_check.check_amount',
@@ -41,8 +42,15 @@ class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMap
             ->join('check_stream_banks', 'check_stream_banks.id', '=', 'printed_check.drawee_bank_id')
             ->join('entities', 'entities.id', '=', 'printed_check.entity_id')
             ->orderByDesc('printed_check.created_at')
+            ->orderByDesc('printed_check.id')
             ->active()
             ->filter($this->filters['filter']);
+
+        if (!$this->isAdmin) {
+            $query->where('printed_check.created_by', $this->userId);
+        }
+
+        return $query;
     }
 
     public function registerEvents(): array
@@ -54,6 +62,10 @@ class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMap
                     ->join('entities', 'entities.id', '=', 'printed_check.entity_id')
                     ->active()
                     ->filter($this->filters['filter']);
+
+                if (!$this->isAdmin) {
+                    $query->where('printed_check.created_by', $this->userId);
+                }
 
                 $totalRecords = $query->count();
                 $totalAmount = $query->sum('printed_check.check_amount');
@@ -81,6 +93,7 @@ class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMap
             'Remarks',
         ];
     }
+
     public function map($row): array
     {
         return [

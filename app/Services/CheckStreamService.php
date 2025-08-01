@@ -13,9 +13,9 @@ class CheckStreamService
         $this->repository = $repository;
     }
 
-    public function getPrintedChecks(array $filter)
+    public function getPrintedChecks(array $filter, int $userId)
     {
-        return $this->repository->getPrintedChecks($filter);
+        return $this->repository->getPrintedChecks($filter, $userId);
     }
 
     public function storePrintedCheck(array $data, int $id)

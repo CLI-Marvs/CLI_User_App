@@ -89,8 +89,6 @@ export default function AdminSettings() {
         return null;
     };
 
-    console.log("flteredItems", filteredItems);
-
     return (
         <div className="w-full mx-auto p-6 space-y-6">
             <div className="bg-white p-6 rounded shadow">
