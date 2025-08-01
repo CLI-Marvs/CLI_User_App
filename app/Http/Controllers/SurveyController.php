@@ -7,6 +7,7 @@ use App\Models\Survey_forms;
 use App\Models\Survey_list;
 use App\Models\Survey_questions;
 use App\Models\SurveyAnswer;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -73,7 +74,6 @@ class SurveyController extends Controller
         }
 
         $existingSurvey->update([
-            'survey_title' => $surveyData[0]['surveyTitle'] ?? 'Untitled Form',
             'status' => $surveyData[0]['status'],
         ]);
 
@@ -161,6 +161,8 @@ class SurveyController extends Controller
 
         // Delete forms not in newFormIds
         $existingSurvey->forms()->whereNotIn('id', $newFormIds)->delete();
+
+        $existingSurvey->touch();
 
         return response()->json(['message' => 'Survey updated successfully']);
     }
