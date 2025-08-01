@@ -23,6 +23,8 @@ const FeedbackTabs = ({ filteredData, filters, activeTab, setActiveTab }) => {
             activeTab !== "standalone"
         ) {
             setActiveTab("standalone");
+        } else {
+            setActiveTab("queue-linked");
         }
     }, [filters?.sourceType]);
 
