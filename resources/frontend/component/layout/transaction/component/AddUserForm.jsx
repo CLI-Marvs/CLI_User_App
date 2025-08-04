@@ -2,8 +2,9 @@ import { useState } from "react";
 import { Check, X } from "lucide-react";
 import { useStateContext } from "@/context/contextprovider";
 import SelectInput from "@/component/shared/components/SelectInput";
+import { showToast } from "@/util/toastUtil";
 
-export function AddUserForm({ onSubmit, onCancel }) {
+export function AddUserForm({ onSubmit, onCancel, users }) {
     const { allEmployees } = useStateContext();
     const [formData, setFormData] = useState({
         employee_id: null,
@@ -17,6 +18,12 @@ export function AddUserForm({ onSubmit, onCancel }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        if(users.map((user) => user.employee_id).includes(formData.employee_id)) {
+            showToast("User already exists", "error");
+            return;
+        }
+    
         if (!formData.employee_id || !formData.role) return;
 
         onSubmit({

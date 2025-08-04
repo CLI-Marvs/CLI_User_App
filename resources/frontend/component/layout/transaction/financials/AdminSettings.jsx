@@ -63,13 +63,13 @@ export default function AdminSettings() {
             },
         });
     };
-
     const renderForm = () => {
         if (activeTab === "banks")
             return (
                 <AddBankForm
                     onSubmit={handleCreate}
                     onCancel={() => setShowForm(false)}
+                    banks={items}
                 />
             );
         if (activeTab === "users")
@@ -77,6 +77,7 @@ export default function AdminSettings() {
                 <AddUserForm
                     onSubmit={handleCreate}
                     onCancel={() => setShowForm(false)}
+                    users={items}
                 />
             );
         if (activeTab === "payorders")
@@ -84,6 +85,7 @@ export default function AdminSettings() {
                 <AddPayToOrderForm
                     onSubmit={handleCreate}
                     onCancel={() => setShowForm(false)}
+                    payToOrders={items}
                 />
             );
         return null;

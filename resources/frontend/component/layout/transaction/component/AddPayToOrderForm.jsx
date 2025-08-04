@@ -1,14 +1,20 @@
 import { useState } from "react";
 import { Check, X } from "lucide-react";
 import { showToast } from "@/util/toastUtil";
+import { valueExistsFuzzy } from "../utils/stringChecker";
 
-export function AddPayToOrderForm({ onSubmit, onCancel }) {
+export function AddPayToOrderForm({ onSubmit, onCancel, payToOrders }) {
   const [formData, setFormData] = useState({
     name: ""
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if(valueExistsFuzzy(payToOrders, formData.name, "payTo")) {
+      showToast("Pay To Order already exists", "error");
+      return;
+    }
+    
     if (!formData.name) return;
 
     onSubmit({

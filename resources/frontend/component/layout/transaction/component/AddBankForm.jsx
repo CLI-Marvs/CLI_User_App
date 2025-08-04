@@ -1,13 +1,20 @@
 import { useState } from "react";
 import { Check, X } from "lucide-react";
+import { showToast } from "@/util/toastUtil";
+import { valueExistsFuzzy } from "../utils/stringChecker";
 
-export function AddBankForm({ onSubmit, onCancel }) {
+export function AddBankForm({ onSubmit, onCancel, banks }) {
   const [formData, setFormData] = useState({
     bank_name: "",
   });
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if(valueExistsFuzzy(banks, formData.bank_name, "bank_name")) {
+      showToast("Bank already exists", "error");
+      return;
+    };
     if (!formData.bank_name) return;
 
     onSubmit({
