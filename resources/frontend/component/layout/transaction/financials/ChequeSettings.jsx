@@ -9,27 +9,9 @@ import {
 } from "../hooks/useTransactionQueries";
 import CustomInput from "@/component/Input/CustomInput";
 import useValidation from "../hooks/useValidation";
+import { requiredKeys } from "../constant/requiredKeys";
 
-const requiredKeys = [
-    "payTo",
-    "payor_name",
-    "contract_number",
-    "checkBaseNo",
-    "total_purchased_amount",
-    "totalMonths",
-    "amount",
-    "bank_name",
-    "startDate",
-];
-
-
-const ChequeSettings = ({
-    handleCheck,
-    data,
-    setData,
-    endDate,
-    setIsError,
-}) => {
+const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
     const { data: checkStreamBanks } = useCheckStreamBanks();
     const { data: checkStreamEntities } = useCheckEntities();
     const { errors, validateField, validateAll, clearError } = useValidation();
@@ -40,12 +22,17 @@ const ChequeSettings = ({
             fieldsToValidate[key] = data[key];
         });
 
-        const isValid = validateAll(fieldsToValidate);
-        if (isValid) {
-            setIsError(true);
+        validateAll(fieldsToValidate);
+    };
+    const handleFieldChange = (fieldKey, value, customOnChange) => {
+        clearError(fieldKey);
+
+        if (customOnChange) {
+            customOnChange(fieldKey, value);
+        } else {
+            setData((prev) => ({ ...prev, [fieldKey]: value }));
         }
     };
-
 
     const fields = [
         {
@@ -59,6 +46,7 @@ const ChequeSettings = ({
             type: "number",
             key: "contract_number",
             placeholder: "Enter contract number",
+            onChange: handleCheck,
         },
         {
             label: "Check Number:",
@@ -72,7 +60,6 @@ const ChequeSettings = ({
             type: "text",
             key: "total_purchased_amount",
             inputMode: "decimal",
-            pattern: "^\\d+(\\.\\d{0,2})?$",
             onChange: handleCheck,
             placeholder: "Enter total equity amount",
         },
@@ -88,9 +75,7 @@ const ChequeSettings = ({
             type: "text",
             key: "amount",
             inputMode: "decimal",
-            pattern: "^\\d+(\\.\\d{0,2})?$",
-            onChange: (field, value) =>
-                setData({ ...data, [field]: value.replace(/[^0-9.]/g, "") }),
+            onChange: handleCheck,
             placeholder: "Enter monthly amortization",
         },
     ];
@@ -114,21 +99,12 @@ const ChequeSettings = ({
                 placeholder={placeholder}
                 pattern={pattern}
                 inputMode={inputMode}
-                onBlur={() => validateField(key, data[key])}
-                onChange={(e) => {
-                    const value = e.target.value;
-                    clearError(key);
-                    const updatedData = {
-                        ...data,
-                        [key]: value,
-                    };
-                    onChange ? onChange(key, value) : setData(updatedData);
-                    const allFieldsFilled = requiredKeys.every(
-                        (fieldKey) =>
-                            updatedData[fieldKey]?.toString().trim() !== ""
-                    );
-                    setIsError(allFieldsFilled);
+                onBlur={() => {
+                    validateField(key, data[key]);
                 }}
+                onChange={(e) =>
+                    handleFieldChange(key, e.target.value, onChange)
+                }
                 className={`w-full p-3 border rounded-md outline-none ${
                     errors[key]
                         ? "border-red-500 focus:ring-2 focus:ring-red-300"
@@ -164,15 +140,11 @@ const ChequeSettings = ({
                             value={data.bank_name}
                             onChange={(val) => {
                                 clearError("bank_name");
-                                const updatedData = { ...data, bank_name: val.id };
+                                const updatedData = {
+                                    ...data,
+                                    bank_name: val.id,
+                                };
                                 setData(updatedData);
-                                const allFieldsFilled = requiredKeys.every(
-                                    (fieldKey) =>
-                                        updatedData[fieldKey]
-                                            ?.toString()
-                                            .trim() !== ""
-                                );
-                                setIsError(allFieldsFilled);
                             }}
                             onBlur={() =>
                                 validateField("bank_name", data.bank_name)
@@ -198,19 +170,12 @@ const ChequeSettings = ({
                             value={data.entity_id}
                             onChange={(val) => {
                                 clearError("payTo");
-                                const updatedData = { 
-                                    ...data, 
+                                const updatedData = {
+                                    ...data,
                                     payTo: val.payTo,
-                                    entity_id: val.id
+                                    entity_id: val.id,
                                 };
                                 setData(updatedData);
-                                const allFieldsFilled = requiredKeys.every(
-                                    (fieldKey) =>
-                                        updatedData[fieldKey]
-                                            ?.toString()
-                                            .trim() !== ""
-                                );
-                                setIsError(allFieldsFilled);
                             }}
                             onBlur={() => validateField("payTo", data.payTo)}
                             valueKey="id"
@@ -264,16 +229,6 @@ const ChequeSettings = ({
                                                     startDate: formatted,
                                                 };
                                                 setData(updatedData);
-                                                const allFieldsFilled =
-                                                    requiredKeys.every(
-                                                        (fieldKey) =>
-                                                            updatedData[
-                                                                fieldKey
-                                                            ]
-                                                                ?.toString()
-                                                                .trim() !== ""
-                                                    );
-                                                setIsError(allFieldsFilled);
                                             }
                                         }}
                                         onBlur={() =>
