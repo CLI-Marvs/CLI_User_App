@@ -26,7 +26,6 @@ export const useChequeData = () => {
 
     const handleCheck = (field, value, index = null) => {
         let updatedData = { ...data };
-
         let cleanedValue = value.replace(/[^0-9.]/g, "");
 
         const totalAmount = parseFloat(
@@ -34,9 +33,8 @@ export const useChequeData = () => {
                 ? cleanedValue
                 : (data.total_purchased_amount || "0").replace(/,/g, "")
         );
-        const months = parseInt(
-            field === "totalMonths" ? cleanedValue : data.totalMonths
-        );
+
+        let months;
 
         if (field === "contract_number") {
             updatedData.contract_number = value.replace(/\D/g, "").slice(0, 13);
@@ -66,7 +64,13 @@ export const useChequeData = () => {
         }
 
         if (field === "totalMonths") {
-            updatedData.totalChecks = cleanedValue;
+            const limitedValue = value.replace(/\D/g, "").slice(0, 3);
+            updatedData.totalChecks = limitedValue;
+            updatedData.totalMonths = limitedValue;
+            // Use the limited value for calculation
+            months = parseInt(limitedValue);
+        } else {
+            months = parseInt(data.totalMonths);
         }
 
         if (!isNaN(totalAmount) && months && field !== "amount") {
