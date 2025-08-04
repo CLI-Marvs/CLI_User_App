@@ -42,13 +42,12 @@ export const useSaveView = (subFeatureId) => {
     });
 };
 
-
 export const useTransactionsExport = () => {
     return useMutation({
         mutationFn: async ({ data }) => {
             return await transaction.exportTransactions(data);
         },
-    })
+    });
 };
 
 export const useSetDefaultView = (subFeatureId, setHasManuallySelected) => {
@@ -87,6 +86,39 @@ export const useTransactionReports = ({ activeTab, dateRange }) => {
     });
 };
 
+export const useCreateBank = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data) => transaction.createCheckStreamBank(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["check-stream-banks"]);
+        },
+    });
+};
+
+export const useUpdateBank = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, data }) =>
+            transaction.updateCheckStreamBank(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["check-stream-banks"]);
+        },
+    });
+};
+
+export const useDeleteBank = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id) => transaction.deleteCheckStreamBank(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["check-stream-banks"]);
+        },
+    });
+};
 
 export const useCheckStreamBanks = () => {
     return useQuery({
@@ -94,10 +126,51 @@ export const useCheckStreamBanks = () => {
         queryFn: async () => {
             return await transaction.retrieveCheckStreamBanks();
         },
-        staleTime: 5 * 60 * 1000,
     });
 };
 
+export const useCheckEntities = () => {
+    return useQuery({
+        queryKey: ["check-stream-entities"],
+        queryFn: async () => {
+            return await transaction.retrieveCheckEntities();
+        },
+    });
+};
+
+export const useCreateEntity = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data) => transaction.createCheckEntity(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["check-stream-entities"]);
+        },
+    });
+};
+
+export const useUpdateEntity = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, data }) =>
+            transaction.updateCheckStreamEntity(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["check-stream-entities"]);
+        },
+    });
+};
+
+export const useDeleteEntity = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id) => transaction.deleteCheckStreamEntity(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["check-stream-entities"]);
+        },
+    });
+};
 
 export const useSaveChecks = () => {
     const queryClient = useQueryClient();
@@ -111,13 +184,53 @@ export const useSaveChecks = () => {
     });
 };
 
-
 export const useChecksExport = () => {
     return useMutation({
         mutationFn: async ({ data }) => {
             return await transaction.exportChecks(data);
         },
-    })
+    });
 };
 
+export const useCheckStreamAdminSettings = () => {
+    return useQuery({
+        queryKey: ["check-stream-admin-settings"],
+        queryFn: async () => {
+            return await transaction.retrieveCheckStreamAdminSettings();
+        },
+    });
+};
 
+export const useCreateCheckStreamAdminSettings = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data) => transaction.createCheckStreamAdminSettings(data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["check-stream-admin-settings"]);
+        },
+    });
+};
+
+export const useUpdateCheckStreamAdminSettings = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, data }) =>
+            transaction.updateCheckStreamAdminSettings(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["check-stream-admin-settings"]);
+        },
+    });
+};
+
+export const useDeleteCheckStreamAdminSettings = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id) => transaction.deleteCheckStreamAdminSettings(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries(["check-stream-admin-settings"]);
+        },
+    });
+};

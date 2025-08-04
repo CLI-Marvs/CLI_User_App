@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Exports\ChecksExport;
 use App\Http\Requests\StoreChequeRequest;
+use App\Models\CheckStreamAdminSettings;
 use App\Models\CheckStreamBanks;
+use App\Models\Entity;
 use App\Models\PrintedCheck;
 use App\Services\CheckStreamService;
 use Illuminate\Http\Request;
@@ -24,9 +26,19 @@ class CheckStreamController extends Controller
     public function index(Request $request)
     {
         try {
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json([
+                    'message' => 'Unauthorized',
+                ], 401);
+            }
+
+            $userId = $user->id;
+
             $filter = $request->only('start_date', 'end_date', 'check_number', 'printed_start_date', 'printed_end_date');
 
-            $query = $this->checkService->getPrintedChecks($filter);
+            $query = $this->checkService->getPrintedChecks($filter, $userId);
 
             $totalCheckAmount = (clone $query)->sum('check_amount');
             $response = $query->paginate(20);
@@ -92,7 +104,7 @@ class CheckStreamController extends Controller
                 'check_date' => $data['check_date'],
                 'check_amount' => $data['check_amount'],
                 'drawee_bank_id' => $data['drawee_bank_id'],
-                'beneficiary_name' => $data['beneficiary_name'],
+                'entity_id' => $data['entity_id'],
                 'payor_name' => $data['payor_name'],
                 'remarks' => $data['remarks'],
                 'last_updated_by' => $userId,
@@ -132,22 +144,19 @@ class CheckStreamController extends Controller
         }
     }
 
-
-
-    public function getCheckStreamBanks()
-    {
-        $response = CheckStreamBanks::select('id', 'bank_name')->get();
-        return response()->json([
-            'response_message' => 'Data retrieved successfully',
-            'data' => $response
-        ]);
-    }
-
     public function exportChecks(Request $request)
     {
         try {
+            $user = $request->user();
+
+            if (!$user) {
+                return response()->json(['message' => 'Unauthorized'], 401);
+            }
+            $userId = $user->id;
+            $adminRole = CheckStreamAdminSettings::where('employee_id', $userId)->first();
+            $isAdmin = $adminRole && $adminRole->role === 'admin';
             $data = $request->all();
-            return Excel::download(new ChecksExport($data), 'Printed Checkss.csv');
+            return Excel::download(new ChecksExport($data, $isAdmin, $userId), 'Printed Checkss.csv');
         } catch (\Throwable $e) {
             return response()->json([
                 'message' => 'Error occurred.',

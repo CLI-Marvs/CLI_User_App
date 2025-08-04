@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useParams } from 'react-router-dom';
+import { useParams } from "react-router-dom";
 import CLILogo from "../../../../../public/Images/CLILogo.png";
 import Kent from "../../../../../public/Images/kent.png";
 import apiService from "../../servicesApi/apiService";
@@ -13,16 +13,15 @@ import { startsWith } from "lodash";
 import Alert from "@mui/material/Alert";
 import { MdOutlineMail } from "react-icons/md";
 import FeedbackModal from "./FeedbackModal";
-import Skeleton from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 import { useSurvey } from "../../../context/Survey/SurveyContext";
 
 const Navbar = () => {
-
     const { id } = useParams();
 
-
-    const { data, ticketId, navBarData, loading, user, getNavBarData } = useStateContext();
+    const { data, ticketId, navBarData, loading, user, getNavBarData } =
+        useStateContext();
     const { survey_title, fetchSurveyTitle, survey_loading } = useSurvey();
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
@@ -42,7 +41,6 @@ const Navbar = () => {
             fetchSurveyTitle(id);
         }
     }, [id]);
-
 
     useEffect(() => {
         if (isOpen) {
@@ -158,7 +156,6 @@ const Navbar = () => {
                 );
             }
 
-
             if (value.toLowerCase() === "transaction") {
                 breadcrumbLabel = "Transaction Management";
                 // Non-linkable
@@ -250,11 +247,17 @@ const Navbar = () => {
                 );
             }
 
-
             if (id && value === id) {
                 return (
-                    <span key={routeTo} className="text-custom-solidgreen cursor-default">
-                        {survey_loading ? <Skeleton width={200} /> : (survey_title || id)}
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {survey_loading ? (
+                            <Skeleton width={200} />
+                        ) : (
+                            survey_title || id
+                        )}
                     </span>
                 );
             }
@@ -293,8 +296,14 @@ const Navbar = () => {
             if (value.toLowerCase() === "bank-statements") {
                 breadcrumbLabel = "Bank Statements";
             }
-              if (value.toLowerCase() === "check-generator") {
+            if (value.toLowerCase() === "check-generator") {
                 breadcrumbLabel = "Check Generator";
+            }
+            if (value.toLowerCase() === "admin-settings") {
+                breadcrumbLabel = "Admin Settings";
+            }
+              if (value.toLowerCase() === "check-writer") {
+                breadcrumbLabel = "Check Writer";
             }
 
             if (value.toLowerCase() === "receivables") {
@@ -343,7 +352,8 @@ const Navbar = () => {
                     >
                         {
                             /* capitalizeWords()*/
-                            `${concernData?.buyer_firstname || ""} ${concernData?.buyer_middlename || ""
+                            `${concernData?.buyer_firstname || ""} ${
+                                concernData?.buyer_middlename || ""
                             } ${concernData?.buyer_lastname || ""}`
                         }{" "}
                         {/* capitalizeWords()*/ concernData?.suffix_name || ""}{" "}

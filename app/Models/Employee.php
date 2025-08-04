@@ -28,4 +28,9 @@ class Employee extends Authenticatable
     {
         return "{$this->firstname} {$this->lastname}";
     }
+
+    public function employee()
+    {
+        return $this->hasOne(CheckStreamAdminSettings::class, 'employee_id');
+    }
 }

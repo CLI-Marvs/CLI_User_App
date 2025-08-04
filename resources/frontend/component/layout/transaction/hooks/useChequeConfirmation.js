@@ -20,6 +20,7 @@ export const useChequeConfirmation = (data, checkDates, getCheckNos) => {
             payor_name: data.payor_name,
             contract_number: data.contract_number,
             bank_name: data.bank_name,
+            entity_id: data.entity_id,
             status: "active",
         };
 
@@ -52,6 +53,7 @@ export const useChequeConfirmation = (data, checkDates, getCheckNos) => {
                 amount: parseFloat(cleaned),
                 payTo: data.payTo,
                 payor_name: data.payor_name,
+                entity_id: data.entity_id,
                 contract_number: data.contract_number,
                 bank_name: data.bank_name,
                 status: "active",
