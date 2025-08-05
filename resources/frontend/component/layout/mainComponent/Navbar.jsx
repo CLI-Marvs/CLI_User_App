@@ -298,6 +298,15 @@ const Navbar = () => {
             }
             if (value.toLowerCase() === "check-generator") {
                 breadcrumbLabel = "Check Generator";
+                  return (
+                    <Link
+                        key={routeTo}
+                        to="/transaction/tools/check-generator/check-writer"
+                        className="text-custom-solidgreen"
+                    >
+                        {breadcrumbLabel}
+                    </Link>
+                  )
             }
             if (value.toLowerCase() === "admin-settings") {
                 breadcrumbLabel = "Admin Settings";
