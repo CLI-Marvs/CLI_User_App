@@ -52,12 +52,6 @@ const SurveyForm = () => {
 
 
   useEffect(() => {
-    console.log(surveyData);
-  }, [surveyData]);
-
-
-
-  useEffect(() => {
     if (surveyId) {
       apiService
         .get(`/fetch-survey/${surveyId}`)

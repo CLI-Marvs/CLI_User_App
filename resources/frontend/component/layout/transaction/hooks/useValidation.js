@@ -5,18 +5,25 @@ export default function useValidation(initialErrors = {}) {
 
     const validateField = (field, value) => {
         let stringValue = "";
+        let errorMsg = "";
 
         if (typeof value === "string") {
             stringValue = value.trim();
-        } else if (value !== null && value !== undefined) {
+        } else if (value !== null && value !== undefined && value) {
             stringValue = value.toString().trim();
         }
 
         const isEmpty = stringValue === "";
 
+        if (isEmpty) {
+            errorMsg = "This field is required.";
+        } else if (field === "contract_number" && stringValue.length !== 13) {
+            errorMsg = "Contract number must be exactly 13 digits.";
+        }
+
         setErrors((prev) => ({
             ...prev,
-            [field]: isEmpty ? "This field is required." : "",
+            [field]: errorMsg,
         }));
 
         return !isEmpty;
@@ -27,8 +34,17 @@ export default function useValidation(initialErrors = {}) {
         let isValid = true;
 
         Object.keys(fields).forEach((field) => {
-            if (!fields[field] || fields[field].toString().trim() === "") {
+            const value = fields[field];
+            const stringValue = value?.toString().trim() || "";
+
+            if (stringValue === "") {
                 newErrors[field] = "This field is required.";
+                isValid = false;
+            } else if (
+                field === "contract_number" &&
+                stringValue.length !== 13
+            ) {
+                newErrors[field] = "Contract number must be exactly 13 digits.";
                 isValid = false;
             }
         });

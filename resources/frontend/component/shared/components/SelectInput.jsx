@@ -35,7 +35,6 @@ const SelectInput = ({
         setSearch("");
     };
 
-    // 👇 useEffect to detect clicks outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (
@@ -43,9 +42,6 @@ const SelectInput = ({
                 !wrapperRef.current.contains(event.target)
             ) {
                 setShowOptions(false);
-                if (onBlur) {
-                    onBlur();
-                }
             }
         };
 
@@ -53,7 +49,7 @@ const SelectInput = ({
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [onBlur]);
+    }, []);
 
     return (
         <div ref={wrapperRef} className="relative w-full">

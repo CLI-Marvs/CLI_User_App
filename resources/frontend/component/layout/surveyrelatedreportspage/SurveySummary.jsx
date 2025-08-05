@@ -118,16 +118,16 @@ const SurveySummary = () => {
         const groups = [];
         const ungrouped = [];
 
-        questions.forEach((q) => {
-            // Skip and store separately if no options
+        questions.forEach((q, idx) => {
             if (!q.options || q.options.length === 0) {
                 ungrouped.push(q);
                 return;
             }
 
             const normalizedQuestion = normalizeOptions(q);
-            const optionSignature = normalizedQuestion.options.map(opt => opt.value).join('|');
+            normalizedQuestion.originalIndex = idx + 1; // 1-based index
 
+            const optionSignature = normalizedQuestion.options.map(opt => opt.value).join('|');
             let existingGroup = groups.find(group => group.signature === optionSignature);
 
             if (existingGroup) {
@@ -142,6 +142,7 @@ const SurveySummary = () => {
 
         return { groups, ungrouped };
     }
+
 
 
 
@@ -187,16 +188,16 @@ const SurveySummary = () => {
                                 )
                             )}
                             {item?.input_type === "textbox" && (
-                               <SummaryTextboxTable question={item} />
+                                <SummaryTextboxTable question={item} />
                             )}
                             {item?.input_type === "checkboxes" && (
                                 <SummaryVerticalBar question={item} />
                             )}
-                            
+
                         </div>
                     );
                 })}
-               
+
             </div>
         </div>
     )
