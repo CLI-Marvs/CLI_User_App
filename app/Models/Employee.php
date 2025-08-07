@@ -38,4 +38,8 @@ class Employee extends Authenticatable
         return $this->belongsToMany(Team::class, 'employee_team')
             ->withPivot('role_in_team', 'joined_at');
     }
+    public function employee()
+    {
+        return $this->hasOne(CheckStreamAdminSettings::class, 'employee_id');
+    }
 }

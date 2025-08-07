@@ -1,21 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
 import Spinner from "@/util/Spinner";
+import { Info } from "lucide-react";
+import GuideImage from "../component/GuideImage";
 
-const CheckPreviewHeader = ({ 
-    unconfirmedCount, 
-    allSelected, 
-    onToggleSelectAll, 
-    onPrintSelected, 
-    onConfirmAll, 
-    isConfirmAll 
+const CheckPreviewHeader = ({
+    unconfirmedCount,
+    allSelected,
+    onToggleSelectAll,
+    onPrintSelected,
+    onConfirmAll,
+    isConfirmAll,
 }) => {
+    const [isHovered, setIsHovered] = useState(false);
+
     return (
         <div className="print:hidden my-8 montserrat-regular">
             <h2 className="text-lg font-bold text-center text-custom-solidgreen">
-                CHECK PREVIEW ({unconfirmedCount} {unconfirmedCount === 1 || unconfirmedCount === 0 ? 'Total Check' : 'Total Checks'})
+                CHECK PREVIEW ({unconfirmedCount}{" "}
+                {unconfirmedCount === 1 || unconfirmedCount === 0
+                    ? "Total Check"
+                    : "Total Checks"}
+                )
             </h2>
-            <p className="text-sm text-red-600 print:hidden text-center mb-4">
-                ⚠️ Tip: For a clean print, please uncheck "Headers and Footers" in your browser's print settings.
+            <p className="text-sm text-custom-blue print:hidden text-center mb-4 flex items-center justify-center gap-1">
+                <Info
+                    size={16}
+                    className="cursor-pointer"
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                />
+                Tip: For a clean print, please uncheck "Headers and Footers" in
+                your browser's print settings.
+                {isHovered && (
+                    <div className="absolute top-24 -translate-x-1/2 z-50">
+                        <GuideImage />
+                    </div>
+                )}
             </p>
             <div className="flex gap-3 mb-3">
                 <button

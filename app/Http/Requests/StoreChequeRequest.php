@@ -31,9 +31,11 @@ class StoreChequeRequest extends FormRequest
             'checks.*.payTo' => 'required_with:checks.*',
             'checks.*.payor_name' => 'required_with:checks.*',
             'checks.*.contract_number' => 'required_with:checks.*',
+            'checks.*.entity_id' => 'required_with:checks.*',
 
             // Handle single check
             'check_no' => 'required_without:checks',
+            'entity_id' => 'required_without:checks',
             'check_date' => 'required_without:checks|date',
             'amount' => 'required_without:checks|numeric|min:1',
             'bank_name' => 'required_without:checks',

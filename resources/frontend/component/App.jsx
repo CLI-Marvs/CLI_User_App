@@ -75,6 +75,7 @@ import SurveyMainView from "./views/pages/surveyrelatedreportsViews/SurveyMainVi
 import SurveyReviewView from "./views/pages/surveyrelatedreportsViews/SurveyReviewView";
 import SurveyMainReportView from "./views/pages/surveyrelatedreportsViews/SurveyMainReportView";
 import SurveySummaryView from "./views/pages/surveyrelatedreportsViews/SurveySummaryView";
+import AdminSettingsView from "./views/pages/transactionViews/AdminSettingsView";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, adminOnly, children }) => {
@@ -298,13 +299,17 @@ const App = () => {
                                     element: <TransactionLayout />,
                                     children: [
                                         {
-                                            path: "check-generator",
+                                            path: "check-generator/check-writer",
                                             element: <FinancialToolsView />,
                                         },
                                         {
-                                            path: "reports",
+                                            path: "check-generator/reports",
                                             element: <CheckStreamReportsView />,
                                         },
+                                        {
+                                             path: "check-generator/admin-settings",
+                                             element: <AdminSettingsView />,
+                                        }
                                     ],
                                 },
                             ],

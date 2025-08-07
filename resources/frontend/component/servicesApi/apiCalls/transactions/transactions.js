@@ -152,6 +152,47 @@ export const transaction = {
             console.log("error", error);
         }
     },
+    createCheckStreamBank: async (data) => {
+        const response = await apiService.post("check-stream-banks", data);
+        return response.data.data;
+    },
+
+    updateCheckStreamBank: async (id, data) => {
+        const response = await apiService.put(`check-stream-banks/${id}`, data);
+        return response.data.data;
+    },
+
+    deleteCheckStreamBank: async (id) => {
+        const response = await apiService.delete(`check-stream-banks/${id}`);
+        return response.data;
+    },
+
+    retrieveCheckEntities: async () => {
+        try {
+            const response = await apiService.get("check-stream-entities");
+
+            return response?.data.data;
+        } catch (error) {
+            console.log("error", error);
+        }
+    },
+    createCheckEntity: async (data) => {
+        const response = await apiService.post("check-stream-entities", data);
+        return response.data.data;
+    },
+
+    updateCheckStreamEntity: async (id, data) => {
+        const response = await apiService.put(
+            `check-stream-entities/${id}`,
+            data
+        );
+        return response.data.data;
+    },
+
+    deleteCheckStreamEntity: async (id) => {
+        const response = await apiService.delete(`check-stream-entities/${id}`);
+        return response.data;
+    },
 
     storePrintedCheck: async (data) => {
         try {
@@ -209,5 +250,29 @@ export const transaction = {
             console.log("error", error);
             throw error;
         }
+    },
+
+    retrieveCheckStreamAdminSettings: async () => {
+        try {
+            const response = await apiService.get("check-stream-admin");
+
+            return response?.data.data;
+        } catch (error) {
+            console.log("error", error);
+        }
+    },
+    createCheckStreamAdminSettings: async (data) => {
+        const response = await apiService.post("check-stream-admin", data);
+        return response.data.data;
+    },
+
+    updateCheckStreamAdminSettings: async (id, data) => {
+        const response = await apiService.put(`check-stream-admin/${id}`, data);
+        return response.data.data;
+    },
+
+    deleteCheckStreamAdminSettings: async (id) => {
+        const response = await apiService.delete(`check-stream-admin/${id}`);
+        return response.data;
     },
 };

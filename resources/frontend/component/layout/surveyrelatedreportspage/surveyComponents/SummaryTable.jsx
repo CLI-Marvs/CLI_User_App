@@ -25,8 +25,8 @@ const SummaryTable = ({ groupedTables }) => {
                     <div key={index} className="mb-8">
                         <h2 className="text-[20px] montserrat-semibold mb-2">
                             {group.questions.length > 1
-                                ? `Table question ${questionCounter} to ${questionCounter + group.questions.length - 1} summary`
-                                : `Table question ${questionCounter} summary`}
+                                ? `Table question ${group.questions[0].originalIndex} to ${group.questions[group.questions.length - 1].originalIndex} summary`
+                                : `Table question ${group.questions[0].originalIndex} summary`}
                         </h2>
 
                         <table className="w-full border-2">
@@ -41,7 +41,7 @@ const SummaryTable = ({ groupedTables }) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {group.questions.map((q, idx) => {
+                                {group.questions.map((q) => {
                                     let totalScore = 0;
                                     let totalCount = 0;
                                     const totalOptions = q.options.length;
@@ -60,7 +60,7 @@ const SummaryTable = ({ groupedTables }) => {
                                         ? (totalScore / totalCount).toFixed(2)
                                         : null;
 
-                                    const questionNumber = questionCounter + idx;
+                                    const questionNumber = q.originalIndex; // Use original index for consistent numbering
 
                                     return (
                                         <tr key={q.question_id}>
@@ -74,6 +74,7 @@ const SummaryTable = ({ groupedTables }) => {
                                     );
                                 })}
                             </tbody>
+
                         </table>
 
                         {/* Increment questionCounter after rendering the group */}

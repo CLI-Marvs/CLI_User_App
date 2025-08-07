@@ -9,10 +9,10 @@ import { useChequeSelection } from "../hooks/useChequeSelection";
 import { useChequeConfirmation } from "../hooks/useChequeConfirmation";
 import { useChequeData } from "../hooks/useChequeData";
 import { generateMonthlyDates } from "../utils/chequeUtils";
+import { requiredKeys } from "../constant/requiredKeys";
 
 const ChequeStream = () => {
     const { data, setData, handleCheck } = useChequeData();
-    const [isError, setIsError] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const [reprintMode, setReprintMode] = useState(false);
@@ -95,6 +95,13 @@ const ChequeStream = () => {
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
+    const isError = useMemo(() => {
+        const allFieldsFilled = requiredKeys.every(
+            (key) => data[key]?.toString().trim() !== ""
+        );
+        const isContractValid = data.contract_number?.toString().length === 13;
+        return allFieldsFilled && isContractValid;
+    }, [data]);
 
     useEffect(() => {
         setConfirmedChecks([]);
@@ -120,7 +127,6 @@ const ChequeStream = () => {
                 data={data}
                 setData={setData}
                 endDate={endDate}
-                setIsError={setIsError}
             />
 
             <div

@@ -7,50 +7,54 @@ export const useChequeData = () => {
         total_purchased_amount: "",
         date: "",
         totalChecks: 0,
-        totalMonths: 0,
+        totalMonths: "",
         startDate: "",
         checkBaseNo: "",
         checkNos: [],
         contract_number: "",
         payor_name: "",
         bank_name: "",
+        entity_id: "",
     });
 
+    const formatWithCommas = (whole, decimal) => {
+        const formattedWhole = whole ? Number(whole).toLocaleString() : "";
+        return decimal !== undefined
+            ? `${formattedWhole}.${decimal}`
+            : formattedWhole;
+    };
+
     const handleCheck = (field, value, index = null) => {
+        let updatedData = { ...data };
         let cleanedValue = value.replace(/[^0-9.]/g, "");
-        const floatValue = parseFloat(cleanedValue);
+
         const totalAmount = parseFloat(
             field === "total_purchased_amount"
                 ? cleanedValue
                 : (data.total_purchased_amount || "0").replace(/,/g, "")
         );
-        const months = parseInt(
-            field === "totalMonths" ? cleanedValue : data.totalMonths
-        );
-        let updatedData = { ...data };
-        
-        const formatNumber = (val) =>
-            isNaN(val)
-                ? ""
-                : new Intl.NumberFormat("en-PH", {
-                      minimumFractionDigits: 0,
-                      maximumFractionDigits: 2,
-                  }).format(val);
 
-        if (field === "total_purchased_amount") {
-            updatedData.total_purchased_amount = formatNumber(floatValue);
-        } else if (field === "amount") {
-            updatedData.amount = formatNumber(floatValue);
-        } else {
+        let months;
+
+        if (field === "contract_number") {
+            updatedData.contract_number = value.replace(/\D/g, "").slice(0, 13);
+        }
+        else if (field === "total_purchased_amount" || field === "amount") {
+            if (cleanedValue === ".") {
+                updatedData[field] = "0.";
+            } else {
+                let [whole, decimal] = cleanedValue.split(".");
+                whole = whole?.slice(0, 7).replace(/^0+(?=\d)/, ""); 
+                updatedData[field] = formatWithCommas(whole, decimal);
+            }
+        }
+        else {
             updatedData[field] = cleanedValue;
         }
 
         if (field === "checkBaseNo") {
-            updatedData = {
-                ...updatedData,
-                checkBaseNo: value,
-                checkNos: [],
-            };
+            updatedData.checkBaseNo = value;
+            updatedData.checkNos = [];
         }
 
         if (field === "checkNos" && index !== null) {
@@ -60,12 +64,19 @@ export const useChequeData = () => {
         }
 
         if (field === "totalMonths") {
-            updatedData.totalChecks = cleanedValue;
+            const limitedValue = value.replace(/\D/g, "").slice(0, 3);
+            updatedData.totalChecks = limitedValue;
+            updatedData.totalMonths = limitedValue;
+            // Use the limited value for calculation
+            months = parseInt(limitedValue);
+        } else {
+            months = parseInt(data.totalMonths);
         }
 
-        if (!isNaN(totalAmount) && months) {
+        if (!isNaN(totalAmount) && months && field !== "amount") {
             const monthly = totalAmount / months;
-            updatedData.amount = formatNumber(monthly);
+            let [whole, decimal] = monthly.toFixed(2).split(".");
+            updatedData.amount = formatWithCommas(whole, decimal);
         }
 
         setData(updatedData);
