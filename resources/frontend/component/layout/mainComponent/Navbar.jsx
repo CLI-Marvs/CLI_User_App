@@ -298,7 +298,7 @@ const Navbar = () => {
             }
             if (value.toLowerCase() === "check-generator") {
                 breadcrumbLabel = "Check Generator";
-                  return (
+                return (
                     <Link
                         key={routeTo}
                         to="/transaction/tools/check-generator/check-writer"
@@ -306,12 +306,24 @@ const Navbar = () => {
                     >
                         {breadcrumbLabel}
                     </Link>
-                  )
+                );
             }
+
+            if (value.toLowerCase() === "tools") {
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+            
             if (value.toLowerCase() === "admin-settings") {
                 breadcrumbLabel = "Admin Settings";
             }
-              if (value.toLowerCase() === "check-writer") {
+            if (value.toLowerCase() === "check-writer") {
                 breadcrumbLabel = "Check Writer";
             }
 
