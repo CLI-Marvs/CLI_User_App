@@ -38,17 +38,16 @@ export const useChequeData = () => {
 
         if (field === "contract_number") {
             updatedData.contract_number = value.replace(/\D/g, "").slice(0, 13);
-        }
-        else if (field === "total_purchased_amount" || field === "amount") {
+        } else if (field === "total_purchased_amount" || field === "amount") {
             if (cleanedValue === ".") {
                 updatedData[field] = "0.";
             } else {
                 let [whole, decimal] = cleanedValue.split(".");
-                whole = whole?.slice(0, 7).replace(/^0+(?=\d)/, ""); 
+                whole = whole?.slice(0, 7).replace(/^0+(?=\d)/, "");
+                decimal = decimal?.slice(0, 2);
                 updatedData[field] = formatWithCommas(whole, decimal);
             }
-        }
-        else {
+        } else {
             updatedData[field] = cleanedValue;
         }
 
@@ -75,7 +74,9 @@ export const useChequeData = () => {
 
         if (!isNaN(totalAmount) && months && field !== "amount") {
             const monthly = totalAmount / months;
-            let [whole, decimal] = monthly.toFixed(2).split(".");
+            const monthlyStr = monthly.toString();
+            let [whole, decimal = ""] = monthlyStr.split(".");
+            decimal = decimal.slice(0, 2).padEnd(2, "0");
             updatedData.amount = formatWithCommas(whole, decimal);
         }
 
