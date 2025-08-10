@@ -159,23 +159,27 @@ const SurveySummary = () => {
                         <BiSolidLeftArrow className='size-[13px]' />
                     </div>
                 </div>
+                <div className='flex w-full mt-[10px] p-[3px]'>
+                    <div className='h-[500px] p-[8px] rounded-[10px] shadow-custom7 border-[2px] w-full'>
+                        <div className='mt-[20px] mb-[20px]'>
+                            <p className='text-[24px] font-semibold'>{surveySummary?.survey_title}</p>
+                        </div>
+                        <div className='flex gap-[20px]'>
+                            <div className='w-[400px]'>
+                                <SummaryRating ratingCounts={ratingCounts} />
+                            </div>
+                            <div className='w-full'>
+                                <SummaryRatingDetails />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className='w-full mt-[15px] p-[3px]'>
+                    <div className='p-[8px] rounded-[10px] shadow-custom7 border-[2px] w-full'>
+                        <SummaryTable groupedTables={groupedTables} />
+                    </div>
+                </div>
 
-                <div className='h-[500px]'>
-                    <div className='mt-[20px] mb-[20px]'>
-                        <p className='text-[24px] font-semibold'>{surveySummary?.survey_title}</p>
-                    </div>
-                    <div className='flex gap-[20px]'>
-                        <div className='w-[400px]'>
-                            <SummaryRating ratingCounts={ratingCounts} />
-                        </div>
-                        <div className='w-full'>
-                            <SummaryRatingDetails />
-                        </div>
-                    </div>
-                </div>
-                <div>
-                    <SummaryTable groupedTables={groupedTables} />
-                </div>
 
                 {surveySummary?.questions?.map((item, index) => {
                     return (
