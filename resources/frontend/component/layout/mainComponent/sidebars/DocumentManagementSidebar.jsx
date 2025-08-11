@@ -49,10 +49,18 @@ const DocumentManagementSidebar = () => {
     }, []);
 
     // Role-based access: only admin/manager sees all, others see only Account Master and My Work Orders
+    const adminEmails = [
+        "metoh@cebulandmasters.com",
+        "jlgomo@cebulandmasters.com",
+        "ccliwagon@cebulandmasters.com",
+        "jnlayson@cebulandmasters.com",
+        "bvith@cebulandmasters.com",
+        "aabayocboc@cebulandmasters.com",
+    ];
     const isAdmin =
         user &&
-        (user.email === "metoh@cebulandmasters.com" ||
-            user.employee_email === "metoh@cebulandmasters.com");
+        (adminEmails.includes(user.email) ||
+            adminEmails.includes(user.employee_email));
 
     return (
         <>

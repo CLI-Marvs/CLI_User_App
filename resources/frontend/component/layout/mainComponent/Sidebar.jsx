@@ -137,16 +137,19 @@ const Sidebar = () => {
             setIsInvoiceOpen(false);
             setSuperAdminOpen(true);
             setIsSalesOpen(false);
+            setIsDocumentManagementOpen(false);
         } else if (pathname.startsWith("/transaction")) {
             setInquiryOpen(false);
             setIsInvoiceOpen(true);
             setSuperAdminOpen(false);
             setIsSalesOpen(false);
+            setIsDocumentManagementOpen(false);
         } else if (pathname.startsWith("/inquirymanagement")) {
             setIsInvoiceOpen(false);
             setInquiryOpen(true);
             setSuperAdminOpen(false);
             setIsSalesOpen(false);
+            setIsDocumentManagementOpen(false);
         } else if (pathname.startsWith("/documentmanagement")) {
             setIsInvoiceOpen(false);
             setInquiryOpen(false);
@@ -161,12 +164,14 @@ const Sidebar = () => {
             setInquiryOpen(false);
             setIsInvoiceOpen(false);
             setSuperAdminOpen(false);
+            setIsDocumentManagementOpen(false);
         } else {
             // Default case
             setInquiryOpen(false);
             setIsInvoiceOpen(false);
             setSuperAdminOpen(false);
             setIsSalesOpen(false);
+            setIsDocumentManagementOpen(false);
         }
     }, [location.pathname]);
     return (
