@@ -641,7 +641,9 @@ class SurveyController extends Controller
             ->where('status', true)
             ->get()
             ->map(function ($survey) {
-                $respondentsCount = ExperienceRating::where('survey_link', $survey->survey_link)->count();
+                $respondentsCount = ExperienceRating::where('survey_link', $survey->survey_link)
+                    ->orWhere('survey_title', $survey->survey_title)
+                    ->count();
 
                 return [
                     'id' => $survey->id,
@@ -662,7 +664,7 @@ class SurveyController extends Controller
         $result = $surveys->map(function ($survey) {
             // Fetch counts of each rating (1-5) for this survey_link
             $ratingCounts = ExperienceRating::where('survey_link', $survey->survey_link)
-                
+
                 ->select('rating', DB::raw('COUNT(*) as total'))
                 ->groupBy('rating')
                 ->pluck('total', 'rating'); // [rating => count]

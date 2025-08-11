@@ -76,25 +76,27 @@ const SummaryRatingDetails = () => {
             </div>
             {/* Table section */}
             <div className="h-full flex flex-col">
-                <div className='h-[320px]'>
+                <div className='h-[300px]'>
                     <table className="w-full">
                         <thead>
                             <tr>
-                                <th className="border-2 px-2 py-1 text-center w-[400px]">Ticket ID</th>
-                                <th className="border-2 px-2 py-1 text-center w-[400px]">Email</th>
-                                <th className="border-2 px-2 py-1 text-center">Rate</th>
-                                <th className="border-2 px-2 py-1 text-center">Date</th>
+                                <th className="border-2 px-2 py-1 w-[200px] text-center">Date</th>
+                                <th className="border-2 px-2 py-1 w-[150px] text-center">Rate</th>
+                                <th className="border-2 px-2 py-1 text-center">Email</th>
+                                <th className="border-2 px-2 py-1 text-center">Ticket ID</th>
+                                
                             </tr>
                         </thead>
                         <tbody>
                             {currentRatingDetails.map((item, index) => (
                                 <tr key={index}>
-                                    <td className="border-2 px-2 py-1 text-center">{item.ticket_id}</td>
-                                    <td className="border-2 px-2 py-1 text-center">{item.email}</td>
-                                    <td className="border-2 px-2 py-1 text-center">{emojiMap[item.rating] ?? ''}</td>
                                     <td className="border-2 px-2 py-1 text-center">
                                         {new Date(item.created_at).toLocaleDateString('en-US')}
                                     </td>
+                                    <td className="border-2 px-2 py-1 text-center">{emojiMap[item.rating] ?? ''}</td>
+                                    <td className="border-2 px-2 py-1 text-center">{item.email}</td>
+                                    <td className="border-2 px-2 py-1 text-center">{item.ticket_id}</td>
+                                    
                                 </tr>
                             ))}
                         </tbody>
