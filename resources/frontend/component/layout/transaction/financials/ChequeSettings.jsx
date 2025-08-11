@@ -6,15 +6,20 @@ import SelectInput from "@/component/shared/components/SelectInput";
 import {
     useCheckEntities,
     useCheckStreamBanks,
+    useCreateBank,
+    useCreateEntity,
 } from "../hooks/useTransactionQueries";
 import CustomInput from "@/component/Input/CustomInput";
 import useValidation from "../hooks/useValidation";
 import { requiredKeys } from "../constant/requiredKeys";
+import { showToast } from "@/util/toastUtil";
 
 const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
     const { data: checkStreamBanks } = useCheckStreamBanks();
     const { data: checkStreamEntities } = useCheckEntities();
     const { errors, validateField, validateAll, clearError } = useValidation();
+    const { mutate: createEntity } = useCreateEntity();
+    const { mutate: createBank } = useCreateBank();
 
     const handlePreviewChecks = () => {
         const fieldsToValidate = {};
@@ -31,6 +36,29 @@ const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
             customOnChange(fieldKey, value);
         } else {
             setData((prev) => ({ ...prev, [fieldKey]: value }));
+        }
+    };
+    const handleAddOption = (name, type) => {
+        if (type === "entity") {
+            createEntity(
+                { name },
+                {
+                    onSuccess: () => showToast("Entity created successfully"),
+                    onError: () => {
+                        showToast("Failed to create entity", "error");
+                    },
+                }
+            );
+        } else {
+            createBank(
+                { bank_name: name },
+                {
+                    onSuccess: () => showToast("Bank created successfully"),
+                    onError: () => {
+                        showToast("Failed to create bank", "error");
+                    },
+                }
+            );
         }
     };
 
@@ -151,6 +179,9 @@ const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
                             }
                             valueKey="id"
                             labelKey="bank_name"
+                            onAddOption={(bankName) =>
+                                handleAddOption(bankName, "bank")
+                            }
                             className={`${
                                 errors["bank_name"]
                                     ? "border-red-500 focus:ring-2 focus:ring-red-300"
@@ -180,17 +211,15 @@ const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
                             onBlur={() => validateField("payTo", data.payTo)}
                             valueKey="id"
                             labelKey="payTo"
+                            onAddOption={(entityName) =>
+                                handleAddOption(entityName, "entity")
+                            }
                             className={`${
                                 errors["payTo"]
                                     ? "border-red-500 focus:ring-2 focus:ring-red-300"
                                     : ""
                             }`}
                         />
-                        {errors["payTo"] && (
-                            <span className="text-red-500 text-xs mt-1">
-                                {errors["payTo"]}
-                            </span>
-                        )}
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
