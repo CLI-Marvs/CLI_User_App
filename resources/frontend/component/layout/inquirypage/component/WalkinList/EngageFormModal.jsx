@@ -53,11 +53,7 @@ const EngageFormModal = forwardRef(
         // Mutations
         const transactionMutation = useMutation({
             mutationFn: walkinTransactionService.createWalkinTransactionDetail,
-            onSuccess: () => {
-                showToast(
-                    "Walkin transaction details created successfully.",
-                    "success"
-                );
+            onSuccess: (response) => {
                 queryClient.invalidateQueries({
                     queryKey: ["queueWalkinTransactions"],
                 });
