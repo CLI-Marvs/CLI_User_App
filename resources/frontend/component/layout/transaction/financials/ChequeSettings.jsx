@@ -13,6 +13,7 @@ import CustomInput from "@/component/Input/CustomInput";
 import useValidation from "../hooks/useValidation";
 import { requiredKeys } from "../constant/requiredKeys";
 import { showToast } from "@/util/toastUtil";
+import { valueExistsFuzzy } from "../utils/stringChecker";
 
 const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
     const { data: checkStreamBanks } = useCheckStreamBanks();
@@ -39,27 +40,37 @@ const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
         }
     };
     const handleAddOption = (name, type) => {
-        if (type === "entity") {
-            createEntity(
-                { name },
-                {
-                    onSuccess: () => showToast("Entity created successfully"),
-                    onError: () => {
-                        showToast("Failed to create entity", "error");
-                    },
-                }
-            );
-        } else {
-            createBank(
-                { bank_name: name },
-                {
-                    onSuccess: () => showToast("Bank created successfully"),
-                    onError: () => {
-                        showToast("Failed to create bank", "error");
-                    },
-                }
-            );
+        const isEntity = type === "entity";
+
+        const config = isEntity
+            ? {
+                  list: checkStreamEntities,
+                  key: "payTo",
+                  createFn: createEntity,
+                  payload: { name },
+                  existsMsg: "Entity already exists",
+                  successMsg: "Entity created successfully",
+                  errorMsg: "Failed to create entity",
+              }
+            : {
+                  list: checkStreamBanks,
+                  key: "bank_name",
+                  createFn: createBank,
+                  payload: { bank_name: name },
+                  existsMsg: "Bank already exists",
+                  successMsg: "Bank created successfully",
+                  errorMsg: "Failed to create bank",
+              };
+
+        if (valueExistsFuzzy(config.list, name, config.key)) {
+            showToast(config.existsMsg, "error");
+            return;
         }
+
+        config.createFn(config.payload, {
+            onSuccess: () => showToast(config.successMsg),
+            onError: () => showToast(config.errorMsg, "error"),
+        });
     };
 
     const fields = [
