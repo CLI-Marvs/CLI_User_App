@@ -18,12 +18,12 @@ const TransactionSidebar = () => {
               /* { name: "Invoices", path: "/transaction/receivables/invoices" },
             { name: "Auto Posting", path: "/transaction/receivables/posting" }, */
         ],
-        "/transaction/bank-monitoring": [
+       /*  "/transaction/bank-monitoring": [
             {
                 name: "Bank Statements",
                 path: "/transaction/bank-monitoring/bank-statements",
             },
-        ],
+        ], */
         "/transaction/settings": [
             {
                 name: "Markup Settings",

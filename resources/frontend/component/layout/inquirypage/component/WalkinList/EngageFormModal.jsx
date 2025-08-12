@@ -7,15 +7,13 @@ import React, {
 import { IoMdArrowDropdown } from "react-icons/io";
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
-import { showToast } from "@/util/toastUtil";
 import Button from "@/component/layout/inquirypage/component/ui/button";
 import CustomInput from "@/component/Input/CustomInput";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useEngageForm } from "@/component/layout/inquirypage/hooks/useEngageForm";
 import { INQUIRY_FROM_OPTIONS } from "@/component/layout/inquirypage/constants/inquiryFrom";
 import { TYPE_OPTIONS } from "@/component/layout/inquirypage/constants/type";
-import { walkinTransactionService } from "@/component/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 const formDataInitialState = {
     first_name: "",
     middle_name: "",
@@ -58,7 +56,6 @@ const EngageFormModal = forwardRef(
             setError,
             dialogRef
         );
-        const queryClient = useQueryClient();
         const validateEmail = (email) => {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);

@@ -22,13 +22,12 @@ const CheckPreviewHeader = ({
                     : "Total Checks"}
                 )
             </h2>
-            <p className="text-sm text-custom-blue print:hidden text-center mb-4 flex items-center justify-center gap-1">
-                <Info
-                    size={16}
-                    className="cursor-pointer"
-                    onMouseEnter={() => setIsHovered(true)}
-                    onMouseLeave={() => setIsHovered(false)}
-                />
+            <p
+                className="text-sm text-custom-blue print:hidden text-center mb-4 flex items-center justify-center gap-1 cursor-pointer"
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+            >
+                <Info size={16} className="cursor-pointer" />
                 Tip: For a clean print, please uncheck "Headers and Footers" in
                 your browser's print settings.
                 {isHovered && (

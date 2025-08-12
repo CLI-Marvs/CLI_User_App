@@ -116,33 +116,31 @@ export function useEngageForm(
         }
     };
 
-    
-const handleCloseModal = async () => {
-    try {
-        dialogRef.current?.close();
+    const handleCloseModal = async () => {
+        try {
+            dialogRef.current?.close();
 
-        await Promise.all([
-            queueMutation.mutateAsync({
-                priority_number: itemData?.priority_number,
-                status: "queue",
-            }),
-            walkinTransactionService.updateWalkinTransactionStatus({
-                walkin_transaction_id: itemData?.id,
-                status: "queue",
-            }),
-        ]);
+            await Promise.all([
+                queueMutation.mutateAsync({
+                    priority_number: itemData?.priority_number,
+                    status: "queue",
+                }),
+                walkinTransactionService.updateWalkinTransactionStatus({
+                    walkin_transaction_id: itemData?.id,
+                    status: "queue",
+                }),
+            ]);
 
-        queryClient.invalidateQueries({
-            queryKey: ["queueWalkinTransactions"],
-        });
+            queryClient.invalidateQueries({
+                queryKey: ["queueWalkinTransactions"],
+            });
 
-        setSelectedItem(null);
-        setError(null);
-    } catch (error) {
-        showToast("Error closing the form", "error");
-    }
-};
-
+            setSelectedItem(null);
+            setError(null);
+        } catch (error) {
+            showToast("Error closing the form", "error");
+        }
+    };
 
     return {
         isPropertyButtonDisabled,
