@@ -92,6 +92,7 @@ const WalkinTransactionHistoryPage = () => {
         },
     ];
 
+
     // Handles input change: updates search values based on user input
     const handleInputChange = ({ target: { name, value } }) => {
         setSearchValues((prev) => ({ ...prev, [name]: value }));

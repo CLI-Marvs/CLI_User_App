@@ -46,6 +46,8 @@ const InquiryList = () => {
         searchFilter,
         user,
         dataCount,
+        dataFilterCount,
+        setDataFilterCount,
         setSpecificAssigneeCsr,
         specificAssigneeCsr,
         department,
@@ -1111,11 +1113,11 @@ const InquiryList = () => {
                                 {resultSearchActive ||
                                 daysActive ||
                                 assignedToMeActive ? (
-                                    dataCount && dataCount === 0 ? (
+                                    dataFilterCount === 0 ? (
                                         <p>No Records Found</p>
                                     ) : (
                                         <p>
-                                            {dataCount}{" "}
+                                            {dataFilterCount}{" "}
                                             {data?.length > 1
                                                 ? "Results"
                                                 : "Result"}{" "}
@@ -1125,10 +1127,10 @@ const InquiryList = () => {
                                 ) : (
                                     <p>
                                         {selectedOption} (
-                                        {dataCount == 0 ? (
+                                        {loading ? (
                                             <CircularProgress size={14} />
                                         ) : (
-                                            dataCount
+                                           dataFilterCount
                                         )}
                                         )
                                     </p>
@@ -1145,11 +1147,7 @@ const InquiryList = () => {
                                                 handleOptionClick("All")
                                             }
                                         >
-                                            All (
-                                            {countAllConcerns?.counts?.all ?? (
-                                                <CircularProgress size={14} />
-                                            )}
-                                            )
+                                           All ({dataCount?.total ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1157,12 +1155,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Resolved")
                                             }
                                         >
-                                            Resolved (
-                                            {countAllConcerns?.counts
-                                                ?.resolved ?? (
-                                                <CircularProgress size={14} />
-                                            )}
-                                            )
+                                           Resolved ({dataCount?.resolved_count ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1170,12 +1163,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Closed")
                                             }
                                         >
-                                            Closed (
-                                            {countAllConcerns?.counts
-                                                ?.closed ?? (
-                                                <CircularProgress size={14} />
-                                            )}
-                                            )
+                                            Closed ({dataCount?.closed_count ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1183,12 +1171,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Unresolved")
                                             }
                                         >
-                                            Unresolved (
-                                            {countAllConcerns?.counts
-                                                ?.unresolved ?? (
-                                                <CircularProgress size={14} />
-                                            )}
-                                            )
+                                            Unresolved ({dataCount?.unresolved_count ?? <CircularProgress size={14} />})
                                         </li>
                                     </ul>
                                 </div>
