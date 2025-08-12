@@ -48,9 +48,9 @@ const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
                   key: "payTo",
                   createFn: createEntity,
                   payload: { name },
-                  existsMsg: "Entity already exists",
-                  successMsg: "Entity created successfully",
-                  errorMsg: "Failed to create entity",
+                  existsMsg: "Pay To Order already exists",
+                  successMsg: "Pay To Order created successfully",
+                  errorMsg: "Failed to create Pay To Order",
               }
             : {
                   list: checkStreamBanks,
