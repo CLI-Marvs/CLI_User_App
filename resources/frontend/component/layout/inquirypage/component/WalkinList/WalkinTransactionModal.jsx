@@ -4,7 +4,6 @@ import { toLowerCaseText } from "@/util/formatToLowerCase";
 
 const WalkinTransactionModal = ({ open, onClose, item }) => {
     const dialogRef = useRef(null);
-
     useEffect(() => {
         const dialog = dialogRef.current;
         if (!dialog) return;
@@ -26,7 +25,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
         <dialog
             ref={dialogRef}
             id="engageFormModal"
-            className="modal w-[550px] rounded-[10px] shadow-custom5 backdrop:bg-black/50"
+            className="modal w-[600px] rounded-[10px] shadow-custom5 backdrop:bg-black/50"
         >
             <div className="relative p-[20px]  rounded-lg">
                 {/* Close modal button */}
@@ -51,68 +50,10 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                             </span>
                         </h1>
                     </div>
-                    {/* Status */}
-                    <div className="">
-                        <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden  `}
-                        >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[195px]  montserrat-regular ">
-                                Status
-                            </span>
-                            <CustomInput
-                                name="first_name"
-                                type="text"
-                                value={toLowerCaseText(item.status || "N/A")}
-                                disabled
-                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs  montserrat-regular "
-                            />
-                        </div>
-                    </div>
-
-                    {/* Inquiry Type */}
+                    {/* First Name */}
                     <div className="py-1">
-                        <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden  `}
-                        >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[195px]  montserrat-regular ">
-                                Inquiry Type
-                            </span>
-                            <CustomInput
-                                name="first_name"
-                                type="text"
-                                value={item.category?.name || ""}
-                                disabled
-                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs  montserrat-regular "
-                            />
-                        </div>
-                    </div>
-
-                    {/*Project/Property */}
-                    <div className="py-1">
-                        <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden  `}
-                        >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[195px]  montserrat-regular ">
-                                Project
-                            </span>
-                            <CustomInput
-                                name="first_name"
-                                type="text"
-                                value={toLowerCaseText(
-                                    item.walkin_transaction_detail
-                                        ?.property_master?.property_name || ""
-                                )}
-                                disabled
-                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs  montserrat-regular "
-                            />
-                        </div>
-                    </div>
-                    {/*First name */}
-                    <div className="py-1">
-                        <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden  `}
-                        >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[195px]  montserrat-regular ">
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 First Name
                             </span>
                             <CustomInput
@@ -123,17 +64,37 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                                         ?.first_name || ""
                                 }
                                 disabled
-                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs  montserrat-regular "
+                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"
                             />
                         </div>
                     </div>
 
-                    {/*Last name */}
-                    <div>
-                        <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden  `}
-                        >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[195px]  montserrat-regular ">
+                    {/* Middle Name with N/A */}
+                    <div className="py-1">
+                        <div className="flex relative items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
+                                Middle Name
+                            </span>
+                            <CustomInput
+                                name="middle_name"
+                                type="text"
+                                value={
+                                    item.walkin_transaction_detail
+                                        ?.middle_name_na
+                                        ? ""
+                                        : item.walkin_transaction_detail
+                                              ?.middle_name || ""
+                                }
+                                disabled
+                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular capitalize"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Last Name */}
+                    <div className="py-1">
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Last Name
                             </span>
                             <CustomInput
@@ -143,18 +104,53 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                                     item.walkin_transaction_detail?.last_name ||
                                     ""
                                 }
-                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs  montserrat-regular "
                                 disabled
+                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"
                             />
                         </div>
                     </div>
 
-                    {/*Contact Number */}
+                    {/* Suffix Name with N/A */}
                     <div className="py-1">
-                        <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden  `}
-                        >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[195px]  montserrat-regular ">
+                        <div className="flex relative items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
+                                Suffix Name
+                            </span>
+                            <CustomInput
+                                name="suffix_name"
+                                type="text"
+                                value={
+                                    item.walkin_transaction_detail
+                                        ?.suffix_name || ""
+                                }
+                                disabled
+                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular capitalize"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Email */}
+                    <div className="py-1">
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
+                                Email
+                            </span>
+                            <CustomInput
+                                name="email"
+                                type="text"
+                                value={
+                                    item.walkin_transaction_detail?.email || ""
+                                }
+                                disabled
+                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Mobile Number */}
+                    <div className="py-1">
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Mobile Number
                             </span>
                             <CustomInput
@@ -164,19 +160,91 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                                     item.walkin_transaction_detail
                                         ?.contact_number || ""
                                 }
-                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs  montserrat-regular "
-                                restrictNumbers={true}
                                 disabled
+                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"
                             />
                         </div>
                     </div>
 
-                    {/*Contract Number*/}
-                    <div className="">
-                        <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden  `}
-                        >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[195px]  montserrat-regular ">
+                    {/* Property */}
+                    <div className="py-1">
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
+                                Property
+                            </span>
+                            <CustomInput
+                                name="property"
+                                type="text"
+                                value={toLowerCaseText(
+                                    item.walkin_transaction_detail
+                                        ?.property_master?.property_name || ""
+                                )}
+                                disabled
+                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Category Type/Concern Regarding */}
+                    <div className="py-1">
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
+                                Concern Regarding
+                            </span>
+                            <CustomInput
+                                name="category"
+                                type="text"
+                                value={
+                                    item.walkin_transaction_detail?.category
+                                        ?.name || "N/A"
+                                }
+                                disabled
+                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Type */}
+                    <div className="py-1">
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
+                                Type
+                            </span>
+                            <CustomInput
+                                name="type"
+                                type="text"
+                                value={
+                                    item.walkin_transaction_detail?.type || ""
+                                }
+                                disabled
+                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Inquiry From */}
+                    <div className="py-1">
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
+                                Inquiry From
+                            </span>
+                            <CustomInput
+                                name="inquiry_from"
+                                type="text"
+                                value={
+                                    item.walkin_transaction_detail
+                                        ?.inquiry_from || ""
+                                }
+                                disabled
+                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Contract Number */}
+                    <div className="py-1">
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Contract Number
                             </span>
                             <CustomInput
@@ -186,40 +254,46 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                                     item.walkin_transaction_detail
                                         ?.contract_number || ""
                                 }
-                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs"
                                 disabled
+                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"
                             />
                         </div>
                     </div>
 
-                    {/*Email*/}
+                    {/* Unit/Lot Number */}
                     <div className="py-1">
-                        <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden  `}
-                        >
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[195px]  montserrat-regular ">
-                                Email
+                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
+                                Unit/Lot Number
                             </span>
                             <CustomInput
-                                name="email"
+                                name="unit_number"
                                 type="text"
                                 value={
-                                    item.walkin_transaction_detail?.email || ""
+                                    item.walkin_transaction_detail
+                                        ?.unit_number || ""
                                 }
-                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs  montserrat-regular "
                                 disabled
+                                className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"
                             />
                         </div>
                     </div>
 
-                    {/* Detailed notes */}
-                    <div
-                        className={`  rounded-[5px] bg-custom-lightestgreen border`}
-                    >
+                    {/* Detailed Notes with character count */}
+                    <div className="rounded-[5px] bg-custom-lightestgreen border mt-2">
                         <div className="flex items-center justify-between">
-                            <p className="text-custom-bluegreen text-sm bg-custom-lightestgreen pl-3  flex-grow mobile:text-xs mobile:w-[170px] montserrat-regular py-2">
+                            <p className="text-custom-bluegreen text-sm bg-custom-lightestgreen pl-3 flex-grow mobile:text-xs mobile:w-[170px] montserrat-regular py-2">
                                 Detailed Notes
                             </p>
+                            <span className="bg-white text-sm2 text-gray-400 font-normal py-3 border-l border-custom-bluegreen pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">
+                                {
+                                    (
+                                        item.walkin_transaction_detail
+                                            ?.detailed_notes || ""
+                                    ).length
+                                }
+                                /500 characters
+                            </span>
                         </div>
                         <div className="flex gap-3">
                             <CustomInput
@@ -232,7 +306,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                                         ?.detailed_notes ||
                                     "No message provided."
                                 }
-                                className={`border-custom-bluegreen rounded-b-[5px] border-t w-full pl-2 outline-none montserrat-regular py-4`}
+                                className="border-custom-bluegreen rounded-b-[5px] border-t w-full pl-2 outline-none montserrat-regular py-4"
                                 disabled
                                 rows="4"
                             />
