@@ -105,6 +105,7 @@ export function useEngageForm(
             queryClient.invalidateQueries({
                 queryKey: ["walkinTransactionHistory"],
             });
+            localStorage.removeItem("engagedWalkinId");
             setError(null);
             dialogRef.current?.close();
             setSelectedItem(null);
@@ -119,6 +120,9 @@ export function useEngageForm(
     const handleCloseModal = async () => {
         try {
             dialogRef.current?.close();
+
+            // Remove engaged ID from localStorage
+            localStorage.removeItem("engagedWalkinId");
 
             await Promise.all([
                 queueMutation.mutateAsync({

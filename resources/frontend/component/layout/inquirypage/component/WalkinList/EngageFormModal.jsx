@@ -47,7 +47,6 @@ const EngageFormModal = forwardRef(
             handleSubmit,
             contractNumberError,
             transactionMutation,
-            queueMutation,
             handleCloseModal,
         } = useEngageForm(
             formData,
