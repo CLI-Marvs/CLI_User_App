@@ -73,7 +73,7 @@ const WalkinListPage = () => {
 
         setSelectedItem(item);
         try {
-            //Update the status
+            // Update the status
             await walkinTransactionService.updateWalkinTransactionStatus({
                 walkin_transaction_id: item?.id,
                 status: "serving",
@@ -95,7 +95,6 @@ const WalkinListPage = () => {
             engageFormModalRef.current.showModal();
         } catch (error) {
             showToast("Failed to engage transaction.", "error");
-            console.error(error);
         }
     };
 
@@ -201,7 +200,7 @@ const WalkinListPage = () => {
                     </div>
                 </div>
 
-                {/* Table */} 
+                {/* Table */}
                 <div className="mt-3 mx-1 py-4">
                     {!selectedBranch.id || !selectedBranch.id ? (
                         <div className="text-center py-4 text-custom-bluegreen montserrat-medium">
