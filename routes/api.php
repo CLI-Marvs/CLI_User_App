@@ -1,8 +1,5 @@
 <?php
 
-use App\Http\Controllers\ExecutiveDashboardController;
-use App\Http\Controllers\MilestoneProgressionController;
-use App\Http\Controllers\ProjectAssigneeController;
 use Illuminate\Http\Request;
 
 use App\Models\DynamicBanner;
@@ -44,6 +41,9 @@ use App\Http\Controllers\TeamController;
 use App\Http\Controllers\WorkOrderGroupController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\EmployeeEvaluationController;
+use App\Http\Controllers\ExecutiveDashboardController;
+use App\Http\Controllers\MilestoneProgressionController;
+use App\Http\Controllers\ProjectAssigneeController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
