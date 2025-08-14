@@ -76,10 +76,13 @@ class FlexibleTakenOutAccountsImport implements ToCollection, WithMultipleSheets
         $possibleHeaders = [
             'contract_no' => ['contract no', 'contract_no', 'contract number', 'contractno', 'contract #'],
             'account_name' => ['account name', 'account_name', 'accountname', 'client name', 'customer name'],
-            'property_name' => ['property name', 'property_name', 'propertyname', 'property', 'project name'],
-            'unit_no' => ['unit no', 'unit_no', 'unitno', 'unit number', 'unit #'],
+            'property_name' => ['property name', 'property_name', 'propertyname', 'property', 'project name', 'project'],
+            'unit_no' => ['unit no', 'unit_no', 'unitno', 'unit number', 'unit #', 'unit'],
             'financing' => ['financing', 'finance', 'loan type', 'payment type'],
-            'take_out_date' => ['takeout date', 'take_out_date', 'takeout_date', 'take out date', 'date taken out'],
+            'category' => ['category'],
+            'to_year' => ['to year', 'to_year', 'year', 'toyear', 'to yr'],
+            'to_month' => ['to month', 'to_month', 'month', 'tomonth', 'to mnth'],
+            'take_out_date' => ['takeout date', 'take_out_date', 'takeout_date', 'take out date', 'date taken out', 'date of takeout'],
             'dou_expiry' => ['dou expiry', 'dou_expiry', 'douexpiry', 'expiry date', 'dou expiration']
         ];
 
@@ -165,6 +168,20 @@ class FlexibleTakenOutAccountsImport implements ToCollection, WithMultipleSheets
         }
 
         $mappedData['added_status'] = true;
+
+        // Debug log for mapped data
+        \Log::debug('Mapped row data', [
+            'contract_no' => $mappedData['contract_no'] ?? null,
+            'account_name' => $mappedData['account_name'] ?? null,
+            'property_name' => $mappedData['property_name'] ?? null,
+            'unit_no' => $mappedData['unit_no'] ?? null,
+            'financing' => $mappedData['financing'] ?? null,
+            'category' => $mappedData['category'] ?? null,
+            'to_year' => $mappedData['to_year'] ?? null,
+            'to_month' => $mappedData['to_month'] ?? null,
+            'take_out_date' => $mappedData['take_out_date'] ?? null,
+            'dou_expiry' => $mappedData['dou_expiry'] ?? null,
+        ]);
 
         return $mappedData;
     }

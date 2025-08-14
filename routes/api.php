@@ -134,7 +134,8 @@ Route::middleware('auth:sanctum')->group(function () {
     /**
      * Titling & Registration Monitor
      */
-    Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName']);
+    Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName'])
+    ->where('contractNumber', '.*');
     /**
      * Milestones
      */

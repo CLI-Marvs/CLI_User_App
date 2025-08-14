@@ -393,7 +393,6 @@ const Sidebar = () => {
                             </Link>
                         </div>
                     )}
-
                     <Link to="/transaction/receivables/transactions">
                         <ListItem
                             className={`h-[35px] w-[185px] text-sm pl-[12px] py-7 transition-all duration-300 ease-in-out 

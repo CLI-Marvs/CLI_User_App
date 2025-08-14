@@ -72,8 +72,10 @@ export default function TitlingAndRegistrationMonitor({
             setError(null);
 
             try {
+                const encodedContractNumber =
+                    encodeURIComponent(contractNumber);
                 const response = await apiService.get(
-                    `/titling-registration/monitor/${contractNumber}`
+                    `/titling-registration/monitor/${encodedContractNumber}`
                 );
                 const data = response.data;
                 if (!Array.isArray(data)) {
@@ -396,7 +398,7 @@ export default function TitlingAndRegistrationMonitor({
                     </div>
                     <div>
                         <span className="font-semibold text-sm">
-                            Property Details:
+                            Project Details:
                         </span>
                         <span className="font-normal text-sm">
                             &nbsp;&nbsp;{contractNumber}

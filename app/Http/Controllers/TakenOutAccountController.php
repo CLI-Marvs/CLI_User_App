@@ -94,8 +94,21 @@ class TakenOutAccountController extends Controller
     public function getMasterList()
     {
         $masterList = TakenOutAccount::where('added_status', 1)
-            ->select('id', 'contract_no', 'account_name', 'financing', 'take_out_date', 'dou_expiry', 'property_name', 'unit_no') // Or other relevant columns
+            ->select(
+                'id',
+                'contract_no',
+                'account_name',
+                'financing',
+                'take_out_date',
+                'dou_expiry',
+                'property_name',
+                'unit_no',
+                'category',
+                'to_year',
+                'to_month'
+            )
             ->get();
+        // \Log::info('MasterList:', $masterList->toArray()); // Optional debug
         return response()->json($masterList);
     }
 

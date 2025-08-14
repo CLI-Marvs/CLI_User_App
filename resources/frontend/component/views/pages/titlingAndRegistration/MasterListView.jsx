@@ -151,26 +151,13 @@ const ExpiryIcon = () => [
 ];
 
 const TABLE_HEAD = [
-    {
-        head: "Account Name",
-        icon: <UserIcon />,
-    },
-    {
-        head: "Property Details",
-        icon: <Propertyicon />,
-    },
-    {
-        head: "Financing",
-        icon: <FinanceIcon />,
-    },
-    {
-        head: "Takeout Date",
-        icon: <DateIcon />,
-    },
-    {
-        head: "DOU Expiry",
-        icon: <ExpiryIcon />,
-    },
+    { head: "Account Name", icon: <UserIcon /> },
+    { head: "Project Details", icon: <Propertyicon /> },
+    { head: "Financing", icon: <FinanceIcon /> },
+    { head: "TO Year", icon: <DateIcon /> },
+    { head: "TO Month", icon: <DateIcon /> },
+    { head: "Takeout Date", icon: <DateIcon /> },
+    { head: "DOU Expiry", icon: <ExpiryIcon /> },
 ];
 
 const financeColorClasses = {
@@ -337,6 +324,7 @@ export default function PaginatedTable() {
     const [showTitlingMonitor, setShowTitlingMonitor] = useState(false);
     const [selectedRowDataForMonitor, setSelectedRowDataForMonitor] =
         useState(null);
+    console.log("MasterList:", masterListCurrentData);
     // const [isPageLoading, setIsPageLoading] = useState(
     //     !masterListFilteredRows || masterListFilteredRows.length === 0
     // );
@@ -1233,6 +1221,9 @@ export default function PaginatedTable() {
                                                         "Property Details":
                                                             "contract_no",
                                                         Financing: "financing",
+                                                        Category: "category",
+                                                        "TO Year": "to_year",
+                                                        "TO Month": "to_month",
                                                         "Takeout Date":
                                                             "take_out_date",
                                                         "DOU Expiry":
@@ -1265,10 +1256,6 @@ export default function PaginatedTable() {
                                                             : "pl-4"
                                                     }`}
                                                 >
-                                                    {head ===
-                                                        "Account Name" && (
-                                                        <span className="inline-flex justify-center items-center mr-2"></span>
-                                                    )}
                                                     {icon}
                                                     <Typography
                                                         variant="small"
@@ -1294,6 +1281,8 @@ export default function PaginatedTable() {
                                                     propertyName,
                                                     unitNumber,
                                                     finance,
+                                                    to_year,
+                                                    to_month,
                                                     takeOutdate,
                                                     douExpiry,
                                                 },
@@ -1335,15 +1324,6 @@ export default function PaginatedTable() {
                                                     >
                                                         <td className={classes}>
                                                             <div className="flex items-center gap-2">
-                                                                <span className="inline-flex w-6 h-6 justify-center items-center ml-5 mr-2">
-                                                                    <img
-                                                                        src={
-                                                                            TicketSvg
-                                                                        }
-                                                                        alt="Ticket Icon"
-                                                                        className="size-6"
-                                                                    />
-                                                                </span>
                                                                 <div className="flex flex-col items-start">
                                                                     <span className="text-base font-normal">
                                                                         {user}
@@ -1398,6 +1378,22 @@ export default function PaginatedTable() {
                                                                 >
                                                                     {finance}{" "}
                                                                 </span>
+                                                            </Typography>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <Typography
+                                                                variant="small"
+                                                                className="text-base font-normal text-center"
+                                                            >
+                                                                {to_year}
+                                                            </Typography>
+                                                        </td>
+                                                        <td className={classes}>
+                                                            <Typography
+                                                                variant="small"
+                                                                className="text-base font-normal text-center"
+                                                            >
+                                                                {to_month}
                                                             </Typography>
                                                         </td>
                                                         <td className={classes}>

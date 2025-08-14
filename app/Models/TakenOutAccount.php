@@ -26,6 +26,9 @@ class TakenOutAccount extends Model
         'dou_expiry',
         'added_status',
         'checklist_status',
+        'category',
+        'to_year',
+        'to_month',
     ];
 
     protected $casts = [

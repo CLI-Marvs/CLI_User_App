@@ -69,6 +69,9 @@ export const DocumentManagementProvider = ({ children }) => {
                 finance: row.financing,
                 takeOutdate: row.take_out_date,
                 douExpiry: row.dou_expiry,
+                category: row.category,
+                to_year: row.to_year,
+                to_month: row.to_month,
             }));
             setTakenOutMasterListTableRows(mappedRows);
         } catch (error) {
