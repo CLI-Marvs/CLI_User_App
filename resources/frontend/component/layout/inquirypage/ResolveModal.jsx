@@ -5,8 +5,9 @@ import { AiFillInfoCircle } from "react-icons/ai";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { SURVEY_LINKS } from '../../../constant/data/surveyLink';
 import CircularProgress from "@mui/material/CircularProgress";
+import { useSurvey } from "@/context/Survey/SurveyContext";
 
-const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
+const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate, setSurveyLink }) => {
     const { getAllConcerns, user, getInquiryLogs, data, assigneesPersonnel } =
         useStateContext();
     const [remarks, setRemarks] = useState("");
@@ -20,6 +21,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const [selectedSurveyType, setSelectedSurveyType] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [surveyLinks, setSurveyLinks] = useState([]);
+    const { fetchSurveyStatus } = useSurvey();
 
     /**
      *  Set initial communication type when dataRef changes
@@ -71,6 +73,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const handleSurveyChange = (selectedSurveyType) => {
         setSelectedSurveyType(selectedSurveyType);
         setIsSurveyRequired(false);
+        setSurveyLink(selectedSurveyType.surveyLink);
     };
 
     /**
@@ -120,7 +123,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
             localStorage.setItem("dataConcern", JSON.stringify(updatedData));
             onupdate(updatedData); // Call handleUpdate with the updated data
             getAllConcerns();
-
+            fetchSurveyStatus(ticketId);
             //Close the modal
             if (modalRef.current) {
                 modalRef.current.close();
@@ -139,7 +142,12 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         setIsCommunicationTypeRequired(false);
         setIsSurveyRequired(false);
         setSelectedSurveyType([]);
+        setSurveyLink(null);
     };
+
+    const handleSurveySend = (e) => {
+        handleSurveyChange(JSON.parse(e.target.value))
+    }
 
     const handleCancel = () => {
         if (modalRef.current) {
@@ -148,6 +156,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
             setIsCommunicationTypeRequired(false);
             setIsSurveyRequired(false);
             setSelectedSurveyType([]);
+            setSurveyLink(null);
             modalRef.current.close();
         }
     };
@@ -262,7 +271,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                          *SET value TO JSON string of selectedSurveyType
                         */}
                         <select
-                            onChange={(e) => handleSurveyChange(JSON.parse(e.target.value))}
+                            onChange={handleSurveySend}
                             value={JSON.stringify(selectedSurveyType)}
                             className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                         >

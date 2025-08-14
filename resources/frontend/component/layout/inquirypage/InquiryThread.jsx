@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import Backbtn from "../../../../../public/Images/Expand_up.svg";
 import { FaTrash } from "react-icons/fa";
 import UserMessages from "./UserMessages";
@@ -26,6 +26,8 @@ import InquiryFormModal from "./InquiryFormModal";
 import ThreadInquiryFormModal from "./ThreadInquiryFormModal";
 import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
 import { ALLOWED_DEPARTMENT } from "../../../constant/data/allowedDepartment";
+
+import { useSurvey } from '@/context/Survey/SurveyContext';
 
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -72,6 +74,8 @@ const InquiryThread = () => {
         isUserTypeChange,
         categories,
     } = useStateContext();
+
+    const { surveyStatus, fetchSurveyStatus } = useSurvey();
     const [chatMessage, setChatMessage] = useState("");
     const userLoggedInEmail = user?.employee_email;
     const userLoggedInDepartment = user?.department; //Holds the user's department
@@ -88,6 +92,29 @@ const InquiryThread = () => {
     const ticketId = decodeURIComponent(params.id);
     const [dataConcern, setDataConcern] = useState(itemsData || {});
     const [emailMessageID, setEmailMessageID] = useState(null);
+    const [surveyLink, setSurveyLink] = useState(null);
+
+    function getSurveyFullLink() {
+
+        if (
+            dataConcern?.survey_link &&
+            dataConcern?.survey_link !== "none" &&
+            dataConcern?.survey_link !== "null"
+        ) {
+            const id = ticketId.replace("Ticket#", "").trim();
+            return `${dataConcern.survey_link}/${id}/manual`;
+        }
+        return null;
+    }
+
+    const fullLink = getSurveyFullLink();
+
+    useEffect(() => {
+        if (surveyStatus === "none") {
+            fetchSurveyStatus(ticketId);
+        }
+    }, []);
+
     const handleDateChange = (date) => {
         setStartDate(date);
     };
@@ -106,16 +133,24 @@ const InquiryThread = () => {
         }));
     };
 
+
+
+    /* useEffect(() => {
+       console.log(surveyStatus);
+    }, [ticketId]); */
+
     useEffect(() => {
         const storedData = JSON.parse(localStorage.getItem("dataConcern"));
         const updatedData = JSON.parse(localStorage.getItem("updatedData"));
 
         if (storedData) {
             setDataConcern(storedData);
+            getSurveyFullLink();
         }
 
         if (updatedData) {
             setDataConcern(updatedData);
+            getSurveyFullLink();
         }
     }, []);
 
@@ -1470,25 +1505,46 @@ const InquiryThread = () => {
 
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                             <div className="w-full flex justify-end gap-[13px] items-center">
-                                {(dataConcern?.status === "Resolved" ||
-                                    dataConcern?.status === "Closed") && (
-                                        <div className="flex gap-[14px]">
-                                             <button 
-                                                className="w-auto font-semibold text-[13px] text-custom-lightgreen underline cursor-pointer"
-                                                onClick={handleSendSurveyModal}
+                                {(dataConcern?.status === "Resolved" || dataConcern?.status === "Closed") && (
+                                    <div className="flex items-center gap-[14px]">
+                                        {surveyStatus === "submitted" ? (
+                                            <div className="flex justify-start items-center px-[8px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
+                                                <p>Survey Submitted</p>
+                                                <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
+                                            </div>
+                                        ) : dataConcern?.survey_link !== null ? (    //resolved in CRS inquiry
+                                            fullLink && (
+                                                <div className="flex items-center">
+                                                    <a
+                                                        href={fullLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="w-auto font-semibold text-[13px] text-custom-lightgreen underline cursor-pointer"
+                                                    >
+                                                        Input Survey Data
+                                                    </a>
+                                                </div>
+
+                                            )
+                                        ) : (      //resolved in Walin-in
+                                            <div className="flex items-center">
+                                                <button
+                                                    onClick={handleSendSurveyModal}
+                                                    className="w-auto font-semibold text-[13px] text-custom-lightgreen underline cursor-pointer"
                                                 >
-                                                Input Survey Data
-                                            </button>
-                                            <span
-                                                className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                                onClick={handleOpenAddInfoModal}
-                                            >
-                                                Create new ticket
-                                            </span>
-                                        </div>
+                                                    Input Survey Data
+                                                </button>
+                                            </div>
+                                        )}
 
-                                    )}
-
+                                        <span
+                                            className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                            onClick={handleOpenAddInfoModal}
+                                        >
+                                            Create new ticket
+                                        </span>
+                                    </div>
+                                )}
                                 {dataConcern?.status === "Resolved" ? (
                                     <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
                                         <p>Ticket Resolved</p>
@@ -1659,6 +1715,7 @@ const InquiryThread = () => {
                     ticketId={ticketId}
                     dataRef={dataConcern}
                     onupdate={handleUpdate}
+
                 />
             </div>
 
@@ -1678,7 +1735,10 @@ const InquiryThread = () => {
                 />
             </div>
             <div>
-                <SendSurveyModal modalRef={modalRef3} />
+                <SendSurveyModal
+                    ticketId={ticketId}
+                    modalRef={modalRef3}
+                />
             </div>
         </>
     );

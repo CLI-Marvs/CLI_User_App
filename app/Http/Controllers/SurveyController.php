@@ -11,7 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-
+use PhpOffice\PhpSpreadsheet\Calculation\TextData\Replace;
 
 class SurveyController extends Controller
 {
@@ -624,6 +624,7 @@ class SurveyController extends Controller
 
     public function getSurveyTitle($id)
     {
+        
         $survey = DB::table('surveys_list')
             ->where('id', $id)
             ->value('survey_title');
@@ -684,6 +685,18 @@ class SurveyController extends Controller
 
         return response()->json([
             'data' => $result
+        ]);
+    }
+
+    public function getSurveyStatus($ticketId)
+    {
+
+        $survey = ExperienceRating::where('ticket_id', $ticketId)
+            ->select('status')
+            ->first();
+
+        return response()->json([
+            'status' => $survey ? $survey->status : 'none'
         ]);
     }
 

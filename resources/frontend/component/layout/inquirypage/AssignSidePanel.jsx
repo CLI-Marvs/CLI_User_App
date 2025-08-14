@@ -37,8 +37,7 @@ const AssignSidePanel = ({ ticketId }) => {
     const dropdownRef = useRef(null);
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
-    console.log("selectedOptions:", selectedOptions);
-    console.log("assigneesPersonnel", assigneesPersonnel);
+   
     const employeeOptions = allEmployees.map((employee) => ({
         name: `${employee.firstname} ${employee.lastname}`,
         email: employee.employee_email,
