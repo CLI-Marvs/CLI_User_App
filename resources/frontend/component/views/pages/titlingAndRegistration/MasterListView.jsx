@@ -352,7 +352,7 @@ export default function PaginatedTable() {
             // setIsPageLoading(true); // Always set loading to true when fetching
             try {
                 await Promise.all([
-                    fetchMasterList(),
+                    // fetchMasterList(),
                     // fetchLocalMasterListData(),
                 ]);
                 // await new Promise((resolve) => setTimeout(resolve, 100));

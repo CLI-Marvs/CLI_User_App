@@ -418,9 +418,7 @@ const App = () => {
                                 {
                                     path: "workorders",
                                     element: (
-                                        <PrivateRoute adminOnly>
                                             <WorkOrderView />
-                                        </PrivateRoute>
                                     ),
                                 },
                                 {
@@ -430,17 +428,13 @@ const App = () => {
                                 {
                                     path: "executivedashboard",
                                     element: (
-                                        <PrivateRoute adminOnly>
                                             <ExecutiveDashboardView />
-                                        </PrivateRoute>
                                     ),
                                 },
                                 {
                                     path: "settings",
                                     element: (
-                                        <PrivateRoute adminOnly>
                                             <SettingsView />
-                                        </PrivateRoute>
                                     ),
                                 },
                                 {
@@ -450,9 +444,7 @@ const App = () => {
                                 {
                                     path: "filemanager",
                                     element: (
-                                        <PrivateRoute adminOnly>
                                             <FileManagerView />
-                                        </PrivateRoute>
                                     ),
                                 },
                             ],
