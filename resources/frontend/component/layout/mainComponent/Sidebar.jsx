@@ -393,7 +393,8 @@ const Sidebar = () => {
                             </Link>
                         </div>
                     )}
-                    <Link to="/transaction/bank-monitoring/bank-statements">
+
+                    <Link to="/transaction/receivables/transactions">
                         <ListItem
                             className={`h-[35px] w-[185px] text-sm pl-[12px] py-7 transition-all duration-300 ease-in-out 
             ${
@@ -420,7 +421,7 @@ const Sidebar = () => {
                     </Link>
                     {isInvoiceOpen && (
                         <div className="px-[10px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
-                            <Link to="/transaction/bank-monitoring/bank-statements">
+                            {/* <Link to="/transaction/bank-monitoring/bank-statements">
                                 <ListItem
                                     className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
                                         location.pathname.startsWith(
@@ -437,7 +438,7 @@ const Sidebar = () => {
                                 >
                                     Bank Monitoring
                                 </ListItem>
-                            </Link>
+                            </Link> */}
                             <Link to="/transaction/receivables/transactions">
                                 <ListItem
                                     className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${

@@ -569,7 +569,7 @@ const Navbar = () => {
                                 </div>
                             )} */}
                         </div>
-                        <div className="flex items-center">
+                        <div className="hidden items-center">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"

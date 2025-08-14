@@ -6,15 +6,21 @@ import SelectInput from "@/component/shared/components/SelectInput";
 import {
     useCheckEntities,
     useCheckStreamBanks,
+    useCreateBank,
+    useCreateEntity,
 } from "../hooks/useTransactionQueries";
 import CustomInput from "@/component/Input/CustomInput";
 import useValidation from "../hooks/useValidation";
 import { requiredKeys } from "../constant/requiredKeys";
+import { showToast } from "@/util/toastUtil";
+import { valueExistsFuzzy } from "../utils/stringChecker";
 
 const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
     const { data: checkStreamBanks } = useCheckStreamBanks();
     const { data: checkStreamEntities } = useCheckEntities();
     const { errors, validateField, validateAll, clearError } = useValidation();
+    const { mutate: createEntity } = useCreateEntity();
+    const { mutate: createBank } = useCreateBank();
 
     const handlePreviewChecks = () => {
         const fieldsToValidate = {};
@@ -32,6 +38,39 @@ const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
         } else {
             setData((prev) => ({ ...prev, [fieldKey]: value }));
         }
+    };
+    const handleAddOption = (name, type) => {
+        const isEntity = type === "entity";
+
+        const config = isEntity
+            ? {
+                  list: checkStreamEntities,
+                  key: "payTo",
+                  createFn: createEntity,
+                  payload: { name },
+                  existsMsg: "Pay To Order already exists",
+                  successMsg: "Pay To Order created successfully",
+                  errorMsg: "Failed to create Pay To Order",
+              }
+            : {
+                  list: checkStreamBanks,
+                  key: "bank_name",
+                  createFn: createBank,
+                  payload: { bank_name: name },
+                  existsMsg: "Bank already exists",
+                  successMsg: "Bank created successfully",
+                  errorMsg: "Failed to create bank",
+              };
+
+        if (valueExistsFuzzy(config.list, name, config.key)) {
+            showToast(config.existsMsg, "error");
+            return;
+        }
+
+        config.createFn(config.payload, {
+            onSuccess: () => showToast(config.successMsg),
+            onError: () => showToast(config.errorMsg, "error"),
+        });
     };
 
     const fields = [
@@ -151,6 +190,9 @@ const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
                             }
                             valueKey="id"
                             labelKey="bank_name"
+                            onAddOption={(bankName) =>
+                                handleAddOption(bankName, "bank")
+                            }
                             className={`${
                                 errors["bank_name"]
                                     ? "border-red-500 focus:ring-2 focus:ring-red-300"
@@ -180,17 +222,15 @@ const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
                             onBlur={() => validateField("payTo", data.payTo)}
                             valueKey="id"
                             labelKey="payTo"
+                            onAddOption={(entityName) =>
+                                handleAddOption(entityName, "entity")
+                            }
                             className={`${
                                 errors["payTo"]
                                     ? "border-red-500 focus:ring-2 focus:ring-red-300"
                                     : ""
                             }`}
                         />
-                        {errors["payTo"] && (
-                            <span className="text-red-500 text-xs mt-1">
-                                {errors["payTo"]}
-                            </span>
-                        )}
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

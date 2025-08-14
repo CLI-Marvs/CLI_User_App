@@ -6,7 +6,7 @@ export const convertAmountToWords = (amountStr) => {
     const numAmount = parseFloat(cleanedStr);
     if (isNaN(numAmount)) return "";
     const pesos = Math.floor(numAmount);
-    const centavos = Math.floor((numAmount - pesos) * 100);
+    const centavos = Math.round((numAmount - pesos) * 100);
     let result = numberToWords(pesos) + " Peso";
     if (pesos !== 1) result += "s";
     if (centavos > 0) {

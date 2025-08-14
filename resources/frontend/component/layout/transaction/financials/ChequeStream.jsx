@@ -27,8 +27,10 @@ const ChequeStream = () => {
         const override = data.checkNos?.[index];
         if (override && override.trim() !== "") return override;
         if (data.checkBaseNo) {
-            const padded = String(index + 1).padStart(3, "0");
-            return `${data.checkBaseNo}${padded}`;
+            const baseStr = data.checkBaseNo.toString();
+            const baseNo = parseInt(baseStr, 10);
+            const nextNo = baseNo + index + 1;
+            return nextNo.toString().padStart(baseStr.length, "0");
         }
         return "";
     };

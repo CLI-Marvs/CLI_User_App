@@ -7,25 +7,29 @@ import React, {
 import { IoMdArrowDropdown } from "react-icons/io";
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
-import { walkinTransactionService } from "@/component/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
-import { showToast } from "@/util/toastUtil";
 import Button from "@/component/layout/inquirypage/component/ui/button";
-import { queueService } from "@/component/servicesApi/apiCalls/emojiWalkin/queueService";
-import isButtonDisabled from "@/util/isFormButtonDisabled";
 import CustomInput from "@/component/Input/CustomInput";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import validateContractNumber from "@/component/layout/inquirypage/utils/validateContractNumber";
+import { useEngageForm } from "@/component/layout/inquirypage/hooks/useEngageForm";
+import { INQUIRY_FROM_OPTIONS } from "@/component/layout/inquirypage/constants/inquiryFrom";
+import { TYPE_OPTIONS } from "@/component/layout/inquirypage/constants/type";
 
 const formDataInitialState = {
-    category_id: "",
-    property_id: "",
     first_name: "",
+    middle_name: "",
     last_name: "",
-    contact_number: "",
-    contract_number: "",
+    suffix: "",
     email: "",
+    contact_number: "",
+    property_id: "",
+    category_id: "",
+    type: "",
+    inquiry_from: "",
+    contract_number: "",
+    unit_number: "",
     details_message: "",
+    middle_name_na: false,
+    suffix_na: false,
 };
 
 const EngageFormModal = forwardRef(
@@ -34,41 +38,27 @@ const EngageFormModal = forwardRef(
         const dialogRef = React.useRef(null);
         //States
         const [formData, setFormData] = useState(formDataInitialState);
-        const [error, setError] = useState(null);
+        const [error, setError] = useState("");
         //Hooks
         const { propertyNamesList } = useProperty();
-        const queryClient = useQueryClient();
-        // Form validation
-        const contractNumberError = validateContractNumber(
-            formData.contract_number
+        const {
+            isPropertyButtonDisabled,
+            isSubmitting,
+            handleSubmit,
+            contractNumberError,
+            transactionMutation,
+            handleCloseModal,
+        } = useEngageForm(
+            formData,
+            itemData,
+            setSelectedItem,
+            setError,
+            dialogRef
         );
-        const isPropertyButtonDisabled =
-            isButtonDisabled(
-                formData,
-                Object.keys(formDataInitialState).filter(
-                    (key) => key !== "details_message"
-                )
-            ) || !!contractNumberError;
-
-        // Mutations
-        const transactionMutation = useMutation({
-            mutationFn: walkinTransactionService.createWalkinTransactionDetail,
-            onSuccess: (response) => {
-                queryClient.invalidateQueries({
-                    queryKey: ["queueWalkinTransactions"],
-                });
-            },
-            onError: (error) => {
-                setError(error?.response?.data?.message);
-            },
-        });
-        const queueMutation = useMutation({
-            mutationFn: queueService.updateQueueStatus,
-        });
-
-        // Derived state
-        const isSubmitting =
-            transactionMutation.isPending || queueMutation.isPending;
+        const validateEmail = (email) => {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        };
 
         // Expose methods to parent through ref
         useImperativeHandle(ref, () => ({
@@ -100,71 +90,6 @@ const EngageFormModal = forwardRef(
             }
         }, [itemData]);
 
-        //Event Handlers
-        // Handle form submission
-        const handleSubmit = async (e, actionType) => {
-            e.preventDefault();
-
-            // Prepare transaction payload
-            const transactionPayload = {
-                walkin_transaction_id: itemData.id,
-                category_id: formData.category_id,
-                property_masters_id: formData.property_id,
-                first_name: formData.first_name,
-                last_name: formData.last_name,
-                contact_number: formData.contact_number,
-                contract_number: formData.contract_number,
-                email: formData.email,
-                detailed_notes: formData.details_message,
-                status: actionType,
-            };
-
-            // Prepare queue payload
-            const queuePayload = {
-                priority_number: itemData?.priority_number,
-                status: actionType,
-            };
-
-            try {
-                // Submit transaction first
-                await transactionMutation.mutateAsync(transactionPayload);
-
-                // Then update queue status
-                await queueMutation.mutateAsync(queuePayload);
-
-
-                if(actionType === "resolved"){
-                    // Show success toast
-                    showToast(   
-                            "Walk-in Transaction Closed Successfully!",
-                        "success"
-                    );
-                }
-                else{
-                    showToast(
-                            "Walk-in Transaction Saved Successfully!",
-                        "success"
-                    );
-                }
-              
-
-                //Refresh the transaction history list
-                queryClient.invalidateQueries({
-                    queryKey: ["walkinTransactionHistory"],
-                });
-
-                // Reset form data and close dialog
-                setFormData(formDataInitialState);
-                dialogRef.current?.close();
-                setSelectedItem(null);
-            } catch (error) {
-                setError(
-                    error?.response?.data?.message ||
-                        "An error occurred while processing the request"
-                );
-            }
-        };
-
         // Handle input changes
         const handleInputChange = (e) => {
             const { name, value } = e.target;
@@ -172,45 +97,16 @@ const EngageFormModal = forwardRef(
                 ...prevData,
                 [name]: value,
             }));
-        };
-
-        // Handle modal close
-        const handleCloseModal = async () => {
-            try {
-                dialogRef.current?.close();
-
-                // Create a single transaction for all updates
-                await Promise.all([
-                    // Update queue status in firebase
-                    queueMutation.mutateAsync({
-                        priority_number: itemData?.priority_number,
-                        status: "queue",
-                    }),
-
-                    // Update transaction status in postgres
-                    walkinTransactionService.updateWalkinTransactionStatus({
-                        walkin_transaction_id: itemData?.id,
-                        status: "queue",
-                    }),
-                ]);
-
-                // Batch invalidate queries
-                queryClient.invalidateQueries({
-                    queries: [{ queryKey: ["queueWalkinTransactions"] }],
-                });
-
-                // Reset selected item
-                setSelectedItem(null);
-                setError(null);
-            } catch (error) {
-                showToast("Error closing the form", "error");
+            if (name === "email") {
+                setError(validateEmail(value) ? "" : "Invalid email address");
             }
         };
 
+        
         return (
             <dialog
                 id="engageFormModal"
-                className="modal w-[550px] rounded-[10px] shadow-custom5 backdrop:bg-black/50"
+                className="modal w-[600px] rounded-[10px] shadow-custom5 backdrop:bg-black/50"
                 ref={dialogRef}
             >
                 <div className="relative p-[20px] mb-5 rounded-lg">
@@ -225,7 +121,11 @@ const EngageFormModal = forwardRef(
                             </button>
                         </div>
                     </div>
-
+                    <div className="flex justify-center items-center my-6 mobile:mb-7 mobile:my-0">
+                        <p className="montserrat-bold text-[19px] text-custom-solidgreen mobile:text-sm">
+                            Walk-in Form
+                        </p>
+                    </div>
                     {/* Modal content */}
                     <div>
                         {error && (
@@ -245,72 +145,11 @@ const EngageFormModal = forwardRef(
                                 </span>
                             </h1>
                         </div>
-
-                        {/* Category Type */}
-                        <div className="py-2">
-                            <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden ">
-                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[200px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
-                                    Category Type
-                                </span>
-                                <div className="relative w-full">
-                                    <select
-                                        name="category_id"
-                                        value={formData.category_id}
-                                        onChange={handleInputChange}
-                                        className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
-                                    >
-                                        <option value="">
-                                            (Select category type)
-                                        </option>
-                                        {categories &&
-                                            categories.map((category) => (
-                                                <option
-                                                    key={category.id}
-                                                    value={category.id}
-                                                >
-                                                    {category.name}
-                                                </option>
-                                            ))}
-                                    </select>
-                                    <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
-                                        <IoMdArrowDropdown />
-                                    </span>
-                                </div>
-                            </div>
+                        <div className="mt-4">
+                            <p className="text-sm font-semibold mobile:text-xs">
+                                Required
+                            </p>
                         </div>
-
-                        {/*Project/Property */}
-                        <div className="py-1">
-                            <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden ">
-                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[200px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
-                                    Project
-                                </span>
-                                <div className="relative w-full">
-                                    <select
-                                        name="property_id"
-                                        value={formData.property_id}
-                                        onChange={handleInputChange}
-                                        className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
-                                    >
-                                        <option value="">
-                                            (Select project)
-                                        </option>
-                                        {propertyNamesList.map((property) => (
-                                            <option
-                                                key={property.id}
-                                                value={property.id}
-                                            >
-                                                {toLowerCaseText(property.name)}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
-                                        <IoMdArrowDropdown />
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
                         {/*First name */}
                         <div className="py-1">
                             <div
@@ -327,6 +166,51 @@ const EngageFormModal = forwardRef(
                                     noNumbers={true}
                                     className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 />
+                            </div>
+                        </div>
+
+                        {/*Middle name */}
+                        <div className="py-1">
+                            <div
+                                className={`flex relative items-center border border-custom-bluegreen rounded-[5px] overflow-hidden`}
+                            >
+                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
+                                    Middle Name
+                                </span>
+                                <CustomInput
+                                    name="middle_name"
+                                    type="text"
+                                    value={
+                                        formData.middle_name_na
+                                            ? ""
+                                            : formData.middle_name
+                                    }
+                                    onChange={handleInputChange}
+                                    noNumbers={true}
+                                    className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                    disabled={formData.middle_name_na}
+                                    required={!formData.middle_name_na}
+                                />
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
+                                    <input
+                                        onChange={(e) => {
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                middle_name_na:
+                                                    e.target.checked,
+                                                middle_name: e.target.checked
+                                                    ? ""
+                                                    : prev.middle_name,
+                                            }));
+                                        }}
+                                        type="checkbox"
+                                        checked={formData.middle_name_na}
+                                        name="middle_name_na"
+                                        className="accent-custom-lightgreen"
+                                        value="checkbox"
+                                    />
+                                    <p>N/A</p>
+                                </span>
                             </div>
                         </div>
 
@@ -349,7 +233,68 @@ const EngageFormModal = forwardRef(
                             </div>
                         </div>
 
-                        {/*Contact Number */}
+                        {/*Suffix name */}
+                        <div className="py-1">
+                            <div
+                                className={`flex relative items-center border border-custom-bluegreen rounded-[5px] overflow-hidden  `}
+                            >
+                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
+                                    Suffix Name
+                                </span>
+                                <CustomInput
+                                    name="suffix"
+                                    type="text"
+                                    value={
+                                        formData.suffix_na
+                                            ? ""
+                                            : formData.suffix
+                                    }
+                                    onChange={handleInputChange}
+                                    noNumbers={true}
+                                    className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                    disabled={formData.suffix_na}
+                                    required={!formData.suffix_na}
+                                />
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 gap-2 text-sm bg-custom-lightestgreen">
+                                    <input
+                                        type="checkbox"
+                                        checked={formData.suffix_na}
+                                        onChange={(e) => {
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                suffix_na: e.target.checked,
+                                                suffix: e.target.checked
+                                                    ? ""
+                                                    : prev.suffix,
+                                            }));
+                                        }}
+                                        name="suffix_na"
+                                        className="accent-custom-lightgreen"
+                                    />
+                                    <p>N/A</p>
+                                </span>
+                            </div>
+                        </div>
+
+                        {/*Email*/}
+                        <div className="py-1">
+                            <div
+                                className={`flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden  `}
+                            >
+                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
+                                    Email
+                                </span>
+                                <CustomInput
+                                    name="email"
+                                    type="text"
+                                    value={formData.email}
+                                    onChange={handleInputChange}
+                                    className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                                />
+                            </div>
+                        </div>
+
+                        {/*Mobile Number */}
                         <div className="py-1">
                             <div
                                 className={`flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden  `}
@@ -368,16 +313,143 @@ const EngageFormModal = forwardRef(
                             </div>
                         </div>
 
-                        {/*Contract Number*/}
+                        {/*Project/Property */}
                         <div className="py-1">
+                            <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden ">
+                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[200px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
+                                    Property
+                                </span>
+                                <div className="relative w-full">
+                                    <select
+                                        name="property_id"
+                                        value={formData.property_id}
+                                        onChange={handleInputChange}
+                                        className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
+                                    >
+                                        <option value="">(Select)</option>
+                                        <option value="N/A">N/A</option>
+                                        {propertyNamesList.map((property) => (
+                                            <option
+                                                key={property.id}
+                                                value={property.id}
+                                            >
+                                                {toLowerCaseText(property.name)}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
+                                        <IoMdArrowDropdown />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Category Type */}
+                        <div className="py-1">
+                            <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden ">
+                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[200px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
+                                    Concern Regarding
+                                </span>
+                                <div className="relative w-full">
+                                    <select
+                                        name="category_id"
+                                        value={formData.category_id}
+                                        onChange={handleInputChange}
+                                        className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
+                                    >
+                                        <option value="">(Select)</option>
+                                        {categories &&
+                                            categories.map((category) => (
+                                                <option
+                                                    key={category.id}
+                                                    value={category.id}
+                                                >
+                                                    {category.name}
+                                                </option>
+                                            ))}
+                                    </select>
+                                    <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
+                                        <IoMdArrowDropdown />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Type */}
+                        <div className="py-1 mb-1">
+                            <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden ">
+                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[200px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
+                                    Type
+                                </span>
+                                <div className="relative w-full">
+                                    <select
+                                        name="type"
+                                        value={formData.type}
+                                        onChange={handleInputChange}
+                                        className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
+                                    >
+                                        {TYPE_OPTIONS.map((option) => (
+                                            <option
+                                                key={option.value}
+                                                value={option.value}
+                                            >
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
+                                        <IoMdArrowDropdown />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="border border-t-1 border-[#D9D9D9]"></div>
+                        <div className="mt-3">
+                            <p className="text-sm font-semibold mobile:text-xs">
+                                Optional
+                            </p>
+                        </div>
+
+                        {/* Inquiry From */}
+                        <div className="py-1 mb-1">
+                            <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden ">
+                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[200px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-4 pl-3 py-1">
+                                    Inquiry From
+                                </span>
+                                <div className="relative w-full">
+                                    <select
+                                        name="inquiry_from"
+                                        value={formData.inquiry_from}
+                                        onChange={handleInputChange}
+                                        className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
+                                    >
+                                        {INQUIRY_FROM_OPTIONS.map((option) => (
+                                            <option
+                                                key={option.value}
+                                                value={option.value}
+                                            >
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3  bg-custom-lightestgreen text-custom-bluegreen pointer-events-none">
+                                        <IoMdArrowDropdown />
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/*Contract Number*/}
+                        <div className="">
                             <div
-                                className={`flex items-center border rounded-[5px] overflow-hidden ${
-                                    formData.contract_number.length > 0 &&
-                                    contractNumberError
-                                        ? "border-red-500"
-                                        : formData.contract_number.length === 13
-                                        ? "border-custom-bluegreen"
-                                        : ""
+                                className={`flex items-center rounded-[5px] overflow-hidden ${
+                                    formData.contract_number.length === 13
+                                        ? "border border-custom-bluegreen"
+                                        : formData.contract_number.length > 0 &&
+                                          formData.contract_number.length < 13
+                                        ? "border border-red-500"
+                                        : "border border-custom-bluegreen"
                                 }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
@@ -410,31 +482,27 @@ const EngageFormModal = forwardRef(
                             </span>
                         </div>
 
-                        {/*Email*/}
-                        <div className="py-1">
-                            <div
-                                className={`flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden  `}
-                            >
-                                <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
-                                    Email
-                                </span>
-                                <CustomInput
-                                    name="email"
-                                    type="text"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                    className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
-                                />
-                            </div>
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden mt-2">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[182px] pl-3 py-1">
+                                Unit/Lot Number
+                            </span>
+                            <CustomInput
+                                name="unit_number"
+                                type="text"
+                                value={formData.unit_number}
+                                onChange={handleInputChange}
+                                className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
+                            />
                         </div>
+                        <div className="border border-t-1 border-[#D9D9D9] mt-2"></div>
 
                         {/* Detailed notes */}
                         <div
-                            className={`  rounded-[5px] border-custom-bluegreen border mt-1`}
+                            className={`  rounded-[5px] border-custom-bluegreen border mt-2`}
                         >
                             <div className="flex items-center justify-between h-full bg-custom-lightestgreen rounded-t-[5px]">
-                                <p className="text-custom-bluegreen text-sm  pl-3  flex-grow mobile:text-xs mobile:w-[170px]">
-                                    Detailed Notes
+                                <p className="text-custom-bluegreen text-sm  pl-3  flex-grow mobile:text-xs mobile:w-[170px] montserrat-semibold">
+                                    Details (Required)
                                 </p>
                                 <span className="bg-white text-sm2 text-gray-400 font-normal py-2 border-l border-custom-bluegreen pl-2 pr-12 mobile:pr-1 mobile:text-xs ml-auto rounded-tr-[4px]">
                                     {formData.details_message.length}/500

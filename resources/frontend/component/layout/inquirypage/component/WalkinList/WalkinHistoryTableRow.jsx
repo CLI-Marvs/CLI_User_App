@@ -15,7 +15,7 @@ const WalkinHistoryTableRow = ({ item , onClick }) => {
                 {item?.priority_number}
             </td>
             <td className="w-[150px] py-4 montserrat-regular px-1">
-                {item?.category?.name || "N/A"}
+                {item?.walkin_transaction_detail?.category?.name || "N/A"}
             </td>
             <td className="w-[200px] py-4 capitalize montserrat-regular px-1">
                 {item?.status || "N/A"}

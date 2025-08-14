@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { IoChevronDownCircleOutline } from "react-icons/io5";
+import { IoChevronDownCircleOutline, IoAddCircleOutline } from "react-icons/io5";
 
 const SelectInput = ({
     label,
@@ -12,6 +12,7 @@ const SelectInput = ({
     getOptionClassName = () => "",
     valueKey = "id",
     labelKey = "label",
+    onAddOption
 }) => {
     const [search, setSearch] = useState("");
     const [showOptions, setShowOptions] = useState(false);
@@ -97,6 +98,20 @@ const SelectInput = ({
                         ) : (
                             <div className="px-3 py-2 text-gray-400">
                                 No results found
+                            </div>
+                        )}
+
+                        {onAddOption && search && (
+                            <div
+                                className="px-3 py-2 cursor-pointer bg-green-50 hover:bg-green-100 text-green-600 font-medium flex gap-1 items-center"
+                                onClick={() => {
+                                    onAddOption(search);
+                                    setSearch("");
+                                    setShowOptions(false);
+                                }}
+                            >
+                            <IoAddCircleOutline className="h-5 w-5" />
+                               Add “{search}”
                             </div>
                         )}
                     </div>
