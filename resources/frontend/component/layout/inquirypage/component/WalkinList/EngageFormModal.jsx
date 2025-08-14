@@ -30,6 +30,7 @@ const formDataInitialState = {
     details_message: "",
     middle_name_na: false,
     suffix_na: false,
+    other_user_type: "",
 };
 
 const EngageFormModal = forwardRef(
@@ -53,8 +54,11 @@ const EngageFormModal = forwardRef(
             itemData,
             setSelectedItem,
             setError,
-            dialogRef
+            dialogRef,
+            propertyNamesList,
+            categories
         );
+
         const validateEmail = (email) => {
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);
@@ -90,6 +94,15 @@ const EngageFormModal = forwardRef(
             }
         }, [itemData]);
 
+        useEffect(() => {
+            if (formData.inquiry_from !== "Others") {
+                setFormData((prevData) => ({
+                    ...prevData,
+                    other_user_type: "",
+                }));
+            }
+        }, [formData.inquiry_from]);
+        
         // Handle input changes
         const handleInputChange = (e) => {
             const { name, value } = e.target;
@@ -97,12 +110,12 @@ const EngageFormModal = forwardRef(
                 ...prevData,
                 [name]: value,
             }));
+
             if (name === "email") {
                 setError(validateEmail(value) ? "" : "Invalid email address");
             }
         };
 
-        
         return (
             <dialog
                 id="engageFormModal"
@@ -438,6 +451,22 @@ const EngageFormModal = forwardRef(
                                     </span>
                                 </div>
                             </div>
+                            {formData.inquiry_from === "Others" && (
+                                <div className="flex justify-end mt-2">
+                                    <div
+                                        className={`flex items-center border rounded-[5px] w-[277px] overflow-hidden `}
+                                    >
+                                        <input
+                                            name="other_user_type"
+                                            type="text"
+                                            className="w-full px-4 text-sm focus:outline-none mobile:text-xs py-1"
+                                            value={formData.other_user_type}
+                                            onChange={handleInputChange}
+                                            placeholder=""
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/*Contract Number*/}

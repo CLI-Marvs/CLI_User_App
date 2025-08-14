@@ -372,61 +372,6 @@ class ConcernController extends Controller
     }
 
 
-    //* For saving to gdrive
-    // public function addConcernPublic(Request $request)
-    // {
-    //     try {
-    //         $files = $request->file('files');
-    //         $lastConcern = Concerns::latest()->first();
-    //         $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
-    //         $formattedId = str_pad($nextId, 7, '0', STR_PAD_LEFT);
-
-    //         $ticketId = 'Ticket#24' . $formattedId;
-
-
-    //         $concerns = new Concerns();
-    //         $concerns->details_concern = $request->details_concern;
-    //         $concerns->property = $request->property;
-    //         $concerns->details_message = $request->message;
-    //         $concerns->status = "unresolved";
-    //         $concerns->ticket_id = $ticketId;
-    //         $concerns->user_type = $request->user_type;
-    //         $concerns->buyer_name = $request->fname . ' ' . $request->lname;
-    //         $concerns->mobile_number = $request->mobile_number;
-    //         $concerns->contract_number = $request->contract_number;
-    //         $concerns->unit_number = $request->unit_number;
-    //         $concerns->buyer_email = $request->buyer_email;
-    //         $concerns->inquiry_type = "from_admin";
-    //         $concerns->save();
-
-    //         $this->inquiryReceivedLogs($request, $ticketId);
-
-    //         $fileLinks = [];
-    //         if ($files) {
-    //             foreach ($files as $file) {
-    //                 $fileLink = $this->store($file);
-    //                 $fileLinks[] = $fileLink;
-    //             }
-    //         }
-
-    //         $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
-    //         $messages = new Messages();
-    //         $messages->admin_email = $request->admin_email;
-    //         $messages->admin_id = $request->admin_id;
-    //         $messages->attachment = $attachment;
-    //         $messages->ticket_id = $concerns->ticket_id;
-    //         $messages->details_message = $request->message;
-    //         $messages->save();
-
-
-
-    //         return response()->json('Successfully added');
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
-
-
     //*For Cloud Storage
     public function addConcernPublic(Request $request)
     {
@@ -472,12 +417,11 @@ class ConcernController extends Controller
 
             $ticketId = 'Ticket#' . $this->dynamicTicketYear . $formattedId;
 
-
             $concerns = new Concerns();
             $concerns->details_concern = $request->details_concern;
             $concerns->property = $request->property;
             $concerns->details_message = $validatedData['message'];
-            $concerns->status = "unresolved";
+            $concerns->status = $request->status ?? "unresolved";
             $concerns->ticket_id = $ticketId;
             $concerns->user_type = $request->user_type;
             if ($request->user_type === "Others") {
@@ -497,6 +441,20 @@ class ConcernController extends Controller
             $concerns->channels = $request->channels;
             $concerns->suffix_name = $request->suffix;
             $concerns->inquiry_type = "from_admin";
+            $concerns->walkin_transaction_id = $request->walkin_transaction_id ?? null;
+            if ($request->source_from === 'Walk-in') {
+                $assignTo = json_decode($request->assign_to, true);
+                if ($assignTo) {
+                    $this->assignAssigneesToConcern(
+                        is_array($assignTo) ? [$assignTo] : [$assignTo],
+                        $ticketId,
+                        $assignTo['email'],
+                        $assignTo['department']
+                    );
+                }
+                $concerns->assign_to = json_encode(is_array($assignTo) && isset($assignTo[0]) ? $assignTo : [$assignTo]);
+            }
+
             $concerns->save();
 
             $this->inquiryReceivedLogs($request, $ticketId);
@@ -518,7 +476,6 @@ class ConcernController extends Controller
                 SendFeedbackNotificationJob::dispatch($data, $request->buyer_email);
             }
 
-
             $attachment = !empty($filesData) ? json_encode($filesData) : null;
             $messages = new Messages();
             $messages->buyer_email = $request->buyer_email;
@@ -537,6 +494,23 @@ class ConcernController extends Controller
         }
     }
 
+    private function assignAssigneesToConcern($assignees, $ticketId, $assignBy, $assignByDepartment)
+    {
+        $assigneeNames = [];
+        foreach ($assignees as $assignee) {
+            $assigneeNames[] = $assignee['name'];
+            $inquiryAssignee = new InquiryAssignee();
+            $inquiryAssignee->ticket_id = $ticketId;
+            $inquiryAssignee->email = $assignee['email'];
+            $inquiryAssignee->save();
+        }
+
+        // Log the assignment
+        $this->inquiryAssigneeLogs((object)[
+            'assign_by' => $assignBy,
+            'assign_by_department' => $assignByDepartment,
+        ], $assigneeNames, $ticketId);
+    }
 
     public function addConcernFromPreviousInquiry(Request $request)
     {
@@ -928,13 +902,9 @@ class ConcernController extends Controller
 
             $allConcerns->counts = $counts;
 
-            \Log::info($allConcerns);
-
-            /* dd($allConcerns); */
-
             return response()->json([
-                'data' => $allConcerns->items(), 
-                'counts' => $counts,             
+                'data' => $allConcerns->items(),
+                'counts' => $counts,
                 'current_page' => $allConcerns->currentPage(),
                 'last_page' => $allConcerns->lastPage(),
                 'per_page' => $allConcerns->perPage(),
@@ -1462,6 +1432,7 @@ class ConcernController extends Controller
 
     public function inquiryAssigneeLogs($request, $assignees, $ticketId)
     {
+
         try {
             $inquiry = new InquiryLogs();
             $formattedAssignees = implode(', ', $assignees);
@@ -1496,6 +1467,8 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
+
     public function removeInquiryAssigneeLog($request)
     {
         try {
@@ -1691,9 +1664,6 @@ class ConcernController extends Controller
     public function testApi(Request $request)
     {
         try {
-            \Log::info('testApi', [
-                'content' => $request->all()
-            ]);
             $testData = new BankTransaction();
 
             $testData->bank_name = $request->input('burks');
@@ -1707,6 +1677,8 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
+
     public function removeAssignee(Request $request)
     {
         try {
@@ -1756,70 +1728,7 @@ class ConcernController extends Controller
             return response()->json(['message' => 'Error.', 'error' => $e->getMessage()], 500);
         }
     }
-    // public function removeAssignee(Request $request)
-    // {
-    //     try {
-    //         $user = $request->user();
-    //         $userDepartment = $user->department;
 
-    //         if ($userDepartment !== "CRS") {
-    //             return response()->json(['message' => 'Unauthorized user']);
-    //         }
-
-    //         $assignee = InquiryAssignee::where('ticket_id', $request->ticketId)
-    //             ->where('email', $request->email)
-    //             ->first();
-
-    //         if ($assignee) {
-    //             $assignee->delete();
-    //             $newTicketId = str_replace('#', '', $request->ticketId);
-    //             $data = [
-    //                 'ticketId' => $newTicketId,
-    //                 'email' => $request->email,
-    //             ];
-    //             RemoveAssignees::dispatch($data);
-    //             return response()->json(['message' => 'Assignee removed successfully']);
-    //         }
-
-    //         return response()->json(['message' => 'No assignee found']);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'Error.', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
-
-
-
-
-    //*For Reassigning
-    // public function reassignInquiry(Request $request)
-    // {
-    //     try {
-    //         $emailContent = "Hey " . $request->firstname . ", inquiry " . $request->ticketId . " has been assigned to you.";
-    //         $prevInquiry = InquiryAssignee::where('ticket_id', $request->ticketId)->first();
-
-
-    //         $concern = Concerns::where("ticket_id", $request->ticketId)->first();
-    //         $concern->resolve_from = $request->department;
-    //         $concern->assign_to = $request->department;
-    //         $concern->save();
-
-    //         $prevInquiry->email = $request->email;
-    //         $prevInquiry->save();
-
-    //         $this->inquiryAssigneeLogs($request);
-    //         /*   JobToPersonnelAssign::dispatch($request->email, $emailContent, $request->email); */
-
-    //         $data = [
-    //             'firstname' => $request->firstname,
-    //          /*    'ticketId' => str_replace('#', '', $request->ticketId), */
-    //             'concernId' => $request->concernId,
-    //         ];
-    //         InquiryAssignedLogs::dispatch($data);
-    //         return response()->json('Successfully reassign');
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
     public function getInquiryLogs($ticketId)
     {
         try {
@@ -1929,10 +1838,6 @@ class ConcernController extends Controller
                         'modifiedTicketId' => $modifiedTicketId,
                         'status' => 'Resolved'
                     ];
-
-                    \Log::info([
-                        'datasssssss' => $data,
-                    ]);
 
                     NotifyAssignedCliOfResolvedInquiryJob::dispatch(
                         $assignee['employee_email'],
@@ -2279,11 +2184,6 @@ class ConcernController extends Controller
         ]);
     }
 
-
-
-
-
-
     /**
      * Get Inquiries per channel data
      */
@@ -2353,9 +2253,9 @@ class ConcernController extends Controller
             return $item;
         });
 
-
         return response()->json($inquiryChannels);
     }
+
 
     public function getCommunicationType(Request $request)
     {
@@ -2410,7 +2310,6 @@ class ConcernController extends Controller
 
         $communicationTypes = $query->groupBy('communication_type')->get();
 
-
         $mappedCommunicationTypes = $communicationTypes->map(function ($item) {
             switch ($item->communication_type) {
                 case 'Complaint':
@@ -2432,9 +2331,9 @@ class ConcernController extends Controller
             return $item;
         });
 
+        
         return response()->json($mappedCommunicationTypes);
     }
-
 
 
     public function getInquiriesByCategory(Request $request)
