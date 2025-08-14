@@ -5,7 +5,7 @@ import { useStateContext } from "../../../context/contextprovider";
 import Alert from "../../Alert";
 import { showToast } from "../../../util/toastUtil";
 import { PREDEFINED_USER_TYPES } from "../../../constant/data/preDefinedUserTypes";
-
+import { sortByNameAlphabetically } from "./utils/sort";
 /**
  * Function to normalizeData, that returns;
  * Strip out fields that needed to compare (like `id`, `status`, `created_at`, `updated_at`, etc.)
@@ -547,7 +547,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 >
                                     <option value="">(Select)</option>
                                     {categories &&
-                                        categories.map((category) => (
+                                        sortByNameAlphabetically(categories, ["Other Concerns"]).map((category) => (
                                             <option key={category.id}>
                                                 {category.name}
                                             </option>

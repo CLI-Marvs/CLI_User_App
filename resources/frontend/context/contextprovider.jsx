@@ -34,7 +34,8 @@ export const ContextProvider = ({ children }) => {
     const [notifCurrentPage, setNotifCurrentPage] = useState(0);
     const [searchFilter, setSearchFilter] = useState({});
     const [data, setData] = useState([]);
-    const [dataCount, setDataCount] = useState([]);
+    const [dataCount, setDataCount] = useState({});
+    const [dataFilterCount, setDataFilterCount] = useState([]);
     const itemsPerPage = 20;
     const [pageCount, setPageCount] = useState(0);
     const [notifPageCount, setNotifPageCount] = useState(0);
@@ -214,8 +215,10 @@ export const ContextProvider = ({ children }) => {
                     `/get-concern?${searchParams}`
                 );
 
+                
                 setData(response.data.data);
-                setDataCount(response.data.total);
+                setDataFilterCount(response.data.total);
+                setDataCount(response.data.counts);
                 setPageCount(response.data.last_page);
             } catch (error) {
                 console.error("Error fetching data: ", error);
@@ -971,6 +974,8 @@ export const ContextProvider = ({ children }) => {
                 setData,
                 dataCount,
                 setDataCount,
+                setDataFilterCount,
+                dataFilterCount,
                 searchFilter,
                 statusFilter,
                 specificInquiry,

@@ -15,6 +15,7 @@ import { useSearchParams, useLocation } from "react-router-dom";
 import Spinner from "../../../util/Spinner";
 import Skeletons from "../../Skeletons";
 import { CircularProgress } from "@mui/material";
+import { sortByNameAlphabetically } from "./utils/sort";
 
 const InquiryList = () => {
     const location = useLocation();
@@ -46,6 +47,8 @@ const InquiryList = () => {
         searchFilter,
         user,
         dataCount,
+        dataFilterCount,
+        setDataFilterCount,
         setSpecificAssigneeCsr,
         specificAssigneeCsr,
         department,
@@ -602,7 +605,8 @@ const InquiryList = () => {
                                                 <option value=" ">
                                                     Select Category
                                                 </option>
-                                                {categories && categories.map(
+                                                {categories && 
+                                                sortByNameAlphabetically(categories, ["Other Concerns"]).map(
                                                     (category) => (
                                                         <option
                                                             key={category.id}
@@ -1123,7 +1127,7 @@ const InquiryList = () => {
                                         <p>No Records Found</p>
                                     ) : (
                                         <p>
-                                            {dataCount}{" "}
+                                            {dataFilterCount}{" "}
                                             {data?.length > 1
                                                 ? "Results"
                                                 : "Result"}{" "}
@@ -1133,10 +1137,10 @@ const InquiryList = () => {
                                 ) : (
                                     <p>
                                         {selectedOption} (
-                                        {dataCount == 0 ? (
+                                        {loading ? (
                                             <CircularProgress size={14} />
                                         ) : (
-                                            dataCount
+                                           dataFilterCount
                                         )}
                                         )
                                     </p>
@@ -1153,11 +1157,7 @@ const InquiryList = () => {
                                                 handleOptionClick("All")
                                             }
                                         >
-                                            All (
-                                            {countAllConcerns?.counts?.all ?? (
-                                                <CircularProgress size={14} />
-                                            )}
-                                            )
+                                           All ({dataCount?.total ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1165,12 +1165,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Resolved")
                                             }
                                         >
-                                            Resolved (
-                                            {countAllConcerns?.counts
-                                                ?.resolved ?? (
-                                                    <CircularProgress size={14} />
-                                                )}
-                                            )
+                                           Resolved ({dataCount?.resolved_count ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1178,12 +1173,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Closed")
                                             }
                                         >
-                                            Closed (
-                                            {countAllConcerns?.counts
-                                                ?.closed ?? (
-                                                    <CircularProgress size={14} />
-                                                )}
-                                            )
+                                            Closed ({dataCount?.closed_count ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1191,12 +1181,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Unresolved")
                                             }
                                         >
-                                            Unresolved (
-                                            {countAllConcerns?.counts
-                                                ?.unresolved ?? (
-                                                    <CircularProgress size={14} />
-                                                )}
-                                            )
+                                            Unresolved ({dataCount?.unresolved_count ?? <CircularProgress size={14} />})
                                         </li>
                                     </ul>
                                 </div>

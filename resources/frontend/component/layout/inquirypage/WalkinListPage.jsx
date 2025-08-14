@@ -1,22 +1,19 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState,useEffect } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
 import { WALKIN_COLUMNS } from "@/constant/data/tableColumns";
 import WalkinTableRow from "@/component/layout/inquirypage/component/WalkinList/WalkinTableRow";
 import EngageFormModal from "@/component/layout/inquirypage/component/WalkinList/EngageFormModal";
-import { walkinTransactionService } from "@/component/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
-import { queueService } from "@/component/servicesApi/apiCalls/emojiWalkin/queueService";
 import { showToast } from "@/util/toastUtil";
 import Button from "@/component/layout/inquirypage/component/ui/button";
 import { FaHistory } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
 import { useCategories } from "@/component/layout/inquirypage/hooks/useCategories";
 import { useBranch } from "@/component/layout/inquirypage/hooks/useBranch";
 import Skeleton from "@/component/Skeletons";
 import { useWalkinSelection } from "@/context/InquiryManagement/WalkinSelectionContext";
-
+import { useWalkinTransactions } from "@/component/layout/inquirypage/hooks/useWalkinTransactions";
 const WalkinListPage = () => {
     //States
     const [page, setPage] = useState(1);
@@ -32,27 +29,16 @@ const WalkinListPage = () => {
         setSelectedDesk,
     } = useWalkinSelection();
     const navigate = useNavigate();
-    const { data: walkinData, isLoading } = useQuery({
-        queryKey: ["queueWalkinTransactions", page, selectedBranch.slug],
-        queryFn: () => {
-            if (!selectedBranch.slug) {
-                // Don't fetch if no branch selected
-                return Promise.resolve(undefined);
-            }
-            // Pass slug to the service
-            return walkinTransactionService.getQueuedWalkinTransactions(
-                page,
-                PAGE_SIZE,
-                selectedBranch.slug
-            );
-        },
-        enabled: !!selectedBranch.slug,
-        keepPreviousData: true,
-        staleTime: 1000 * 60,
-        cacheTime: 1000 * 60 * 5,
-        refetchInterval: 10000,
+    const {
+        data: walkinData,
+        isLoading,
+        engageMutation,
+    } = useWalkinTransactions({
+        page,
+        pageSize: PAGE_SIZE,
+        selectedBranch,
+        selectedDesk,
     });
-    const queryClient = useQueryClient();
     const { data: categoriesData } = useCategories();
     const { data: branchesData } = useBranch();
 
@@ -60,42 +46,19 @@ const WalkinListPage = () => {
     //Handle engage form modal open
     const handleEngage = async (item) => {
         if (!engageFormModalRef.current) return;
-
-        if (selectedBranch.id === "") {
-            showToast("Please select a branch first.", "warning");
-            return;
-        }
-
-        if (!selectedDesk.id) {
-            showToast("Please select a desk/counter first.", "warning");
-            return;
-        }
-
         setSelectedItem(item);
         try {
-            //Update the status
-            await walkinTransactionService.updateWalkinTransactionStatus({
-                walkin_transaction_id: item?.id,
-                status: "serving",
-            });
-
-            // Invalidate the query to refresh the list
-            queryClient.invalidateQueries({
-                queryKey: ["queueWalkinTransactions", page],
-            });
-
-            // Send to queue monitor - firebase
-            const payload = {
-                priority_number: item?.priority_number,
-                status: "serving",
-                counter: selectedDesk?.name,
-            };
-            queueService.updateQueueStatus(payload);
-
+            await engageMutation.mutateAsync(item);
+            // Save to localStorage
+            localStorage.setItem("engagedWalkinId", item?.id);
             engageFormModalRef.current.showModal();
         } catch (error) {
-            showToast("Failed to engage transaction.", "error");
-            console.error(error);
+            if (
+                !error.message.includes("No branch selected") &&
+                !error.message.includes("No desk selected")
+            ) {
+                showToast("Failed to engage transaction.", "error");
+            }
         }
     };
 
@@ -127,7 +90,7 @@ const WalkinListPage = () => {
                                     });
                                     setDesks(branch ? branch.desks : []);
                                 }}
-                                value={selectedBranch.id}
+                                value={selectedBranch.id ?? ""}
                                 className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
                             >
                                 <option value="" className="montserrat-regular">
@@ -182,6 +145,7 @@ const WalkinListPage = () => {
                                         name: desk ? desk.name : "",
                                     });
                                 }}
+                                value={selectedDesk?.id ?? ""}
                                 className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
                             >
                                 <option value="" className="montserrat-regular">
@@ -201,7 +165,7 @@ const WalkinListPage = () => {
                     </div>
                 </div>
 
-                {/* Table */} 
+                {/* Table */}
                 <div className="mt-3 mx-1 py-4">
                     {!selectedBranch.id || !selectedBranch.id ? (
                         <div className="text-center py-4 text-custom-bluegreen montserrat-medium">

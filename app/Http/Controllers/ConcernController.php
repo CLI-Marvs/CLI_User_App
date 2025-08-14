@@ -886,6 +886,19 @@ class ConcernController extends Controller
             $query = Concerns::query();
             $this->applyFilters($query, $request, $employee);
 
+            $countsQuery = Concerns::query();
+            $this->applyFilters($countsQuery, $request, $employee, true);
+
+            $countsQuery->getQuery()->orders = null;
+
+            $counts = $countsQuery->select(
+                DB::raw("COUNT(*) as total"),
+                DB::raw("COALESCE(SUM(CASE WHEN status = 'Resolved' THEN 1 ELSE 0 END), 0) as resolved_count"),
+                DB::raw("COALESCE(SUM(CASE WHEN status = 'unresolved' THEN 1 ELSE 0 END), 0) as unresolved_count"),
+                DB::raw("COALESCE(SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END), 0) as closed_count")
+            )->first();
+
+
             $latestLogs = $this->getLatestLogsSubquery();
             $latestMessages = $this->getLatestMessage();
             $pinnedSubquery = $this->getPinnedConcernsSubquery($employee);
@@ -913,11 +926,20 @@ class ConcernController extends Controller
                 )
                 ->paginate(20);
 
+            $allConcerns->counts = $counts;
+
             \Log::info($allConcerns);
 
             /* dd($allConcerns); */
 
-            return response()->json($allConcerns);
+            return response()->json([
+                'data' => $allConcerns->items(), 
+                'counts' => $counts,             
+                'current_page' => $allConcerns->currentPage(),
+                'last_page' => $allConcerns->lastPage(),
+                'per_page' => $allConcerns->perPage(),
+                'total' => $allConcerns->total(),
+            ]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -963,7 +985,7 @@ class ConcernController extends Controller
             });
     }
 
-    private function applyFilters($query, Request $request, $employee)
+    private function applyFilters($query, Request $request, $employee, $forCounts = false)
     {
         $days = $request->query("days", null);
         $status = $request->query("status", null);
@@ -994,6 +1016,10 @@ class ConcernController extends Controller
 
         if ($employee->department !== 'Customer Relations - Services') {
             $query->whereIn('concerns.ticket_id', $ticketIds);
+        }
+
+        if ($forCounts) {
+            return;
         }
 
         $this->daysAndStatusFilter($status, $days, $query);
@@ -1122,16 +1148,11 @@ class ConcernController extends Controller
             $endDate = Carbon::parse($searchParams['endDate'])->setTimezone('Asia/Manila');
             if ($startDate && $endDate) {
                 $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+            } elseif ($startDate) {
+                $query->whereDate('created_at', '>=', $startDate);
+            } elseif ($endDate) {
+                $query->whereDate('created_at', '<=', $endDate);
             }
-           
-            elseif ($startDate) {
-                $query->whereDate('created_at', '>=', $startDate); 
-            }
-            
-            elseif ($endDate) {
-                $query->whereDate('created_at', '<=', $endDate); 
-            }
-            
         }
 
         if (!empty($searchParams['selectedYear'])) {
@@ -1925,9 +1946,9 @@ class ConcernController extends Controller
 
 
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
-            
+
             if (
-                isset($selectedSurveyType['surveyName']) && 
+                isset($selectedSurveyType['surveyName']) &&
                 $selectedSurveyType['surveyName'] !== 'N/A' ||
                 strtolower($selectedSurveyType['surveyName']) !== 'n/a'
             ) {
@@ -1939,7 +1960,6 @@ class ConcernController extends Controller
                     $modifiedTicketId
                 );
             }
-            
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
@@ -2023,7 +2043,7 @@ class ConcernController extends Controller
     {
         $user = $request->user();
 
-        $employees = Employee::select('id','firstname', 'employee_email', 'department', 'lastname')->get();
+        $employees = Employee::select('id', 'firstname', 'employee_email', 'department', 'lastname')->get();
         return response()->json($employees);
     }
 
@@ -2041,73 +2061,73 @@ class ConcernController extends Controller
 
     public function getMonthlyReports(Request $request)
     {
-    // Get the parameters from the request
-    $year = $request->year ?? Carbon::now()->year;
-    $department = $request->department;
-    $project = $request->property;
-    $month = $request->month;
-    $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
-    $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        // Get the parameters from the request
+        $year = $request->year ?? Carbon::now()->year;
+        $department = $request->department;
+        $project = $request->property;
+        $month = $request->month;
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
-    $query = Concerns::select(
-        DB::raw('EXTRACT(MONTH FROM created_at) as month'),
-        DB::raw('EXTRACT(YEAR FROM created_at) as year'),
-        DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
-        DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
-        DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
-    );
+        $query = Concerns::select(
+            DB::raw('EXTRACT(MONTH FROM created_at) as month'),
+            DB::raw('EXTRACT(YEAR FROM created_at) as year'),
+            DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
+            DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
+            DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
+        );
 
-    if($year && $year !== 'All') {
-        $query->whereYear('created_at', $year);
+        if ($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
+
+        // Apply department filter
+        if ($department && $department !== 'All') {
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
+        }
+
+        // Apply month filter
+        if ($month && $month !== 'All') {
+            $query->whereMonth('created_at', $month);
+        }
+
+        // Apply project filter
+        if ($project && $project !== 'All') {
+            $query->where('property', $project);
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
+        }
+
+        // Group by month and order by month
+        $reports = $query->groupBy('month', 'year')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+
+        $allMonths = $reports->map(function ($report) {
+            return [
+                'month' => $report->month, // Directly use the month without formatting
+                'year' => $report->year,   // Directly use the year
+                'resolved' => $report->resolved ?? 0,
+                'unresolved' => $report->unresolved ?? 0,
+                'closed' => $report->closed ?? 0,
+            ];
+        });
+
+        // Return the response as JSON
+        return response()->json($allMonths);
     }
-
-    // Apply department filter
-    if ($department && $department !== 'All') {
-        $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
-    }
-
-    // Apply month filter
-    if ($month && $month !== 'All') {
-        $query->whereMonth('created_at', $month);
-    }
-
-    // Apply project filter
-    if ($project && $project !== 'All') {
-        $query->where('property', $project);
-    }
-
-    if ($startDate && $endDate) {
-        $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
-    }
-    // If only start date is provided, filter from start date to present
-    elseif ($startDate) {
-        $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
-    }
-    // If only end date is provided, filter from start to end date
-    elseif ($endDate) {
-        $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
-    }
-
-    // Group by month and order by month
-    $reports = $query->groupBy('month', 'year')
-    ->orderBy('year')
-    ->orderBy('month')
-    ->get();
-
-    
-    $allMonths = $reports->map(function ($report) {
-        return [
-            'month' => $report->month, // Directly use the month without formatting
-            'year' => $report->year,   // Directly use the year
-            'resolved' => $report->resolved ?? 0,
-            'unresolved' => $report->unresolved ?? 0,
-            'closed' => $report->closed ?? 0,
-        ];
-    });
-
-    // Return the response as JSON
-    return response()->json($allMonths);
-}
 
 
 
@@ -2129,7 +2149,7 @@ class ConcernController extends Controller
             DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
         );
 
-        if($year && $year !== 'All') {
+        if ($year && $year !== 'All') {
             $query->whereYear('created_at', $year);
         }
 
@@ -2187,13 +2207,13 @@ class ConcernController extends Controller
         )
             ->whereNotNull('status');
 
-            if($year !== 'All') {
-                $query->whereYear('created_at', $year);
-            }
-            
-            if ($month !== 'All') {
-                $query->whereMonth('created_at', $month);
-            }
+        if ($year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
+
+        if ($month !== 'All') {
+            $query->whereMonth('created_at', $month);
+        }
         if ($project && $project !== 'All') {
             $query->where('property', $project);
         }
@@ -2233,7 +2253,7 @@ class ConcernController extends Controller
         COUNT(DISTINCT CASE WHEN status = 'Resolved' AND assign_to IS NULL THEN id ELSE NULL END) as total_resolved,
         COUNT(DISTINCT CASE WHEN assign_to IS NULL THEN id ELSE NULL END) as total_unassigned,
         COUNT(DISTINCT id) as total_all
-    ") 
+    ")
             ->whereNotNull('status');
 
         if ($project && $project !== 'All') {
@@ -2242,7 +2262,7 @@ class ConcernController extends Controller
         if ($year !== 'All') {
             $totalUnassigned->whereYear('created_at', $year);
         }
-        
+
         if ($month !== 'All') {
             $totalUnassigned->whereMonth('created_at', $month);
         }
@@ -2279,7 +2299,7 @@ class ConcernController extends Controller
 
         $query = Concerns::select('channels', DB::raw('COUNT(*) as total'));
 
-        if($year && $year !== 'All') {
+        if ($year && $year !== 'All') {
             $query->whereYear('created_at', $year);
         }
 
@@ -2350,10 +2370,10 @@ class ConcernController extends Controller
         // Query to count each <communication_t></communication_t>ype grouped by property
         $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'));
 
-        if($year && $year !== 'All') {
+        if ($year && $year !== 'All') {
             $query->whereYear('created_at', $year);
         }
-            
+
         if ($department && $department !== "All") {
             $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
         }
@@ -2427,7 +2447,6 @@ class ConcernController extends Controller
             $year = $request->year ?? Carbon::now()->year;
             $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
             $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
-
         } catch (\Exception $e) {
             return response()->json(['error' => 'Invalid month format'], 400);
         }
@@ -2435,7 +2454,7 @@ class ConcernController extends Controller
         $department = $request->department;
         $query = Concerns::select('details_concern', DB::raw('COUNT(*) as total'));
 
-        if($year && $year !== 'All') {
+        if ($year && $year !== 'All') {
             $query->whereYear('created_at', $year);
         }
 
