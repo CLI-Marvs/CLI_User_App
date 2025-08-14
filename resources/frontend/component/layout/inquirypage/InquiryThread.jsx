@@ -29,6 +29,7 @@ import { ALLOWED_DEPARTMENT } from "../../../constant/data/allowedDepartment";
 
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { sortByNameAlphabetically } from "./utils/sort";
 
 const InquiryThread = () => {
     const [attachedFiles, setAttachedFiles] = useState([]);
@@ -620,7 +621,7 @@ const InquiryThread = () => {
                                                 Select Category
                                             </option>
                                             {categories &&
-                                                categories.map((category) => (
+                                                sortByNameAlphabetically(categories, ["Other Concerns"]).map((category) => (
                                                     <option key={category.id}>
                                                         {category.name}
                                                     </option>
