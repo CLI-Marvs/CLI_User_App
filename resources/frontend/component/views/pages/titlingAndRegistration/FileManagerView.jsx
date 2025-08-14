@@ -385,8 +385,6 @@ const FileManagerView = () => {
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
 
-    // ...existing code...
-
     // Fetch files for a specific account and step
     const fetchStepFiles = async (accountId, workOrderTypeId) => {
         try {
@@ -414,13 +412,6 @@ const FileManagerView = () => {
             return [];
         }
     };
-
-    // Initialize component: only fetch if accounts are not loaded
-    useEffect(() => {
-        if (!Array.isArray(accounts) || accounts.length === 0) {
-            fetchAllAccounts();
-        }
-    }, [fetchAllAccounts, accounts]);
 
     // Handle search with debouncing
     useEffect(() => {
@@ -759,8 +750,7 @@ const FileManagerView = () => {
                                     Retry
                                 </Button>
                             </div>
-                        ) : (Array.isArray(accounts) ? accounts.length : 0) ===
-                          0 ? (
+                        ) : Array.isArray(accounts) && accounts.length === 0 ? (
                             <div className="text-center py-8">
                                 <Typography
                                     variant="small"

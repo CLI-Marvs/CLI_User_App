@@ -1106,12 +1106,15 @@ const MyWorkOrders = () => {
                                     Recently Updated
                                 </option>
                                 <option value="updated_at:asc">
-                                    Least Recently Updated
+                                    Least Recent
                                 </option>
                             </select>
                         </div>
-
-                        {/* Clear Filter Action & Refresh Button */}
+                        <RefreshIcon
+                            onClick={handleRefresh}
+                            isRefreshing={isRefreshing}
+                        />
+                        {/* Clear Filter Action */}
                         <div className="flex items-center space-x-2 ml-auto">
                             {hasActiveFilters() && (
                                 <button
@@ -1122,18 +1125,12 @@ const MyWorkOrders = () => {
                                     <span>Clear</span>
                                 </button>
                             )}
-                            {/* Refresh Button Aligned with Filters */}
-                            <RefreshIcon
-                                onClick={handleRefresh}
-                                isRefreshing={isRefreshing}
-                            />
                         </div>
                     </div>
                 </div>
 
                 {/* Loading State */}
-                {workOrdersLoading && workOrderGroups.length === 0 ? (
-                    // Only show skeleton if loading AND there is a chance of data
+                {workOrdersLoading && workOrderGroups.length === 0 && (
                     <SkeletonTheme baseColor="#f3f4f6" highlightColor="#e5e7eb">
                         {viewMode === "grid" ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -1169,9 +1166,56 @@ const MyWorkOrders = () => {
                             </Card>
                         )}
                     </SkeletonTheme>
-                ) : null}
+                )}
 
-                {/* No Work Orders Assigned State */}
+                {/* Error State */}
+                {workOrdersError && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+                        <div className="text-red-600 font-medium">Error</div>
+                        <p className="text-red-600 mt-1">{workOrdersError}</p>
+                    </div>
+                )}
+
+                {/* Empty State */}
+                {!workOrdersLoading &&
+                    !workOrdersError &&
+                    getFilteredWorkOrderGroups().length === 0 &&
+                    (workOrderGroups || []).length > 0 && (
+                        <div className="text-center py-12">
+                            <svg
+                                className="mx-auto h-12 w-12 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                />
+                            </svg>
+                            <h3 className="mt-4 text-lg font-medium text-gray-900">
+                                No work orders found
+                            </h3>
+                            <p className="mt-2 text-gray-600">
+                                {hasActiveFilters()
+                                    ? "No work orders match your current filters."
+                                    : "You have no work orders assigned to you."}
+                            </p>
+                            {hasActiveFilters() && (
+                                <button
+                                    onClick={clearAllFilters}
+                                    className="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200"
+                                >
+                                    <MdClear className="mr-2" />
+                                    Clear all filters
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                {/* No Data State */}
                 {!workOrdersLoading &&
                     !workOrdersError &&
                     (workOrderGroups || []).length === 0 && (
@@ -1190,22 +1234,13 @@ const MyWorkOrders = () => {
                                 />
                             </svg>
                             <h3 className="mt-4 text-lg font-medium text-gray-900">
-                                No work orders assigned
+                                No work orders found
                             </h3>
                             <p className="mt-2 text-gray-600">
-                                You currently have no work orders assigned to
-                                you.
+                                You have no work orders assigned to you.
                             </p>
                         </div>
                     )}
-
-                {/* Error State */}
-                {workOrdersError && (
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-                        <div className="text-red-600 font-medium">Error</div>
-                        <p className="text-red-600 mt-1">{workOrdersError}</p>
-                    </div>
-                )}
 
                 {/* Content */}
                 {getFilteredWorkOrderGroups().length > 0 && (
@@ -1246,4 +1281,5 @@ const MyWorkOrders = () => {
         </div>
     );
 };
+
 export default MyWorkOrders;
