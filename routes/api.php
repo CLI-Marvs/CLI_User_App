@@ -176,7 +176,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/executive', [ExecutiveDashboardController::class, 'getExecutiveDashboardData']);
     // Employee Evaluation Endpoint
     Route::get('/employee-evaluation', [EmployeeEvaluationController::class, 'index']);
-    // Team Management Endpoints
+    // Team Management Endpoin
     Route::get('/employees', [TeamController::class, 'getEmployees']);
     Route::put('/teams/{team}/members', [TeamController::class, 'updateMembers']);
     Route::apiResource('teams', TeamController::class);
