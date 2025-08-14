@@ -3,7 +3,6 @@ import { useStateContext } from "../../../../context/contextprovider";
 import { Card, List, ListItem } from "@material-tailwind/react";
 import { Link, useLocation } from "react-router-dom";
 import { IoIosArrowForward } from "react-icons/io";
-import { set } from "lodash";
 
 const DocumentManagementSidebar = () => {
     const location = useLocation();
@@ -48,20 +47,20 @@ const DocumentManagementSidebar = () => {
         };
     }, []);
 
-    // Role-based access: only admin/manager sees all, others see only Account Master and My Work Orders
+    // Role-based access: admin emails
     const adminEmails = [
         "metoh@cebulandmasters.com",
-        "jlgomo@cebulandmasters.com",
+        "appsdev@cebulandmasters.com",
         "ccliwagon@cebulandmasters.com",
         "jnlayson@cebulandmasters.com",
         "bvith@cebulandmasters.com",
         "aabayocboc@cebulandmasters.com",
-        "rttayong@cebulandmasters.com"
+        "rttayong@cebulandmasters.com",
     ];
-    const isAdmin =
-        user &&
-        (adminEmails.includes(user.email) ||
-            adminEmails.includes(user.employee_email));
+    const userEmail = (user?.email || user?.employee_email || "")
+        .toLowerCase()
+        .trim();
+    const isAdmin = adminEmails.includes(userEmail);
 
     return (
         <>
@@ -70,7 +69,7 @@ const DocumentManagementSidebar = () => {
                     <List className="flex flex-col justify-center w-full">
                         <div className="px-5 leading-1">
                             <div className="flex flex-col space-y-1 mt-1">
-                                {/* Account Master always visible */}
+                                {/* Account Master - Always visible to all users */}
                                 <div className="relative">
                                     <ListItem
                                         onClick={togglePopup}
@@ -125,64 +124,74 @@ const DocumentManagementSidebar = () => {
                                     )}
                                 </div>
 
-                                {/* Work Orders always visible, but only My Work Orders for non-admins */}
-                                <ListItem
-                                    onClick={toggleWorkOrderPopUp}
-                                    className={`cursor-pointer h-[39px] w-[160px] mb-[5px] flex justify-between items-center rounded-[10px] px-4 ${
-                                        isWorkOrderActive ||
-                                        location.pathname.startsWith(
-                                            "/documentmanagement/titleandregistration/workorders"
-                                        ) ||
-                                        location.pathname.startsWith(
-                                            "/documentmanagement/titleandregistration/myworkorders"
-                                        )
-                                            ? "text-[15px] font-semibold bg-white shadow-custom6"
-                                            : "text-[15px] text-[#8A8888]"
-                                    }`}
-                                >
-                                    <span>Work Orders</span>
-                                    <IoIosArrowForward className="text-[15px]" />
-                                </ListItem>
-                                {isWorkOrderPopUpOpen && (
-                                    <div
-                                        ref={popupRef}
-                                        className="absolute top-[68px] left-[198px] bg-white shadow-lg rounded-[10px] py-4 h-[80px] w-[161px] z-50 flex flex-col justify-center"
+                                {/* Work Orders - Always visible, but content varies by role */}
+                                <div className="relative">
+                                    <ListItem
+                                        onClick={toggleWorkOrderPopUp}
+                                        className={`cursor-pointer h-[39px] w-[160px] mb-[5px] flex justify-between items-center rounded-[10px] px-4 ${
+                                            isWorkOrderActive ||
+                                            location.pathname.startsWith(
+                                                "/documentmanagement/titleandregistration/workorders"
+                                            ) ||
+                                            location.pathname.startsWith(
+                                                "/documentmanagement/titleandregistration/myworkorders"
+                                            )
+                                                ? "text-[15px] font-semibold bg-white shadow-custom6"
+                                                : "text-[15px] text-[#8A8888]"
+                                        }`}
                                     >
-                                        {isAdmin && (
-                                            <>
-                                                <Link
-                                                    to="workorders"
-                                                    onClick={() => {
-                                                        setIsWorkOrderPopUpOpen(
-                                                            false
-                                                        );
-                                                        setIsWorkOrderActive(
-                                                            false
-                                                        );
-                                                    }}
-                                                >
-                                                    <div className="text-[14px] pl-[15px] pt-2 hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-[#A5A5A5]">
-                                                        Manage Work Orders
-                                                    </div>
-                                                </Link>
-                                                <div className="border-t border-gray-300 my-2"></div>
-                                            </>
-                                        )}
-                                        <Link
-                                            to="myworkorders"
-                                            onClick={() => {
-                                                setIsWorkOrderPopUpOpen(false);
-                                                setIsWorkOrderActive(false);
-                                            }}
+                                        <span>Work Orders</span>
+                                        <IoIosArrowForward className="text-[15px]" />
+                                    </ListItem>
+                                    {isWorkOrderPopUpOpen && (
+                                        <div
+                                            ref={popupRef}
+                                            className={`absolute top-[68px] left-[198px] bg-white shadow-lg rounded-[10px] py-4 ${
+                                                isAdmin
+                                                    ? "h-[80px]"
+                                                    : "h-[50px]"
+                                            } w-[161px] z-50 flex flex-col justify-center`}
                                         >
-                                            <div className="text-[14px] pl-[15px] pb-2 hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-[#A5A5A5]">
-                                                My Work Orders
-                                            </div>
-                                        </Link>
-                                    </div>
-                                )}
+                                            {/* Admin-only: Manage Work Orders */}
+                                            {isAdmin && (
+                                                <>
+                                                    <Link
+                                                        to="workorders"
+                                                        onClick={() => {
+                                                            setIsWorkOrderPopUpOpen(
+                                                                false
+                                                            );
+                                                            setIsWorkOrderActive(
+                                                                false
+                                                            );
+                                                        }}
+                                                    >
+                                                        <div className="text-[14px] pl-[15px] pt-2 hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-[#A5A5A5]">
+                                                            Manage Work Orders
+                                                        </div>
+                                                    </Link>
+                                                    <div className="border-t border-gray-300 my-2"></div>
+                                                </>
+                                            )}
+                                            {/* My Work Orders available to all */}
+                                            <Link
+                                                to="myworkorders"
+                                                onClick={() => {
+                                                    setIsWorkOrderPopUpOpen(
+                                                        false
+                                                    );
+                                                    setIsWorkOrderActive(false);
+                                                }}
+                                            >
+                                                <div className="text-[14px] pl-[15px] pb-2 hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-[#A5A5A5]">
+                                                    My Work Orders
+                                                </div>
+                                            </Link>
+                                        </div>
+                                    )}
+                                </div>
 
-                                {/* Only admin/manager can see the rest */}
+                                {/* Admin-only tabs */}
                                 {isAdmin && (
                                     <>
                                         <Link to="filemanager">
