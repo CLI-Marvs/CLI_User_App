@@ -41,7 +41,7 @@ use App\Http\Controllers\TeamController;
 use App\Http\Controllers\WorkOrderGroupController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\EmployeeEvaluationController;
-use App\Http\Controllers\ExecutiveDashboardController;
+use App\Http\Controllers\ExecutiveDashBoardController;
 use App\Http\Controllers\MilestoneProgressionController;
 use App\Http\Controllers\ProjectAssigneeController;
 
@@ -173,7 +173,7 @@ Route::middleware('auth:sanctum')->group(function () {
     /**
      * Dashboard
      */
-    Route::get('/dashboard/executive', [ExecutiveDashboardController::class, 'getExecutiveDashboardData']);
+    Route::get('/dashboard/executive', [ExecutiveDashBoardController::class, 'getExecutiveDashboardData']);
     // Employee Evaluation Endpoint
     Route::get('/employee-evaluation', [EmployeeEvaluationController::class, 'index']);
     // Team Management Endpoints

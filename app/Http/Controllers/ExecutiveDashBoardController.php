@@ -8,9 +8,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
-class ExecutiveDashboardController extends Controller
+class ExecutiveDashBoardController extends Controller
 {
-    public function getExecutiveDashboardData(Request $request)
+    public function getExecutiveDashBoardData(Request $request)
     {
         // Get all Work Order Groups with their work orders
         $workOrderGroups = WorkOrderGroup::with([
