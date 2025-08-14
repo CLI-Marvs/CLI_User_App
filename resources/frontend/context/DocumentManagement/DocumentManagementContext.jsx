@@ -278,28 +278,38 @@ export const DocumentManagementProvider = ({ children }) => {
     const fetchAllAccounts = useCallback(async () => {
         setIsAccountsLoading(true);
         setAccountsError(null);
+
         try {
             const response = await apiService.get("/file-manager/accounts");
-            if (response.data.success) {
-                const normalizedAccounts = response.data.data.map(
-                    (account) => ({
+
+            if (response.data?.success) {
+                const data = Array.isArray(response.data.data)
+                    ? response.data.data
+                    : [];
+
+                if (data.length > 0) {
+                    const normalizedAccounts = data.map((account) => ({
                         ...account,
-                        steps: account.steps || [],
-                        milestones: account.milestones || [],
-                    })
-                );
-                setAccounts(normalizedAccounts);
+                        steps: Array.isArray(account.steps) ? account.steps : [],
+                        milestones: Array.isArray(account.milestones) ? account.milestones : [],
+                    }));
+                    setAccounts(normalizedAccounts);
+                } else {
+                    // No data in DB
+                    setAccounts([]);
+                    console.warn("No accounts found in the database.");
+                }
             } else {
-                throw new Error(
-                    response.data.message || "Failed to fetch accounts"
-                );
+                throw new Error(response.data?.message || "Failed to fetch accounts");
             }
         } catch (err) {
+            setAccounts([]);
             setAccountsError(err.message || "Failed to fetch accounts");
         } finally {
             setIsAccountsLoading(false);
         }
     }, []);
+
 
     // Search accounts
     const searchAccounts = useCallback(
@@ -368,7 +378,6 @@ export const DocumentManagementProvider = ({ children }) => {
             const response = await apiService.get(
                 "/work-orders/get-work-order-groups"
             );
-            // Extract the actual data array from the paginated response
             setWorkOrderGroups(response.data.data || []);
         } catch (error) {
             console.error("Failed to fetch work order groups:", error);

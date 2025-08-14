@@ -146,7 +146,7 @@ const DocumentManagementSidebar = () => {
                                     {isWorkOrderPopUpOpen && (
                                         <div
                                             ref={popupRef}
-                                            className={`absolute top-[68px] left-[198px] bg-white shadow-lg rounded-[10px] py-4 ${
+                                            className={`absolute top-[0px] left-[168px] bg-white shadow-lg rounded-[10px] py-4 ${
                                                 isAdmin
                                                     ? "h-[80px]"
                                                     : "h-[50px]"
