@@ -1,8 +1,5 @@
 <?php
 
-use App\Http\Controllers\ExecutiveDashboardController;
-use App\Http\Controllers\MilestoneProgressionController;
-use App\Http\Controllers\ProjectAssigneeController;
 use Illuminate\Http\Request;
 
 use App\Models\DynamicBanner;
@@ -44,6 +41,9 @@ use App\Http\Controllers\TeamController;
 use App\Http\Controllers\WorkOrderGroupController;
 use App\Http\Controllers\FileManagerController;
 use App\Http\Controllers\EmployeeEvaluationController;
+use App\Http\Controllers\ExecutiveDashboardController;
+use App\Http\Controllers\MilestoneProgressionController;
+use App\Http\Controllers\ProjectAssigneeController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -176,7 +176,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/executive', [ExecutiveDashboardController::class, 'getExecutiveDashboardData']);
     // Employee Evaluation Endpoint
     Route::get('/employee-evaluation', [EmployeeEvaluationController::class, 'index']);
-    // Team Management Endpoin
+    // Team Management Endpoints
     Route::get('/employees', [TeamController::class, 'getEmployees']);
     Route::put('/teams/{team}/members', [TeamController::class, 'updateMembers']);
     Route::apiResource('teams', TeamController::class);
