@@ -15,6 +15,7 @@ import { useSearchParams, useLocation } from "react-router-dom";
 import Spinner from "../../../util/Spinner";
 import Skeletons from "../../Skeletons";
 import { CircularProgress } from "@mui/material";
+import { sortByNameAlphabetically } from "./utils/sort";
 
 const InquiryList = () => {
     const location = useLocation();
@@ -596,7 +597,8 @@ const InquiryList = () => {
                                                 <option value=" ">
                                                     Select Category
                                                 </option>
-                                                {categories && categories.map(
+                                                {categories && 
+                                                sortByNameAlphabetically(categories, ["Other Concerns"]).map(
                                                     (category) => (
                                                         <option
                                                             key={category.id}
