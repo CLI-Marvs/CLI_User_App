@@ -893,9 +893,9 @@ class ConcernController extends Controller
 
             $counts = $countsQuery->select(
                 DB::raw("COUNT(*) as total"),
-                DB::raw("SUM(CASE WHEN status = 'Resolved' THEN 1 ELSE 0 END) as resolved_count"),
-                DB::raw("SUM(CASE WHEN status = 'unresolved' THEN 1 ELSE 0 END) as unresolved_count"),
-                DB::raw("SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END) as closed_count")
+                DB::raw("COALESCE(SUM(CASE WHEN status = 'Resolved' THEN 1 ELSE 0 END), 0) as resolved_count"),
+                DB::raw("COALESCE(SUM(CASE WHEN status = 'unresolved' THEN 1 ELSE 0 END), 0) as unresolved_count"),
+                DB::raw("COALESCE(SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END), 0) as closed_count")
             )->first();
 
 
