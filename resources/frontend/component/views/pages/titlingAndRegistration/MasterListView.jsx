@@ -324,7 +324,7 @@ export default function PaginatedTable() {
     const [showTitlingMonitor, setShowTitlingMonitor] = useState(false);
     const [selectedRowDataForMonitor, setSelectedRowDataForMonitor] =
         useState(null);
-    console.log("MasterList:", masterListCurrentData);
+    
     // const [isPageLoading, setIsPageLoading] = useState(
     //     !masterListFilteredRows || masterListFilteredRows.length === 0
     // );

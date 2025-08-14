@@ -56,6 +56,7 @@ const DocumentManagementSidebar = () => {
         "jnlayson@cebulandmasters.com",
         "bvith@cebulandmasters.com",
         "aabayocboc@cebulandmasters.com",
+        "rttayong@cebulandmasters.com"
     ];
     const isAdmin =
         user &&
