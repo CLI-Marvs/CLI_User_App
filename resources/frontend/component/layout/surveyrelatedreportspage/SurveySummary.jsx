@@ -117,15 +117,20 @@ const SurveySummary = () => {
     function groupQuestionsByOptions(questions) {
         const groups = [];
         const ungrouped = [];
+        let displayCounter = 1; // Only counts "real" table questions
 
-        questions.forEach((q, idx) => {
+        questions.forEach((q) => {
             if (!q.options || q.options.length === 0) {
+                // This is likely a textbox or non-table question
                 ungrouped.push(q);
                 return;
             }
 
             const normalizedQuestion = normalizeOptions(q);
-            normalizedQuestion.originalIndex = idx + 1; // 1-based index
+
+            // Assign displayCounter instead of raw index
+            normalizedQuestion.originalIndex = displayCounter;
+            displayCounter++;
 
             const optionSignature = normalizedQuestion.options.map(opt => opt.value).join('|');
             let existingGroup = groups.find(group => group.signature === optionSignature);
@@ -142,6 +147,7 @@ const SurveySummary = () => {
 
         return { groups, ungrouped };
     }
+
 
 
 
