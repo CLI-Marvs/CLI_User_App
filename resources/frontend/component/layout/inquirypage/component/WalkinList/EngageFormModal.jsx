@@ -340,7 +340,7 @@ const EngageFormModal = forwardRef(
                                         className="appearance-none w-full px-4 py-1 text-sm bg-white focus:outline-none border-0 mobile:text-xs"
                                     >
                                         <option value="">(Select)</option>
-                                        <option value="N/A">N/A</option>
+                                        <option value={0}>N/A</option>
                                         {propertyNamesList.map((property) => (
                                             <option
                                                 key={property.id}

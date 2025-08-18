@@ -175,10 +175,16 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                             <CustomInput
                                 name="property"
                                 type="text"
-                                value={toLowerCaseText(
+                                value={
                                     item.walkin_transaction_detail
-                                        ?.property_master?.property_name || ""
-                                )}
+                                        ?.property_masters_id === null
+                                        ? "N/A"
+                                        : toLowerCaseText(
+                                              item.walkin_transaction_detail
+                                                  ?.property_master
+                                                  ?.property_name
+                                          )
+                                }
                                 disabled
                                 className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"
                             />

@@ -52,10 +52,18 @@ export function useEngageForm(
 
     const transactionMutation = useMutation({
         mutationFn: walkinTransactionService.createWalkinTransactionDetail,
-        onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: ["queueWalkinTransactions"],
-            });
+        onSuccess: async () => {
+            try {
+                await insertoConcern({ formData, user, categories, itemData });
+                queryClient.invalidateQueries({
+                    queryKey: ["queueWalkinTransactions"],
+                });
+            } catch (error) {
+                showToast(
+                    "Walk-in transaction saved but concern creation failed",
+                    "warning"
+                );
+            }
         },
         onError: (error) => {
             showToast(error?.response?.data?.message || "Error", "error");
@@ -74,7 +82,10 @@ export function useEngageForm(
         const transactionPayload = {
             walkin_transaction_id: itemData.id,
             category_id: formData.category_id,
-            property_masters_id: formData.property_id,
+            property_masters_id:
+                formData.property_id === "0" || formData.property_id === 0
+                    ? null
+                    : Number(formData.property_id),
             first_name: formData.first_name,
             last_name: formData.last_name,
             contact_number: formData.contact_number,
@@ -84,13 +95,11 @@ export function useEngageForm(
             status: actionType,
             type: formData.type,
             inquiry_from: formData.inquiry_from,
+            other_user_type: formData.other_user_type,
             unit_number: formData.unit_number,
             middle_name: formData.middle_name_na ? "" : formData.middle_name,
-            suffix: formData.suffix_na ? "" : formData.suffix,
+            suffix_name: formData.suffix_na ? "" : formData.suffix,
         };
-
-        //Insert to concern
-        await insertoConcern({ formData, user, categories, itemData });
 
         // Prepare queue payload
         const queuePayload = {
@@ -175,7 +184,7 @@ export function useEngageForm(
             const payload = {
                 walkin_transaction_id: itemData.id,
                 details_concern: detailConcern,
-                property: propertyName ? propertyName : null,
+                property: propertyName ? propertyName : "N/A",
                 message: formData.details_message,
                 status: "Resolved",
                 buyer_email: formData.email,
