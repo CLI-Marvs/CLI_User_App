@@ -137,7 +137,6 @@ export const SurveyAddQuestion = (
                 <div className='flex flex-col z-10'>
                     <div className='flex flex-col gap-2 '>
                         {data?.option?.map((item, optionIndex) => (
-                            <>
                                 <div key={item.id} className='flex gap-[8px] items-center'>
                                     {data.inputType === "multiple-choice" && (
                                         <input
@@ -175,7 +174,6 @@ export const SurveyAddQuestion = (
                                     )}
 
                                 </div>
-                            </>
                         ))}
                     </div>
                     {data.inputType === "textbox" && (

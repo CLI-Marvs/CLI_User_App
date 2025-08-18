@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import Backbtn from "../../../../../public/Images/Expand_up.svg";
 import { FaTrash } from "react-icons/fa";
 import UserMessages from "./UserMessages";
@@ -27,8 +27,11 @@ import ThreadInquiryFormModal from "./ThreadInquiryFormModal";
 import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
 import { ALLOWED_DEPARTMENT } from "../../../constant/data/allowedDepartment";
 
+import { useSurvey } from '@/context/Survey/SurveyContext';
+
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import SendSurveyModal from "./SendSurveyModal";
 import { sortByNameAlphabetically } from "./utils/sort";
 
 const InquiryThread = () => {
@@ -72,12 +75,15 @@ const InquiryThread = () => {
         isUserTypeChange,
         categories,
     } = useStateContext();
+
+    const { surveyStatus, fetchSurveyStatus } = useSurvey();
     const [chatMessage, setChatMessage] = useState("");
     const userLoggedInEmail = user?.employee_email;
     const userLoggedInDepartment = user?.department; //Holds the user's department
     const [isSearchLoading, setIsSearchLoading] = useState(false);
     const modalRef = useRef(null);
     const modalRef2 = useRef(null);
+    const modalRef3 = useRef(null);
     const resolveModalRef = useRef(null);
     const closeModalRef = useRef(null);
     const navigate = useNavigate();
@@ -87,6 +93,29 @@ const InquiryThread = () => {
     const ticketId = decodeURIComponent(params.id);
     const [dataConcern, setDataConcern] = useState(itemsData || {});
     const [emailMessageID, setEmailMessageID] = useState(null);
+    const [surveyLink, setSurveyLink] = useState(null);
+
+    function getSurveyFullLink() {
+
+        if (
+            dataConcern?.survey_link &&
+            dataConcern?.survey_link !== "none" &&
+            dataConcern?.survey_link !== "null"
+        ) {
+            const id = ticketId.replace("Ticket#", "").trim();
+            return `${dataConcern.survey_link}/${id}/manual`;
+        }
+        return null;
+    }
+
+    const fullLink = getSurveyFullLink();
+
+    useEffect(() => {
+        if (surveyStatus === "none") {
+            fetchSurveyStatus(ticketId);
+        }
+    }, []);
+
     const handleDateChange = (date) => {
         setStartDate(date);
     };
@@ -105,16 +134,24 @@ const InquiryThread = () => {
         }));
     };
 
+
+
+    /* useEffect(() => {
+       console.log(surveyStatus);
+    }, [ticketId]); */
+
     useEffect(() => {
         const storedData = JSON.parse(localStorage.getItem("dataConcern"));
         const updatedData = JSON.parse(localStorage.getItem("updatedData"));
 
         if (storedData) {
             setDataConcern(storedData);
+            getSurveyFullLink();
         }
 
         if (updatedData) {
             setDataConcern(updatedData);
+            getSurveyFullLink();
         }
     }, []);
 
@@ -155,38 +192,38 @@ const InquiryThread = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => {
-                      let formattedItem = formatFunc(item);
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => {
+                    let formattedItem = formatFunc(item);
 
-                      // Capitalize each word in the string
-                      formattedItem = formattedItem
-                          .split(" ")
-                          .map((word) => {
-                              // Check for specific words that need to be fully capitalized
-                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                  return word.toUpperCase();
-                              }
-                              // Capitalize the first letter of all other words
-                              return (
-                                  word.charAt(0).toUpperCase() +
-                                  word.slice(1).toLowerCase()
-                              );
-                          })
-                          .join(" ");
+                    // Capitalize each word in the string
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return (
+                                word.charAt(0).toUpperCase() +
+                                word.slice(1).toLowerCase()
+                            );
+                        })
+                        .join(" ");
 
-                      // Replace specific names if needed
-                      if (formattedItem === "Casamira South") {
-                          formattedItem = "Casa Mira South";
-                      }
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
 
-                      return formattedItem;
-                  })
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                    return formattedItem;
+                })
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -219,6 +256,12 @@ const InquiryThread = () => {
     const handleOpenAddInfoModal = () => {
         if (modalRef2.current) {
             modalRef2.current.showModal();
+        }
+    };
+
+    const handleSendSurveyModal = () => {
+        if (modalRef3.current) {
+            modalRef3.current.showModal();
         }
     };
 
@@ -452,8 +495,8 @@ const InquiryThread = () => {
 
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
-              .flat()
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .flat()
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
     const getLatestMessageFromBuyer = combineThreadMessages.find(
         (item) => item.buyer_email
@@ -803,11 +846,11 @@ const InquiryThread = () => {
                                                             .filter(
                                                                 (department) =>
                                                                     department !==
-                                                                        null &&
+                                                                    null &&
                                                                     department !==
-                                                                        undefined &&
+                                                                    undefined &&
                                                                     department !==
-                                                                        "NULL" &&
+                                                                    "NULL" &&
                                                                     department !== "IT" &&
                                                                     department !== "Digital Innovation"
                                                             )
@@ -1155,12 +1198,12 @@ const InquiryThread = () => {
                                                                     );
                                                                 const truncatedName =
                                                                     baseName.length >
-                                                                    30
+                                                                        30
                                                                         ? baseName.slice(
-                                                                              0,
-                                                                              30
-                                                                          ) +
-                                                                          "..."
+                                                                            0,
+                                                                            30
+                                                                        ) +
+                                                                        "..."
                                                                         : baseName;
                                                                 return (
                                                                     <div
@@ -1246,12 +1289,11 @@ const InquiryThread = () => {
                                                                 loading
                                                             }
                                                             className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${
-                                                            loading ||
-                                                            !chatMessage.trim()
-                                                                ? "bg-gray-400 cursor-not-allowed"
-                                                                : "gradient-background3 hover:shadow-custom4"
-                                                        } 
+                                                        ${loading ||
+                                                                    !chatMessage.trim()
+                                                                    ? "bg-gray-400 cursor-not-allowed"
+                                                                    : "gradient-background3 hover:shadow-custom4"
+                                                                } 
                                                     `}
                                                         >
                                                             {loading ? (
@@ -1350,64 +1392,64 @@ const InquiryThread = () => {
                                                                 </div>
                                                                 {attachedFiles.length >
                                                                     0 && (
-                                                                    <div className="mb-2 ">
-                                                                        {attachedFiles.map(
-                                                                            (
-                                                                                file,
-                                                                                index
-                                                                            ) => {
-                                                                                const fileName =
-                                                                                    file.name;
-                                                                                const fileExtension =
-                                                                                    fileName.slice(
-                                                                                        fileName.lastIndexOf(
-                                                                                            "."
-                                                                                        )
-                                                                                    );
-                                                                                const baseName =
-                                                                                    fileName.slice(
-                                                                                        0,
-                                                                                        fileName.lastIndexOf(
-                                                                                            "."
-                                                                                        )
-                                                                                    );
-                                                                                const truncatedName =
-                                                                                    baseName.length >
-                                                                                    30
-                                                                                        ? baseName.slice(
-                                                                                              0,
-                                                                                              30
-                                                                                          ) +
-                                                                                          "..."
-                                                                                        : baseName;
-                                                                                return (
-                                                                                    <div
-                                                                                        key={
-                                                                                            index
-                                                                                        }
-                                                                                        className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                                                    >
-                                                                                        <span className="text-sm text-gray-700">
-                                                                                            {truncatedName +
-                                                                                                fileExtension}
-                                                                                        </span>
-                                                                                        <button
-                                                                                            type="button"
-                                                                                            onClick={() =>
-                                                                                                removeFile(
-                                                                                                    file.name
-                                                                                                )
+                                                                        <div className="mb-2 ">
+                                                                            {attachedFiles.map(
+                                                                                (
+                                                                                    file,
+                                                                                    index
+                                                                                ) => {
+                                                                                    const fileName =
+                                                                                        file.name;
+                                                                                    const fileExtension =
+                                                                                        fileName.slice(
+                                                                                            fileName.lastIndexOf(
+                                                                                                "."
+                                                                                            )
+                                                                                        );
+                                                                                    const baseName =
+                                                                                        fileName.slice(
+                                                                                            0,
+                                                                                            fileName.lastIndexOf(
+                                                                                                "."
+                                                                                            )
+                                                                                        );
+                                                                                    const truncatedName =
+                                                                                        baseName.length >
+                                                                                            30
+                                                                                            ? baseName.slice(
+                                                                                                0,
+                                                                                                30
+                                                                                            ) +
+                                                                                            "..."
+                                                                                            : baseName;
+                                                                                    return (
+                                                                                        <div
+                                                                                            key={
+                                                                                                index
                                                                                             }
-                                                                                            className="text-red-500"
+                                                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
                                                                                         >
-                                                                                            Remove
-                                                                                        </button>
-                                                                                    </div>
-                                                                                );
-                                                                            }
-                                                                        )}
-                                                                    </div>
-                                                                )}
+                                                                                            <span className="text-sm text-gray-700">
+                                                                                                {truncatedName +
+                                                                                                    fileExtension}
+                                                                                            </span>
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                onClick={() =>
+                                                                                                    removeFile(
+                                                                                                        file.name
+                                                                                                    )
+                                                                                                }
+                                                                                                className="text-red-500"
+                                                                                            >
+                                                                                                Remove
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    );
+                                                                                }
+                                                                            )}
+                                                                        </div>
+                                                                    )}
                                                             </div>
                                                         </div>
                                                     )}
@@ -1421,15 +1463,12 @@ const InquiryThread = () => {
                                                 <span className="font-semibold">
                                                     {
                                                         /* capitalizeWords() */
-                                                        `${
-                                                            dataConcern?.buyer_firstname ||
-                                                            ""
-                                                        } ${
-                                                            dataConcern?.buyer_middlename ||
-                                                            ""
-                                                        } ${
-                                                            dataConcern?.buyer_lastname ||
-                                                            ""
+                                                        `${dataConcern?.buyer_firstname ||
+                                                        ""
+                                                        } ${dataConcern?.buyer_middlename ||
+                                                        ""
+                                                        } ${dataConcern?.buyer_lastname ||
+                                                        ""
                                                         }`
                                                     }{" "}
                                                     {
@@ -1448,35 +1487,65 @@ const InquiryThread = () => {
                             {!ALLOWED_DEPARTMENT.includes(
                                 userLoggedInDepartment
                             ) && (
-                                <div className="relative py-2">
-                                    <div className="text-[11px] text-[#B54D4D]">
-                                        <p>
-                                            <span className="font-semibold">
-                                                Note: Only CRS, Turnovers,
-                                                Accounts Management, Sales, and
-                                                Registration & Documentation
-                                                teams can reply directly to
-                                                inquiries, use the comment
-                                                section for internal
-                                                communication.
-                                            </span>
-                                        </p>
+                                    <div className="relative py-2">
+                                        <div className="text-[11px] text-[#B54D4D]">
+                                            <p>
+                                                <span className="font-semibold">
+                                                    Note: Only CRS, Turnovers,
+                                                    Accounts Management, Sales, and
+                                                    Registration & Documentation
+                                                    teams can reply directly to
+                                                    inquiries, use the comment
+                                                    section for internal
+                                                    communication.
+                                                </span>
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                             <div className="w-full flex justify-end gap-[13px] items-center">
-                                {(dataConcern?.status === "Resolved" ||
-                                    dataConcern?.status === "Closed") && (
-                                    <span
-                                        className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                        onClick={handleOpenAddInfoModal}
-                                    >
-                                        Create new ticket
-                                    </span>
-                                )}
+                                {(dataConcern?.status === "Resolved" || dataConcern?.status === "Closed") && (
+                                    <div className="flex items-center gap-[14px]">
+                                        {surveyStatus === "submitted" ? (
+                                            <div className="flex justify-start items-center px-[8px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
+                                                <p>Survey Submitted</p>
+                                                <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
+                                            </div>
+                                        ) : dataConcern?.survey_link !== null ? (    //resolved in CRS inquiry
+                                            fullLink && (
+                                                <div className="flex items-center">
+                                                    <a
+                                                        href={fullLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="w-auto font-semibold text-[13px] text-custom-lightgreen underline cursor-pointer"
+                                                    >
+                                                        Input Survey Data
+                                                    </a>
+                                                </div>
 
+                                            )
+                                        ) : (      //resolved in Walin-in
+                                            <div className="flex items-center">
+                                                <button
+                                                    onClick={handleSendSurveyModal}
+                                                    className="w-auto font-semibold text-[13px] text-custom-lightgreen underline cursor-pointer"
+                                                >
+                                                    Input Survey Data
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        <span
+                                            className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                            onClick={handleOpenAddInfoModal}
+                                        >
+                                            Create new ticket
+                                        </span>
+                                    </div>
+                                )}
                                 {dataConcern?.status === "Resolved" ? (
                                     <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
                                         <p>Ticket Resolved</p>
@@ -1647,6 +1716,7 @@ const InquiryThread = () => {
                     ticketId={ticketId}
                     dataRef={dataConcern}
                     onupdate={handleUpdate}
+
                 />
             </div>
 
@@ -1658,12 +1728,17 @@ const InquiryThread = () => {
                     onupdate={handleUpdate}
                 />
             </div>
-
             <div>
                 <ThreadInquiryFormModal
                     modalRef={modalRef2}
                     messageRef={getLatestMessageFromBuyer}
                     dataConcern={dataConcern}
+                />
+            </div>
+            <div>
+                <SendSurveyModal
+                    ticketId={ticketId}
+                    modalRef={modalRef3}
                 />
             </div>
         </>

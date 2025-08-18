@@ -29,6 +29,7 @@ const Navbar = () => {
     const dropdownRef = useRef(null);
 
     const pathnames = location.pathname.split("/").filter((x) => x);
+    
 
     const handleOpenModal = () => {
         if (modalRef.current) {
@@ -37,10 +38,11 @@ const Navbar = () => {
     };
 
     useEffect(() => {
-        if (id) {
+        if (id && location.pathname.includes("/survey/") || location.pathname.includes("/surveysettings/")) {
             fetchSurveyTitle(id);
         }
-    }, [id]);
+        
+    }, [id, location.pathname]);
 
     useEffect(() => {
         if (isOpen) {
@@ -319,7 +321,7 @@ const Navbar = () => {
                     </span>
                 );
             }
-            
+
             if (value.toLowerCase() === "admin-settings") {
                 breadcrumbLabel = "Admin Settings";
             }
@@ -373,8 +375,7 @@ const Navbar = () => {
                     >
                         {
                             /* capitalizeWords()*/
-                            `${concernData?.buyer_firstname || ""} ${
-                                concernData?.buyer_middlename || ""
+                            `${concernData?.buyer_firstname || ""} ${concernData?.buyer_middlename || ""
                             } ${concernData?.buyer_lastname || ""}`
                         }{" "}
                         {/* capitalizeWords()*/ concernData?.suffix_name || ""}{" "}
