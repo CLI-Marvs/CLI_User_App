@@ -44,21 +44,21 @@ export default function AdminSettings() {
             { id, data },
             {
                 onSuccess: () =>
-                    showToast(`${singularLabel} updated`, "success"),
+                    showToast(`${singularLabel} updated successfully`, "success"),
             }
         );
     };
 
     const handleDelete = (id) => {
         deleteMutation.mutate(id, {
-            onSuccess: () => showToast(`${singularLabel} deleted`, "success"),
+            onSuccess: () => showToast(`${singularLabel} deleted successfully`, "success"),
         });
     };
 
     const handleCreate = (data) => {
         createMutation.mutate(data, {
             onSuccess: () => {
-                showToast(`${singularLabel} created`, "success");
+                showToast(`${singularLabel} created successfully`, "success");
                 setShowForm(false);
             },
         });
