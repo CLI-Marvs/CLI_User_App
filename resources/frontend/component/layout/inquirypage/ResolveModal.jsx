@@ -7,7 +7,7 @@ import { SURVEY_LINKS } from '../../../constant/data/surveyLink';
 import CircularProgress from "@mui/material/CircularProgress";
 import { useSurvey } from "@/context/Survey/SurveyContext";
 
-const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate, setSurveyLink }) => {
+const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const { getAllConcerns, user, getInquiryLogs, data, assigneesPersonnel } =
         useStateContext();
     const [remarks, setRemarks] = useState("");
@@ -20,7 +20,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate, setSurveyLink }) 
     const [communicationType, setCommunicationType] = useState("");
     const [selectedSurveyType, setSelectedSurveyType] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [surveyLinks, setSurveyLinks] = useState([]);
+    const [surveyLinks, setSurveyLinks] = useState(null);
     const { fetchSurveyStatus } = useSurvey();
 
     /**
@@ -73,7 +73,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate, setSurveyLink }) 
     const handleSurveyChange = (selectedSurveyType) => {
         setSelectedSurveyType(selectedSurveyType);
         setIsSurveyRequired(false);
-        setSurveyLink(selectedSurveyType.surveyLink);
+
     };
 
     /**
@@ -142,7 +142,6 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate, setSurveyLink }) 
         setIsCommunicationTypeRequired(false);
         setIsSurveyRequired(false);
         setSelectedSurveyType([]);
-        setSurveyLink(null);
     };
 
     const handleSurveySend = (e) => {
@@ -156,7 +155,6 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate, setSurveyLink }) 
             setIsCommunicationTypeRequired(false);
             setIsSurveyRequired(false);
             setSelectedSurveyType([]);
-            setSurveyLink(null);
             modalRef.current.close();
         }
     };

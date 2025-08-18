@@ -711,6 +711,7 @@ class SurveyController extends Controller
 
 
         $ratings = ExperienceRating::where('survey_link', $survey->survey_link)
+            ->whereNotNull('rating')
             ->orderBy('created_at', 'desc')
             ->select('ticket_id', 'email', 'rating', 'created_at')
             ->get();

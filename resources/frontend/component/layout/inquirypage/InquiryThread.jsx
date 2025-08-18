@@ -93,7 +93,7 @@ const InquiryThread = () => {
     const ticketId = decodeURIComponent(params.id);
     const [dataConcern, setDataConcern] = useState(itemsData || {});
     const [emailMessageID, setEmailMessageID] = useState(null);
-    const [surveyLink, setSurveyLink] = useState(null);
+    
 
     function getSurveyFullLink() {
 
@@ -1716,10 +1716,8 @@ const InquiryThread = () => {
                     ticketId={ticketId}
                     dataRef={dataConcern}
                     onupdate={handleUpdate}
-
                 />
             </div>
-
             <div>
                 <CloseModal
                     modalRef={closeModalRef}
