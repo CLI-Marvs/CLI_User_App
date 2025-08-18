@@ -62,7 +62,7 @@ const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
                   errorMsg: "Failed to create bank",
               };
 
-        if (valueExistsFuzzy(config.list, name, config.key)) {
+        if (valueExistsFuzzy(config.list, name, config.key, 0.9)) {
             showToast(config.existsMsg, "error");
             return;
         }
@@ -231,6 +231,11 @@ const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
                                     : ""
                             }`}
                         />
+                         {errors["payTo"] && (
+                            <span className="text-red-500 text-xs mt-1">
+                                {errors["payTo"]}
+                            </span>
+                        )}
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
