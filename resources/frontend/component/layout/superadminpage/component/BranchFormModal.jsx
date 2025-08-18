@@ -13,7 +13,7 @@ import { showToast } from "@/util/toastUtil";
 import CustomInput from "@/component/Input/CustomInput";
 import isFormButtonDisabled from "@/util/isFormButtonDisabled";
 import { IoIosCloseCircle } from "react-icons/io";
-import { id } from "date-fns/locale";
+import { useWalkinSelection } from "@/context/InquiryManagement/WalkinSelectionContext";
 
 const initialFormState = {
     branch_name: "",
@@ -27,6 +27,11 @@ const BranchFormModal = forwardRef((props, ref) => {
     const queryClient = useQueryClient();
     const [error, setError] = useState(null);
     const [initialData, setInitialData] = useState(initialFormState);
+    const {
+        selectedBranch,
+        setSelectedBranch,
+        setDesks,
+    } = useWalkinSelection();
 
     //Hooks
     useEffect(() => {
@@ -70,11 +75,46 @@ const BranchFormModal = forwardRef((props, ref) => {
         }
     };
 
-    // Mutation for creating branch
+    const updateBranchMutation = useMutation({
+        mutationFn: ({ id, data }) => branchService.updateBranch(id, data),
+        onSuccess: (response) => {
+            showToast(response?.message, "success");
+
+            // Get filtered desks
+            const updatedDesks = formData.desks
+                .filter((desk) => desk.name.trim() !== "")
+                .map((desk) => ({
+                    id: desk.id,
+                    name: desk.name,
+                }));
+            
+            // Update global state if the current branch is being edited
+            if (selectedBranch?.id === props.branch?.id) {
+                setSelectedBranch((prev) => ({
+                    ...prev,
+                    desks: updatedDesks,
+                }));
+                setDesks(updatedDesks);
+            }
+
+            // Invalidate branches query to refresh the data
+            queryClient.invalidateQueries({ queryKey: ["branches"] });
+            setError(null);
+            dialogRef.current?.close();
+        },
+        onError: (error) => {
+            setError(
+                error?.response?.data?.message || "Failed to update branch"
+            );
+        },
+        onSettled: () => setIsSubmitting(false),
+    });
+
     const createBranchMutation = useMutation({
         mutationFn: branchService.createBranch,
-        onSuccess: () => {
-            showToast("Branch created successfully!", "success");
+        onSuccess: (response) => {
+            showToast(response?.message, "success");
+
             queryClient.invalidateQueries({ queryKey: ["branches"] });
             setFormData(initialFormState);
             setError(null);
@@ -83,23 +123,6 @@ const BranchFormModal = forwardRef((props, ref) => {
         onError: (error) => {
             setError(
                 error?.response?.data?.message || "Failed to create branch"
-            );
-        },
-        onSettled: () => setIsSubmitting(false),
-    });
-
-    // Mutation for updating branch
-    const updateBranchMutation = useMutation({
-        mutationFn: ({ id, data }) => branchService.updateBranch(id, data),
-        onSuccess: (response) => {
-            showToast(response?.message, "success");
-            queryClient.invalidateQueries({ queryKey: ["branches"] });
-            setError(null);
-            dialogRef.current?.close();
-        },
-        onError: (error) => {
-            setError(
-                error?.response?.data?.message || "Failed to update branch"
             );
         },
         onSettled: () => setIsSubmitting(false),

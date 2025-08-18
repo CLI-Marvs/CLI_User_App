@@ -1,4 +1,4 @@
-import React, { useRef, useState,useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
 import { WALKIN_COLUMNS } from "@/constant/data/tableColumns";
@@ -41,6 +41,43 @@ const WalkinListPage = () => {
     });
     const { data: categoriesData } = useCategories();
     const { data: branchesData } = useBranch();
+
+    useEffect(() => {
+        if (!selectedBranch?.id || !branchesData) return;
+    
+        const branchList = Array.isArray(branchesData)
+            ? branchesData
+            : branchesData?.data || [];
+    
+        if (!branchList.length) return;
+    
+        const currentBranch = branchList.find(
+            (branch) => String(branch.id) === String(selectedBranch.id)
+        );
+
+        if (!currentBranch) return;
+    
+        setSelectedBranch((prev) => ({
+            ...prev,
+            name: currentBranch.name ?? prev.name,
+            slug: currentBranch.slug ?? prev.slug,
+        }));
+    
+        // Update desks dropdown immediately
+        setDesks(currentBranch.desks || []);
+    
+        // Keep selectedDesk in sync or reset if removed
+        if (selectedDesk?.id) {
+            const updatedDesk = (currentBranch.desks || []).find(
+                (d) => String(d.id) === String(selectedDesk.id)
+            );
+            if (!updatedDesk) {
+                setSelectedDesk({ id: "", name: "" });
+            } else {
+                setSelectedDesk({ id: String(updatedDesk.id), name: updatedDesk.name });
+            }
+        }
+    }, [branchesData, selectedBranch?.id, selectedDesk?.id]);
 
     //Event handler
     //Handle engage form modal open
@@ -100,7 +137,7 @@ const WalkinListPage = () => {
                                     branchesData.map((branch) => (
                                         <option
                                             key={branch.id}
-                                            value={branch.id}
+                                            value={branch.id ?? ""}
                                         >
                                             {branch.name}
                                         </option>
