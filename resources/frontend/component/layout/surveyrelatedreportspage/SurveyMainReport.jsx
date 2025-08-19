@@ -14,13 +14,12 @@ import {
 import { MdSearch } from "react-icons/md";
 import apiService from '../../servicesApi/apiService';
 
-
 const emojiMap = {
-    5: '😃',
-    4: '😊',
-    3: '😐',
-    2: '😒',
-    1: '😠',
+    5: '/images/emoji1.png',
+    4: '/images/emoji2.png',
+    3: '/images/emoji3.png',
+    2: '/images/emoji4.png',
+    1: '/images/emoji5.png',
 };
 
 
@@ -174,8 +173,15 @@ const SurveyMainReport = () => {
                                                 <tr>
                                                     <th className="border-2 px-2 py-1 text-center">Survey Name</th>
                                                     {[5, 4, 3, 2, 1].map(rating => (
-                                                        <th key={rating} className="border-2 px-2 py-1 text-center text-[24px]">
-                                                            {emojiMap[rating]}
+                                                        <th
+                                                            key={rating}
+                                                            className="border-2 px-2 py-1 text-center"
+                                                        >
+                                                            <img
+                                                                src={emojiMap[rating]}
+                                                                alt={`Rating ${rating}`}
+                                                                className="w-8 h-8 mx-auto"
+                                                            />
                                                         </th>
                                                     ))}
                                                     <th className="border-2 px-2 py-1 text-center">Total</th>
