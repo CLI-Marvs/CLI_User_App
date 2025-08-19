@@ -117,7 +117,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
 
             setRemarks("");
             getInquiryLogs(ticketId);
-            const updatedData = { ...dataRef, status: "Resolved", communication_type: communicationType };
+            const updatedData = { ...dataRef, status: "Resolved", communication_type: communicationType, survey_link: selectedSurveyType.surveyLink };
             localStorage.removeItem("updatedData");
             localStorage.removeItem("closeConcern");
             localStorage.setItem("dataConcern", JSON.stringify(updatedData));

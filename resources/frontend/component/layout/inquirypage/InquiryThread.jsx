@@ -111,10 +111,8 @@ const InquiryThread = () => {
     const fullLink = getSurveyFullLink();
 
     useEffect(() => {
-        if (surveyStatus === "none") {
-            fetchSurveyStatus(ticketId);
-        }
-    }, []);
+        fetchSurveyStatus(ticketId);
+    }, [dataConcern]);
 
     const handleDateChange = (date) => {
         setStartDate(date);
