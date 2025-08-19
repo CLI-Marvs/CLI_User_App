@@ -169,11 +169,31 @@
     <p style="color:#404B52; font-size: 20px;">
         Please rate your experience with us: <br>
 
-        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/5" class="emoji-button">😃</a>
-        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/4" class="emoji-button">😊</a>
-        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/3" class="emoji-button">😐</a>
-        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/2" class="emoji-button">😒</a>
-        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/1" class="emoji-button">😠</a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/5" class="emoji-button">
+            <img style="width: 50px; height: 50px;"
+            src="https://storage.googleapis.com/f42e9ac57bfc-storage/emoji1.png"
+            title="emoji1" />
+        </a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/4" class="emoji-button">
+            <img style="width: 50px; height: 50px;"
+            src="https://storage.googleapis.com/f42e9ac57bfc-storage/emoji2.png"
+            title="emoji2" />
+        </a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/3" class="emoji-button">
+            <img style="width: 50px; height: 50px;"
+            src="https://storage.googleapis.com/f42e9ac57bfc-storage/emoji3.png"
+            title="emoji3" />
+        </a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/2" class="emoji-button">
+            <img style="width: 50px; height: 50px;"
+            src="https://storage.googleapis.com/f42e9ac57bfc-storage/emoji4.png"
+            title="emoji4" />
+        </a>
+        <a href="{{ $selectedSurveyType['surveyLink'] }}/{{ $modifiedTicketId }}/1" class="emoji-button">
+            <img style="width: 50px; height: 50px;"
+            src="https://storage.googleapis.com/f42e9ac57bfc-storage/emoji5.png"
+            title="emoji5" />
+        </a>
 
     </p>
 

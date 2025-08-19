@@ -1,7 +1,13 @@
 import React from 'react'
 
 const SummaryRating = ({ ratingCounts }) => {
-    const emojis = ['😃', '😊', '😐', '😒', '😠'];
+    const emojis = [
+        '/images/emoji1.png',
+        '/images/emoji2.png',
+        '/images/emoji3.png',
+        '/images/emoji4.png',
+        '/images/emoji5.png',
+    ];
 
     // Calculate average
     const totalScore = [5, 4, 3, 2, 1].reduce((acc, rating) => {
@@ -20,8 +26,12 @@ const SummaryRating = ({ ratingCounts }) => {
                 {[5, 4, 3, 2, 1].map((rating, index) => {
                     const count = ratingCounts?.find(c => c.rating === rating)?.total ?? 0;
                     return (
-                        <div key={rating} className='flex gap-[10px] text-[24px]'>
-                            <p>{emojis[index]}</p>
+                        <div key={rating} className="flex gap-[10px] items-center text-[24px]">
+                            <img
+                                src={emojis[index]}
+                                alt={`Emoji ${index + 1}`}
+                                className="w-8 h-8"
+                            />
                             <p>-</p>
                             <p>{count}</p>
                         </div>

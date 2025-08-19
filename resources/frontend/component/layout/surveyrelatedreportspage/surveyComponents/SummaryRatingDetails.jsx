@@ -6,12 +6,12 @@ import { useSurvey } from '@/context/Survey/SurveyContext';
 
 
 const emojiMap = {
-    5: '😃',
-    4: '😊',
-    3: '😐',
-    2: '😒',
-    1: '😠',
-};
+    5: '/images/emoji1.png',
+    4: '/images/emoji2.png',
+    3: '/images/emoji3.png',
+    2: '/images/emoji4.png',
+    1: '/images/emoji5.png',
+};;
 
 const SummaryRatingDetails = () => {
     const { id } = useParams();
@@ -54,8 +54,8 @@ const SummaryRatingDetails = () => {
             <div className="mb-4 flex items-center gap-2">
                 <span className="font-semibold">Filter by:</span>
                 {Object.entries(emojiMap)
-                    .sort((a, b) => b[0] - a[0]) 
-                    .map(([rating, emoji]) => (
+                    .sort((a, b) => b[0] - a[0])
+                    .map(([rating, imageUrl]) => (
                         <button
                             key={rating}
                             onClick={() => setSelectedRating(Number(rating))}
@@ -64,7 +64,11 @@ const SummaryRatingDetails = () => {
                                 : 'bg-white text-black'
                                 }`}
                         >
-                            {emoji}
+                            <img
+                                src={imageUrl}
+                                alt={`Rating ${rating}`}
+                                className="w-6 h-6 inline-block"
+                            />
                         </button>
                     ))}
                 <button
@@ -84,7 +88,7 @@ const SummaryRatingDetails = () => {
                                 <th className="border-2 px-2 py-1 w-[150px] text-center">Rate</th>
                                 <th className="border-2 px-2 py-1 text-center">Email</th>
                                 <th className="border-2 px-2 py-1 text-center">Ticket ID</th>
-                                
+
                             </tr>
                         </thead>
                         <tbody>
@@ -93,10 +97,17 @@ const SummaryRatingDetails = () => {
                                     <td className="border-2 px-2 py-1 text-center">
                                         {new Date(item.created_at).toLocaleDateString('en-US')}
                                     </td>
-                                    <td className="border-2 px-2 py-1 text-center">{emojiMap[item.rating] ?? ''}</td>
+                                    <td className="border-2 px-2 py-1 text-center">
+                                        {emojiMap[item.rating] ? (
+                                            <img
+                                                src={emojiMap[item.rating]}
+                                                alt={`Rating ${item.rating}`}
+                                                className="w-6 h-6 mx-auto"
+                                            />
+                                        ) : null}
+                                    </td>
                                     <td className="border-2 px-2 py-1 text-center">{item.email}</td>
                                     <td className="border-2 px-2 py-1 text-center">{item.ticket_id}</td>
-                                    
                                 </tr>
                             ))}
                         </tbody>
