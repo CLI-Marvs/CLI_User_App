@@ -164,7 +164,7 @@ const WalkinTransactionHistoryPage = () => {
                 />
             </div>
 
-            <div className="mt-3 mx-1 py-4">
+            <div className="mt-3 mx-2 py-4">
                 {isLoading && !isFetching ? (
                     <div className="text-center py-4">
                         <Skeleton height={140} className="my-1" />
