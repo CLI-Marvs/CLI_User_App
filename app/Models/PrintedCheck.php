@@ -28,14 +28,15 @@ class PrintedCheck extends Model
         return $query->where('status', 'active');
     }
 
-
     public function scopeFilter(Builder $query, array $filters)
     {
         $checkStartDate    = $filters['start_date'] ?? null;
         $checkEndDate      = $filters['end_date'] ?? null;
         $printedStartDate  = $filters['printed_start_date'] ?? null;
         $printedEndDate    = $filters['printed_end_date'] ?? null;
-     
+        $checkNumberFrom   = $filters['check_number_from'] ?? null;
+        $checkNumberTo     = $filters['check_number_to'] ?? null;
+
         if ($checkStartDate && $checkEndDate) {
             $query->whereBetween('check_date', [$checkStartDate, $checkEndDate]);
         } elseif ($checkStartDate) {
@@ -43,7 +44,7 @@ class PrintedCheck extends Model
         } elseif ($checkEndDate) {
             $query->whereDate('check_date', $checkEndDate);
         }
-       
+
         if ($printedStartDate && $printedEndDate) {
             $start = Carbon::parse($printedStartDate)->startOfDay();
             $end   = Carbon::parse($printedEndDate)->endOfDay();
@@ -59,7 +60,15 @@ class PrintedCheck extends Model
                 Carbon::parse($printedEndDate)->endOfDay()
             ]);
         }
-       
+
+        if ($checkNumberFrom && $checkNumberTo) {
+            $query->whereBetween('check_no', [$checkNumberFrom, $checkNumberTo]);
+        } elseif ($checkNumberFrom) {
+            $query->where('check_no', '>=', $checkNumberFrom);
+        } elseif ($checkNumberTo) {
+            $query->where('check_no', '<=', $checkNumberTo);
+        }
+
         if (!empty($filters['check_number'])) {
             $query->where('check_no', $filters['check_number']);
         }
