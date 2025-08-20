@@ -1,13 +1,13 @@
 import React from 'react'
 
+import emoji1 from "../../../../../../public/Images/emoji1.png";
+import emoji2 from "../../../../../../public/Images/emoji2.png";
+import emoji3 from "../../../../../../public/Images/emoji3.png";
+import emoji4 from "../../../../../../public/Images/emoji4.png";    
+import emoji5 from "../../../../../../public/Images/emoji5.png";
+
 const SummaryRating = ({ ratingCounts }) => {
-    const emojis = [
-        '/images/emoji1.png',
-        '/images/emoji2.png',
-        '/images/emoji3.png',
-        '/images/emoji4.png',
-        '/images/emoji5.png',
-    ];
+   const emojis = [emoji1, emoji2, emoji3, emoji4, emoji5];
 
     // Calculate average
     const totalScore = [5, 4, 3, 2, 1].reduce((acc, rating) => {
