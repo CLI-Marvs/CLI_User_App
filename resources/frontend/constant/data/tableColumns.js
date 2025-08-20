@@ -37,5 +37,5 @@ export const WALKIN_HISTORY_COLUMNS = [
 export const BRANCH_SETTING_COLUMNS = [
     { label: "Branch Name", width: "w-[200px]" },
     { label: "URL", width: "w-[150px]" },
-    { label: "Action", width: "w-[60px]" },
+    { label: "Actions", width: "w-[60px]" },
 ]
