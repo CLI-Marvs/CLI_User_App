@@ -2,9 +2,10 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-
+use Illuminate\Support\Facades\Log;
 
 class PrintedCheck extends Model
 {
@@ -30,11 +31,11 @@ class PrintedCheck extends Model
 
     public function scopeFilter(Builder $query, array $filters)
     {
-        $checkStartDate = $filters['start_date'] ?? null;
-        $checkEndDate = $filters['end_date'] ?? null;
-        $printedStartDate = $filters['printed_start_date'] ?? null;
-        $printedEndDate = $filters['printed_end_date'] ?? null;
-
+        $checkStartDate    = $filters['start_date'] ?? null;
+        $checkEndDate      = $filters['end_date'] ?? null;
+        $printedStartDate  = $filters['printed_start_date'] ?? null;
+        $printedEndDate    = $filters['printed_end_date'] ?? null;
+     
         if ($checkStartDate && $checkEndDate) {
             $query->whereBetween('check_date', [$checkStartDate, $checkEndDate]);
         } elseif ($checkStartDate) {
@@ -42,15 +43,23 @@ class PrintedCheck extends Model
         } elseif ($checkEndDate) {
             $query->whereDate('check_date', $checkEndDate);
         }
-
+       
         if ($printedStartDate && $printedEndDate) {
-            $query->whereBetween('created_at', [$printedStartDate, $printedEndDate]);
+            $start = Carbon::parse($printedStartDate)->startOfDay();
+            $end   = Carbon::parse($printedEndDate)->endOfDay();
+            $query->whereBetween('created_at', [$start, $end]);
         } elseif ($printedStartDate) {
-            $query->whereDate('created_at', $printedStartDate);
+            $query->whereBetween('created_at', [
+                Carbon::parse($printedStartDate)->startOfDay(),
+                Carbon::parse($printedStartDate)->endOfDay()
+            ]);
         } elseif ($printedEndDate) {
-            $query->whereDate('created_at', $printedEndDate);
+            $query->whereBetween('created_at', [
+                Carbon::parse($printedEndDate)->startOfDay(),
+                Carbon::parse($printedEndDate)->endOfDay()
+            ]);
         }
-
+       
         if (!empty($filters['check_number'])) {
             $query->where('check_no', $filters['check_number']);
         }
