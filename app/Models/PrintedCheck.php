@@ -38,39 +38,39 @@ class PrintedCheck extends Model
         $checkNumberTo     = $filters['check_number_to'] ?? null;
 
         if ($checkStartDate && $checkEndDate) {
-            $query->whereBetween('check_date', [$checkStartDate, $checkEndDate]);
+            $query->whereBetween('printed_check.check_date', [$checkStartDate, $checkEndDate]);
         } elseif ($checkStartDate) {
-            $query->whereDate('check_date', $checkStartDate);
+            $query->whereDate('printed_check.check_date', $checkStartDate);
         } elseif ($checkEndDate) {
-            $query->whereDate('check_date', $checkEndDate);
+            $query->whereDate('printed_check.check_date', $checkEndDate);
         }
 
         if ($printedStartDate && $printedEndDate) {
             $start = Carbon::parse($printedStartDate)->startOfDay();
             $end   = Carbon::parse($printedEndDate)->endOfDay();
-            $query->whereBetween('created_at', [$start, $end]);
+            $query->whereBetween('printed_check.created_at', [$start, $end]);
         } elseif ($printedStartDate) {
-            $query->whereBetween('created_at', [
+            $query->whereBetween('printed_check.created_at', [
                 Carbon::parse($printedStartDate)->startOfDay(),
                 Carbon::parse($printedStartDate)->endOfDay()
             ]);
         } elseif ($printedEndDate) {
-            $query->whereBetween('created_at', [
+            $query->whereBetween('printed_check.created_at', [
                 Carbon::parse($printedEndDate)->startOfDay(),
                 Carbon::parse($printedEndDate)->endOfDay()
             ]);
         }
 
         if ($checkNumberFrom && $checkNumberTo) {
-            $query->whereBetween('check_no', [$checkNumberFrom, $checkNumberTo]);
+            $query->whereBetween('printed_check.check_no', [$checkNumberFrom, $checkNumberTo]);
         } elseif ($checkNumberFrom) {
-            $query->where('check_no', '>=', $checkNumberFrom);
+            $query->where('printed_check.check_no', '>=', $checkNumberFrom);
         } elseif ($checkNumberTo) {
-            $query->where('check_no', '<=', $checkNumberTo);
+            $query->where('printed_check.check_no', '<=', $checkNumberTo);
         }
 
         if (!empty($filters['check_number'])) {
-            $query->where('check_no', $filters['check_number']);
+            $query->where('printed_check.check_no', $filters['check_number']);
         }
 
         return $query;
