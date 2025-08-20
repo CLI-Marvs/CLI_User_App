@@ -28,7 +28,6 @@ const AssignSidePanel = ({ ticketId }) => {
     const [search, setSearch] = useState("");
     const [selectedAssignees, setSelectedAssignees] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
-    console.log("selectedOptions", selectedOptions);
     const [tempSelection, setTempSelection] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
