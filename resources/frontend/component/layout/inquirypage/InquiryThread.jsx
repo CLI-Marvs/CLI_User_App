@@ -109,7 +109,7 @@ const InquiryThread = () => {
     }
 
     const fullLink = getSurveyFullLink();
-
+    console.log('1121',surveyStatus)
     useEffect(() => {
         if (surveyStatus === "none") {
             fetchSurveyStatus(ticketId);

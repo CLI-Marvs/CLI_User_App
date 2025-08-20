@@ -3,15 +3,25 @@ import CustomInput from "@/component/Input/CustomInput";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import SendSurveyModal from "@/component/layout/inquirypage/SendSurveyModal";
 import { useStateContext } from "@/context/contextprovider";
+import {useSurvey} from '@/context/survey/SurveyContext';
 
 const WalkinTransactionModal = ({ open, onClose, item }) => {
     const { data } = useStateContext();
     const dialogRef = useRef(null);
+    const { surveyStatus, fetchSurveyStatus } = useSurvey();
     const surveyModalRef = useRef(null);
     const ticketId =
         data?.find((ticket) => ticket?.walkin_transaction_id === item?.id)
             ?.ticket_id ?? null;
     
+    useEffect(() => {
+        if (surveyStatus === "none") {
+            fetchSurveyStatus(ticketId);
+        }
+    }, []);
+    console.log("surveyStatus 1", surveyStatus);
+    console.log("ticketId 1", ticketId);
+
     useEffect(() => {
         const dialog = dialogRef.current;
         if (!dialog) return;
