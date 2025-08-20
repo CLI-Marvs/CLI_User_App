@@ -28,6 +28,7 @@ const AssignSidePanel = ({ ticketId }) => {
     const [search, setSearch] = useState("");
     const [selectedAssignees, setSelectedAssignees] = useState([]);
     const [selectedOptions, setSelectedOptions] = useState([]);
+    console.log("selectedOptions", selectedOptions);
     const [tempSelection, setTempSelection] = useState([]);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -37,7 +38,7 @@ const AssignSidePanel = ({ ticketId }) => {
     const dropdownRef = useRef(null);
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
-   
+
     const employeeOptions = allEmployees.map((employee) => ({
         name: `${employee.firstname} ${employee.lastname}`,
         email: employee.employee_email,
@@ -589,37 +590,10 @@ const AssignSidePanel = ({ ticketId }) => {
             <div className=" w-full bg-white rounded-[10px] py-[16px] shadow-custom7">
                 <div className="flex w-full px-[20px] justify-start items-start">
                     <p className="text-sm text-custom-bluegreen pt-1 font-semibold">
-                        Assignee
+                        {/* Assignee */}
+                        {selectedOptions?.length > 1 ? 'Assignees' : 'Assignee'}
                     </p>
                     <div className="ml-2 flex overflow-x-auto gap-2 max-w-full custom-scrollbar">
-                        {/* {selectedOptions.length > 0 ? (
-                            <>
-                                {selectedOptions.map((assignee) => (
-                                    <>
-                                        <span
-                                            key={assignee.name}
-                                            className="bg-custom-lightgreen text-white rounded-full px-3 py-1 text-xs flex-shrink-0 flex mb-[4px]"
-                                        >
-                                            {assignee.name}
-                                            {user?.department === "CRS" && (
-                                                <button
-                                                    onClick={() =>
-                                                        removeTag(assignee)
-                                                    }
-                                                    className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-lightgreen rounded-full h-5 w-5 flex items-center justify-center"
-                                                >
-                                                    &times;
-                                                </button>
-                                            )}
-                                        </span>
-                                    </>
-                                ))}
-                            </>
-                        ) : (
-                            <span className="text-sm text-gray-500 pt-1">
-                                No assignee selected
-                            </span>
-                        )} */}
                         {selectedOptions.length > 0 ? (
                             <>
                                 {selectedOptions.map((assignee) => (
