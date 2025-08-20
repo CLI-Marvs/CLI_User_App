@@ -31,17 +31,19 @@ const SummaryTextboxTable = ({ question }) => {
                     <table className='w-full'>
                         <thead>
                             <tr>
-                                <th className="border-2 px-2 py-1 text-center shrink-0 w-[120px]">Ticket ID</th>
+                                <th className="border-2 px-2 py-1 text-center shrink-0 w-[120px]">Date</th>
                                 <th className="border-2 px-2 py-1 text-center shrink-0 ">Email</th>
                                 <th className="border-2 px-2 py-1 text-center">Answer</th>
+                                <th className="border-2 px-2 py-1 text-center shrink-0 w-[120px]">Ticket ID</th>
                             </tr>
                         </thead>
                         <tbody>
                             {currentAnswers.map((answer, index) => (
                                 <tr key={index}>
-                                    <td className="border-2 px-2 py-1 text-center">{answer.ticket_id}</td>
+                                    <td className="border-2 px-2 py-1 text-center"> {new Date(answer.date).toLocaleDateString('en-US')}</td>
                                     <td className="border-2 px-2 py-1 text-center">{answer.email}</td>
                                     <td className="border-2 px-2 py-1 text-center">{answer.answer_value}</td>
+                                    <td className="border-2 px-2 py-1 text-center">{answer.ticket_id}</td>
                                 </tr>
                             ))}
                         </tbody>

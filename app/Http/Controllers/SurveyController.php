@@ -477,34 +477,36 @@ class SurveyController extends Controller
                         ->whereNotNull('answer_value')
                         ->get();
 
-                    $formattedAnswers = [];
                     foreach ($standardAnswers as $a) {
-                        $email = DB::table('experience_ratings')
+                        $experience = DB::table('experience_ratings')
                             ->where('id', $a->experience_rating_id)
-                            ->value('email');
-
-                        $ticketId = DB::table('experience_ratings')
-                            ->where('id', $a->experience_rating_id)
-                            ->value('ticket_id');
+                            ->select('email', 'ticket_id', 'created_at')
+                            ->first();
 
                         $formattedAnswers[] = [
-                            'ticket_id' => $ticketId,
-                            'email' => $email,
+                            'ticket_id'    => $experience->ticket_id ?? null,
+                            'email'        => $experience->email ?? null,
                             'answer_value' => $a->answer_value,
+                            'date'   => $experience->created_at ?? $a->created_at, // fallback
                         ];
                     }
-
 
                     $totalResponses += $standardAnswers->count();
 
                     // Get imported answers (no question_id, no survey_list_id)
                     $rawTicketMap = DB::table('experience_ratings')
                         ->where('survey_title', trim($survey->survey_title))
-                        ->select('ticket_id', 'email')
+                        ->select('ticket_id', 'email', 'created_at')
                         ->get()
                         ->mapWithKeys(function ($row) {
                             $numeric = preg_replace('/\D/', '', $row->ticket_id);
-                            return [$numeric => ['original' => $row->ticket_id, 'email' => $row->email]];
+                            return [
+                                $numeric => [
+                                    'original'   => $row->ticket_id,
+                                    'email'      => $row->email,
+                                    'created_at' => $row->created_at,
+                                ]
+                            ];
                         })
                         ->toArray();
 
@@ -515,18 +517,18 @@ class SurveyController extends Controller
                             ->whereIn(DB::raw("REGEXP_REPLACE(ticket_id, '\\D', '', 'g')"), $importedTicketIds)
                             ->where('question', 'ILIKE', '%' . trim($question->question) . '%')
                             ->whereNotNull('answer_value')
-                            ->select('ticket_id', 'answer_value')
+                            ->select('ticket_id', 'answer_value', 'created_at')
                             ->get();
 
                         foreach ($importedAnswers as $a) {
-                            // Normalize again for matching
                             $numericTicketId = preg_replace('/\D/', '', $a->ticket_id);
 
                             if (isset($rawTicketMap[$numericTicketId])) {
                                 $formattedAnswers[] = [
-                                    'ticket_id' => $rawTicketMap[$numericTicketId]['original'],
-                                    'email' => $rawTicketMap[$numericTicketId]['email'],
+                                    'ticket_id'    => $rawTicketMap[$numericTicketId]['original'],
+                                    'email'        => $rawTicketMap[$numericTicketId]['email'],
                                     'answer_value' => $a->answer_value,
+                                    'created_at'   => $rawTicketMap[$numericTicketId]['created_at'] ?? $a->created_at,
                                 ];
                             }
                         }
@@ -535,11 +537,11 @@ class SurveyController extends Controller
                     }
 
                     $questionsResult[] = [
-                        'question_id' => $question->id,
-                        'question' => $question->question,
-                        'input_type' => $inputType,
-                        'total_responses' => $totalResponses,
-                        'answers' => $formattedAnswers,
+                        'question_id'      => $question->id,
+                        'question'         => $question->question,
+                        'input_type'       => $inputType,
+                        'total_responses'  => $totalResponses,
+                        'answers'          => $formattedAnswers,
                     ];
                 }
             }
@@ -624,7 +626,7 @@ class SurveyController extends Controller
 
     public function getSurveyTitle($id)
     {
-        
+
         $survey = DB::table('surveys_list')
             ->where('id', $id)
             ->value('survey_title');
