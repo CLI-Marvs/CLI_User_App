@@ -4,7 +4,7 @@ import DatePicker from "react-datepicker";
 import { MdCalendarToday, MdRefresh } from "react-icons/md";
 import moment from "moment";
 import CustomToolTip from "@/component/CustomToolTip";
-
+import CustomInput from "@/component/Input/CustomInput";
 
 const TransactionSearchBar = ({
     fields,
@@ -131,6 +131,7 @@ const TransactionSearchBar = ({
                                                         className="outline-none h-full text-sm px-2 cursor-pointer"
                                                         calendarClassName="custom-calendar"
                                                         name="start_date"
+                                                        autoComplete="off"
                                                         onChange={(date) => {
                                                             if (date) {
                                                                 const formattedDate =
@@ -170,6 +171,7 @@ const TransactionSearchBar = ({
                                                         className="outline-none h-full text-sm px-2 cursor-pointer"
                                                         calendarClassName="custom-calendar"
                                                         name="end_date"
+                                                        autoComplete="off"
                                                         onChange={(date) => {
                                                             if (date) {
                                                                 const formattedDate =
@@ -197,11 +199,13 @@ const TransactionSearchBar = ({
                                                         }
                                                     />
                                                 </div>
-                                                <img src={DateLogo} className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 pointer-events-none cursor-pointer">
-                                                </img>
+                                                <img
+                                                    src={DateLogo}
+                                                    className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 pointer-events-none cursor-pointer"
+                                                ></img>
                                             </div>
-                                        ) : item.type === "printed_date" ?
-                                             <div className="relative flex border-b w-max rounded-[5px] z-10 mt-3">
+                                        ) : item.type === "printed_date" ? (
+                                            <div className="relative flex border-b w-max rounded-[5px] z-10 mt-3">
                                                 <span className="text-custom-bluegreen text-sm flex items-center w-max px-[15px] pl-3 py-1 shrink-0 cursor-default">
                                                     From
                                                 </span>
@@ -210,6 +214,7 @@ const TransactionSearchBar = ({
                                                         className="outline-none h-full text-sm px-2 cursor-pointer"
                                                         calendarClassName="custom-calendar"
                                                         name="start_date"
+                                                        autoComplete="off"
                                                         onChange={(date) => {
                                                             if (date) {
                                                                 const formattedDate =
@@ -249,6 +254,7 @@ const TransactionSearchBar = ({
                                                         className="outline-none h-full text-sm px-2 cursor-pointer"
                                                         calendarClassName="custom-calendar"
                                                         name="end_date"
+                                                        autoComplete="off"
                                                         onChange={(date) => {
                                                             if (date) {
                                                                 const formattedDate =
@@ -276,15 +282,58 @@ const TransactionSearchBar = ({
                                                         }
                                                     />
                                                 </div>
-                                                <img src={DateLogo} className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 pointer-events-none cursor-pointer">
-                                                </img>
+                                                <img
+                                                    src={DateLogo}
+                                                    className="absolute inset-y-0 right-0 flex items-center text-white pr-3 pl-3 pointer-events-none cursor-pointer"
+                                                ></img>
                                             </div>
-                                        : (
+                                        ) : item.type === "check_number" ? (
+                                            <div className="flex w-full">
+                                                <div className="flex gap-3 border-b border-custom-gray outline-none text-xs border-opacity-30">
+                                                    <span className="text-custom-bluegreen text-sm">
+                                                        From
+                                                    </span>
+                                                    <CustomInput
+                                                        type="number"
+                                                        className="outline-none"
+                                                        autoComplete="off"
+                                                        onChange={
+                                                            onChangeSearch
+                                                        }
+                                                        value={
+                                                            searchValues.check_number_from ||
+                                                            ""
+                                                        }
+                                                        name="check_number_from"
+                                                    />
+                                                </div>
+
+                                                <div className="flex gap-3 w-full border-b border-custom-gray outline-none text-xs border-opacity-30">
+                                                    <span className="text-custom-bluegreen text-sm ml-12">
+                                                        To
+                                                    </span>
+                                                   <CustomInput
+                                                        type="number"
+                                                        className="outline-none"
+                                                        autoComplete="off"
+                                                        onChange={
+                                                            onChangeSearch
+                                                        }
+                                                        value={
+                                                            searchValues.check_number_to ||
+                                                            ""
+                                                        }
+                                                        name="check_number_to"
+                                                    />
+                                                </div>
+                                            </div>
+                                        ) : (
                                             <input
                                                 type="text"
                                                 className="w-full h-full border-b border-custom-gray outline-none text-xs border-opacity-30"
                                                 name={item.name}
                                                 onChange={onChangeSearch}
+                                                autoComplete="off"
                                                 value={
                                                     searchValues[item.name] ||
                                                     ""
@@ -317,7 +366,6 @@ const TransactionSearchBar = ({
                     <MdRefresh className="h-6 w-6 mt-1" />
                 </button>
             </CustomToolTip>
-
         </div>
     );
 };

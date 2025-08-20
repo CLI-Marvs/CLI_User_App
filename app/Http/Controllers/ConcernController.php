@@ -1823,7 +1823,9 @@ class ConcernController extends Controller
             $buyer_name = $request->buyer_name;
             $concerns->communication_type = $request->communication_type;
             $concerns->status = "Resolved";
-            $concerns->survey_link = $selectedSurveyType['surveyLink']; 
+            if ($selectedSurveyType && isset($selectedSurveyType['surveyLink'])) {
+                $concerns->survey_link = $selectedSurveyType['surveyLink'];
+            }
             $buyer_lastname = $request->buyer_lastname;
             $message_id = $request->message_id;
             $concerns->save();

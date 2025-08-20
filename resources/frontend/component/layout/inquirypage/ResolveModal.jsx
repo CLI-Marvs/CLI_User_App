@@ -117,7 +117,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
 
             setRemarks("");
             getInquiryLogs(ticketId);
-            const updatedData = { ...dataRef, status: "Resolved", communication_type: communicationType };
+            const updatedData = { ...dataRef, status: "Resolved", communication_type: communicationType, survey_link: selectedSurveyType.surveyLink };
             localStorage.removeItem("updatedData");
             localStorage.removeItem("closeConcern");
             localStorage.setItem("dataConcern", JSON.stringify(updatedData));
@@ -245,7 +245,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                             <option value="Complaint">Complaint</option>
                             <option value="Request">Request</option>
                             <option value="Inquiry">Inquiry</option>
-                            <option value="Suggestion or recommendation">Suggestion or Recommendation</option>
+                            <option value="Suggestion or Recommendation">Suggestion or Recommendation</option>
                         </select>
                         <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
                             <IoMdArrowDropdown />
