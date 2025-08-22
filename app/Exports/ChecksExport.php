@@ -58,6 +58,7 @@ class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMap
         return [
             BeforeSheet::class => function (BeforeSheet $event) {
                 $query = PrintedCheck::query()
+                   
                     ->join('check_stream_banks', 'check_stream_banks.id', '=', 'printed_check.drawee_bank_id')
                     ->join('entities', 'entities.id', '=', 'printed_check.entity_id')
                     ->active()
@@ -76,7 +77,7 @@ class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMap
                 $event->sheet->setCellValue('B1', $totalRecords);
 
                 $event->sheet->setCellValue('A2', 'Total Check Amount:');
-                $event->sheet->setCellValue('B2', $totalAmount);
+                $event->sheet->setCellValue('B2', number_format($totalAmount, 2, '.', ','));
             }
         ];
     }
@@ -98,7 +99,7 @@ class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMap
     {
         return [
             "\t" . $row->check_no,
-            $row->check_amount,
+            number_format($row->check_amount, 2, '.', ','), 
             $row->check_date ? Carbon::parse($row->check_date)->format('m/d/Y') : '',
             $row->payor_name,
             $row->bank_name,

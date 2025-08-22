@@ -9,6 +9,7 @@ export const SurveyProvider = ({ children }) => {
   const [ratingDetails, setRatingDetails] = useState([]);
   const [surveyLinks, setSurveyLinks] = useState([]);
   const [surveyStatus, setSurveyStatus] = useState("");
+  const [statusLoading, setStatusLoading] = useState(false);
 
   const fetchSurveyTitle = async (survey_list_id) => {
     setLoading(true);
@@ -53,6 +54,7 @@ export const SurveyProvider = ({ children }) => {
       const response = await apiService.get(`/survey-status/${newTicketId}`);
       console.log("55",response)
       setSurveyStatus(response.data.status);
+      setStatusLoading(false);
     } catch (error) {
       console.error('Error fetching survey status:', error);
     }
@@ -69,7 +71,9 @@ export const SurveyProvider = ({ children }) => {
         fetchSurveyLinks,
         surveyLinks,
         fetchSurveyStatus,
-        surveyStatus
+        surveyStatus,
+        statusLoading,
+        setStatusLoading
         
       }
     }>

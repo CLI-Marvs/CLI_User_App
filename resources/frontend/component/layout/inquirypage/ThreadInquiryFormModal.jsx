@@ -29,8 +29,8 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
         if (messageRef?.details_message) {
             setMessage(messageRef.details_message);
         }
-    }, [messageRef?.details_message]); 
-    
+    }, [messageRef?.details_message]);
+
     useEffect(() => {
         setIsMiddleNameChecked(!dataConcern.buyer_middlename);
     }, [dataConcern]);
@@ -52,9 +52,11 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
         buyer_middlename: dataConcern.buyer_middlename || "",
         buyer_lastname: dataConcern.buyer_lastname || "",
         suffix_name: dataConcern.suffix_name || "",
-        user_type: predefinedUserTypes.includes(dataConcern.user_type)
-            ? dataConcern.user_type
-            : "Others",
+        user_type: dataConcern.user_type
+            ? predefinedUserTypes.includes(dataConcern.user_type)
+                ? dataConcern.user_type
+                : "Others"
+            : "",
         communication_type: dataConcern.communication_type || "",
         channels: dataConcern.channels || "",
         other_user_type: !predefinedUserTypes.includes(dataConcern.user_type)
@@ -83,7 +85,10 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
             requiredFields.push({ field: "suffix_name", label: "Suffix" });
         }
         if (dataToUpdate.user_type === "Others") {
-            requiredFields.push({ field: "other_user_type", label: "Other User Type" });
+            requiredFields.push({
+                field: "other_user_type",
+                label: "Other User Type",
+            });
         }
 
         const newInvalidFields = {};
@@ -137,35 +142,38 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                .filter((item) => !item.toLowerCase().includes("phase"))
-                .map((item) => {
-                    let formattedItem = formatFunc(item);
+                  .filter((item) => !item.toLowerCase().includes("phase"))
+                  .map((item) => {
+                      let formattedItem = formatFunc(item);
 
-                // Capitalize each word in the string
-                formattedItem = formattedItem
-                    .split(" ")
-                    .map((word) => {
-                        // Check for specific words that need to be fully capitalized
-                        if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                            return word.toUpperCase();
-                        }
-                        // Capitalize the first letter of all other words
-                        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-                    })
-                    .join(" ");
+                      // Capitalize each word in the string
+                      formattedItem = formattedItem
+                          .split(" ")
+                          .map((word) => {
+                              // Check for specific words that need to be fully capitalized
+                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                  return word.toUpperCase();
+                              }
+                              // Capitalize the first letter of all other words
+                              return (
+                                  word.charAt(0).toUpperCase() +
+                                  word.slice(1).toLowerCase()
+                              );
+                          })
+                          .join(" ");
 
-                // Replace specific names if needed
-                if (formattedItem === "Casamira South") {
-                    formattedItem = "Casa Mira South";
-                }
+                      // Replace specific names if needed
+                      if (formattedItem === "Casamira South") {
+                          formattedItem = "Casa Mira South";
+                      }
 
-                return formattedItem;
-                })
-                .sort((a, b) => {
-                    if (a === "N/A") return -1;
-                    if (b === "N/A") return 1;
-                    return a.localeCompare(b);
-                })
+                      return formattedItem;
+                  })
+                  .sort((a, b) => {
+                      if (a === "N/A") return -1;
+                      if (b === "N/A") return 1;
+                      return a.localeCompare(b);
+                  })
             : []),
     ];
 
@@ -219,7 +227,19 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
         if (dataConcern) {
             setIsMiddleNameChecked(!dataConcern.buyer_middlename);
             setIsSuffixChecked(!dataConcern.suffix_name);
-            setDataToUpdate(dataConcern);
+            setDataToUpdate({
+                ...dataConcern,
+                user_type: dataConcern.user_type
+                    ? predefinedUserTypes.includes(dataConcern.user_type)
+                        ? dataConcern.user_type
+                        : "Others"
+                    : "",
+                other_user_type: !predefinedUserTypes.includes(
+                    dataConcern.user_type
+                )
+                    ? dataConcern.user_type
+                    : "",
+            });
             setMessage(messageRef.details_message);
             getAllConcerns();
         }
@@ -235,7 +255,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
             /*  Object.keys(dataToUpdate).forEach((key) => {
                  formData.append(key, dataToUpdate[key]);
              }); */
-         
+
             Object.keys(dataToUpdate).forEach((key) => {
                 const value = dataToUpdate[key];
                 formData.append(key, value == null ? "" : value); // Replace null/undefined with empty string
@@ -275,7 +295,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
             console.log("error", error);
         }
     };
-  
+
     return (
         <dialog
             id="Employment"
@@ -337,11 +357,12 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                     </div>
                     <div className="flex flex-col gap-2">
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${invalidFields.buyer_firstname &&
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                invalidFields.buyer_firstname &&
                                 validationMessage
-                                ? "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                                    ? "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[240px]">
                                 First Name
@@ -357,11 +378,12 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                         </div>
                         <div className="flex items-center gap-[4px]">
                             <div
-                                className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden  ${invalidFields.buyer_middlename &&
+                                className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden  ${
+                                    invalidFields.buyer_middlename &&
                                     validationMessage
-                                    ? "border-red-500"
-                                    : "border-custom-bluegreen"
-                                    }`}
+                                        ? "border-red-500"
+                                        : "border-custom-bluegreen"
+                                }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
                                     Middle Name
@@ -390,11 +412,12 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                         </div>
 
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${invalidFields.buyer_lastname &&
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                invalidFields.buyer_lastname &&
                                 validationMessage
-                                ? "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                                    ? "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Last Name
@@ -410,11 +433,12 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                         </div>
                         <div className="flex items-center gap-[4px]">
                             <div
-                                className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden  ${invalidFields.suffix_name &&
+                                className={`flex relative items-center border w-[430px] rounded-[5px] overflow-hidden  ${
+                                    invalidFields.suffix_name &&
                                     validationMessage
-                                    ? "border-red-500"
-                                    : "border-custom-bluegreen"
-                                    }`}
+                                        ? "border-red-500"
+                                        : "border-custom-bluegreen"
+                                }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
                                     Suffix Name
@@ -443,10 +467,11 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${invalidFields.buyer_email && validationMessage
-                                ? "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                invalidFields.buyer_email && validationMessage
+                                    ? "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Email
@@ -462,10 +487,11 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                         </div>
 
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${invalidFields.mobile_number && validationMessage
-                                ? "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                invalidFields.mobile_number && validationMessage
+                                    ? "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Mobile Number
@@ -476,19 +502,18 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                                 placeholder=""
                                 value={dataToUpdate.mobile_number || ""}
                                 onChange={(e) => {
-                                    if (
-                                        e.target.value.length <= 13
-                                    ) {
+                                    if (e.target.value.length <= 13) {
                                         handleChange(e);
                                     }
                                 }}
                             />
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${invalidFields.property && validationMessage
-                                ? "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                invalidFields.property && validationMessage
+                                    ? "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Property
@@ -515,11 +540,12 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${invalidFields.details_concern &&
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                invalidFields.details_concern &&
                                 validationMessage
-                                ? "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                                    ? "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Concern regarding
@@ -567,11 +593,12 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${invalidFields.communication_type &&
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                invalidFields.communication_type &&
                                 validationMessage
-                                ? "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                                    ? "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Type
@@ -599,10 +626,11 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${invalidFields.channels && validationMessage
-                                ? "border-red-500"
-                                : "border-custom-bluegreen"
-                                }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${
+                                invalidFields.channels && validationMessage
+                                    ? "border-red-500"
+                                    : "border-custom-bluegreen"
+                            }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Channels
@@ -669,7 +697,12 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                         {dataToUpdate.user_type === "Others" && (
                             <div className="flex justify-end">
                                 <div
-                                    className={`flex items-center border rounded-[5px] w-[61.5%] overflow-hidden ${invalidFields.other_user_type && validationMessage ? 'border-red-500' : 'border'}`}
+                                    className={`flex items-center border rounded-[5px] w-[61.5%] overflow-hidden ${
+                                        invalidFields.other_user_type &&
+                                        validationMessage
+                                            ? "border-red-500"
+                                            : "border"
+                                    }`}
                                 >
                                     <input
                                         name="other_user_type"
@@ -682,27 +715,7 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                                 </div>
                             </div>
                         )}
-                        {/* {formData.user_type === "Others" && (
-                            <div className="flex justify-end">
-                                <div
-                                    className={`flex items-center border rounded-[5px] w-[277px] overflow-hidden ${isSubmitted && !formData.other_user_type
-                                        ? resetSuccess
-                                            ? "border-custom-bluegreen"
-                                            : "border-red-500"
-                                        : "border-custom-bluegreen"
-                                        }`}
-                                >
-                                    <input
-                                        name="other_user_type"
-                                        type="text"
-                                        className="w-full px-4 text-sm focus:outline-none mobile:text-xs py-1"
-                                        value={formData.other_user_type}
-                                        onChange={handleChange}
-                                        placeholder=""
-                                    />
-                                </div>
-                            </div>
-                        )} */}
+
                         <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Contract Number
@@ -712,13 +725,10 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                                 onChange={(e) => {
-                                    if (
-                                        e.target.value.length <= 13
-                                    ) {
+                                    if (e.target.value.length <= 13) {
                                         handleChange(e);
                                     }
                                 }}
-                               
                                 value={dataToUpdate.contract_number || ""}
                             />
                         </div>
@@ -772,40 +782,69 @@ const ThreadInquiryFormModal = ({ modalRef, dataConcern, messageRef }) => {
                         )}
                         <div className="flex justify-between w-54 tablet:flex-col">
                             <div>
-                                {attachmentData &&
-                                    attachmentData.map((item, key) => {
-                                        // Check if the file name exists and is valid
-                                        const originalFileName = item?.original_file_name;
+                                {
+                                    attachmentData &&
+                                        attachmentData
+                                            .map((item, key) => {
+                                                // Check if the file name exists and is valid
+                                                const originalFileName =
+                                                    item?.original_file_name;
 
-                                        if (!originalFileName || typeof originalFileName !== 'string') {
-                                            return null;
-                                        }
+                                                if (
+                                                    !originalFileName ||
+                                                    typeof originalFileName !==
+                                                        "string"
+                                                ) {
+                                                    return null;
+                                                }
 
-                                        const fileParts = originalFileName.split('.');
+                                                const fileParts =
+                                                    originalFileName.split(".");
 
-                                        const fileName = fileParts.slice(0, -1).join('.') || 'Unknown';
-                                        const fileExtension = fileParts.length > 1 ? fileParts[fileParts.length - 1] : 'unknown';
+                                                const fileName =
+                                                    fileParts
+                                                        .slice(0, -1)
+                                                        .join(".") || "Unknown";
+                                                const fileExtension =
+                                                    fileParts.length > 1
+                                                        ? fileParts[
+                                                              fileParts.length -
+                                                                  1
+                                                          ]
+                                                        : "unknown";
 
-                                        const truncatedName = fileName.length > 20 ? fileName.slice(0, 15) + '...' : fileName;
+                                                const truncatedName =
+                                                    fileName.length > 20
+                                                        ? fileName.slice(
+                                                              0,
+                                                              15
+                                                          ) + "..."
+                                                        : fileName;
 
-                                        return (
-                                            <div key={key}>
-                                                <span>
-                                                    {truncatedName}.{fileExtension}
-                                                </span>
-                                            </div>
-                                        );
-                                    }).filter(Boolean) /* Filter out null values */}
+                                                return (
+                                                    <div key={key}>
+                                                        <span>
+                                                            {truncatedName}.
+                                                            {fileExtension}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })
+                                            .filter(
+                                                Boolean
+                                            ) /* Filter out null values */
+                                }
                             </div>
                             <button
                                 onClick={submitNewEntry}
                                 disabled={loading}
                                 type="submit"
                                 className={`w-[133px] text-sm montserrat-semibold text-white h-[40px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4
-                                            ${loading
-                                        ? "cursor-not-allowed"
-                                        : ""
-                                    }
+                                            ${
+                                                loading
+                                                    ? "cursor-not-allowed"
+                                                    : ""
+                                            }
                                             `}
                             >
                                 {loading ? (
