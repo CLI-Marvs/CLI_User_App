@@ -3,7 +3,8 @@ import CustomInput from "@/component/Input/CustomInput";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import SendSurveyModal from "@/component/layout/inquirypage/SendSurveyModal";
 import { useStateContext } from "@/context/contextprovider";
-import {useSurvey} from '@/context/survey/SurveyContext';
+import { useSurvey } from '@/context/survey/SurveyContext';
+import { IoIosCheckmarkCircle } from "react-icons/io";
 
 const WalkinTransactionModal = ({ open, onClose, item }) => {
     const { data } = useStateContext();
@@ -13,14 +14,12 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
     const ticketId =
         data?.find((ticket) => ticket?.walkin_transaction_id === item?.id)
             ?.ticket_id ?? null;
-    
+
     useEffect(() => {
         if (surveyStatus === "none") {
             fetchSurveyStatus(ticketId);
         }
-    }, []);
-    console.log("surveyStatus 1", surveyStatus);
-    console.log("ticketId 1", ticketId);
+    }, [ticketId]);
 
     useEffect(() => {
         const dialog = dialogRef.current;
@@ -69,16 +68,24 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                         </h1>
                         {item?.status === "resolved" && (
                             <div className="flex items-center">
-                                <button
-                                    onClick={() => {
-                                        if (surveyModalRef.current) {
-                                            surveyModalRef.current.showModal();
-                                        }
-                                    }}
-                                    className="w-auto font-semibold text-[13px] text-custom-lightgreen underline cursor-pointer montserrat-regular"
-                                >
-                                    Input Survey Data
-                                </button>
+                                {surveyStatus === "submitted" ? (
+                                    <div className="flex justify-start items-center px-[8px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
+                                        <p>Survey Submitted</p>
+                                        <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            if (surveyModalRef.current) {
+                                                surveyModalRef.current.showModal();
+                                            }
+                                        }}
+                                        className="w-auto font-semibold text-[13px] text-custom-lightgreen underline cursor-pointer montserrat-regular"
+                                    >
+                                        Input Survey Data
+                                    </button>
+                                )}
+
                             </div>
                         )}
                     </div>
@@ -115,7 +122,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                                         ?.middle_name_na
                                         ? ""
                                         : item.walkin_transaction_detail
-                                              ?.middle_name || ""
+                                            ?.middle_name || ""
                                 }
                                 disabled
                                 className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular capitalize"
@@ -212,10 +219,10 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                                         ?.property_masters_id === null
                                         ? "N/A"
                                         : toLowerCaseText(
-                                              item.walkin_transaction_detail
-                                                  ?.property_master
-                                                  ?.property_name
-                                          )
+                                            item.walkin_transaction_detail
+                                                ?.property_master
+                                                ?.property_name
+                                        )
                                 }
                                 disabled
                                 className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"

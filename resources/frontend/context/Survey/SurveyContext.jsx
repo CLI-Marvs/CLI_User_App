@@ -52,7 +52,6 @@ export const SurveyProvider = ({ children }) => {
 
     try {
       const response = await apiService.get(`/survey-status/${newTicketId}`);
-      console.log("55",response)
       setSurveyStatus(response.data.status);
       setStatusLoading(false);
     } catch (error) {
