@@ -33,7 +33,7 @@ export default function AdminSettings() {
             return (
                 item[entity.field]?.toLowerCase().includes(isSearchTerm) ||
                 item.employee?.firstname?.toLowerCase().includes(isSearchTerm) ||
-                item.employee?.email?.toLowerCase().includes(isSearchTerm) ||
+                item.employee?.employee_email?.toLowerCase().includes(isSearchTerm) ||
                 item.employee?.lastname?.toLowerCase().includes(isSearchTerm) 
             )
         }),
