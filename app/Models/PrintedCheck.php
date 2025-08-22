@@ -64,15 +64,11 @@ class PrintedCheck extends Model
         if ($checkNumberFrom && $checkNumberTo) {
             $query->whereBetween('printed_check.check_no', [$checkNumberFrom, $checkNumberTo]);
         } elseif ($checkNumberFrom) {
-            $query->where('printed_check.check_no', '>=', $checkNumberFrom);
+            $query->where('printed_check.check_no', $checkNumberFrom);
         } elseif ($checkNumberTo) {
-            $query->where('printed_check.check_no', '<=', $checkNumberTo);
+            $query->where('printed_check.check_no', $checkNumberTo);
         }
-
-        if (!empty($filters['check_number'])) {
-            $query->where('printed_check.check_no', $filters['check_number']);
-        }
-
+     
         return $query;
     }
 }

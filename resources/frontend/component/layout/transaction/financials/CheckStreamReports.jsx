@@ -15,6 +15,7 @@ import { showToast } from "@/util/toastUtil";
 import CheckStreamModal from "./CheckStreamModal";
 import { formatCurrency } from "@/util/formatCurrency";
 import Alert from "@/component/Alert";
+import FilterChips from "../component/FilterChips";
 
 const CheckStreamReports = () => {
     const { canWrite } = useStateContext();
@@ -137,6 +138,10 @@ const CheckStreamReports = () => {
     const onSubmit = () => {
         setFilters(searchValues);
         setSearchValues({});
+        setPrintedChecks((prev) => ({
+            ...prev,
+            loading: true,
+        }));
     };
 
     const handleConfirm = async () => {
@@ -156,6 +161,28 @@ const CheckStreamReports = () => {
             setIsLoading(false);
             setShowAlert(false);
         }
+    };
+
+     const removeFilter = (key) => {
+        const newFilters = { ...printedChecks?.filters };
+
+        delete newFilters[key];
+
+         if (key === "start_date") {
+            delete newFilters["end_date"];
+        }
+        if (key === "printed_start_date") {
+            delete newFilters["printed_end_date"];
+        }
+
+        if (key === "check_number_from") {
+            delete newFilters["check_number_to"];
+        }
+      
+        setPrintedChecks((prev) => ({
+            ...prev,
+            filters: newFilters,
+        }));
     };
 
     const handleCancel = () => {
@@ -179,6 +206,8 @@ const CheckStreamReports = () => {
                         exportToExcel={exportToExcel}
                     />
                 </div>
+
+                <FilterChips filters={printedChecks?.filters} onRemove={removeFilter} type="cheque" />
 
                 <div className="flex px-2 gap-3 montserrat-regular">
                     <span>Total Records:</span>

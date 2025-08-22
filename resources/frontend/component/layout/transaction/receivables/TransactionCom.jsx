@@ -23,6 +23,7 @@ import {
 import useRouteSections from "@/hooks/useRouteSections";
 import ColumnModal from "../component/ColumnModal";
 import { showToast } from "@/util/toastUtil";
+import FilterChips from "../component/FilterChips";
 
 const TransactionCom = () => {
     const { subSection } = useRouteSections();
@@ -276,30 +277,6 @@ const TransactionCom = () => {
         }));
     };
 
-    const formatFiltersLabel = (key, value, filters) => {
-        if (key === "start_date") {
-            const start = moment(value).format("MMMM D, YYYY");
-            const end = filters.end_date
-                ? moment(filters.end_date).format("MMMM D, YYYY")
-                : "";
-            return `Date Range: From ${start} to ${end}`;
-        }
-
-        const formattedKey = key
-            .split("_")
-            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(" ");
-
-        const displayKey =
-            formattedKey === "Payment Option" ? "Payment Method" : formattedKey;
-
-        if (value === "Paymaya" || value === "GCash") {
-            return `${displayKey}: Ewallet (${value})`;
-        }
-
-        return `${displayKey}: ${value}`;
-    };
-
     return (
         <>
             <div className="space-y-2 w-full">
@@ -353,7 +330,7 @@ const TransactionCom = () => {
                         )}
                     </div>
                 </div>
-                <div className="flex flex-wrap px-2 gap-2">
+             {/*    <div className="flex flex-wrap px-2 gap-2">
                     {transactions?.filters &&
                         Object.entries(transactions?.filters)
                             .filter(([key]) => key !== "end_date")
@@ -374,7 +351,9 @@ const TransactionCom = () => {
                                     </button>
                                 </div>
                             ))}
-                </div>
+                </div> */}
+
+                <FilterChips filters={transactions?.filters} onRemove={removeFilter} />
                 <GlobalTable
                     columns={columns}
                     data={transactions.data}
