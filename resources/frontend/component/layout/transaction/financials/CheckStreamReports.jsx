@@ -47,6 +47,11 @@ const CheckStreamReports = () => {
             render: (row) => <CheckTableCell type="check_date" row={row} />,
         },
         {
+            header: "Printed Date",
+            accessor: "created_at",
+            render: (row) => <CheckTableCell type="created_at" row={row} />,
+        },
+        {
             header: "Payor Name",
             accessor: "payor_name",
             render: (row) => <CheckTableCell type="payor_name" row={row} />,
@@ -89,7 +94,6 @@ const CheckStreamReports = () => {
     ];
 
     const [searchValues, setSearchValues] = useState({});
-    console.log("searchValues", searchValues);
     const { printedChecks, setPrintedChecks } = useTransactionContext();
     const { handlePageClick, setFilters, getData } = usePagination(
         transaction.retrievePrintedChecks,

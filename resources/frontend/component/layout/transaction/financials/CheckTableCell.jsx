@@ -1,4 +1,5 @@
 import { formatCurrency } from "@/util/formatCurrency";
+import moment from "moment";
 import React from "react";
 import { IoMdCreate } from "react-icons/io";
 import { MdDelete } from "react-icons/md";
@@ -30,7 +31,7 @@ const CheckTableCell = ({
         );
     }
 
-     if (type === "beneficiary_name") {
+    if (type === "beneficiary_name") {
         return (
             <span className="montserrat-regular text-[13px] break-all">
                 {row.check_entities.entity_name}
@@ -49,6 +50,13 @@ const CheckTableCell = ({
         return (
             <span className="montserrat-regular text-[13px] break-all">
                 {formatDate}
+            </span>
+        );
+    }
+    if (type === "created_at") {
+        return (
+            <span className="montserrat-regular text-[13px] break-all">
+                {moment(row.created_at).format("MM/DD/YYYY")}
             </span>
         );
     }
