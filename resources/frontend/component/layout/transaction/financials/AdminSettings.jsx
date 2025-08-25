@@ -27,13 +27,16 @@ export default function AdminSettings() {
     const updateMutation = updateHook();
     const deleteMutation = deleteHook();
 
-    const filteredItems = useMemo(
-        () =>
-            items.filter((item) =>
-                item[entity.field]
-                    ?.toLowerCase()
-                    .includes(searchTerm.toLowerCase())
-            ),
+    const filteredItems = useMemo(() => 
+        items.filter((item) => {
+            const isSearchTerm = searchTerm.toLowerCase();
+            return (
+                item[entity.field]?.toLowerCase().includes(isSearchTerm) ||
+                item.employee?.firstname?.toLowerCase().includes(isSearchTerm) ||
+                item.employee?.employee_email?.toLowerCase().includes(isSearchTerm) ||
+                item.employee?.lastname?.toLowerCase().includes(isSearchTerm) 
+            )
+        }),
         [items, searchTerm]
     );
 
@@ -44,14 +47,18 @@ export default function AdminSettings() {
             { id, data },
             {
                 onSuccess: () =>
-                    showToast(`${singularLabel} updated successfully`, "success"),
+                    showToast(
+                        `${singularLabel} updated successfully`,
+                        "success"
+                    ),
             }
         );
     };
 
     const handleDelete = (id) => {
         deleteMutation.mutate(id, {
-            onSuccess: () => showToast(`${singularLabel} deleted successfully`, "success"),
+            onSuccess: () =>
+                showToast(`${singularLabel} deleted successfully`, "success"),
         });
     };
 
