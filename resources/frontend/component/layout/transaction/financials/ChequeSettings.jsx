@@ -88,19 +88,12 @@ const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
             onChange: handleCheck,
         },
         {
-            label: "Check Number:",
-            type: "number",
-            key: "checkBaseNo",
-            onChange: handleCheck,
-            placeholder: "Enter check number",
-        },
-        {
-            label: "Total Equity Amount (₱):",
+            label: "Monthly Amortization (₱):",
             type: "text",
-            key: "total_purchased_amount",
+            key: "amount",
             inputMode: "decimal",
             onChange: handleCheck,
-            placeholder: "Enter total equity amount",
+            placeholder: "Enter monthly amortization",
         },
         {
             label: "Number of Months to Pay:",
@@ -110,12 +103,20 @@ const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
             placeholder: "Enter number of months",
         },
         {
-            label: "Monthly Amortization (₱):",
+            label: "Total Equity Amount (₱):",
             type: "text",
-            key: "amount",
+            key: "total_purchased_amount",
             inputMode: "decimal",
             onChange: handleCheck,
-            placeholder: "Enter monthly amortization",
+            placeholder: "Enter total equity amount",
+        },
+
+        {
+            label: "Check Number:",
+            type: "number",
+            key: "checkBaseNo",
+            onChange: handleCheck,
+            placeholder: "Enter check number",
         },
     ];
 
@@ -231,7 +232,7 @@ const ChequeSettings = ({ handleCheck, data, setData, endDate }) => {
                                     : ""
                             }`}
                         />
-                         {errors["payTo"] && (
+                        {errors["payTo"] && (
                             <span className="text-red-500 text-xs mt-1">
                                 {errors["payTo"]}
                             </span>
