@@ -312,63 +312,78 @@ class SurveyController extends Controller
                         ];
                     }
 
-                    // 2. Count normal answers using option_id
+                    $veryDissatisfiedUsers = [];
+                    $totalResponses = 0;
+
+                    /**
+                     * 🚩 SCENARIO 1: Frontend input (normal survey flow)
+                     */
                     $standardAnswers = DB::table('survey_answers')
                         ->where('survey_list_id', $survey_list_id)
                         ->where('question_id', $question->id)
                         ->whereNotNull('option_id')
-                        ->select('option_id')
+                        ->select('option_id', 'ticket_id', 'created_at', 'experience_rating_id')
                         ->get();
 
-                    $totalResponses = $standardAnswers->count();
+
+
+                    $totalResponses += $standardAnswers->count();
 
                     foreach ($standardAnswers as $answer) {
                         $optionId = $answer->option_id;
                         if ($optionId && isset($optionCounts[$optionId])) {
                             $optionCounts[$optionId]['count']++;
+
+                            if (strcasecmp($optionCounts[$optionId]['value'], "Very Dissatisfied") === 0) {
+
+                                // Fetch the related experience_rating using experience_rating_id
+                                $rating = null;
+                                if ($answer->experience_rating_id) {
+                                    $rating = DB::table('experience_ratings')
+                                        ->where('id', $answer->experience_rating_id)
+                                        ->select('ticket_id', 'email', 'created_at')
+                                        ->first();
+                                }
+
+                                $veryDissatisfiedUsers[] = [
+                                    'ticket_id' => $rating->ticket_id ?? null,
+                                    'email'     => $rating->email ?? null,
+                                    'timestamp' => $answer->created_at ?? $rating->created_at ?? null,
+                                ];
+                            }
                         }
                     }
 
-                    // Get ticket_ids from experience_ratings matching survey_title
-                    $importedTicketIds = DB::table('experience_ratings')
-                        ->where('survey_title', trim($survey->survey_title))
-                        ->pluck('ticket_id')
-                        ->map(function ($ticketId) {
-                            // Strip non-numeric to match how it's saved in survey_answers (if numeric only)
-                            return preg_replace('/\D/', '', $ticketId);
-                        })
-                        ->filter()
-                        ->unique()
-                        ->values()
-                        ->toArray();
 
 
 
-                    // STEP 2: Check if we have ticket_ids to work with
-                    if (!empty($importedTicketIds)) {
+                    /**
+                     * 🚩 SCENARIO 2: Imported Google Form CSV (join experience_ratings)
+                     */
+                    $importedAnswers = DB::table('survey_answers as sa')
+                        ->join('experience_ratings as er', DB::raw("CAST(sa.ticket_id AS TEXT)"), '=', DB::raw("CAST(er.ticket_id AS TEXT)"))
+                        ->where('er.survey_title', trim($survey->survey_title))
+                        ->whereRaw('LOWER(sa.question) = ?', [strtolower(trim($question->question))])
+                        ->whereNotNull('sa.answer_value')
+                        ->select('sa.answer_value', 'sa.ticket_id', 'er.email', 'er.created_at')
+                        ->get();
 
-                        // STEP 3: Fetch matching answers from survey_answers
-                        $importedAnswers = DB::table('survey_answers')
-                            ->whereIn(DB::raw("REGEXP_REPLACE(ticket_id, '\\D', '', 'g')"), $importedTicketIds) // Ensures matching even if "Ticket#123"
-                            ->whereRaw('LOWER(question) = ?', [strtolower(trim($question->question))])
-                            ->whereNotNull('answer_value')
-                            ->select('answer_value')
-                            ->get();
+                    $totalResponses += $importedAnswers->count();
 
-                        // STEP 4: Count answers
-                        $totalResponses += $importedAnswers->count();
+                    foreach ($importedAnswers as $answer) {
+                        $values = array_map('trim', explode(',', $answer->answer_value));
 
-                        // STEP 5: Count option occurrences
-                        foreach ($importedAnswers as $answer) {
-                            $raw = $answer->answer_value;
+                        foreach ($values as $value) {
+                            foreach ($optionCounts as $optionId => &$option) {
+                                if (strcasecmp($option['value'], $value) === 0) {
+                                    $option['count']++;
 
-                            // handle both single and multiple comma-separated values
-                            $values = array_map('trim', explode(',', $raw));
-
-                            foreach ($values as $value) {
-                                foreach ($optionCounts as $optionId => &$option) {
-                                    if (strcasecmp($option['value'], $value) === 0) {
-                                        $option['count']++;
+                                    if (strcasecmp($value, "Very Dissatisfied") === 0) {
+                                        $veryDissatisfiedUsers[] = [
+                                            'ticket_id' => $answer->ticket_id,
+                                            'email' => $answer->email,
+                                            'timestamp' => $answer->created_at,
+                                        ];
                                     }
                                 }
                             }
@@ -377,13 +392,14 @@ class SurveyController extends Controller
 
                     usort($optionCounts, fn($a, $b) => $a['id'] <=> $b['id']);
 
-                    // 4. Final result
+                    // Final result per question
                     $questionsResult[] = [
                         'question_id' => $question->id,
                         'question' => $question->question,
-                        'input_type' => $inputType,
+                        'input_type' => $question->input_type,
                         'total_responses' => $totalResponses,
                         'options' => array_values($optionCounts),
+                        'very_dissatisfied_users' => $veryDissatisfiedUsers,
                     ];
                 } elseif ($inputType === 'checkboxes') {
                     // 1. Get all options for this question
@@ -574,6 +590,7 @@ class SurveyController extends Controller
 
         $ratings = ExperienceRating::select('rating', DB::raw('COUNT(*) as total'))
             ->where('survey_link', $surveyLink)
+            ->whereNotNull('rating')
             ->groupBy('rating')
             ->get();
 
@@ -644,9 +661,19 @@ class SurveyController extends Controller
             ->where('status', true)
             ->get()
             ->map(function ($survey) {
-                $respondentsCount = ExperienceRating::where('survey_link', $survey->survey_link)
-                    ->orWhere('survey_title', $survey->survey_title)
-                    ->count();
+                $respondentsCount = 0;
+
+
+                if (!empty($survey->survey_link)) {
+                    $respondentsCount += ExperienceRating::where('survey_link', $survey->survey_link)
+                        ->where('status', 'submitted')
+                        ->count();
+                }
+
+                if (!empty($survey->survey_title)) {
+                    $respondentsCount += ExperienceRating::where('survey_title', $survey->survey_title)
+                        ->count();
+                }
 
                 return [
                     'id' => $survey->id,
@@ -660,6 +687,7 @@ class SurveyController extends Controller
         ]);
     }
 
+
     public function getSurveysWithRatingBreakdown()
     {
         $surveys = Survey_list::select('id', 'survey_title', 'survey_link')->where('status', true)->get();
@@ -667,7 +695,7 @@ class SurveyController extends Controller
         $result = $surveys->map(function ($survey) {
             // Fetch counts of each rating (1-5) for this survey_link
             $ratingCounts = ExperienceRating::where('survey_link', $survey->survey_link)
-
+                ->whereNotNull('rating')
                 ->select('rating', DB::raw('COUNT(*) as total'))
                 ->groupBy('rating')
                 ->pluck('total', 'rating'); // [rating => count]
