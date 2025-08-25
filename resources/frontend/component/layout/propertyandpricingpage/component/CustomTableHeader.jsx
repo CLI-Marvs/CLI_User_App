@@ -11,7 +11,9 @@ const CustomTableHeader = ({
                 {columns?.map((col, index) => (
                     <th
                         key={index}
-                        className={`${textAlign} shrink-0 pl-1 ${col.width}   `}
+                        className={`${textAlign} shrink-0 pl-1 ${col.width}  ${
+                            col.className || ""
+                        } `}
                     >
                         {col.label}
                     </th>

@@ -7,7 +7,7 @@ const WalkinHistoryTableRow = ({ item , onClick }) => {
             onClick={() => onClick?.(item)}
             tabIndex={0}
         >
-            <td className="w-[200px] py-4 montserrat-regular px-1">
+            <td className="w-[200px] py-4 montserrat-regular px-2">
                 {item?.walkin_transaction_detail.first_name}{" "}
                 {item?.walkin_transaction_detail.last_name}
             </td>
