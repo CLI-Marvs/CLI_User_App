@@ -4,14 +4,19 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from 'react-icons/md';
 import ReactPaginate from 'react-paginate';
 import { useSurvey } from '@/context/Survey/SurveyContext';
 
+import emoji1 from "../../../../../../public/Images/emoji1.png";
+import emoji2 from "../../../../../../public/Images/emoji2.png";
+import emoji3 from "../../../../../../public/Images/emoji3.png";
+import emoji4 from "../../../../../../public/Images/emoji4.png";
+import emoji5 from "../../../../../../public/Images/emoji5.png";
 
 const emojiMap = {
-    5: '/images/emoji1.png',
-    4: '/images/emoji2.png',
-    3: '/images/emoji3.png',
-    2: '/images/emoji4.png',
-    1: '/images/emoji5.png',
-};;
+    5: emoji1,
+    4: emoji2,
+    3: emoji3,
+    2: emoji4,
+    1: emoji5,
+};
 
 const SummaryRatingDetails = () => {
     const { id } = useParams();
@@ -60,8 +65,8 @@ const SummaryRatingDetails = () => {
                             key={rating}
                             onClick={() => setSelectedRating(Number(rating))}
                             className={`px-3 py-1 border rounded ${selectedRating === Number(rating)
-                                ? 'bg-custom-lightgreen text-white'
-                                : 'bg-white text-black'
+                                ? "bg-custom-lightgreen text-white"
+                                : "bg-white text-black"
                                 }`}
                         >
                             <img
@@ -98,13 +103,13 @@ const SummaryRatingDetails = () => {
                                         {new Date(item.created_at).toLocaleDateString('en-US')}
                                     </td>
                                     <td className="border-2 px-2 py-1 text-center">
-                                        {emojiMap[item.rating] ? (
+                                        {emojiMap[item.rating] && (
                                             <img
                                                 src={emojiMap[item.rating]}
                                                 alt={`Rating ${item.rating}`}
                                                 className="w-6 h-6 mx-auto"
                                             />
-                                        ) : null}
+                                        )}
                                     </td>
                                     <td className="border-2 px-2 py-1 text-center">{item.email}</td>
                                     <td className="border-2 px-2 py-1 text-center">{item.ticket_id}</td>

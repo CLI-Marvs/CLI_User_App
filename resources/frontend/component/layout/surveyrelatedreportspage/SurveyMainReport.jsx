@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
+import emoji1 from "../../../../../public/Images/emoji1.png";
+import emoji2 from "../../../../../public/Images/emoji2.png";
+import emoji3 from "../../../../../public/Images/emoji3.png";
+import emoji4 from "../../../../../public/Images/emoji4.png";    
+import emoji5 from "../../../../../public/Images/emoji5.png";
+
 import {
     BarChart,
     Bar,
@@ -14,12 +20,14 @@ import {
 import { MdSearch } from "react-icons/md";
 import apiService from '../../servicesApi/apiService';
 
+
+
 const emojiMap = {
-    5: '/images/emoji1.png',
-    4: '/images/emoji2.png',
-    3: '/images/emoji3.png',
-    2: '/images/emoji4.png',
-    1: '/images/emoji5.png',
+  5: emoji1,
+  4: emoji2,
+  3: emoji3,
+  2: emoji4,
+  1: emoji5,
 };
 
 
