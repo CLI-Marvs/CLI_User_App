@@ -300,6 +300,23 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         }));
     }, [message]);
 
+    const isUpdateDisabled = (dataToUpdate, isUserTypeChange, hasChanges) => {
+        // Case 1: No changes made at all
+        if (!isUserTypeChange && !hasChanges) {
+            return true;
+        }
+
+        // Case 2: Selected "Others" but didn't specify other_user_type
+        if (
+            dataToUpdate?.user_type === "Others" &&
+            !dataToUpdate?.other_user_type?.trim()
+        ) {
+            return true;
+        }
+
+        return false;
+    };
+
     return (
         <dialog
             id="Resolved"
@@ -547,7 +564,9 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 >
                                     <option value="">(Select)</option>
                                     {categories &&
-                                        sortByNameAlphabetically(categories, ["Other Concerns"]).map((category) => (
+                                        sortByNameAlphabetically(categories, [
+                                            "Other Concerns",
+                                        ]).map((category) => (
                                             <option key={category.id}>
                                                 {category.name}
                                             </option>
@@ -661,19 +680,29 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                             {user?.department ===
                                 "Customer Relations - Services" && (
                                 <button
-                                    disabled={!isUserTypeChange && !hasChanges}
+                                    disabled={isUpdateDisabled(
+                                        dataToUpdate,
+                                        isUserTypeChange,
+                                        hasChanges
+                                    )}
                                     className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
                                     type="button"
                                     onClick={handleShowUpdateAlert}
                                     style={{
-                                        opacity:
-                                            !isUserTypeChange && !hasChanges
-                                                ? 0.5
-                                                : 1,
-                                        cursor:
-                                            !isUserTypeChange && !hasChanges
-                                                ? "not-allowed"
-                                                : "pointer",
+                                        opacity: isUpdateDisabled(
+                                            dataToUpdate,
+                                            isUserTypeChange,
+                                            hasChanges
+                                        )
+                                            ? 0.5
+                                            : 1,
+                                        cursor: isUpdateDisabled(
+                                            dataToUpdate,
+                                            isUserTypeChange,
+                                            hasChanges
+                                        )
+                                            ? "not-allowed"
+                                            : "pointer",
                                     }}
                                 >
                                     Update

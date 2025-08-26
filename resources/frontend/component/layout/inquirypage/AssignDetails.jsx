@@ -12,7 +12,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { BsDownload } from "react-icons/bs";
 import { FaTrash } from "react-icons/fa";
 import { Link } from "react-router-dom";
-
+import { PREDEFINED_USER_TYPES } from "@/constant/data/preDefinedUserTypes";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 
@@ -971,67 +971,57 @@ const AssignDetails = ({ logMessages, ticketId }) => {
                                 )}
 
                                 {/*User type*/}
-                                {details.buyer_old_data.user_type !==
-                                    details.buyer_updated_data.user_type ||
-                                (details.buyer_old_data.other_user_type !==
-                                    details.buyer_updated_data
-                                        .other_user_type &&
-                                    details.buyer_updated_data.user_type ===
-                                        "Others") ? (
-                                    <p className="text-sm text-custom-bluegreen">
-                                        User Type:
-                                        {details.buyer_old_data.user_type &&
-                                        details.buyer_updated_data.user_type ? (
-                                            <>
-                                                <span className="text-custom-grayA5">
-                                                    {" "}
-                                                    From {"{"}
-                                                </span>
-                                                <span className="text-red-500">
-                                                    {details.buyer_old_data
-                                                        .user_type === "Others"
-                                                        ? details.buyer_old_data
-                                                              .other_user_type
-                                                        : details.buyer_old_data
-                                                              .user_type}
-                                                </span>
-                                                <span className="text-custom-grayA5">
-                                                    {"}"} To {"{"}
-                                                </span>
-                                                <span className="text-black">
-                                                    {details.buyer_updated_data
-                                                        .user_type === "Others"
-                                                        ? details
-                                                              .buyer_updated_data
-                                                              .other_user_type
-                                                        : details
-                                                              .buyer_updated_data
-                                                              .user_type}
-                                                </span>
-                                                <span className="text-custom-grayA5">
-                                                    {"}"}
-                                                </span>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <span className="text-custom-grayA5">
-                                                    {details.buyer_old_data
-                                                        .user_type
-                                                        ? " "
-                                                        : " Added "}
-                                                </span>
-                                                <span className="text-black">
-                                                    {" "}
-                                                    {
-                                                        details
-                                                            .buyer_updated_data
-                                                            .user_type
-                                                    }{" "}
-                                                </span>
-                                            </>
-                                        )}
-                                    </p>
-                                ) : null}
+                                {(() => {
+                                    const oldLabel = getUserTypeLabel(
+                                        details.buyer_old_data.user_type,
+                                        details.buyer_old_data.other_user_type
+                                    );
+                                    const newLabel = getUserTypeLabel(
+                                        details.buyer_updated_data.user_type,
+                                        details.buyer_updated_data
+                                            .other_user_type
+                                    );
+                                    if (
+                                        oldLabel === newLabel ||
+                                        (!oldLabel && !newLabel)
+                                    )
+                                        return null;
+                                    return (
+                                        <p className="text-sm text-custom-bluegreen">
+                                            User Type:
+                                            {oldLabel ? (
+                                                <>
+                                                    <span className="text-custom-grayA5">
+                                                        {" "}
+                                                        From {"{"}
+                                                    </span>
+                                                    <span className="text-red-500">
+                                                        {oldLabel}
+                                                    </span>
+                                                    <span className="text-custom-grayA5">
+                                                        {"}"} To {"{"}
+                                                    </span>
+                                                    <span className="text-black">
+                                                        {newLabel}
+                                                    </span>
+                                                    <span className="text-custom-grayA5">
+                                                        {"}"}
+                                                    </span>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <span className="text-custom-grayA5">
+                                                        {" "}
+                                                        Added{" "}
+                                                    </span>
+                                                    <span className="text-black">
+                                                        {newLabel}
+                                                    </span>
+                                                </>
+                                            )}
+                                        </p>
+                                    );
+                                })()}
 
                                 {/* Communication type */}
                                 {details.buyer_old_data.communication_type !==
@@ -1450,6 +1440,30 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             default:
                 return <p>Unknown log type</p>;
         }
+    };
+
+    const getUserTypeLabel = (userType, otherUserType) => {
+        const ut = userType?.toString().trim();
+        const ou = otherUserType?.toString().trim();
+
+        // nothing present
+        if (!ut && !ou) return "";
+
+        // If otherUserType exists, prefer it (handles backend storing custom label there)
+        if (ou) return ou;
+
+        // explicit predefined type (Property Owner, Buyer, etc.)
+        if (PREDEFINED_USER_TYPES.includes(ut)) return ut;
+
+        if (ut && ut !== "Others" && !PREDEFINED_USER_TYPES.includes(ut)) {
+            return ut;
+        }
+
+        // if user_type === "Others" and no otherUserType provided
+        if (ut === "Others") return "Others";
+
+        // fallback
+        return ut || "";
     };
 
     return (
