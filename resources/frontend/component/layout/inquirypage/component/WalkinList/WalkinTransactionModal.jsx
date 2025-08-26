@@ -2,24 +2,20 @@ import React, { useEffect, useRef } from "react";
 import CustomInput from "@/component/Input/CustomInput";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import SendSurveyModal from "@/component/layout/inquirypage/SendSurveyModal";
-import { useStateContext } from "@/context/contextprovider";
-import { useSurvey } from '@/context/Survey/SurveyContext';
+import { useSurvey } from "@/context/Survey/SurveyContext";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 
 const WalkinTransactionModal = ({ open, onClose, item }) => {
-    const { data } = useStateContext();
     const dialogRef = useRef(null);
     const { surveyStatus, fetchSurveyStatus } = useSurvey();
     const surveyModalRef = useRef(null);
-    const ticketId =
-        data?.find((ticket) => ticket?.walkin_transaction_id === item?.id)
-            ?.ticket_id ?? null;
-
+ 
     useEffect(() => {
+        if (!item?.ticket_id) return;
         if (surveyStatus === "none") {
-            fetchSurveyStatus(ticketId);
+            fetchSurveyStatus(item?.ticket_id);
         }
-    }, [ticketId]);
+    }, [item?.ticket_id, surveyStatus, fetchSurveyStatus]);
 
     useEffect(() => {
         const dialog = dialogRef.current;
@@ -85,7 +81,6 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                                         Input Survey Data
                                     </button>
                                 )}
-
                             </div>
                         )}
                     </div>
@@ -122,7 +117,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                                         ?.middle_name_na
                                         ? ""
                                         : item.walkin_transaction_detail
-                                            ?.middle_name || ""
+                                              ?.middle_name || ""
                                 }
                                 disabled
                                 className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular capitalize"
@@ -219,10 +214,10 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                                         ?.property_masters_id === null
                                         ? "N/A"
                                         : toLowerCaseText(
-                                            item.walkin_transaction_detail
-                                                ?.property_master
-                                                ?.property_name
-                                        )
+                                              item.walkin_transaction_detail
+                                                  ?.property_master
+                                                  ?.property_name
+                                          )
                                 }
                                 disabled
                                 className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"
@@ -362,7 +357,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
             <div>
                 <SendSurveyModal
                     modalRef={surveyModalRef}
-                    ticketId={ticketId}
+                    ticketId={item?.ticket_id}
                 />
             </div>
         </dialog>

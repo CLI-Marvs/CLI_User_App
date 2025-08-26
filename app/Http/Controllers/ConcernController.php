@@ -457,6 +457,20 @@ class ConcernController extends Controller
 
             $concerns->save();
 
+            // Update walk-in transaction if an ID was provided so the transaction stores the ticket id
+            if ($request->has('walkin_transaction_id') && $request->walkin_transaction_id) {
+                try {
+                    DB::table('walkin_transactions')
+                        ->where('id', $request->walkin_transaction_id)
+                        ->update([
+                            'ticket_id' => $concerns->ticket_id,
+                            'updated_at' => now(),
+                        ]);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to update walkin transaction for concern: ' . $e->getMessage());
+                }
+            }
+
             $this->inquiryReceivedLogs($request, $ticketId);
             $this->concernsCreatedBy($user, $concerns->id);
 
