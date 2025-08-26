@@ -9,13 +9,21 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
     const dialogRef = useRef(null);
     const { surveyStatus, fetchSurveyStatus } = useSurvey();
     const surveyModalRef = useRef(null);
- 
+
     useEffect(() => {
         if (!item?.ticket_id) return;
+
         if (surveyStatus === "none") {
             fetchSurveyStatus(item?.ticket_id);
         }
     }, [item?.ticket_id, surveyStatus, fetchSurveyStatus]);
+
+    const handleClose = () => {
+        onClose?.();
+        if (item?.ticket_id) {
+            fetchSurveyStatus(item.ticket_id);
+        }
+    };
 
     useEffect(() => {
         const dialog = dialogRef.current;
@@ -27,10 +35,9 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
             if (dialog.open) dialog.close();
         }
 
-        const handleClose = () => onClose?.();
         dialog.addEventListener("close", handleClose);
         return () => dialog.removeEventListener("close", handleClose);
-    }, [open, onClose]);
+    }, [open, onClose, item?.ticket_id, fetchSurveyStatus]);
 
     if (!item) return null;
 
@@ -46,7 +53,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                     <div>
                         <button
                             className="absolute top-3 right-3 w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg"
-                            onClick={onClose}
+                            onClick={handleClose}
                         >
                             ✕
                         </button>
