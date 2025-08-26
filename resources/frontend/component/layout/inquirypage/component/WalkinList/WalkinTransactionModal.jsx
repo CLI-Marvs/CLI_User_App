@@ -3,7 +3,7 @@ import CustomInput from "@/component/Input/CustomInput";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import SendSurveyModal from "@/component/layout/inquirypage/SendSurveyModal";
 import { useStateContext } from "@/context/contextprovider";
-import { useSurvey } from '@/context/survey/SurveyContext';
+import { useSurvey } from '@/context/Survey/SurveyContext';
 import { IoIosCheckmarkCircle } from "react-icons/io";
 
 const WalkinTransactionModal = ({ open, onClose, item }) => {
