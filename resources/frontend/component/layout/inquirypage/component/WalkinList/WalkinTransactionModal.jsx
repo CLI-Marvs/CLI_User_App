@@ -12,11 +12,8 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
 
     useEffect(() => {
         if (!item?.ticket_id) return;
-
-        if (surveyStatus === "none") {
-            fetchSurveyStatus(item?.ticket_id);
-        }
-    }, [item?.ticket_id, surveyStatus, fetchSurveyStatus]);
+        fetchSurveyStatus(item.ticket_id);
+    }, [item?.ticket_id, fetchSurveyStatus]);
 
     const handleClose = () => {
         onClose?.();
