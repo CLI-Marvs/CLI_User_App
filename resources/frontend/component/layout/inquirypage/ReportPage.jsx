@@ -1335,7 +1335,7 @@ const ReportPage = () => {
                                 data={communicationTypeData}
                                 margin={{
                                     top: 5,
-                                    right: 20,
+                                    right: 60,
                                     left: 20,
                                     bottom: 15,
                                 }}
@@ -1751,7 +1751,7 @@ const ReportPage = () => {
                                     data={inquriesPerChannelData}
                                     margin={{
                                         top: 5,
-                                        right: 20,
+                                        right: 60,
                                         left: 20,
                                         bottom: 15,
                                     }}
