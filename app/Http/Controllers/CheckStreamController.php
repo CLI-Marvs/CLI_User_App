@@ -36,7 +36,7 @@ class CheckStreamController extends Controller
 
             $userId = $user->id;
 
-            $filter = $request->only('start_date', 'end_date', 'check_number', 'printed_start_date', 'printed_end_date', 'check_number_from', 'check_number_to');
+            $filter = $request->only('start_date', 'end_date', 'check_number', 'printed_start_date', 'printed_end_date', 'check_number_from', 'check_number_to', 'contract_number');
 
             $query = $this->checkService->getPrintedChecks($filter, $userId);
 

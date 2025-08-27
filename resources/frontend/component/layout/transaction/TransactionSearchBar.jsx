@@ -312,7 +312,7 @@ const TransactionSearchBar = ({
                                                     <span className="text-custom-bluegreen text-sm ml-12">
                                                         To
                                                     </span>
-                                                   <CustomInput
+                                                    <CustomInput
                                                         type="number"
                                                         className="outline-none"
                                                         autoComplete="off"
@@ -326,6 +326,21 @@ const TransactionSearchBar = ({
                                                         name="check_number_to"
                                                     />
                                                 </div>
+                                            </div>
+                                        ) : item.type === "contract_number" ? (
+                                            <div className="flex gap-3 w-full border-b border-custom-gray outline-none text-xs border-opacity-30">
+                                                <CustomInput
+                                                    type="number"
+                                                    className="outline-none"
+                                                    autoComplete="off"
+                                                    onChange={onChangeSearch}
+                                                    value={
+                                                        searchValues[
+                                                            item.name
+                                                        ] || ""
+                                                    }
+                                                    name={item.name}
+                                                />
                                             </div>
                                         ) : (
                                             <input

@@ -36,6 +36,7 @@ class PrintedCheck extends Model
         $printedEndDate    = $filters['printed_end_date'] ?? null;
         $checkNumberFrom   = $filters['check_number_from'] ?? null;
         $checkNumberTo     = $filters['check_number_to'] ?? null;
+        $contractNumber    = $filters['contract_number'] ?? null;
 
         if ($checkStartDate && $checkEndDate) {
             $query->whereBetween('printed_check.check_date', [$checkStartDate, $checkEndDate]);
@@ -67,6 +68,10 @@ class PrintedCheck extends Model
             $query->where('printed_check.check_no', $checkNumberFrom);
         } elseif ($checkNumberTo) {
             $query->where('printed_check.check_no', $checkNumberTo);
+        }
+
+        if($contractNumber) {
+            $query->where('printed_check.remarks', $contractNumber);
         }
      
         return $query;
