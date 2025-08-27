@@ -366,6 +366,7 @@ class SurveyController extends Controller
                         ->whereRaw('LOWER(sa.question) = ?', [strtolower(trim($question->question))])
                         ->whereNotNull('sa.answer_value')
                         ->select('sa.answer_value', 'sa.ticket_id', 'er.email', 'er.created_at')
+                        ->distinct()
                         ->get();
 
                     $totalResponses += $importedAnswers->count();
