@@ -56,14 +56,14 @@ const SummaryBar = ({ question }) => {
                 <div>
                     <p>Acknowledgements: <span className='font-bold'>{question?.total_responses}</span></p>
                 </div>
-                <div className="w-full flex gap-[82px]">
+                <div className="w-full flex gap-[42px]">
                     {/* CHART */}
-                    <div className="max-w-[600px] w-full h-[340px]">
+                    <div className="max-w-[620px] w-full h-[340px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart
                                 layout="vertical"
                                 data={sortedOptionsArray}
-                                margin={{ top: 20, right: 40, left: 0, bottom: 20 }}
+                                margin={{ top: 20, right: 90, left: 0, bottom: 20 }}
                                 barCategoryGap={gapHeight}
                             >
                                 <XAxis type="number" hide />
