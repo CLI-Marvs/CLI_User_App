@@ -56,7 +56,7 @@ const SummaryBar = ({ question }) => {
                 <div>
                     <p>Acknowledgements: <span className='font-bold'>{question?.total_responses}</span></p>
                 </div>
-                <div className="w-full flex gap-[24px]">
+                <div className="w-full flex gap-[82px]">
                     {/* CHART */}
                     <div className="max-w-[600px] w-full h-[340px]">
                         <ResponsiveContainer width="100%" height="100%">
@@ -148,15 +148,16 @@ const SummaryBar = ({ question }) => {
 
                     {/* TABLE (show only when a bar is clicked) */}
                     {selectedUsers && selectedUsers.length > 0 && (
-                        <div className="flex flex-col gap-[15px]">
+                        <div className="flex flex-col gap-[15px] py-[12px] px-[24px] rounded-[10px] shadow-custom7 border-[2px]">
                             {/* Header with close button */}
                             <div className="flex justify-between items-center">
                                 <p className="font-bold">
-                                    {selectedUsers.length} Very Dissatisfied Users
+                                    {selectedUsers.length} Very Dissatisfied User
+                                    {selectedUsers.length !== 1 && "s"}
                                 </p>
                                 <button
                                     onClick={() => setSelectedUsers(null)}
-                                    className="text-red-500 hover:text-red-700 font-semibold"
+                                    className="text-red-500 hover:text-red-700 font-semibold border-2 border-red-500 rounded-[4px] px-[10px] py-[5px]"
                                 >
                                     Close
                                 </button>
@@ -175,7 +176,12 @@ const SummaryBar = ({ question }) => {
                                     {currentPageData.map((user, idx) => (
                                         <tr key={idx}>
                                             <td className="border px-2 py-1">
-                                                {user.timestamp ? user.timestamp.split(" ")[0] : "N/A"}
+                                                {user.timestamp
+                                                    ? (() => {
+                                                        const [year, month, day] = user.timestamp.split(" ")[0].split("-");
+                                                        return `${month}/${day}/${year}`;
+                                                    })()
+                                                    : "N/A"}
                                             </td>
                                             <td className="border px-2 py-1">{user.email}</td>
                                             <td className="border px-2 py-1">{user.ticket_id}</td>
