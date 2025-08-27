@@ -26,12 +26,12 @@ const CheckStreamReports = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const fields = [
-        { name: "check_number", type: "check_number", label: "Check Number" },
-        {
+         {
             name: "contract_number",
             type: "contract_number",
             label: "Contract Number",
         },
+        { name: "check_number", type: "check_number", label: "Check Number" },
         { name: "date_range", type: "date_range", label: "Check Date" },
         { name: "printed_date", type: "printed_date", label: "Printed Date" },
     ];
