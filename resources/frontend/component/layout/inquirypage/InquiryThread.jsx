@@ -93,7 +93,7 @@ const InquiryThread = () => {
     const ticketId = decodeURIComponent(params.id);
     const [dataConcern, setDataConcern] = useState(itemsData || {});
     const [emailMessageID, setEmailMessageID] = useState(null);
-    
+
 
     function getSurveyFullLink() {
 
@@ -1526,14 +1526,16 @@ const InquiryThread = () => {
 
                                             )
                                         ) : (      //resolved in Walin-in
-                                            <div className="flex items-center">
-                                                <button
-                                                    onClick={handleSendSurveyModal}
-                                                    className="w-auto font-semibold text-[13px] text-custom-lightgreen underline cursor-pointer"
-                                                >
-                                                    Input Survey Data
-                                                </button>
-                                            </div>
+                                            dataConcern?.status === "Resolved" && (
+                                                <div className="flex items-center">
+                                                    <button
+                                                        onClick={handleSendSurveyModal}
+                                                        className="w-auto font-semibold text-[13px] text-custom-lightgreen underline cursor-pointer"
+                                                    >
+                                                        Input Survey Data
+                                                    </button>
+                                                </div>
+                                            )
                                         )}
 
                                         <span
