@@ -1,4 +1,5 @@
 import React from 'react'
+import moment from "moment";
 
 const WalkinHistoryTableRow = ({ item , onClick }) => {
     return (
@@ -21,13 +22,7 @@ const WalkinHistoryTableRow = ({ item , onClick }) => {
                 {item?.status || "N/A"}
             </td>
             <td className="w-[150px] py-4 montserrat-regular px-1">
-                {item?.updated_at
-                    ? `${new Date(
-                          item.updated_at
-                      ).toLocaleTimeString()} ${new Date(
-                          item.updated_at
-                      ).toLocaleDateString()}`
-                    : "N/A"}
+                {moment(item?.created_at).format("hh:mm:ss A YYYY-MM-DD")}
             </td>
         </tr>
     );
