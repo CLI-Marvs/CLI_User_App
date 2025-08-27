@@ -37,7 +37,8 @@ class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMap
                 'printed_check.payor_name',
                 'check_stream_banks.bank_name',
                 'entities.name as entity_name',
-                'printed_check.remarks'
+                'printed_check.remarks',
+                'printed_check.created_at'
             )
             ->join('check_stream_banks', 'check_stream_banks.id', '=', 'printed_check.drawee_bank_id')
             ->join('entities', 'entities.id', '=', 'printed_check.entity_id')
@@ -58,7 +59,6 @@ class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMap
         return [
             BeforeSheet::class => function (BeforeSheet $event) {
                 $query = PrintedCheck::query()
-                   
                     ->join('check_stream_banks', 'check_stream_banks.id', '=', 'printed_check.drawee_bank_id')
                     ->join('entities', 'entities.id', '=', 'printed_check.entity_id')
                     ->active()
@@ -88,6 +88,7 @@ class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMap
             'Check Number',
             'Check Amount',
             'Check Date',
+            'Printed Date',
             'Payor Name',
             'Drawee Bank',
             'Beneficiary Name',
@@ -101,6 +102,7 @@ class ChecksExport implements FromQuery, WithHeadings, WithChunkReading, WithMap
             "\t" . $row->check_no,
             number_format($row->check_amount, 2, '.', ','), 
             $row->check_date ? Carbon::parse($row->check_date)->format('m/d/Y') : '',
+            $row->created_at ? Carbon::parse($row->created_at)->format('m/d/Y') : '',
             $row->payor_name,
             $row->bank_name,
             $row->entity_name,
