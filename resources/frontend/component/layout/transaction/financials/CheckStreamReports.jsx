@@ -27,6 +27,11 @@ const CheckStreamReports = () => {
 
     const fields = [
         { name: "check_number", type: "check_number", label: "Check Number" },
+        {
+            name: "contract_number",
+            type: "contract_number",
+            label: "Contract Number",
+        },
         { name: "date_range", type: "date_range", label: "Check Date" },
         { name: "printed_date", type: "printed_date", label: "Printed Date" },
     ];
@@ -107,7 +112,8 @@ const CheckStreamReports = () => {
 
     const exportToExcel = async () => {
         try {
-            if(printedChecks?.data.length === 0) return showToast("No data to export", "info");
+            if (printedChecks?.data.length === 0)
+                return showToast("No data to export", "info");
             const payload = {
                 filter: printedChecks?.filters,
             };
@@ -167,12 +173,12 @@ const CheckStreamReports = () => {
         }
     };
 
-     const removeFilter = (key) => {
+    const removeFilter = (key) => {
         const newFilters = { ...printedChecks?.filters };
 
         delete newFilters[key];
 
-         if (key === "start_date") {
+        if (key === "start_date") {
             delete newFilters["end_date"];
         }
         if (key === "printed_start_date") {
@@ -182,7 +188,7 @@ const CheckStreamReports = () => {
         if (key === "check_number_from") {
             delete newFilters["check_number_to"];
         }
-      
+
         setPrintedChecks((prev) => ({
             ...prev,
             filters: newFilters,
@@ -211,7 +217,11 @@ const CheckStreamReports = () => {
                     />
                 </div>
 
-                <FilterChips filters={printedChecks?.filters} onRemove={removeFilter} type="cheque" />
+                <FilterChips
+                    filters={printedChecks?.filters}
+                    onRemove={removeFilter}
+                    type="cheque"
+                />
 
                 <div className="flex px-2 gap-3 montserrat-regular">
                     <span>Total Records:</span>
