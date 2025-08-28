@@ -393,6 +393,10 @@ class SurveyController extends Controller
 
                     usort($optionCounts, fn($a, $b) => $a['id'] <=> $b['id']);
 
+                    usort($veryDissatisfiedUsers, function ($a, $b) {
+                        return strtotime($b['timestamp']) <=> strtotime($a['timestamp']);
+                    });
+
                     // Final result per question
                     $questionsResult[] = [
                         'question_id' => $question->id,
@@ -545,13 +549,17 @@ class SurveyController extends Controller
                                     'ticket_id'    => $rawTicketMap[$numericTicketId]['original'],
                                     'email'        => $rawTicketMap[$numericTicketId]['email'],
                                     'answer_value' => $a->answer_value,
-                                    'created_at'   => $rawTicketMap[$numericTicketId]['created_at'] ?? $a->created_at,
+                                    'date'   => $rawTicketMap[$numericTicketId]['created_at'] ?? $a->created_at,
                                 ];
                             }
                         }
 
                         $totalResponses += $importedAnswers->count();
                     }
+
+                    usort($formattedAnswers, function ($a, $b) {
+                        return strtotime($b['date']) <=> strtotime($a['date']);
+                    });
 
                     $questionsResult[] = [
                         'question_id'      => $question->id,
