@@ -464,10 +464,10 @@ class SurveyController extends Controller
                         foreach ($importedAnswers as $answer) {
                             $rawAnswer = trim($answer->answer_value);
 
-                            // Split into individual checkbox values
-                            $values = array_map('trim', explode(',', $rawAnswer));
+                            $values = preg_split('/,\s+(?=[A-Z])/', $rawAnswer);
 
                             foreach ($values as $value) {
+                                $value = trim($value);
                                 foreach ($optionCounts as $optionId => &$option) {
                                     // Match checkbox value exactly (case-insensitive)
                                     if (strcasecmp($option['value'], $value) === 0) {
