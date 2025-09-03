@@ -82,7 +82,7 @@ const WalkinTransactionHistoryPage = () => {
         },
         {
             name: "status",
-            label: "Satus",
+            label: "Status",
             type: "select",
             defaultValue: "",
             options: [
