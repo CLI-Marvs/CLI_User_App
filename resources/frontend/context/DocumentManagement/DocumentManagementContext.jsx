@@ -44,6 +44,28 @@ export const DocumentManagementProvider = ({ children }) => {
     });
     const rowsPerPage = 5;
 
+    // Helper to normalize dates to 'YYYY-MM-DD' without timezone shift
+    const normalizeDate = (val) => {
+        if (!val) return null;
+        if (val instanceof Date) {
+            const y = val.getFullYear();
+            const m = String(val.getMonth() + 1).padStart(2, "0");
+            const d = String(val.getDate()).padStart(2, "0");
+            return `${y}-${m}-${d}`;
+        }
+        const str = String(val).trim();
+        const m = str.match(/^(\d{4})[-/](\d{2})[-/](\d{2})/);
+        if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+        const parsed = new Date(str);
+        if (!isNaN(parsed.getTime())) {
+            const y = parsed.getFullYear();
+            const mm = String(parsed.getMonth() + 1).padStart(2, "0");
+            const dd = String(parsed.getDate()).padStart(2, "0");
+            return `${y}-${mm}-${dd}`;
+        }
+        return null;
+    };
+
     // --- Fetchers ---
     const fetchTakenOutAccounts = async () => {
         try {
@@ -134,13 +156,23 @@ export const DocumentManagementProvider = ({ children }) => {
                 !filters.financing ||
                 row.financing?.toLowerCase().trim() ===
                     filters.financing?.toLowerCase().trim();
-            // Date filter omitted for brevity
+            // Date filter (exact match on selected date)
+            let matchesDate = true;
+            if (filters.dateFilter && filters.date) {
+                const target = normalizeDate(filters.date);
+                if (filters.dateFilter === "Takeout Date") {
+                    matchesDate = normalizeDate(row.take_out_date) === target;
+                } else if (filters.dateFilter === "DOU Expiry") {
+                    matchesDate = normalizeDate(row.dou_expiry) === target;
+                }
+            }
             return (
                 matchesSearchQuery &&
                 matchesContractNo &&
                 matchesAccountName &&
                 matchesProject &&
-                matchesFinancing
+                matchesFinancing &&
+                matchesDate
             );
         });
     }, [takenOutTableRows, takenOutSearchQuery, takenOutAppliedFilters]);
@@ -203,13 +235,23 @@ export const DocumentManagementProvider = ({ children }) => {
                 !filters.financing ||
                 row.finance?.toLowerCase().trim() ===
                     filters.financing?.toLowerCase().trim();
-            // Date filter omitted for brevity
+            // Date filter
+            let matchesDate = true;
+            if (filters.dateFilter && filters.date) {
+                const target = normalizeDate(filters.date);
+                if (filters.dateFilter === "Takeout Date") {
+                    matchesDate = normalizeDate(row.takeOutdate) === target;
+                } else if (filters.dateFilter === "DOU Expiry") {
+                    matchesDate = normalizeDate(row.douExpiry) === target;
+                }
+            }
             return (
                 matchesSearchQuery &&
                 matchesContractNo &&
                 matchesAccountName &&
                 matchesProject &&
-                matchesFinancing
+                matchesFinancing &&
+                matchesDate
             );
         });
     }, [
@@ -290,8 +332,12 @@ export const DocumentManagementProvider = ({ children }) => {
                 if (data.length > 0) {
                     const normalizedAccounts = data.map((account) => ({
                         ...account,
-                        steps: Array.isArray(account.steps) ? account.steps : [],
-                        milestones: Array.isArray(account.milestones) ? account.milestones : [],
+                        steps: Array.isArray(account.steps)
+                            ? account.steps
+                            : [],
+                        milestones: Array.isArray(account.milestones)
+                            ? account.milestones
+                            : [],
                     }));
                     setAccounts(normalizedAccounts);
                 } else {
@@ -300,7 +346,9 @@ export const DocumentManagementProvider = ({ children }) => {
                     console.warn("No accounts found in the database.");
                 }
             } else {
-                throw new Error(response.data?.message || "Failed to fetch accounts");
+                throw new Error(
+                    response.data?.message || "Failed to fetch accounts"
+                );
             }
         } catch (err) {
             setAccounts([]);
@@ -309,7 +357,6 @@ export const DocumentManagementProvider = ({ children }) => {
             setIsAccountsLoading(false);
         }
     }, []);
-
 
     // Search accounts
     const searchAccounts = useCallback(
@@ -462,7 +509,6 @@ export const DocumentManagementProvider = ({ children }) => {
                     }, {})
                 );
                 setWorkOrderGroups(grouped);
-                console.log("Work Order Groups:", grouped);
                 setWorkOrdersTotal(response.data.total);
                 setWorkOrdersLoading(false);
             } catch (err) {
