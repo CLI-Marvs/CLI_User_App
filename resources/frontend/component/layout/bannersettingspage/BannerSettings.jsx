@@ -132,7 +132,7 @@ const BannerSettings = () => {
                 </div>
                 <div className='w-full border-t-[1px] border-custom-grayA5'></div>
                 <div className='flex flex-col gap-[12px] w-full'>
-                    <p className=''>Banners</p>
+                   
                     {/* should be dynamic below */}
                     {bannerLists && bannerLists.length > 0 && bannerLists.map((item, index) => (
                         <div key={index} className='w-full h-[112px] rounded-[10px] bg-custom-lightestgreen p-[20px]'>

@@ -15,6 +15,7 @@ import { showToast } from "@/util/toastUtil";
 import CheckStreamModal from "./CheckStreamModal";
 import { formatCurrency } from "@/util/formatCurrency";
 import Alert from "@/component/Alert";
+import FilterChips from "../component/FilterChips";
 
 const CheckStreamReports = () => {
     const { canWrite } = useStateContext();
@@ -25,7 +26,12 @@ const CheckStreamReports = () => {
     const [isLoading, setIsLoading] = useState(false);
 
     const fields = [
-        { name: "check_number", label: "Check Number" },
+         {
+            name: "contract_number",
+            type: "contract_number",
+            label: "Contract Number",
+        },
+        { name: "check_number", type: "check_number", label: "Check Number" },
         { name: "date_range", type: "date_range", label: "Check Date" },
         { name: "printed_date", type: "printed_date", label: "Printed Date" },
     ];
@@ -45,6 +51,11 @@ const CheckStreamReports = () => {
             header: "Check Date",
             accessor: "check_date",
             render: (row) => <CheckTableCell type="check_date" row={row} />,
+        },
+        {
+            header: "Printed Date",
+            accessor: "created_at",
+            render: (row) => <CheckTableCell type="created_at" row={row} />,
         },
         {
             header: "Payor Name",
@@ -101,7 +112,8 @@ const CheckStreamReports = () => {
 
     const exportToExcel = async () => {
         try {
-            if(printedChecks?.data.length === 0) return showToast("No data to export", "info");
+            if (printedChecks?.data.length === 0)
+                return showToast("No data to export", "info");
             const payload = {
                 filter: printedChecks?.filters,
             };
@@ -136,6 +148,10 @@ const CheckStreamReports = () => {
     const onSubmit = () => {
         setFilters(searchValues);
         setSearchValues({});
+        setPrintedChecks((prev) => ({
+            ...prev,
+            loading: true,
+        }));
     };
 
     const handleConfirm = async () => {
@@ -155,6 +171,28 @@ const CheckStreamReports = () => {
             setIsLoading(false);
             setShowAlert(false);
         }
+    };
+
+    const removeFilter = (key) => {
+        const newFilters = { ...printedChecks?.filters };
+
+        delete newFilters[key];
+
+        if (key === "start_date") {
+            delete newFilters["end_date"];
+        }
+        if (key === "printed_start_date") {
+            delete newFilters["printed_end_date"];
+        }
+
+        if (key === "check_number_from") {
+            delete newFilters["check_number_to"];
+        }
+
+        setPrintedChecks((prev) => ({
+            ...prev,
+            filters: newFilters,
+        }));
     };
 
     const handleCancel = () => {
@@ -178,6 +216,12 @@ const CheckStreamReports = () => {
                         exportToExcel={exportToExcel}
                     />
                 </div>
+
+                <FilterChips
+                    filters={printedChecks?.filters}
+                    onRemove={removeFilter}
+                    type="cheque"
+                />
 
                 <div className="flex px-2 gap-3 montserrat-regular">
                     <span>Total Records:</span>

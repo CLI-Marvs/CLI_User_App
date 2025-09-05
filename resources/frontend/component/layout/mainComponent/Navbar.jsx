@@ -37,10 +37,13 @@ const Navbar = () => {
     };
 
     useEffect(() => {
-        if (id) {
+        if (
+            (id && location.pathname.includes("/survey/")) ||
+            location.pathname.includes("/surveysettings/")
+        ) {
             fetchSurveyTitle(id);
         }
-    }, [id]);
+    }, [id, location.pathname]);
 
     useEffect(() => {
         if (isOpen) {
@@ -367,7 +370,7 @@ const Navbar = () => {
                     <Link
                         key={routeTo}
                         to="/transaction/tools/check-generator/check-writer"
-                        className="text-custom-solidgreen"
+                        className="text-custom-solidgreen cursor-default"
                     >
                         {breadcrumbLabel}
                     </Link>
@@ -378,18 +381,25 @@ const Navbar = () => {
                 return (
                     <span
                         key={routeTo}
-                        className="text-custom-solidgreen"
+                        className="text-custom-solidgreen cursor-default"
                     >
                         {breadcrumbLabel}
                     </span>
                 );
             }
-            
+
             if (value.toLowerCase() === "admin-settings") {
                 breadcrumbLabel = "Admin Settings";
             }
             if (value.toLowerCase() === "check-writer") {
-                breadcrumbLabel = "Check Writer";
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        Check Writer
+                    </span>
+                );
             }
 
             if (value.toLowerCase() === "receivables") {

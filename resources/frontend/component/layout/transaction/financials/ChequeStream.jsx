@@ -29,7 +29,7 @@ const ChequeStream = () => {
         if (data.checkBaseNo) {
             const baseStr = data.checkBaseNo.toString();
             const baseNo = parseInt(baseStr, 10);
-            const nextNo = baseNo + index + 1;
+            const nextNo = baseNo + index;
             return nextNo.toString().padStart(baseStr.length, "0");
         }
         return "";

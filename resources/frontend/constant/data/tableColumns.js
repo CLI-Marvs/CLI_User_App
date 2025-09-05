@@ -1,3 +1,5 @@
+import { ClassNames } from "@emotion/react";
+
 export const ADDITIONAL_PREMIUM_COLUMNS = [
     { label: "Floor", width: "w-[150px]" },
     { label: "Premium Cost", width: "w-[150px]" },
@@ -27,7 +29,7 @@ export const WALKIN_COLUMNS = [
 ];
 
 export const WALKIN_HISTORY_COLUMNS = [
-    { label: "Full Name", width: "w-[250px]" },
+    { label: "Full Name", width: "w-[250px]", className:"pl-2"},
     { label: "Priority Number", width: "w-[0px]" },
     { label: "Category", width: "w-[300px]" },
     { label: "Status", width: "w-[200px]" },
@@ -37,5 +39,5 @@ export const WALKIN_HISTORY_COLUMNS = [
 export const BRANCH_SETTING_COLUMNS = [
     { label: "Branch Name", width: "w-[200px]" },
     { label: "URL", width: "w-[150px]" },
-    { label: "Action", width: "w-[60px]" },
+    { label: "Actions", width: "w-[60px]" },
 ]

@@ -22,7 +22,6 @@ const BranchSetting = () => {
     const deleteBranchMutation = useMutation({
         mutationFn: (id) => branchService.deleteBranch(id),
         onSuccess: (response) => {
-            console.log("Branch deleted successfully:", response);
             showToast(response?.message, "success");
             queryClient.invalidateQueries({ queryKey: ["branches"] });
             setShowAlert(false);
@@ -73,7 +72,6 @@ const BranchSetting = () => {
             <div>
                 <div className="">
                     <button
-                        // onClick={() => branchFormRef.current.showModal()}
                         onClick={() => handleOpenModal("", "add")}
                         className="montserrat-semibold text-sm px-6 gradient-btn h-[37px] rounded-[10px] text-white hover:shadow-custom4"
                     >
@@ -81,6 +79,7 @@ const BranchSetting = () => {
                         Add Branch
                     </button>
                 </div>
+                
                 {/* Table */}
                 <div className="mt-6">
                     {isLoading ? (

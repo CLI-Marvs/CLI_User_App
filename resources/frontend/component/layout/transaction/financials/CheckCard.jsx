@@ -100,7 +100,7 @@ const CheckCard = ({
                 </div>
                 
                 <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-600">Payment Confirmation:</span>
+                    <span className="text-sm font-medium text-gray-600">Print Confirmation:</span>
                     <div className="flex gap-2">
                         <button
                             className="inline-flex items-center gap-2 bg-gradient-to-r from-custom-lightgreen to-custom-solidgreen hover:from-custom-solidgreen hover:to-custom-lightgreen text-white text-sm font-semibold px-4 py-2 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"

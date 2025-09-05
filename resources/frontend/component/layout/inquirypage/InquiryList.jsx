@@ -103,7 +103,7 @@ const InquiryList = () => {
     const [selectedYear, setSelectedYear] = useState("");
     const [selectedMonth, setSelectedMonth] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
-    const { propertyNamesList,categories } = useStateContext();
+    const { propertyNamesList, categories } = useStateContext();
 
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
@@ -129,18 +129,25 @@ const InquiryList = () => {
 
     const handleRefresh = () => {
         setResultSearchActive(false);
-        if (daysFilter) {
-            setDaysFilter(null);
-            setActiveDayButton(null);
-        } else if (statusFilter) {
+
+        // Reset day filter states
+        setDaysFilter(null);
+        setActiveDayButton(null);
+        setDaysActive(false);
+
+        // Reset other filters
+        if (statusFilter) {
             setSelectedOption("All");
             setStatusFilter(null);
-        } else if (searchFilter) {
+        }
+        if (searchFilter) {
             setSearchFilter({});
-        } else if (specificAssigneeCsr) {
+        }
+        if (specificAssigneeCsr) {
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         }
+
         setStartDate(null);
         setEndDate(null);
 
@@ -152,6 +159,7 @@ const InquiryList = () => {
 
         getAllConcerns();
     };
+
 
     const displayAll = () => {
         setDaysFilter(null);
@@ -289,38 +297,38 @@ const InquiryList = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => {
-                      let formattedItem = formatFunc(item);
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => {
+                    let formattedItem = formatFunc(item);
 
-                      // Capitalize each word in the string
-                      formattedItem = formattedItem
-                          .split(" ")
-                          .map((word) => {
-                              // Check for specific words that need to be fully capitalized
-                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                  return word.toUpperCase();
-                              }
-                              // Capitalize the first letter of all other words
-                              return (
-                                  word.charAt(0).toUpperCase() +
-                                  word.slice(1).toLowerCase()
-                              );
-                          })
-                          .join(" ");
+                    // Capitalize each word in the string
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return (
+                                word.charAt(0).toUpperCase() +
+                                word.slice(1).toLowerCase()
+                            );
+                        })
+                        .join(" ");
 
-                      // Replace specific names if needed
-                      if (formattedItem === "Casamira South") {
-                          formattedItem = "Casa Mira South";
-                      }
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
 
-                      return formattedItem;
-                  })
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                    return formattedItem;
+                })
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -386,7 +394,7 @@ const InquiryList = () => {
     };
 
     const handleSearch = () => {
-        
+
         let summaryParts = []; // Array to hold each part of the summary
 
         if (category) summaryParts.push(`Category: ${category}`);
@@ -403,8 +411,8 @@ const InquiryList = () => {
                 channels === "Walk in"
                     ? "Walk-in"
                     : channels === "Social media"
-                    ? "Social Media"
-                    : channels;
+                        ? "Social Media"
+                        : channels;
             summaryParts.push(`Channel: ${formattedChannels}`);
         }
         if (departments) summaryParts.push(`Department: ${departments}`);
@@ -469,7 +477,7 @@ const InquiryList = () => {
         setEndDate(null);
     };
 
-   
+
 
     useEffect(() => {
         if (isFilterVisible) {
@@ -786,9 +794,9 @@ const InquiryList = () => {
                                                             .filter(
                                                                 (department) =>
                                                                     department !==
-                                                                        null &&
+                                                                    null &&
                                                                     department !==
-                                                                        undefined &&
+                                                                    undefined &&
                                                                     department !== "NULL" &&
                                                                     department !== "IT" &&
                                                                     department !== "Digital Innovation"
@@ -1113,9 +1121,9 @@ const InquiryList = () => {
                             >
                                 {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown />}{" "}
                                 {resultSearchActive ||
-                                daysActive ||
-                                assignedToMeActive ? (
-                                    dataFilterCount === 0 ? (
+                                    daysActive ||
+                                    assignedToMeActive ? (
+                                    dataCount && dataCount === 0 ? (
                                         <p>No Records Found</p>
                                     ) : (
                                         <p>
@@ -1184,51 +1192,46 @@ const InquiryList = () => {
                                 <div className="flex items-center space-x-2">
                                     {user?.department ===
                                         "Customer Relations - Services" && (
-                                        <button
-                                            onClick={handleAssignedToMeClick}
-                                            className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${
-                                                assignedToMeActive
-                                                    ? "bglightgreen-btn"
-                                                    : "gradient-btn2hover "
-                                            }`}
-                                        >
-                                            <p
-                                                className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${
-                                                    assignedToMeActive
+                                            <button
+                                                onClick={handleAssignedToMeClick}
+                                                className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${assignedToMeActive
                                                         ? "bglightgreen-btn"
-                                                        : "bg-white hover:bg-custom-lightestgreen"
-                                                }
-                                        `}
+                                                        : "gradient-btn2hover "
+                                                    }`}
                                             >
-                                                Assigned to me
-                                            </p>
-                                        </button>
-                                    )}
+                                                <p
+                                                    className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${assignedToMeActive
+                                                            ? "bglightgreen-btn"
+                                                            : "bg-white hover:bg-custom-lightestgreen"
+                                                        }
+                                        `}
+                                                >
+                                                    Assigned to me
+                                                </p>
+                                            </button>
+                                        )}
                                     {dayButtonLabels.map((label) => (
                                         <button
                                             key={label}
                                             onClick={() =>
                                                 handleDayClick(label)
                                             }
-                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
-                                                activeDayButton === label
+                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label
                                                     ? "bglightgreen-btn hover:bg-custom-lightgreen"
                                                     : "gradient-btn2hover border-custom-lightgreen"
-                                            } hover:bg-custom-lightestgreen ${
-                                                label === "3+ Days"
+                                                } hover:bg-custom-lightestgreen ${label === "3+ Days"
                                                     ? "w-[76px]"
                                                     : label === "2 Days"
-                                                    ? "w-[69px]"
-                                                    : "w-[60px]"
-                                            }`}
+                                                        ? "w-[69px]"
+                                                        : "w-[60px]"
+                                                }`}
                                         >
                                             <p
                                                 className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
-                                            ${
-                                                activeDayButton === label
-                                                    ? "bglightgreen-btn"
-                                                    : "bg-white hover:bg-custom-lightestgreen"
-                                            }
+                                            ${activeDayButton === label
+                                                        ? "bglightgreen-btn"
+                                                        : "bg-white hover:bg-custom-lightestgreen"
+                                                    }
                                             `}
                                             >
                                                 {label}

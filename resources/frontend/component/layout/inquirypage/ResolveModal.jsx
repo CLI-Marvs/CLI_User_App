@@ -5,6 +5,7 @@ import { AiFillInfoCircle } from "react-icons/ai";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { SURVEY_LINKS } from '../../../constant/data/surveyLink';
 import CircularProgress from "@mui/material/CircularProgress";
+import { useSurvey } from "@/context/Survey/SurveyContext";
 
 const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const { getAllConcerns, user, getInquiryLogs, data, assigneesPersonnel } =
@@ -19,7 +20,8 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const [communicationType, setCommunicationType] = useState("");
     const [selectedSurveyType, setSelectedSurveyType] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [surveyLinks, setSurveyLinks] = useState([]);
+    const [surveyLinks, setSurveyLinks] = useState(null);
+    const { fetchSurveyStatus } = useSurvey();
 
     /**
      *  Set initial communication type when dataRef changes
@@ -71,6 +73,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const handleSurveyChange = (selectedSurveyType) => {
         setSelectedSurveyType(selectedSurveyType);
         setIsSurveyRequired(false);
+
     };
 
     /**
@@ -114,13 +117,13 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
 
             setRemarks("");
             getInquiryLogs(ticketId);
-            const updatedData = { ...dataRef, status: "Resolved", communication_type: communicationType };
+            const updatedData = { ...dataRef, status: "Resolved", communication_type: communicationType, survey_link: selectedSurveyType.surveyLink };
             localStorage.removeItem("updatedData");
             localStorage.removeItem("closeConcern");
             localStorage.setItem("dataConcern", JSON.stringify(updatedData));
             onupdate(updatedData); // Call handleUpdate with the updated data
             getAllConcerns();
-
+            fetchSurveyStatus(ticketId);
             //Close the modal
             if (modalRef.current) {
                 modalRef.current.close();
@@ -140,6 +143,10 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         setIsSurveyRequired(false);
         setSelectedSurveyType([]);
     };
+
+    const handleSurveySend = (e) => {
+        handleSurveyChange(JSON.parse(e.target.value))
+    }
 
     const handleCancel = () => {
         if (modalRef.current) {
@@ -238,7 +245,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                             <option value="Complaint">Complaint</option>
                             <option value="Request">Request</option>
                             <option value="Inquiry">Inquiry</option>
-                            <option value="Suggestion or recommendation">Suggestion or Recommendation</option>
+                            <option value="Suggestion or Recommendation">Suggestion or Recommendation</option>
                         </select>
                         <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
                             <IoMdArrowDropdown />
@@ -262,7 +269,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                          *SET value TO JSON string of selectedSurveyType
                         */}
                         <select
-                            onChange={(e) => handleSurveyChange(JSON.parse(e.target.value))}
+                            onChange={handleSurveySend}
                             value={JSON.stringify(selectedSurveyType)}
                             className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
                         >
