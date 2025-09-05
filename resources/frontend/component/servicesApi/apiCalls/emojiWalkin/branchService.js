@@ -24,7 +24,6 @@ export const branchService = {
      */
     createBranch: async (payload) => {
         try {
-            console.log(payload);
             const response = await walkinFeedbackService.post(
                 "/admin/branches",
                 payload

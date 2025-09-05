@@ -42,9 +42,17 @@ const MyWorkOrders = () => {
     const [isRefreshing, setIsRefreshing] = useState(false);
 
     const handleRefresh = async () => {
+        // Force re-fetch of ONLY the current user's work orders
         setIsRefreshing(true);
         try {
-            await fetchWorkOrderGroups();
+            if (fetchWorkOrdersPaginated) {
+                await fetchWorkOrdersPaginated(
+                    1,
+                    1000,
+                    workOrdersSortBy,
+                    workOrdersSortOrder
+                );
+            }
         } finally {
             setIsRefreshing(false);
         }
@@ -66,7 +74,8 @@ const MyWorkOrders = () => {
         workOrdersSortOrder,
         setWorkOrdersSortOrder,
         fetchWorkOrders,
-        fetchWorkOrderGroups,
+        fetchWorkOrderGroups, // retained in context but no longer used here for My Work Orders visibility
+        fetchWorkOrdersPaginated,
     } = useDocumentManagementContext();
     const [statusFilter, setStatusFilter] = useState("");
     const [viewMode, setViewMode] = useState("table");
@@ -81,6 +90,8 @@ const MyWorkOrders = () => {
         useState(false);
     const [groupDetailsData, setGroupDetailsData] = useState(null);
     const [isGroupDetailsLoading, setIsGroupDetailsLoading] = useState(null);
+    // Local gate to avoid flicker of stale global work orders
+    const [hasLoadedMyWorkOrders, setHasLoadedMyWorkOrders] = useState(false);
 
     // Filter states
     const [workOrderNoFilter, setWorkOrderNoFilter] = useState("");
@@ -88,12 +99,54 @@ const MyWorkOrders = () => {
     const [dueDateFilter, setDueDateFilter] = useState("");
     const [lastUpdatedFilter, setLastUpdatedFilter] = useState("");
 
-    // Fetch work order groups on component mount
+    // Fetch only the logged-in user's work orders (large per_page to allow client filters & pagination)
     useEffect(() => {
-        if (fetchWorkOrderGroups) {
-            fetchWorkOrderGroups();
-        }
-    }, [fetchWorkOrderGroups]);
+        let isMounted = true;
+        const load = async () => {
+            if (!fetchWorkOrdersPaginated) return;
+            // Clear any stale data immediately to prevent showing others' WOs
+            setWorkOrderGroups([]);
+            setHasLoadedMyWorkOrders(false);
+            try {
+                await fetchWorkOrdersPaginated(
+                    1,
+                    1000,
+                    workOrdersSortBy,
+                    workOrdersSortOrder
+                );
+            } finally {
+                if (isMounted) setHasLoadedMyWorkOrders(true);
+            }
+        };
+        load();
+        return () => {
+            isMounted = false;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fetchWorkOrdersPaginated]);
+
+    // Re-fetch when sorting changes (client pagination handled locally)
+    useEffect(() => {
+        let isMounted = true;
+        const reload = async () => {
+            if (!fetchWorkOrdersPaginated) return;
+            setHasLoadedMyWorkOrders(false);
+            try {
+                await fetchWorkOrdersPaginated(
+                    1,
+                    1000,
+                    workOrdersSortBy,
+                    workOrdersSortOrder
+                );
+            } finally {
+                if (isMounted) setHasLoadedMyWorkOrders(true);
+            }
+        };
+        reload();
+        return () => {
+            isMounted = false;
+        };
+    }, [workOrdersSortBy, workOrdersSortOrder, fetchWorkOrdersPaginated]);
 
     const handlePageChange = (newPage) => {
         setWorkOrdersCurrentPage(newPage);
@@ -171,7 +224,6 @@ const MyWorkOrders = () => {
                                 .toLowerCase()
                                 .includes(workOrderNoFilter.toLowerCase())
                     ) ||
-                    // Also check the group id itself as fallback
                     String(group.id)
                         .toLowerCase()
                         .includes(workOrderNoFilter.toLowerCase()) ||
@@ -1129,8 +1181,8 @@ const MyWorkOrders = () => {
                     </div>
                 </div>
 
-                {/* Loading State */}
-                {workOrdersLoading && workOrderGroups.length === 0 && (
+                {/* Loading State (initial gate) */}
+                {(workOrdersLoading || !hasLoadedMyWorkOrders) && (
                     <SkeletonTheme baseColor="#f3f4f6" highlightColor="#e5e7eb">
                         {viewMode === "grid" ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -1177,7 +1229,8 @@ const MyWorkOrders = () => {
                 )}
 
                 {/* Empty State */}
-                {!workOrdersLoading &&
+                {hasLoadedMyWorkOrders &&
+                    !workOrdersLoading &&
                     !workOrdersError &&
                     getFilteredWorkOrderGroups().length === 0 &&
                     (workOrderGroups || []).length > 0 && (
@@ -1216,7 +1269,8 @@ const MyWorkOrders = () => {
                     )}
 
                 {/* No Data State */}
-                {!workOrdersLoading &&
+                {hasLoadedMyWorkOrders &&
+                    !workOrdersLoading &&
                     !workOrdersError &&
                     (workOrderGroups || []).length === 0 && (
                         <div className="text-center py-12">
@@ -1243,13 +1297,14 @@ const MyWorkOrders = () => {
                     )}
 
                 {/* Content */}
-                {getFilteredWorkOrderGroups().length > 0 && (
-                    <>
-                        {viewMode === "grid"
-                            ? renderGridView()
-                            : renderTableView()}
-                    </>
-                )}
+                {hasLoadedMyWorkOrders &&
+                    getFilteredWorkOrderGroups().length > 0 && (
+                        <>
+                            {viewMode === "grid"
+                                ? renderGridView()
+                                : renderTableView()}
+                        </>
+                    )}
 
                 <ProcessWorkOrderModal
                     isOpen={isProcessModalOpen}

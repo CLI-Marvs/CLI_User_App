@@ -13,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa6";
 import WalkinTransactionModal from "@/component/layout/inquirypage/component/WalkinList/WalkinTransactionModal";
 import { useWalkinSelection } from "@/context/InquiryManagement/WalkinSelectionContext";
+import { useSurvey } from "@/context/Survey/SurveyContext";
 
 const INITIAL_SEARCH_STATE = {
     full_name: "",
@@ -23,6 +24,7 @@ const INITIAL_SEARCH_STATE = {
 
 const WalkinTransactionHistoryPage = () => {
     //States
+    const { fetchSurveyStatus } = useSurvey();
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const navigate = useNavigate();
@@ -36,7 +38,7 @@ const WalkinTransactionHistoryPage = () => {
         isLoading,
         isError,
         refetch,
-        isFetching
+        isFetching,
     } = useQuery({
         queryKey: [
             "walkinTransactionHistory",
@@ -80,7 +82,7 @@ const WalkinTransactionHistoryPage = () => {
         },
         {
             name: "status",
-            label: "Satus",
+            label: "Status",
             type: "select",
             defaultValue: "",
             options: [
@@ -91,7 +93,6 @@ const WalkinTransactionHistoryPage = () => {
             ],
         },
     ];
-
 
     // Handles input change: updates search values based on user input
     const handleInputChange = ({ target: { name, value } }) => {
@@ -122,7 +123,10 @@ const WalkinTransactionHistoryPage = () => {
     };
 
     //Handle click item
-    const handleClickItem = (item) => {
+    const handleClickItem = async (item) => {
+        if (item?.ticket_id) {
+            await fetchSurveyStatus(item.ticket_id);
+        }
         setSelectedItem(item);
         setModalOpen(true);
     };
@@ -164,7 +168,7 @@ const WalkinTransactionHistoryPage = () => {
                 />
             </div>
 
-            <div className="mt-3 mx-1 py-4">
+            <div className="mt-3 mx-2 py-4">
                 {isLoading && !isFetching ? (
                     <div className="text-center py-4">
                         <Skeleton height={140} className="my-1" />

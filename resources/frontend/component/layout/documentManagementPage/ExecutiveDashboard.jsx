@@ -717,10 +717,7 @@ const ExecutiveDashboard = () => {
                                                 className="hover:bg-gray-50 transition-colors"
                                             >
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                    1
-                                                    {String(
-                                                        row.workOrderId
-                                                    ).padStart(5, "0")}
+                                                        {row.workOrderId}
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap">
                                                     <span className="px-2 py-1 text-xs font-medium border border-gray-300 rounded-full">

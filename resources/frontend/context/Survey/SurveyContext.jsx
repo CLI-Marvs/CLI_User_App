@@ -7,6 +7,9 @@ export const SurveyProvider = ({ children }) => {
   const [survey_title, setSurveyTitle] = useState("");
   const [survey_loading, setLoading] = useState(false);
   const [ratingDetails, setRatingDetails] = useState([]);
+  const [surveyLinks, setSurveyLinks] = useState([]);
+  const [surveyStatus, setSurveyStatus] = useState("");
+  const [statusLoading, setStatusLoading] = useState(false);
 
   const fetchSurveyTitle = async (survey_list_id) => {
     setLoading(true);
@@ -25,16 +28,54 @@ export const SurveyProvider = ({ children }) => {
   const fetchSurveyRatingDetails = async (survey_list_id) => {
     try {
       const response = await apiService.get(`/survey-rating-details/${survey_list_id}`);
-      
+
       setRatingDetails(response.data.data);
     } catch (error) {
       console.error('Error fetching survey rating details:', error);
       setRatingDetails([]);
-    } 
+    }
+  };
+
+  const fetchSurveyLinks = async () => {
+    try {
+      const response = await apiService.get('/survey-links'); 
+      setSurveyLinks(response.data);
+    } catch (err) {
+      setError('Failed to fetch survey links');
+      console.error(err);
+    }
+  };
+
+  const fetchSurveyStatus = async (ticketId) => {
+
+    const newTicketId = ticketId.replace("Ticket#", "").trim();
+
+    try {
+      const response = await apiService.get(`/survey-status/${newTicketId}`);
+      setSurveyStatus(response.data.status);
+      setStatusLoading(false);
+    } catch (error) {
+      console.error('Error fetching survey status:', error);
+    }
   };
 
   return (
-    <SurveyContext.Provider value={{ survey_title, fetchSurveyTitle, survey_loading, ratingDetails, fetchSurveyRatingDetails }}>
+    <SurveyContext.Provider value={
+      {
+        survey_title,
+        fetchSurveyTitle,
+        survey_loading,
+        ratingDetails,
+        fetchSurveyRatingDetails,
+        fetchSurveyLinks,
+        surveyLinks,
+        fetchSurveyStatus,
+        surveyStatus,
+        statusLoading,
+        setStatusLoading
+        
+      }
+    }>
       {children}
     </SurveyContext.Provider>
   );

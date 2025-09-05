@@ -373,6 +373,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/surveys-count/respondents', [SurveyController::class, 'getSurveysWithRatingCounts']);
     Route::get('/surveys-count/ratings', [SurveyController::class, 'getSurveysWithRatingBreakdown']);
     Route::get('/survey-rating-details/{id}', [SurveyController::class, 'getSurveyRatingDetails']);
+    Route::get('/survey-status/{ticketId}', [SurveyController::class, 'getSurveyStatus']);
 
     //Employee Department
     Route::get('/get-employees-departments', [EmployeeDepartmentController::class, 'index']);

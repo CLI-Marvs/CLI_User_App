@@ -29,9 +29,9 @@ export const useChequeData = () => {
         let cleanedValue = value.replace(/[^0-9.]/g, "");
 
         const totalAmount = parseFloat(
-            field === "total_purchased_amount"
+            field === "amount"
                 ? cleanedValue
-                : (data.total_purchased_amount || "0").replace(/,/g, "")
+                : (data.amount || "0").replace(/,/g, "")
         );
 
         let months;
@@ -73,11 +73,11 @@ export const useChequeData = () => {
         }
 
         if (!isNaN(totalAmount) && months && field !== "amount") {
-            const monthly = totalAmount / months;
+            const monthly = totalAmount * months;
             const monthlyStr = monthly.toString();
             let [whole, decimal = ""] = monthlyStr.split(".");
             decimal = decimal.slice(0, 2).padEnd(2, "0");
-            updatedData.amount = formatWithCommas(whole, decimal);
+            updatedData.total_purchased_amount = formatWithCommas(whole, decimal);
         }
 
         setData(updatedData);

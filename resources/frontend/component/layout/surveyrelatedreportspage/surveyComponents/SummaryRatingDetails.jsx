@@ -4,13 +4,18 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from 'react-icons/md';
 import ReactPaginate from 'react-paginate';
 import { useSurvey } from '@/context/Survey/SurveyContext';
 
+import emoji1 from "../../../../../../public/Images/emoji1.png";
+import emoji2 from "../../../../../../public/Images/emoji2.png";
+import emoji3 from "../../../../../../public/Images/emoji3.png";
+import emoji4 from "../../../../../../public/Images/emoji4.png";
+import emoji5 from "../../../../../../public/Images/emoji5.png";
 
 const emojiMap = {
-    5: '😃',
-    4: '😊',
-    3: '😐',
-    2: '😒',
-    1: '😠',
+    5: emoji1,
+    4: emoji2,
+    3: emoji3,
+    2: emoji4,
+    1: emoji5,
 };
 
 const SummaryRatingDetails = () => {
@@ -54,17 +59,21 @@ const SummaryRatingDetails = () => {
             <div className="mb-4 flex items-center gap-2">
                 <span className="font-semibold">Filter by:</span>
                 {Object.entries(emojiMap)
-                    .sort((a, b) => b[0] - a[0]) 
-                    .map(([rating, emoji]) => (
+                    .sort((a, b) => b[0] - a[0])
+                    .map(([rating, imageUrl]) => (
                         <button
                             key={rating}
                             onClick={() => setSelectedRating(Number(rating))}
                             className={`px-3 py-1 border rounded ${selectedRating === Number(rating)
-                                ? 'bg-custom-lightgreen text-white'
-                                : 'bg-white text-black'
+                                ? "bg-custom-lightgreen text-white"
+                                : "bg-white text-black"
                                 }`}
                         >
-                            {emoji}
+                            <img
+                                src={imageUrl}
+                                alt={`Rating ${rating}`}
+                                className="w-6 h-6 inline-block"
+                            />
                         </button>
                     ))}
                 <button
@@ -84,7 +93,7 @@ const SummaryRatingDetails = () => {
                                 <th className="border-2 px-2 py-1 w-[150px] text-center">Rate</th>
                                 <th className="border-2 px-2 py-1 text-center">Email</th>
                                 <th className="border-2 px-2 py-1 text-center">Ticket ID</th>
-                                
+
                             </tr>
                         </thead>
                         <tbody>
@@ -93,10 +102,17 @@ const SummaryRatingDetails = () => {
                                     <td className="border-2 px-2 py-1 text-center">
                                         {new Date(item.created_at).toLocaleDateString('en-US')}
                                     </td>
-                                    <td className="border-2 px-2 py-1 text-center">{emojiMap[item.rating] ?? ''}</td>
+                                    <td className="border-2 px-2 py-1 text-center">
+                                        {emojiMap[item.rating] && (
+                                            <img
+                                                src={emojiMap[item.rating]}
+                                                alt={`Rating ${item.rating}`}
+                                                className="w-6 h-6 mx-auto"
+                                            />
+                                        )}
+                                    </td>
                                     <td className="border-2 px-2 py-1 text-center">{item.email}</td>
                                     <td className="border-2 px-2 py-1 text-center">{item.ticket_id}</td>
-                                    
                                 </tr>
                             ))}
                         </tbody>

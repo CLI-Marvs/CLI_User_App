@@ -1,9 +1,27 @@
 import React, { useEffect, useRef } from "react";
 import CustomInput from "@/component/Input/CustomInput";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
+import SendSurveyModal from "@/component/layout/inquirypage/SendSurveyModal";
+import { useSurvey } from "@/context/Survey/SurveyContext";
+import { IoIosCheckmarkCircle } from "react-icons/io";
 
 const WalkinTransactionModal = ({ open, onClose, item }) => {
     const dialogRef = useRef(null);
+    const { surveyStatus, fetchSurveyStatus } = useSurvey();
+    const surveyModalRef = useRef(null);
+
+    useEffect(() => {
+        if (!item?.ticket_id) return;
+        fetchSurveyStatus(item.ticket_id);
+    }, [item?.ticket_id, fetchSurveyStatus]);
+
+    const handleClose = () => {
+        onClose?.();
+        if (item?.ticket_id) {
+            fetchSurveyStatus(item.ticket_id);
+        }
+    };
+
     useEffect(() => {
         const dialog = dialogRef.current;
         if (!dialog) return;
@@ -14,10 +32,9 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
             if (dialog.open) dialog.close();
         }
 
-        const handleClose = () => onClose?.();
         dialog.addEventListener("close", handleClose);
         return () => dialog.removeEventListener("close", handleClose);
-    }, [open, onClose]);
+    }, [open, onClose, item?.ticket_id, fetchSurveyStatus]);
 
     if (!item) return null;
 
@@ -33,7 +50,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                     <div>
                         <button
                             className="absolute top-3 right-3 w-10 h-10 items-center rounded-full bg-custombg3 text-custom-bluegreen hover:bg-custombg"
-                            onClick={onClose}
+                            onClick={handleClose}
                         >
                             ✕
                         </button>
@@ -41,19 +58,40 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                 </div>
 
                 {/* Modal content */}
-                <div className=" ">
-                    <div className="mt-10">
+                <div>
+                    <div className="mt-[50px] flex justify-between items-center">
                         <h1 className="montserrat-bold ">
                             Priority Number :{" "}
                             <span className="montserrat-regular">
                                 {item?.priority_number}
                             </span>
                         </h1>
+                        {item?.status === "resolved" && (
+                            <div className="flex items-center">
+                                {surveyStatus === "submitted" ? (
+                                    <div className="flex justify-start items-center px-[8px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
+                                        <p>Survey Submitted</p>
+                                        <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => {
+                                            if (surveyModalRef.current) {
+                                                surveyModalRef.current.showModal();
+                                            }
+                                        }}
+                                        className="w-auto font-semibold text-[13px] text-custom-lightgreen underline cursor-pointer montserrat-regular"
+                                    >
+                                        Input Survey Data
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
                     {/* First Name */}
                     <div className="py-1">
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
-                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden ">
+                            <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular ">
                                 First Name
                             </span>
                             <CustomInput
@@ -71,7 +109,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
 
                     {/* Middle Name with N/A */}
                     <div className="py-1">
-                        <div className="flex relative items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex relative items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Middle Name
                             </span>
@@ -93,7 +131,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
 
                     {/* Last Name */}
                     <div className="py-1">
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Last Name
                             </span>
@@ -112,7 +150,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
 
                     {/* Suffix Name with N/A */}
                     <div className="py-1">
-                        <div className="flex relative items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex relative items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Suffix Name
                             </span>
@@ -131,7 +169,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
 
                     {/* Email */}
                     <div className="py-1">
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Email
                             </span>
@@ -149,7 +187,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
 
                     {/* Mobile Number */}
                     <div className="py-1">
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Mobile Number
                             </span>
@@ -168,17 +206,23 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
 
                     {/* Property */}
                     <div className="py-1">
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Property
                             </span>
                             <CustomInput
                                 name="property"
                                 type="text"
-                                value={toLowerCaseText(
+                                value={
                                     item.walkin_transaction_detail
-                                        ?.property_master?.property_name || ""
-                                )}
+                                        ?.property_masters_id === null
+                                        ? "N/A"
+                                        : toLowerCaseText(
+                                              item.walkin_transaction_detail
+                                                  ?.property_master
+                                                  ?.property_name
+                                          )
+                                }
                                 disabled
                                 className="w-full px-2 text-sm focus:outline-none mobile:text-xs montserrat-regular"
                             />
@@ -187,7 +231,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
 
                     {/* Category Type/Concern Regarding */}
                     <div className="py-1">
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Concern Regarding
                             </span>
@@ -206,7 +250,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
 
                     {/* Type */}
                     <div className="py-1">
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Type
                             </span>
@@ -224,7 +268,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
 
                     {/* Inquiry From */}
                     <div className="py-1">
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Inquiry From
                             </span>
@@ -243,7 +287,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
 
                     {/* Contract Number */}
                     <div className="py-1">
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Contract Number
                             </span>
@@ -262,7 +306,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
 
                     {/* Unit/Lot Number */}
                     <div className="py-1">
-                        <div className="flex items-center border rounded-[5px] overflow-hidden">
+                        <div className="flex items-center border border-custom-bluegreen rounded-[5px] overflow-hidden">
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[215px] montserrat-regular">
                                 Unit/Lot Number
                             </span>
@@ -280,7 +324,7 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                     </div>
 
                     {/* Detailed Notes with character count */}
-                    <div className="rounded-[5px] bg-custom-lightestgreen border mt-2">
+                    <div className="rounded-[5px] bg-custom-lightestgreen border border-custom-bluegreen mt-2">
                         <div className="flex items-center justify-between">
                             <p className="text-custom-bluegreen text-sm bg-custom-lightestgreen pl-3 flex-grow mobile:text-xs mobile:w-[170px] montserrat-regular py-2">
                                 Detailed Notes
@@ -313,6 +357,12 @@ const WalkinTransactionModal = ({ open, onClose, item }) => {
                         </div>
                     </div>
                 </div>
+            </div>
+            <div>
+                <SendSurveyModal
+                    modalRef={surveyModalRef}
+                    ticketId={item?.ticket_id}
+                />
             </div>
         </dialog>
     );
