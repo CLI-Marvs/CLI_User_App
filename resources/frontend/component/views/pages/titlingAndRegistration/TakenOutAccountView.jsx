@@ -1137,7 +1137,7 @@ export default function PaginatedTable() {
                                                 <td className={classes}>
                                                     <Typography
                                                         variant="small"
-                                                        className="text-base font-normal"
+                                                        className="max-w-[180px] inline-block truncate align-bottom text-xs font-normal"
                                                     >
                                                         {contract_no}
                                                         <br />

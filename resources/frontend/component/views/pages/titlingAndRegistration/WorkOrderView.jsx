@@ -691,13 +691,8 @@ const WorkOrderView = () => {
                                                 <div className="flex items-center space-x-1">
                                                     <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                                                     <span className="font-medium">
-                                                        {group.created_at
-                                                            ? new Date(
-                                                                  group.created_at
-                                                              )
-                                                                  .toISOString()
-                                                                  .slice(0, 10)
-                                                            : "-"}
+                                                        {group.created_at ||
+                                                            "-"}
                                                     </span>
                                                 </div>
                                             </td>

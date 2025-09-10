@@ -10,12 +10,16 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
     const [checkedItems, setCheckedItems] = useState({});
     const [milestoneDetails, setMilestoneDetails] = useState({});
     const [uploadedDocuments, setUploadedDocuments] = useState([]);
+    const [accountChecklistStatuses, setAccountChecklistStatuses] = useState(
+        []
+    );
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [viewingFile, setViewingFile] = useState(null);
     const [milestoneOverallStatus, setMilestoneOverallStatus] = useState(null);
-    const [isCompletionStatusUpdated, setIsCompletionStatusUpdated] = useState(false);
+    const [isCompletionStatusUpdated, setIsCompletionStatusUpdated] =
+        useState(false);
 
     useEffect(() => {
         const isWorkOrderInvalid =
@@ -23,11 +27,12 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
             workOrderId === WORK_ORDER_TBD ||
             workOrderId === WORK_ORDER_NA;
 
-        setIsCompletionStatusUpdated(false); 
+        setIsCompletionStatusUpdated(false);
 
         if (!currentMilestone || isWorkOrderInvalid || !accountId) {
             setMilestoneDetails({});
             setUploadedDocuments([]);
+            setAccountChecklistStatuses([]);
             setCheckedItems({});
             setMilestoneOverallStatus(null);
             if (isWorkOrderInvalid || !accountId) {
@@ -54,7 +59,8 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                     typeof response.data === "object" &&
                     response.data !== null &&
                     response.data.checklistStructure &&
-                    Array.isArray(response.data.uploadedDocuments)
+                    Array.isArray(response.data.uploadedDocuments) &&
+                    Array.isArray(response.data.accountChecklistStatuses)
                 ) {
                     const upperCasedData = Object.keys(
                         response.data.checklistStructure
@@ -65,7 +71,12 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                     }, {});
                     setMilestoneDetails(upperCasedData);
                     setUploadedDocuments(response.data.uploadedDocuments || []);
-                    setMilestoneOverallStatus(response.data.milestoneOverallStatus || null);
+                    setAccountChecklistStatuses(
+                        response.data.accountChecklistStatuses || []
+                    );
+                    setMilestoneOverallStatus(
+                        response.data.milestoneOverallStatus || null
+                    );
                 } else {
                     console.error(
                         "API did not return a valid object for milestone details:",
@@ -74,6 +85,7 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                     setError("Failed to load details: Invalid data format.");
                     setMilestoneDetails({});
                     setUploadedDocuments([]);
+                    setAccountChecklistStatuses([]);
                     setMilestoneOverallStatus(null);
                 }
             } catch (err) {
@@ -86,6 +98,7 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                 );
                 setMilestoneDetails({});
                 setUploadedDocuments([]);
+                setAccountChecklistStatuses([]);
                 setMilestoneOverallStatus(null);
             } finally {
                 setIsLoading(false);
@@ -98,17 +111,28 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
     useEffect(() => {
         if (
             Object.keys(milestoneDetails).length > 0 &&
-            uploadedDocuments.length >= 0
+            (uploadedDocuments.length >= 0 ||
+                accountChecklistStatuses.length >= 0)
         ) {
             const initialCheckedState = {};
             Object.keys(milestoneDetails).forEach((subMilestone) => {
                 (milestoneDetails[subMilestone] || []).forEach(
                     (item, index) => {
-                        if (
-                            uploadedDocuments.some(
-                                (doc) => doc.file_title === item
-                            )
-                        ) {
+                        // Check if completed via uploaded document
+                        const hasUploadedDoc = uploadedDocuments.some(
+                            (doc) => doc.file_title === item
+                        );
+
+                        // Check if completed via manual checklist status
+                        const hasChecklistStatus =
+                            accountChecklistStatuses.some(
+                                (status) =>
+                                    status.checklist &&
+                                    status.checklist.name === item &&
+                                    status.is_completed
+                            );
+
+                        if (hasUploadedDoc || hasChecklistStatus) {
                             initialCheckedState[
                                 `${subMilestone}-${index}`
                             ] = true;
@@ -120,7 +144,7 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
         } else {
             setCheckedItems({});
         }
-    }, [milestoneDetails, uploadedDocuments]);
+    }, [milestoneDetails, uploadedDocuments, accountChecklistStatuses]);
 
     useEffect(() => {
         if (
@@ -133,14 +157,17 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
         ) {
             return;
         }
-        if (milestoneOverallStatus === 'Complete' && !isCompletionStatusUpdated) {
+        if (
+            milestoneOverallStatus === "Complete" &&
+            !isCompletionStatusUpdated
+        ) {
             setIsCompletionStatusUpdated(true);
         }
 
         const allSubmilestonesComplete = Object.keys(milestoneDetails).every(
             (subMilestone) => {
                 const items = milestoneDetails[subMilestone];
-                if (!items || items.length === 0) return true; 
+                if (!items || items.length === 0) return true;
 
                 const checkedCount = items.filter(
                     (_, index) => checkedItems[`${subMilestone}-${index}`]
@@ -152,15 +179,27 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
         if (allSubmilestonesComplete) {
             const updateWorkOrderStatus = async () => {
                 try {
-                    await apiService.patch(`/work-orders/${workOrderId}/status-complete`);
+                    await apiService.patch(
+                        `/work-orders/${workOrderId}/status-complete`
+                    );
                     setIsCompletionStatusUpdated(true);
                 } catch (error) {
-                    console.error(`Failed to update work order ${workOrderId} status to complete:`, error);
+                    console.error(
+                        `Failed to update work order ${workOrderId} status to complete:`,
+                        error
+                    );
                 }
             };
             updateWorkOrderStatus();
         }
-    }, [milestoneDetails, checkedItems, workOrderId, accountId, isCompletionStatusUpdated, milestoneOverallStatus]);
+    }, [
+        milestoneDetails,
+        checkedItems,
+        workOrderId,
+        accountId,
+        isCompletionStatusUpdated,
+        milestoneOverallStatus,
+    ]);
 
     const toggleSubMilestone = (subMilestone) => {
         setExpandedSubMilestones((prev) => ({
@@ -355,13 +394,31 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                                                 checkedItems[
                                                     `${subMilestone}-${index}`
                                                 ];
-                                            const uploadedDoc = isChecked
-                                                ? uploadedDocuments.find(
-                                                      (doc) =>
-                                                          doc.file_title ===
-                                                          item
-                                                  )
-                                                : null;
+
+                                            // Check if completed via uploaded document
+                                            const uploadedDoc =
+                                                uploadedDocuments.find(
+                                                    (doc) =>
+                                                        doc.file_title === item
+                                                );
+
+                                            // Check if completed via manual checklist status
+                                            const checklistStatus =
+                                                accountChecklistStatuses.find(
+                                                    (status) =>
+                                                        status.checklist &&
+                                                        status.checklist
+                                                            .name === item &&
+                                                        status.is_completed
+                                                );
+
+                                            // Determine completion method
+                                            const completedViaDocument =
+                                                !!uploadedDoc;
+                                            const completedViaStatus =
+                                                !!checklistStatus &&
+                                                !completedViaDocument;
+
                                             return (
                                                 <div
                                                     key={itemKey}
@@ -399,7 +456,11 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                                                                         : "⚠️"}
                                                                 </span>
                                                                 {isChecked
-                                                                    ? "Document Uploaded"
+                                                                    ? completedViaDocument
+                                                                        ? "Document Uploaded"
+                                                                        : completedViaStatus
+                                                                        ? "Completed via Remarks"
+                                                                        : "Completed"
                                                                     : "Document Required"}
                                                             </div>
                                                         </div>
