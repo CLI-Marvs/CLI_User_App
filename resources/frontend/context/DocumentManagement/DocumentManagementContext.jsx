@@ -501,6 +501,7 @@ export const DocumentManagementProvider = ({ children }) => {
                                 due_date: wo.group_due_date,
                                 status: wo.group_status,
                                 updated_at: wo.group_updated_at,
+                                created_at: wo.group_created_at,
                                 work_orders: [],
                             };
                         }

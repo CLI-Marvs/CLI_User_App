@@ -175,12 +175,18 @@ const CrudModal = ({
                                                     type="checkbox"
                                                     name={field.name}
                                                     id={field.name}
-                                                    checked={Boolean(formData[field.name])}
+                                                    checked={Boolean(
+                                                        formData[field.name]
+                                                    )}
                                                     onChange={handleChange}
                                                     className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                                                 />
-                                                <label htmlFor={field.name} className="ml-2 text-sm text-gray-700">
-                                                    {field.checkboxLabel || "Enable this option"}
+                                                <label
+                                                    htmlFor={field.name}
+                                                    className="ml-2 text-sm text-gray-700"
+                                                >
+                                                    {field.checkboxLabel ||
+                                                        "Enable this option"}
                                                 </label>
                                             </div>
                                         ) : (
@@ -611,10 +617,10 @@ const AdminSettings = () => {
                             ? "/admin/settings/checklists"
                             : `/admin/settings/checklists/${item.id}`;
                     method = mode === "add" ? "post" : "put";
-                    body = { 
-                        name: formData.name, 
+                    body = {
+                        name: formData.name,
                         submilestone_id: parentId,
-                        requires_document: Boolean(formData.requires_document)
+                        requires_document: Boolean(formData.requires_document),
                     };
                     break;
                 default:
@@ -766,7 +772,8 @@ const AdminSettings = () => {
                         name: "requires_document",
                         label: "Document Requirement",
                         type: "checkbox",
-                        checkboxLabel: "This checklist item requires document upload",
+                        checkboxLabel:
+                            "This checklist item requires document upload",
                         helpText:
                             "Check this if users need to upload a document to complete this item",
                     },
@@ -1118,7 +1125,12 @@ const AdminSettings = () => {
                                                                                                 .checklists
                                                                                                 ?.length ||
                                                                                                 0}{" "}
-                                                                                            items
+                                                                                            {sub
+                                                                                                .checklists
+                                                                                                ?.length ===
+                                                                                            1
+                                                                                                ? "item"
+                                                                                                : "items"}
                                                                                         </span>
                                                                                     </div>
                                                                                     {sub.description && (
@@ -1231,21 +1243,41 @@ const AdminSettings = () => {
                                                                                                     <div className="flex flex-col">
                                                                                                         <div className="flex items-center space-x-2">
                                                                                                             <span className="text-sm text-gray-700">
-                                                                                                                {chk.name}
+                                                                                                                {
+                                                                                                                    chk.name
+                                                                                                                }
                                                                                                             </span>
                                                                                                             {chk.requires_document ? (
                                                                                                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
-                                                                                                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                                                                                        <path fillRule="evenodd" d="M3 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1v-3zM12 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1V4zM12 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-3z" clipRule="evenodd" />
+                                                                                                                    <svg
+                                                                                                                        className="w-3 h-3 mr-1"
+                                                                                                                        fill="currentColor"
+                                                                                                                        viewBox="0 0 20 20"
+                                                                                                                    >
+                                                                                                                        <path
+                                                                                                                            fillRule="evenodd"
+                                                                                                                            d="M3 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1v-3zM12 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1V4zM12 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-3z"
+                                                                                                                            clipRule="evenodd"
+                                                                                                                        />
                                                                                                                     </svg>
-                                                                                                                    Document Required
+                                                                                                                    Document
+                                                                                                                    Required
                                                                                                                 </span>
                                                                                                             ) : (
                                                                                                                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
-                                                                                                                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                                                                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                                                                                    <svg
+                                                                                                                        className="w-3 h-3 mr-1"
+                                                                                                                        fill="currentColor"
+                                                                                                                        viewBox="0 0 20 20"
+                                                                                                                    >
+                                                                                                                        <path
+                                                                                                                            fillRule="evenodd"
+                                                                                                                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                                                            clipRule="evenodd"
+                                                                                                                        />
                                                                                                                     </svg>
-                                                                                                                    Remarks Only
+                                                                                                                    Remarks
+                                                                                                                    Only
                                                                                                                 </span>
                                                                                                             )}
                                                                                                         </div>

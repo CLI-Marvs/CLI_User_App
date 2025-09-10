@@ -324,7 +324,7 @@ export default function PaginatedTable() {
     const [showTitlingMonitor, setShowTitlingMonitor] = useState(false);
     const [selectedRowDataForMonitor, setSelectedRowDataForMonitor] =
         useState(null);
-    
+
     // const [isPageLoading, setIsPageLoading] = useState(
     //     !masterListFilteredRows || masterListFilteredRows.length === 0
     // );
@@ -1206,168 +1206,210 @@ export default function PaginatedTable() {
                             ))}
                         </div>
                         <Card className="w-full overflow-hidden">
-                            {" "}
-                            <table className="w-full table-fixed text-left">
-                                <thead>
-                                    <tr>
-                                        {TABLE_HEAD.map(({ head, icon }) => (
-                                            <th
-                                                key={head}
-                                                className="border-b bg-[#175D5F] text-white h-[60px] cursor-pointer"
-                                                onClick={() => {
-                                                    const columnMap = {
-                                                        "Account Name":
-                                                            "account_name",
-                                                        "Property Details":
-                                                            "contract_no",
-                                                        Financing: "financing",
-                                                        Category: "category",
-                                                        "TO Year": "to_year",
-                                                        "TO Month": "to_month",
-                                                        "Takeout Date":
-                                                            "take_out_date",
-                                                        "DOU Expiry":
-                                                            "dou_expiry",
-                                                    };
-                                                    const col = columnMap[head];
-                                                    if (col) {
-                                                        if (
-                                                            sortColumn === col
-                                                        ) {
-                                                            setSortDirection(
-                                                                sortDirection ===
-                                                                    "asc"
-                                                                    ? "desc"
-                                                                    : "asc"
-                                                            );
-                                                        } else {
-                                                            setSortColumn(col);
-                                                            setSortDirection(
-                                                                "asc"
-                                                            );
-                                                        }
-                                                    }
-                                                }}
-                                            >
-                                                <div
-                                                    className={`flex items-center gap-2 ${
-                                                        head === "Financing"
-                                                            ? "justify-center pl-0"
-                                                            : "pl-4"
-                                                    }`}
-                                                >
-                                                    {icon}
-                                                    <Typography
-                                                        variant="small"
-                                                        className="!font-semibold text-base"
+                            <div
+                                style={{ height: "500px", overflow: "hidden" }}
+                            >
+                                <table className="w-full table-fixed text-left">
+                                    <thead className="sticky top-0 z-10">
+                                        <tr>
+                                            {TABLE_HEAD.map(
+                                                ({ head, icon }) => (
+                                                    <th
+                                                        key={head}
+                                                        className="border-b bg-[#175D5F] text-white h-[60px] cursor-pointer sticky top-0 z-10"
+                                                        onClick={() => {
+                                                            const columnMap = {
+                                                                "Account Name":
+                                                                    "account_name",
+                                                                "Property Details":
+                                                                    "contract_no",
+                                                                Financing:
+                                                                    "financing",
+                                                                Category:
+                                                                    "category",
+                                                                "TO Year":
+                                                                    "to_year",
+                                                                "TO Month":
+                                                                    "to_month",
+                                                                "Takeout Date":
+                                                                    "take_out_date",
+                                                                "DOU Expiry":
+                                                                    "dou_expiry",
+                                                            };
+                                                            const col =
+                                                                columnMap[head];
+                                                            if (col) {
+                                                                if (
+                                                                    sortColumn ===
+                                                                    col
+                                                                ) {
+                                                                    setSortDirection(
+                                                                        sortDirection ===
+                                                                            "asc"
+                                                                            ? "desc"
+                                                                            : "asc"
+                                                                    );
+                                                                } else {
+                                                                    setSortColumn(
+                                                                        col
+                                                                    );
+                                                                    setSortDirection(
+                                                                        "asc"
+                                                                    );
+                                                                }
+                                                            }
+                                                        }}
                                                     >
-                                                        {head}
-                                                    </Typography>
-                                                </div>
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {paginatedData &&
-                                    paginatedData.length > 0 ? (
-                                        paginatedData.map(
-                                            (
-                                                {
-                                                    id,
-                                                    user,
-                                                    contractNumber,
-                                                    propertyName,
-                                                    unitNumber,
-                                                    finance,
-                                                    to_year,
-                                                    to_month,
-                                                    takeOutdate,
-                                                    douExpiry,
-                                                },
-                                                index
-                                            ) => {
-                                                const isLast =
-                                                    index ===
-                                                    masterListCurrentData.length -
-                                                        1;
-                                                const classes = isLast
-                                                    ? "p-4"
-                                                    : "p-4 border-b border-gray-300";
-
-                                                const globalIndex =
-                                                    masterListIndexOfFirstRow +
-                                                    index;
-
-                                                const isChecked =
-                                                    checkedRows[contractNumber];
-
-                                                const isInMasterList =
-                                                    masterListContracts.has(
-                                                        contractNumber
-                                                    );
-
-                                                return (
-                                                    <tr
-                                                        key={`${contractNumber}-${globalIndex}`}
-                                                        className={`${classes} ${
-                                                            isChecked
-                                                                ? "bg-slate-200 text-[#348017] text-base font-normal"
-                                                                : "text-[#348017] text-base font-normal"
-                                                        } cursor-pointer`}
-                                                        onClick={() =>
-                                                            setIsChecked(
-                                                                !isChecked
-                                                            )
-                                                        }
-                                                    >
-                                                        <td className={classes}>
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="flex flex-col items-start">
-                                                                    <span className="text-base font-normal">
-                                                                        {user}
-                                                                    </span>
-                                                                    <button
-                                                                        className="text-sm underline hover:text-[#067AC5]"
-                                                                        onClick={(
-                                                                            event
-                                                                        ) => {
-                                                                            event.stopPropagation();
-                                                                            handleOpenTitlingMonitor(
-                                                                                user,
-                                                                                contractNumber,
-                                                                                propertyName,
-                                                                                unitNumber,
-                                                                                id
-                                                                            );
-                                                                        }}
-                                                                    >
-                                                                        View
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </td>
-
-                                                        <td className={classes}>
+                                                        <div
+                                                            className={`flex items-center gap-2 ${
+                                                                head ===
+                                                                "Financing"
+                                                                    ? "justify-center pl-0"
+                                                                    : "pl-4"
+                                                            }`}
+                                                        >
+                                                            {icon}
                                                             <Typography
                                                                 variant="small"
-                                                                className="text-base font-normal"
+                                                                className="!font-semibold text-base"
                                                             >
-                                                                {contractNumber}
-                                                                <br />
-                                                                {propertyName}
-                                                                <br />
-                                                                {unitNumber}
+                                                                {head}
                                                             </Typography>
-                                                        </td>
-                                                        <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="text-base font-normal text-center"
+                                                        </div>
+                                                    </th>
+                                                )
+                                            )}
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        {paginatedData &&
+                                        paginatedData.length > 0 ? (
+                                            paginatedData.map(
+                                                (
+                                                    {
+                                                        id,
+                                                        user,
+                                                        contractNumber,
+                                                        propertyName,
+                                                        unitNumber,
+                                                        finance,
+                                                        to_year,
+                                                        to_month,
+                                                        takeOutdate,
+                                                        douExpiry,
+                                                    },
+                                                    index
+                                                ) => {
+                                                    const isLast =
+                                                        index ===
+                                                        masterListCurrentData.length -
+                                                            1;
+                                                    const classes = isLast
+                                                        ? "p-4"
+                                                        : "p-4 border-b border-gray-300";
+
+                                                    const globalIndex =
+                                                        masterListIndexOfFirstRow +
+                                                        index;
+
+                                                    const isChecked =
+                                                        checkedRows[
+                                                            contractNumber
+                                                        ];
+
+                                                    const isInMasterList =
+                                                        masterListContracts.has(
+                                                            contractNumber
+                                                        );
+
+                                                    return (
+                                                        <tr
+                                                            key={`${contractNumber}-${globalIndex}`}
+                                                            className={`${classes} ${
+                                                                isChecked
+                                                                    ? "bg-slate-200 text-[#348017] text-base font-normal"
+                                                                    : "text-[#348017] text-base font-normal"
+                                                            } cursor-pointer`}
+                                                            onClick={() =>
+                                                                setIsChecked(
+                                                                    !isChecked
+                                                                )
+                                                            }
+                                                        >
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
                                                             >
-                                                                <span
-                                                                    className={`w-[80px] h-[30px] px-[12px] py-1 rounded-[50px] inline-block font-montserrat
+                                                                <div className="flex items-center gap-2">
+                                                                    <div className="flex flex-col items-start">
+                                                                        <span className="text-base font-normal">
+                                                                            {
+                                                                                user
+                                                                            }
+                                                                        </span>
+                                                                        <button
+                                                                            className="text-sm underline hover:text-[#067AC5]"
+                                                                            onClick={(
+                                                                                event
+                                                                            ) => {
+                                                                                event.stopPropagation();
+                                                                                handleOpenTitlingMonitor(
+                                                                                    user,
+                                                                                    contractNumber,
+                                                                                    propertyName,
+                                                                                    unitNumber,
+                                                                                    id
+                                                                                );
+                                                                            }}
+                                                                        >
+                                                                            View
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </td>
+
+                                                            <td
+                                                                className={
+                                                                    classes +
+                                                                    " max-w-[180px] truncate whitespace-nowrap overflow-hidden"
+                                                                }
+                                                            >
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="text-base font-normal max-w-[180px] truncate whitespace-nowrap overflow-hidden"
+                                                                >
+                                                                    <span className="max-w-[180px] inline-block truncate align-bottom text-xs font-normal">
+                                                                        {
+                                                                            contractNumber
+                                                                        }
+                                                                    </span>
+                                                                    <br />
+                                                                    <span className="max-w-[180px] inline-block truncate align-bottom text-xs font-normal">
+                                                                        {
+                                                                            propertyName
+                                                                        }
+                                                                    </span>
+                                                                    <br />
+                                                                    <span className="max-w-[180px] inline-block truncate align-bottom text-xs font-normal">
+                                                                        {
+                                                                            unitNumber
+                                                                        }
+                                                                    </span>
+                                                                </Typography>
+                                                            </td>
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="text-base font-normal text-center"
+                                                                >
+                                                                    <span
+                                                                        className={`w-[80px] h-[30px] px-[12px] py-1 rounded-[50px] inline-block font-montserrat
                                                 ${
                                                     financeColorClasses[
                                                         finance
@@ -1375,59 +1417,80 @@ export default function PaginatedTable() {
                                                     "bg-gray-100 text-gray-700"
                                                 }
                                             `}
+                                                                    >
+                                                                        {
+                                                                            finance
+                                                                        }{" "}
+                                                                    </span>
+                                                                </Typography>
+                                                            </td>
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
+                                                            >
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="text-base font-normal text-center"
                                                                 >
-                                                                    {finance}{" "}
-                                                                </span>
-                                                            </Typography>
-                                                        </td>
-                                                        <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="text-base font-normal text-center"
+                                                                    {to_year}
+                                                                </Typography>
+                                                            </td>
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
                                                             >
-                                                                {to_year}
-                                                            </Typography>
-                                                        </td>
-                                                        <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="text-base font-normal text-center"
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="text-base font-normal text-center"
+                                                                >
+                                                                    {to_month}
+                                                                </Typography>
+                                                            </td>
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
                                                             >
-                                                                {to_month}
-                                                            </Typography>
-                                                        </td>
-                                                        <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="text-base font-normal"
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="text-base font-normal"
+                                                                >
+                                                                    {
+                                                                        takeOutdate
+                                                                    }{" "}
+                                                                </Typography>
+                                                            </td>
+                                                            <td
+                                                                className={
+                                                                    classes
+                                                                }
                                                             >
-                                                                {takeOutdate}{" "}
-                                                            </Typography>
-                                                        </td>
-                                                        <td className={classes}>
-                                                            <Typography
-                                                                variant="small"
-                                                                className="text-base font-normal"
-                                                            >
-                                                                {douExpiry}
-                                                            </Typography>
-                                                        </td>
-                                                    </tr>
-                                                );
-                                            }
-                                        )
-                                    ) : (
-                                        <tr>
-                                            <td
-                                                colSpan={TABLE_HEAD.length}
-                                                className="p-4 text-center text-gray-500"
-                                            >
-                                                No records found
-                                            </td>
-                                        </tr>
-                                    )}
-                                </tbody>
-                            </table>
+                                                                <Typography
+                                                                    variant="small"
+                                                                    className="text-base font-normal"
+                                                                >
+                                                                    {douExpiry}
+                                                                </Typography>
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                }
+                                            )
+                                        ) : (
+                                            <tr>
+                                                <td
+                                                    colSpan={TABLE_HEAD.length}
+                                                    className="p-4 text-center text-gray-500"
+                                                >
+                                                    No records found
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </tbody>
+                                </table>
+                            </div>
                             <CardFooter className="flex items-center justify-end border-t border-blue-gray-50 p-4 gap-2">
                                 {" "}
                                 <ReactPaginate

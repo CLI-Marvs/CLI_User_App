@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
 import apiService from "../../../component/servicesApi/apiService";
-import { useStateContext } from "../../../context/contextprovider";
 import { useDocumentManagementContext } from "../../../context/DocumentManagement/DocumentManagementContext";
 import DatePicker from "react-datepicker";
 import SearchableDropdown from "./SearchableDropdown";
@@ -24,8 +23,7 @@ const EditWorkOrderModal = ({
         fetchAccounts,
         fetchWorkOrders,
         user,
-    } = useStateContext();
-    const docMgmt = useDocumentManagementContext();
+    } = useDocumentManagementContext();
 
     useEffect(() => {
         fetchAccounts();
@@ -70,52 +68,34 @@ const EditWorkOrderModal = ({
     const handleSubmit = async (event) => {
         event.preventDefault();
 
+        // No need to check for assignee or work order type, only accounts and due date are editable
+
         let formattedDueDate = null;
         if (dueDate) {
             formattedDueDate = dueDate.toISOString().slice(0, 10);
         }
 
-        const formData = {
-            work_order_id: workOrder.id,
-            work_order: selectedWorkOrderType?.type_name,
-            account_ids: selectedAccounts.map((account) => account.id),
-            assigned_to_user_id: selectedAssignee?.id,
-            work_order_type_id: selectedWorkOrderType?.id,
-            work_order_deadline: formattedDueDate,
-            status: workOrder.status || "Pending",
-            description: workOrder.description || "",
-            priority: workOrder.priority || "Medium",
-            updated_by_user_id: user.id,
-        };
-
         try {
-            const response = await apiService.put(
-                `/work-orders/${workOrder.work_order_id}`,
-                formData
-            );
-            if (
-                response.status === 200 ||
-                response.data?.message === "Work order updated successfully."
-            ) {
-                const logEntry = {
-                    work_order_id: workOrder.work_order_id,
-                    log_type: selectedWorkOrderType?.type_name,
-                    log_message: `Work Order #${workOrder.work_order_id} has been updated.`,
-                    account_ids: selectedAccounts.map((account) => account.id),
-                    created_by_user_id: user.id,
-                    assigned_user_id: selectedAssignee?.id,
-                };
-
-                await apiService.post("/work-order-logs", logEntry);
-
-                fetchWorkOrders();
-                if (onWorkOrderUpdated) onWorkOrderUpdated();
-                onClose();
-            } else {
-                console.error("Error updating work order:", response);
+            const groupId = workOrder.work_order_group_id;
+            if (groupId && formattedDueDate) {
+                await apiService.put(
+                    `/work-orders/group/${groupId}/bulk-update-deadline`,
+                    {
+                        work_order_deadline: formattedDueDate,
+                        account_ids: selectedAccounts.map(
+                            (account) => account.id
+                        ),
+                    }
+                );
             }
+            fetchWorkOrders();
+            if (onWorkOrderUpdated) onWorkOrderUpdated();
+            onClose();
         } catch (error) {
-            console.error("Error updating work order:", error.message || error);
+            console.error(
+                "Error updating work orders and group:",
+                error.message || error
+            );
         }
     };
     if (!isOpen) return null;
@@ -138,16 +118,13 @@ const EditWorkOrderModal = ({
                             </h3>
                             <h2 className="text-2xl font-semibold text-custom-bluegreen mt-1">
                                 Work Order:{" "}
-                                <span className="font-normal text-custom-lightgreen">
-                                    {workOrder?.work_order || "N/A"}
-                                </span>
+                                {workOrder?.work_order_group_id && (
+                                    <div className="mt-1 bg-[#067AC5] text-white font-normal text-xs inline-block px-4 py-1 rounded-full">
+                                         No.
+                                        {workOrder.work_order_group_id}
+                                    </div>
+                                )}
                             </h2>
-                            {workOrder?.work_order_id && (
-                                <div className="mt-1 bg-[#067AC5] text-white font-normal text-xs inline-block px-4 py-1 rounded-full">
-                                    Order No. 1000
-                                    {workOrder.work_order_group_id}
-                                </div>
-                            )}
                         </div>
                         <button
                             onClick={onClose}

@@ -128,6 +128,9 @@ class WorkOrderController extends Controller
                 : null;
             $arr['group_status'] = $wo->workOrderGroup ? $wo->workOrderGroup->status : null;
             $arr['group_updated_at'] = $wo->workOrderGroup ? $wo->workOrderGroup->updated_at : null;
+            $arr['group_created_at'] = $wo->workOrderGroup && $wo->workOrderGroup->created_at
+                ? $wo->workOrderGroup->created_at->format('Y-m-d')
+                : null;
             return $arr;
         });
 
@@ -186,12 +189,24 @@ class WorkOrderController extends Controller
             'status' => ['nullable', 'string', Rule::in(['Pending', 'Assigned', 'In Progress', 'Complete', 'Cancelled'])],
             'description' => 'nullable|string',
             'priority' => ['nullable', 'string', Rule::in(['Low', 'Medium', 'High', 'Urgent'])],
+            // Optionally validate these:
+            // 'work_order_group_id' => 'nullable|integer|exists:work_order_groups,id',
+            // 'due_date' => 'nullable|date',
         ]);
 
         $workOrder->update(collect($validatedData)->except('account_ids')->toArray());
 
         if (isset($validatedData['account_ids'])) {
             $workOrder->accounts()->sync($validatedData['account_ids']);
+        }
+
+        // Update group due date if provided
+        if ($request->has('work_order_group_id') && $request->has('due_date')) {
+            $group = \App\Models\WorkOrderGroup::find($request->input('work_order_group_id'));
+            if ($group) {
+                $group->due_date = $request->input('due_date');
+                $group->save();
+            }
         }
 
         return response()->json($workOrder->load(['accounts', 'assignedTo', 'workOrderType']));
@@ -756,11 +771,42 @@ class WorkOrderController extends Controller
             $arr = $group->toArray();
             // workOrders relation is camelCase in Eloquent, but you want work_orders in API
             $arr['work_orders'] = $arr['work_orders'] ?? ($group->workOrders ? $group->workOrders->toArray() : []);
+            // Format created_at for consistency with the index method
+            $arr['created_at'] = $group->created_at ? $group->created_at->format('Y-m-d') : null;
             return $arr;
         });
 
         Log::info('Retrieved work order groups:', ['current_count' => $workOrderGroups->count(), 'total' => $workOrderGroups->total()]);
 
         return response()->json($workOrderGroups);
+    }
+    /**
+     * Bulk update work_order_deadline and accounts for all work orders in a group
+     */
+    public function bulkUpdateDeadline(Request $request, $groupId)
+    {
+        $request->validate([
+            'work_order_deadline' => 'required|date',
+            'account_ids' => 'nullable|array',
+            'account_ids.*' => 'integer|exists:taken_out_accounts,id',
+        ]);
+
+        $workOrders = \App\Models\WorkOrder::where('work_order_group_id', $groupId)->get();
+        foreach ($workOrders as $workOrder) {
+            $workOrder->work_order_deadline = $request->work_order_deadline;
+            if ($request->has('account_ids')) {
+                $workOrder->accounts()->sync($request->account_ids);
+            }
+            $workOrder->save();
+        }
+
+        // Update group due date
+        $group = \App\Models\WorkOrderGroup::find($groupId);
+        if ($group) {
+            $group->due_date = $request->work_order_deadline;
+            $group->save();
+        }
+
+        return response()->json(['message' => 'All deadlines and accounts updated.']);
     }
 }

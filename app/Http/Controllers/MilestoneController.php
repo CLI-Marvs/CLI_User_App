@@ -53,7 +53,8 @@ class MilestoneController extends Controller
             $checklistStructure[$subMilestoneKey] = $submilestone->checklists->pluck('name')->toArray();
         }
 
-        $uploadedDocuments = []; 
+        $uploadedDocuments = [];
+        $accountChecklistStatuses = [];
         if ($accountId && $workOrderIdInput && is_numeric($workOrderIdInput) && $workOrderIdInput !== 'TBD' && $workOrderIdInput !== 'N/A') {
             $numericWorkOrderId = (int) $workOrderIdInput;
 
@@ -64,9 +65,24 @@ class MilestoneController extends Controller
                 })
                 ->whereNotNull('file_title')
                 ->where('file_title', '!=', '')
-                ->select('file_title', 'file_path', 'file_name') 
-                ->get() 
+                ->select('file_title', 'file_path', 'file_name')
+                ->get()
                 ->toArray();
+
+            // Get account checklist statuses for this milestone
+            $checklistIds = [];
+            foreach ($submilestonesFromDb as $submilestone) {
+                $checklistIds = array_merge($checklistIds, $submilestone->checklists->pluck('id')->toArray());
+            }
+
+            if (!empty($checklistIds)) {
+                $accountChecklistStatuses = AccountChecklistStatus::where('account_id', $accountId)
+                    ->whereIn('checklist_id', $checklistIds)
+                    ->with(['checklist:id,name,submilestone_id'])
+                    ->select('checklist_id', 'is_completed', 'completed_at')
+                    ->get()
+                    ->toArray();
+            }
         }
 
         $milestoneOverallStatus = null;
@@ -126,6 +142,7 @@ class MilestoneController extends Controller
         return response()->json([
             'checklistStructure' => $checklistStructure,
             'uploadedDocuments' => $uploadedDocuments,
+            'accountChecklistStatuses' => $accountChecklistStatuses,
             'milestoneOverallStatus' => $milestoneOverallStatus,
         ]);
     }
