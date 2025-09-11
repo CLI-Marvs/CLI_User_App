@@ -7,6 +7,7 @@ use App\Models\Submilestone;
 use App\Models\Checklist;
 use App\Models\WorkOrder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 
 class WorkOrderTypeSettingsController extends Controller
 {
@@ -35,8 +36,24 @@ class WorkOrderTypeSettingsController extends Controller
 
             $workOrderType = WorkOrderType::create($validated);
             return response()->json($workOrderType, 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Handle validation errors specifically
+            $errors = $e->errors();
+
+            // Check if the error is due to duplicate type_name
+            if (isset($errors['type_name']) && strpos($errors['type_name'][0], 'already been taken') !== false) {
+                return response()->json([
+                    'error' => 'A work order type with the name "' . $request->type_name . '" already exists. Please choose a different name.',
+                    'field_errors' => $errors
+                ], 422);
+            }
+
+            return response()->json([
+                'error' => 'Validation failed: ' . implode(', ', Arr::flatten($errors)),
+                'field_errors' => $errors
+            ], 422);
         } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Failed to create work order type: ' . $e->getMessage()], 500);
         }
     }
 

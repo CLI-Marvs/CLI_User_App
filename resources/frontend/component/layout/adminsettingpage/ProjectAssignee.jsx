@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import apiService from "../../../component/servicesApi/apiService";
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import ReactPaginate from "react-paginate";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
 const ProjectAssigneeComponent = () => {
     const [projects, setProjects] = useState([]);
@@ -12,7 +14,7 @@ const ProjectAssigneeComponent = () => {
     const [loadingStates, setLoadingStates] = useState({
         list: true,
         assign: false,
-        remove: null, 
+        remove: null,
         submilestones: false,
     });
     const [searchTerm, setSearchTerm] = useState("");
@@ -21,6 +23,10 @@ const ProjectAssigneeComponent = () => {
     const [expandedMilestones, setExpandedMilestones] = useState({}); // Tracks expanded milestone rows
     const [projectMilestones, setProjectMilestones] = useState({});
     const [assignees, setAssignees] = useState({});
+
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10); // Show 10 projects per page
 
     const fetchProjects = useCallback(() => {
         setLoadingStates((s) => ({ ...s, list: true }));
@@ -65,6 +71,11 @@ const ProjectAssigneeComponent = () => {
         fetchEmployees();
     }, [fetchProjects, fetchEmployees]);
 
+    // Reset to first page when projects data changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [projects.length]);
+
     const fetchSubmilestonesForProject = useCallback((projectName) => {
         if (!projectName) {
             setProjectSubmilestones([]);
@@ -77,7 +88,10 @@ const ProjectAssigneeComponent = () => {
                 setProjectSubmilestones(res.data);
             })
             .catch((err) => {
-                console.error(`Failed to fetch submilestones for ${projectName}`, err);
+                console.error(
+                    `Failed to fetch submilestones for ${projectName}`,
+                    err
+                );
                 setProjectSubmilestones([]);
             })
             .finally(() => {
@@ -95,7 +109,9 @@ const ProjectAssigneeComponent = () => {
         const key = `${projectName}-${submilestoneId}`;
         try {
             const response = await apiService.get(
-                `/projects/${encodeURIComponent(projectName)}/milestones/${submilestoneId}/assignees`
+                `/projects/${encodeURIComponent(
+                    projectName
+                )}/milestones/${submilestoneId}/assignees`
             );
             setAssignees((prev) => ({
                 ...prev,
@@ -113,13 +129,26 @@ const ProjectAssigneeComponent = () => {
                 const isExpanded = !prev[projectName];
                 if (isExpanded && !projectMilestones[projectName]) {
                     apiService
-                        .get(`/projects/${encodeURIComponent(projectName)}/submilestones`)
+                        .get(
+                            `/projects/${encodeURIComponent(
+                                projectName
+                            )}/submilestones`
+                        )
                         .then((res) => {
-                            setProjectMilestones((prev) => ({ ...prev, [projectName]: res.data }));
+                            setProjectMilestones((prev) => ({
+                                ...prev,
+                                [projectName]: res.data,
+                            }));
                         })
                         .catch((err) => {
-                            console.error(`Failed to fetch milestones for project row ${projectName}`, err);
-                            setProjectMilestones((prev) => ({ ...prev, [projectName]: [] }));
+                            console.error(
+                                `Failed to fetch milestones for project row ${projectName}`,
+                                err
+                            );
+                            setProjectMilestones((prev) => ({
+                                ...prev,
+                                [projectName]: [],
+                            }));
                         });
                 }
                 return { ...prev, [projectName]: isExpanded };
@@ -173,12 +202,19 @@ const ProjectAssigneeComponent = () => {
     }, []);
 
     const handleAssign = useCallback(() => {
-        if (!selectedProject || !selectedSubmilestone || selectedEmployees.length === 0) return;
+        if (
+            !selectedProject ||
+            !selectedSubmilestone ||
+            selectedEmployees.length === 0
+        )
+            return;
 
         setLoadingStates((s) => ({ ...s, assign: true }));
         apiService
             .put(
-                `/projects/${encodeURIComponent(selectedProject)}/milestones/${selectedSubmilestone}/assignees`,
+                `/projects/${encodeURIComponent(
+                    selectedProject
+                )}/milestones/${selectedSubmilestone}/assignees`,
                 {
                     employee_ids: selectedEmployees,
                 }
@@ -187,31 +223,40 @@ const ProjectAssigneeComponent = () => {
                 setSelectedEmployees([]);
                 setSearchTerm("");
                 setIsDropdownOpen(false);
- 
+
                 const key = `${selectedProject}-${selectedSubmilestone}`;
                 const newAssignees = res.data.assignees;
- 
+
                 // Update the detailed assignee list for the expanded milestone view
                 setAssignees((prev) => ({
                     ...prev,
                     [key]: newAssignees,
                 }));
- 
+
                 // Update the specific milestone's count within the projectMilestones state
                 // This will make the count update in the UI without a full refresh.
                 setProjectMilestones((prev) => {
                     const currentMilestones = prev[selectedProject] || [];
-                    const updatedMilestones = currentMilestones.map((m) => (m.id.toString() === selectedSubmilestone ? { ...m, assignees_count: newAssignees.length } : m));
+                    const updatedMilestones = currentMilestones.map((m) =>
+                        m.id.toString() === selectedSubmilestone
+                            ? { ...m, assignees_count: newAssignees.length }
+                            : m
+                    );
                     return { ...prev, [selectedProject]: updatedMilestones };
                 });
- 
+
                 fetchProjects(); // Refetch projects to update the total assignee count for the project row
             })
             .catch((err) => {
                 console.error("Failed to assign employees", err);
             })
             .finally(() => setLoadingStates((s) => ({ ...s, assign: false })));
-    }, [selectedProject, selectedSubmilestone, selectedEmployees, fetchProjects]);
+    }, [
+        selectedProject,
+        selectedSubmilestone,
+        selectedEmployees,
+        fetchProjects,
+    ]);
 
     const employeeMap = useMemo(() => {
         return employees.reduce((acc, emp) => {
@@ -221,14 +266,25 @@ const ProjectAssigneeComponent = () => {
     }, [employees]);
 
     const selectedEmployeeDetails = useMemo(() => {
-        return selectedEmployees
-            .map((id) => employeeMap[id])
-            .filter(Boolean);
+        return selectedEmployees.map((id) => employeeMap[id]).filter(Boolean);
     }, [selectedEmployees, employeeMap]);
 
     const filteredEmployees = employees.filter((employee) =>
         employee.fullname.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    // Pagination calculations
+    const totalPages = Math.ceil(projects.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentProjects = projects.slice(startIndex, endIndex);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        // Close all expanded rows when changing pages
+        setExpandedProjects({});
+        setExpandedMilestones({});
+    };
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
@@ -240,7 +296,8 @@ const ProjectAssigneeComponent = () => {
                             Project Assignee Management
                         </h1>
                         <p className="mt-2 text-sm text-gray-700">
-                            Assign employees to specific milestones within a project.
+                            Assign employees to specific milestones within a
+                            project.
                         </p>
                     </div>
                 </div>
@@ -268,7 +325,9 @@ const ProjectAssigneeComponent = () => {
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
                                     disabled={loadingStates.assign}
                                 >
-                                    <option value="">Select a project...</option>
+                                    <option value="">
+                                        Select a project...
+                                    </option>
                                     {projects.map((p) => (
                                         <option
                                             key={p.property_name}
@@ -292,22 +351,25 @@ const ProjectAssigneeComponent = () => {
                                         setSelectedSubmilestone(e.target.value)
                                     }
                                     className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                    disabled={!selectedProject || loadingStates.submilestones || loadingStates.assign}
+                                    disabled={
+                                        !selectedProject ||
+                                        loadingStates.submilestones ||
+                                        loadingStates.assign
+                                    }
                                 >
                                     <option value="">
-                                        {loadingStates.submilestones ? "Loading milestones..." : "Select a milestone..."}
+                                        {loadingStates.submilestones
+                                            ? "Loading milestones..."
+                                            : "Select a milestone..."}
                                     </option>
                                     {projectSubmilestones.map((sm) => (
-                                        <option
-                                            key={sm.id}
-                                            value={sm.id}
-                                        >
-                                            {sm.work_order_type?.type_name} - {sm.name}
+                                        <option key={sm.id} value={sm.id}>
+                                            {sm.work_order_type?.type_name} -{" "}
+                                            {sm.name}
                                         </option>
                                     ))}
                                 </select>
                             </div>
-
 
                             {/* Employee Selection */}
                             <div className="space-y-2">
@@ -316,6 +378,21 @@ const ProjectAssigneeComponent = () => {
                                     <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <svg
+                                            className="h-4 w-4 text-gray-400"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                            />
+                                        </svg>
+                                    </div>
                                     <input
                                         type="text"
                                         placeholder="Search employees..."
@@ -324,35 +401,134 @@ const ProjectAssigneeComponent = () => {
                                             setSearchTerm(e.target.value)
                                         }
                                         onFocus={() => setIsDropdownOpen(true)}
-                                        className="w-full px-3 py-2 pl-10 border border-gray-300 rounded-md"
+                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
                                         disabled={loadingStates.assign}
                                     />
+                                    {searchTerm && (
+                                        <button
+                                            onClick={() => {
+                                                setSearchTerm("");
+                                                setIsDropdownOpen(false);
+                                            }}
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                                        >
+                                            <svg
+                                                className="h-4 w-4"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </button>
+                                    )}
                                 </div>
                                 {isDropdownOpen && (
                                     <div className="relative">
-                                        <div className="absolute z-10 w-full bg-white border rounded-md shadow-lg max-h-60 overflow-y-auto">
-                                            {filteredEmployees.map((emp) => (
-                                                <label
-                                                    key={emp.id}
-                                                    className="px-3 py-2 cursor-pointer hover:bg-blue-50 flex items-center space-x-2"
-                                                >
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedEmployees.includes(
+                                        <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto backdrop-blur-sm">
+                                            <div className="sticky top-0 bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-2 border-b border-gray-200">
+                                                <p className="text-xs font-medium text-gray-700 uppercase tracking-wide">
+                                                    Select Employees (
+                                                    {filteredEmployees.length}{" "}
+                                                    available)
+                                                </p>
+                                            </div>
+                                            {filteredEmployees.length === 0 ? (
+                                                <div className="px-3 py-4 text-center text-gray-500">
+                                                    <svg
+                                                        className="w-8 h-8 mx-auto mb-2 text-gray-300"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={1.5}
+                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                                        />
+                                                    </svg>
+                                                    <p className="text-sm">
+                                                        No employees found
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                filteredEmployees.map((emp) => (
+                                                    <label
+                                                        key={emp.id}
+                                                        className="group px-3 py-3 cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
+                                                    >
+                                                        <div className="relative">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={selectedEmployees.includes(
+                                                                    emp.id.toString()
+                                                                )}
+                                                                onChange={() =>
+                                                                    handleEmployeeToggle(
+                                                                        emp.id
+                                                                    )
+                                                                }
+                                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
+                                                            />
+                                                            {selectedEmployees.includes(
+                                                                emp.id.toString()
+                                                            ) && (
+                                                                <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                                            )}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <div className="flex items-center space-x-2">
+                                                                <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
+                                                                    {emp.fullname
+                                                                        .split(
+                                                                            " "
+                                                                        )
+                                                                        .map(
+                                                                            (
+                                                                                n
+                                                                            ) =>
+                                                                                n[0]
+                                                                        )
+                                                                        .join(
+                                                                            ""
+                                                                        )
+                                                                        .toUpperCase()
+                                                                        .slice(
+                                                                            0,
+                                                                            2
+                                                                        )}
+                                                                </div>
+                                                                <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
+                                                                    {
+                                                                        emp.fullname
+                                                                    }
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        {selectedEmployees.includes(
                                                             emp.id.toString()
+                                                        ) && (
+                                                            <div className="flex-shrink-0">
+                                                                <svg
+                                                                    className="w-4 h-4 text-green-500"
+                                                                    fill="currentColor"
+                                                                    viewBox="0 0 20 20"
+                                                                >
+                                                                    <path
+                                                                        fillRule="evenodd"
+                                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                        clipRule="evenodd"
+                                                                    />
+                                                                </svg>
+                                                            </div>
                                                         )}
-                                                        onChange={() =>
-                                                            handleEmployeeToggle(
-                                                                emp.id
-                                                            )
-                                                        }
-                                                        className="h-4 w-4 text-blue-600 rounded"
-                                                    />
-                                                    <span className="flex-1 select-none">
-                                                        {emp.fullname}
-                                                    </span>
-                                                </label>
-                                            ))}
+                                                    </label>
+                                                ))
+                                            )}
                                         </div>
                                     </div>
                                 )}
@@ -363,16 +539,67 @@ const ProjectAssigneeComponent = () => {
                                     />
                                 )}
                                 {selectedEmployeeDetails.length > 0 && (
-                                    <div className="mt-2 space-y-2">
+                                    <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                                        <div className="flex items-center justify-between mb-2">
+                                            <p className="text-xs font-medium text-blue-700 uppercase tracking-wide">
+                                                Selected (
+                                                {selectedEmployeeDetails.length}
+                                                )
+                                            </p>
+                                            <button
+                                                onClick={() =>
+                                                    setSelectedEmployees([])
+                                                }
+                                                className="text-xs text-red-600 hover:text-red-800 font-medium transition-colors duration-200"
+                                                disabled={loadingStates.assign}
+                                            >
+                                                Clear All
+                                            </button>
+                                        </div>
                                         <div className="flex flex-wrap gap-2">
                                             {selectedEmployeeDetails.map(
                                                 (emp) => (
-                                                    <span
+                                                    <div
                                                         key={emp.id}
-                                                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
+                                                        className="group inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-white border border-blue-300 text-blue-800 shadow-sm hover:shadow-md transition-all duration-200"
                                                     >
-                                                        {emp.fullname}
-                                                    </span>
+                                                        <div className="w-5 h-5 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold mr-2">
+                                                            {emp.fullname
+                                                                .split(" ")
+                                                                .map(
+                                                                    (n) => n[0]
+                                                                )
+                                                                .join("")
+                                                                .toUpperCase()
+                                                                .slice(0, 2)}
+                                                        </div>
+                                                        <span className="mr-1">
+                                                            {emp.fullname}
+                                                        </span>
+                                                        <button
+                                                            onClick={() =>
+                                                                handleEmployeeToggle(
+                                                                    emp.id
+                                                                )
+                                                            }
+                                                            className="ml-1 text-blue-600 hover:text-red-600 transition-colors duration-200"
+                                                            disabled={
+                                                                loadingStates.assign
+                                                            }
+                                                        >
+                                                            <svg
+                                                                className="w-3 h-3"
+                                                                fill="currentColor"
+                                                                viewBox="0 0 20 20"
+                                                            >
+                                                                <path
+                                                                    fillRule="evenodd"
+                                                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                    clipRule="evenodd"
+                                                                />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
                                                 )
                                             )}
                                         </div>
@@ -403,9 +630,18 @@ const ProjectAssigneeComponent = () => {
                     {/* Projects Table */}
                     <div className="lg:col-span-2 bg-white shadow-sm border rounded-lg">
                         <div className="px-6 py-4 border-b">
-                            <h3 className="text-lg font-semibold text-gray-900">
-                                Current Project Assignments
-                            </h3>
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-lg font-semibold text-gray-900">
+                                    Current Project Assignments
+                                </h3>
+                                {projects.length > 0 && (
+                                    <div className="text-sm text-gray-500">
+                                        Showing {startIndex + 1}-
+                                        {Math.min(endIndex, projects.length)} of{" "}
+                                        {projects.length} projects
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div className="overflow-hidden">
                             {loadingStates.list ? (
@@ -413,131 +649,270 @@ const ProjectAssigneeComponent = () => {
                                     Loading projects...
                                 </div>
                             ) : projects.length > 0 ? (
-                                <div className="overflow-x-auto">
-                                    <table className="min-w-full divide-y divide-gray-200">
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                                    Project Name
-                                                </th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                                    Assignees
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white divide-y divide-gray-200">
-                                            {projects.map((p) => (
-                                                <React.Fragment
-                                                    key={p.property_name}
-                                                >
-                                                    <tr
-                                                        className="hover:bg-gray-50 cursor-pointer"
-                                                        onClick={() =>
-                                                            handleProjectRowClick(
-                                                                p.property_name
-                                                            )
-                                                        }
+                                <>
+                                    <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                                        <table className="min-w-full divide-y divide-gray-200">
+                                            <thead className="bg-gray-50 sticky top-0 z-10">
+                                                <tr>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                        Project Name
+                                                    </th>
+                                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                                        Assignees
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="bg-white divide-y divide-gray-200">
+                                                {currentProjects.map((p) => (
+                                                    <React.Fragment
+                                                        key={p.property_name}
                                                     >
-                                                        <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
-                                                            {p.property_name}
-                                                        </td>
-                                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                                            {assignees[
-                                                                p.property_name
-                                                            ] !== undefined
-                                                                ? `${
-                                                                      assignees[
-                                                                          p
-                                                                              .property_name
-                                                                      ].length
-                                                                  } assignee(s)`
-                                                                : `${
-                                                                      p.assignees_count ??
-                                                                      0
-                                                                  } assignee(s)`}
-                                                        </td>
-                                                    </tr>
-                                                    {expandedProjects[
-                                                        p.property_name
-                                                    ] && (
-                                                        <tr>
-                                                            <td
-                                                                colSpan="2"
-                                                                className="p-0 bg-slate-50"
-                                                            >
-                                                                <div className="p-4">
-                                                                    <h4 className="text-md font-semibold text-gray-800 mb-2">Milestones for {p.property_name}</h4>
-                                                                    {!projectMilestones[p.property_name] ? (
-                                                                        <div className="text-sm text-gray-500">Loading milestones...</div>
-                                                                    ) : projectMilestones[p.property_name].length === 0 ? (
-                                                                        <div className="text-sm text-gray-500">No milestones found for this project.</div>
-                                                                    ) : (
-                                                                        <ul className="space-y-2">
-                                                                            {projectMilestones[p.property_name].map((milestone) => {
-                                                                                const assigneeKey = `${p.property_name}-${milestone.id}`;
-                                                                                const isMilestoneExpanded = !!expandedMilestones[assigneeKey];
-                                                                                const milestoneAssignees = assignees[assigneeKey];
-
-                                                                                return (
-                                                                                    <li key={milestone.id} className="bg-white p-3 rounded-md border">
-                                                                                        <div
-                                                                                            className="flex justify-between items-center cursor-pointer hover:bg-gray-50 -m-3 p-3"
-                                                                                            onClick={() => handleMilestoneRowClick(p.property_name, milestone.id)}
-                                                                                        >
-                                                                                            <div className="flex items-center">
-                                                                                                {isMilestoneExpanded ? <ChevronDownIcon className="h-4 w-4 mr-2 text-gray-600" /> : <ChevronRightIcon className="h-4 w-4 mr-2 text-gray-500" />}
-                                                                                                <span className="font-medium text-gray-800">{milestone.name}</span>
-                                                                                            </div>
-                                                                                            <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
-                                                                                                {milestone.assignees_count} assignee(s)
-                                                                                            </span>
-                                                                                        </div>
-                                                                                        {isMilestoneExpanded && (
-                                                                                            <div className="mt-3 pt-3 border-t border-gray-200">
-                                                                                                {!milestoneAssignees ? (
-                                                                                                    <p className="text-sm text-gray-500">Loading assignees...</p>
-                                                                                                ) : milestoneAssignees.length > 0 ? (
-                                                                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                                                                        {milestoneAssignees.map((assignee) => (
-                                                                                                            <div key={assignee.id} className="flex items-center justify-between bg-gray-100 px-2 py-1 rounded">
-                                                                                                                <p className="text-sm">{assignee.fullname}</p>
-                                                                                                                <button
-                                                                                                                    onClick={() => handleRemoveAssignee(p.property_name, milestone.id, assignee.id)}
-                                                                                                                    disabled={loadingStates.remove === `${p.property_name}-${milestone.id}-${assignee.id}`}
-                                                                                                                    className="text-red-500 hover:text-red-700 text-xs disabled:text-gray-300"
-                                                                                                                >
-                                                                                                                    {loadingStates.remove === `${p.property_name}-${milestone.id}-${assignee.id}` ? "..." : "Remove"}
-                                                                                                                </button>
-                                                                                                            </div>
-                                                                                                        ))}
-                                                                                                    </div>
-                                                                                                ) : (
-                                                                                                    <p className="text-sm text-gray-500">No assignees for this milestone.</p>
-                                                                                                )}
-                                                                                            </div>
-                                                                                        )}
-                                                                                    </li>
-                                                                                );
-                                                                            })}
-                                                                        </ul>
-                                                                    )}
-                                                                </div>
+                                                        <tr
+                                                            className="hover:bg-gray-50 cursor-pointer"
+                                                            onClick={() =>
+                                                                handleProjectRowClick(
+                                                                    p.property_name
+                                                                )
+                                                            }
+                                                        >
+                                                            <td className="px-6 py-4 whitespace-nowrap font-medium text-gray-900">
+                                                                {
+                                                                    p.property_name
+                                                                }
+                                                            </td>
+                                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                                {assignees[
+                                                                    p
+                                                                        .property_name
+                                                                ] !== undefined
+                                                                    ? `${
+                                                                          assignees[
+                                                                              p
+                                                                                  .property_name
+                                                                          ]
+                                                                              .length
+                                                                      } assignee(s)`
+                                                                    : `${
+                                                                          p.assignees_count ??
+                                                                          0
+                                                                      } assignee(s)`}
                                                             </td>
                                                         </tr>
-                                                    )}
-                                                </React.Fragment>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
+                                                        {expandedProjects[
+                                                            p.property_name
+                                                        ] && (
+                                                            <tr>
+                                                                <td
+                                                                    colSpan="2"
+                                                                    className="p-0 bg-slate-50"
+                                                                >
+                                                                    <div className="p-4">
+                                                                        <h4 className="text-md font-semibold text-gray-800 mb-2">
+                                                                            Milestones
+                                                                            for{" "}
+                                                                            {
+                                                                                p.property_name
+                                                                            }
+                                                                        </h4>
+                                                                        {!projectMilestones[
+                                                                            p
+                                                                                .property_name
+                                                                        ] ? (
+                                                                            <div className="text-sm text-gray-500">
+                                                                                Loading
+                                                                                milestones...
+                                                                            </div>
+                                                                        ) : projectMilestones[
+                                                                              p
+                                                                                  .property_name
+                                                                          ]
+                                                                              .length ===
+                                                                          0 ? (
+                                                                            <div className="text-sm text-gray-500">
+                                                                                No
+                                                                                milestones
+                                                                                found
+                                                                                for
+                                                                                this
+                                                                                project.
+                                                                            </div>
+                                                                        ) : (
+                                                                            <ul className="space-y-2">
+                                                                                {projectMilestones[
+                                                                                    p
+                                                                                        .property_name
+                                                                                ].map(
+                                                                                    (
+                                                                                        milestone
+                                                                                    ) => {
+                                                                                        const assigneeKey = `${p.property_name}-${milestone.id}`;
+                                                                                        const isMilestoneExpanded =
+                                                                                            !!expandedMilestones[
+                                                                                                assigneeKey
+                                                                                            ];
+                                                                                        const milestoneAssignees =
+                                                                                            assignees[
+                                                                                                assigneeKey
+                                                                                            ];
+
+                                                                                        return (
+                                                                                            <li
+                                                                                                key={
+                                                                                                    milestone.id
+                                                                                                }
+                                                                                                className="bg-white p-3 rounded-md border"
+                                                                                            >
+                                                                                                <div
+                                                                                                    className="flex justify-between items-center cursor-pointer hover:bg-gray-50 -m-3 p-3"
+                                                                                                    onClick={() =>
+                                                                                                        handleMilestoneRowClick(
+                                                                                                            p.property_name,
+                                                                                                            milestone.id
+                                                                                                        )
+                                                                                                    }
+                                                                                                >
+                                                                                                    <div className="flex items-center">
+                                                                                                        {isMilestoneExpanded ? (
+                                                                                                            <ChevronDownIcon className="h-4 w-4 mr-2 text-gray-600" />
+                                                                                                        ) : (
+                                                                                                            <ChevronRightIcon className="h-4 w-4 mr-2 text-gray-500" />
+                                                                                                        )}
+                                                                                                        <span className="font-medium text-gray-800">
+                                                                                                            {
+                                                                                                                milestone.name
+                                                                                                            }
+                                                                                                        </span>
+                                                                                                    </div>
+                                                                                                    <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
+                                                                                                        {
+                                                                                                            milestone.assignees_count
+                                                                                                        }{" "}
+                                                                                                        assignee(s)
+                                                                                                    </span>
+                                                                                                </div>
+                                                                                                {isMilestoneExpanded && (
+                                                                                                    <div className="mt-3 pt-3 border-t border-gray-200">
+                                                                                                        {!milestoneAssignees ? (
+                                                                                                            <p className="text-sm text-gray-500">
+                                                                                                                Loading
+                                                                                                                assignees...
+                                                                                                            </p>
+                                                                                                        ) : milestoneAssignees.length >
+                                                                                                          0 ? (
+                                                                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                                                                                {milestoneAssignees.map(
+                                                                                                                    (
+                                                                                                                        assignee
+                                                                                                                    ) => (
+                                                                                                                        <div
+                                                                                                                            key={
+                                                                                                                                assignee.id
+                                                                                                                            }
+                                                                                                                            className="flex items-center justify-between bg-gray-100 px-2 py-1 rounded"
+                                                                                                                        >
+                                                                                                                            <p className="text-sm">
+                                                                                                                                {
+                                                                                                                                    assignee.fullname
+                                                                                                                                }
+                                                                                                                            </p>
+                                                                                                                            <button
+                                                                                                                                onClick={() =>
+                                                                                                                                    handleRemoveAssignee(
+                                                                                                                                        p.property_name,
+                                                                                                                                        milestone.id,
+                                                                                                                                        assignee.id
+                                                                                                                                    )
+                                                                                                                                }
+                                                                                                                                disabled={
+                                                                                                                                    loadingStates.remove ===
+                                                                                                                                    `${p.property_name}-${milestone.id}-${assignee.id}`
+                                                                                                                                }
+                                                                                                                                className="text-red-500 hover:text-red-700 text-xs disabled:text-gray-300"
+                                                                                                                            >
+                                                                                                                                {loadingStates.remove ===
+                                                                                                                                `${p.property_name}-${milestone.id}-${assignee.id}`
+                                                                                                                                    ? "..."
+                                                                                                                                    : "Remove"}
+                                                                                                                            </button>
+                                                                                                                        </div>
+                                                                                                                    )
+                                                                                                                )}
+                                                                                                            </div>
+                                                                                                        ) : (
+                                                                                                            <p className="text-sm text-gray-500">
+                                                                                                                No
+                                                                                                                assignees
+                                                                                                                for
+                                                                                                                this
+                                                                                                                milestone.
+                                                                                                            </p>
+                                                                                                        )}
+                                                                                                    </div>
+                                                                                                )}
+                                                                                            </li>
+                                                                                        );
+                                                                                    }
+                                                                                )}
+                                                                            </ul>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        )}
+                                                    </React.Fragment>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {/* Pagination Controls */}
+                                    {totalPages > 1 && (
+                                        <div className="bg-white px-4 py-3 border-t border-gray-200 sm:px-6">
+                                            <div className="flex items-center justify-between">
+                                                <div className="text-sm text-gray-700">
+                                                    Page {currentPage} of{" "}
+                                                    {totalPages}
+                                                </div>
+                                                <ReactPaginate
+                                                    previousLabel={
+                                                        <MdKeyboardArrowLeft className="text-[#404B52]" />
+                                                    }
+                                                    nextLabel={
+                                                        <MdKeyboardArrowRight className="text-[#404B52]" />
+                                                    }
+                                                    breakLabel={"..."}
+                                                    pageCount={totalPages}
+                                                    marginPagesDisplayed={2}
+                                                    pageRangeDisplayed={2}
+                                                    onPageChange={(data) =>
+                                                        handlePageChange(
+                                                            data.selected + 1
+                                                        )
+                                                    }
+                                                    containerClassName={
+                                                        "flex gap-2"
+                                                    }
+                                                    previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
+                                                    nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
+                                                    pageClassName="border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
+                                                    activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-white rounded-[4px] text-[12px]"
+                                                    pageLinkClassName="w-full h-full flex justify-center items-center"
+                                                    activeLinkClassName="w-full h-full flex justify-center items-center"
+                                                    disabledLinkClassName="text-gray-300 cursor-not-allowed"
+                                                    forcePage={currentPage - 1}
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+                                </>
                             ) : (
                                 <div className="text-center py-12">
                                     <h3 className="mt-2 text-sm font-medium text-gray-900">
                                         No Projects Found
                                     </h3>
                                     <p className="mt-1 text-sm text-gray-500">
-                                        Projects are derived from the 'Taken
-                                        Out Accounts' table.
+                                        Projects are derived from the 'Taken Out
+                                        Accounts' table.
                                     </p>
                                 </div>
                             )}
