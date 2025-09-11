@@ -32,6 +32,7 @@ const CrudModal = ({
     fields,
     title,
     loading = false,
+    externalErrors = {},
 }) => {
     const [formData, setFormData] = useState({});
     const [errors, setErrors] = useState({});
@@ -54,6 +55,13 @@ const CrudModal = ({
         }
     }, [item, fields, isOpen]);
 
+    // Merge external errors with local errors
+    useEffect(() => {
+        if (Object.keys(externalErrors).length > 0) {
+            setErrors((prevErrors) => ({ ...prevErrors, ...externalErrors }));
+        }
+    }, [externalErrors]);
+
     const validateForm = () => {
         const newErrors = {};
         fields.forEach((field) => {
@@ -69,6 +77,14 @@ const CrudModal = ({
                 newErrors[
                     field.name
                 ] = `Must be at least ${field.minLength} characters`;
+            }
+            if (
+                field.maxLength &&
+                formData[field.name]?.length > field.maxLength
+            ) {
+                newErrors[
+                    field.name
+                ] = `Must be no more than ${field.maxLength} characters`;
             }
         });
         setErrors(newErrors);
@@ -162,7 +178,7 @@ const CrudModal = ({
                                                 }
                                                 onChange={handleChange}
                                                 onBlur={() => handleBlur(field)}
-                                                className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${
+                                                className={`block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${
                                                     errors[field.name]
                                                         ? "ring-red-300 focus:ring-red-500"
                                                         : "ring-gray-300 focus:ring-indigo-600"
@@ -190,22 +206,59 @@ const CrudModal = ({
                                                 </label>
                                             </div>
                                         ) : (
-                                            <input
-                                                type={field.type || "text"}
-                                                name={field.name}
-                                                id={field.name}
-                                                value={
-                                                    formData[field.name] || ""
-                                                }
-                                                onChange={handleChange}
-                                                onBlur={() => handleBlur(field)}
-                                                className={`block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${
-                                                    errors[field.name]
-                                                        ? "ring-red-300 focus:ring-red-500"
-                                                        : "ring-gray-300 focus:ring-indigo-600"
-                                                }`}
-                                                placeholder={field.placeholder}
-                                            />
+                                            <div className="space-y-1">
+                                                <input
+                                                    type={field.type || "text"}
+                                                    name={field.name}
+                                                    id={field.name}
+                                                    value={
+                                                        formData[field.name] ||
+                                                        ""
+                                                    }
+                                                    onChange={handleChange}
+                                                    onBlur={() =>
+                                                        handleBlur(field)
+                                                    }
+                                                    maxLength={field.maxLength}
+                                                    className={`block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${
+                                                        errors[field.name]
+                                                            ? "ring-red-300 focus:ring-red-500"
+                                                            : "ring-gray-300 focus:ring-indigo-600"
+                                                    }`}
+                                                    placeholder={
+                                                        field.placeholder
+                                                    }
+                                                />
+                                                {field.maxLength && (
+                                                    <div className="flex justify-end text-xs text-gray-500">
+                                                        <span
+                                                            className={`${
+                                                                (formData[
+                                                                    field.name
+                                                                ]?.length ||
+                                                                    0) >
+                                                                field.maxLength *
+                                                                    0.9
+                                                                    ? "text-orange-600"
+                                                                    : (formData[
+                                                                          field
+                                                                              .name
+                                                                      ]
+                                                                          ?.length ||
+                                                                          0) >=
+                                                                      field.maxLength
+                                                                    ? "text-red-600"
+                                                                    : "text-gray-500"
+                                                            }`}
+                                                        >
+                                                            {formData[
+                                                                field.name
+                                                            ]?.length || 0}
+                                                            /{field.maxLength}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         )}
 
                                         {errors[field.name] && (
@@ -239,10 +292,12 @@ const CrudModal = ({
                                         Saving...
                                     </>
                                 ) : (
-                                    <>
-                                        <CheckCircleIcon className="h-4 w-4 mr-2" />
-                                        {item ? "Update" : "Create"}
-                                    </>
+                                    <div className="flex items-center">
+                                        <CheckCircleIcon className="h-4 w-4 mr-1" />
+                                        <span>
+                                            {item ? "Update" : "Create"}
+                                        </span>
+                                    </div>
                                 )}
                             </button>
                             <button
@@ -405,17 +460,26 @@ function DraggableWOT({
                                 <ChevronRightIcon className="h-5 w-5" />
                             )}
                         </button>
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                             <div className="flex items-center">
-                                <h2 className="text-xl font-semibold text-gray-900">
+                                <h2
+                                    className="text-xl font-semibold text-gray-900 truncate pr-2"
+                                    title={wot.type_name}
+                                >
                                     {wot.type_name}
                                 </h2>
-                                <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                    {wot.submilestones?.length || 0} Milestones
+                                <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 flex-shrink-0">
+                                    {wot.submilestones?.length || 0}{" "}
+                                    {(wot.submilestones?.length || 0) === 1
+                                        ? "Milestone"
+                                        : "Milestones"}
                                 </span>
                             </div>
                             {wot.description && (
-                                <p className="mt-1 text-sm text-gray-600">
+                                <p
+                                    className="mt-1 text-sm text-gray-600 truncate"
+                                    title={wot.description}
+                                >
                                     {wot.description}
                                 </p>
                             )}
@@ -460,6 +524,7 @@ const AdminSettings = () => {
         parentId: null,
         loading: false,
     });
+    const [fieldErrors, setFieldErrors] = useState({});
     const [confirmDialog, setConfirmDialog] = useState({
         isOpen: false,
         type: null,
@@ -559,6 +624,7 @@ const AdminSettings = () => {
     }, [fetchData]);
 
     const openModal = (type, mode, item = null, parentId = null) => {
+        setFieldErrors({}); // Clear any previous field errors
         setModalState({
             isOpen: true,
             type,
@@ -570,6 +636,7 @@ const AdminSettings = () => {
     };
 
     const closeModal = () => {
+        setFieldErrors({}); // Clear field errors when closing
         setModalState({
             isOpen: false,
             type: null,
@@ -633,7 +700,42 @@ const AdminSettings = () => {
             closeModal();
         } catch (err) {
             console.error("Save error:", err);
-            setError("Failed to save. Please try again.");
+
+            // Handle specific error messages from the backend
+            if (
+                err.response &&
+                err.response.status === 422 &&
+                err.response.data
+            ) {
+                // If there are field-specific errors, set them
+                if (err.response.data.field_errors) {
+                    const fieldErrors = {};
+                    Object.keys(err.response.data.field_errors).forEach(
+                        (field) => {
+                            fieldErrors[field] =
+                                err.response.data.field_errors[field][0]; // Take first error message
+                        }
+                    );
+                    setFieldErrors(fieldErrors);
+                }
+
+                // Also set the general error message if provided (but prioritize field errors)
+                if (
+                    err.response.data.error &&
+                    Object.keys(err.response.data.field_errors || {}).length ===
+                        0
+                ) {
+                    setError(err.response.data.error);
+                }
+            } else if (
+                err.response &&
+                err.response.data &&
+                err.response.data.error
+            ) {
+                setError(err.response.data.error);
+            } else {
+                setError("Failed to save. Please try again.");
+            }
         } finally {
             setModalState((prev) => ({ ...prev, loading: false }));
         }
@@ -732,7 +834,9 @@ const AdminSettings = () => {
                         label: "Type Name",
                         required: true,
                         minLength: 2,
-                        placeholder: "Enter work order type name",
+                        maxLength: 50,
+                        placeholder:
+                            "Enter work order type name (max 50 characters)",
                         helpText:
                             "This will be displayed in work order creation forms",
                     },
@@ -748,16 +852,15 @@ const AdminSettings = () => {
                 ],
             },
             submilestone: {
-                title: `${
-                    mode === "add" ? "Create New" : "Edit"
-                } Sub-milestone`,
+                title: `${mode === "add" ? "Create New" : "Edit"} Milestone`,
                 fields: [
                     {
                         name: "name",
                         label: "Milestone Name",
                         required: true,
                         minLength: 2,
-                        placeholder: "Enter milestone name",
+                        maxLength: 60,
+                        placeholder: "Enter milestone name (max 60 characters)",
                         helpText: "Clear, actionable milestone name",
                     },
                     {
@@ -781,7 +884,9 @@ const AdminSettings = () => {
                         label: "Checklist Item",
                         required: true,
                         minLength: 2,
-                        placeholder: "Enter checklist item description",
+                        maxLength: 100,
+                        placeholder:
+                            "Enter checklist item description (max 100 characters)",
                         helpText:
                             "Specific, actionable task that can be checked off",
                     },
@@ -1130,14 +1235,19 @@ const AdminSettings = () => {
                                                                                         <ChevronRightIcon className="h-4 w-4" />
                                                                                     )}
                                                                                 </button>
-                                                                                <div className="flex-1">
+                                                                                <div className="flex-1 min-w-0">
                                                                                     <div className="flex items-center">
-                                                                                        <h4 className="text-base font-medium text-gray-900">
+                                                                                        <h4
+                                                                                            className="text-base font-medium text-gray-900 truncate pr-2"
+                                                                                            title={
+                                                                                                sub.name
+                                                                                            }
+                                                                                        >
                                                                                             {
                                                                                                 sub.name
                                                                                             }
                                                                                         </h4>
-                                                                                        <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                                                        <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 flex-shrink-0">
                                                                                             {sub
                                                                                                 .checklists
                                                                                                 ?.length ||
@@ -1151,7 +1261,12 @@ const AdminSettings = () => {
                                                                                         </span>
                                                                                     </div>
                                                                                     {sub.description && (
-                                                                                        <p className="mt-1 text-sm text-gray-600">
+                                                                                        <p
+                                                                                            className="mt-1 text-sm text-gray-600 truncate"
+                                                                                            title={
+                                                                                                sub.description
+                                                                                            }
+                                                                                        >
                                                                                             {
                                                                                                 sub.description
                                                                                             }
@@ -1256,16 +1371,21 @@ const AdminSettings = () => {
                                                                                                 }
                                                                                                 className="flex items-center justify-between py-2 px-3 bg-white rounded-md border border-gray-200"
                                                                                             >
-                                                                                                <div className="flex items-center space-x-3">
-                                                                                                    <div className="flex flex-col">
+                                                                                                <div className="flex items-center space-x-3 min-w-0 flex-1">
+                                                                                                    <div className="flex flex-col min-w-0 flex-1">
                                                                                                         <div className="flex items-center space-x-2">
-                                                                                                            <span className="text-sm text-gray-700">
+                                                                                                            <span
+                                                                                                                className="text-sm text-gray-700 truncate"
+                                                                                                                title={
+                                                                                                                    chk.name
+                                                                                                                }
+                                                                                                            >
                                                                                                                 {
                                                                                                                     chk.name
                                                                                                                 }
                                                                                                             </span>
                                                                                                             {chk.requires_document ? (
-                                                                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
+                                                                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200 flex-shrink-0">
                                                                                                                     <svg
                                                                                                                         className="w-3 h-3 mr-1"
                                                                                                                         fill="currentColor"
@@ -1281,7 +1401,7 @@ const AdminSettings = () => {
                                                                                                                     Required
                                                                                                                 </span>
                                                                                                             ) : (
-                                                                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                                                                                                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200 flex-shrink-0">
                                                                                                                     <svg
                                                                                                                         className="w-3 h-3 mr-1"
                                                                                                                         fill="currentColor"
@@ -1300,7 +1420,7 @@ const AdminSettings = () => {
                                                                                                         </div>
                                                                                                     </div>
                                                                                                 </div>
-                                                                                                <div className="flex items-center space-x-1">
+                                                                                                <div className="flex items-center space-x-1 flex-shrink-0">
                                                                                                     <button
                                                                                                         onClick={() =>
                                                                                                             openModal(
@@ -1359,6 +1479,7 @@ const AdminSettings = () => {
                 onSave={handleSave}
                 item={modalState.item}
                 loading={modalState.loading}
+                externalErrors={fieldErrors}
                 {...getModalConfig()}
             />
 
