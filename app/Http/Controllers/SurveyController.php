@@ -613,6 +613,7 @@ class SurveyController extends Controller
             $surveys = DB::table('surveys_list')
                 ->select('survey_title', 'survey_link')
                 ->where('status', true)
+                ->orderBy('created_at', 'asc')
                 ->get();
 
             // Dynamically map app.url → survey base URL
@@ -668,6 +669,7 @@ class SurveyController extends Controller
     {
         $surveys = Survey_list::select('id', 'survey_title', 'survey_link')
             ->where('status', true)
+            ->orderBy('created_at', 'asc')
             ->get()
             ->map(function ($survey) {
                 $respondentsCount = 0;
@@ -699,17 +701,20 @@ class SurveyController extends Controller
 
     public function getSurveysWithRatingBreakdown()
     {
-        $surveys = Survey_list::select('id', 'survey_title', 'survey_link')->where('status', true)->get();
+        $surveys = Survey_list::select('id', 'survey_title', 'survey_link')
+        ->where('status', true)
+        ->orderBy('created_at', 'asc')
+        ->get();
 
         $result = $surveys->map(function ($survey) {
-            // Fetch counts of each rating (1-5) for this survey_link
+        
             $ratingCounts = ExperienceRating::where('survey_link', $survey->survey_link)
                 ->whereNotNull('rating')
                 ->select('rating', DB::raw('COUNT(*) as total'))
                 ->groupBy('rating')
-                ->pluck('total', 'rating'); // [rating => count]
+                ->pluck('total', 'rating'); 
 
-            // Ensure all ratings from 1 to 5 are included, default to 0 if missing
+            
             $fullRatingCounts = [];
             for ($i = 1; $i <= 5; $i++) {
                 $fullRatingCounts[$i] = $ratingCounts->get($i, 0);
@@ -718,7 +723,7 @@ class SurveyController extends Controller
             return [
                 'id' => $survey->id,
                 'survey_title' => $survey->survey_title,
-                'ratings' => $fullRatingCounts, // e.g., [1 => 3, 2 => 0, 3 => 5, 4 => 2, 5 => 8]
+                'ratings' => $fullRatingCounts,
             ];
         });
 
