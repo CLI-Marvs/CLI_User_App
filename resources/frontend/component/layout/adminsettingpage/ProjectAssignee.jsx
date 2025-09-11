@@ -10,7 +10,7 @@ const ProjectAssigneeComponent = () => {
     const [projectSubmilestones, setProjectSubmilestones] = useState([]);
     const [selectedProject, setSelectedProject] = useState("");
     const [selectedSubmilestone, setSelectedSubmilestone] = useState("");
-    const [selectedEmployees, setSelectedEmployees] = useState([]);
+    const [selectedEmployees, setSelectedEmployees] = useState("");
     const [loadingStates, setLoadingStates] = useState({
         list: true,
         assign: false,
@@ -19,6 +19,11 @@ const ProjectAssigneeComponent = () => {
     });
     const [searchTerm, setSearchTerm] = useState("");
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [projectSearchTerm, setProjectSearchTerm] = useState("");
+    const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
+    const [milestoneSearchTerm, setMilestoneSearchTerm] = useState("");
+    const [isMilestoneDropdownOpen, setIsMilestoneDropdownOpen] =
+        useState(false);
     const [expandedProjects, setExpandedProjects] = useState({}); // Tracks expanded project rows
     const [expandedMilestones, setExpandedMilestones] = useState({}); // Tracks expanded milestone rows
     const [projectMilestones, setProjectMilestones] = useState({});
@@ -193,20 +198,16 @@ const ProjectAssigneeComponent = () => {
     );
 
     const handleEmployeeToggle = useCallback((employeeId) => {
+        const employeeIdStr = employeeId.toString();
         setSelectedEmployees((prev) => {
-            const employeeIdStr = employeeId.toString();
-            return prev.includes(employeeIdStr)
-                ? prev.filter((id) => id !== employeeIdStr)
-                : [...prev, employeeIdStr];
+            // If clicking the same employee, deselect (empty string)
+            // If clicking a different employee, select that one
+            return prev === employeeIdStr ? "" : employeeIdStr;
         });
     }, []);
 
     const handleAssign = useCallback(() => {
-        if (
-            !selectedProject ||
-            !selectedSubmilestone ||
-            selectedEmployees.length === 0
-        )
+        if (!selectedProject || !selectedSubmilestone || !selectedEmployees)
             return;
 
         setLoadingStates((s) => ({ ...s, assign: true }));
@@ -216,11 +217,11 @@ const ProjectAssigneeComponent = () => {
                     selectedProject
                 )}/milestones/${selectedSubmilestone}/assignees`,
                 {
-                    employee_ids: selectedEmployees,
+                    employee_ids: [selectedEmployees],
                 }
             )
             .then((res) => {
-                setSelectedEmployees([]);
+                setSelectedEmployees("");
                 setSearchTerm("");
                 setIsDropdownOpen(false);
 
@@ -266,12 +267,57 @@ const ProjectAssigneeComponent = () => {
     }, [employees]);
 
     const selectedEmployeeDetails = useMemo(() => {
-        return selectedEmployees.map((id) => employeeMap[id]).filter(Boolean);
+        return selectedEmployees ? employeeMap[selectedEmployees] : null;
     }, [selectedEmployees, employeeMap]);
 
     const filteredEmployees = employees.filter((employee) =>
         employee.fullname.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const selectedProjectDetails = useMemo(() => {
+        return (
+            projects.find((p) => p.property_name === selectedProject) || null
+        );
+    }, [selectedProject, projects]);
+
+    const filteredProjects = projects.filter((project) =>
+        project.property_name
+            .toLowerCase()
+            .includes(projectSearchTerm.toLowerCase())
+    );
+
+    const handleProjectToggle = useCallback((projectName) => {
+        setSelectedProject((prev) => (prev === projectName ? "" : projectName));
+        setIsProjectDropdownOpen(false);
+        setProjectSearchTerm("");
+    }, []);
+
+    const selectedMilestoneDetails = useMemo(() => {
+        return (
+            projectSubmilestones.find(
+                (sm) => sm.id.toString() === selectedSubmilestone
+            ) || null
+        );
+    }, [selectedSubmilestone, projectSubmilestones]);
+
+    const filteredMilestones = projectSubmilestones.filter(
+        (milestone) =>
+            milestone.name
+                .toLowerCase()
+                .includes(milestoneSearchTerm.toLowerCase()) ||
+            milestone.work_order_type?.type_name
+                .toLowerCase()
+                .includes(milestoneSearchTerm.toLowerCase())
+    );
+
+    const handleMilestoneToggle = useCallback((milestoneId) => {
+        const milestoneIdStr = milestoneId.toString();
+        setSelectedSubmilestone((prev) =>
+            prev === milestoneIdStr ? "" : milestoneIdStr
+        );
+        setIsMilestoneDropdownOpen(false);
+        setMilestoneSearchTerm("");
+    }, []);
 
     // Pagination calculations
     const totalPages = Math.ceil(projects.length / itemsPerPage);
@@ -317,26 +363,213 @@ const ProjectAssigneeComponent = () => {
                                     Target Project{" "}
                                     <span className="text-red-500">*</span>
                                 </label>
-                                <select
-                                    value={selectedProject}
-                                    onChange={(e) =>
-                                        setSelectedProject(e.target.value)
-                                    }
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                    disabled={loadingStates.assign}
-                                >
-                                    <option value="">
-                                        Select a project...
-                                    </option>
-                                    {projects.map((p) => (
-                                        <option
-                                            key={p.property_name}
-                                            value={p.property_name}
+                                <div className="relative">
+                                    {!selectedProjectDetails && (
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg
+                                                className="h-4 w-4 text-gray-400"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                                />
+                                            </svg>
+                                        </div>
+                                    )}
+
+                                    {/* Selected Project Tag inside input */}
+                                    {selectedProjectDetails && (
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm">
+                                                <span className="mr-1">
+                                                    {
+                                                        selectedProjectDetails.property_name
+                                                    }
+                                                </span>
+                                                <button
+                                                    onClick={() =>
+                                                        handleProjectToggle(
+                                                            selectedProjectDetails.property_name
+                                                        )
+                                                    }
+                                                    className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto"
+                                                    disabled={
+                                                        loadingStates.assign
+                                                    }
+                                                >
+                                                    <svg
+                                                        className="w-3 h-3"
+                                                        fill="currentColor"
+                                                        viewBox="0 0 20 20"
+                                                    >
+                                                        <path
+                                                            fillRule="evenodd"
+                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                            clipRule="evenodd"
+                                                        />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <input
+                                        type="text"
+                                        placeholder={
+                                            selectedProjectDetails
+                                                ? ""
+                                                : "Search for a project..."
+                                        }
+                                        value={projectSearchTerm}
+                                        onChange={(e) =>
+                                            setProjectSearchTerm(e.target.value)
+                                        }
+                                        onFocus={() =>
+                                            setIsProjectDropdownOpen(true)
+                                        }
+                                        className={`w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
+                                            selectedProjectDetails
+                                                ? "pl-32"
+                                                : "pl-10"
+                                        }`}
+                                        style={{
+                                            paddingLeft: selectedProjectDetails
+                                                ? `${
+                                                      selectedProjectDetails
+                                                          .property_name
+                                                          .length *
+                                                          8 +
+                                                      60
+                                                  }px`
+                                                : "40px",
+                                        }}
+                                        disabled={loadingStates.assign}
+                                    />
+                                    {projectSearchTerm && (
+                                        <button
+                                            onClick={() => {
+                                                setProjectSearchTerm("");
+                                                setIsProjectDropdownOpen(false);
+                                            }}
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
                                         >
-                                            {p.property_name}
-                                        </option>
-                                    ))}
-                                </select>
+                                            <svg
+                                                className="h-4 w-4"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </button>
+                                    )}
+                                </div>
+
+                                {isProjectDropdownOpen && (
+                                    <div className="relative">
+                                        <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
+                                            <div className="sticky top-0 bg-gray-50 px-4 py-2 border-b border-gray-200">
+                                                <p className="text-sm font-medium text-gray-700">
+                                                    Select Project (
+                                                    {filteredProjects.length}{" "}
+                                                    available)
+                                                </p>
+                                            </div>
+                                            <div className="overflow-y-auto max-h-48">
+                                                {filteredProjects.length ===
+                                                0 ? (
+                                                    <div className="px-4 py-6 text-center text-gray-500">
+                                                        <svg
+                                                            className="w-8 h-8 mx-auto mb-2 text-gray-300"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={
+                                                                    1.5
+                                                                }
+                                                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                                            />
+                                                        </svg>
+                                                        <p className="text-sm">
+                                                            No projects found
+                                                        </p>
+                                                    </div>
+                                                ) : (
+                                                    filteredProjects.map(
+                                                        (project) => (
+                                                            <label
+                                                                key={
+                                                                    project.property_name
+                                                                }
+                                                                className="group px-4 py-3 cursor-pointer hover:bg-blue-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
+                                                            >
+                                                                <div className="flex-shrink-0">
+                                                                    <input
+                                                                        type="radio"
+                                                                        name="project-selection"
+                                                                        checked={
+                                                                            selectedProject ===
+                                                                            project.property_name
+                                                                        }
+                                                                        onChange={() =>
+                                                                            handleProjectToggle(
+                                                                                project.property_name
+                                                                            )
+                                                                        }
+                                                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 transition-colors duration-200"
+                                                                    />
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
+                                                                        {
+                                                                            project.property_name
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                                {selectedProject ===
+                                                                    project.property_name && (
+                                                                    <div className="flex-shrink-0">
+                                                                        <svg
+                                                                            className="w-4 h-4 text-green-500"
+                                                                            fill="currentColor"
+                                                                            viewBox="0 0 20 20"
+                                                                        >
+                                                                            <path
+                                                                                fillRule="evenodd"
+                                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                clipRule="evenodd"
+                                                                            />
+                                                                        </svg>
+                                                                    </div>
+                                                                )}
+                                                            </label>
+                                                        )
+                                                    )
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                {isProjectDropdownOpen && (
+                                    <div
+                                        className="fixed inset-0 z-5"
+                                        onClick={() =>
+                                            setIsProjectDropdownOpen(false)
+                                        }
+                                    />
+                                )}
                             </div>
 
                             {/* Submilestone Selection */}
@@ -345,63 +578,337 @@ const ProjectAssigneeComponent = () => {
                                     Target Milestone{" "}
                                     <span className="text-red-500">*</span>
                                 </label>
-                                <select
-                                    value={selectedSubmilestone}
-                                    onChange={(e) =>
-                                        setSelectedSubmilestone(e.target.value)
-                                    }
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                                    disabled={
-                                        !selectedProject ||
-                                        loadingStates.submilestones ||
-                                        loadingStates.assign
-                                    }
-                                >
-                                    <option value="">
-                                        {loadingStates.submilestones
-                                            ? "Loading milestones..."
-                                            : "Select a milestone..."}
-                                    </option>
-                                    {projectSubmilestones.map((sm) => (
-                                        <option key={sm.id} value={sm.id}>
-                                            {sm.work_order_type?.type_name} -{" "}
-                                            {sm.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                <div className="relative">
+                                    {!selectedMilestoneDetails && (
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg
+                                                className="h-4 w-4 text-gray-400"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                                />
+                                            </svg>
+                                        </div>
+                                    )}
+
+                                    {/* Selected Milestone Tag inside input */}
+                                    {selectedMilestoneDetails && (
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm">
+                                                <span className="mr-1">
+                                                    {
+                                                        selectedMilestoneDetails
+                                                            .work_order_type
+                                                            ?.type_name
+                                                    }{" "}
+                                                    -{" "}
+                                                    {
+                                                        selectedMilestoneDetails.name
+                                                    }
+                                                </span>
+                                                <button
+                                                    onClick={() =>
+                                                        handleMilestoneToggle(
+                                                            selectedMilestoneDetails.id
+                                                        )
+                                                    }
+                                                    className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto"
+                                                    disabled={
+                                                        loadingStates.assign
+                                                    }
+                                                >
+                                                    <svg
+                                                        className="w-3 h-3"
+                                                        fill="currentColor"
+                                                        viewBox="0 0 20 20"
+                                                    >
+                                                        <path
+                                                            fillRule="evenodd"
+                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                            clipRule="evenodd"
+                                                        />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <input
+                                        type="text"
+                                        placeholder={
+                                            selectedMilestoneDetails
+                                                ? ""
+                                                : loadingStates.submilestones
+                                                ? "Loading milestones..."
+                                                : "Search for a milestone..."
+                                        }
+                                        value={milestoneSearchTerm}
+                                        onChange={(e) =>
+                                            setMilestoneSearchTerm(
+                                                e.target.value
+                                            )
+                                        }
+                                        onFocus={() =>
+                                            !loadingStates.submilestones &&
+                                            selectedProject &&
+                                            setIsMilestoneDropdownOpen(true)
+                                        }
+                                        className={`w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
+                                            selectedMilestoneDetails
+                                                ? "pl-32"
+                                                : "pl-10"
+                                        }`}
+                                        style={{
+                                            paddingLeft:
+                                                selectedMilestoneDetails
+                                                    ? `${
+                                                          (selectedMilestoneDetails
+                                                              .work_order_type
+                                                              ?.type_name
+                                                              ?.length +
+                                                              selectedMilestoneDetails
+                                                                  .name
+                                                                  .length) *
+                                                              8 +
+                                                          80
+                                                      }px`
+                                                    : "40px",
+                                        }}
+                                        disabled={
+                                            !selectedProject ||
+                                            loadingStates.submilestones ||
+                                            loadingStates.assign
+                                        }
+                                    />
+                                    {milestoneSearchTerm && (
+                                        <button
+                                            onClick={() => {
+                                                setMilestoneSearchTerm("");
+                                                setIsMilestoneDropdownOpen(
+                                                    false
+                                                );
+                                            }}
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                                        >
+                                            <svg
+                                                className="h-4 w-4"
+                                                fill="currentColor"
+                                                viewBox="0 0 20 20"
+                                            >
+                                                <path
+                                                    fillRule="evenodd"
+                                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                    clipRule="evenodd"
+                                                />
+                                            </svg>
+                                        </button>
+                                    )}
+                                </div>
+
+                                {isMilestoneDropdownOpen &&
+                                    selectedProject &&
+                                    !loadingStates.submilestones && (
+                                        <div className="relative">
+                                            <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
+                                                <div className="sticky top-0 bg-gray-50 px-4 py-2 border-b border-gray-200">
+                                                    <p className="text-sm font-medium text-gray-700">
+                                                        Select Milestone (
+                                                        {
+                                                            filteredMilestones.length
+                                                        }{" "}
+                                                        available)
+                                                    </p>
+                                                </div>
+                                                <div className="overflow-y-auto max-h-48">
+                                                    {filteredMilestones.length ===
+                                                    0 ? (
+                                                        <div className="px-4 py-6 text-center text-gray-500">
+                                                            <svg
+                                                                className="w-8 h-8 mx-auto mb-2 text-gray-300"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={
+                                                                        1.5
+                                                                    }
+                                                                    d="M9 5H7a2 2 0 00-2 2v6a2 2 0 002 2h6a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                                                                />
+                                                            </svg>
+                                                            <p className="text-sm">
+                                                                No milestones
+                                                                found
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        filteredMilestones.map(
+                                                            (milestone) => (
+                                                                <label
+                                                                    key={
+                                                                        milestone.id
+                                                                    }
+                                                                    className="group px-4 py-3 cursor-pointer hover:bg-blue-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
+                                                                >
+                                                                    <div className="flex-shrink-0">
+                                                                        <input
+                                                                            type="radio"
+                                                                            name="milestone-selection"
+                                                                            checked={
+                                                                                selectedSubmilestone ===
+                                                                                milestone.id.toString()
+                                                                            }
+                                                                            onChange={() =>
+                                                                                handleMilestoneToggle(
+                                                                                    milestone.id
+                                                                                )
+                                                                            }
+                                                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 transition-colors duration-200"
+                                                                        />
+                                                                    </div>
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
+                                                                            {
+                                                                                milestone
+                                                                                    .work_order_type
+                                                                                    ?.type_name
+                                                                            }{" "}
+                                                                            -{" "}
+                                                                            {
+                                                                                milestone.name
+                                                                            }
+                                                                        </span>
+                                                                    </div>
+                                                                    {selectedSubmilestone ===
+                                                                        milestone.id.toString() && (
+                                                                        <div className="flex-shrink-0">
+                                                                            <svg
+                                                                                className="w-4 h-4 text-green-500"
+                                                                                fill="currentColor"
+                                                                                viewBox="0 0 20 20"
+                                                                            >
+                                                                                <path
+                                                                                    fillRule="evenodd"
+                                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                    clipRule="evenodd"
+                                                                                />
+                                                                            </svg>
+                                                                        </div>
+                                                                    )}
+                                                                </label>
+                                                            )
+                                                        )
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                {isMilestoneDropdownOpen && (
+                                    <div
+                                        className="fixed inset-0 z-5"
+                                        onClick={() =>
+                                            setIsMilestoneDropdownOpen(false)
+                                        }
+                                    />
+                                )}
                             </div>
 
                             {/* Employee Selection */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700">
-                                    Select Employees{" "}
+                                    Select Employee{" "}
                                     <span className="text-red-500">*</span>
                                 </label>
                                 <div className="relative">
-                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg
-                                            className="h-4 w-4 text-gray-400"
-                                            fill="none"
-                                            stroke="currentColor"
-                                            viewBox="0 0 24 24"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth={2}
-                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                            />
-                                        </svg>
-                                    </div>
+                                    {!selectedEmployeeDetails && (
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg
+                                                className="h-4 w-4 text-gray-400"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                                />
+                                            </svg>
+                                        </div>
+                                    )}
+
+                                    {/* Selected Employee Tag inside input */}
+                                    {selectedEmployeeDetails && (
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm">
+                                                <span className="mr-1">
+                                                    {
+                                                        selectedEmployeeDetails.fullname
+                                                    }
+                                                </span>
+                                                <button
+                                                    onClick={() =>
+                                                        handleEmployeeToggle(
+                                                            selectedEmployeeDetails.id
+                                                        )
+                                                    }
+                                                    className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto"
+                                                    disabled={
+                                                        loadingStates.assign
+                                                    }
+                                                >
+                                                    <svg
+                                                        className="w-3 h-3"
+                                                        fill="currentColor"
+                                                        viewBox="0 0 20 20"
+                                                    >
+                                                        <path
+                                                            fillRule="evenodd"
+                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                            clipRule="evenodd"
+                                                        />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
                                     <input
                                         type="text"
-                                        placeholder="Search employees..."
+                                        placeholder={
+                                            selectedEmployeeDetails
+                                                ? ""
+                                                : "Search for an employee..."
+                                        }
                                         value={searchTerm}
                                         onChange={(e) =>
                                             setSearchTerm(e.target.value)
                                         }
                                         onFocus={() => setIsDropdownOpen(true)}
-                                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
+                                        className={`w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
+                                            selectedEmployeeDetails
+                                                ? "pl-32"
+                                                : "pl-10"
+                                        }`}
+                                        style={{
+                                            paddingLeft: selectedEmployeeDetails
+                                                ? `${
+                                                      selectedEmployeeDetails
+                                                          .fullname.length *
+                                                          8 +
+                                                      60
+                                                  }px`
+                                                : "40px",
+                                        }}
                                         disabled={loadingStates.assign}
                                     />
                                     {searchTerm && (
@@ -426,109 +933,91 @@ const ProjectAssigneeComponent = () => {
                                         </button>
                                     )}
                                 </div>
+
                                 {isDropdownOpen && (
                                     <div className="relative">
-                                        <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto backdrop-blur-sm">
-                                            <div className="sticky top-0 bg-gradient-to-r from-blue-50 to-indigo-50 px-3 py-2 border-b border-gray-200">
-                                                <p className="text-xs font-medium text-gray-700 uppercase tracking-wide">
-                                                    Select Employees (
+                                        <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
+                                            <div className="sticky top-0 bg-gray-50 px-4 py-2 border-b border-gray-200">
+                                                <p className="text-sm font-medium text-gray-700">
+                                                    Select Employee (
                                                     {filteredEmployees.length}{" "}
                                                     available)
                                                 </p>
                                             </div>
-                                            {filteredEmployees.length === 0 ? (
-                                                <div className="px-3 py-4 text-center text-gray-500">
-                                                    <svg
-                                                        className="w-8 h-8 mx-auto mb-2 text-gray-300"
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={1.5}
-                                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                                        />
-                                                    </svg>
-                                                    <p className="text-sm">
-                                                        No employees found
-                                                    </p>
-                                                </div>
-                                            ) : (
-                                                filteredEmployees.map((emp) => (
-                                                    <label
-                                                        key={emp.id}
-                                                        className="group px-3 py-3 cursor-pointer hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
-                                                    >
-                                                        <div className="relative">
-                                                            <input
-                                                                type="checkbox"
-                                                                checked={selectedEmployees.includes(
-                                                                    emp.id.toString()
-                                                                )}
-                                                                onChange={() =>
-                                                                    handleEmployeeToggle(
-                                                                        emp.id
-                                                                    )
+                                            <div className="overflow-y-auto max-h-48">
+                                                {filteredEmployees.length ===
+                                                0 ? (
+                                                    <div className="px-4 py-6 text-center text-gray-500">
+                                                        <svg
+                                                            className="w-8 h-8 mx-auto mb-2 text-gray-300"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={
+                                                                    1.5
                                                                 }
-                                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
+                                                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                                             />
-                                                            {selectedEmployees.includes(
-                                                                emp.id.toString()
-                                                            ) && (
-                                                                <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                                                            )}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <div className="flex items-center space-x-2">
-                                                                <div className="w-8 h-8 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                                                                    {emp.fullname
-                                                                        .split(
-                                                                            " "
-                                                                        )
-                                                                        .map(
-                                                                            (
-                                                                                n
-                                                                            ) =>
-                                                                                n[0]
-                                                                        )
-                                                                        .join(
-                                                                            ""
-                                                                        )
-                                                                        .toUpperCase()
-                                                                        .slice(
-                                                                            0,
-                                                                            2
-                                                                        )}
-                                                                </div>
-                                                                <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
-                                                                    {
-                                                                        emp.fullname
-                                                                    }
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        {selectedEmployees.includes(
-                                                            emp.id.toString()
-                                                        ) && (
-                                                            <div className="flex-shrink-0">
-                                                                <svg
-                                                                    className="w-4 h-4 text-green-500"
-                                                                    fill="currentColor"
-                                                                    viewBox="0 0 20 20"
-                                                                >
-                                                                    <path
-                                                                        fillRule="evenodd"
-                                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                        clipRule="evenodd"
+                                                        </svg>
+                                                        <p className="text-sm">
+                                                            No employees found
+                                                        </p>
+                                                    </div>
+                                                ) : (
+                                                    filteredEmployees.map(
+                                                        (emp) => (
+                                                            <label
+                                                                key={emp.id}
+                                                                className="group px-4 py-3 cursor-pointer hover:bg-blue-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
+                                                            >
+                                                                <div className="flex-shrink-0">
+                                                                    <input
+                                                                        type="radio"
+                                                                        name="employee-selection"
+                                                                        checked={
+                                                                            selectedEmployees ===
+                                                                            emp.id.toString()
+                                                                        }
+                                                                        onChange={() =>
+                                                                            handleEmployeeToggle(
+                                                                                emp.id
+                                                                            )
+                                                                        }
+                                                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 transition-colors duration-200"
                                                                     />
-                                                                </svg>
-                                                            </div>
-                                                        )}
-                                                    </label>
-                                                ))
-                                            )}
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
+                                                                        {
+                                                                            emp.fullname
+                                                                        }
+                                                                    </span>
+                                                                </div>
+                                                                {selectedEmployees ===
+                                                                    emp.id.toString() && (
+                                                                    <div className="flex-shrink-0">
+                                                                        <svg
+                                                                            className="w-4 h-4 text-green-500"
+                                                                            fill="currentColor"
+                                                                            viewBox="0 0 20 20"
+                                                                        >
+                                                                            <path
+                                                                                fillRule="evenodd"
+                                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                clipRule="evenodd"
+                                                                            />
+                                                                        </svg>
+                                                                    </div>
+                                                                )}
+                                                            </label>
+                                                        )
+                                                    )
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 )}
@@ -537,73 +1026,6 @@ const ProjectAssigneeComponent = () => {
                                         className="fixed inset-0 z-5"
                                         onClick={() => setIsDropdownOpen(false)}
                                     />
-                                )}
-                                {selectedEmployeeDetails.length > 0 && (
-                                    <div className="mt-3 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
-                                        <div className="flex items-center justify-between mb-2">
-                                            <p className="text-xs font-medium text-blue-700 uppercase tracking-wide">
-                                                Selected (
-                                                {selectedEmployeeDetails.length}
-                                                )
-                                            </p>
-                                            <button
-                                                onClick={() =>
-                                                    setSelectedEmployees([])
-                                                }
-                                                className="text-xs text-red-600 hover:text-red-800 font-medium transition-colors duration-200"
-                                                disabled={loadingStates.assign}
-                                            >
-                                                Clear All
-                                            </button>
-                                        </div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {selectedEmployeeDetails.map(
-                                                (emp) => (
-                                                    <div
-                                                        key={emp.id}
-                                                        className="group inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-white border border-blue-300 text-blue-800 shadow-sm hover:shadow-md transition-all duration-200"
-                                                    >
-                                                        <div className="w-5 h-5 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold mr-2">
-                                                            {emp.fullname
-                                                                .split(" ")
-                                                                .map(
-                                                                    (n) => n[0]
-                                                                )
-                                                                .join("")
-                                                                .toUpperCase()
-                                                                .slice(0, 2)}
-                                                        </div>
-                                                        <span className="mr-1">
-                                                            {emp.fullname}
-                                                        </span>
-                                                        <button
-                                                            onClick={() =>
-                                                                handleEmployeeToggle(
-                                                                    emp.id
-                                                                )
-                                                            }
-                                                            className="ml-1 text-blue-600 hover:text-red-600 transition-colors duration-200"
-                                                            disabled={
-                                                                loadingStates.assign
-                                                            }
-                                                        >
-                                                            <svg
-                                                                className="w-3 h-3"
-                                                                fill="currentColor"
-                                                                viewBox="0 0 20 20"
-                                                            >
-                                                                <path
-                                                                    fillRule="evenodd"
-                                                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                                    clipRule="evenodd"
-                                                                />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
-                                                )
-                                            )}
-                                        </div>
-                                    </div>
                                 )}
                             </div>
 
@@ -614,14 +1036,14 @@ const ProjectAssigneeComponent = () => {
                                     disabled={
                                         !selectedProject ||
                                         !selectedSubmilestone ||
-                                        selectedEmployees.length === 0 ||
+                                        !selectedEmployees ||
                                         loadingStates.assign
                                     }
                                     className="w-full px-4 py-2 gradient-btn5 text-white font-medium rounded-md disabled:bg-gray-400"
                                 >
                                     {loadingStates.assign
                                         ? "Assigning..."
-                                        : "Assign Employees"}
+                                        : "Assign Employee"}
                                 </button>
                             </div>
                         </div>

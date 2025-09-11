@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import ReactDOM from "react-dom";
 import apiService from "../../../component/servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
@@ -14,9 +14,14 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     const modalRef = useRef();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [workOrderId, setWorkOrderId] = useState(null);
-    const [projectMilestoneStructure, setProjectMilestoneStructure] = useState(
-        []
-    );
+    const [projectMilestoneStructure, setProjectMilestoneStructure] = useState([]);
+    
+    // New state for modern dropdowns
+    const [projectSearchTerm, setProjectSearchTerm] = useState("");
+    const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
+    const [accountSearchTerm, setAccountSearchTerm] = useState("");
+    const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
+    
     const { user } = useStateContext();
     const { accounts, workOrderTypes, fetchWorkOrderGroups } =
         useDocumentManagementContext();
@@ -64,6 +69,10 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             setSelectedAccounts([]);
             setSelectedProject("");
             setDueDate("");
+            setProjectSearchTerm("");
+            setAccountSearchTerm("");
+            setIsProjectDropdownOpen(false);
+            setIsAccountDropdownOpen(false);
         }
     }, [isOpen]);
 
@@ -90,6 +99,46 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             (account) => account.property_name === selectedProject
         );
     }, [accounts, selectedProject]);
+
+    // Helper functions for modern dropdowns
+    const selectedProjectDetails = useMemo(() => {
+        return projects.find(p => p === selectedProject) || null;
+    }, [selectedProject, projects]);
+
+    const filteredProjects = projects.filter((project) =>
+        project && project.toLowerCase().includes(projectSearchTerm.toLowerCase())
+    );
+
+    const filteredAccountsForDropdown = filteredAccounts.filter((account) =>
+        account.account_name && account.account_name.toLowerCase().includes(accountSearchTerm.toLowerCase())
+    );
+
+    const handleProjectToggle = useCallback((projectName) => {
+        setSelectedProject(prev => prev === projectName ? "" : projectName);
+        setSelectedAccounts([]); // Clear accounts when project changes
+        setIsProjectDropdownOpen(false);
+        setProjectSearchTerm("");
+    }, []);
+
+    const handleAccountToggle = useCallback((account) => {
+        setSelectedAccounts(prev => {
+            const exists = prev.find(acc => acc.id === account.id);
+            if (exists) {
+                return prev.filter(acc => acc.id !== account.id);
+            } else {
+                return [...prev, account];
+            }
+        });
+    }, []);
+
+    const handleRemoveAccount = useCallback((accountId) => {
+        setSelectedAccounts(prev => prev.filter(acc => acc.id !== accountId));
+    }, []);
+
+    const handleSelectAllAccounts = useCallback(() => {
+        setSelectedAccounts(filteredAccountsForDropdown);
+        setIsAccountDropdownOpen(false);
+    }, [filteredAccountsForDropdown]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -276,32 +325,174 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                     Filter by Project:
                                 </label>
                                 <div className="w-2/3">
-                                    <SearchableDropdown
-                                        options={projects.map((p) => ({
-                                            id: p,
-                                            name: p,
-                                        }))}
-                                        selectedOptions={
-                                            selectedProject
-                                                ? [
-                                                      {
-                                                          id: selectedProject,
-                                                          name: selectedProject,
-                                                      },
-                                                  ]
-                                                : []
-                                        }
-                                        setSelectedOptions={(newOptions) => {
-                                            setSelectedProject(
-                                                newOptions[0]?.name || ""
-                                            );
-                                            setSelectedAccounts([]);
-                                        }}
-                                        placeholder="Filter by Project"
-                                        showCheckbox={false}
-                                        showSelectedTags={false}
-                                        hideInputValue={false}
-                                    />
+                                    <div className="relative">
+                                        {!selectedProjectDetails && (
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg
+                                                    className="h-4 w-4 text-gray-400"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                                    />
+                                                </svg>
+                                            </div>
+                                        )}
+
+                                        {/* Selected Project Tag inside input */}
+                                        {selectedProjectDetails && (
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm">
+                                                    <span className="mr-1">
+                                                        {selectedProjectDetails}
+                                                    </span>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleProjectToggle(selectedProjectDetails)
+                                                        }
+                                                        className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto"
+                                                    >
+                                                        <svg
+                                                            className="w-3 h-3"
+                                                            fill="currentColor"
+                                                            viewBox="0 0 20 20"
+                                                        >
+                                                            <path
+                                                                fillRule="evenodd"
+                                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                clipRule="evenodd"
+                                                            />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <input
+                                            type="text"
+                                            placeholder={selectedProjectDetails ? "" : "Search for a project..."}
+                                            value={projectSearchTerm}
+                                            onChange={(e) =>
+                                                setProjectSearchTerm(e.target.value)
+                                            }
+                                            onFocus={() => setIsProjectDropdownOpen(true)}
+                                            className={`w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
+                                                selectedProjectDetails
+                                                    ? "pl-32"
+                                                    : "pl-10"
+                                            }`}
+                                            style={{
+                                                paddingLeft: selectedProjectDetails
+                                                    ? `${selectedProjectDetails.length * 8 + 60}px`
+                                                    : '40px'
+                                            }}
+                                        />
+                                        {projectSearchTerm && (
+                                            <button
+                                                onClick={() => {
+                                                    setProjectSearchTerm("");
+                                                    setIsProjectDropdownOpen(false);
+                                                }}
+                                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                                            >
+                                                <svg
+                                                    className="h-4 w-4"
+                                                    fill="currentColor"
+                                                    viewBox="0 0 20 20"
+                                                >
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {isProjectDropdownOpen && (
+                                        <div className="relative">
+                                            <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden mt-1">
+                                                <div className="sticky top-0 bg-gray-50 px-4 py-2 border-b border-gray-200">
+                                                    <p className="text-sm font-medium text-gray-700">
+                                                        Select Project (
+                                                        {filteredProjects.length}{" "}
+                                                        available)
+                                                    </p>
+                                                </div>
+                                                <div className="overflow-y-auto max-h-48">
+                                                    {filteredProjects.length === 0 ? (
+                                                        <div className="px-4 py-6 text-center text-gray-500">
+                                                            <svg
+                                                                className="w-8 h-8 mx-auto mb-2 text-gray-300"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={1.5}
+                                                                    d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+                                                                />
+                                                            </svg>
+                                                            <p className="text-sm">
+                                                                No projects found
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        filteredProjects.map((project) => (
+                                                            <label
+                                                                key={project}
+                                                                className="group px-4 py-3 cursor-pointer hover:bg-blue-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
+                                                            >
+                                                                <div className="flex-shrink-0">
+                                                                    <input
+                                                                        type="radio"
+                                                                        name="project-selection"
+                                                                        checked={selectedProject === project}
+                                                                        onChange={() => handleProjectToggle(project)}
+                                                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 transition-colors duration-200"
+                                                                    />
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
+                                                                        {project}
+                                                                    </span>
+                                                                </div>
+                                                                {selectedProject === project && (
+                                                                    <div className="flex-shrink-0">
+                                                                        <svg
+                                                                            className="w-4 h-4 text-green-500"
+                                                                            fill="currentColor"
+                                                                            viewBox="0 0 20 20"
+                                                                        >
+                                                                            <path
+                                                                                fillRule="evenodd"
+                                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                clipRule="evenodd"
+                                                                            />
+                                                                        </svg>
+                                                                    </div>
+                                                                )}
+                                                            </label>
+                                                        ))
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {isProjectDropdownOpen && (
+                                        <div
+                                            className="fixed inset-0 z-5"
+                                            onClick={() => setIsProjectDropdownOpen(false)}
+                                        />
+                                    )}
                                 </div>
                             </div>
 
@@ -313,17 +504,203 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                     Add Accounts:
                                 </label>
                                 <div className="w-2/3">
-                                    <SearchableDropdown
-                                        options={filteredAccounts}
-                                        selectedOptions={selectedAccounts}
-                                        setSelectedOptions={setSelectedAccounts}
-                                        optionKey="id"
-                                        placeholder="Select Account"
-                                        showCheckbox={true}
-                                        showSelectedTags={true}
-                                        hideInputValue={true}
-                                        showSelectAll={true}
-                                    />
+                                    <div className="relative">
+                                        {selectedAccounts.length === 0 && (
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <svg
+                                                    className="h-4 w-4 text-gray-400"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                                    />
+                                                </svg>
+                                            </div>
+                                        )}
+
+                                        {/* Selected Accounts Tags inside input */}
+                                        {selectedAccounts.length > 0 && (
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none overflow-x-auto">
+                                                <div className="flex gap-1 items-center">
+                                                    {selectedAccounts.slice(0, 3).map((account) => (
+                                                        <div
+                                                            key={account.id}
+                                                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm flex-shrink-0"
+                                                        >
+                                                            <span className="mr-1 truncate max-w-20">
+                                                                {account.account_name}
+                                                            </span>
+                                                            <button
+                                                                onClick={() => handleRemoveAccount(account.id)}
+                                                                className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto"
+                                                            >
+                                                                <svg
+                                                                    className="w-3 h-3"
+                                                                    fill="currentColor"
+                                                                    viewBox="0 0 20 20"
+                                                                >
+                                                                    <path
+                                                                        fillRule="evenodd"
+                                                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                        clipRule="evenodd"
+                                                                    />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                    ))}
+                                                    {selectedAccounts.length > 3 && (
+                                                        <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 border text-gray-600 shadow-sm flex-shrink-0">
+                                                            <span>+{selectedAccounts.length - 3} more</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        <input
+                                            type="text"
+                                            placeholder={selectedAccounts.length > 0 ? "" : "Search for accounts..."}
+                                            value={accountSearchTerm}
+                                            onChange={(e) =>
+                                                setAccountSearchTerm(e.target.value)
+                                            }
+                                            onFocus={() => setIsAccountDropdownOpen(true)}
+                                            className={`w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
+                                                selectedAccounts.length > 0
+                                                    ? "pl-64"
+                                                    : "pl-10"
+                                            }`}
+                                            style={{
+                                                paddingLeft: selectedAccounts.length > 0
+                                                    ? `${Math.min(selectedAccounts.length * 80 + 60, 250)}px`
+                                                    : '40px'
+                                            }}
+                                        />
+                                        {accountSearchTerm && (
+                                            <button
+                                                onClick={() => {
+                                                    setAccountSearchTerm("");
+                                                    setIsAccountDropdownOpen(false);
+                                                }}
+                                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                                            >
+                                                <svg
+                                                    className="h-4 w-4"
+                                                    fill="currentColor"
+                                                    viewBox="0 0 20 20"
+                                                >
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {isAccountDropdownOpen && (
+                                        <div className="relative">
+                                            <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden mt-1">
+                                                <div className="sticky top-0 bg-gray-50 px-4 py-2 border-b border-gray-200">
+                                                    <div className="flex justify-between items-center">
+                                                        <p className="text-sm font-medium text-gray-700">
+                                                            Select Accounts (
+                                                            {filteredAccountsForDropdown.length}{" "}
+                                                            available)
+                                                        </p>
+                                                        <div className="flex gap-2">
+                                                            {filteredAccountsForDropdown.length > 0 && (
+                                                                <button
+                                                                    onClick={handleSelectAllAccounts}
+                                                                    className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                                                                >
+                                                                    Select All
+                                                                </button>
+                                                            )}
+                                                            {selectedAccounts.length > 0 && (
+                                                                <button
+                                                                    onClick={() => setSelectedAccounts([])}
+                                                                    className="text-xs text-red-600 hover:text-red-800 font-medium"
+                                                                >
+                                                                    Clear All
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="overflow-y-auto max-h-48">
+                                                    {filteredAccountsForDropdown.length === 0 ? (
+                                                        <div className="px-4 py-6 text-center text-gray-500">
+                                                            <svg
+                                                                className="w-8 h-8 mx-auto mb-2 text-gray-300"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={1.5}
+                                                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                                                />
+                                                            </svg>
+                                                            <p className="text-sm">
+                                                                No accounts found
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        filteredAccountsForDropdown.map((account) => (
+                                                            <label
+                                                                key={account.id}
+                                                                className="group px-4 py-3 cursor-pointer hover:bg-blue-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
+                                                            >
+                                                                <div className="flex-shrink-0">
+                                                                    <input
+                                                                        type="checkbox"
+                                                                        checked={selectedAccounts.some(acc => acc.id === account.id)}
+                                                                        onChange={() => handleAccountToggle(account)}
+                                                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
+                                                                    />
+                                                                </div>
+                                                                <div className="flex-1 min-w-0">
+                                                                    <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
+                                                                        {account.account_name}
+                                                                    </span>
+                                                                </div>
+                                                                {selectedAccounts.some(acc => acc.id === account.id) && (
+                                                                    <div className="flex-shrink-0">
+                                                                        <svg
+                                                                            className="w-4 h-4 text-green-500"
+                                                                            fill="currentColor"
+                                                                            viewBox="0 0 20 20"
+                                                                        >
+                                                                            <path
+                                                                                fillRule="evenodd"
+                                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                clipRule="evenodd"
+                                                                            />
+                                                                        </svg>
+                                                                    </div>
+                                                                )}
+                                                            </label>
+                                                        ))
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                    {isAccountDropdownOpen && (
+                                        <div
+                                            className="fixed inset-0 z-5"
+                                            onClick={() => setIsAccountDropdownOpen(false)}
+                                        />
+                                    )}
                                 </div>
                             </div>
 
