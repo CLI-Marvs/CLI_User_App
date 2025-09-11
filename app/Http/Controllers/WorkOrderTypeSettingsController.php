@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\WorkOrderType;
 use App\Models\Submilestone;
 use App\Models\Checklist;
+use App\Models\WorkOrder;
 use Illuminate\Http\Request;
 
 class WorkOrderTypeSettingsController extends Controller
@@ -57,8 +58,23 @@ class WorkOrderTypeSettingsController extends Controller
      */
     public function destroyWorkOrderType(WorkOrderType $workOrderType)
     {
-        $workOrderType->delete();
-        return response()->json(null, 204);
+        try {
+            // Check if there are any work orders using this work order type
+            $workOrderCount = $workOrderType->workOrders()->count();
+
+            if ($workOrderCount > 0) {
+                return response()->json([
+                    'error' => 'Cannot delete this work order type because it is being used by ' . $workOrderCount . ' work order(s). Please reassign or remove those work orders first.'
+                ], 422);
+            }
+
+            $workOrderType->delete();
+            return response()->json(null, 204);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to delete work order type: ' . $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -93,8 +109,23 @@ class WorkOrderTypeSettingsController extends Controller
      */
     public function destroySubmilestone(Submilestone $submilestone)
     {
-        $submilestone->delete();
-        return response()->json(null, 204);
+        try {
+            // Check if there are any project milestone assignees using this submilestone
+            $assigneeCount = $submilestone->projectMilestoneAssignees()->count();
+
+            if ($assigneeCount > 0) {
+                return response()->json([
+                    'error' => 'Cannot delete this submilestone because it has ' . $assigneeCount . ' assignee(s). Please remove those assignees first.'
+                ], 422);
+            }
+
+            $submilestone->delete();
+            return response()->json(null, 204);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to delete submilestone: ' . $e->getMessage()
+            ], 500);
+        }
     }
     /**
      * Store a new checklist.
@@ -128,8 +159,23 @@ class WorkOrderTypeSettingsController extends Controller
      */
     public function destroyChecklist(Checklist $checklist)
     {
-        $checklist->delete();
-        return response()->json(null, 204);
+        try {
+            // Check if there are any account checklist statuses using this checklist
+            $statusCount = $checklist->accountChecklistStatuses()->count();
+
+            if ($statusCount > 0) {
+                return response()->json([
+                    'error' => 'Cannot delete this checklist item because it has ' . $statusCount . ' status record(s) in use. Please remove those records first.'
+                ], 422);
+            }
+
+            $checklist->delete();
+            return response()->json(null, 204);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to delete checklist item: ' . $e->getMessage()
+            ], 500);
+        }
     }
     public function reorderWorkOrderTypes(Request $request)
     {
