@@ -697,7 +697,24 @@ const AdminSettings = () => {
             });
         } catch (err) {
             console.error("Delete error:", err);
-            setError("Failed to delete. Please try again.");
+
+            // Handle specific error messages from the backend
+            if (
+                err.response &&
+                err.response.status === 422 &&
+                err.response.data &&
+                err.response.data.error
+            ) {
+                setError(err.response.data.error);
+            } else if (
+                err.response &&
+                err.response.data &&
+                err.response.data.error
+            ) {
+                setError(err.response.data.error);
+            } else {
+                setError("Failed to delete. Please try again.");
+            }
         }
         fetchWorkOrderTypes();
     };

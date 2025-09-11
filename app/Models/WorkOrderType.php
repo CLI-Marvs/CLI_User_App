@@ -20,4 +20,9 @@ class WorkOrderType extends Model
         return $this->hasMany(Submilestone::class, 'work_order_type_id');
     }
 
+    public function workOrders()
+    {
+        return $this->hasMany(WorkOrder::class, 'work_order_type_id');
+    }
+
 }
