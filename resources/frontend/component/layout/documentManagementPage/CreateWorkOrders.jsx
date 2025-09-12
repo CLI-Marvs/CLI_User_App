@@ -14,14 +14,16 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     const modalRef = useRef();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [workOrderId, setWorkOrderId] = useState(null);
-    const [projectMilestoneStructure, setProjectMilestoneStructure] = useState([]);
-    
+    const [projectMilestoneStructure, setProjectMilestoneStructure] = useState(
+        []
+    );
+
     // New state for modern dropdowns
     const [projectSearchTerm, setProjectSearchTerm] = useState("");
     const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
     const [accountSearchTerm, setAccountSearchTerm] = useState("");
     const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
-    
+
     const { user } = useStateContext();
     const { accounts, workOrderTypes, fetchWorkOrderGroups } =
         useDocumentManagementContext();
@@ -102,29 +104,35 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
 
     // Helper functions for modern dropdowns
     const selectedProjectDetails = useMemo(() => {
-        return projects.find(p => p === selectedProject) || null;
+        return projects.find((p) => p === selectedProject) || null;
     }, [selectedProject, projects]);
 
-    const filteredProjects = projects.filter((project) =>
-        project && project.toLowerCase().includes(projectSearchTerm.toLowerCase())
+    const filteredProjects = projects.filter(
+        (project) =>
+            project &&
+            project.toLowerCase().includes(projectSearchTerm.toLowerCase())
     );
 
-    const filteredAccountsForDropdown = filteredAccounts.filter((account) =>
-        account.account_name && account.account_name.toLowerCase().includes(accountSearchTerm.toLowerCase())
+    const filteredAccountsForDropdown = filteredAccounts.filter(
+        (account) =>
+            account.account_name &&
+            account.account_name
+                .toLowerCase()
+                .includes(accountSearchTerm.toLowerCase())
     );
 
     const handleProjectToggle = useCallback((projectName) => {
-        setSelectedProject(prev => prev === projectName ? "" : projectName);
+        setSelectedProject((prev) => (prev === projectName ? "" : projectName));
         setSelectedAccounts([]); // Clear accounts when project changes
         setIsProjectDropdownOpen(false);
         setProjectSearchTerm("");
     }, []);
 
     const handleAccountToggle = useCallback((account) => {
-        setSelectedAccounts(prev => {
-            const exists = prev.find(acc => acc.id === account.id);
+        setSelectedAccounts((prev) => {
+            const exists = prev.find((acc) => acc.id === account.id);
             if (exists) {
-                return prev.filter(acc => acc.id !== account.id);
+                return prev.filter((acc) => acc.id !== account.id);
             } else {
                 return [...prev, account];
             }
@@ -132,7 +140,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     }, []);
 
     const handleRemoveAccount = useCallback((accountId) => {
-        setSelectedAccounts(prev => prev.filter(acc => acc.id !== accountId));
+        setSelectedAccounts((prev) =>
+            prev.filter((acc) => acc.id !== accountId)
+        );
     }, []);
 
     const handleSelectAllAccounts = useCallback(() => {
@@ -142,6 +152,39 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        // Validation: Check if required data exists
+        if (
+            !firstWorkOrderType ||
+            !firstWorkOrderType.id ||
+            !firstWorkOrderType.type_name
+        ) {
+            alert(
+                "Work order type is not available. Please refresh the page and try again."
+            );
+            return;
+        }
+
+        if (!user || !user.id) {
+            alert("User information is not available. Please log in again.");
+            return;
+        }
+
+        if (selectedAccounts.length === 0) {
+            alert("Please select at least one account to create a work order.");
+            return;
+        }
+
+        // Validate selectedAccounts have proper structure
+        const invalidAccounts = selectedAccounts.filter(
+            (account) => !account || !account.id
+        );
+        if (invalidAccounts.length > 0) {
+            alert(
+                "Some selected accounts are invalid. Please reselect your accounts."
+            );
+            return;
+        }
 
         let formattedDueDate = null;
         if (dueDate) {
@@ -165,17 +208,27 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
         // Get all assignees from all milestones
         const allProjectAssignees = [];
         projectMilestoneStructure.forEach((step) => {
-            step.milestones.forEach((milestone) => {
-                milestone.assignees.forEach((assignee) => {
+            if (step.milestones && Array.isArray(step.milestones)) {
+                step.milestones.forEach((milestone) => {
                     if (
-                        !allProjectAssignees.find(
-                            (emp) => emp.id === assignee.id
-                        )
+                        milestone.assignees &&
+                        Array.isArray(milestone.assignees)
                     ) {
-                        allProjectAssignees.push(assignee);
+                        milestone.assignees.forEach((assignee) => {
+                            if (
+                                assignee &&
+                                assignee.id &&
+                                assignee.full_name &&
+                                !allProjectAssignees.find(
+                                    (emp) => emp.id === assignee.id
+                                )
+                            ) {
+                                allProjectAssignees.push(assignee);
+                            }
+                        });
                     }
                 });
-            });
+            }
         });
 
         if (allProjectAssignees.length === 0) {
@@ -186,24 +239,38 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
         }
 
         // Assign each account to a project assignee in ascending order (round-robin)
-        const accountAssignments = selectedAccounts.map((account, idx) => {
-            const assignee =
-                allProjectAssignees[idx % allProjectAssignees.length];
-            return {
-                account_id: account.id,
-                employee_id: assignee.id,
-            };
-        });
+        const accountAssignments = selectedAccounts
+            .map((account, idx) => {
+                const assignee =
+                    allProjectAssignees[idx % allProjectAssignees.length];
+                if (!assignee || !assignee.id || !account || !account.id) {
+                    return null; // Mark invalid assignments
+                }
+                return {
+                    account_id: account.id,
+                    employee_id: assignee.id,
+                };
+            })
+            .filter((assignment) => assignment !== null); // Remove invalid assignments
 
-        if (accountAssignments.some((a) => !a.employee_id)) {
+        if (accountAssignments.length !== selectedAccounts.length) {
+            alert(
+                "Some accounts could not be assigned to employees due to data issues. Please try again."
+            );
+            return;
+        }
+
+        if (accountAssignments.some((a) => !a.employee_id || !a.account_id)) {
             alert("One or more accounts could not be assigned to an employee.");
             return;
         }
 
         const formData = {
-            work_order: firstWorkOrderType?.type_name,
-            account_ids: selectedAccounts.map((account) => account.id),
-            work_order_type_id: firstWorkOrderType?.id,
+            work_order: firstWorkOrderType.type_name,
+            account_ids: selectedAccounts
+                .map((account) => account.id)
+                .filter((id) => id), // Filter out null/undefined IDs
+            work_order_type_id: firstWorkOrderType.id,
             work_order_deadline: formattedDueDate,
             status: "In Progress",
             description: "",
@@ -211,6 +278,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             created_by_user_id: user.id,
             account_assignments: accountAssignments,
         };
+
+        console.log("Submitting form data:", formData); // Debug log for production
+
         try {
             const response = await apiService.post(
                 "/work-orders/create-work-order",
@@ -353,7 +423,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                     </span>
                                                     <button
                                                         onClick={() =>
-                                                            handleProjectToggle(selectedProjectDetails)
+                                                            handleProjectToggle(
+                                                                selectedProjectDetails
+                                                            )
                                                         }
                                                         className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto"
                                                     >
@@ -375,28 +447,43 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
 
                                         <input
                                             type="text"
-                                            placeholder={selectedProjectDetails ? "" : "Search for a project..."}
+                                            placeholder={
+                                                selectedProjectDetails
+                                                    ? ""
+                                                    : "Search for a project..."
+                                            }
                                             value={projectSearchTerm}
                                             onChange={(e) =>
-                                                setProjectSearchTerm(e.target.value)
+                                                setProjectSearchTerm(
+                                                    e.target.value
+                                                )
                                             }
-                                            onFocus={() => setIsProjectDropdownOpen(true)}
+                                            onFocus={() =>
+                                                setIsProjectDropdownOpen(true)
+                                            }
                                             className={`w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
                                                 selectedProjectDetails
                                                     ? "pl-32"
                                                     : "pl-10"
                                             }`}
                                             style={{
-                                                paddingLeft: selectedProjectDetails
-                                                    ? `${selectedProjectDetails.length * 8 + 60}px`
-                                                    : '40px'
+                                                paddingLeft:
+                                                    selectedProjectDetails
+                                                        ? `${
+                                                              selectedProjectDetails.length *
+                                                                  8 +
+                                                              60
+                                                          }px`
+                                                        : "40px",
                                             }}
                                         />
                                         {projectSearchTerm && (
                                             <button
                                                 onClick={() => {
                                                     setProjectSearchTerm("");
-                                                    setIsProjectDropdownOpen(false);
+                                                    setIsProjectDropdownOpen(
+                                                        false
+                                                    );
                                                 }}
                                                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
                                             >
@@ -421,12 +508,15 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                 <div className="sticky top-0 bg-gray-50 px-4 py-2 border-b border-gray-200">
                                                     <p className="text-sm font-medium text-gray-700">
                                                         Select Project (
-                                                        {filteredProjects.length}{" "}
+                                                        {
+                                                            filteredProjects.length
+                                                        }{" "}
                                                         available)
                                                     </p>
                                                 </div>
                                                 <div className="overflow-y-auto max-h-48">
-                                                    {filteredProjects.length === 0 ? (
+                                                    {filteredProjects.length ===
+                                                    0 ? (
                                                         <div className="px-4 py-6 text-center text-gray-500">
                                                             <svg
                                                                 className="w-8 h-8 mx-auto mb-2 text-gray-300"
@@ -437,51 +527,68 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                                 <path
                                                                     strokeLinecap="round"
                                                                     strokeLinejoin="round"
-                                                                    strokeWidth={1.5}
+                                                                    strokeWidth={
+                                                                        1.5
+                                                                    }
                                                                     d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
                                                                 />
                                                             </svg>
                                                             <p className="text-sm">
-                                                                No projects found
+                                                                No projects
+                                                                found
                                                             </p>
                                                         </div>
                                                     ) : (
-                                                        filteredProjects.map((project) => (
-                                                            <label
-                                                                key={project}
-                                                                className="group px-4 py-3 cursor-pointer hover:bg-blue-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
-                                                            >
-                                                                <div className="flex-shrink-0">
-                                                                    <input
-                                                                        type="radio"
-                                                                        name="project-selection"
-                                                                        checked={selectedProject === project}
-                                                                        onChange={() => handleProjectToggle(project)}
-                                                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 transition-colors duration-200"
-                                                                    />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
-                                                                        {project}
-                                                                    </span>
-                                                                </div>
-                                                                {selectedProject === project && (
+                                                        filteredProjects.map(
+                                                            (project) => (
+                                                                <label
+                                                                    key={
+                                                                        project
+                                                                    }
+                                                                    className="group px-4 py-3 cursor-pointer hover:bg-blue-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
+                                                                >
                                                                     <div className="flex-shrink-0">
-                                                                        <svg
-                                                                            className="w-4 h-4 text-green-500"
-                                                                            fill="currentColor"
-                                                                            viewBox="0 0 20 20"
-                                                                        >
-                                                                            <path
-                                                                                fillRule="evenodd"
-                                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                                clipRule="evenodd"
-                                                                            />
-                                                                        </svg>
+                                                                        <input
+                                                                            type="radio"
+                                                                            name="project-selection"
+                                                                            checked={
+                                                                                selectedProject ===
+                                                                                project
+                                                                            }
+                                                                            onChange={() =>
+                                                                                handleProjectToggle(
+                                                                                    project
+                                                                                )
+                                                                            }
+                                                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 transition-colors duration-200"
+                                                                        />
                                                                     </div>
-                                                                )}
-                                                            </label>
-                                                        ))
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
+                                                                            {
+                                                                                project
+                                                                            }
+                                                                        </span>
+                                                                    </div>
+                                                                    {selectedProject ===
+                                                                        project && (
+                                                                        <div className="flex-shrink-0">
+                                                                            <svg
+                                                                                className="w-4 h-4 text-green-500"
+                                                                                fill="currentColor"
+                                                                                viewBox="0 0 20 20"
+                                                                            >
+                                                                                <path
+                                                                                    fillRule="evenodd"
+                                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                    clipRule="evenodd"
+                                                                                />
+                                                                            </svg>
+                                                                        </div>
+                                                                    )}
+                                                                </label>
+                                                            )
+                                                        )
                                                     )}
                                                 </div>
                                             </div>
@@ -490,7 +597,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                     {isProjectDropdownOpen && (
                                         <div
                                             className="fixed inset-0 z-5"
-                                            onClick={() => setIsProjectDropdownOpen(false)}
+                                            onClick={() =>
+                                                setIsProjectDropdownOpen(false)
+                                            }
                                         />
                                     )}
                                 </div>
@@ -527,35 +636,49 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                         {selectedAccounts.length > 0 && (
                                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none overflow-x-auto">
                                                 <div className="flex gap-1 items-center">
-                                                    {selectedAccounts.slice(0, 3).map((account) => (
-                                                        <div
-                                                            key={account.id}
-                                                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm flex-shrink-0"
-                                                        >
-                                                            <span className="mr-1 truncate max-w-20">
-                                                                {account.account_name}
-                                                            </span>
-                                                            <button
-                                                                onClick={() => handleRemoveAccount(account.id)}
-                                                                className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto"
+                                                    {selectedAccounts
+                                                        .slice(0, 3)
+                                                        .map((account) => (
+                                                            <div
+                                                                key={account.id}
+                                                                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm flex-shrink-0"
                                                             >
-                                                                <svg
-                                                                    className="w-3 h-3"
-                                                                    fill="currentColor"
-                                                                    viewBox="0 0 20 20"
+                                                                <span className="mr-1 truncate max-w-20">
+                                                                    {
+                                                                        account.account_name
+                                                                    }
+                                                                </span>
+                                                                <button
+                                                                    onClick={() =>
+                                                                        handleRemoveAccount(
+                                                                            account.id
+                                                                        )
+                                                                    }
+                                                                    className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto"
                                                                 >
-                                                                    <path
-                                                                        fillRule="evenodd"
-                                                                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                                        clipRule="evenodd"
-                                                                    />
-                                                                </svg>
-                                                            </button>
-                                                        </div>
-                                                    ))}
-                                                    {selectedAccounts.length > 3 && (
+                                                                    <svg
+                                                                        className="w-3 h-3"
+                                                                        fill="currentColor"
+                                                                        viewBox="0 0 20 20"
+                                                                    >
+                                                                        <path
+                                                                            fillRule="evenodd"
+                                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                            clipRule="evenodd"
+                                                                        />
+                                                                    </svg>
+                                                                </button>
+                                                            </div>
+                                                        ))}
+                                                    {selectedAccounts.length >
+                                                        3 && (
                                                         <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 border text-gray-600 shadow-sm flex-shrink-0">
-                                                            <span>+{selectedAccounts.length - 3} more</span>
+                                                            <span>
+                                                                +
+                                                                {selectedAccounts.length -
+                                                                    3}{" "}
+                                                                more
+                                                            </span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -564,28 +687,44 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
 
                                         <input
                                             type="text"
-                                            placeholder={selectedAccounts.length > 0 ? "" : "Search for accounts..."}
+                                            placeholder={
+                                                selectedAccounts.length > 0
+                                                    ? ""
+                                                    : "Search for accounts..."
+                                            }
                                             value={accountSearchTerm}
                                             onChange={(e) =>
-                                                setAccountSearchTerm(e.target.value)
+                                                setAccountSearchTerm(
+                                                    e.target.value
+                                                )
                                             }
-                                            onFocus={() => setIsAccountDropdownOpen(true)}
+                                            onFocus={() =>
+                                                setIsAccountDropdownOpen(true)
+                                            }
                                             className={`w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
                                                 selectedAccounts.length > 0
                                                     ? "pl-64"
                                                     : "pl-10"
                                             }`}
                                             style={{
-                                                paddingLeft: selectedAccounts.length > 0
-                                                    ? `${Math.min(selectedAccounts.length * 80 + 60, 250)}px`
-                                                    : '40px'
+                                                paddingLeft:
+                                                    selectedAccounts.length > 0
+                                                        ? `${Math.min(
+                                                              selectedAccounts.length *
+                                                                  80 +
+                                                                  60,
+                                                              250
+                                                          )}px`
+                                                        : "40px",
                                             }}
                                         />
                                         {accountSearchTerm && (
                                             <button
                                                 onClick={() => {
                                                     setAccountSearchTerm("");
-                                                    setIsAccountDropdownOpen(false);
+                                                    setIsAccountDropdownOpen(
+                                                        false
+                                                    );
                                                 }}
                                                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
                                             >
@@ -611,21 +750,31 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                     <div className="flex justify-between items-center">
                                                         <p className="text-sm font-medium text-gray-700">
                                                             Select Accounts (
-                                                            {filteredAccountsForDropdown.length}{" "}
+                                                            {
+                                                                filteredAccountsForDropdown.length
+                                                            }{" "}
                                                             available)
                                                         </p>
                                                         <div className="flex gap-2">
-                                                            {filteredAccountsForDropdown.length > 0 && (
+                                                            {filteredAccountsForDropdown.length >
+                                                                0 && (
                                                                 <button
-                                                                    onClick={handleSelectAllAccounts}
+                                                                    onClick={
+                                                                        handleSelectAllAccounts
+                                                                    }
                                                                     className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                                                                 >
                                                                     Select All
                                                                 </button>
                                                             )}
-                                                            {selectedAccounts.length > 0 && (
+                                                            {selectedAccounts.length >
+                                                                0 && (
                                                                 <button
-                                                                    onClick={() => setSelectedAccounts([])}
+                                                                    onClick={() =>
+                                                                        setSelectedAccounts(
+                                                                            []
+                                                                        )
+                                                                    }
                                                                     className="text-xs text-red-600 hover:text-red-800 font-medium"
                                                                 >
                                                                     Clear All
@@ -635,7 +784,8 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                     </div>
                                                 </div>
                                                 <div className="overflow-y-auto max-h-48">
-                                                    {filteredAccountsForDropdown.length === 0 ? (
+                                                    {filteredAccountsForDropdown.length ===
+                                                    0 ? (
                                                         <div className="px-4 py-6 text-center text-gray-500">
                                                             <svg
                                                                 className="w-8 h-8 mx-auto mb-2 text-gray-300"
@@ -646,50 +796,73 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                                 <path
                                                                     strokeLinecap="round"
                                                                     strokeLinejoin="round"
-                                                                    strokeWidth={1.5}
+                                                                    strokeWidth={
+                                                                        1.5
+                                                                    }
                                                                     d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                                                 />
                                                             </svg>
                                                             <p className="text-sm">
-                                                                No accounts found
+                                                                No accounts
+                                                                found
                                                             </p>
                                                         </div>
                                                     ) : (
-                                                        filteredAccountsForDropdown.map((account) => (
-                                                            <label
-                                                                key={account.id}
-                                                                className="group px-4 py-3 cursor-pointer hover:bg-blue-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
-                                                            >
-                                                                <div className="flex-shrink-0">
-                                                                    <input
-                                                                        type="checkbox"
-                                                                        checked={selectedAccounts.some(acc => acc.id === account.id)}
-                                                                        onChange={() => handleAccountToggle(account)}
-                                                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
-                                                                    />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
-                                                                        {account.account_name}
-                                                                    </span>
-                                                                </div>
-                                                                {selectedAccounts.some(acc => acc.id === account.id) && (
+                                                        filteredAccountsForDropdown.map(
+                                                            (account) => (
+                                                                <label
+                                                                    key={
+                                                                        account.id
+                                                                    }
+                                                                    className="group px-4 py-3 cursor-pointer hover:bg-blue-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
+                                                                >
                                                                     <div className="flex-shrink-0">
-                                                                        <svg
-                                                                            className="w-4 h-4 text-green-500"
-                                                                            fill="currentColor"
-                                                                            viewBox="0 0 20 20"
-                                                                        >
-                                                                            <path
-                                                                                fillRule="evenodd"
-                                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                                clipRule="evenodd"
-                                                                            />
-                                                                        </svg>
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={selectedAccounts.some(
+                                                                                (
+                                                                                    acc
+                                                                                ) =>
+                                                                                    acc.id ===
+                                                                                    account.id
+                                                                            )}
+                                                                            onChange={() =>
+                                                                                handleAccountToggle(
+                                                                                    account
+                                                                                )
+                                                                            }
+                                                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
+                                                                        />
                                                                     </div>
-                                                                )}
-                                                            </label>
-                                                        ))
+                                                                    <div className="flex-1 min-w-0">
+                                                                        <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
+                                                                            {
+                                                                                account.account_name
+                                                                            }
+                                                                        </span>
+                                                                    </div>
+                                                                    {selectedAccounts.some(
+                                                                        (acc) =>
+                                                                            acc.id ===
+                                                                            account.id
+                                                                    ) && (
+                                                                        <div className="flex-shrink-0">
+                                                                            <svg
+                                                                                className="w-4 h-4 text-green-500"
+                                                                                fill="currentColor"
+                                                                                viewBox="0 0 20 20"
+                                                                            >
+                                                                                <path
+                                                                                    fillRule="evenodd"
+                                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                    clipRule="evenodd"
+                                                                                />
+                                                                            </svg>
+                                                                        </div>
+                                                                    )}
+                                                                </label>
+                                                            )
+                                                        )
                                                     )}
                                                 </div>
                                             </div>
@@ -698,7 +871,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                     {isAccountDropdownOpen && (
                                         <div
                                             className="fixed inset-0 z-5"
-                                            onClick={() => setIsAccountDropdownOpen(false)}
+                                            onClick={() =>
+                                                setIsAccountDropdownOpen(false)
+                                            }
                                         />
                                     )}
                                 </div>
