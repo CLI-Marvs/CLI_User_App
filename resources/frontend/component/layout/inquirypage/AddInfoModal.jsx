@@ -535,7 +535,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <option value="Walk in">Walk-in</option>
                                     <option value="Website">Website</option>
                                     <option value="Social media">
-                                        Social media
+                                        Social Media
                                     </option>
                                     <option value="Branch Tablet">
                                         Branch Tablet
