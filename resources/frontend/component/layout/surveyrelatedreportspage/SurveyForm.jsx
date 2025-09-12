@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
 import { MdKeyboardArrowLeft } from "react-icons/md";
 import { SurveySection } from './surveyComponents/SurveySection';
@@ -6,15 +6,17 @@ import { showToast } from "../../../util/toastUtil";
 import apiService from '../../servicesApi/apiService';
 import Spinner from '../../../util/Spinner';
 import { CircularProgress } from '@mui/material';
+import SurveyUnpublishedModal from './surveyComponents/SurveyUnpublishedModal';
 const SurveyForm = () => {
 
   const { id } = useParams();
+
+  const modalRef = useRef(null);
 
   const [surveyId, setSurveyId] = useState(id || null);
   const [loading1, setLoading1] = useState(false);
   const [loading2, setLoading2] = useState(false);
 
-  
 
   const generateId = () => crypto?.randomUUID?.() || Date.now().toString();
 
@@ -66,6 +68,24 @@ const SurveyForm = () => {
       setSurveyData(initialSurveyData);
     }
   }, [id]);
+
+
+  const openModal = () => {
+    if (surveyData[0]?.status) {
+      if (modalRef.current) {
+        modalRef.current.showModal();
+      }
+    } else {
+      handlePublish();
+    }
+
+  };
+
+  const closeModal = () => {
+    if (modalRef.current) {
+      modalRef.current.close();
+    }
+  };
 
 
   // Update Survey Title
@@ -198,23 +218,23 @@ const SurveyForm = () => {
       prev.map((survey, surveyIndex) =>
         surveyIndex === 0
           ? {
-              ...survey,
-              data: survey.data.map((section, idx) =>
-                idx === sectionIndex
-                  ? {
-                      ...section,
-                      dataQASet: section.dataQASet.map((question, qIdx) =>
-                        qIdx === questionIndex
-                          ? {
-                              ...question,
-                              option: [],
-                            }
-                          : question
-                      ),
-                    }
-                  : section
-              ),
-            }
+            ...survey,
+            data: survey.data.map((section, idx) =>
+              idx === sectionIndex
+                ? {
+                  ...section,
+                  dataQASet: section.dataQASet.map((question, qIdx) =>
+                    qIdx === questionIndex
+                      ? {
+                        ...question,
+                        option: [],
+                      }
+                      : question
+                  ),
+                }
+                : section
+            ),
+          }
           : survey
       )
     );
@@ -280,20 +300,20 @@ const SurveyForm = () => {
       prev.map((survey, surveyIndex) =>
         surveyIndex === 0
           ? {
-              ...survey,
-              data: survey.data.map((section, idx) =>
-                idx === sectionIndex
-                  ? {
-                      ...section,
-                      dataQASet: section.dataQASet.map((question, qIdx) =>
-                        qIdx === questionIndex
-                          ? { ...question, inputType: newInputType }
-                          : question
-                      ),
-                    }
-                  : section
-              ),
-            }
+            ...survey,
+            data: survey.data.map((section, idx) =>
+              idx === sectionIndex
+                ? {
+                  ...section,
+                  dataQASet: section.dataQASet.map((question, qIdx) =>
+                    qIdx === questionIndex
+                      ? { ...question, inputType: newInputType }
+                      : question
+                  ),
+                }
+                : section
+            ),
+          }
           : survey
       )
     );
@@ -316,7 +336,7 @@ const SurveyForm = () => {
                         ...question,
                         option: question.option.map((option) =>
                           option.id === optionId
-                            ? { ...option, text: newText } 
+                            ? { ...option, text: newText }
                             : option
                         ),
                       }
@@ -403,7 +423,7 @@ const SurveyForm = () => {
         const response = await apiService.post('/surveys', { surveyData });
         setSurveyId(response.data.survey_id);
         showToast("Survey Saved Successfully!", "success");
-        
+
       }
     } catch (error) {
       showToast("Error saving survey!", "error");
@@ -416,6 +436,7 @@ const SurveyForm = () => {
 
 
   const handlePublish = async () => {
+    closeModal();
     try {
 
       setLoading2(true);
@@ -423,12 +444,12 @@ const SurveyForm = () => {
         idx === 0 ? { ...survey, status: !survey.status } : survey
       );
 
-      setSurveyData(updatedSurveyData); 
+      setSurveyData(updatedSurveyData);
 
       try {
         if (surveyId) {
           await apiService.put(`/surveys/${surveyId}`, { surveyData: updatedSurveyData });
-          if(updatedSurveyData[0].status) {
+          if (updatedSurveyData[0].status) {
             showToast("Survey Published Sucessfully!", "success");
           } else {
             showToast("Survey Unpublished Sucessfully!", "success");
@@ -452,7 +473,7 @@ const SurveyForm = () => {
 
   return (
     <div className='h-screen max-w-full bg-custom-grayFA'>
-      
+
       <div className='flex flex-col max-w-[687px]'>
         <div className='flex flex-col'>
           {surveyData[0]?.data?.map((item, index) => (
@@ -483,25 +504,28 @@ const SurveyForm = () => {
           <div
             className="flex justify-center h-[31px] gap-[14px]"
           >
-            <button 
-                onClick={handleSave}
-                className='h-[31px] w-[104px] gradient-btn2 rounded-[5px] text-sm hover:shadow-custom border-[0.5px] border-custom-grayA5'>
-                <div  className='bg-white w-full h-full flex justify-center items-center rounded-[4px]'>
-               {loading1 ? <CircularProgress className="spinnerSize" /> : "Save"}
+            <button
+              onClick={handleSave}
+              className='h-[31px] w-[104px] gradient-btn2 rounded-[5px] text-sm hover:shadow-custom border-[0.5px] border-custom-grayA5'>
+              <div className='bg-white w-full h-full flex justify-center items-center rounded-[4px]'>
+                {loading1 ? <CircularProgress className="spinnerSize" /> : "Save"}
               </div>
             </button>
 
 
             <button
-              onClick={handlePublish}
+              onClick={openModal}
               className={`h-[31px] w-[104px] text-white rounded-[5px] text-sm hover:shadow-custom
                 ${surveyData[0]?.status ? "bg-red-500 " : "gradient-btn2"}
               `}
             >
-              {   loading2 ? <CircularProgress className="spinnerSize" /> : surveyData[0]?.status ? "Unpublish " : "Publish"}
+              {loading2 ? <CircularProgress className="spinnerSize" /> : surveyData[0]?.status ? "Unpublish " : "Publish"}
             </button>
           </div>
         </div>
+      </div>
+      <div>
+        <SurveyUnpublishedModal modalRef={modalRef} unpublish={handlePublish} />
       </div>
     </div>
   )
