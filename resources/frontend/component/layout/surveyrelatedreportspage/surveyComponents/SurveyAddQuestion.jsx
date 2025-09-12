@@ -72,7 +72,7 @@ export const SurveyAddQuestion = (
     const options = [
         { value: "multiple-choice", label: "Multiple choice", icon: <IoMdRadioButtonOn /> },
         { value: "checkboxes", label: "Checkboxes", icon: <IoIosCheckboxOutline /> },
-        { value: "textbox", label: "Short answer", icon: <MdOutlineShortText /> },
+        { value: "textbox", label: "Text Box", icon: <MdOutlineShortText /> },
     ];
 
     return (

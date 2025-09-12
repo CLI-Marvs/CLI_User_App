@@ -1468,13 +1468,13 @@ const InquiryThread = () => {
                                                         } ${dataConcern?.buyer_lastname ||
                                                         ""
                                                         }`
-                                                    }{" "}
+                                                    }{""}
                                                     {
                                                         /* capitalizeWords() */
                                                         dataConcern?.suffix_name
                                                     }
                                                 </span>
-                                                . Please use the comment section
+                                            . Please use the comment section
                                                 for CLI internal communication.
                                             </p>
                                         </div>

@@ -204,6 +204,9 @@ const ProjectAssigneeComponent = () => {
             // If clicking a different employee, select that one
             return prev === employeeIdStr ? "" : employeeIdStr;
         });
+        // Clear search term and close dropdown when selecting an employee
+        setSearchTerm("");
+        setIsDropdownOpen(false);
     }, []);
 
     const handleAssign = useCallback(() => {
@@ -600,8 +603,8 @@ const ProjectAssigneeComponent = () => {
                                     {/* Selected Milestone Tag inside input */}
                                     {selectedMilestoneDetails && (
                                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm">
-                                                <span className="mr-1">
+                                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm max-w-48">
+                                                <span className="mr-1 truncate">
                                                     {
                                                         selectedMilestoneDetails
                                                             .work_order_type
@@ -618,7 +621,7 @@ const ProjectAssigneeComponent = () => {
                                                             selectedMilestoneDetails.id
                                                         )
                                                     }
-                                                    className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto"
+                                                    className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto flex-shrink-0"
                                                     disabled={
                                                         loadingStates.assign
                                                     }
@@ -661,25 +664,9 @@ const ProjectAssigneeComponent = () => {
                                         }
                                         className={`w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
                                             selectedMilestoneDetails
-                                                ? "pl-32"
+                                                ? "pl-52"
                                                 : "pl-10"
                                         }`}
-                                        style={{
-                                            paddingLeft:
-                                                selectedMilestoneDetails
-                                                    ? `${
-                                                          (selectedMilestoneDetails
-                                                              .work_order_type
-                                                              ?.type_name
-                                                              ?.length +
-                                                              selectedMilestoneDetails
-                                                                  .name
-                                                                  .length) *
-                                                              8 +
-                                                          80
-                                                      }px`
-                                                    : "40px",
-                                        }}
                                         disabled={
                                             !selectedProject ||
                                             loadingStates.submilestones ||
