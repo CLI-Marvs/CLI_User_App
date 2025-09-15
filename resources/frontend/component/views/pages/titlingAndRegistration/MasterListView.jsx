@@ -285,7 +285,12 @@ export default function PaginatedTable() {
     const [selectedContractNo, setSelectedContractNo] = useState("");
     const [selectedAccountName, setSelectedAccountName] = useState("");
     const [selectedProject, setSelectedProject] = useState("");
+    const [projectSearchTerm, setProjectSearchTerm] = useState("");
+    const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
     const [selectedFinancing, setSelectedFinancing] = useState("");
+    const [financingSearchTerm, setFinancingSearchTerm] = useState("");
+    const [isFinancingDropdownOpen, setIsFinancingDropdownOpen] =
+        useState(false);
     const [selectedDateFilter, setSelectedDateFilter] = useState("");
     const [selectedDate, setSelectedDate] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
@@ -368,6 +373,26 @@ export default function PaginatedTable() {
         };
         loadInitialData();
     }, [fetchMasterList]);
+
+    // Close project dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            const clickedElement = event.target;
+            const isInsideDropdown = clickedElement.closest(".relative");
+
+            if (isProjectDropdownOpen && !isInsideDropdown) {
+                setIsProjectDropdownOpen(false);
+            }
+            if (isFinancingDropdownOpen && !isInsideDropdown) {
+                setIsFinancingDropdownOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isProjectDropdownOpen, isFinancingDropdownOpen]);
 
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
@@ -486,6 +511,46 @@ export default function PaginatedTable() {
     const masterListContracts = useMemo(
         () => new Set(masterList.map((item) => item.contract_no)),
         [masterList]
+    );
+
+    const uniqueProjects = useMemo(() => {
+        const projectSet = new Set();
+
+        // Use masterListFilteredRows to get all projects, not just current page
+        const allData = masterListFilteredRows || [];
+        allData.forEach((item) => {
+            // Use the correct field name: propertyName (camelCase)
+            const projectName = item.propertyName;
+            if (projectName && projectName.toString().trim()) {
+                projectSet.add(projectName.toString().trim());
+            }
+        });
+
+        return Array.from(projectSet).sort();
+    }, [masterListFilteredRows]);
+
+    const uniqueFinancing = useMemo(() => {
+        const financingSet = new Set();
+
+        // Use masterListFilteredRows to get all financing options, not just current page
+        const allData = masterListFilteredRows || [];
+        allData.forEach((item) => {
+            // Use the correct field name: finance
+            const financingName = item.finance;
+            if (financingName && financingName.toString().trim()) {
+                financingSet.add(financingName.toString().trim());
+            }
+        });
+
+        return Array.from(financingSet).sort();
+    }, [masterListFilteredRows]);
+
+    const filteredProjects = uniqueProjects.filter((project) =>
+        project.toLowerCase().includes(projectSearchTerm.toLowerCase())
+    );
+
+    const filteredFinancing = uniqueFinancing.filter((financing) =>
+        financing.toLowerCase().includes(financingSearchTerm.toLowerCase())
     );
 
     function formatDate(date) {
@@ -820,15 +885,45 @@ export default function PaginatedTable() {
         setSelectedContractNo("");
         setSelectedAccountName("");
         setSelectedProject("");
+        setProjectSearchTerm("");
         setSelectedFinancing("");
+        setFinancingSearchTerm("");
         setSelectedDateFilter("");
         setSelectedDate("");
     };
 
+    const handleProjectToggle = useCallback((projectName) => {
+        setSelectedProject(projectName);
+        setProjectSearchTerm(projectName);
+        setIsProjectDropdownOpen(false);
+    }, []);
+
+    const handleFinancingToggle = useCallback((financingName) => {
+        setSelectedFinancing(financingName);
+        setFinancingSearchTerm(financingName);
+        setIsFinancingDropdownOpen(false);
+    }, []);
+
     const [isRefreshing, setIsRefreshing] = useState(false);
     const handleRefreshAndClearFilters = async () => {
         setIsRefreshing(true);
+
+        // Clear all filter inputs
         clearFilters();
+
+        // Reset dropdown filter to "All"
+        setFilterOption("All");
+
+        // Close project dropdown
+        setIsProjectDropdownOpen(false);
+
+        // Close financing dropdown
+        setIsFinancingDropdownOpen(false);
+
+        // Clear checked rows
+        setCheckedRows({});
+
+        // Clear applied filters in context
         setTakenOutMasterListAppliedFilters({
             contractNo: "",
             accountName: "",
@@ -837,6 +932,10 @@ export default function PaginatedTable() {
             dateFilter: "",
             date: "",
         });
+
+        // Reset current page to 1
+        setTakenOutMasterListCurrentpage(1);
+
         try {
             await fetchMasterList();
         } finally {
@@ -968,7 +1067,7 @@ export default function PaginatedTable() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, y: -10 }}
                                         transition={{ duration: 0.15 }}
-                                        className="absolute top-[110%] transform -translate-x-1/2 p-6 sm:p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[100%] max-w-full"
+                                        className="absolute top-[110%] transform -translate-x-1/2 p-6 sm:p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-50 w-[100%] max-w-full"
                                     >
                                         <div className="flex flex-col gap-4">
                                             <div className="flex flex-col sm:flex-row">
@@ -1007,44 +1106,175 @@ export default function PaginatedTable() {
                                                 <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
                                                     Project
                                                 </label>
-                                                <input
-                                                    type="text"
-                                                    value={selectedProject}
-                                                    onChange={(e) =>
-                                                        setSelectedProject(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    className="w-full border-b outline-none text-sm px-2"
-                                                />
+                                                <div className="relative w-full">
+                                                    <input
+                                                        type="text"
+                                                        value={
+                                                            projectSearchTerm
+                                                        }
+                                                        onChange={(e) =>
+                                                            setProjectSearchTerm(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        onFocus={() =>
+                                                            setIsProjectDropdownOpen(
+                                                                true
+                                                            )
+                                                        }
+                                                        placeholder={
+                                                            selectedProject ||
+                                                            "Search or select project..."
+                                                        }
+                                                        className="w-full border-b outline-none text-sm px-2 py-1"
+                                                    />
+                                                    <svg
+                                                        className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 transition-transform cursor-pointer ${
+                                                            isProjectDropdownOpen
+                                                                ? "rotate-180"
+                                                                : ""
+                                                        }`}
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                        onClick={() =>
+                                                            setIsProjectDropdownOpen(
+                                                                !isProjectDropdownOpen
+                                                            )
+                                                        }
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M19 9l-7 7-7-7"
+                                                        />
+                                                    </svg>
+                                                    {isProjectDropdownOpen && (
+                                                        <div className="absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-md shadow-lg z-50 max-h-60 overflow-y-auto">
+                                                            <div className="max-h-48 overflow-y-auto">
+                                                                {filteredProjects.length >
+                                                                0 ? (
+                                                                    filteredProjects.map(
+                                                                        (
+                                                                            project
+                                                                        ) => (
+                                                                            <div
+                                                                                key={
+                                                                                    project
+                                                                                }
+                                                                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                                                                onClick={() =>
+                                                                                    handleProjectToggle(
+                                                                                        project
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    project
+                                                                                }
+                                                                            </div>
+                                                                        )
+                                                                    )
+                                                                ) : (
+                                                                    <div className="px-3 py-2 text-gray-500 text-sm">
+                                                                        No
+                                                                        projects
+                                                                        found
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             <div className="flex flex-col sm:flex-row">
                                                 <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
                                                     Financing
                                                 </label>
-                                                <select
-                                                    value={selectedFinancing}
-                                                    onChange={(e) =>
-                                                        setSelectedFinancing(
-                                                            e.target.value
-                                                        )
-                                                    }
-                                                    className="w-full border-b outline-none text-sm px-2"
-                                                >
-                                                    <option value="">
-                                                        Select Financing
-                                                    </option>
-                                                    <option value="Cash">
-                                                        Cash
-                                                    </option>
-                                                    <option value="BPI">
-                                                        BPI
-                                                    </option>
-                                                    <option value="HDMF">
-                                                        HDMF
-                                                    </option>
-                                                </select>
+                                                <div className="relative w-full">
+                                                    <input
+                                                        type="text"
+                                                        value={
+                                                            financingSearchTerm
+                                                        }
+                                                        onChange={(e) =>
+                                                            setFinancingSearchTerm(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        onFocus={() =>
+                                                            setIsFinancingDropdownOpen(
+                                                                true
+                                                            )
+                                                        }
+                                                        placeholder={
+                                                            selectedFinancing ||
+                                                            "Search or select financing..."
+                                                        }
+                                                        className="w-full border-b outline-none text-sm px-2 py-1"
+                                                    />
+                                                    <svg
+                                                        className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 transition-transform cursor-pointer ${
+                                                            isFinancingDropdownOpen
+                                                                ? "rotate-180"
+                                                                : ""
+                                                        }`}
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                        onClick={() =>
+                                                            setIsFinancingDropdownOpen(
+                                                                !isFinancingDropdownOpen
+                                                            )
+                                                        }
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M19 9l-7 7-7-7"
+                                                        />
+                                                    </svg>
+                                                    {isFinancingDropdownOpen && (
+                                                        <div className="absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-md shadow-lg z-50 max-h-60 overflow-y-auto">
+                                                            <div className="max-h-48 overflow-y-auto">
+                                                                {filteredFinancing.length >
+                                                                0 ? (
+                                                                    filteredFinancing.map(
+                                                                        (
+                                                                            financing
+                                                                        ) => (
+                                                                            <div
+                                                                                key={
+                                                                                    financing
+                                                                                }
+                                                                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                                                                onClick={() =>
+                                                                                    handleFinancingToggle(
+                                                                                        financing
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    financing
+                                                                                }
+                                                                            </div>
+                                                                        )
+                                                                    )
+                                                                ) : (
+                                                                    <div className="px-3 py-2 text-gray-500 text-sm">
+                                                                        No
+                                                                        financing
+                                                                        options
+                                                                        found
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
 
                                             <div className="flex flex-col sm:flex-row sm:items-center gap-4">
@@ -1056,11 +1286,21 @@ export default function PaginatedTable() {
                                                         value={
                                                             selectedDateFilter
                                                         }
-                                                        onChange={(e) =>
+                                                        onChange={(e) => {
                                                             setSelectedDateFilter(
                                                                 e.target.value
-                                                            )
-                                                        }
+                                                            );
+                                                            // Clear selected date when filter changes
+                                                            if (
+                                                                e.target
+                                                                    .value ===
+                                                                ""
+                                                            ) {
+                                                                setSelectedDate(
+                                                                    ""
+                                                                );
+                                                            }
+                                                        }}
                                                         className="w-full border-b outline-none text-sm px-2"
                                                     >
                                                         <option value=""></option>
@@ -1083,13 +1323,44 @@ export default function PaginatedTable() {
                                                             selected={
                                                                 selectedDate
                                                             }
-                                                            onChange={(date) =>
+                                                            onChange={(
+                                                                date
+                                                            ) => {
+                                                                if (
+                                                                    !selectedDateFilter
+                                                                ) {
+                                                                    alert(
+                                                                        "Please select a Date Filter first (Takeout Date or DOU Expiry) before choosing a date."
+                                                                    );
+                                                                    return;
+                                                                }
                                                                 setSelectedDate(
                                                                     date
-                                                                )
-                                                            }
-                                                            className="w-full pr-10 text-sm text-center"
+                                                                );
+                                                            }}
+                                                            onFocus={() => {
+                                                                if (
+                                                                    !selectedDateFilter
+                                                                ) {
+                                                                    alert(
+                                                                        "Please select a Date Filter first (Takeout Date or DOU Expiry) before choosing a date."
+                                                                    );
+                                                                }
+                                                            }}
+                                                            className={`w-full pr-10 text-sm text-center ${
+                                                                !selectedDateFilter
+                                                                    ? "cursor-not-allowed opacity-50"
+                                                                    : ""
+                                                            }`}
                                                             calendarClassName="custom-calendar"
+                                                            disabled={
+                                                                !selectedDateFilter
+                                                            }
+                                                            placeholderText={
+                                                                !selectedDateFilter
+                                                                    ? "Select Date Filter first"
+                                                                    : "Select date"
+                                                            }
                                                         />
                                                         <img
                                                             src={DateLogo}
@@ -1207,7 +1478,7 @@ export default function PaginatedTable() {
                         </div>
                         <Card className="w-full overflow-hidden">
                             <div
-                                style={{ height: "500px", overflow: "hidden" }}
+                                style={{ height: "600px", overflow: "hidden" }}
                             >
                                 <table className="w-full table-fixed text-left">
                                     <thead className="sticky top-0 z-10">
@@ -1524,21 +1795,19 @@ export default function PaginatedTable() {
                     </>
                 )}
             </div>{" "}
-            {/* <ToastContainer
-                    position="bottom-right"
-                    autoClose={3000}
-                    hideProgressBar={false}
-                    newestOnTop={false}
-                    closeOnClick
-                    rtl={false}
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover
-                    theme="dark"
-                    className="custom-toast-container"
-                /> */}
-            {/* </>
-            )} */}
+            <ToastContainer
+                position="bottom-right"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+                className="custom-toast-container"
+            />
         </>
     );
 }

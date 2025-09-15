@@ -134,7 +134,7 @@ const Navbar = () => {
             }
 
             if (value.toLowerCase() === "workorders") {
-                breadcrumbLabel = "Workorders";
+                breadcrumbLabel = "Work Orders";
                 // Non-linkable
                 return (
                     <span
@@ -145,6 +145,33 @@ const Navbar = () => {
                     </span>
                 );
             }
+
+            if (value.toLowerCase() === "myworkorders") {
+                breadcrumbLabel = "My Work Orders";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "filemanager") {
+                breadcrumbLabel = "File Manager";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
 
             if (value.toLowerCase() === "executivedashboard") {
                 breadcrumbLabel = "Executive Dashboard";
