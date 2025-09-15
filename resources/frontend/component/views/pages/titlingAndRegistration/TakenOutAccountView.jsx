@@ -242,10 +242,10 @@ export default function PaginatedTable() {
     function formatDate(date) {
         if (!date) return "";
         const d = new Date(date);
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
         const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, "0");
-        const day = String(d.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
+        return `${month}/${day}/${year}`;
     }
 
     useEffect(() => {
@@ -1168,7 +1168,9 @@ export default function PaginatedTable() {
                                                         variant="small"
                                                         className="text-base font-normal"
                                                     >
-                                                        {take_out_date}
+                                                        {formatDate(
+                                                            take_out_date
+                                                        )}
                                                     </Typography>
                                                 </td>
                                                 <td className={classes}>
@@ -1176,7 +1178,7 @@ export default function PaginatedTable() {
                                                         variant="small"
                                                         className="text-base font-normal"
                                                     >
-                                                        {dou_expiry}
+                                                        {formatDate(dou_expiry)}
                                                     </Typography>
                                                 </td>
                                             </tr>

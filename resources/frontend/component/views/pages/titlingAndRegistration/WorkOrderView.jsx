@@ -103,6 +103,16 @@ const WorkOrderView = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedWorkOrderForDelete, setSelectedWorkOrderForDelete] =
         useState(null);
+
+    // Date formatting function for consistent M/D/YYYY format
+    const formatDate = (dateString) => {
+        if (!dateString) return "-";
+        const d = new Date(dateString);
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
+        const year = d.getFullYear();
+        return `${month}/${day}/${year}`;
+    };
     const [isDeleting, setIsDeleting] = useState(false);
     const [isGroupDetailsModalOpen, setIsGroupDetailsModalOpen] =
         useState(false);
@@ -691,57 +701,20 @@ const WorkOrderView = () => {
                                                 <div className="flex items-center space-x-1">
                                                     <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                                                     <span className="font-medium">
-                                                        {group.created_at ||
-                                                            "-"}
+                                                        {formatDate(
+                                                            group.created_at
+                                                        )}
                                                     </span>
                                                 </div>
                                             </td>
                                             <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
                                                 <div className="flex items-center space-x-1">
                                                     <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                                                    {(() => {
-                                                        return (
-                                                            <span className="font-medium">
-                                                                {group.due_date
-                                                                    ? typeof group.due_date ===
-                                                                      "string"
-                                                                        ? group.due_date.slice(
-                                                                              0,
-                                                                              10
-                                                                          )
-                                                                        : (() => {
-                                                                              // Add 1 day to counteract timezone offset
-                                                                              const d =
-                                                                                  new Date(
-                                                                                      group.due_date
-                                                                                  );
-                                                                              d.setDate(
-                                                                                  d.getDate() +
-                                                                                      1
-                                                                              );
-                                                                              const year =
-                                                                                  d.getFullYear();
-                                                                              const month =
-                                                                                  String(
-                                                                                      d.getMonth() +
-                                                                                          1
-                                                                                  ).padStart(
-                                                                                      2,
-                                                                                      "0"
-                                                                                  );
-                                                                              const day =
-                                                                                  String(
-                                                                                      d.getDate()
-                                                                                  ).padStart(
-                                                                                      2,
-                                                                                      "0"
-                                                                                  );
-                                                                              return `${year}-${month}-${day}`;
-                                                                          })()
-                                                                    : "-"}
-                                                            </span>
-                                                        );
-                                                    })()}
+                                                    <span className="font-medium">
+                                                        {formatDate(
+                                                            group.due_date
+                                                        )}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td className="px-3 py-2 text-center">
