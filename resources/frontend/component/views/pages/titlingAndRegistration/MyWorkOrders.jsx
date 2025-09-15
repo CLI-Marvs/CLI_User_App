@@ -598,11 +598,11 @@ const MyWorkOrders = () => {
 
     const formatDate = (dateString) => {
         if (!dateString) return "N/A";
-        return new Date(dateString).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-        });
+        const d = new Date(dateString);
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
+        const year = d.getFullYear();
+        return `${month}/${day}/${year}`;
     };
 
     const isOverdue = (deadline) => {
@@ -888,9 +888,8 @@ const MyWorkOrders = () => {
                                                     <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
                                                     <span className="font-medium">
                                                         {group.due_date
-                                                            ? group.due_date.slice(
-                                                                  0,
-                                                                  10
+                                                            ? formatDate(
+                                                                  group.due_date
                                                               )
                                                             : "-"}
                                                     </span>
@@ -901,11 +900,9 @@ const MyWorkOrders = () => {
                                                     <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                                                     <span className="font-medium">
                                                         {group.updated_at
-                                                            ? new Date(
+                                                            ? formatDate(
                                                                   group.updated_at
                                                               )
-                                                                  .toISOString()
-                                                                  .slice(0, 10)
                                                             : "N/A"}
                                                     </span>
                                                 </div>

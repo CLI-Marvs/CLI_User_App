@@ -31,6 +31,7 @@ import { useStateContext } from "../../../../context/contextprovider";
 import { useDocumentManagementContext } from "../../../../context/DocumentManagement/DocumentManagementContext";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { CircularProgress } from "@mui/material";
@@ -394,6 +395,102 @@ export default function PaginatedTable() {
         };
     }, [isProjectDropdownOpen, isFinancingDropdownOpen]);
 
+    // Function to validate uploaded file starting from table headers
+    const validateFileData = (data) => {
+        const errors = [];
+        const missingDataRows = [];
+
+        // Check if data is empty
+        if (!data || data.length === 0) {
+            errors.push("File contains no data rows.");
+            return { isValid: false, errors, missingDataRows };
+        }
+
+        // Find the actual table header row (skip rows with 'optional', 'required' etc.)
+        let headerRowIndex = -1;
+        let actualData = [];
+
+        for (let i = 0; i < data.length; i++) {
+            const row = data[i];
+            const firstValue = Object.values(row)[0];
+
+            // Skip rows that contain 'optional', 'required', or are clearly not data
+            if (
+                typeof firstValue === "string" &&
+                (firstValue.toLowerCase().includes("optional") ||
+                    firstValue.toLowerCase().includes("required") ||
+                    firstValue === "Identifier")
+            ) {
+                continue;
+            }
+
+            // This should be the start of actual table data
+            headerRowIndex = i;
+            actualData = data.slice(i);
+            break;
+        }
+
+        // Debug: Log the actual data we're working with
+        console.log("Debug: Found table data starting at row:", headerRowIndex);
+        console.log("Debug: First table row:", actualData[0]);
+        console.log(
+            "Debug: Available columns:",
+            Object.keys(actualData[0] || {})
+        );
+
+        // Check if we found actual data
+        if (actualData.length === 0) {
+            errors.push("No table data found in file.");
+            return { isValid: false, errors, missingDataRows };
+        }
+
+        // Get column names from the first data row
+        const columnNames = Object.keys(actualData[0]);
+
+        // Check each row for missing data (excluding identifier/optional columns)
+        actualData.forEach((row, index) => {
+            const missingColumns = [];
+
+            columnNames.forEach((column) => {
+                const value = row[column];
+
+                // Skip the identifier column (usually first column) as it's optional
+                const isIdentifierColumn = column === columnNames[0];
+
+                if (!isIdentifierColumn) {
+                    // Check if value is missing, null, undefined, or empty string
+                    if (
+                        value === null ||
+                        value === undefined ||
+                        (typeof value === "string" && value.trim() === "") ||
+                        value === ""
+                    ) {
+                        missingColumns.push(column);
+                    }
+                }
+            });
+
+            if (missingColumns.length > 0) {
+                missingDataRows.push({
+                    rowIndex: index + 1, // 1-based index for user display
+                    missingColumns,
+                });
+            }
+        });
+
+        // If there are rows with missing data, it's invalid
+        if (missingDataRows.length > 0) {
+            const errorMessage = `Upload failed: ${missingDataRows.length} row(s) have missing required data. Please check your file and ensure all required columns are filled.`;
+            errors.push(errorMessage);
+        }
+
+        return {
+            isValid: missingDataRows.length === 0,
+            errors,
+            missingDataRows,
+        };
+    };
+
     const handleFileUpload = async (event) => {
         const file = event.target.files[0];
         if (!file) {
@@ -418,6 +515,42 @@ export default function PaginatedTable() {
         setIsFileUploading(true);
 
         try {
+            // Read and parse the file for validation
+            const fileData = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: "array" });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                        resolve(jsonData);
+                    } catch (parseError) {
+                        reject(parseError);
+                    }
+                };
+                reader.onerror = () => reject(new Error("Failed to read file"));
+                reader.readAsArrayBuffer(file);
+            });
+
+            // Validate the parsed data
+            const validation = validateFileData(fileData);
+
+            if (!validation.isValid) {
+                // Show single consolidated error message
+                const errorMessage = validation.errors.join(" ");
+                toast.error(errorMessage, {
+                    autoClose: 8000,
+                    position: "top-right",
+                });
+
+                setIsFileUploading(false);
+                if (event.target) event.target.value = null;
+                return;
+            }
+
+            // If validation passes, proceed with upload
             const formData = new FormData();
             formData.append("file", file);
             const response = await apiService.post(
@@ -457,11 +590,23 @@ export default function PaginatedTable() {
             }
         } catch (error) {
             console.error("File upload error:", error);
-            const errorMessage =
-                error.response?.data?.error ||
-                error.response?.data?.message ||
-                "Unknown error occurred";
-            toast.error(`Failed to upload data: ${errorMessage}`);
+
+            // Check if it's a file reading/parsing error
+            if (
+                error.message === "Failed to read file" ||
+                error.message.includes("parse")
+            ) {
+                toast.error(
+                    "Failed to read or parse the file. Please ensure it's a valid Excel or CSV file."
+                );
+            } else {
+                // Server-side error
+                const errorMessage =
+                    error.response?.data?.error ||
+                    error.response?.data?.message ||
+                    "Unknown error occurred";
+                toast.error(`Failed to upload data: ${errorMessage}`);
+            }
         } finally {
             setIsFileUploading(false);
             if (event.target) event.target.value = null;
@@ -557,9 +702,9 @@ export default function PaginatedTable() {
         if (!date) return "";
         const d = new Date(date);
         const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, "0");
-        const day = String(d.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
+        const month = d.getMonth() + 1; // No padding for single digit months
+        const day = d.getDate(); // No padding for single digit days
+        return `${month}/${day}/${year}`;
     }
 
     useEffect(() => {
@@ -1728,9 +1873,9 @@ export default function PaginatedTable() {
                                                                     variant="small"
                                                                     className="text-base font-normal"
                                                                 >
-                                                                    {
+                                                                    {formatDate(
                                                                         takeOutdate
-                                                                    }{" "}
+                                                                    )}{" "}
                                                                 </Typography>
                                                             </td>
                                                             <td
@@ -1742,7 +1887,9 @@ export default function PaginatedTable() {
                                                                     variant="small"
                                                                     className="text-base font-normal"
                                                                 >
-                                                                    {douExpiry}
+                                                                    {formatDate(
+                                                                        douExpiry
+                                                                    )}
                                                                 </Typography>
                                                             </td>
                                                         </tr>
