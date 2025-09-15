@@ -235,7 +235,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                     <div className="relative w-full">
 
                         <select
-                            disabled={!!dataRef.communication_type}
+                            /* disabled={!!dataRef.communication_type} */
                             name="user_type"
                             value={communicationType || ""}
                             onChange={handleCommunityTypeChange}
