@@ -289,7 +289,8 @@ export default function PaginatedTable() {
     const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
     const [selectedFinancing, setSelectedFinancing] = useState("");
     const [financingSearchTerm, setFinancingSearchTerm] = useState("");
-    const [isFinancingDropdownOpen, setIsFinancingDropdownOpen] = useState(false);
+    const [isFinancingDropdownOpen, setIsFinancingDropdownOpen] =
+        useState(false);
     const [selectedDateFilter, setSelectedDateFilter] = useState("");
     const [selectedDate, setSelectedDate] = useState("");
     const [activeFilters, setActiveFilters] = useState([]);
@@ -377,8 +378,8 @@ export default function PaginatedTable() {
     useEffect(() => {
         const handleClickOutside = (event) => {
             const clickedElement = event.target;
-            const isInsideDropdown = clickedElement.closest('.relative');
-            
+            const isInsideDropdown = clickedElement.closest(".relative");
+
             if (isProjectDropdownOpen && !isInsideDropdown) {
                 setIsProjectDropdownOpen(false);
             }
@@ -387,9 +388,9 @@ export default function PaginatedTable() {
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
+        document.addEventListener("mousedown", handleClickOutside);
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [isProjectDropdownOpen, isFinancingDropdownOpen]);
 
@@ -514,7 +515,7 @@ export default function PaginatedTable() {
 
     const uniqueProjects = useMemo(() => {
         const projectSet = new Set();
-        
+
         // Use masterListFilteredRows to get all projects, not just current page
         const allData = masterListFilteredRows || [];
         allData.forEach((item) => {
@@ -524,13 +525,13 @@ export default function PaginatedTable() {
                 projectSet.add(projectName.toString().trim());
             }
         });
-        
+
         return Array.from(projectSet).sort();
     }, [masterListFilteredRows]);
 
     const uniqueFinancing = useMemo(() => {
         const financingSet = new Set();
-        
+
         // Use masterListFilteredRows to get all financing options, not just current page
         const allData = masterListFilteredRows || [];
         allData.forEach((item) => {
@@ -540,7 +541,7 @@ export default function PaginatedTable() {
                 financingSet.add(financingName.toString().trim());
             }
         });
-        
+
         return Array.from(financingSet).sort();
     }, [masterListFilteredRows]);
 
@@ -1108,37 +1109,78 @@ export default function PaginatedTable() {
                                                 <div className="relative w-full">
                                                     <input
                                                         type="text"
-                                                        value={projectSearchTerm}
-                                                        onChange={(e) => setProjectSearchTerm(e.target.value)}
-                                                        onFocus={() => setIsProjectDropdownOpen(true)}
-                                                        placeholder={selectedProject || "Search or select project..."}
+                                                        value={
+                                                            projectSearchTerm
+                                                        }
+                                                        onChange={(e) =>
+                                                            setProjectSearchTerm(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        onFocus={() =>
+                                                            setIsProjectDropdownOpen(
+                                                                true
+                                                            )
+                                                        }
+                                                        placeholder={
+                                                            selectedProject ||
+                                                            "Search or select project..."
+                                                        }
                                                         className="w-full border-b outline-none text-sm px-2 py-1"
                                                     />
                                                     <svg
-                                                        className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 transition-transform cursor-pointer ${isProjectDropdownOpen ? "rotate-180" : ""}`}
+                                                        className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 transition-transform cursor-pointer ${
+                                                            isProjectDropdownOpen
+                                                                ? "rotate-180"
+                                                                : ""
+                                                        }`}
                                                         fill="none"
                                                         stroke="currentColor"
                                                         viewBox="0 0 24 24"
-                                                        onClick={() => setIsProjectDropdownOpen(!isProjectDropdownOpen)}
+                                                        onClick={() =>
+                                                            setIsProjectDropdownOpen(
+                                                                !isProjectDropdownOpen
+                                                            )
+                                                        }
                                                     >
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M19 9l-7 7-7-7"
+                                                        />
                                                     </svg>
                                                     {isProjectDropdownOpen && (
                                                         <div className="absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-md shadow-lg z-50 max-h-60 overflow-y-auto">
                                                             <div className="max-h-48 overflow-y-auto">
-                                                                {filteredProjects.length > 0 ? (
-                                                                    filteredProjects.map((project) => (
-                                                                        <div
-                                                                            key={project}
-                                                                            className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                                                                            onClick={() => handleProjectToggle(project)}
-                                                                        >
-                                                                            {project}
-                                                                        </div>
-                                                                    ))
+                                                                {filteredProjects.length >
+                                                                0 ? (
+                                                                    filteredProjects.map(
+                                                                        (
+                                                                            project
+                                                                        ) => (
+                                                                            <div
+                                                                                key={
+                                                                                    project
+                                                                                }
+                                                                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                                                                onClick={() =>
+                                                                                    handleProjectToggle(
+                                                                                        project
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    project
+                                                                                }
+                                                                            </div>
+                                                                        )
+                                                                    )
                                                                 ) : (
                                                                     <div className="px-3 py-2 text-gray-500 text-sm">
-                                                                        No projects found
+                                                                        No
+                                                                        projects
+                                                                        found
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -1154,37 +1196,79 @@ export default function PaginatedTable() {
                                                 <div className="relative w-full">
                                                     <input
                                                         type="text"
-                                                        value={financingSearchTerm}
-                                                        onChange={(e) => setFinancingSearchTerm(e.target.value)}
-                                                        onFocus={() => setIsFinancingDropdownOpen(true)}
-                                                        placeholder={selectedFinancing || "Search or select financing..."}
+                                                        value={
+                                                            financingSearchTerm
+                                                        }
+                                                        onChange={(e) =>
+                                                            setFinancingSearchTerm(
+                                                                e.target.value
+                                                            )
+                                                        }
+                                                        onFocus={() =>
+                                                            setIsFinancingDropdownOpen(
+                                                                true
+                                                            )
+                                                        }
+                                                        placeholder={
+                                                            selectedFinancing ||
+                                                            "Search or select financing..."
+                                                        }
                                                         className="w-full border-b outline-none text-sm px-2 py-1"
                                                     />
                                                     <svg
-                                                        className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 transition-transform cursor-pointer ${isFinancingDropdownOpen ? "rotate-180" : ""}`}
+                                                        className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 transition-transform cursor-pointer ${
+                                                            isFinancingDropdownOpen
+                                                                ? "rotate-180"
+                                                                : ""
+                                                        }`}
                                                         fill="none"
                                                         stroke="currentColor"
                                                         viewBox="0 0 24 24"
-                                                        onClick={() => setIsFinancingDropdownOpen(!isFinancingDropdownOpen)}
+                                                        onClick={() =>
+                                                            setIsFinancingDropdownOpen(
+                                                                !isFinancingDropdownOpen
+                                                            )
+                                                        }
                                                     >
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M19 9l-7 7-7-7"
+                                                        />
                                                     </svg>
                                                     {isFinancingDropdownOpen && (
                                                         <div className="absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-md shadow-lg z-50 max-h-60 overflow-y-auto">
                                                             <div className="max-h-48 overflow-y-auto">
-                                                                {filteredFinancing.length > 0 ? (
-                                                                    filteredFinancing.map((financing) => (
-                                                                        <div
-                                                                            key={financing}
-                                                                            className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-                                                                            onClick={() => handleFinancingToggle(financing)}
-                                                                        >
-                                                                            {financing}
-                                                                        </div>
-                                                                    ))
+                                                                {filteredFinancing.length >
+                                                                0 ? (
+                                                                    filteredFinancing.map(
+                                                                        (
+                                                                            financing
+                                                                        ) => (
+                                                                            <div
+                                                                                key={
+                                                                                    financing
+                                                                                }
+                                                                                className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                                                                onClick={() =>
+                                                                                    handleFinancingToggle(
+                                                                                        financing
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                {
+                                                                                    financing
+                                                                                }
+                                                                            </div>
+                                                                        )
+                                                                    )
                                                                 ) : (
                                                                     <div className="px-3 py-2 text-gray-500 text-sm">
-                                                                        No financing options found
+                                                                        No
+                                                                        financing
+                                                                        options
+                                                                        found
                                                                     </div>
                                                                 )}
                                                             </div>
@@ -1207,8 +1291,14 @@ export default function PaginatedTable() {
                                                                 e.target.value
                                                             );
                                                             // Clear selected date when filter changes
-                                                            if (e.target.value === "") {
-                                                                setSelectedDate("");
+                                                            if (
+                                                                e.target
+                                                                    .value ===
+                                                                ""
+                                                            ) {
+                                                                setSelectedDate(
+                                                                    ""
+                                                                );
                                                             }
                                                         }}
                                                         className="w-full border-b outline-none text-sm px-2"
@@ -1233,28 +1323,42 @@ export default function PaginatedTable() {
                                                             selected={
                                                                 selectedDate
                                                             }
-                                                            onChange={(date) => {
-                                                                if (!selectedDateFilter) {
-                                                                    alert("Please select a Date Filter first (Takeout Date or DOU Expiry) before choosing a date.");
+                                                            onChange={(
+                                                                date
+                                                            ) => {
+                                                                if (
+                                                                    !selectedDateFilter
+                                                                ) {
+                                                                    alert(
+                                                                        "Please select a Date Filter first (Takeout Date or DOU Expiry) before choosing a date."
+                                                                    );
                                                                     return;
                                                                 }
-                                                                setSelectedDate(date);
+                                                                setSelectedDate(
+                                                                    date
+                                                                );
                                                             }}
                                                             onFocus={() => {
-                                                                if (!selectedDateFilter) {
-                                                                    alert("Please select a Date Filter first (Takeout Date or DOU Expiry) before choosing a date.");
+                                                                if (
+                                                                    !selectedDateFilter
+                                                                ) {
+                                                                    alert(
+                                                                        "Please select a Date Filter first (Takeout Date or DOU Expiry) before choosing a date."
+                                                                    );
                                                                 }
                                                             }}
                                                             className={`w-full pr-10 text-sm text-center ${
-                                                                !selectedDateFilter 
-                                                                    ? "cursor-not-allowed opacity-50" 
+                                                                !selectedDateFilter
+                                                                    ? "cursor-not-allowed opacity-50"
                                                                     : ""
                                                             }`}
                                                             calendarClassName="custom-calendar"
-                                                            disabled={!selectedDateFilter}
+                                                            disabled={
+                                                                !selectedDateFilter
+                                                            }
                                                             placeholderText={
-                                                                !selectedDateFilter 
-                                                                    ? "Select Date Filter first" 
+                                                                !selectedDateFilter
+                                                                    ? "Select Date Filter first"
                                                                     : "Select date"
                                                             }
                                                         />
