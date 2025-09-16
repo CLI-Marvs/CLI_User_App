@@ -335,6 +335,161 @@ export default function PaginatedTable() {
     //     !masterListFilteredRows || masterListFilteredRows.length === 0
     // );
 
+    // Function to convert Excel serial date to M/D/YYYY format
+    const convertExcelSerialDate = (serial) => {
+        // Excel serial date: days since January 1, 1900 (with 1900 incorrectly treated as leap year)
+        const excelEpoch = new Date(1899, 11, 30); // December 30, 1899
+        const date = new Date(
+            excelEpoch.getTime() + serial * 24 * 60 * 60 * 1000
+        );
+
+        const month = date.getMonth() + 1; // 0-based to 1-based
+        const day = date.getDate();
+        const year = date.getFullYear();
+
+        return `${month}/${day}/${year}`;
+    };
+
+    // Function to validate date format M/D/YYYY (e.g., 9/15/2025)
+    const isValidDateFormat = (dateString) => {
+        // Handle case where Excel might parse date as a number (Excel serial date)
+        if (typeof dateString === "number") {
+            // Check if it's a reasonable Excel serial date (between 1900-2100)
+            if (dateString > 0 && dateString < 73411) {
+                // 73411 ≈ Dec 31, 2100
+                const convertedDate = convertExcelSerialDate(dateString);
+
+                // Now validate the converted date
+                return isValidDateFormat(convertedDate);
+            } else {
+                return {
+                    isValid: false,
+                    message: `Invalid Excel date number: ${dateString}. Format cell as Text and use M/D/YYYY.`,
+                };
+            }
+        }
+
+        if (!dateString || typeof dateString !== "string") {
+            return {
+                isValid: false,
+                message: "Date is required (text format)",
+            };
+        }
+
+        // Remove any extra whitespace
+        const cleanDateString = dateString.toString().trim();
+
+        if (cleanDateString === "") {
+            return { isValid: false, message: "Date cannot be empty" };
+        }
+
+        // Check if the format matches M/D/YYYY or MM/DD/YYYY - MUST have 4-digit year
+        // First check for any date-like pattern to catch 2-digit years
+        const generalDatePattern = /^(\d{1,2})\/(\d{1,2})\/(\d{1,4})$/;
+        const generalMatch = cleanDateString.match(generalDatePattern);
+
+        if (generalMatch) {
+            const yearPart = generalMatch[3];
+            if (yearPart.length !== 4) {
+                return {
+                    isValid: false,
+                    message: `Year must be 4 digits (e.g., 2025, not ${yearPart}). Got: "${cleanDateString}"`,
+                };
+            }
+        }
+
+        // Now check the strict pattern with 4-digit year requirement
+        const datePattern = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
+        const match = cleanDateString.match(datePattern);
+
+        if (!match) {
+            return {
+                isValid: false,
+                message: `Use M/D/YYYY format (e.g., 9/15/2025). Got: "${cleanDateString}"`,
+            };
+        }
+
+        const month = parseInt(match[1], 10);
+        const day = parseInt(match[2], 10);
+        const year = parseInt(match[3], 10);
+
+        // Validate year - must be reasonable range (not too far in past or future)
+        const currentYear = new Date().getFullYear();
+        if (year < 1900 || year > currentYear + 100) {
+            return {
+                isValid: false,
+                message: `Year ${year} is out of range (1900-${
+                    currentYear + 100
+                }). Got: "${cleanDateString}"`,
+            };
+        }
+
+        // Validate month (1-12)
+        if (month < 1 || month > 12) {
+            return {
+                isValid: false,
+                message: `Month ${month} is invalid (1-12). Got: "${cleanDateString}"`,
+            };
+        }
+
+        // Validate day (1-31, but also consider month-specific limits)
+        if (day < 1 || day > 31) {
+            return {
+                isValid: false,
+                message: `Day ${day} is invalid (1-31). Got: "${cleanDateString}"`,
+            };
+        }
+
+        // Additional validation for months with fewer than 31 days
+        const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+        // Check for leap year
+        const isLeapYear =
+            (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+        if (isLeapYear && month === 2) {
+            daysInMonth[1] = 29;
+        }
+
+        if (day > daysInMonth[month - 1]) {
+            const monthNames = [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+            ];
+            return {
+                isValid: false,
+                message: `${monthNames[month - 1]} ${year} has only ${
+                    daysInMonth[month - 1]
+                } days. Got: "${cleanDateString}"`,
+            };
+        }
+
+        // Final check: Create a date object and verify it matches our input
+        const dateObject = new Date(year, month - 1, day);
+        const isValidDate =
+            dateObject.getFullYear() === year &&
+            dateObject.getMonth() === month - 1 &&
+            dateObject.getDate() === day;
+
+        if (!isValidDate) {
+            return {
+                isValid: false,
+                message: `Date "${cleanDateString}" does not exist in calendar.`,
+            };
+        }
+
+        return { isValid: true, message: "" };
+    };
+
     // const fetchLocalMasterListData = useCallback(async () => {
     //     try {
     //         const response = await apiService.get(
@@ -431,12 +586,43 @@ export default function PaginatedTable() {
         }
 
         // Debug: Log the actual data we're working with
-        console.log("Debug: Found table data starting at row:", headerRowIndex);
-        console.log("Debug: First table row:", actualData[0]);
-        console.log(
-            "Debug: Available columns:",
-            Object.keys(actualData[0] || {})
-        );
+
+        // However, we need to get the actual column headers from the first non-data row
+        // The headers are in the row where values are like 'Contract Number', 'Account Name', etc.
+        let actualHeaders = {};
+        let headerFound = false;
+
+        // Look for the header row in the original data
+        for (let i = 0; i < data.length; i++) {
+            const row = data[i];
+            const values = Object.values(row);
+
+            // Check if this row contains header names (like 'Contract Number', 'Account Name')
+            const hasHeaderPattern = values.some(
+                (value) =>
+                    typeof value === "string" &&
+                    (value.toLowerCase().includes("takeout") ||
+                        value.toLowerCase().includes("dou") ||
+                        value.toLowerCase().includes("contract") ||
+                        value.toLowerCase().includes("account") ||
+                        value.toLowerCase().includes("expiry"))
+            );
+
+            if (hasHeaderPattern) {
+                // Map the generic column names to actual header names
+                const columnKeys = Object.keys(row);
+                columnKeys.forEach((key) => {
+                    actualHeaders[key] = row[key];
+                });
+                headerFound = true;
+                break;
+            }
+        }
+
+        if (!headerFound) {
+            // Fallback: use column names as headers
+            actualHeaders = {};
+        }
 
         // Check if we found actual data
         if (actualData.length === 0) {
@@ -447,12 +633,43 @@ export default function PaginatedTable() {
         // Get column names from the first data row
         const columnNames = Object.keys(actualData[0]);
 
-        // Check each row for missing data (excluding identifier/optional columns)
+        // Define date columns that need format validation (case-insensitive matching)
+        const dateColumns = [
+            "takeout date",
+            "take out date",
+            "takeoutdate",
+            "dou expiry",
+            "douexpiry",
+            "dou_expiry",
+        ];
+
+        // Check which columns are detected as date columns using actual header names
+        const detectedDateColumns = columnNames.filter((column) => {
+            // Get the actual header name for this column
+            const actualHeaderName = actualHeaders[column] || column;
+            const headerLower = actualHeaderName.toLowerCase().trim();
+
+            const isDateColumn = dateColumns.some(
+                (dateCol) =>
+                    headerLower.includes(dateCol) ||
+                    dateCol.includes(headerLower)
+            );
+
+            return isDateColumn;
+        });
+
+        // Check each row for missing data and date format validation
+        const dateFormatErrors = [];
+
         actualData.forEach((row, index) => {
             const missingColumns = [];
 
             columnNames.forEach((column) => {
                 const value = row[column];
+
+                // Get the actual header name for this column
+                const actualHeaderName = actualHeaders[column] || column;
+                const headerLower = actualHeaderName.toLowerCase().trim();
 
                 // Skip the identifier column (usually first column) as it's optional
                 const isIdentifierColumn = column === columnNames[0];
@@ -465,7 +682,26 @@ export default function PaginatedTable() {
                         (typeof value === "string" && value.trim() === "") ||
                         value === ""
                     ) {
-                        missingColumns.push(column);
+                        missingColumns.push(actualHeaderName); // Use actual header name for error message
+                    } else {
+                        // Check if this is a date column and validate the format using actual header name
+                        const isDateColumn = dateColumns.some(
+                            (dateCol) =>
+                                headerLower.includes(dateCol) ||
+                                dateCol.includes(headerLower)
+                        );
+
+                        if (isDateColumn) {
+                            const dateValidation = isValidDateFormat(value);
+                            if (!dateValidation.isValid) {
+                                dateFormatErrors.push({
+                                    rowIndex: index + 1,
+                                    column: actualHeaderName, // Use actual header name for error message
+                                    value: value,
+                                    error: dateValidation.message,
+                                });
+                            }
+                        }
                     }
                 }
             });
@@ -478,16 +714,24 @@ export default function PaginatedTable() {
             }
         });
 
+        // Check for date format errors
+        if (dateFormatErrors.length > 0) {
+            const dateErrorMessage = `Upload failed: ${dateFormatErrors.length} invalid date(s) found. Use M/D/YYYY format (e.g., 9/15/2025).`;
+            errors.push(dateErrorMessage);
+        }
+
         // If there are rows with missing data, it's invalid
         if (missingDataRows.length > 0) {
-            const errorMessage = `Upload failed: ${missingDataRows.length} row(s) have missing required data. Please check your file and ensure all required columns are filled.`;
+            const errorMessage = `Upload failed: ${missingDataRows.length} row(s) have missing data. Please fill all required columns.`;
             errors.push(errorMessage);
         }
 
         return {
-            isValid: missingDataRows.length === 0,
+            isValid:
+                missingDataRows.length === 0 && dateFormatErrors.length === 0,
             errors,
             missingDataRows,
+            dateFormatErrors,
         };
     };
 
@@ -521,10 +765,24 @@ export default function PaginatedTable() {
                 reader.onload = (e) => {
                     try {
                         const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, { type: "array" });
+                        const workbook = XLSX.read(data, {
+                            type: "array",
+                            cellDates: false, // Don't convert to Date objects
+                            cellText: true, // Use cell text representation when available
+                            raw: false, // Don't use raw values, use formatted text
+                            dateNF: "M/D/YYYY", // Preferred date format
+                        });
                         const firstSheetName = workbook.SheetNames[0];
                         const worksheet = workbook.Sheets[firstSheetName];
-                        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                        // Try to preserve text formatting by checking cell types
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet, {
+                            raw: false, // Use formatted values
+                            defval: "", // Default value for empty cells
+                            blankrows: false, // Skip blank rows
+                        });
+
+                        // Debug: Log the parsed data to see what we're actually getting
                         resolve(jsonData);
                     } catch (parseError) {
                         reject(parseError);

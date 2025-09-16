@@ -7,6 +7,7 @@ use App\Models\Submilestone;
 use App\Models\WorkOrder;
 use App\Models\WorkOrderType;
 use App\Models\TakenOutAccount;
+use App\Models\Checklist;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -171,18 +172,18 @@ class ProjectAssigneeController extends Controller
     }
 
     /**
-     * Get hierarchical structure of steps/milestones with their assignees for a specific project.
+     * Get hierarchical structure of steps/milestones with their assignees and checklists for a specific project.
      */
     public function getProjectMilestoneStructure(string $projectName)
     {
-        // Get all work order types with their submilestones ordered by sequence
+        // Get all work order types with their submilestones and checklists ordered by sequence
         $workOrderTypes = WorkOrderType::with([
             'submilestones' => function ($query) {
-                $query->orderBy('id');
+                $query->with('checklists')->orderBy('id');
             }
         ])
-        ->orderBy('sequence')
-        ->get();
+            ->orderBy('sequence')
+            ->get();
 
         $result = [];
 
@@ -211,27 +212,35 @@ class ProjectAssigneeController extends Controller
                         if (empty($fullName)) {
                             $fullName = trim(($employee->firstname ?? '') . ' ' . ($employee->lastname ?? ''));
                         }
-                        
+
                         return [
                             'id' => $employee->id,
-                            'full_name' => $fullName, // Changed from fullname to full_name
+                            'full_name' => $fullName,
                             'firstname' => $employee->firstname,
                             'lastname' => $employee->lastname
                         ];
                     })->toArray();
                 }
 
+                // Get checklists for this submilestone
+                $checklists = $submilestone->checklists->map(function ($checklist) {
+                    return [
+                        'id' => $checklist->id,
+                        'checklist_item' => $checklist->checklist_item ?? $checklist->name ?? '',
+                        'is_required' => $checklist->is_required ?? true
+                    ];
+                })->toArray();
+
                 $stepData['milestones'][] = [
                     'id' => $submilestone->id,
-                    'milestone_name' => $submilestone->name, // Changed from name to milestone_name
-                    'assignees' => $assignees
+                    'milestone_name' => $submilestone->name,
+                    'assignees' => $assignees,
+                    'checklists' => $checklists
                 ];
             }
 
-            // Include all steps, even if they don't have assignees (for better visualization)
-            if (!empty($stepData['milestones'])) {
-                $result[] = $stepData;
-            }
+            // Include all work order types, even if they don't have milestones
+            $result[] = $stepData;
         }
 
         return response()->json($result);

@@ -17,6 +17,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     const [projectMilestoneStructure, setProjectMilestoneStructure] = useState(
         []
     );
+    const [isMilestoneStructureLoading, setIsMilestoneStructureLoading] =
+        useState(false);
+    const [isProjectsRefreshing, setIsProjectsRefreshing] = useState(false);
 
     // New state for modern dropdowns
     const [projectSearchTerm, setProjectSearchTerm] = useState("");
@@ -25,7 +28,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
 
     const { user } = useStateContext();
-    const { accounts, workOrderTypes, fetchWorkOrderGroups } =
+    const { accounts, workOrderTypes, fetchWorkOrderGroups, fetchAccounts } =
         useDocumentManagementContext();
 
     useEffect(() => {
@@ -35,25 +38,48 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
 
     useEffect(() => {
         if (selectedProject) {
-            apiService
-                .get(
-                    `/projects/${encodeURIComponent(
-                        selectedProject
-                    )}/milestone-structure`
-                )
-                .then((res) => {
-                    setProjectMilestoneStructure(res.data || []);
-                })
-                .catch((err) => {
-                    console.error(
-                        "Failed to fetch project milestone structure:",
-                        err
-                    );
-                    setProjectMilestoneStructure([]);
-                });
+            fetchProjectMilestoneStructure();
         } else {
             setProjectMilestoneStructure([]);
         }
+    }, [selectedProject]);
+
+    // Function to refresh projects data
+    const refreshProjects = useCallback(async () => {
+        setIsProjectsRefreshing(true);
+        try {
+            await fetchAccounts();
+        } catch (error) {
+            console.error("Failed to refresh projects:", error);
+        } finally {
+            setIsProjectsRefreshing(false);
+        }
+    }, [fetchAccounts]);
+
+    // Function to fetch project milestone structure
+    const fetchProjectMilestoneStructure = useCallback(() => {
+        if (!selectedProject) return;
+
+        setIsMilestoneStructureLoading(true);
+        apiService
+            .get(
+                `/projects/${encodeURIComponent(
+                    selectedProject
+                )}/milestone-structure`
+            )
+            .then((res) => {
+                setProjectMilestoneStructure(res.data || []);
+            })
+            .catch((err) => {
+                console.error(
+                    "Failed to fetch project milestone structure:",
+                    err
+                );
+                setProjectMilestoneStructure([]);
+            })
+            .finally(() => {
+                setIsMilestoneStructureLoading(false);
+            });
     }, [selectedProject]);
 
     useEffect(() => {
@@ -75,8 +101,11 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             setAccountSearchTerm("");
             setIsProjectDropdownOpen(false);
             setIsAccountDropdownOpen(false);
+        } else if (isOpen && selectedProject) {
+            // Refresh milestone structure when modal opens and project is selected
+            fetchProjectMilestoneStructure();
         }
-    }, [isOpen]);
+    }, [isOpen, fetchProjectMilestoneStructure, selectedProject]);
 
     const firstWorkOrderType = useMemo(() => {
         if (!workOrderTypes || workOrderTypes.length === 0) {
@@ -150,6 +179,62 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
         setIsAccountDropdownOpen(false);
     }, [filteredAccountsForDropdown]);
 
+    // Helper function to check if all requirements are met for work order creation
+    const canCreateWorkOrder = useMemo(() => {
+        // Check if project milestone structure exists
+        if (
+            !projectMilestoneStructure ||
+            projectMilestoneStructure.length === 0
+        ) {
+            return false;
+        }
+
+        // Check if all milestones have assignees and checklists
+        return projectMilestoneStructure.every((step) => {
+            if (!step.milestones || !Array.isArray(step.milestones)) {
+                return false;
+            }
+            return step.milestones.every((milestone) => {
+                // Check if milestone has assignees
+                const hasAssignees =
+                    milestone.assignees &&
+                    Array.isArray(milestone.assignees) &&
+                    milestone.assignees.length > 0;
+
+                // Check if milestone has checklists
+                const hasChecklists =
+                    milestone.checklists &&
+                    Array.isArray(milestone.checklists) &&
+                    milestone.checklists.length > 0;
+
+                return hasAssignees && hasChecklists;
+            });
+        });
+    }, [projectMilestoneStructure]);
+
+    // Keep the original function for backward compatibility and specific checks
+    const allMilestonesHaveAssignees = useMemo(() => {
+        if (
+            !projectMilestoneStructure ||
+            projectMilestoneStructure.length === 0
+        ) {
+            return false;
+        }
+
+        return projectMilestoneStructure.every((step) => {
+            if (!step.milestones || !Array.isArray(step.milestones)) {
+                return false;
+            }
+            return step.milestones.every((milestone) => {
+                return (
+                    milestone.assignees &&
+                    Array.isArray(milestone.assignees) &&
+                    milestone.assignees.length > 0
+                );
+            });
+        });
+    }, [projectMilestoneStructure]);
+
     const handleSubmit = async (event) => {
         event.preventDefault();
 
@@ -161,6 +246,47 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
         ) {
             alert(
                 "Work order type is not available. Please refresh the page and try again."
+            );
+            return;
+        }
+
+        // Validate work order type structure: Must have milestones with checklists
+        if (
+            !projectMilestoneStructure ||
+            projectMilestoneStructure.length === 0
+        ) {
+            alert(
+                "Cannot create work order. The selected work order type has no milestones defined. Please configure milestones for this work order type first."
+            );
+            return;
+        }
+
+        // Check that all milestones have checklists
+        const milestonesWithoutChecklists = [];
+        projectMilestoneStructure.forEach((step) => {
+            if (step.milestones && Array.isArray(step.milestones)) {
+                step.milestones.forEach((milestone) => {
+                    if (
+                        !milestone.checklists ||
+                        !Array.isArray(milestone.checklists) ||
+                        milestone.checklists.length === 0
+                    ) {
+                        milestonesWithoutChecklists.push({
+                            stepName: step.step_name,
+                            milestoneName: milestone.milestone_name,
+                        });
+                    }
+                });
+            }
+        });
+
+        if (milestonesWithoutChecklists.length > 0) {
+            const milestoneList = milestonesWithoutChecklists
+                .map((item) => `• ${item.stepName} > ${item.milestoneName}`)
+                .join("\n");
+
+            alert(
+                `Cannot create work order. The following milestones have no checklists defined:\n\n${milestoneList}\n\nPlease configure checklists for all milestones before creating a work order.`
             );
             return;
         }
@@ -201,6 +327,36 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
         ) {
             alert(
                 "The selected project has no assigned employees. Please assign employees to this project first."
+            );
+            return;
+        }
+
+        // Validate that all milestones have at least one assignee
+        const milestonesWithoutAssignees = [];
+        projectMilestoneStructure.forEach((step) => {
+            if (step.milestones && Array.isArray(step.milestones)) {
+                step.milestones.forEach((milestone) => {
+                    if (
+                        !milestone.assignees ||
+                        !Array.isArray(milestone.assignees) ||
+                        milestone.assignees.length === 0
+                    ) {
+                        milestonesWithoutAssignees.push({
+                            stepName: step.step_name,
+                            milestoneName: milestone.milestone_name,
+                        });
+                    }
+                });
+            }
+        });
+
+        if (milestonesWithoutAssignees.length > 0) {
+            const milestoneList = milestonesWithoutAssignees
+                .map((item) => `• ${item.stepName} > ${item.milestoneName}`)
+                .join("\n");
+
+            alert(
+                `Cannot create work order. The following milestones have no assignees:\n\n${milestoneList}\n\nPlease assign employees to all milestones before creating a work order.`
             );
             return;
         }
@@ -278,8 +434,6 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             created_by_user_id: user.id,
             account_assignments: accountAssignments,
         };
-
-        console.log("Submitting form data:", formData); // Debug log for production
 
         try {
             const response = await apiService.post(
@@ -461,10 +615,10 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                             onFocus={() =>
                                                 setIsProjectDropdownOpen(true)
                                             }
-                                            className={`w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
+                                            className={`w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
                                                 selectedProjectDetails
-                                                    ? "pl-32"
-                                                    : "pl-10"
+                                                    ? "pl-32 pr-20"
+                                                    : "pl-10 pr-20"
                                             }`}
                                             style={{
                                                 paddingLeft:
@@ -477,6 +631,8 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                         : "40px",
                                             }}
                                         />
+
+                                        {/* Clear button */}
                                         {projectSearchTerm && (
                                             <button
                                                 onClick={() => {
@@ -485,7 +641,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                         false
                                                     );
                                                 }}
-                                                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
+                                                className="absolute inset-y-0 right-10 pr-1 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-200"
                                             >
                                                 <svg
                                                     className="h-4 w-4"
@@ -500,6 +656,36 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                 </svg>
                                             </button>
                                         )}
+
+                                        {/* Refresh button */}
+                                        <button
+                                            onClick={refreshProjects}
+                                            disabled={isProjectsRefreshing}
+                                            className={`absolute inset-y-0 right-0 pr-3 flex items-center transition-colors duration-200 ${
+                                                isProjectsRefreshing
+                                                    ? "text-custom-bluegreen cursor-not-allowed"
+                                                    : "text-gray-400 hover:text-custom-bluegreen"
+                                            }`}
+                                            title="Refresh projects"
+                                        >
+                                            <svg
+                                                className={`h-4 w-4 ${
+                                                    isProjectsRefreshing
+                                                        ? "animate-spin"
+                                                        : ""
+                                                }`}
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                />
+                                            </svg>
+                                        </button>
                                     </div>
 
                                     {isProjectDropdownOpen && (
@@ -880,10 +1066,47 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                             </div>
 
                             <div className="flex items-start mb-2 justify-between">
-                                <label className="block text-sm ml-4 font-semibold text-custom-bluegreen w-1/4 pt-2">
-                                    Assigned To:
-                                </label>
-                                <div className="w-2/3">
+                                <div className="w-1/4 pt-2">
+                                    <label className="block text-sm ml-4 font-semibold text-custom-bluegreen">
+                                        Assigned To:
+                                    </label>
+                                </div>
+                                <div className="w-2/3 relative">
+                                    {selectedProject && (
+                                        <button
+                                            type="button"
+                                            onClick={
+                                                fetchProjectMilestoneStructure
+                                            }
+                                            disabled={
+                                                isMilestoneStructureLoading
+                                            }
+                                            className={`absolute top-2 right-0 pr-5 text-custom-bluegreen hover:text-custom-lightgreen transition-colors duration-200 p-1 rounded-full hover:bg-gray-100 z-0 ${
+                                                isMilestoneStructureLoading
+                                                    ? "cursor-not-allowed opacity-50"
+                                                    : ""
+                                            }`}
+                                            title="Refresh milestone structure"
+                                        >
+                                            <svg
+                                                className={`w-4 h-4 ${
+                                                    isMilestoneStructureLoading
+                                                        ? "animate-spin"
+                                                        : ""
+                                                }`}
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                />
+                                            </svg>
+                                        </button>
+                                    )}
                                     {projectMilestoneStructure &&
                                     projectMilestoneStructure.length > 0 ? (
                                         <div className="p-3 border border-gray-200 rounded-md bg-gray-50 max-h-60 overflow-y-auto font-mono text-sm">
@@ -921,18 +1144,47 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                                                 ? "└──"
                                                                                 : "├──"}
                                                                         </span>
-                                                                        <span className="font-medium leading-tight">
-                                                                            {
-                                                                                milestone.milestone_name
-                                                                            }
-                                                                        </span>
+                                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                                            <span className="font-medium leading-tight">
+                                                                                {
+                                                                                    milestone.milestone_name
+                                                                                }
+                                                                            </span>
+                                                                            {(!milestone.assignees ||
+                                                                                !Array.isArray(
+                                                                                    milestone.assignees
+                                                                                ) ||
+                                                                                milestone
+                                                                                    .assignees
+                                                                                    .length ===
+                                                                                    0) && (
+                                                                                <span className="px-2 py-1 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                                                                                    No
+                                                                                    Assignees
+                                                                                </span>
+                                                                            )}
+                                                                            {(!milestone.checklists ||
+                                                                                !Array.isArray(
+                                                                                    milestone.checklists
+                                                                                ) ||
+                                                                                milestone
+                                                                                    .checklists
+                                                                                    .length ===
+                                                                                    0) && (
+                                                                                <span className="px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+                                                                                    No
+                                                                                    Checklists
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
                                                                     </div>
 
                                                                     {/* Assignees */}
-                                                                    {milestone
-                                                                        .assignees
-                                                                        .length >
-                                                                        0 &&
+                                                                    {milestone.assignees &&
+                                                                        milestone
+                                                                            .assignees
+                                                                            .length >
+                                                                            0 &&
                                                                         milestone.assignees.map(
                                                                             (
                                                                                 assignee,
@@ -968,6 +1220,85 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                                                 </div>
                                                                             )
                                                                         )}
+
+                                                                    {/* Show messages for milestones with missing requirements */}
+                                                                    {(!milestone.assignees ||
+                                                                        !Array.isArray(
+                                                                            milestone.assignees
+                                                                        ) ||
+                                                                        milestone
+                                                                            .assignees
+                                                                            .length ===
+                                                                            0 ||
+                                                                        !milestone.checklists ||
+                                                                        !Array.isArray(
+                                                                            milestone.checklists
+                                                                        ) ||
+                                                                        milestone
+                                                                            .checklists
+                                                                            .length ===
+                                                                            0) && (
+                                                                        <div className="space-y-1">
+                                                                            {(!milestone.assignees ||
+                                                                                !Array.isArray(
+                                                                                    milestone.assignees
+                                                                                ) ||
+                                                                                milestone
+                                                                                    .assignees
+                                                                                    .length ===
+                                                                                    0) && (
+                                                                                <div className="flex items-start text-xs">
+                                                                                    <span className="text-gray-400 mr-2 mt-0.5 select-none whitespace-pre">
+                                                                                        {milestoneIndex ===
+                                                                                        step
+                                                                                            .milestones
+                                                                                            .length -
+                                                                                            1
+                                                                                            ? "    "
+                                                                                            : "│   "}
+                                                                                        ├──
+                                                                                    </span>
+                                                                                    <span className="px-2 py-1 bg-red-50 text-red-600 rounded text-xs italic">
+                                                                                        Please
+                                                                                        assign
+                                                                                        employees
+                                                                                        to
+                                                                                        this
+                                                                                        milestone
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+                                                                            {(!milestone.checklists ||
+                                                                                !Array.isArray(
+                                                                                    milestone.checklists
+                                                                                ) ||
+                                                                                milestone
+                                                                                    .checklists
+                                                                                    .length ===
+                                                                                    0) && (
+                                                                                <div className="flex items-start text-xs">
+                                                                                    <span className="text-gray-400 mr-2 mt-0.5 select-none whitespace-pre">
+                                                                                        {milestoneIndex ===
+                                                                                        step
+                                                                                            .milestones
+                                                                                            .length -
+                                                                                            1
+                                                                                            ? "    "
+                                                                                            : "│   "}
+                                                                                        └──
+                                                                                    </span>
+                                                                                    <span className="px-2 py-1 bg-orange-50 text-orange-600 rounded text-xs italic">
+                                                                                        Please
+                                                                                        configure
+                                                                                        checklists
+                                                                                        for
+                                                                                        this
+                                                                                        milestone
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    )}
                                                                 </div>
                                                             )
                                                         )}
@@ -976,11 +1307,50 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                             )}
                                         </div>
                                     ) : (
-                                        <p className="text-sm text-gray-500 pt-2">
-                                            {selectedProject
-                                                ? "Loading assignees..."
-                                                : "Select a project to see assignees"}
-                                        </p>
+                                        <div className="text-sm text-gray-500 pt-2">
+                                            {isMilestoneStructureLoading ? (
+                                                <div className="flex items-center gap-2">
+                                                    <svg
+                                                        className="animate-spin h-4 w-4 text-custom-bluegreen"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <circle
+                                                            className="opacity-25"
+                                                            cx="12"
+                                                            cy="12"
+                                                            r="10"
+                                                            stroke="currentColor"
+                                                            strokeWidth="4"
+                                                        ></circle>
+                                                        <path
+                                                            className="opacity-75"
+                                                            fill="currentColor"
+                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                                        ></path>
+                                                    </svg>
+                                                    <span>
+                                                        Loading milestone
+                                                        structure...
+                                                    </span>
+                                                </div>
+                                            ) : selectedProject ? (
+                                                <div>
+                                                    <p>
+                                                        No milestones found for
+                                                        this project.
+                                                    </p>
+                                                    <p className="text-xs mt-1 text-gray-400">
+                                                        Click the refresh button
+                                                        to reload milestone
+                                                        data.
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                "Select a project to see milestone structure"
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -1011,12 +1381,35 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                 >
                                     Cancel
                                 </button>
-                                <button
-                                    type="submit"
-                                    className="inline-flex justify-center py-[10px] px-11 border border-transparent shadow-sm text-sm font-medium rounded-[10px] text-white bg-gradient-to-r from-custom-bluegreen to-custom-lightgreen focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                >
-                                    Create
-                                </button>
+                                <div className="relative group">
+                                    <button
+                                        type="submit"
+                                        disabled={
+                                            !canCreateWorkOrder ||
+                                            selectedAccounts.length === 0
+                                        }
+                                        className={`inline-flex justify-center py-[10px] px-11 border border-transparent shadow-sm text-sm font-medium rounded-[10px] text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${
+                                            canCreateWorkOrder &&
+                                            selectedAccounts.length > 0
+                                                ? "bg-gradient-to-r from-custom-bluegreen to-custom-lightgreen hover:opacity-90"
+                                                : "bg-gray-400 cursor-not-allowed"
+                                        }`}
+                                    >
+                                        Create
+                                    </button>
+                                    {(!canCreateWorkOrder ||
+                                        selectedAccounts.length === 0) && (
+                                        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50">
+                                            {!canCreateWorkOrder &&
+                                            selectedAccounts.length === 0
+                                                ? "Select accounts and ensure all milestones have assignees & checklists"
+                                                : !canCreateWorkOrder
+                                                ? "All milestones must have assignees and checklists"
+                                                : "Select at least one account"}
+                                            <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </form>
                     </>
