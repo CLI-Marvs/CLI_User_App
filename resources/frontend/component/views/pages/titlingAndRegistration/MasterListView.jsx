@@ -849,6 +849,34 @@ export default function PaginatedTable() {
         } catch (error) {
             console.error("File upload error:", error);
 
+            // Check for duplicate contract number validation error (422 status)
+            if (error.response?.status === 422) {
+                const errorData = error.response.data;
+                if (errorData.error === "Duplicate contract numbers found") {
+                    // Show specific error for duplicate contract numbers
+                    toast.error(
+                        errorData.message ||
+                            "Duplicate contract numbers found in the uploaded file",
+                        {
+                            autoClose: 10000, // Show for longer since it's important
+                            position: "top-right",
+                        }
+                    );
+                } else {
+                    // Other validation errors
+                    toast.error(
+                        errorData.message ||
+                            errorData.error ||
+                            "Validation error occurred",
+                        {
+                            autoClose: 8000,
+                            position: "top-right",
+                        }
+                    );
+                }
+                return;
+            }
+
             // Check if it's a file reading/parsing error
             if (
                 error.message === "Failed to read file" ||
