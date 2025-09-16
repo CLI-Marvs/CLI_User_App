@@ -135,7 +135,7 @@ Route::middleware('auth:sanctum')->group(function () {
      * Titling & Registration Monitor
      */
     Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName'])
-    ->where('contractNumber', '.*');
+        ->where('contractNumber', '.*');
     /**
      * Milestones
      */
@@ -189,11 +189,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Project Assignee Management
     Route::get('/projects-with-assignees', [ProjectAssigneeController::class, 'index']);
     Route::get('/projects/{projectName}/all-assignees', [ProjectAssigneeController::class, 'getAssigneesForProject'])->where('projectName', '.*');
-    Route::get('/projects/{projectName}/milestone-structure', [ProjectAssigneeController::class, 'getProjectMilestoneStructure'])->where('projectName', '.*');
+
     Route::get('/projects/{projectName}/submilestones', [ProjectAssigneeController::class, 'getSubmilestonesForProject'])->where('projectName', '.*');
     Route::get('/projects/{projectName}/milestones/{submilestone}/assignees', [ProjectAssigneeController::class, 'getAssignees'])->where('projectName', '.*');
     Route::put('/projects/{projectName}/milestones/{submilestone}/assignees', [ProjectAssigneeController::class, 'updateAssignees'])->where('projectName', '.*');
     Route::delete('/projects/{projectName}/milestones/{submilestone}/assignees/{employee}', [ProjectAssigneeController::class, 'removeAssignee'])->where('projectName', '.*');
+    Route::get('/projects/{projectName}/milestone-structure', [ProjectAssigneeController::class, 'getProjectMilestoneStructure'])->where('projectName', '.*');
     //for workorder group
     Route::get('/work-order-groups/{groupId}/details', [WorkOrderGroupController::class, 'showDetails']);
     Route::post('/work-order-groups/{id}/update-status', [WorkOrderGroupController::class, 'updateStatus']);
@@ -267,13 +268,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/store-view-and-columns', 'storeViewAndColumns');
         Route::put('/set-default-view', 'setDefaultView');
     });
-    
+
     Route::apiResource('markup-settings', MarkupSettignsController::class);
     Route::apiResource('check-stream', CheckStreamController::class);
     Route::apiResource('check-stream-banks', CheckStreamBanksController::class);
     Route::apiResource('check-stream-entities', CheckStreamEntitiesController::class);
     Route::apiResource('check-stream-admin', CheckStreamAdminSettingsController::class);
-    
+
     Route::controller(MarkupSettignsController::class)->group(function () {
         Route::get('/card/fee', 'retrieveCardMarkupDetails');
         Route::put('/card/fee/{id}', 'updateCardSettings');
@@ -409,5 +410,3 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 });
-
-        
