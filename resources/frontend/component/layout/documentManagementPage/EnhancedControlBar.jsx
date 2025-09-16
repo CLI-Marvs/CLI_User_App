@@ -9,6 +9,7 @@ const EnhancedControlBar = ({
     onStatusFilterChange,
     onRefresh,
     isRefreshing,
+    hideItemsPerPage = false, // New prop to hide items per page control
 }) => {
     const [viewMode, setViewMode] = useState("grid");
     const [showFilters, setShowFilters] = useState(false);
@@ -136,23 +137,25 @@ const EnhancedControlBar = ({
                     {/* Right Section - View Controls and Actions */}
                     <div className="flex items-center gap-3">
                         {/* Items Per Page */}
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600 whitespace-nowrap">
-                                Show:
-                            </span>
-                            <select
-                                value={itemsPerPage}
-                                onChange={(e) =>
-                                    onItemsPerPageChange(e.target.value)
-                                }
-                                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-lightgreen focus:border-custom-lightgreen transition-colors duration-200 text-sm bg-white"
-                            >
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
-                                <option value="200">200</option>
-                            </select>
-                        </div>
+                        {!hideItemsPerPage && (
+                            <div className="flex items-center gap-2">
+                                <span className="text-sm text-gray-600 whitespace-nowrap">
+                                    Show:
+                                </span>
+                                <select
+                                    value={itemsPerPage}
+                                    onChange={(e) =>
+                                        onItemsPerPageChange(e.target.value)
+                                    }
+                                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-custom-lightgreen focus:border-custom-lightgreen transition-colors duration-200 text-sm bg-white"
+                                >
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                    <option value="200">200</option>
+                                </select>
+                            </div>
+                        )}
 
                         {/* Action Buttons */}
                         <div className="flex items-center gap-2">

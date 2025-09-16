@@ -178,15 +178,18 @@ const ChecklistTable = ({
     return (
         <div className="w-full">
             <div
-                className={`shadow-lg rounded-lg border border-gray-200 bg-white overflow-auto max-h-screen ${
+                className={`shadow-lg rounded-lg border border-gray-200 bg-white overflow-x-auto overflow-y-auto max-h-screen ${
                     totalColumns <= 4 ? "max-w-fit" : ""
                 }`}
             >
-                <table className="text-left border-collapse bg-white table-auto w-full">
+                <table className="text-left border-separate border-spacing-0 bg-white table-auto min-w-full">
                     <thead className="sticky top-0 z-50 bg-custom-bluegreen">
                         {/* Row 1: Steps */}
                         <tr className="bg-custom-bluegreen text-white">
-                            <th className="px-4 py-2.5 font-bold sticky left-0 bg-custom-bluegreen z-60 border-r border-white border-opacity-30 min-w-[220px] max-w-[220px] text-center shadow-lg"></th>
+                            <th
+                                className="px-4 py-2.5 font-bold sticky left-0 bg-custom-bluegreen z-60 border-r border-white min-w-[220px] max-w-[220px] text-center shadow-lg"
+                                style={{ backgroundColor: "#175D5F" }}
+                            ></th>
                             {filteredSteps.map((step, idx) => (
                                 <th
                                     key={idx}
@@ -198,11 +201,17 @@ const ChecklistTable = ({
                                             0
                                         ) * 2
                                     }
-                                    className={`text-center px-3 py-2.5 font-bold text-sm border-x border-white border-opacity-30 min-w-[140px] transition-all duration-200 hover:bg-opacity-90 ${
+                                    className={`text-center px-3 py-2.5 font-bold text-sm border-x border-white min-w-[140px] transition-all duration-200 ${
                                         idx % 2 === 0
                                             ? "bg-custom-bluegreen"
                                             : "bg-teal-600"
                                     }`}
+                                    style={{
+                                        backgroundColor:
+                                            idx % 2 === 0
+                                                ? "#175D5F"
+                                                : "#0d9488",
+                                    }}
                                 >
                                     <div className="flex items-center justify-center">
                                         <span className="font-semibold tracking-wide leading-tight">
@@ -217,7 +226,8 @@ const ChecklistTable = ({
                         <tr className="bg-custom-bluegreen text-white">
                             <th
                                 rowSpan={2}
-                                className="px-4 py-2.5 font-bold sticky left-0 bg-custom-bluegreen z-60 border-r border-white border-opacity-30 min-w-[220px] max-w-[220px] text-center align-middle text-sm shadow-lg"
+                                className="px-4 py-2.5 font-bold sticky left-0 bg-custom-bluegreen z-60 border-r border-white min-w-[220px] max-w-[220px] text-center align-middle text-sm shadow-lg"
+                                style={{ backgroundColor: "#175D5F" }}
                             >
                                 <div className="flex items-center justify-center">
                                     <span className="font-bold tracking-wide text-white">
@@ -232,11 +242,17 @@ const ChecklistTable = ({
                                         colSpan={
                                             (sub.checklists?.length || 0) * 2
                                         }
-                                        className={`text-center px-3 py-2.5 font-semibold text-sm border-x border-t border-white border-opacity-30 min-w-[180px] transition-all duration-200 hover:bg-opacity-90 ${
+                                        className={`text-center px-3 py-2.5 font-semibold text-sm border-x border-t border-white min-w-[180px] transition-all duration-200 ${
                                             stepIdx % 2 === 0
                                                 ? "bg-custom-bluegreen"
                                                 : "bg-teal-600"
                                         }`}
+                                        style={{
+                                            backgroundColor:
+                                                stepIdx % 2 === 0
+                                                    ? "#175D5F"
+                                                    : "#0d9488",
+                                        }}
                                     >
                                         <div className="flex items-center justify-center">
                                             <span
@@ -265,11 +281,17 @@ const ChecklistTable = ({
                                             <th
                                                 key={`${stepIdx}-${subIdx}-${cIdx}`}
                                                 colSpan={2}
-                                                className={`text-center px-2 py-2.5 font-medium border-x border-y border-white border-opacity-30 min-w-[200px] transition-all duration-200 hover:bg-opacity-90 ${
+                                                className={`text-center px-2 py-2.5 font-medium border-x border-y border-white min-w-[200px] transition-all duration-200 ${
                                                     stepIdx % 2 === 0
                                                         ? "bg-custom-bluegreen"
                                                         : "bg-teal-600"
                                                 }`}
+                                                style={{
+                                                    backgroundColor:
+                                                        stepIdx % 2 === 0
+                                                            ? "#175D5F"
+                                                            : "#0d9488",
+                                                }}
                                             >
                                                 <div className="flex items-center justify-center px-1">
                                                     <span
@@ -294,7 +316,10 @@ const ChecklistTable = ({
 
                         {/* Row 4: Date and Remarks/Files */}
                         <tr className="bg-custom-bluegreen text-white">
-                            <th className="px-4 py-1.5 font-medium sticky left-0 bg-custom-bluegreen z-60 border-r border-white border-opacity-30 shadow-lg"></th>
+                            <th
+                                className="px-4 py-1.5 font-medium sticky left-0 bg-custom-bluegreen z-60 border-r border-white shadow-lg"
+                                style={{ backgroundColor: "#175D5F" }}
+                            ></th>
                             {filteredSteps.map((step, stepIdx) =>
                                 step.subMilestones.map((sub, subIdx) =>
                                     (sub.checklists || []).map(

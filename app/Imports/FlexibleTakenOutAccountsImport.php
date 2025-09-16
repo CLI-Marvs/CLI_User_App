@@ -250,38 +250,50 @@ class FlexibleTakenOutAccountsImport implements ToCollection, WithMultipleSheets
         // Handle Excel numeric dates
         if (is_numeric($value)) {
             try {
-                return Date::excelToDateTimeObject($value)->format('Y-m-d');
+                // Convert Excel numeric date to PHP DateTime
+                $date = Date::excelToDateTimeObject($value);
+                return $date->format('Y-m-d');
             } catch (\Exception $e) {
                 \Log::error('Failed to convert numeric date:', ['value' => $value, 'error' => $e->getMessage()]);
+                return null;
             }
         }
 
         // Handle string dates
         if (is_string($value)) {
             try {
-                // Try various date formats
+                $cleanValue = trim($value);
+
+                // Try various date formats - prioritize common US format m/d/Y since your example is 3/22/2020
                 $formats = [
-                    'Y-m-d',
-                    'd/m/Y',
-                    'm/d/Y',
-                    'd-m-Y',
-                    'm-d-Y',
-                    'Y/m/d',
-                    'd.m.Y',
-                    'm.d.Y',
-                    'M d, Y',
-                    'F d, Y'
+                    'm/d/Y',    // US format: 3/22/2020 (prioritized)
+                    'd/m/Y',    // European format: 22/3/2020
+                    'Y-m-d',    // ISO format: 2020-03-22
+                    'm-d-Y',    // US with dashes: 3-22-2020
+                    'd-m-Y',    // European with dashes: 22-3-2020
+                    'Y/m/d',    // ISO with slashes: 2020/3/22
+                    'd.m.Y',    // European with dots: 22.3.2020
+                    'm.d.Y',    // US with dots: 3.22.2020
+                    'M d, Y',   // Text month: Mar 22, 2020
+                    'F d, Y'    // Full text month: March 22, 2020
                 ];
 
                 foreach ($formats as $format) {
-                    $date = \DateTime::createFromFormat($format, $value);
-                    if ($date !== false) {
+                    $date = \DateTime::createFromFormat($format, $cleanValue);
+                    if ($date !== false && $date->format($format) === $cleanValue) {
+                        // Ensure the parsed date matches the original string to avoid false positives
                         return $date->format('Y-m-d');
                     }
                 }
 
-                // Fallback to Carbon parser
-                return Carbon::parse($value)->format('Y-m-d');
+                // Fallback to Carbon parser with explicit US format preference
+                $carbonDate = Carbon::createFromFormat('m/d/Y', $cleanValue);
+                if ($carbonDate) {
+                    return $carbonDate->format('Y-m-d');
+                }
+
+                // Last fallback to Carbon's general parser
+                return Carbon::parse($cleanValue)->format('Y-m-d');
             } catch (\Exception $e) {
                 \Log::warning('Failed to parse string date:', ['value' => $value, 'error' => $e->getMessage()]);
             }
