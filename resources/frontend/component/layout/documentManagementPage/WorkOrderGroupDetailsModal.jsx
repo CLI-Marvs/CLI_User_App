@@ -765,6 +765,7 @@ const WorkOrderGroupDetailsModal = ({
                 onStatusFilterChange={handleStatusFilterChange}
                 onRefresh={handleRefresh}
                 isRefreshing={isRefreshing}
+                hideItemsPerPage={showChecklistTable}
             />
 
             {/* Milestone Progression Notification */}
@@ -790,7 +791,11 @@ const WorkOrderGroupDetailsModal = ({
             )}
 
             {/* Table Content */}
-            <DialogBody className="p-0 flex-1 overflow-hidden">
+            <DialogBody
+                className={`p-0 flex-1 ${
+                    showChecklistTable ? "overflow-hidden" : "overflow-y-auto"
+                }`}
+            >
                 {isLoading ? (
                     <div className="flex items-center justify-center h-full bg-gray-50">
                         <div className="text-center">
@@ -820,7 +825,7 @@ const WorkOrderGroupDetailsModal = ({
                         </div>
                     </div>
                 ) : showChecklistTable ? (
-                    <div className="h-full overflow-auto">
+                    <div className="h-full">
                         <ChecklistTable
                             steps={steps}
                             accounts={(() => {
@@ -875,13 +880,17 @@ const WorkOrderGroupDetailsModal = ({
                         )}
                     </div>
                 ) : paginatedData.length > 0 ? (
-                    <div className="h-full overflow-auto">
-                        <table className="w-full text-left border-collapse bg-white">
+                    <div className="h-full">
+                        <table className="w-full text-left border-separate border-spacing-0 bg-white">
                             <thead className="sticky top-0 z-50 bg-custom-bluegreen">
                                 {/* Row 1: Step headers */}
                                 <tr className="bg-custom-bluegreen text-white">
                                     <th
                                         className="px-3 py-2 font-medium sticky left-0 bg-custom-bluegreen z-50 border-r border-white min-w-[180px]"
+                                        style={{
+                                            backgroundColor:
+                                                "var(--tw-bg-opacity, 1)",
+                                        }} // ensure sticky bg
                                         rowSpan={3}
                                     >
                                         <div className="flex items-center gap-2">
@@ -904,6 +913,10 @@ const WorkOrderGroupDetailsModal = ({
                                                 col.subMilestones.length * 2
                                             }
                                             className="text-center px-2 py-2 font-medium border-x border-white min-w-[100px] bg-custom-bluegreen"
+                                            style={{
+                                                backgroundColor:
+                                                    "var(--tw-bg-opacity, 1)",
+                                            }}
                                         >
                                             <span className="text-xs font-semibold uppercase tracking-wide">
                                                 {col.stepName}
@@ -912,6 +925,10 @@ const WorkOrderGroupDetailsModal = ({
                                     ))}
                                     <th
                                         className="px-2 py-2 font-medium border-l border-white min-w-[80px] bg-custom-bluegreen"
+                                        style={{
+                                            backgroundColor:
+                                                "var(--tw-bg-opacity, 1)",
+                                        }}
                                         rowSpan={3}
                                     >
                                         <div className="flex items-center justify-center gap-1">
@@ -932,6 +949,10 @@ const WorkOrderGroupDetailsModal = ({
                                     </th>
                                     <th
                                         className="px-2 py-2 font-medium border-l border-white min-w-[120px] bg-custom-bluegreen"
+                                        style={{
+                                            backgroundColor:
+                                                "var(--tw-bg-opacity, 1)",
+                                        }}
                                         rowSpan={3}
                                     >
                                         <div className="flex items-center justify-center gap-1">
@@ -952,6 +973,10 @@ const WorkOrderGroupDetailsModal = ({
                                     </th>
                                     <th
                                         className="px-2 py-2 font-medium border-l border-white min-w-[80px] bg-custom-bluegreen"
+                                        style={{
+                                            backgroundColor:
+                                                "var(--tw-bg-opacity, 1)",
+                                        }}
                                         rowSpan={3}
                                     >
                                         <div className="flex items-center justify-center gap-1">
@@ -978,6 +1003,10 @@ const WorkOrderGroupDetailsModal = ({
                                                     key={`${idx}-${i}`}
                                                     colSpan={2}
                                                     className="text-center px-2 py-1 font-medium border-x border-y border-white min-w-[180px] bg-custom-bluegreen"
+                                                    style={{
+                                                        backgroundColor:
+                                                            "var(--tw-bg-opacity, 1)",
+                                                    }}
                                                 >
                                                     <span
                                                         className="text-xs font-medium truncate block"
@@ -1004,12 +1033,24 @@ const WorkOrderGroupDetailsModal = ({
                                                 <React.Fragment
                                                     key={`${idx}-${i}-dates`}
                                                 >
-                                                    <th className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px] bg-custom-bluegreen">
+                                                    <th
+                                                        className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px] bg-custom-bluegreen"
+                                                        style={{
+                                                            backgroundColor:
+                                                                "var(--tw-bg-opacity, 1)",
+                                                        }}
+                                                    >
                                                         <span className="text-xs font-medium">
                                                             Date Created
                                                         </span>
                                                     </th>
-                                                    <th className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px] bg-custom-bluegreen">
+                                                    <th
+                                                        className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px] bg-custom-bluegreen"
+                                                        style={{
+                                                            backgroundColor:
+                                                                "var(--tw-bg-opacity, 1)",
+                                                        }}
+                                                    >
                                                         <span className="text-xs font-medium">
                                                             Date Updated
                                                         </span>
@@ -1095,85 +1136,143 @@ const WorkOrderGroupDetailsModal = ({
 
             {/* Pagination Footer */}
             <DialogFooter className="bg-white border-t border-gray-200 p-3">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
-                    <Typography variant="small" className="text-gray-600">
-                        Page {currentPage} of {totalPages} •{" "}
-                        {filteredRows.length} entries
-                    </Typography>
-
-                    <div className="flex items-center gap-1">
-                        <Button
-                            variant="outlined"
-                            size="sm"
-                            onClick={() => handlePageChange(1)}
-                            disabled={currentPage === 1}
-                            className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
-                        >
-                            First
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            size="sm"
-                            onClick={() => handlePageChange(currentPage - 1)}
-                            disabled={currentPage === 1}
-                            className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
-                        >
-                            ‹
-                        </Button>
+                {showChecklistTable ? (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
+                        <Typography variant="small" className="text-gray-600">
+                            {(() => {
+                                // Calculate ChecklistTable filtered accounts count
+                                const allAccounts = Object.values(
+                                    steps.reduce((acc, step) => {
+                                        (step.workOrder.accounts || []).forEach(
+                                            (account) => {
+                                                acc[account.id] = account;
+                                            }
+                                        );
+                                        return acc;
+                                    }, {})
+                                );
+                                const filteredChecklistAccounts =
+                                    allAccounts.filter((account) => {
+                                        const searchMatch =
+                                            searchTerm === "" ||
+                                            (account.account_name &&
+                                                account.account_name
+                                                    .toLowerCase()
+                                                    .includes(
+                                                        searchTerm.toLowerCase()
+                                                    )) ||
+                                            (account.remarks &&
+                                                account.remarks
+                                                    .toLowerCase()
+                                                    .includes(
+                                                        searchTerm.toLowerCase()
+                                                    ));
+                                        return searchMatch;
+                                    });
+                                return `Showing ${filteredChecklistAccounts.length} accounts`;
+                            })()}
+                        </Typography>
+                        <div className="text-xs text-gray-500">
+                            Checklist view shows all accounts without pagination
+                        </div>
+                    </div>
+                ) : (
+                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
+                        <Typography variant="small" className="text-gray-600">
+                            Page {currentPage} of {totalPages} •{" "}
+                            {filteredRows.length} entries
+                        </Typography>
 
                         <div className="flex items-center gap-1">
-                            {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                                const pageNum = Math.max(
-                                    1,
-                                    Math.min(
-                                        currentPage - 2 + i,
-                                        totalPages - 4 + i
-                                    )
-                                );
-                                return pageNum <= totalPages ? (
-                                    <Button
-                                        key={pageNum}
-                                        variant={
-                                            currentPage === pageNum
-                                                ? "filled"
-                                                : "outlined"
-                                        }
-                                        size="sm"
-                                        onClick={() =>
-                                            handlePageChange(pageNum)
-                                        }
-                                        className={
-                                            currentPage === pageNum
-                                                ? "bg-custom-lightgreen text-white px-2 py-1 text-xs min-w-[28px]"
-                                                : "border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs min-w-[28px]"
-                                        }
-                                    >
-                                        {pageNum}
-                                    </Button>
-                                ) : null;
-                            })}
-                        </div>
+                            <Button
+                                variant="outlined"
+                                size="sm"
+                                onClick={() => handlePageChange(1)}
+                                disabled={currentPage === 1}
+                                className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
+                            >
+                                First
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                size="sm"
+                                onClick={() =>
+                                    handlePageChange(currentPage - 1)
+                                }
+                                disabled={currentPage === 1}
+                                className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
+                            >
+                                ‹
+                            </Button>
 
-                        <Button
-                            variant="outlined"
-                            size="sm"
-                            onClick={() => handlePageChange(currentPage + 1)}
-                            disabled={currentPage === totalPages}
-                            className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
-                        >
-                            ›
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            size="sm"
-                            onClick={() => handlePageChange(totalPages)}
-                            disabled={currentPage === totalPages}
-                            className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
-                        >
-                            Last
-                        </Button>
+                            <div className="flex items-center gap-1">
+                                {(() => {
+                                    let start = Math.max(1, currentPage - 2);
+                                    let end = Math.min(
+                                        totalPages,
+                                        currentPage + 2
+                                    );
+                                    if (end - start < 4) {
+                                        if (start === 1) {
+                                            end = Math.min(
+                                                totalPages,
+                                                start + 4
+                                            );
+                                        } else if (end === totalPages) {
+                                            start = Math.max(1, end - 4);
+                                        }
+                                    }
+                                    const pageNumbers = [];
+                                    for (let i = start; i <= end; i++) {
+                                        pageNumbers.push(i);
+                                    }
+                                    return pageNumbers.map((pageNum) => (
+                                        <Button
+                                            key={pageNum}
+                                            variant={
+                                                currentPage === pageNum
+                                                    ? "filled"
+                                                    : "outlined"
+                                            }
+                                            size="sm"
+                                            onClick={() =>
+                                                handlePageChange(pageNum)
+                                            }
+                                            className={
+                                                currentPage === pageNum
+                                                    ? "bg-custom-lightgreen text-white px-2 py-1 text-xs min-w-[28px]"
+                                                    : "border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs min-w-[28px]"
+                                            }
+                                        >
+                                            {pageNum}
+                                        </Button>
+                                    ));
+                                })()}
+                            </div>
+
+                            <Button
+                                variant="outlined"
+                                size="sm"
+                                onClick={() =>
+                                    handlePageChange(currentPage + 1)
+                                }
+                                disabled={currentPage === totalPages}
+                                className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
+                            >
+                                ›
+                            </Button>
+                            <Button
+                                variant="outlined"
+                                size="sm"
+                                onClick={() => handlePageChange(totalPages)}
+                                disabled={currentPage === totalPages}
+                                className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
+                            >
+                                Last
+                            </Button>
+                        </div>
                     </div>
-                </div>
+                )}
             </DialogFooter>
 
             {isNotesModalOpen && selectedAccountForNotes && (

@@ -66,7 +66,21 @@ class TakenOutAccountsImport implements ToModel, WithHeadingRow
                }
           } elseif (!empty($value)) {
                try {
-                    return Carbon::parse($value)->format('Y-m-d');
+                    $cleanValue = trim($value);
+
+                    try {
+                         $date = Carbon::createFromFormat('m/d/Y', $cleanValue);
+                         return $date->format('Y-m-d');
+                    } catch (\Exception $e1) {
+                         // Try other common formats
+                         try {
+                              $date = Carbon::createFromFormat('d/m/Y', $cleanValue);
+                              return $date->format('Y-m-d');
+                         } catch (\Exception $e2) {
+                              // Fallback to Carbon's general parser
+                              return Carbon::parse($cleanValue)->format('Y-m-d');
+                         }
+                    }
                } catch (\Exception $e) {
                     \Log::warning('Failed to parse string date:', ['value' => $value, 'error' => $e->getMessage()]);
                }
