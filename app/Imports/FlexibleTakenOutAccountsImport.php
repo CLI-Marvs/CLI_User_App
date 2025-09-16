@@ -14,6 +14,8 @@ class FlexibleTakenOutAccountsImport implements ToCollection, WithMultipleSheets
     private $importedCount = 0;
     private $errorCount = 0;
     private $errors = [];
+    private $duplicateContracts = []; // Track duplicate contract numbers
+    private $duplicateCount = 0;
 
     /**
      * Handle the collection of data from Excel
@@ -228,9 +230,10 @@ class FlexibleTakenOutAccountsImport implements ToCollection, WithMultipleSheets
         $existing = TakenOutAccount::where('contract_no', $data['contract_no'])->first();
 
         if ($existing) {
-            // Update existing record
-            $existing->update($data);
-            \Log::info('Updated existing record', ['contract_no' => $data['contract_no']]);
+            // Track as duplicate instead of updating
+            $this->duplicateContracts[] = $data['contract_no'];
+            $this->duplicateCount++;
+            \Log::warning('Duplicate contract number found', ['contract_no' => $data['contract_no']]);
         } else {
             // Create new record
             TakenOutAccount::create($data);
@@ -321,7 +324,9 @@ class FlexibleTakenOutAccountsImport implements ToCollection, WithMultipleSheets
         return [
             'imported' => $this->importedCount,
             'errors' => $this->errorCount,
-            'error_details' => $this->errors
+            'error_details' => $this->errors,
+            'duplicates' => $this->duplicateCount,
+            'duplicate_contracts' => $this->duplicateContracts
         ];
     }
 }

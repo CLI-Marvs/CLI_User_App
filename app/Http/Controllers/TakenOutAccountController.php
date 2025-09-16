@@ -72,6 +72,23 @@ class TakenOutAccountController extends Controller
             // Get import statistics
             $stats = $import->getImportStats();
 
+            // Check for duplicate contract numbers
+            if ($stats['duplicates'] > 0) {
+                $duplicateCount = $stats['duplicates'];
+                if ($duplicateCount === 1) {
+                    $message = "Cannot import file. 1 contract number already exists in the database.";
+                } else {
+                    $message = "Cannot import file. {$duplicateCount} contract numbers already exist in the database.";
+                }
+
+                return response()->json([
+                    'error' => 'Duplicate contract numbers found',
+                    'message' => $message,
+                    'duplicates' => $stats['duplicate_contracts'],
+                    'stats' => $stats
+                ], 422); // 422 Unprocessable Entity for validation errors
+            }
+
             $message = "Data uploaded successfully! ";
             $message .= "Imported: {$stats['imported']} records";
 
