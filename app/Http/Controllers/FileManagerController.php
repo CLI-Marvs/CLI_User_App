@@ -520,4 +520,131 @@ class FileManagerController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Delete a file/document
+     */
+    public function deleteFile(Request $request, $documentId)
+    {
+        try {
+            // Find the document
+            $document = WorkOrderDocument::findOrFail($documentId);
+
+            // Store file path for potential physical file deletion
+            $filePath = $document->file_path;
+            $fileName = $document->file_name;
+            $accountId = $document->account_id;
+
+            // Delete the document record from database
+            $document->delete();
+
+            // Optionally delete the physical file from storage
+            // Note: You might want to implement proper file storage deletion here
+            // depending on your storage system (local, S3, Google Cloud, etc.)
+            if ($filePath && file_exists(public_path($filePath))) {
+                unlink(public_path($filePath));
+            }
+
+            \Log::info('File deleted successfully', [
+                'document_id' => $documentId,
+                'file_name' => $fileName,
+                'account_id' => $accountId,
+                'file_path' => $filePath
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'File deleted successfully',
+                'deleted_document_id' => $documentId
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error deleting file', [
+                'document_id' => $documentId,
+                'error' => $e->getMessage(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error deleting file',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete multiple files at once
+     */
+    public function deleteMultipleFiles(Request $request)
+    {
+        $request->validate([
+            'document_ids' => 'required|array|min:1',
+            'document_ids.*' => 'required|integer|exists:work_order_documents,document_id'
+        ]);
+
+        try {
+            $documentIds = $request->input('document_ids');
+            $deletedCount = 0;
+            $failedDeletions = [];
+
+            foreach ($documentIds as $documentId) {
+                try {
+                    $document = WorkOrderDocument::findOrFail($documentId);
+
+                    // Store info for logging
+                    $filePath = $document->file_path;
+                    $fileName = $document->file_name;
+
+                    // Delete from database
+                    $document->delete();
+
+                    // Optionally delete physical file
+                    if ($filePath && file_exists(public_path($filePath))) {
+                        unlink(public_path($filePath));
+                    }
+
+                    $deletedCount++;
+
+                } catch (\Exception $e) {
+                    $failedDeletions[] = [
+                        'document_id' => $documentId,
+                        'error' => $e->getMessage()
+                    ];
+                }
+            }
+
+            \Log::info('Bulk file deletion completed', [
+                'requested_count' => count($documentIds),
+                'deleted_count' => $deletedCount,
+                'failed_count' => count($failedDeletions),
+                'failed_deletions' => $failedDeletions
+            ]);
+
+            $message = $deletedCount > 0
+                ? "Successfully deleted {$deletedCount} file(s)"
+                : "No files were deleted";
+
+            if (count($failedDeletions) > 0) {
+                $failedCount = count($failedDeletions);
+                $message .= ". {$failedCount} file(s) failed to delete.";
+            }
+
+            return response()->json([
+                'success' => $deletedCount > 0,
+                'message' => $message,
+                'deleted_count' => $deletedCount,
+                'failed_count' => count($failedDeletions),
+                'failed_deletions' => $failedDeletions
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error processing bulk file deletion',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

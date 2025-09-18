@@ -21,6 +21,9 @@ import {
 } from "@heroicons/react/24/outline";
 import FileViewerModal from "../../../layout/documentManagementPage/FileViewerModal";
 import { useDocumentManagementContext } from "../../../../context/DocumentManagement/DocumentManagementContext";
+import apiService from "../../../servicesApi/apiService";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // File type configuration - same as AccountFilesModal
 const getFileType = (extension) => {
@@ -171,7 +174,14 @@ const getFileType = (extension) => {
 };
 
 // File Card Component - same as AccountFilesModal
-const FileCard = ({ file, onClick }) => {
+const FileCard = ({
+    file,
+    onClick,
+    onDelete,
+    isSelectable = false,
+    isSelected = false,
+    onSelect,
+}) => {
     const displayName =
         file.file_title || file.file_name || file.name || "Unknown File";
     const sourceFileName = file.file_name || file.name || displayName;
@@ -199,9 +209,26 @@ const FileCard = ({ file, onClick }) => {
 
     return (
         <div
-            className="w-[200px] h-[200px] rounded-xl border-2 border-gray-200 bg-white shadow-md p-2 flex flex-col justify-between hover:shadow-lg transition-all cursor-pointer"
-            onClick={() => onClick(file)}
+            className={`w-[200px] h-[200px] rounded-xl border-2 ${
+                isSelected ? "border-red-500 bg-red-50" : "border-gray-200"
+            } bg-white shadow-md p-2 flex flex-col justify-between hover:shadow-lg transition-all cursor-pointer relative`}
+            onClick={() => !isSelectable && onClick(file)}
         >
+            {/* Selection checkbox */}
+            {isSelectable && (
+                <div className="absolute top-2 left-2 z-10">
+                    <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={(e) => {
+                            e.stopPropagation();
+                            onSelect(file.document_id, e.target.checked);
+                        }}
+                        className="w-4 h-4 rounded border-gray-300 text-red-600 focus:ring-red-500"
+                    />
+                </div>
+            )}
+
             <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center min-w-0">
                     <div
@@ -213,12 +240,27 @@ const FileCard = ({ file, onClick }) => {
                         {displayName}
                     </span>
                 </div>
-                <button
-                    className="text-gray-400 hover:text-gray-600 text-sm shrink-0"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    ⋮
-                </button>
+
+                {!isSelectable && (
+                    <div className="flex items-center gap-1">
+                        <button
+                            className="text-red-500 hover:text-red-700 text-sm transition-colors p-1 rounded hover:bg-red-100"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(file);
+                            }}
+                            title="Delete file"
+                        >
+                            🗑️
+                        </button>
+                        <button
+                            className="text-gray-400 hover:text-gray-600 text-sm shrink-0"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            ⋮
+                        </button>
+                    </div>
+                )}
             </div>
 
             <div className="h-[140px] flex items-center justify-center border border-gray-200 rounded-md bg-gray-50 overflow-hidden">
@@ -384,6 +426,11 @@ const FileManagerView = () => {
     // Modal state
     const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
+
+    // Delete functionality state
+    const [isSelectionMode, setIsSelectionMode] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Fetch files for a specific account and step
     const fetchStepFiles = async (accountId, workOrderTypeId) => {
@@ -594,6 +641,126 @@ const FileManagerView = () => {
         setSelectedFile(null);
     };
 
+    // Delete functionality
+    const handleDeleteFile = async (file) => {
+        if (
+            !confirm(
+                `Are you sure you want to delete "${
+                    file.file_title || file.file_name
+                }"?`
+            )
+        ) {
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            const response = await apiService.delete(
+                `/file-manager/files/${file.document_id}`
+            );
+
+            if (response.data.success) {
+                toast.success("File deleted successfully");
+
+                // Refresh the current view by refetching the account structure
+                if (selectedAccount) {
+                    await handleAccountSelect(selectedAccount);
+                }
+            } else {
+                toast.error(response.data.message || "Failed to delete file");
+            }
+        } catch (error) {
+            console.error("Error deleting file:", error);
+            toast.error(
+                error.response?.data?.message || "Failed to delete file"
+            );
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedFiles.length === 0) {
+            toast.warning("Please select files to delete");
+            return;
+        }
+
+        const fileCount = selectedFiles.length;
+        if (
+            !confirm(
+                `Are you sure you want to delete ${fileCount} selected file(s)? This action cannot be undone.`
+            )
+        ) {
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            const response = await apiService.delete(
+                "/file-manager/files/bulk",
+                {
+                    data: { document_ids: selectedFiles },
+                }
+            );
+
+            if (response.data.success) {
+                const deletedCount = response.data.deleted_count;
+                const failedCount = response.data.failed_count;
+
+                if (failedCount > 0) {
+                    toast.warning(
+                        `${deletedCount} files deleted successfully, ${failedCount} failed to delete`
+                    );
+                } else {
+                    toast.success(`${deletedCount} files deleted successfully`);
+                }
+
+                // Clear selection and exit selection mode
+                setSelectedFiles([]);
+                setIsSelectionMode(false);
+
+                // Refresh the current view
+                if (selectedAccount) {
+                    await handleAccountSelect(selectedAccount);
+                }
+            } else {
+                toast.error(response.data.message || "Failed to delete files");
+            }
+        } catch (error) {
+            console.error("Error deleting files:", error);
+            toast.error(
+                error.response?.data?.message || "Failed to delete files"
+            );
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleFileSelect = (documentId, isSelected) => {
+        setSelectedFiles((prev) => {
+            if (isSelected) {
+                return [...prev, documentId];
+            } else {
+                return prev.filter((id) => id !== documentId);
+            }
+        });
+    };
+
+    const handleSelectAll = () => {
+        if (selectedFiles.length === currentFiles.length) {
+            // Deselect all
+            setSelectedFiles([]);
+        } else {
+            // Select all
+            setSelectedFiles(currentFiles.map((file) => file.document_id));
+        }
+    };
+
+    const toggleSelectionMode = () => {
+        setIsSelectionMode(!isSelectionMode);
+        setSelectedFiles([]);
+    };
+
     const getHeaderTitle = () => {
         if (selectedMilestone) {
             return `${selectedAccount.account_name} > ${selectedStep.name} > ${selectedMilestone.name}`;
@@ -637,6 +804,56 @@ const FileManagerView = () => {
 
                         {selectedAccount && (
                             <div className="flex items-center gap-3">
+                                {/* Delete Controls */}
+                                <div className="flex items-center gap-2">
+                                    {!isSelectionMode ? (
+                                        <Button
+                                            size="sm"
+                                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 flex items-center gap-2"
+                                            onClick={toggleSelectionMode}
+                                            disabled={currentFiles.length === 0}
+                                        >
+                                            🗑️ Delete Files
+                                        </Button>
+                                    ) : (
+                                        <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                                            <Button
+                                                size="sm"
+                                                variant="text"
+                                                className="text-gray-600 hover:text-gray-800 px-2 py-1"
+                                                onClick={toggleSelectionMode}
+                                            >
+                                                Cancel
+                                            </Button>
+
+                                            <Button
+                                                size="sm"
+                                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1"
+                                                onClick={handleSelectAll}
+                                            >
+                                                {selectedFiles.length ===
+                                                currentFiles.length
+                                                    ? "Deselect All"
+                                                    : "Select All"}
+                                            </Button>
+
+                                            <Button
+                                                size="sm"
+                                                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1"
+                                                onClick={handleBulkDelete}
+                                                disabled={
+                                                    selectedFiles.length ===
+                                                        0 || isDeleting
+                                                }
+                                            >
+                                                {isDeleting
+                                                    ? "Deleting..."
+                                                    : `Delete ${selectedFiles.length}`}
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+
                                 {/* Sort Dropdown - Compact Version */}
                                 <div className="inline-flex items-center gap-3 bg-white rounded-lg px-4 py-2 shadow-md border border-gray-100 hover:shadow-lg transition-all duration-200">
                                     <svg
@@ -965,7 +1182,19 @@ const FileManagerView = () => {
                                     <FileCard
                                         key={`file-${selectedAccount?.id}-${file.document_id}-${index}`}
                                         file={file}
-                                        onClick={handleFileClick}
+                                        onClick={() => handleFileClick(file)}
+                                        showCheckbox={isSelectionMode}
+                                        isSelected={selectedFiles.includes(
+                                            file.document_id
+                                        )}
+                                        onSelect={(isSelected) =>
+                                            handleFileSelect(
+                                                file.document_id,
+                                                isSelected
+                                            )
+                                        }
+                                        showDeleteButton={!isSelectionMode}
+                                        onDelete={() => handleDeleteFile(file)}
                                     />
                                 ))}
                             </div>
@@ -974,48 +1203,98 @@ const FileManagerView = () => {
                                 {currentFiles.map((file, index) => (
                                     <div
                                         key={`file-list-${selectedAccount?.id}-${file.document_id}-${index}`}
-                                        className="flex items-center p-3 bg-white rounded-lg border border-gray-200 hover:shadow-md transition-shadow cursor-pointer"
-                                        onClick={() => handleFileClick(file)}
+                                        className={`flex items-center p-3 rounded-lg border transition-all ${
+                                            isSelectionMode &&
+                                            selectedFiles.includes(
+                                                file.document_id
+                                            )
+                                                ? "bg-blue-50 border-blue-200 shadow-sm"
+                                                : "bg-white border-gray-200 hover:shadow-md"
+                                        } cursor-pointer`}
                                     >
-                                        <div className="w-10 h-10 flex items-center justify-center mr-3">
-                                            {
-                                                getFileType(
-                                                    (file.file_name || "")
-                                                        .split(".")
-                                                        .pop()
-                                                        ?.toLowerCase()
-                                                ).icon
+                                        {/* Selection Checkbox */}
+                                        {isSelectionMode && (
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedFiles.includes(
+                                                    file.document_id
+                                                )}
+                                                onChange={(e) =>
+                                                    handleFileSelect(
+                                                        file.document_id,
+                                                        e.target.checked
+                                                    )
+                                                }
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                                className="mr-3 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                            />
+                                        )}
+
+                                        <div
+                                            className="flex-1 flex items-center"
+                                            onClick={() =>
+                                                !isSelectionMode &&
+                                                handleFileClick(file)
                                             }
+                                        >
+                                            <div className="w-10 h-10 flex items-center justify-center mr-3">
+                                                {
+                                                    getFileType(
+                                                        (file.file_name || "")
+                                                            .split(".")
+                                                            .pop()
+                                                            ?.toLowerCase()
+                                                    ).icon
+                                                }
+                                            </div>
+                                            <div className="flex-1">
+                                                <Typography
+                                                    variant="small"
+                                                    className="font-medium"
+                                                >
+                                                    {file.file_title ||
+                                                        file.file_name}
+                                                </Typography>
+                                                <Typography
+                                                    variant="small"
+                                                    className="text-gray-500"
+                                                >
+                                                    {file.uploaded_by
+                                                        ?.fullname ||
+                                                        file.uploaded_by ||
+                                                        "Unknown User"}
+                                                </Typography>
+                                            </div>
+                                            <div className="text-right mr-3">
+                                                <Typography
+                                                    variant="small"
+                                                    className="text-gray-500"
+                                                >
+                                                    {file.created_at
+                                                        ? new Date(
+                                                              file.created_at
+                                                          ).toLocaleDateString()
+                                                        : "Unknown Date"}
+                                                </Typography>
+                                            </div>
                                         </div>
-                                        <div className="flex-1">
-                                            <Typography
-                                                variant="small"
-                                                className="font-medium"
+
+                                        {/* Delete Button */}
+                                        {!isSelectionMode && (
+                                            <Button
+                                                size="sm"
+                                                variant="text"
+                                                className="text-red-600 hover:text-red-700 hover:bg-red-50 p-2"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeleteFile(file);
+                                                }}
                                             >
-                                                {file.file_title ||
-                                                    file.file_name}
-                                            </Typography>
-                                            <Typography
-                                                variant="small"
-                                                className="text-gray-500"
-                                            >
-                                                {file.uploaded_by?.fullname ||
-                                                    file.uploaded_by ||
-                                                    "Unknown User"}
-                                            </Typography>
-                                        </div>
-                                        <div className="text-right">
-                                            <Typography
-                                                variant="small"
-                                                className="text-gray-500"
-                                            >
-                                                {file.created_at
-                                                    ? new Date(
-                                                          file.created_at
-                                                      ).toLocaleDateString()
-                                                    : "Unknown Date"}
-                                            </Typography>
-                                        </div>
+                                                🗑️
+                                            </Button>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -1029,6 +1308,19 @@ const FileManagerView = () => {
                 isOpen={isFileViewerOpen}
                 onClose={handleCloseFileViewer}
                 file={selectedFile}
+            />
+
+            {/* Toast Container */}
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
             />
         </div>
     );

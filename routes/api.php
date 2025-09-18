@@ -216,6 +216,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/file-manager/accounts/{accountId}/structure', [FileManagerController::class, 'getAccountWithStructure']);
     Route::get('/file-manager/accounts/{accountId}/work-order-type/{workOrderTypeId}/files', [FileManagerController::class, 'getFilesByWorkOrderType']);
     Route::get('/file-manager/accounts/{accountId}/submilestone/{submilestoneId}/files', [FileManagerController::class, 'getFilesBySubmilestone']);
+
+    // Delete routes
+    Route::delete('/file-manager/files/{documentId}', [FileManagerController::class, 'deleteFile']);
+    Route::delete('/file-manager/files/bulk', [FileManagerController::class, 'deleteMultipleFiles']);
+
     // Test route
     Route::get('/test-file-manager', [FileManagerController::class, 'getAllAccountsWithFiles']);
 });

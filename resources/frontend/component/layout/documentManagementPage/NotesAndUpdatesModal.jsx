@@ -337,8 +337,17 @@ function NotesAndUpdatesModal({
 
                                     <div className="text-[#818181] text-sm">
                                         <div className="whitespace-pre-wrap break-words">
-                                            {log.log_message ||
-                                                "Work Order Updated"}
+                                            {/* Replace work order ID with work order group ID in log message */}
+                                            {log.log_message
+                                                ? log.log_message.replace(
+                                                      new RegExp(
+                                                          `\\b${log.work_order_id}\\b`,
+                                                          "g"
+                                                      ),
+                                                      log.work_order_group_id ||
+                                                          log.work_order_id
+                                                  )
+                                                : "Work Order Updated"}
                                         </div>
                                         <div className="text-sm text-gray-500">
                                             <span>

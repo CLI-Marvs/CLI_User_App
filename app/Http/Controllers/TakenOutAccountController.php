@@ -65,14 +65,35 @@ class TakenOutAccountController extends Controller
         try {
             $file = $request->file('file');
 
-            // Use the flexible import class
+            // Create the import instance
             $import = new FlexibleTakenOutAccountsImport();
+
+            // First, validate the file without importing (dry run)
+            $validationResults = $import->validateFileBeforeImport($file);
+
+            // Check for validation errors (including date format errors)
+            if (!$validationResults['isValid']) {
+                \Log::warning('File validation failed before import', [
+                    'errors' => $validationResults['errors'],
+                    'date_errors' => $validationResults['dateErrors'] ?? []
+                ]);
+
+                // Return validation error response - this prevents the import
+                return response()->json([
+                    'error' => 'File validation failed',
+                    'message' => 'Upload failed: ' . implode(' ', $validationResults['errors']),
+                    'validation_errors' => $validationResults['errors'],
+                    'date_errors' => $validationResults['dateErrors'] ?? []
+                ], 422); // 422 Unprocessable Entity for validation errors
+            }
+
+            // If validation passes, proceed with the actual import
             Excel::import($import, $file);
 
             // Get import statistics
             $stats = $import->getImportStats();
 
-            // Check for duplicate contract numbers
+            // Check for duplicate contract numbers (this should not happen after validation, but keep as safety net)
             if ($stats['duplicates'] > 0) {
                 $duplicateCount = $stats['duplicates'];
                 if ($duplicateCount === 1) {

@@ -856,6 +856,7 @@ const ExecutiveDashboard = () => {
                                         <div className="flex items-start">
                                             <div className="flex-shrink-0 mt-1">
                                                 {alert.type === "success" ? (
+                                                    
                                                     <CheckCircleSolid className="w-5 h-5 text-green-500" />
                                                 ) : (
                                                     <ExclamationTriangleSolid
