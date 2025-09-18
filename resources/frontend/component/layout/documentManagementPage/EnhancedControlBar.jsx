@@ -202,7 +202,7 @@ const EnhancedControlBar = ({
                                     <option value="In Progress">
                                         In Progress
                                     </option>
-                                    <option value="Completed">Completed</option>
+                                    <option value="Complete">Complete</option>
                                 </select>
                             </div>
                             <button

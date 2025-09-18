@@ -1083,11 +1083,8 @@ const MyWorkOrders = () => {
                                 className="text-xs border-none outline-none bg-transparent cursor-pointer"
                             >
                                 <option value="">All</option>
-                                <option value="Pending">Pending</option>
-                                <option value="Assigned">Assigned</option>
                                 <option value="In Progress">In Progress</option>
                                 <option value="Complete">Complete</option>
-                                <option value="Cancelled">Cancelled</option>
                             </select>
                         </div>
 

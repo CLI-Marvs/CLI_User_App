@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\TakenOutAccount;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Collection;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Carbon\Carbon;
@@ -160,13 +161,35 @@ class FlexibleTakenOutAccountsImport implements ToCollection, WithMultipleSheets
             $mappedData[$dbField] = $this->cleanCellValue($value);
         }
 
-        // Convert dates
+        // Convert dates and track conversion failures
         if (isset($mappedData['take_out_date'])) {
-            $mappedData['take_out_date'] = $this->convertDate($mappedData['take_out_date']);
+            $originalValue = $mappedData['take_out_date'];
+            $mappedData['take_out_date'] = $this->convertDate($originalValue);
+
+            // Track date conversion failures
+            if (!empty($originalValue) && $mappedData['take_out_date'] === null) {
+                \Log::warning('Take out date conversion failed', [
+                    'original_value' => $originalValue,
+                    'contract_no' => $mappedData['contract_no'] ?? 'unknown'
+                ]);
+                $this->errors[] = "Take out date '{$originalValue}' could not be parsed for contract " . ($mappedData['contract_no'] ?? 'unknown');
+                $this->errorCount++;
+            }
         }
 
         if (isset($mappedData['dou_expiry'])) {
-            $mappedData['dou_expiry'] = $this->convertDate($mappedData['dou_expiry']);
+            $originalValue = $mappedData['dou_expiry'];
+            $mappedData['dou_expiry'] = $this->convertDate($originalValue);
+
+            // Track date conversion failures
+            if (!empty($originalValue) && $mappedData['dou_expiry'] === null) {
+                \Log::warning('DOU expiry date conversion failed', [
+                    'original_value' => $originalValue,
+                    'contract_no' => $mappedData['contract_no'] ?? 'unknown'
+                ]);
+                $this->errors[] = "DOU expiry date '{$originalValue}' could not be parsed for contract " . ($mappedData['contract_no'] ?? 'unknown');
+                $this->errorCount++;
+            }
         }
 
         $mappedData['added_status'] = true;
@@ -267,6 +290,12 @@ class FlexibleTakenOutAccountsImport implements ToCollection, WithMultipleSheets
             try {
                 $cleanValue = trim($value);
 
+                // Add validation for obviously malformed dates before processing
+                if ($this->isObviouslyMalformed($cleanValue)) {
+                    \Log::warning('Detected malformed date format:', ['value' => $cleanValue]);
+                    return null;
+                }
+
                 // Try various date formats - prioritize common US format m/d/Y since your example is 3/22/2020
                 $formats = [
                     'm/d/Y',    // US format: 3/22/2020 (prioritized)
@@ -306,14 +335,241 @@ class FlexibleTakenOutAccountsImport implements ToCollection, WithMultipleSheets
     }
 
     /**
-     * Handle multiple sheets
+     * Get detailed error message for malformed dates
      */
-    public function sheets(): array
+    private function getDetailedDateError($dateString)
     {
-        return [
-            0 => $this, // Process the first sheet
-            // Add more sheets if needed
-        ];
+        $parts = explode('/', $dateString);
+
+        if (count($parts) !== 3) {
+            return 'Date must have exactly 3 parts separated by / (e.g., 3/22/2020)';
+        }
+
+        list($first, $second, $third) = $parts;
+
+        // Check for extra digits in parts
+        if (strlen($second) > 2 && preg_match('/^0\d{2}$/', $second)) {
+            return "Day part '{$second}' has extra digit(s). Remove leading zeros (e.g., {$second} should be " . ltrim($second, '0') . ')';
+        }
+
+        if (strlen($third) > 2 && preg_match('/^0\d{2}$/', $third)) {
+            return "Day part '{$third}' has extra digit(s). Remove leading zeros (e.g., {$third} should be " . ltrim($third, '0') . ')';
+        }
+
+        // Check for year in wrong position
+        if (strlen($first) === 4 && is_numeric($first)) {
+            return 'Date appears to be in YYYY/MM/DD format. Use M/D/YYYY format instead (e.g., 3/22/2020)';
+        }
+
+        // Check for obviously wrong part lengths
+        if (strlen($first) > 2) {
+            return "Month part '{$first}' is too long. Use 1-2 digits for month (e.g., 3 or 12)";
+        }
+
+        if (strlen($second) > 2) {
+            return "Day part '{$second}' is too long. Use 1-2 digits for day (e.g., 5 or 22)";
+        }
+
+        if (strlen($third) !== 4) {
+            return "Year part '{$third}' must be exactly 4 digits (e.g., 2020)";
+        }
+
+        return 'Invalid date format. Use M/D/YYYY format (e.g., 3/22/2020)';
+    }
+
+    /**
+     * Check if a date string is obviously malformed
+     */
+    private function isObviouslyMalformed($dateString)
+    {
+        // Check for dates with too many digits in parts
+        $parts = explode('/', $dateString);
+        if (count($parts) === 3) {
+            foreach ($parts as $part) {
+                // If any part has more than 4 digits, it's likely malformed
+                if (strlen($part) > 4) {
+                    return true;
+                }
+
+                // Check for leading zeros in day/month that might indicate typing errors
+                if (strlen($part) === 3 && preg_match('/^0\d{2}$/', $part)) {
+                    return true; // e.g., "028" is likely a typo for "28"
+                }
+            }
+
+            // Additional checks for common malformation patterns
+            list($first, $second, $third) = $parts;
+
+            // If first part is 4 digits (year), check if other parts are reasonable for mm/dd
+            if (strlen($first) === 4 && (strlen($second) > 2 || strlen($third) > 2)) {
+                return true;
+            }
+
+            // If third part is 4 digits (year), check if other parts are reasonable for mm/dd
+            if (strlen($third) === 4 && (strlen($first) > 2 || strlen($second) > 2)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Validate file before importing (dry run validation)
+     */
+    public function validateFileBeforeImport($file)
+    {
+        try {
+            // Read the Excel file without importing
+            $collection = Excel::toCollection($this, $file)->first();
+
+            if ($collection->isEmpty()) {
+                return [
+                    'isValid' => false,
+                    'errors' => ['File is empty or could not be read.'],
+                    'dateErrors' => []
+                ];
+            }
+
+            // Use existing header detection logic
+            $headerInfo = $this->findHeaderRow($collection);
+
+            if (!$headerInfo) {
+                return [
+                    'isValid' => false,
+                    'errors' => ['Could not detect valid column structure in the file. Please ensure your file has proper headers.'],
+                    'dateErrors' => []
+                ];
+            }
+
+            $errors = [];
+            $dateErrors = [];
+            $duplicateContracts = [];
+
+            // Get existing contract numbers for duplicate checking
+            $existingContracts = TakenOutAccount::pluck('contract_no')->toArray();
+
+            $startRow = $headerInfo['startRow'];
+            $columnMapping = $headerInfo['columnMapping'];
+
+            // Validate each data row
+            for ($i = $startRow; $i < $collection->count(); $i++) {
+                $row = $collection[$i];
+                $actualRowNumber = $i + 1; // 1-based row number
+
+                // Skip completely empty rows
+                if ($this->isEmptyRow($row)) {
+                    continue;
+                }
+
+                // Map the row data using existing logic
+                $mappedData = $this->mapRowDataForValidation($row, $columnMapping);
+
+                // Validate required fields
+                if (empty($mappedData['contract_no']) || empty($mappedData['account_name'])) {
+                    $errors[] = "Row {$actualRowNumber}: Missing required fields (Contract No or Account Name).";
+                    continue;
+                }
+
+                // Check for duplicates in existing database
+                if (in_array($mappedData['contract_no'], $existingContracts)) {
+                    $duplicateContracts[] = $mappedData['contract_no'];
+                }
+
+                // Validate date fields
+                $dateFields = [
+                    'take_out_date' => 'Takeout Date',
+                    'dou_expiry' => 'DOU Expiry'
+                ];
+
+                foreach ($dateFields as $field => $displayName) {
+                    if (!empty($mappedData[$field])) {
+                        $originalValue = $mappedData[$field];
+
+                        // Check if the date is obviously malformed
+                        if ($this->isObviouslyMalformed($originalValue)) {
+                            $errorMessage = $this->getDetailedDateError($originalValue);
+                            $dateErrors[] = [
+                                'row' => $actualRowNumber,
+                                'field' => $displayName,
+                                'value' => $originalValue,
+                                'error' => $errorMessage
+                            ];
+                            continue;
+                        }
+
+                        // Try to convert the date
+                        $convertedDate = $this->convertDate($originalValue);
+                        if ($convertedDate === null) {
+                            $dateErrors[] = [
+                                'row' => $actualRowNumber,
+                                'field' => $displayName,
+                                'value' => $originalValue,
+                                'error' => 'Invalid date format. Use M/D/YYYY format (e.g., 3/22/2020)'
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // Check for duplicate contracts
+            if (!empty($duplicateContracts)) {
+                $duplicateCount = count(array_unique($duplicateContracts));
+                if ($duplicateCount === 1) {
+                    $errors[] = "Cannot import file. 1 contract number already exists in the database.";
+                } else {
+                    $errors[] = "Cannot import file. {$duplicateCount} contract numbers already exist in the database.";
+                }
+            }
+
+            // Check for date errors
+            if (!empty($dateErrors)) {
+                $dateErrorCount = count($dateErrors);
+                $errors[] = "Upload failed: {$dateErrorCount} invalid date(s) found. Use M/D/YYYY format (e.g., 3/22/2020).";
+
+                // Add specific error details for first few errors
+                $maxDetailedErrors = min(3, count($dateErrors));
+                for ($i = 0; $i < $maxDetailedErrors; $i++) {
+                    $err = $dateErrors[$i];
+                    $errors[] = "Row {$err['row']}, {$err['field']}: \"{$err['value']}\" - {$err['error']}";
+                }
+
+                if (count($dateErrors) > $maxDetailedErrors) {
+                    $remaining = count($dateErrors) - $maxDetailedErrors;
+                    $errors[] = "... and {$remaining} more date format errors.";
+                }
+            }
+
+            return [
+                'isValid' => empty($errors),
+                'errors' => $errors,
+                'dateErrors' => $dateErrors,
+                'duplicateContracts' => array_unique($duplicateContracts)
+            ];
+
+        } catch (\Exception $e) {
+            \Log::error('File validation failed:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+            return [
+                'isValid' => false,
+                'errors' => ['Failed to validate file: ' . $e->getMessage()],
+                'dateErrors' => []
+            ];
+        }
+    }
+
+    /**
+     * Map row data for validation (without side effects like error tracking)
+     */
+    private function mapRowDataForValidation(Collection $row, array $columnMapping)
+    {
+        $mappedData = [];
+
+        foreach ($columnMapping as $colIndex => $dbField) {
+            $value = $row->get($colIndex);
+            $mappedData[$dbField] = $this->cleanCellValue($value);
+        }
+
+        return $mappedData;
     }
 
     /**
@@ -327,6 +583,17 @@ class FlexibleTakenOutAccountsImport implements ToCollection, WithMultipleSheets
             'error_details' => $this->errors,
             'duplicates' => $this->duplicateCount,
             'duplicate_contracts' => $this->duplicateContracts
+        ];
+    }
+
+    /**
+     * Handle multiple sheets
+     */
+    public function sheets(): array
+    {
+        return [
+            0 => $this, // Process the first sheet
+            // Add more sheets if needed
         ];
     }
 }

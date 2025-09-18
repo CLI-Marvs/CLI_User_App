@@ -1355,7 +1355,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                 </div>
                             </div>
 
-                            <div class="flex items-center mb-2 justify-between">
+                            <div className="flex items-center mb-2 justify-between">
                                 <label
                                     htmlFor="date"
                                     className="block text-sm ml-4 font-semibold text-custom-bluegreen w-1/4"
@@ -1366,6 +1366,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                     <DatePicker
                                         selected={dueDate}
                                         onChange={(date) => setDueDate(date)}
+                                        minDate={new Date()}
                                         className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm text-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                                         wrapperClassName="w-full"
                                         placeholderText="Select Due Date"

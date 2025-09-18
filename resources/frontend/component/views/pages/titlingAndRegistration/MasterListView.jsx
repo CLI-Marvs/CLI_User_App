@@ -383,35 +383,67 @@ export default function PaginatedTable() {
             return { isValid: false, message: "Date cannot be empty" };
         }
 
-        // Check if the format matches M/D/YYYY or MM/DD/YYYY - MUST have 4-digit year
-        // First check for any date-like pattern to catch 2-digit years
-        const generalDatePattern = /^(\d{1,2})\/(\d{1,2})\/(\d{1,4})$/;
-        const generalMatch = cleanDateString.match(generalDatePattern);
+        // More strict pattern validation - explicitly check format components
+        const parts = cleanDateString.split("/");
 
-        if (generalMatch) {
-            const yearPart = generalMatch[3];
-            if (yearPart.length !== 4) {
-                return {
-                    isValid: false,
-                    message: `Year must be 4 digits (e.g., 2025, not ${yearPart}). Got: "${cleanDateString}"`,
-                };
-            }
-        }
-
-        // Now check the strict pattern with 4-digit year requirement
-        const datePattern = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/;
-        const match = cleanDateString.match(datePattern);
-
-        if (!match) {
+        // Must have exactly 3 parts separated by /
+        if (parts.length !== 3) {
             return {
                 isValid: false,
-                message: `Use M/D/YYYY format (e.g., 9/15/2025). Got: "${cleanDateString}"`,
+                message: `Invalid date format. Use M/D/YYYY format (e.g., 9/15/2025). Got: "${cleanDateString}"`,
             };
         }
 
-        const month = parseInt(match[1], 10);
-        const day = parseInt(match[2], 10);
-        const year = parseInt(match[3], 10);
+        const [monthPart, dayPart, yearPart] = parts;
+
+        // Validate that each part contains only digits
+        if (
+            !/^\d+$/.test(monthPart) ||
+            !/^\d+$/.test(dayPart) ||
+            !/^\d+$/.test(yearPart)
+        ) {
+            return {
+                isValid: false,
+                message: `Date parts must contain only numbers. Use M/D/YYYY format (e.g., 9/15/2025). Got: "${cleanDateString}"`,
+            };
+        }
+
+        // Validate month part (1-2 digits)
+        if (monthPart.length === 0 || monthPart.length > 2) {
+            return {
+                isValid: false,
+                message: `Month must be 1-2 digits (1-12). Got month: "${monthPart}" in "${cleanDateString}"`,
+            };
+        }
+
+        // Validate day part (1-2 digits)
+        if (dayPart.length === 0 || dayPart.length > 2) {
+            return {
+                isValid: false,
+                message: `Day must be 1-2 digits (1-31). Got day: "${dayPart}" in "${cleanDateString}"`,
+            };
+        }
+
+        // Validate year part (exactly 4 digits)
+        if (yearPart.length !== 4) {
+            return {
+                isValid: false,
+                message: `Year must be exactly 4 digits (e.g., 2025, not ${yearPart}). Got: "${cleanDateString}"`,
+            };
+        }
+
+        // Convert to numbers for validation
+        const month = parseInt(monthPart, 10);
+        const day = parseInt(dayPart, 10);
+        const year = parseInt(yearPart, 10);
+
+        // Validate that numbers are in valid ranges
+        if (isNaN(month) || isNaN(day) || isNaN(year)) {
+            return {
+                isValid: false,
+                message: `Invalid numbers in date. Got: "${cleanDateString}"`,
+            };
+        }
 
         // Validate year - must be reasonable range (not too far in past or future)
         const currentYear = new Date().getFullYear();
@@ -718,6 +750,23 @@ export default function PaginatedTable() {
         if (dateFormatErrors.length > 0) {
             const dateErrorMessage = `Upload failed: ${dateFormatErrors.length} invalid date(s) found. Use M/D/YYYY format (e.g., 9/15/2025).`;
             errors.push(dateErrorMessage);
+
+            // Add detailed error information for the first few problematic dates
+            const maxDetailedErrors = Math.min(3, dateFormatErrors.length);
+            for (let i = 0; i < maxDetailedErrors; i++) {
+                const err = dateFormatErrors[i];
+                errors.push(
+                    `Row ${err.rowIndex}, ${err.column}: "${err.value}" - ${err.error}`
+                );
+            }
+
+            if (dateFormatErrors.length > maxDetailedErrors) {
+                errors.push(
+                    `... and ${
+                        dateFormatErrors.length - maxDetailedErrors
+                    } more date format errors.`
+                );
+            }
         }
 
         // If there are rows with missing data, it's invalid
@@ -796,7 +845,7 @@ export default function PaginatedTable() {
             const validation = validateFileData(fileData);
 
             if (!validation.isValid) {
-                // Show single consolidated error message
+                // Show frontend validation errors - this catches basic format issues
                 const errorMessage = validation.errors.join(" ");
                 toast.error(errorMessage, {
                     autoClose: 8000,
@@ -852,6 +901,7 @@ export default function PaginatedTable() {
             // Check for duplicate contract number validation error (422 status)
             if (error.response?.status === 422) {
                 const errorData = error.response.data;
+
                 if (errorData.error === "Duplicate contract numbers found") {
                     // Show specific error for duplicate contract numbers
                     toast.error(
@@ -862,6 +912,52 @@ export default function PaginatedTable() {
                             position: "top-right",
                         }
                     );
+                } else if (errorData.error === "File validation failed") {
+                    // Handle detailed validation errors including date format issues
+                    const validationErrors = errorData.validation_errors || [];
+                    const dateErrors = errorData.date_errors || [];
+
+                    // Show main error message only if it's different from frontend validation
+                    // (Backend validation should only trigger for issues frontend missed)
+                    toast.error(errorData.message || "File validation failed", {
+                        autoClose: 10000,
+                        position: "top-right",
+                    });
+
+                    // Show detailed date errors if any (this provides additional context)
+                    if (dateErrors.length > 0) {
+                        setTimeout(() => {
+                            let detailedMessage = "Additional Details:\n\n";
+
+                            // Show first 3 date errors in detail
+                            const maxErrors = Math.min(3, dateErrors.length);
+                            for (let i = 0; i < maxErrors; i++) {
+                                const err = dateErrors[i];
+                                detailedMessage += `• Row ${err.row}, ${err.field}: "${err.value}"\n  ${err.error}\n\n`;
+                            }
+
+                            if (dateErrors.length > maxErrors) {
+                                detailedMessage += `... and ${
+                                    dateErrors.length - maxErrors
+                                } more issues.\n\n`;
+                            }
+
+                            detailedMessage +=
+                                "� Tip: Use M/D/YYYY format (e.g., 3/22/2020)\n";
+                            detailedMessage +=
+                                "� Ensure dates don't have extra digits or impossible values";
+
+                            toast.info(detailedMessage, {
+                                autoClose: 12000,
+                                position: "top-right",
+                                style: {
+                                    whiteSpace: "pre-line",
+                                    maxWidth: "500px",
+                                    fontSize: "13px",
+                                },
+                            });
+                        }, 2000);
+                    }
                 } else {
                     // Other validation errors
                     toast.error(
