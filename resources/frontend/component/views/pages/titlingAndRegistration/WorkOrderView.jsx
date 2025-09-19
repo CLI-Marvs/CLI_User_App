@@ -444,7 +444,7 @@ const WorkOrderView = () => {
                         value={searchQuery}
                         onChange={handleSearchChange}
                         className="h-[47px] w-full bg-custom-grayF1 rounded-[10px] pl-9 pr-20 text-sm"
-                        placeholder="Search Work Order Group, ID"
+                        placeholder="Search Work Order No....."
                     />
 
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
