@@ -41,21 +41,13 @@ const RefreshIcon = ({ onClick, isRefreshing }) => (
 const MyWorkOrders = () => {
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+    // Manual refresh handler for work order groups
+    const { forceRefreshWorkOrders, workOrderGroupsLastFetched } =
+        useDocumentManagementContext();
     const handleRefresh = async () => {
-        // Force re-fetch of ONLY the current user's work orders
         setIsRefreshing(true);
-        try {
-            if (fetchWorkOrdersPaginated) {
-                await fetchWorkOrdersPaginated(
-                    1,
-                    1000,
-                    workOrdersSortBy,
-                    workOrdersSortOrder
-                );
-            }
-        } finally {
-            setIsRefreshing(false);
-        }
+        await forceRefreshWorkOrders();
+        setIsRefreshing(false);
     };
     const { user } = useStateContext(); // Get current user from context
     // Work order state from context
@@ -99,31 +91,22 @@ const MyWorkOrders = () => {
     const [dueDateFilter, setDueDateFilter] = useState("");
     const [lastUpdatedFilter, setLastUpdatedFilter] = useState("");
 
-    // Fetch only the logged-in user's work orders (large per_page to allow client filters & pagination)
+    // Only fetch if not already loaded or stale (10 min), otherwise use cached
     useEffect(() => {
         let isMounted = true;
-        const load = async () => {
-            if (!fetchWorkOrdersPaginated) return;
-            // Clear any stale data immediately to prevent showing others' WOs
-            setWorkOrderGroups([]);
-            setHasLoadedMyWorkOrders(false);
-            try {
-                await fetchWorkOrdersPaginated(
-                    1,
-                    1000,
-                    workOrdersSortBy,
-                    workOrdersSortOrder
-                );
-            } finally {
+        // Only fetch once per mount unless manually refreshed
+        if (!hasLoadedMyWorkOrders) {
+            const load = async () => {
+                setHasLoadedMyWorkOrders(false);
+                await fetchWorkOrdersPaginated();
                 if (isMounted) setHasLoadedMyWorkOrders(true);
-            }
-        };
-        load();
+            };
+            load();
+        }
         return () => {
             isMounted = false;
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fetchWorkOrdersPaginated]);
+    }, [fetchWorkOrdersPaginated, hasLoadedMyWorkOrders]);
 
     // Re-fetch when sorting changes (client pagination handled locally)
     useEffect(() => {

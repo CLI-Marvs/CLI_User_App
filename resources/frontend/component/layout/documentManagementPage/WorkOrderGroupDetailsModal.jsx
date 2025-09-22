@@ -26,9 +26,9 @@ const WorkOrderGroupDetailsModal = ({
     group,
     getStatusBadge,
     isLoading,
-    showChecklistTable = false, // Add this prop
-    currentUserId, // Add current user ID prop
-    onRefresh, // Add refresh callback
+    showChecklistTable = false,
+    currentUserId,
+    onRefresh,
 }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(50);
@@ -43,7 +43,7 @@ const WorkOrderGroupDetailsModal = ({
     const [progressionStatus, setProgressionStatus] = useState({
         isProgressing: false,
         message: "",
-        type: "info", // 'info', 'success', 'error'
+        type: "info",
     });
     const [isRefreshing, setIsRefreshing] = useState(false);
 
@@ -63,7 +63,7 @@ const WorkOrderGroupDetailsModal = ({
         setIsAddFilesModalOpen(true);
     };
 
-    // Milestone progression logic - moved before useMemo to avoid temporal dead zone
+    // Milestone progression logic
     const checkMilestoneProgression = (account, steps) => {
         const currentStep = steps.find((step) =>
             step.subMilestones.some(
@@ -177,131 +177,198 @@ const WorkOrderGroupDetailsModal = ({
         setFilesModalOpen(true);
     };
 
-    const { columnHeaders, tableRows, filteredRows, totalPages, steps } =
-        useMemo(() => {
-            if (!group || !group.work_orders)
-                return {
-                    columnHeaders: [],
-                    tableRows: [],
-                    filteredRows: [],
-                    totalPages: 0,
-                    steps: [],
-                };
+    const {
+        columnHeaders,
+        tableRows,
+        filteredRows,
+        totalPages,
+        steps,
+        checklistTableAccounts,
+    } = useMemo(() => {
+        if (!group || !group.work_orders)
+            return {
+                columnHeaders: [],
+                tableRows: [],
+                filteredRows: [],
+                totalPages: 0,
+                steps: [],
+                checklistTableAccounts: [],
+            };
 
-            // 1. Gather all steps (work orders) and sort by sequence
-            const steps = [...group.work_orders]
-                .sort(
-                    (a, b) =>
-                        (a.work_order_type?.sequence ?? 0) -
-                        (b.work_order_type?.sequence ?? 0)
-                )
-                .map((wo) => ({
-                    id: wo.work_order_id,
-                    stepName: wo.work_order_type?.type_name || `Step`,
-                    sequence: wo.work_order_type?.sequence ?? 0,
-                    subMilestones:
-                        group.submilestonesByType?.[wo.work_order_type_id] ||
-                        [],
-                    workOrder: wo,
-                }));
-
-            // 2. Prepare column headers for each step and its sub-milestones
-            const columnHeaders = steps.map((step) => ({
-                stepName: step.stepName,
+        // 1. Gather all steps (work orders) and sort by sequence
+        const steps = [...group.work_orders]
+            .sort(
+                (a, b) =>
+                    (a.work_order_type?.sequence ?? 0) -
+                    (b.work_order_type?.sequence ?? 0)
+            )
+            .map((wo) => ({
+                id: wo.work_order_id,
+                stepName: wo.work_order_type?.type_name || `Step`,
+                sequence: wo.work_order_type?.sequence ?? 0,
                 subMilestones:
-                    step.subMilestones.length > 0
-                        ? step.subMilestones.map((m) => m.name)
-                        : ["Progress"],
+                    group.submilestonesByType?.[wo.work_order_type_id] || [],
+                workOrder: wo,
             }));
 
-            // 3. Gather accounts and build milestone completion data
-            const accountMap = {};
+        // 2. Prepare column headers for each step and its sub-milestones
+        const columnHeaders = steps.map((step) => ({
+            stepName: step.stepName,
+            subMilestones:
+                step.subMilestones.length > 0
+                    ? step.subMilestones.map((m) => m.name)
+                    : ["Progress"],
+        }));
 
-            steps.forEach((step) => {
-                (step.workOrder.accounts || []).forEach((account) => {
-                    const accId = account.id;
-                    if (!accountMap[accId]) {
-                        accountMap[accId] = {
-                            ...account,
-                            milestoneData: {},
-                            latestStep: {
-                                sequence: step.sequence,
-                                status: step.workOrder.status,
-                                workOrder: step.workOrder,
-                            },
-                            remarks: step.workOrder.remarks || "-",
-                            currentSubMilestoneId:
-                                account.current_submilestone_id,
-                        };
-                    }
-                    // Update latest step if this step is further
-                    if (step.sequence > accountMap[accId].latestStep.sequence) {
-                        accountMap[accId].latestStep = {
+        // 3. Gather accounts and build milestone completion data
+        const accountMap = {};
+
+        steps.forEach((step) => {
+            (step.workOrder.accounts || []).forEach((account) => {
+                const accId = account.id;
+                if (!accountMap[accId]) {
+                    accountMap[accId] = {
+                        ...account,
+                        milestoneData: {},
+                        latestStep: {
                             sequence: step.sequence,
                             status: step.workOrder.status,
                             workOrder: step.workOrder,
-                        };
-                        accountMap[accId].remarks =
-                            step.workOrder.remarks || "-";
-                    }
+                        },
+                        remarks: step.workOrder.remarks || "-",
+                        currentSubMilestoneId: account.current_submilestone_id,
+                    };
+                }
+                // Update latest step if this step is further
+                if (step.sequence > accountMap[accId].latestStep.sequence) {
+                    accountMap[accId].latestStep = {
+                        sequence: step.sequence,
+                        status: step.workOrder.status,
+                        workOrder: step.workOrder,
+                    };
+                    accountMap[accId].remarks = step.workOrder.remarks || "-";
+                }
 
-                    // Mark milestones as completed or current
-                    let values;
-                    if (step.subMilestones.length > 0) {
-                        values = step.subMilestones.map((sub) => {
-                            const items = sub.checklists || [];
-                            if (!items || items.length === 0) return 0;
+                // Mark milestones as completed or current
+                let values;
+                if (step.subMilestones.length > 0) {
+                    values = step.subMilestones.map((sub) => {
+                        const items = sub.checklists || [];
+                        if (!items || items.length === 0) return 0;
 
-                            const uploadedDocs =
-                                account.uploaded_documents || [];
-                            const completedCount = items.filter((item) => {
-                                // Check if item is completed by either uploaded document OR checklist status
-                                const hasUploadedDoc = uploadedDocs.some(
-                                    (doc) => doc.file_title === item.name
-                                );
-
-                                // Check if item is completed via account_checklist_statuses
-                                const accountChecklistStatus = (
-                                    account.account_checklist_statuses || []
-                                ).find(
-                                    (status) => status.checklist_id === item.id
-                                );
-                                const hasCompletedStatus =
-                                    accountChecklistStatus &&
-                                    accountChecklistStatus.is_completed;
-
-                                return hasUploadedDoc || hasCompletedStatus;
-                            }).length;
-
-                            return Math.round(
-                                (completedCount / items.length) * 100
+                        const uploadedDocs = account.uploaded_documents || [];
+                        const completedCount = items.filter((item) => {
+                            // Check if item is completed by either uploaded document OR checklist status
+                            const hasUploadedDoc = uploadedDocs.some(
+                                (doc) => doc.file_title === item.name
                             );
-                        });
-                    } else {
-                        // For steps without submilestones, we need to determine progress differently
-                        // Since we only have current_submilestone_id, we'll set default values
-                        values = [0];
+
+                            // Check if item is completed via account_checklist_statuses
+                            const accountChecklistStatus = (
+                                account.account_checklist_statuses || []
+                            ).find((status) => status.checklist_id === item.id);
+                            const hasCompletedStatus =
+                                accountChecklistStatus &&
+                                accountChecklistStatus.is_completed;
+
+                            return hasUploadedDoc || hasCompletedStatus;
+                        }).length;
+
+                        return Math.round(
+                            (completedCount / items.length) * 100
+                        );
+                    });
+                } else {
+                    // For steps without submilestones, we need to determine progress differently
+                    // Since we only have current_submilestone_id, we'll set default values
+                    values = [0];
+                }
+                accountMap[accId].milestoneData[step.id] = values;
+            });
+        });
+
+        const tableRows = Object.values(accountMap).map((account) => {
+            // Build stepData as before
+            const stepData = steps.map((step) => {
+                return (
+                    account.milestoneData[step.id] ||
+                    (step.subMilestones.length > 0
+                        ? step.subMilestones.map(() => "")
+                        : [""])
+                );
+            });
+
+            // Build checklistInfos: array of info for each submilestone cell (in step order)
+            const checklistInfos = [];
+            steps.forEach((step) => {
+                step.subMilestones.forEach((sub) => {
+                    const checklists = sub.checklists || [];
+                    const uploadedDocs = account.uploaded_documents || [];
+                    let currentChecklistItem = null;
+                    let completedCount = 0;
+                    const completedChecklists = [];
+                    const pendingChecklists = [];
+                    for (const checklist of checklists) {
+                        const hasUploadedDoc = uploadedDocs.some(
+                            (doc) => doc.file_title === checklist.name
+                        );
+                        const accountChecklistStatus = (
+                            account.account_checklist_statuses || []
+                        ).find(
+                            (status) => status.checklist_id === checklist.id
+                        );
+                        const hasCompletedStatus =
+                            accountChecklistStatus &&
+                            accountChecklistStatus.is_completed;
+                        if (hasUploadedDoc || hasCompletedStatus) {
+                            completedCount++;
+                            completedChecklists.push({
+                                ...checklist,
+                                completedVia: hasUploadedDoc
+                                    ? "document"
+                                    : "status",
+                                completedDate: hasUploadedDoc
+                                    ? uploadedDocs.find(
+                                          (doc) =>
+                                              doc.file_title === checklist.name
+                                      )?.created_at
+                                    : accountChecklistStatus?.updated_at,
+                            });
+                        } else {
+                            pendingChecklists.push(checklist);
+                            if (!currentChecklistItem) {
+                                currentChecklistItem = checklist;
+                            }
+                        }
                     }
-                    accountMap[accId].milestoneData[step.id] = values;
+                    checklistInfos.push({
+                        stepName: step.stepName,
+                        milestoneName: sub.name,
+                        totalChecklists: checklists.length,
+                        completedCount: completedCount,
+                        currentChecklistItem: currentChecklistItem,
+                        completedChecklists: completedChecklists,
+                        pendingChecklists: pendingChecklists,
+                        progressPercentage:
+                            checklists.length > 0
+                                ? Math.round(
+                                      (completedCount / checklists.length) * 100
+                                  )
+                                : 0,
+                        subMilestoneId: sub.id,
+                    });
                 });
             });
 
-            const tableRows = Object.values(accountMap).map((account) => {
-                // Build stepData as before
-                const stepData = steps.map((step) => {
-                    return (
-                        account.milestoneData[step.id] ||
-                        (step.subMilestones.length > 0
-                            ? step.subMilestones.map(() => "")
-                            : [""])
+            // Find current submilestone information
+            let currentChecklistInfo = null;
+            if (account.currentSubMilestoneId) {
+                for (const step of steps) {
+                    const currentSubmilestone = step.subMilestones.find(
+                        (sub) => sub.id === account.currentSubMilestoneId
                     );
-                });
-
-                // Build checklistInfos: array of info for each submilestone cell (in step order)
-                const checklistInfos = [];
-                steps.forEach((step) => {
-                    step.subMilestones.forEach((sub) => {
-                        const checklists = sub.checklists || [];
+                    if (currentSubmilestone) {
+                        const checklists = currentSubmilestone.checklists || [];
                         const uploadedDocs = account.uploaded_documents || [];
                         let currentChecklistItem = null;
                         let completedCount = 0;
@@ -341,9 +408,9 @@ const WorkOrderGroupDetailsModal = ({
                                 }
                             }
                         }
-                        checklistInfos.push({
+                        currentChecklistInfo = {
                             stepName: step.stepName,
-                            milestoneName: sub.name,
+                            milestoneName: currentSubmilestone.name,
                             totalChecklists: checklists.length,
                             completedCount: completedCount,
                             currentChecklistItem: currentChecklistItem,
@@ -356,165 +423,113 @@ const WorkOrderGroupDetailsModal = ({
                                               100
                                       )
                                     : 0,
-                            subMilestoneId: sub.id,
-                        });
-                    });
-                });
-
-                // Find current submilestone information
-                let currentChecklistInfo = null;
-                if (account.currentSubMilestoneId) {
-                    for (const step of steps) {
-                        const currentSubmilestone = step.subMilestones.find(
-                            (sub) => sub.id === account.currentSubMilestoneId
-                        );
-                        if (currentSubmilestone) {
-                            const checklists =
-                                currentSubmilestone.checklists || [];
-                            const uploadedDocs =
-                                account.uploaded_documents || [];
-                            let currentChecklistItem = null;
-                            let completedCount = 0;
-                            const completedChecklists = [];
-                            const pendingChecklists = [];
-                            for (const checklist of checklists) {
-                                const hasUploadedDoc = uploadedDocs.some(
-                                    (doc) => doc.file_title === checklist.name
-                                );
-                                const accountChecklistStatus = (
-                                    account.account_checklist_statuses || []
-                                ).find(
-                                    (status) =>
-                                        status.checklist_id === checklist.id
-                                );
-                                const hasCompletedStatus =
-                                    accountChecklistStatus &&
-                                    accountChecklistStatus.is_completed;
-                                if (hasUploadedDoc || hasCompletedStatus) {
-                                    completedCount++;
-                                    completedChecklists.push({
-                                        ...checklist,
-                                        completedVia: hasUploadedDoc
-                                            ? "document"
-                                            : "status",
-                                        completedDate: hasUploadedDoc
-                                            ? uploadedDocs.find(
-                                                  (doc) =>
-                                                      doc.file_title ===
-                                                      checklist.name
-                                              )?.created_at
-                                            : accountChecklistStatus?.updated_at,
-                                    });
-                                } else {
-                                    pendingChecklists.push(checklist);
-                                    if (!currentChecklistItem) {
-                                        currentChecklistItem = checklist;
-                                    }
-                                }
-                            }
-                            currentChecklistInfo = {
-                                stepName: step.stepName,
-                                milestoneName: currentSubmilestone.name,
-                                totalChecklists: checklists.length,
-                                completedCount: completedCount,
-                                currentChecklistItem: currentChecklistItem,
-                                completedChecklists: completedChecklists,
-                                pendingChecklists: pendingChecklists,
-                                progressPercentage:
-                                    checklists.length > 0
-                                        ? Math.round(
-                                              (completedCount /
-                                                  checklists.length) *
-                                                  100
-                                          )
-                                        : 0,
-                            };
-                            break;
-                        }
+                        };
+                        break;
                     }
                 }
+            }
 
-                // Check for milestone progression after setting currentChecklistInfo
+            // Check for milestone progression after setting currentChecklistInfo
+            if (
+                currentChecklistInfo &&
+                currentChecklistInfo.progressPercentage === 100
+            ) {
+                const nextSubmilestoneId = checkMilestoneProgression(
+                    account,
+                    steps
+                );
                 if (
-                    currentChecklistInfo &&
-                    currentChecklistInfo.progressPercentage === 100
+                    nextSubmilestoneId &&
+                    nextSubmilestoneId !== account.currentSubMilestoneId
                 ) {
-                    const nextSubmilestoneId = checkMilestoneProgression(
-                        account,
-                        steps
-                    );
-                    if (
-                        nextSubmilestoneId &&
-                        nextSubmilestoneId !== account.currentSubMilestoneId
-                    ) {
-                        updateMilestoneProgression(
-                            account.id,
-                            nextSubmilestoneId
-                        );
-                    }
+                    updateMilestoneProgression(account.id, nextSubmilestoneId);
                 }
+            }
 
-                // Determine the overall status based on whether all checklists for the account are complete.
-                const overallStatus = account.checklist_status
-                    ? "Complete"
-                    : "In Progress";
+            // Determine the overall status based on whether all checklists for the account are complete.
+            const overallStatus = account.checklist_status
+                ? "Complete"
+                : "In Progress";
 
-                const notesData = {
-                    accountId: account.id,
-                    workOrder: account.latestStep.workOrder,
-                    workOrderType: "All Steps",
-                    addNoteLogType:
-                        account.latestStep.workOrder.work_order_type?.type_name,
-                    assignee: account.latestStep.workOrder.assignee,
-                    currentUser: group.currentUser,
-                    workOrderGroupId: group.id,
-                };
-
-                return {
-                    key: account.id,
-                    accountName: account.account_name,
-                    property_name: account.property_name,
-                    stepData,
-                    status: overallStatus,
-                    remarks: account.remarks,
-                    notesData: notesData,
-                    currentSubMilestoneId: account.current_submilestone_id,
-                    currentChecklistInfo: currentChecklistInfo,
-                    uploaded_documents: account.uploaded_documents || [],
-                    checklistInfos,
-                };
-            });
-
-            // Filter rows based on search term and status
-            const filteredRows = tableRows.filter((row) => {
-                const searchMatch =
-                    searchTerm === "" ||
-                    row.accountName
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
-                    row.status
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase()) ||
-                    row.remarks
-                        .toLowerCase()
-                        .includes(searchTerm.toLowerCase());
-
-                const statusMatch =
-                    statusFilter === "All" || row.status === statusFilter;
-
-                return searchMatch && statusMatch;
-            });
-
-            const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+            const notesData = {
+                accountId: account.id,
+                workOrder: account.latestStep.workOrder,
+                workOrderType: "All Steps",
+                addNoteLogType:
+                    account.latestStep.workOrder.work_order_type?.type_name,
+                assignee: account.latestStep.workOrder.assignee,
+                currentUser: group.currentUser,
+                workOrderGroupId: group.id,
+            };
 
             return {
-                columnHeaders,
-                tableRows,
-                filteredRows,
-                totalPages,
-                steps,
+                key: account.id,
+                accountName: account.account_name,
+                property_name: account.property_name,
+                stepData,
+                status: overallStatus,
+                remarks: account.remarks,
+                notesData: notesData,
+                currentSubMilestoneId: account.current_submilestone_id,
+                currentChecklistInfo: currentChecklistInfo,
+                uploaded_documents: account.uploaded_documents || [],
+                checklistInfos,
             };
-        }, [group, handleAddFiles, searchTerm, itemsPerPage, statusFilter]);
+        });
+
+        // Filter rows based on search term and status
+        const filteredRows = tableRows.filter((row) => {
+            const searchMatch =
+                searchTerm === "" ||
+                row.accountName
+                    .toLowerCase()
+                    .includes(searchTerm.toLowerCase()) ||
+                row.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                row.remarks.toLowerCase().includes(searchTerm.toLowerCase());
+
+            const statusMatch =
+                statusFilter === "All" || row.status === statusFilter;
+
+            return searchMatch && statusMatch;
+        });
+
+        const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+
+        // Calculate ChecklistTable accounts for pagination
+        const checklistTableAccounts = (() => {
+            const allAccounts = Object.values(
+                steps.reduce((acc, step) => {
+                    (step.workOrder.accounts || []).forEach((account) => {
+                        acc[account.id] = account;
+                    });
+                    return acc;
+                }, {})
+            );
+            // Filter using the same logic as filteredRows
+            return allAccounts.filter((account) => {
+                const searchMatch =
+                    searchTerm === "" ||
+                    (account.account_name &&
+                        account.account_name
+                            .toLowerCase()
+                            .includes(searchTerm.toLowerCase())) ||
+                    (account.remarks &&
+                        account.remarks
+                            .toLowerCase()
+                            .includes(searchTerm.toLowerCase()));
+                return searchMatch;
+            });
+        })();
+
+        return {
+            columnHeaders,
+            tableRows,
+            filteredRows,
+            totalPages,
+            steps,
+            checklistTableAccounts,
+        };
+    }, [group, searchTerm, itemsPerPage, statusFilter]);
 
     const paginatedData = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -552,7 +567,6 @@ const WorkOrderGroupDetailsModal = ({
 
     const handleMilestoneProgression = async (accountId) => {
         try {
-            // Find the account in the current data
             const account = paginatedData.find((row) => row.key === accountId);
             if (account) {
                 const nextSubmilestoneId = checkMilestoneProgression(
@@ -568,11 +582,9 @@ const WorkOrderGroupDetailsModal = ({
             }
         } catch (error) {
             console.error("Error in milestone progression:", error);
-            // Error handling is done through progressionStatus state
         }
     };
 
-    // API function to update milestone progression
     const updateMilestoneProgression = async (accountId, newSubmilestoneId) => {
         try {
             setProgressionStatus({
@@ -588,7 +600,6 @@ const WorkOrderGroupDetailsModal = ({
                 }
             );
 
-            // Refresh data after update
             if (onRefresh) {
                 await onRefresh();
             }
@@ -599,7 +610,6 @@ const WorkOrderGroupDetailsModal = ({
                 type: "success",
             });
 
-            // Check if all accounts are now completed after this update
             setTimeout(async () => {
                 await checkGroupCompletion();
             }, 1000);
@@ -633,7 +643,6 @@ const WorkOrderGroupDetailsModal = ({
         }
     };
 
-    // Handle refresh button click
     const handleRefresh = async () => {
         if (isRefreshing || !onRefresh) return;
 
@@ -661,7 +670,6 @@ const WorkOrderGroupDetailsModal = ({
         }
     };
 
-    // Check if all accounts in the group are completed and update group status
     const checkGroupCompletion = async () => {
         if (!group?.id) return;
 
@@ -681,7 +689,6 @@ const WorkOrderGroupDetailsModal = ({
                     type: "success",
                 });
 
-                // Refresh the data to show updated status
                 if (onRefresh) {
                     await onRefresh();
                 }
@@ -765,7 +772,8 @@ const WorkOrderGroupDetailsModal = ({
                 onStatusFilterChange={handleStatusFilterChange}
                 onRefresh={handleRefresh}
                 isRefreshing={isRefreshing}
-                hideItemsPerPage={showChecklistTable}
+                hideItemsPerPage={false}
+                hideStatusFilter={showChecklistTable}
             />
 
             {/* Milestone Progression Notification */}
@@ -792,7 +800,7 @@ const WorkOrderGroupDetailsModal = ({
 
             {/* Table Content */}
             <DialogBody
-                className={`p-0 flex-1 ${
+                className={`p-0 flex-1 flex flex-col min-h-0 ${
                     showChecklistTable ? "overflow-hidden" : "overflow-y-auto"
                 }`}
             >
@@ -825,47 +833,16 @@ const WorkOrderGroupDetailsModal = ({
                         </div>
                     </div>
                 ) : showChecklistTable ? (
-                    <div className="h-full">
+                    <>
                         <ChecklistTable
-                            steps={steps}
-                            accounts={(() => {
-                                // Gather all original account objects
-                                const allAccounts = Object.values(
-                                    steps.reduce((acc, step) => {
-                                        (step.workOrder.accounts || []).forEach(
-                                            (account) => {
-                                                acc[account.id] = account;
-                                            }
-                                        );
-                                        return acc;
-                                    }, {})
-                                );
-                                // Filter using the same logic as filteredRows
-                                return allAccounts.filter((account) => {
-                                    const searchMatch =
-                                        searchTerm === "" ||
-                                        (account.account_name &&
-                                            account.account_name
-                                                .toLowerCase()
-                                                .includes(
-                                                    searchTerm.toLowerCase()
-                                                )) ||
-                                        (account.remarks &&
-                                            account.remarks
-                                                .toLowerCase()
-                                                .includes(
-                                                    searchTerm.toLowerCase()
-                                                ));
-                                    // You may want to add more fields to search if needed
-                                    // For status, you may need to compute status as in filteredRows
-                                    // For now, skip status filter for simplicity
-                                    return searchMatch;
-                                });
-                            })()}
+                            steps={steps || []}
+                            accounts={checklistTableAccounts || []}
                             onAddFiles={handleAddFiles}
                             handleOpenNotesModal={handleOpenNotesModal}
                             currentUserId={currentUserId}
                             onRefresh={onRefresh}
+                            currentPage={currentPage}
+                            itemsPerPage={itemsPerPage}
                         />
 
                         {isAddFilesModalOpen && (
@@ -878,7 +855,7 @@ const WorkOrderGroupDetailsModal = ({
                                 onRefresh={onRefresh}
                             />
                         )}
-                    </div>
+                    </>
                 ) : paginatedData.length > 0 ? (
                     <div className="h-full">
                         <table className="w-full text-left border-separate border-spacing-0 bg-white">
@@ -887,10 +864,7 @@ const WorkOrderGroupDetailsModal = ({
                                 <tr className="bg-custom-bluegreen text-white">
                                     <th
                                         className="px-3 py-2 font-medium sticky left-0 bg-custom-bluegreen z-50 border-r border-white min-w-[180px]"
-                                        style={{
-                                            backgroundColor:
-                                                "var(--tw-bg-opacity, 1)",
-                                        }} // ensure sticky bg
+                                        style={{ backgroundColor: "#175D5F" }}
                                         rowSpan={3}
                                     >
                                         <div className="flex items-center gap-2">
@@ -1090,18 +1064,6 @@ const WorkOrderGroupDetailsModal = ({
                                 />
                             </tbody>
                         </table>
-
-                        {/* Checklist Table - Show/Hide based on prop */}
-                        {showChecklistTable && (
-                            <div className="mt-4">
-                                <ChecklistTable
-                                    workOrders={group.work_orders}
-                                    onAddFiles={handleAddFiles}
-                                    getStatusBadge={getStatusBadge}
-                                    currentUserId={currentUserId}
-                                />
-                            </div>
-                        )}
                     </div>
                 ) : (
                     <div className="flex items-center justify-center h-full bg-gray-50">
@@ -1136,143 +1098,142 @@ const WorkOrderGroupDetailsModal = ({
 
             {/* Pagination Footer */}
             <DialogFooter className="bg-white border-t border-gray-200 p-3">
-                {showChecklistTable ? (
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
-                        <Typography variant="small" className="text-gray-600">
-                            {(() => {
-                                // Calculate ChecklistTable filtered accounts count
-                                const allAccounts = Object.values(
-                                    steps.reduce((acc, step) => {
-                                        (step.workOrder.accounts || []).forEach(
-                                            (account) => {
-                                                acc[account.id] = account;
-                                            }
-                                        );
-                                        return acc;
-                                    }, {})
-                                );
-                                const filteredChecklistAccounts =
-                                    allAccounts.filter((account) => {
-                                        const searchMatch =
-                                            searchTerm === "" ||
-                                            (account.account_name &&
-                                                account.account_name
-                                                    .toLowerCase()
-                                                    .includes(
-                                                        searchTerm.toLowerCase()
-                                                    )) ||
-                                            (account.remarks &&
-                                                account.remarks
-                                                    .toLowerCase()
-                                                    .includes(
-                                                        searchTerm.toLowerCase()
-                                                    ));
-                                        return searchMatch;
-                                    });
-                                return `Showing ${filteredChecklistAccounts.length} accounts`;
-                            })()}
-                        </Typography>
-                        <div className="text-xs text-gray-500">
-                            Checklist view shows all accounts without pagination
-                        </div>
-                    </div>
-                ) : (
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
-                        <Typography variant="small" className="text-gray-600">
-                            Page {currentPage} of {totalPages} •{" "}
-                            {filteredRows.length} entries
-                        </Typography>
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
+                    <Typography variant="small" className="text-gray-600">
+                        Page {currentPage} of{" "}
+                        {showChecklistTable
+                            ? Math.ceil(
+                                  checklistTableAccounts.length / itemsPerPage
+                              )
+                            : totalPages}{" "}
+                        •{" "}
+                        {showChecklistTable
+                            ? checklistTableAccounts.length
+                            : filteredRows.length}{" "}
+                        entries
+                    </Typography>
 
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="outlined"
-                                size="sm"
-                                onClick={() => handlePageChange(1)}
-                                disabled={currentPage === 1}
-                                className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
-                            >
-                                First
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                size="sm"
-                                onClick={() =>
-                                    handlePageChange(currentPage - 1)
-                                }
-                                disabled={currentPage === 1}
-                                className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
-                            >
-                                ‹
-                            </Button>
-
-                            <div className="flex items-center gap-1">
-                                {(() => {
-                                    let start = Math.max(1, currentPage - 2);
-                                    let end = Math.min(
-                                        totalPages,
-                                        currentPage + 2
-                                    );
-                                    if (end - start < 4) {
-                                        if (start === 1) {
-                                            end = Math.min(
-                                                totalPages,
-                                                start + 4
-                                            );
-                                        } else if (end === totalPages) {
-                                            start = Math.max(1, end - 4);
+                    <div className="flex items-center gap-1">
+                        {(() => {
+                            const currentTotalPages = showChecklistTable
+                                ? Math.ceil(
+                                      checklistTableAccounts.length /
+                                          itemsPerPage
+                                  )
+                                : totalPages;
+                            return (
+                                <>
+                                    <Button
+                                        variant="outlined"
+                                        size="sm"
+                                        onClick={() => handlePageChange(1)}
+                                        disabled={currentPage === 1}
+                                        className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
+                                    >
+                                        First
+                                    </Button>
+                                    <Button
+                                        variant="outlined"
+                                        size="sm"
+                                        onClick={() =>
+                                            handlePageChange(currentPage - 1)
                                         }
-                                    }
-                                    const pageNumbers = [];
-                                    for (let i = start; i <= end; i++) {
-                                        pageNumbers.push(i);
-                                    }
-                                    return pageNumbers.map((pageNum) => (
-                                        <Button
-                                            key={pageNum}
-                                            variant={
-                                                currentPage === pageNum
-                                                    ? "filled"
-                                                    : "outlined"
-                                            }
-                                            size="sm"
-                                            onClick={() =>
-                                                handlePageChange(pageNum)
-                                            }
-                                            className={
-                                                currentPage === pageNum
-                                                    ? "bg-custom-lightgreen text-white px-2 py-1 text-xs min-w-[28px]"
-                                                    : "border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs min-w-[28px]"
-                                            }
-                                        >
-                                            {pageNum}
-                                        </Button>
-                                    ));
-                                })()}
-                            </div>
+                                        disabled={currentPage === 1}
+                                        className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
+                                    >
+                                        ‹
+                                    </Button>
 
-                            <Button
-                                variant="outlined"
-                                size="sm"
-                                onClick={() =>
-                                    handlePageChange(currentPage + 1)
-                                }
-                                disabled={currentPage === totalPages}
-                                className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
-                            >
-                                ›
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                size="sm"
-                                onClick={() => handlePageChange(totalPages)}
-                                disabled={currentPage === totalPages}
-                                className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
-                            >
-                                Last
-                            </Button>
-                        </div>
+                                    <div className="flex items-center gap-1">
+                                        {(() => {
+                                            let start = Math.max(
+                                                1,
+                                                currentPage - 2
+                                            );
+                                            let end = Math.min(
+                                                currentTotalPages,
+                                                currentPage + 2
+                                            );
+                                            if (end - start < 4) {
+                                                if (start === 1) {
+                                                    end = Math.min(
+                                                        currentTotalPages,
+                                                        start + 4
+                                                    );
+                                                } else if (
+                                                    end === currentTotalPages
+                                                ) {
+                                                    start = Math.max(
+                                                        1,
+                                                        end - 4
+                                                    );
+                                                }
+                                            }
+                                            const pageNumbers = [];
+                                            for (let i = start; i <= end; i++) {
+                                                pageNumbers.push(i);
+                                            }
+                                            return pageNumbers.map(
+                                                (pageNum) => (
+                                                    <Button
+                                                        key={pageNum}
+                                                        variant={
+                                                            currentPage ===
+                                                            pageNum
+                                                                ? "filled"
+                                                                : "outlined"
+                                                        }
+                                                        size="sm"
+                                                        onClick={() =>
+                                                            handlePageChange(
+                                                                pageNum
+                                                            )
+                                                        }
+                                                        className={
+                                                            currentPage ===
+                                                            pageNum
+                                                                ? "bg-custom-lightgreen text-white px-2 py-1 text-xs min-w-[28px]"
+                                                                : "border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs min-w-[28px]"
+                                                        }
+                                                    >
+                                                        {pageNum}
+                                                    </Button>
+                                                )
+                                            );
+                                        })()}
+                                    </div>
+
+                                    <Button
+                                        variant="outlined"
+                                        size="sm"
+                                        onClick={() =>
+                                            handlePageChange(currentPage + 1)
+                                        }
+                                        disabled={
+                                            currentPage === currentTotalPages
+                                        }
+                                        className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
+                                    >
+                                        ›
+                                    </Button>
+                                    <Button
+                                        variant="outlined"
+                                        size="sm"
+                                        onClick={() =>
+                                            handlePageChange(currentTotalPages)
+                                        }
+                                        disabled={
+                                            currentPage === currentTotalPages
+                                        }
+                                        className="border-gray-300 text-gray-700 hover:bg-gray-50 px-2 py-1 text-xs"
+                                    >
+                                        Last
+                                    </Button>
+                                </>
+                            );
+                        })()}
                     </div>
-                )}
+                </div>
             </DialogFooter>
 
             {isNotesModalOpen && selectedAccountForNotes && (

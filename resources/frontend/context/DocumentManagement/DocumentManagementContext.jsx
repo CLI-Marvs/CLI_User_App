@@ -400,6 +400,8 @@ export const DocumentManagementProvider = ({ children }) => {
     const [workOrderTypes, setWorkOrderTypes] = useState([]);
     const [workOrders, setWorkOrders] = useState([]);
     const [workOrderGroups, setWorkOrderGroups] = useState([]);
+    const [workOrderGroupsLastFetched, setWorkOrderGroupsLastFetched] =
+        useState(null);
     const [workOrdersLoading, setWorkOrdersLoading] = useState(true);
     const [workOrdersError, setWorkOrdersError] = useState(null);
     const [workOrdersCurrentPage, setWorkOrdersCurrentPage] = useState(1);
@@ -473,13 +475,27 @@ export const DocumentManagementProvider = ({ children }) => {
 
     // --- Additional Work Order/Account Fetchers ---
     // Paginated work order fetcher for advanced use cases
+    // Only fetch if not present, or force=true, or data is stale (older than 10 min)
     const fetchWorkOrdersPaginated = useCallback(
         async (
             page = workOrdersCurrentPage,
             perPage = workOrdersPerPage,
             sortBy = workOrdersSortBy,
-            sortOrder = workOrdersSortOrder
+            sortOrder = workOrdersSortOrder,
+            force = false
         ) => {
+            const now = Date.now();
+            const tenMinutes = 10 * 60 * 1000;
+            if (
+                !force &&
+                workOrderGroups &&
+                workOrderGroups.length > 0 &&
+                workOrderGroupsLastFetched &&
+                now - workOrderGroupsLastFetched < tenMinutes
+            ) {
+                setWorkOrdersLoading(false);
+                return;
+            }
             setWorkOrdersLoading(true);
             setWorkOrdersError(null);
             try {
@@ -510,6 +526,7 @@ export const DocumentManagementProvider = ({ children }) => {
                     }, {})
                 );
                 setWorkOrderGroups(grouped);
+                setWorkOrderGroupsLastFetched(now);
                 setWorkOrdersTotal(response.data.total);
                 setWorkOrdersLoading(false);
             } catch (err) {
@@ -520,12 +537,31 @@ export const DocumentManagementProvider = ({ children }) => {
             }
         },
         [
+            workOrderGroups,
+            workOrderGroupsLastFetched,
             workOrdersCurrentPage,
             workOrdersPerPage,
             workOrdersSortBy,
             workOrdersSortOrder,
         ]
     );
+
+    // Manual force refresh function
+    const forceRefreshWorkOrders = useCallback(async () => {
+        await fetchWorkOrdersPaginated(
+            workOrdersCurrentPage,
+            workOrdersPerPage,
+            workOrdersSortBy,
+            workOrdersSortOrder,
+            true
+        );
+    }, [
+        fetchWorkOrdersPaginated,
+        workOrdersCurrentPage,
+        workOrdersPerPage,
+        workOrdersSortBy,
+        workOrdersSortOrder,
+    ]);
 
     return (
         <DocumentManagementContext.Provider
@@ -593,6 +629,8 @@ export const DocumentManagementProvider = ({ children }) => {
                 fetchAccounts,
                 getAssignee,
                 fetchWorkOrdersPaginated,
+                forceRefreshWorkOrders,
+                workOrderGroupsLastFetched,
                 // Work Order state
                 assignee,
                 setAssignee,
