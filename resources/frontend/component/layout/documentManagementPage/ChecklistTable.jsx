@@ -592,10 +592,11 @@ const ChecklistTable = ({
                                                     const dateColumnBgColor = `bg-${baseColor}-50`;
                                                     const remarksColumnBgColor = `bg-${baseColor}-100`;
 
-                                                    // Only show action buttons if this is the account's current step
+                                                    // For STEP 1 (first step), always show action buttons; for others, only current step
                                                     const showActionButtons =
+                                                        stepIdx === 0 ||
                                                         stepIdx ===
-                                                        currentStepIndex;
+                                                            currentStepIndex;
 
                                                     return [
                                                         <td
