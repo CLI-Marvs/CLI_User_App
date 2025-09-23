@@ -394,20 +394,34 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             return;
         }
 
-        // Assign each account to a project assignee in ascending order (round-robin)
-        const accountAssignments = selectedAccounts
-            .map((account, idx) => {
-                const assignee =
-                    allProjectAssignees[idx % allProjectAssignees.length];
-                if (!assignee || !assignee.id || !account || !account.id) {
-                    return null; // Mark invalid assignments
+        // Assign each account to all unique employees assigned in any milestone (support multiple assignees per account)
+        const accountAssignments = selectedAccounts.map((account) => {
+            const employeeIds = [];
+            projectMilestoneStructure.forEach((step) => {
+                if (step.milestones && Array.isArray(step.milestones)) {
+                    step.milestones.forEach((milestone) => {
+                        if (
+                            milestone.assignees &&
+                            Array.isArray(milestone.assignees)
+                        ) {
+                            milestone.assignees.forEach((assignee) => {
+                                if (
+                                    assignee &&
+                                    assignee.id &&
+                                    !employeeIds.includes(assignee.id)
+                                ) {
+                                    employeeIds.push(assignee.id);
+                                }
+                            });
+                        }
+                    });
                 }
-                return {
-                    account_id: account.id,
-                    employee_id: assignee.id,
-                };
-            })
-            .filter((assignment) => assignment !== null); // Remove invalid assignments
+            });
+            return {
+                account_id: account.id,
+                employee_ids: employeeIds,
+            };
+        });
 
         if (accountAssignments.length !== selectedAccounts.length) {
             alert(
@@ -416,7 +430,14 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             return;
         }
 
-        if (accountAssignments.some((a) => !a.employee_id || !a.account_id)) {
+        if (
+            accountAssignments.some(
+                (a) =>
+                    !a.employee_ids ||
+                    !a.account_id ||
+                    a.employee_ids.length === 0
+            )
+        ) {
             alert("One or more accounts could not be assigned to an employee.");
             return;
         }
