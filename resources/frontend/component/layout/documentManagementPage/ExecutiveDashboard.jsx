@@ -693,16 +693,7 @@ const ExecutiveDashboard = () => {
                                             STEP
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Accounts
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Status
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Assignees
-                                        </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Priority
                                         </th>
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Days Open
@@ -717,15 +708,12 @@ const ExecutiveDashboard = () => {
                                                 className="hover:bg-gray-50 transition-colors"
                                             >
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                        {row.workOrderId}
+                                                    {row.workOrderId}
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap">
                                                     <span className="px-2 py-1 text-xs font-medium border border-gray-300 rounded-full">
                                                         {row.type}
                                                     </span>
-                                                </td>
-                                                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-700 max-w-xs truncate">
-                                                    {row.account}
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap">
                                                     <span
@@ -743,41 +731,6 @@ const ExecutiveDashboard = () => {
                                                         }`}
                                                     >
                                                         {row.status}
-                                                    </span>
-                                                </td>
-                                                <td className="px-4 py-4 whitespace-nowrap">
-                                                    <div className="flex items-center">
-                                                        <div className="flex-shrink-0 w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center text-xs text-gray-700">
-                                                            {row.assignee
-                                                                .split(",")[0]
-                                                                .split(" ")
-                                                                .map(
-                                                                    (n) => n[0]
-                                                                )
-                                                                .join("")
-                                                                .slice(0, 2)}
-                                                        </div>
-                                                        <div className="ml-2 text-sm text-gray-700 truncate max-w-xs">
-                                                            {row.assignee}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-4 whitespace-nowrap">
-                                                    <span
-                                                        className={`px-2 py-1 text-xs font-semibold text-white rounded-full ${
-                                                            row.priority ===
-                                                            "Critical"
-                                                                ? "bg-red-500"
-                                                                : row.priority ===
-                                                                  "High"
-                                                                ? "bg-yellow-500"
-                                                                : row.priority ===
-                                                                  "Medium"
-                                                                ? "bg-cyan-500"
-                                                                : "bg-green-500"
-                                                        }`}
-                                                    >
-                                                        {row.priority}
                                                     </span>
                                                 </td>
                                                 <td className="px-4 py-4 whitespace-nowrap">
@@ -856,7 +809,6 @@ const ExecutiveDashboard = () => {
                                         <div className="flex items-start">
                                             <div className="flex-shrink-0 mt-1">
                                                 {alert.type === "success" ? (
-                                                    
                                                     <CheckCircleSolid className="w-5 h-5 text-green-500" />
                                                 ) : (
                                                     <ExclamationTriangleSolid

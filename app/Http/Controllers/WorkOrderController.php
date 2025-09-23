@@ -299,7 +299,8 @@ class WorkOrderController extends Controller
             'work_order_deadline' => 'required|date',
             'account_assignments' => 'required|array',
             'account_assignments.*.account_id' => 'required|integer|exists:taken_out_accounts,id',
-            'account_assignments.*.employee_id' => 'required|integer|exists:employee,id',
+            'account_assignments.*.employee_ids' => 'required|array|min:1',
+            'account_assignments.*.employee_ids.*' => 'integer|exists:employee,id',
         ]);
         Log::info('Validated data:', $validatedData);
 
@@ -345,16 +346,18 @@ class WorkOrderController extends Controller
             $account->save();
         }
 
-        // Insert account-assignee mapping
+        // Insert account-assignee mapping (support multiple employees per account)
         if (!empty($validatedData['account_assignments'])) {
             foreach ($validatedData['account_assignments'] as $assignment) {
-                \DB::table('work_order_account_assignee')->insert([
-                    'work_order_id' => $workOrder->work_order_id,
-                    'account_id' => $assignment['account_id'],
-                    'employee_id' => $assignment['employee_id'],
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]);
+                foreach ($assignment['employee_ids'] as $employeeId) {
+                    \DB::table('work_order_account_assignee')->insert([
+                        'work_order_id' => $workOrder->work_order_id,
+                        'account_id' => $assignment['account_id'],
+                        'employee_id' => $employeeId,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
             }
         }
 
