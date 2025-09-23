@@ -57,7 +57,8 @@ const DocumentManagementSidebar = () => {
         "aabayocboc@cebulandmasters.com",
         "rttayong@cebulandmasters.com",
         "dataengineer@cebulandmasters.com",
-        "qcmahipos@cebulandmasters.com"
+        "qcmahipos@cebulandmasters.com",
+        "rnabala@cebulandmasters.com"
     ];
     const userEmail = (user?.email || user?.employee_email || "")
         .toLowerCase()
