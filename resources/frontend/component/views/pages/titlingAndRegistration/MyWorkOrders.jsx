@@ -17,7 +17,7 @@ import _ from "lodash";
 import AddFilesModal from "../../../layout/documentManagementPage/AddFilesModal";
 import WorkOrderGroupDetailsModal from "../../../layout/documentManagementPage/WorkOrderGroupDetailsModal";
 import { useStateContext } from "../../../../context/contextprovider";
-import { useDocumentManagementContext } from "../../../../context/DocumentManagement/DocumentManagementContext";
+import { useMyWorkOrdersContext } from "../../../../context/MyWorkOrdersContext";
 
 const RefreshIcon = ({ onClick, isRefreshing }) => (
     <svg
@@ -38,37 +38,40 @@ const RefreshIcon = ({ onClick, isRefreshing }) => (
     </svg>
 );
 
-const MyWorkOrders = () => {
+import { MyWorkOrdersProvider } from "../../../../context/MyWorkOrdersContext";
+
+const MyWorkOrdersContent = () => {
     const [isRefreshing, setIsRefreshing] = useState(false);
 
-    // Manual refresh handler for work order groups
-    const { forceRefreshWorkOrders, workOrderGroupsLastFetched } =
-        useDocumentManagementContext();
-    const handleRefresh = async () => {
-        setIsRefreshing(true);
-        await forceRefreshWorkOrders();
-        setIsRefreshing(false);
-    };
-    const { user } = useStateContext(); // Get current user from context
-    // Work order state from context
+    // Use new MyWorkOrdersContext for all work order state and fetchers
     const {
         workOrderGroups,
         setWorkOrderGroups,
         workOrdersLoading,
+        setWorkOrdersLoading,
         workOrdersError,
+        setWorkOrdersError,
         workOrdersCurrentPage,
         setWorkOrdersCurrentPage,
         workOrdersPerPage,
         setWorkOrdersPerPage,
         workOrdersTotal,
+        setWorkOrdersTotal,
         workOrdersSortBy,
         setWorkOrdersSortBy,
         workOrdersSortOrder,
         setWorkOrdersSortOrder,
-        fetchWorkOrders,
-        fetchWorkOrderGroups, // retained in context but no longer used here for My Work Orders visibility
-        fetchWorkOrdersPaginated,
-    } = useDocumentManagementContext();
+        fetchWorkOrderGroups,
+        forceRefreshWorkOrders,
+        workOrderGroupsLastFetched,
+    } = useMyWorkOrdersContext();
+    const handleRefresh = async () => {
+        setIsRefreshing(true);
+        setWorkOrderGroups([]); // Clear old data to prevent flicker/overlap
+        await forceRefreshWorkOrders();
+        setIsRefreshing(false);
+    };
+    const { user } = useStateContext(); // Get current user from context
     const [statusFilter, setStatusFilter] = useState("");
     const [viewMode, setViewMode] = useState("table");
     const [isProcessModalOpen, setIsProcessModalOpen] = useState(false);
@@ -82,8 +85,7 @@ const MyWorkOrders = () => {
         useState(false);
     const [groupDetailsData, setGroupDetailsData] = useState(null);
     const [isGroupDetailsLoading, setIsGroupDetailsLoading] = useState(null);
-    // Local gate to avoid flicker of stale global work orders
-    const [hasLoadedMyWorkOrders, setHasLoadedMyWorkOrders] = useState(false);
+    // No local hasLoadedMyWorkOrders; rely on context state
 
     // Filter states
     const [workOrderNoFilter, setWorkOrderNoFilter] = useState("");
@@ -93,43 +95,23 @@ const MyWorkOrders = () => {
 
     // Only fetch if not already loaded or stale (10 min), otherwise use cached
     useEffect(() => {
-        let isMounted = true;
-        // Only fetch once per mount unless manually refreshed
-        if (!hasLoadedMyWorkOrders) {
-            const load = async () => {
-                setHasLoadedMyWorkOrders(false);
-                await fetchWorkOrdersPaginated();
-                if (isMounted) setHasLoadedMyWorkOrders(true);
-            };
-            load();
+        const now = Date.now();
+        const tenMinutes = 10 * 60 * 1000;
+        if (
+            !workOrderGroupsLastFetched ||
+            !Array.isArray(workOrderGroups) ||
+            workOrderGroups.length === 0 ||
+            now - workOrderGroupsLastFetched > tenMinutes
+        ) {
+            fetchWorkOrderGroups();
         }
-        return () => {
-            isMounted = false;
-        };
-    }, [fetchWorkOrdersPaginated, hasLoadedMyWorkOrders]);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [fetchWorkOrderGroups, workOrderGroups, workOrderGroupsLastFetched]);
 
-    // Re-fetch when sorting changes (client pagination handled locally)
-    useEffect(() => {
-        let isMounted = true;
-        const reload = async () => {
-            if (!fetchWorkOrdersPaginated) return;
-            setHasLoadedMyWorkOrders(false);
-            try {
-                await fetchWorkOrdersPaginated(
-                    1,
-                    1000,
-                    workOrdersSortBy,
-                    workOrdersSortOrder
-                );
-            } finally {
-                if (isMounted) setHasLoadedMyWorkOrders(true);
-            }
-        };
-        reload();
-        return () => {
-            isMounted = false;
-        };
-    }, [workOrdersSortBy, workOrdersSortOrder, fetchWorkOrdersPaginated]);
+    // If you want to force refresh on sort change, uncomment below:
+    // useEffect(() => {
+    //     fetchWorkOrderGroups(true);
+    // }, [workOrdersSortBy, workOrdersSortOrder, fetchWorkOrderGroups]);
 
     const handlePageChange = (newPage) => {
         setWorkOrdersCurrentPage(newPage);
@@ -184,18 +166,35 @@ const MyWorkOrders = () => {
         );
     };
 
-    // Client-side filtering function
+    // Client-side filtering function: only show groups assigned to the current user
     const getFilteredWorkOrderGroups = () => {
         // Ensure workOrderGroups is always an array
         const safeWorkOrderGroups = Array.isArray(workOrderGroups)
             ? workOrderGroups
             : [];
-        let filtered = [...safeWorkOrderGroups];
+
+        // FIRST: Filter to only show groups where the current user has assigned work orders
+        const userFilteredGroups = safeWorkOrderGroups.filter((group) => {
+            // Check if any work order in this group is assigned to the current user
+            const hasAssignedWorkOrder = (group.work_orders || []).some(
+                (wo) => {
+                    // Check if assignee_ids array includes the current user's ID
+                    if (Array.isArray(wo.assignee_ids) && user?.id) {
+                        return wo.assignee_ids.includes(user.id);
+                    }
+                    return false;
+                }
+            );
+
+            return hasAssignedWorkOrder;
+        });
+
+        // Start with user-filtered groups - NO FALLBACK
+        let filtered = [...userFilteredGroups];
 
         // Filter by work order number (work order group id)
         if (workOrderNoFilter) {
             filtered = filtered.filter((group) => {
-                // Check if any work order in the group has a matching work_order_group_id
                 return (
                     (group.work_orders || []).some(
                         (wo) =>
@@ -203,7 +202,7 @@ const MyWorkOrders = () => {
                                 .toLowerCase()
                                 .includes(workOrderNoFilter.toLowerCase()) ||
                             String(wo.work_order_group_id || "")
-                                .padStart(7)
+                                .padStart(7, "0")
                                 .toLowerCase()
                                 .includes(workOrderNoFilter.toLowerCase())
                     ) ||
@@ -211,7 +210,7 @@ const MyWorkOrders = () => {
                         .toLowerCase()
                         .includes(workOrderNoFilter.toLowerCase()) ||
                     String(group.id)
-                        .padStart(7)
+                        .padStart(7, "0")
                         .toLowerCase()
                         .includes(workOrderNoFilter.toLowerCase())
                 );
@@ -1158,8 +1157,8 @@ const MyWorkOrders = () => {
                     </div>
                 </div>
 
-                {/* Loading State (initial gate) */}
-                {(workOrdersLoading || !hasLoadedMyWorkOrders) && (
+                {/* Loading State */}
+                {workOrdersLoading && (
                     <SkeletonTheme baseColor="#f3f4f6" highlightColor="#e5e7eb">
                         {viewMode === "grid" ? (
                             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
@@ -1206,8 +1205,7 @@ const MyWorkOrders = () => {
                 )}
 
                 {/* Empty State */}
-                {hasLoadedMyWorkOrders &&
-                    !workOrdersLoading &&
+                {!workOrdersLoading &&
                     !workOrdersError &&
                     getFilteredWorkOrderGroups().length === 0 &&
                     (workOrderGroups || []).length > 0 && (
@@ -1246,8 +1244,7 @@ const MyWorkOrders = () => {
                     )}
 
                 {/* No Data State */}
-                {hasLoadedMyWorkOrders &&
-                    !workOrdersLoading &&
+                {!workOrdersLoading &&
                     !workOrdersError &&
                     (workOrderGroups || []).length === 0 && (
                         <div className="text-center py-12">
@@ -1274,7 +1271,7 @@ const MyWorkOrders = () => {
                     )}
 
                 {/* Content */}
-                {hasLoadedMyWorkOrders &&
+                {!workOrdersLoading &&
                     getFilteredWorkOrderGroups().length > 0 && (
                         <>
                             {viewMode === "grid"
@@ -1313,5 +1310,11 @@ const MyWorkOrders = () => {
         </div>
     );
 };
+
+const MyWorkOrders = (props) => (
+    <MyWorkOrdersProvider>
+        <MyWorkOrdersContent {...props} />
+    </MyWorkOrdersProvider>
+);
 
 export default MyWorkOrders;

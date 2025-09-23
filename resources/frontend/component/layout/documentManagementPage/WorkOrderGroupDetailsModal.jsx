@@ -177,6 +177,41 @@ const WorkOrderGroupDetailsModal = ({
         setFilesModalOpen(true);
     };
 
+    // --- Milestone progression updater: must be above all usages ---
+    const updateMilestoneProgression = async (accountId, newSubmilestoneId) => {
+        try {
+            setProgressionStatus({
+                isProgressing: true,
+                // message: "Updating milestone progression...",
+                type: "info",
+            });
+
+            await apiService.put(
+                `/accounts/${accountId}/milestone-progression`,
+                {
+                    current_submilestone_id: newSubmilestoneId,
+                }
+            );
+
+            if (onRefresh) {
+                await onRefresh();
+            }
+
+            setProgressionStatus({
+                isProgressing: false,
+                message: "Milestone progression updated successfully!",
+                type: "success",
+            });
+        } catch (error) {
+            setProgressionStatus({
+                isProgressing: false,
+                // message: "Failed to update milestone progression.",
+                type: "error",
+            });
+            console.error("Error updating milestone progression:", error);
+        }
+    };
+
     const {
         columnHeaders,
         tableRows,
@@ -582,64 +617,6 @@ const WorkOrderGroupDetailsModal = ({
             }
         } catch (error) {
             console.error("Error in milestone progression:", error);
-        }
-    };
-
-    const updateMilestoneProgression = async (accountId, newSubmilestoneId) => {
-        try {
-            setProgressionStatus({
-                isProgressing: true,
-                message: "Updating milestone progression...",
-                type: "info",
-            });
-
-            await apiService.put(
-                `/accounts/${accountId}/milestone-progression`,
-                {
-                    current_submilestone_id: newSubmilestoneId,
-                }
-            );
-
-            if (onRefresh) {
-                await onRefresh();
-            }
-
-            setProgressionStatus({
-                isProgressing: false,
-                message: "Milestone progression updated successfully!",
-                type: "success",
-            });
-
-            setTimeout(async () => {
-                await checkGroupCompletion();
-            }, 1000);
-
-            setTimeout(
-                () =>
-                    setProgressionStatus({
-                        isProgressing: false,
-                        message: "",
-                        type: "info",
-                    }),
-                3000
-            );
-        } catch (error) {
-            console.error("Error updating milestone progression:", error);
-            setProgressionStatus({
-                isProgressing: false,
-                message:
-                    "Failed to update milestone progression. Please try again.",
-                type: "error",
-            });
-            setTimeout(
-                () =>
-                    setProgressionStatus({
-                        isProgressing: false,
-                        message: "",
-                        type: "info",
-                    }),
-                5000
-            );
         }
     };
 

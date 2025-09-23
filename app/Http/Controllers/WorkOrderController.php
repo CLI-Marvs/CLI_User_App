@@ -747,7 +747,8 @@ class WorkOrderController extends Controller
                 $query->with([
                     'team:id,name',
                     'workOrderType:id,type_name',
-                    'accounts:id,account_name,contract_no,checklist_status,property_name'
+                    'accounts:id,account_name,contract_no,checklist_status,property_name',
+                    'assignees:id' // Only need the employee ID for filtering
                 ]);
             }
         ]);
@@ -771,6 +772,17 @@ class WorkOrderController extends Controller
             $arr = $group->toArray();
             // workOrders relation is camelCase in Eloquent, but you want work_orders in API
             $arr['work_orders'] = $arr['work_orders'] ?? ($group->workOrders ? $group->workOrders->toArray() : []);
+            // For each work order, add an 'assignee_ids' array for frontend filtering
+            if (!empty($arr['work_orders'])) {
+                foreach ($arr['work_orders'] as &$wo) {
+                    if (isset($wo['assignees']) && is_array($wo['assignees'])) {
+                        $wo['assignee_ids'] = array_column($wo['assignees'], 'id');
+                    } else {
+                        $wo['assignee_ids'] = [];
+                    }
+                }
+                unset($wo);
+            }
             // Format created_at for consistency with the index method
             $arr['created_at'] = $group->created_at ? $group->created_at->format('Y-m-d') : null;
             return $arr;
