@@ -27,6 +27,7 @@ import WorkOrderGroupDetailsModal from "../../../layout/documentManagementPage/W
 
 const TABLE_HEAD = [
     { head: "Work Order Group" },
+    { head: "Project" },
     { head: "Status" },
     { head: "Date Created" },
     { head: "Due Date" },
@@ -68,6 +69,23 @@ const ProfileIcon = () => {
 };
 
 const WorkOrderView = () => {
+    // Helper to get project names for a group (similar to MyWorkOrders)
+    const getProjectNames = (group) => {
+        // Find the latest work order in the group (by updated_at or sequence)
+        const latestWO = (group.work_orders || [])
+            .slice()
+            .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0];
+        if (latestWO?.accounts && latestWO.accounts.length > 0) {
+            return latestWO.accounts
+                .map(
+                    (acc) =>
+                        acc.property_name || acc.account_name || "No Project"
+                )
+                .filter((v, i, a) => a.indexOf(v) === i)
+                .join(", ");
+        }
+        return "No Project";
+    };
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage] = useState(5);
     const [searchQuery, setSearchQuery] = useState("");
@@ -546,11 +564,12 @@ const WorkOrderView = () => {
             <Card className="w-full overflow-hidden rounded-md border-0 bg-white backdrop-blur-sm">
                 <table className="w-full table-fixed bg-white rounded-md shadow-inner">
                     <colgroup>
-                        <col style={{ width: "25%" }} />
+                        <col style={{ width: "20%" }} />
                         <col style={{ width: "18%" }} />
-                        <col style={{ width: "18%" }} />
-                        <col style={{ width: "18%" }} />
-                        <col style={{ width: "21%" }} />
+                        <col style={{ width: "14%" }} />
+                        <col style={{ width: "14%" }} />
+                        <col style={{ width: "14%" }} />
+                        <col style={{ width: "20%" }} />
                     </colgroup>
                     <thead className="sticky top-0 z-10 bg-custom-bluegreen">
                         <tr>
@@ -568,6 +587,17 @@ const WorkOrderView = () => {
                             <th className="text-white h-[44px] px-3 py-1">
                                 <div className="flex items-center space-x-2">
                                     <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                                    <Typography
+                                        variant="small"
+                                        className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                    >
+                                        Project
+                                    </Typography>
+                                </div>
+                            </th>
+                            <th className="text-white h-[44px] px-3 py-1">
+                                <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
                                     <Typography
                                         variant="small"
                                         className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
@@ -679,6 +709,14 @@ const WorkOrderView = () => {
                                             <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
                                                 <div className="flex items-center space-x-1">
                                                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                    <span className="font-medium">
+                                                        {getProjectNames(group)}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                                <div className="flex items-center space-x-1">
+                                                    <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                                     <span
                                                         className={`font-medium px-2 py-1 rounded-full text-xs ${
                                                             group.status ===
