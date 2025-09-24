@@ -16,50 +16,49 @@ const ActionButtons = ({
     return (
         <>
             {checklist.requires_document ? (
-                <button
-                    type="button"
-                    className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-blue-200 hover:border-blue-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm ${
-                        isComplete
-                            ? "text-green-700 bg-green-100 border border-green-300"
-                            : "text-blue-700 bg-blue-100 border-blue-300"
-                    }`}
-                    onClick={() =>
-                        onAddFiles(
-                            account.id,
-                            step.workOrder,
-                            step.stepName,
-                            checklist,
-                            onRefresh
-                        )
-                    }
-                >
-                    {isComplete ? (
-                        <span className="inline-flex items-center justify-center w-3 h-3 bg-green-500 text-white text-xs font-bold rounded-sm mr-1">
-                            ✓
-                        </span>
-                    ) : (
-                        <svg
-                            className="w-2.5 h-2.5 mr-0.5"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                        >
-                            <path
-                                fillRule="evenodd"
-                                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
-                                clipRule="evenodd"
-                            />
-                        </svg>
-                    )}
-                    Files
-                </button>
-            ) : (
                 <div className="flex items-center gap-2">
                     <button
                         type="button"
-                        className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-gray-200 hover:border-gray-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 shadow-sm ${
+                        className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-blue-200 hover:border-blue-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm ${
                             isComplete
                                 ? "text-green-700 bg-green-100 border border-green-300"
-                                : "text-gray-700 bg-gray-100 border-gray-300"
+                                : "text-blue-700 bg-blue-100 border-blue-300"
+                        }`}
+                        onClick={() =>
+                            onAddFiles(
+                                account.id,
+                                step.workOrder,
+                                step.stepName,
+                                checklist,
+                                onRefresh
+                            )
+                        }
+                    >
+                        {isComplete ? (
+                            <span className="inline-flex items-center justify-center w-3 h-3 bg-green-500 text-white text-xs font-bold rounded-sm mr-1">
+                                ✓
+                            </span>
+                        ) : (
+                            <svg
+                                className="w-2.5 h-2.5 mr-0.5"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                        )}
+                        Files
+                    </button>
+                    <span
+                        role="button"
+                        tabIndex={0}
+                        title="Add/View Notes"
+                        className={`inline-flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 ${
+                            isComplete ? "text-green-700" : "text-gray-700"
                         }`}
                         onClick={() =>
                             handleOpenNotesModal({
@@ -71,62 +70,123 @@ const ActionButtons = ({
                                 onRefresh,
                             })
                         }
+                        onKeyPress={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                                handleOpenNotesModal({
+                                    accountId: account.id,
+                                    workOrder: step.workOrder,
+                                    workOrderType: step.stepName,
+                                    checklistId: checklist.id,
+                                    checklistName: checklist.name,
+                                    onRefresh,
+                                });
+                            }
+                        }}
                     >
-                        <input
-                            type="checkbox"
-                            checked={!!isComplete}
-                            disabled={!!isComplete}
-                            onChange={async (e) => {
-                                if (e.target.checked && !isComplete) {
+                        {/* Uniform Notes Icon (Sticky Note style, no border) */}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v14H7V5h10zm-2 4H9v2h6V9zm0 4H9v2h6v-2z" />
+                        </svg>
+                    </span>
+                </div>
+            ) : (
+                <div className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        checked={!!isComplete}
+                        disabled={!!isComplete}
+                        onChange={async (e) => {
+                            if (e.target.checked && !isComplete) {
+                                if (
+                                    typeof window.setOptimisticCompleted ===
+                                    "function"
+                                ) {
+                                    window.setOptimisticCompleted((prev) => ({
+                                        ...prev,
+                                        [`${account.id}_${checklist.id}`]: true,
+                                    }));
+                                }
+                                try {
+                                    const apiService = await import(
+                                        "../../servicesApi/apiService"
+                                    );
+                                    await apiService.default.post(
+                                        "/account-checklist-status",
+                                        {
+                                            account_id: account.id,
+                                            checklist_id: checklist.id,
+                                            is_completed: true,
+                                        }
+                                    );
+                                    if (onRefresh) onRefresh();
+                                } catch (err) {
+                                    alert(
+                                        "Failed to mark checklist as complete."
+                                    );
                                     if (
                                         typeof window.setOptimisticCompleted ===
                                         "function"
                                     ) {
                                         window.setOptimisticCompleted(
-                                            (prev) => ({
-                                                ...prev,
-                                                [`${account.id}_${checklist.id}`]: true,
-                                            })
-                                        );
-                                    }
-                                    try {
-                                        const apiService = await import(
-                                            "../../servicesApi/apiService"
-                                        );
-                                        await apiService.default.post(
-                                            "/account-checklist-status",
-                                            {
-                                                account_id: account.id,
-                                                checklist_id: checklist.id,
-                                                is_completed: true,
+                                            (prev) => {
+                                                const copy = { ...prev };
+                                                delete copy[
+                                                    `${account.id}_${checklist.id}`
+                                                ];
+                                                return copy;
                                             }
                                         );
-                                        if (onRefresh) onRefresh();
-                                    } catch (err) {
-                                        alert(
-                                            "Failed to mark checklist as complete."
-                                        );
-                                        if (
-                                            typeof window.setOptimisticCompleted ===
-                                            "function"
-                                        ) {
-                                            window.setOptimisticCompleted(
-                                                (prev) => {
-                                                    const copy = { ...prev };
-                                                    delete copy[
-                                                        `${account.id}_${checklist.id}`
-                                                    ];
-                                                    return copy;
-                                                }
-                                            );
-                                        }
                                     }
                                 }
-                            }}
-                            className="form-checkbox h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer mr-1"
-                        />
-                        Notes
-                    </button>
+                            }
+                        }}
+                        className="form-checkbox h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer mr-1"
+                    />
+                    <span
+                        role="button"
+                        tabIndex={0}
+                        title="Add/View Notes"
+                        className={`inline-flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 ${
+                            isComplete ? "text-green-700" : "text-gray-700"
+                        }`}
+                        onClick={() =>
+                            handleOpenNotesModal({
+                                accountId: account.id,
+                                workOrder: step.workOrder,
+                                workOrderType: step.stepName,
+                                checklistId: checklist.id,
+                                checklistName: checklist.name,
+                                onRefresh,
+                            })
+                        }
+                        onKeyPress={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                                handleOpenNotesModal({
+                                    accountId: account.id,
+                                    workOrder: step.workOrder,
+                                    workOrderType: step.stepName,
+                                    checklistId: checklist.id,
+                                    checklistName: checklist.name,
+                                    onRefresh,
+                                });
+                            }
+                        }}
+                    >
+                        {/* Uniform Notes Icon (Sticky Note style, no border) */}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v14H7V5h10zm-2 4H9v2h6V9zm0 4H9v2h6v-2z" />
+                        </svg>
+                    </span>
                 </div>
             )}
         </>

@@ -1015,61 +1015,113 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                             </p>
                                                         </div>
                                                     ) : (
-                                                        filteredAccountsForDropdown.map(
-                                                            (account) => (
-                                                                <label
-                                                                    key={
-                                                                        account.id
-                                                                    }
-                                                                    className="group px-4 py-3 cursor-pointer hover:bg-blue-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
-                                                                >
-                                                                    <div className="flex-shrink-0">
-                                                                        <input
-                                                                            type="checkbox"
-                                                                            checked={selectedAccounts.some(
-                                                                                (
-                                                                                    acc
-                                                                                ) =>
-                                                                                    acc.id ===
-                                                                                    account.id
-                                                                            )}
-                                                                            onChange={() =>
-                                                                                handleAccountToggle(
-                                                                                    account
-                                                                                )
-                                                                            }
-                                                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
-                                                                        />
-                                                                    </div>
-                                                                    <div className="flex-1 min-w-0">
-                                                                        <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
-                                                                            {
-                                                                                account.account_name
-                                                                            }
-                                                                        </span>
-                                                                    </div>
-                                                                    {selectedAccounts.some(
-                                                                        (acc) =>
-                                                                            acc.id ===
+                                                        // Sort accounts alphabetically by last name
+                                                        [
+                                                            ...filteredAccountsForDropdown,
+                                                        ]
+                                                            .sort((a, b) => {
+                                                                const aLast = (
+                                                                    a.account_name ||
+                                                                    ""
+                                                                )
+                                                                    .split(" ")
+                                                                    .pop()
+                                                                    .toLowerCase();
+                                                                const bLast = (
+                                                                    b.account_name ||
+                                                                    ""
+                                                                )
+                                                                    .split(" ")
+                                                                    .pop()
+                                                                    .toLowerCase();
+                                                                return aLast.localeCompare(
+                                                                    bLast
+                                                                );
+                                                            })
+                                                            .map((account) => {
+                                                                const nameParts =
+                                                                    (
+                                                                        account.account_name ||
+                                                                        ""
+                                                                    ).split(
+                                                                        " "
+                                                                    );
+                                                                const lastName =
+                                                                    nameParts.length >
+                                                                    0
+                                                                        ? nameParts[
+                                                                              nameParts.length -
+                                                                                  1
+                                                                          ]
+                                                                        : account.account_name;
+                                                                const unit =
+                                                                    account.unit_no ||
+                                                                    "";
+                                                                return (
+                                                                    <label
+                                                                        key={
                                                                             account.id
-                                                                    ) && (
+                                                                        }
+                                                                        className="group px-4 py-3 cursor-pointer hover:bg-blue-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
+                                                                    >
                                                                         <div className="flex-shrink-0">
-                                                                            <svg
-                                                                                className="w-4 h-4 text-green-500"
-                                                                                fill="currentColor"
-                                                                                viewBox="0 0 20 20"
-                                                                            >
-                                                                                <path
-                                                                                    fillRule="evenodd"
-                                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                                    clipRule="evenodd"
-                                                                                />
-                                                                            </svg>
+                                                                            <input
+                                                                                type="checkbox"
+                                                                                checked={selectedAccounts.some(
+                                                                                    (
+                                                                                        acc
+                                                                                    ) =>
+                                                                                        acc.id ===
+                                                                                        account.id
+                                                                                )}
+                                                                                onChange={() =>
+                                                                                    handleAccountToggle(
+                                                                                        account
+                                                                                    )
+                                                                                }
+                                                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
+                                                                            />
                                                                         </div>
-                                                                    )}
-                                                                </label>
-                                                            )
-                                                        )
+                                                                        <div className="flex-1 min-w-0">
+                                                                            <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
+                                                                                {
+                                                                                    lastName
+                                                                                }
+                                                                                {unit && (
+                                                                                    <span className="ml-2 text-xs text-gray-500">
+                                                                                        (Unit:{" "}
+                                                                                        {
+                                                                                            unit
+                                                                                        }
+                                                                                        )
+                                                                                    </span>
+                                                                                )}
+                                                                            </span>
+                                                                        </div>
+                                                                        {selectedAccounts.some(
+                                                                            (
+                                                                                acc
+                                                                            ) =>
+                                                                                acc.id ===
+                                                                                account.id
+                                                                        ) && (
+                                                                            <div className="flex-shrink-0">
+                                                                                <svg
+                                                                                    className="w-4 h-4 text-green-500"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 20 20"
+                                                                                >
+                                                                                    <path
+                                                                                        fillRule="evenodd"
+                                                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                        clipRule="evenodd"
+                                                                                    />
+                                                                                </svg>
+                                                                            </div>
+                                                                        )}
+                                                                    </label>
+                                                                );
+                                                            })
                                                     )}
                                                 </div>
                                             </div>

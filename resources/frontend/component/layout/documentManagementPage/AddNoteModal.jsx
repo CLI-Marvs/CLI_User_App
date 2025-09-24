@@ -274,46 +274,35 @@ const AddNoteModal = ({
                 );
             }
 
-            // Consolidate checklist completion logic using checklist_id
-            const checklistIdsToComplete = [];
-            if (attachedFiles.length > 0) {
+            // Only mark checklist as complete if files are attached (not just notes)
+            if (attachedFiles.length > 0 && selectedAccountId) {
                 const fileChecklistIds = attachedFiles
                     .map((fw) => fw.checklist_id)
-                    .filter(Boolean); // Filter out null/undefined IDs
-                checklistIdsToComplete.push(...fileChecklistIds);
-            }
-            if (checklistId) {
-                checklistIdsToComplete.push(checklistId);
-            }
-
-            // Remove duplicates and ensure there's something to update
-            const uniqueChecklistIds = [...new Set(checklistIdsToComplete)];
-
-            if (uniqueChecklistIds.length > 0 && selectedAccountId) {
-                try {
-                    const payload = {
-                        account_id: selectedAccountId,
-                        checklist_ids: uniqueChecklistIds,
-                        is_completed: true,
-                        completed_at: new Date().toISOString(),
-                    };
-
-                    const statusResponse = await apiService.post(
-                        "/account-checklist-status/bulk",
-                        payload
-                    );
-                } catch (error) {
-                    console.error(
-                        "AddNoteModal: Error marking checklist(s) as complete:",
-                        error
-                    );
-                    // Optional: Decide if this should prevent onSaveSuccess()
+                    .filter(Boolean);
+                const uniqueChecklistIds = [...new Set(fileChecklistIds)];
+                if (uniqueChecklistIds.length > 0) {
+                    try {
+                        const payload = {
+                            account_id: selectedAccountId,
+                            checklist_ids: uniqueChecklistIds,
+                            is_completed: true,
+                            completed_at: new Date().toISOString(),
+                        };
+                        await apiService.post(
+                            "/account-checklist-status/bulk",
+                            payload
+                        );
+                    } catch (error) {
+                        console.error(
+                            "AddNoteModal: Error marking checklist(s) as complete:",
+                            error
+                        );
+                    }
                 }
             }
 
             onSaveSuccess();
         } catch (err) {
-
             let errorMessage = "Failed to save note. Please try again.";
             if (
                 err.response &&
@@ -347,7 +336,7 @@ const AddNoteModal = ({
                 <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
                     <div>
                         <h2 className="text-xl font-semibold text-custom-bluegreen">
-                            Add Note
+                            Add Notes
                         </h2>
                         <p className="text-sm text-gray-600 mt-1">
                             {logType
