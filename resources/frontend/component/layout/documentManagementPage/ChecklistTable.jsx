@@ -1,4 +1,6 @@
+import apiService from "../../servicesApi/apiService";
 import React from "react";
+import { UploadFileForChecklistModal } from "./UploadFileForChecklistModal";
 
 // Helper component for action buttons
 const ActionButtons = ({
@@ -100,6 +102,7 @@ const ActionButtons = ({
                         type="checkbox"
                         checked={!!isComplete}
                         disabled={!!isComplete}
+                        title="Mark checklist as done"
                         onChange={async (e) => {
                             if (e.target.checked && !isComplete) {
                                 if (
@@ -237,6 +240,58 @@ const ChecklistTable = ({
 }) => {
     const { isChecklistComplete, setOptimisticCompleted } =
         useChecklistCompletion();
+    const [uploadModal, setUploadModal] = React.useState({
+        open: false,
+        checklist: null,
+        step: null,
+        sub: null,
+    });
+
+    const handleOpenUploadModal = (checklist, step, sub) => {
+        setUploadModal({ open: true, checklist, step, sub });
+    };
+    const handleCloseUploadModal = () => {
+        setUploadModal({ open: false, checklist: null, step: null, sub: null });
+    };
+    const handleUploadFileForChecklist = async (file, checklist, step, sub) => {
+        const accountIds = paginatedAccounts.map((acc) => acc.id);
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("checklist_id", checklist.id);
+        // Ensure work_order_id is a primitive value (number or string)
+        let workOrderId = step.workOrder;
+        if (typeof workOrderId === "object" && workOrderId !== null) {
+            workOrderId = workOrderId.work_order_id || workOrderId.id || "";
+        }
+        formData.append("work_order_id", workOrderId);
+        formData.append("submilestone_id", sub.id);
+        accountIds.forEach((id) => formData.append("account_ids[]", id));
+        try {
+            await apiService.post(
+                "/work-orders/upload-to-all-accounts",
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+            // Mark checklist as complete for each account (like UploadFilesOnlyModal)
+            for (const accountId of accountIds) {
+                await apiService.post("/account-checklist-status/bulk", {
+                    account_id: accountId,
+                    checklist_ids: [checklist.id],
+                    is_completed: true,
+                    completed_at: new Date().toISOString(),
+                });
+            }
+            alert("File uploaded for all accounts!");
+            handleCloseUploadModal();
+            if (onRefresh) onRefresh();
+        } catch (err) {
+            alert("Upload failed.");
+        }
+    };
 
     // Memoized filtered steps based on user assignment
     const filteredSteps = React.useMemo(() => {
@@ -423,9 +478,41 @@ const ChecklistTable = ({
         );
     }
 
+    // Scroll position preservation
+    const scrollContainerRef = React.useRef(null);
+    // Use a unique key for this table (could be improved if multiple tables)
+    const SCROLL_KEY = "checklistTableScroll";
+
+    // Restore scroll position on mount
+    React.useEffect(() => {
+        const saved = localStorage.getItem(SCROLL_KEY);
+        if (scrollContainerRef.current && saved) {
+            try {
+                const { left, top } = JSON.parse(saved);
+                scrollContainerRef.current.scrollLeft = left;
+                scrollContainerRef.current.scrollTop = top;
+            } catch {}
+        }
+    }, []);
+
+    // Save scroll position on scroll
+    const handleScroll = React.useCallback(() => {
+        if (scrollContainerRef.current) {
+            localStorage.setItem(
+                SCROLL_KEY,
+                JSON.stringify({
+                    left: scrollContainerRef.current.scrollLeft,
+                    top: scrollContainerRef.current.scrollTop,
+                })
+            );
+        }
+    }, []);
+
     return (
         <div className="w-full h-full overflow-hidden">
             <div
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
                 className={`shadow-lg rounded-lg border border-gray-200 bg-white h-full overflow-x-auto overflow-y-auto ${
                     totalColumns <= 4 ? "max-w-fit" : ""
                 }`}
@@ -574,6 +661,53 @@ const ChecklistTable = ({
                                                         </svg>
                                                         Remarks / Files
                                                     </span>
+                                                    {checklist.requires_document && (
+                                                        <span
+                                                            role="button"
+                                                            tabIndex={0}
+                                                            title="Upload file for all accounts"
+                                                            className="ml-2 cursor-pointer text-white hover:text-blue-200"
+                                                            onClick={() =>
+                                                                handleOpenUploadModal(
+                                                                    checklist,
+                                                                    step,
+                                                                    sub
+                                                                )
+                                                            }
+                                                            onKeyPress={(e) => {
+                                                                if (
+                                                                    e.key ===
+                                                                        "Enter" ||
+                                                                    e.key ===
+                                                                        " "
+                                                                ) {
+                                                                    handleOpenUploadModal(
+                                                                        checklist,
+                                                                        step,
+                                                                        sub
+                                                                    );
+                                                                }
+                                                            }}
+                                                        >
+                                                            {/* Upload Icon */}
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                className="w-4 h-4"
+                                                                fill="none"
+                                                                viewBox="0 0 24 24"
+                                                                stroke="currentColor"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={
+                                                                        2
+                                                                    }
+                                                                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M16 12l-4-4m0 0l-4 4m4-4v12"
+                                                                />
+                                                            </svg>
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </th>,
                                         ]
@@ -736,6 +870,15 @@ const ChecklistTable = ({
                     </tbody>
                 </table>
             </div>
+            {uploadModal.open && (
+                <UploadFileForChecklistModal
+                    checklist={uploadModal.checklist}
+                    step={uploadModal.step}
+                    sub={uploadModal.sub}
+                    onUpload={handleUploadFileForChecklist}
+                    onClose={handleCloseUploadModal}
+                />
+            )}
         </div>
     );
 };
