@@ -12,13 +12,15 @@ class WorkOrderDocument extends Model
     protected $primaryKey = 'document_id';
     protected $fillable = [
         'work_order_id',
-        'account_id', 
+        'account_id',
         'uploaded_by_user_id',
         'file_name',
         'file_path',
         'file_type',
         'file_title',
-        'log_id',   
+        'log_id',
+        'checklist_id',
+        'submilestone_id',
     ];
 
     public function workOrder()

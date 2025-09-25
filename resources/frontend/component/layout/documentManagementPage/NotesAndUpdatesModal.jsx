@@ -113,12 +113,22 @@ function NotesAndUpdatesModal({
     const handleAddNoteSuccess = async () => {
         setIsAddNoteModalOpen(false);
 
+        // Invalidate cache to force fresh fetch
+        invalidateNotesAndUpdatesData({
+            selectedAccountId,
+            selectedWorkOrder,
+            workOrderId: workOrderData?.work_order_id,
+            workOrderGroupId: workOrderData?.work_order_group_id,
+        });
+
         // Refresh the notes and updates within this modal
         await fetchData(true);
 
         // Trigger the refresh callback passed from the parent to update the main view
-        if (onRefresh) {
-            onRefresh();
+        if (typeof onRefresh === "function") {
+            setTimeout(() => {
+                onRefresh();
+            }, 300);
         }
     };
 
@@ -328,11 +338,13 @@ function NotesAndUpdatesModal({
                                 <div key={log.id} className="py-2 border-y-1">
                                     <div className="text-custom-bluegreen font-semibold text-sm ">
                                         {formatDateWithTime(log.created_at)}
+                                        {/*
                                         {log.is_new && (
                                             <span className="bg-custom-lightgreen text-white py-1 px-3 rounded-[50px] text-xs ml-2">
                                                 New
                                             </span>
                                         )}
+                                        */}
                                     </div>
 
                                     <div className="text-[#818181] text-sm">

@@ -208,10 +208,17 @@ const AddNoteModal = ({
             setError("Please enter a note or attach at least one file.");
             return;
         }
-        if (noteText.length > 500) {
-            setError("Note cannot exceed 500 characters.");
+        
+        // Create final note text with checklist name prefix
+        const finalNoteText = checklistName 
+            ? `[${checklistName}] ${noteText}` 
+            : noteText;
+            
+        if (finalNoteText.length > 500) {
+            setError("Note with checklist name prefix cannot exceed 500 characters.");
             return;
         }
+        
         if (submilestoneOptions.length > 0 && attachedFiles.length > 0) {
             const filesWithoutTitles = attachedFiles.filter((fw) => !fw.title);
             if (filesWithoutTitles.length > 0) {
@@ -226,7 +233,7 @@ const AddNoteModal = ({
         setIsSaving(true);
 
         const formData = new FormData();
-        formData.append("note_text", noteText);
+        formData.append("note_text", finalNoteText); // Use the final note text with prefix
         formData.append("account_id", selectedAccountId);
         formData.append("work_order_id", numericWorkOrderId);
         formData.append("log_type", logType);
@@ -274,46 +281,35 @@ const AddNoteModal = ({
                 );
             }
 
-            // Consolidate checklist completion logic using checklist_id
-            const checklistIdsToComplete = [];
-            if (attachedFiles.length > 0) {
+            // Only mark checklist as complete if files are attached (not just notes)
+            if (attachedFiles.length > 0 && selectedAccountId) {
                 const fileChecklistIds = attachedFiles
                     .map((fw) => fw.checklist_id)
-                    .filter(Boolean); // Filter out null/undefined IDs
-                checklistIdsToComplete.push(...fileChecklistIds);
-            }
-            if (checklistId) {
-                checklistIdsToComplete.push(checklistId);
-            }
-
-            // Remove duplicates and ensure there's something to update
-            const uniqueChecklistIds = [...new Set(checklistIdsToComplete)];
-
-            if (uniqueChecklistIds.length > 0 && selectedAccountId) {
-                try {
-                    const payload = {
-                        account_id: selectedAccountId,
-                        checklist_ids: uniqueChecklistIds,
-                        is_completed: true,
-                        completed_at: new Date().toISOString(),
-                    };
-
-                    const statusResponse = await apiService.post(
-                        "/account-checklist-status/bulk",
-                        payload
-                    );
-                } catch (error) {
-                    console.error(
-                        "AddNoteModal: Error marking checklist(s) as complete:",
-                        error
-                    );
-                    // Optional: Decide if this should prevent onSaveSuccess()
+                    .filter(Boolean);
+                const uniqueChecklistIds = [...new Set(fileChecklistIds)];
+                if (uniqueChecklistIds.length > 0) {
+                    try {
+                        const payload = {
+                            account_id: selectedAccountId,
+                            checklist_ids: uniqueChecklistIds,
+                            is_completed: true,
+                            completed_at: new Date().toISOString(),
+                        };
+                        await apiService.post(
+                            "/account-checklist-status/bulk",
+                            payload
+                        );
+                    } catch (error) {
+                        console.error(
+                            "AddNoteModal: Error marking checklist(s) as complete:",
+                            error
+                        );
+                    }
                 }
             }
 
             onSaveSuccess();
         } catch (err) {
-
             let errorMessage = "Failed to save note. Please try again.";
             if (
                 err.response &&
@@ -332,7 +328,10 @@ const AddNoteModal = ({
         fetchWorkOrders();
     };
 
-    const remainingChars = 500 - noteText.length;
+    // Calculate remaining characters considering the prefix that will be added
+    const checklistPrefix = checklistName ? `[${checklistName}] ` : "";
+    const totalLength = checklistPrefix.length + noteText.length;
+    const remainingChars = 500 - totalLength;
     const isValid = noteText.trim() !== "" || attachedFiles.length > 0;
 
     return ReactDOM.createPortal(
@@ -347,12 +346,10 @@ const AddNoteModal = ({
                 <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
                     <div>
                         <h2 className="text-xl font-semibold text-custom-bluegreen">
-                            Add Note
+                            Add Notes
                         </h2>
                         <p className="text-sm text-gray-600 mt-1">
-                            {logType
-                                ? `${logType} - Work Order #${numericWorkOrderId}`
-                                : `Work Order No.${numericWorkOrderId}`}
+                            {logType ? logType : ""}
                         </p>
                     </div>
                     <button
@@ -405,25 +402,25 @@ const AddNoteModal = ({
                             value={noteText}
                             onChange={(e) => setNoteText(e.target.value)}
                             rows="5"
-                            maxLength="500"
+                            maxLength={500 - checklistPrefix.length} // Limit input based on prefix length
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-transparent resize-none"
                             placeholder="Enter your note here..."
                             disabled={isSaving}
                         />
                         <div className="mt-2 flex justify-between items-center">
                             <p className="text-xs text-gray-500">
-                                Maximum 500 characters
+                                Maximum 500 characters {checklistName ? `(including "[${checklistName}]" prefix)` : ""}
                             </p>
                             <p
                                 className={`text-xs font-medium ${
-                                    noteText.length >= 450
+                                    totalLength >= 450
                                         ? "text-orange-600"
-                                        : noteText.length >= 480
+                                        : totalLength >= 480
                                         ? "text-red-600"
                                         : "text-gray-500"
                                 }`}
                             >
-                                {noteText.length}/500
+                                {totalLength}/500
                             </p>
                         </div>
                     </div>

@@ -824,4 +824,96 @@ class WorkOrderController extends Controller
 
         return response()->json(['message' => 'All deadlines and accounts updated.']);
     }
+
+    /**
+     * Upload a single file to all accounts under a checklist.
+     * Expects: file, checklist_id, work_order_id, submilestone_id (optional), account_ids[] (optional)
+     */
+    public function uploadToAllAccounts(Request $request)
+    {
+        $validated = $request->validate([
+            'file' => 'required|file|max:10240',
+            'checklist_id' => 'required|integer|exists:checklists,id',
+            'work_order_id' => 'required|integer|exists:work_orders,work_order_id',
+            'submilestone_id' => 'nullable|integer|exists:submilestones,id',
+            'account_ids' => 'nullable|array',
+            'account_ids.*' => 'integer|exists:taken_out_accounts,id',
+        ]);
+
+        $file = $request->file('file');
+        $checklistId = $validated['checklist_id'];
+        $workOrderId = $validated['work_order_id'];
+        $submilestoneId = $validated['submilestone_id'] ?? null;
+
+        // Get accounts: either from account_ids[] or all accounts under this checklist
+        if (!empty($validated['account_ids'])) {
+            $accounts = TakenOutAccount::whereIn('id', $validated['account_ids'])->get();
+        } else {
+            // All accounts that have this checklist assigned (via AccountChecklistStatus or other logic)
+            $accounts = TakenOutAccount::whereHas('accountChecklistStatuses', function ($q) use ($checklistId) {
+                $q->where('checklist_id', $checklistId);
+            })->get();
+        }
+
+        // Upload file once to GCS
+        $uploadedFilesData = $this->_uploadFilesToGCS([$file]);
+        $fileData = $uploadedFilesData[0] ?? null;
+
+        if (!$fileData) {
+            return response()->json(['message' => 'File upload failed.'], 500);
+        }
+
+        $uploadedByUserId = $request->user()->id ?? 1;
+
+        // Set log_type to the work order type name for consistency with single file upload
+        $logType = null;
+        $workOrder = \App\Models\WorkOrder::find($workOrderId);
+        if ($workOrder && $workOrder->workOrderType && !empty($workOrder->workOrderType->type_name)) {
+            $logType = $workOrder->workOrderType->type_name;
+        } else {
+            $logType = 'Checklist'; // fallback
+        }
+
+        // Get checklist name for file_title
+        $checklist = \App\Models\Checklist::find($checklistId);
+        $checklistName = $checklist && !empty($checklist->name) ? $checklist->name : $fileData['original_file_name'];
+
+        foreach ($accounts as $account) {
+            // Create a log entry for this upload (so frontend can see it in logs)
+            $log = \App\Models\WorkOrderLog::create([
+                'work_order_id' => $workOrderId,
+                'log_type' => $logType,
+                'log_message' => 'Bulk file uploaded to checklist.',
+                'created_by_user_id' => $uploadedByUserId,
+                'account_id' => $account->id,
+                'note_type' => 'File Upload',
+                'is_new' => true,
+            ]);
+
+            // Save a document record for each account, linked to the log
+            \App\Models\WorkOrderDocument::create([
+                'work_order_id' => $workOrderId,
+                'account_id' => $account->id,
+                'uploaded_by_user_id' => $uploadedByUserId,
+                'file_name' => $fileData['original_file_name'],
+                'file_path' => $fileData['file_link'],
+                'file_type' => $fileData['mime_type'],
+                'file_title' => $checklistName,
+                'checklist_id' => $checklistId,
+                'submilestone_id' => $submilestoneId,
+                'log_id' => $log->id,
+            ]);
+
+            // Mark checklist as complete for this account
+            $status = \App\Models\AccountChecklistStatus::firstOrNew([
+                'account_id' => $account->id,
+                'checklist_id' => $checklistId,
+            ]);
+            $status->is_completed = true;
+            $status->completed_at = now();
+            $status->save();
+        }
+
+        return response()->json(['success' => true, 'message' => 'File uploaded to all accounts, checklist status updated, and logs created.']);
+    }
 }

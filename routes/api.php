@@ -111,6 +111,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('{workOrder}', [WorkOrderController::class, 'update']);
         Route::patch('/work-order-groups/{groupId}/soft-delete', [WorkOrderController::class, 'softDelete']);
         Route::patch('{workOrderId}/status-complete', [WorkOrderController::class, 'updateStatusToComplete']);
+        Route::post('upload-to-all-accounts', [WorkOrderController::class, 'uploadToAllAccounts']);
     });
     Route::post('/work-order-logs', [WorkOrderController::class, 'createWorkOrderLog']);
     Route::get('/my-workorders', [WorkOrderController::class, 'index']);

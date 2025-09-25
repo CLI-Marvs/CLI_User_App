@@ -1,4 +1,6 @@
+import apiService from "../../servicesApi/apiService";
 import React from "react";
+import { UploadFileForChecklistModal } from "./UploadFileForChecklistModal";
 
 // Helper component for action buttons
 const ActionButtons = ({
@@ -16,50 +18,49 @@ const ActionButtons = ({
     return (
         <>
             {checklist.requires_document ? (
-                <button
-                    type="button"
-                    className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-blue-200 hover:border-blue-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm ${
-                        isComplete
-                            ? "text-green-700 bg-green-100 border border-green-300"
-                            : "text-blue-700 bg-blue-100 border-blue-300"
-                    }`}
-                    onClick={() =>
-                        onAddFiles(
-                            account.id,
-                            step.workOrder,
-                            step.stepName,
-                            checklist,
-                            onRefresh
-                        )
-                    }
-                >
-                    {isComplete ? (
-                        <span className="inline-flex items-center justify-center w-3 h-3 bg-green-500 text-white text-xs font-bold rounded-sm mr-1">
-                            ✓
-                        </span>
-                    ) : (
-                        <svg
-                            className="w-2.5 h-2.5 mr-0.5"
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                        >
-                            <path
-                                fillRule="evenodd"
-                                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
-                                clipRule="evenodd"
-                            />
-                        </svg>
-                    )}
-                    Files
-                </button>
-            ) : (
                 <div className="flex items-center gap-2">
                     <button
                         type="button"
-                        className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-gray-200 hover:border-gray-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 shadow-sm ${
+                        className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-blue-200 hover:border-blue-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm ${
                             isComplete
                                 ? "text-green-700 bg-green-100 border border-green-300"
-                                : "text-gray-700 bg-gray-100 border-gray-300"
+                                : "text-blue-700 bg-blue-100 border-blue-300"
+                        }`}
+                        onClick={() =>
+                            onAddFiles(
+                                account.id,
+                                step.workOrder,
+                                step.stepName,
+                                checklist,
+                                onRefresh
+                            )
+                        }
+                    >
+                        {isComplete ? (
+                            <span className="inline-flex items-center justify-center w-3 h-3 bg-green-500 text-white text-xs font-bold rounded-sm mr-1">
+                                ✓
+                            </span>
+                        ) : (
+                            <svg
+                                className="w-2.5 h-2.5 mr-0.5"
+                                fill="currentColor"
+                                viewBox="0 0 20 20"
+                            >
+                                <path
+                                    fillRule="evenodd"
+                                    d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"
+                                    clipRule="evenodd"
+                                />
+                            </svg>
+                        )}
+                        Files
+                    </button>
+                    <span
+                        role="button"
+                        tabIndex={0}
+                        title="Add/View Notes"
+                        className={`inline-flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 ${
+                            isComplete ? "text-green-700" : "text-gray-700"
                         }`}
                         onClick={() =>
                             handleOpenNotesModal({
@@ -71,62 +72,124 @@ const ActionButtons = ({
                                 onRefresh,
                             })
                         }
+                        onKeyPress={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                                handleOpenNotesModal({
+                                    accountId: account.id,
+                                    workOrder: step.workOrder,
+                                    workOrderType: step.stepName,
+                                    checklistId: checklist.id,
+                                    checklistName: checklist.name,
+                                    onRefresh,
+                                });
+                            }
+                        }}
                     >
-                        <input
-                            type="checkbox"
-                            checked={!!isComplete}
-                            disabled={!!isComplete}
-                            onChange={async (e) => {
-                                if (e.target.checked && !isComplete) {
+                        {/* Uniform Notes Icon (Sticky Note style, no border) */}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v14H7V5h10zm-2 4H9v2h6V9zm0 4H9v2h6v-2z" />
+                        </svg>
+                    </span>
+                </div>
+            ) : (
+                <div className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        checked={!!isComplete}
+                        disabled={!!isComplete}
+                        title="Mark checklist as done"
+                        onChange={async (e) => {
+                            if (e.target.checked && !isComplete) {
+                                if (
+                                    typeof window.setOptimisticCompleted ===
+                                    "function"
+                                ) {
+                                    window.setOptimisticCompleted((prev) => ({
+                                        ...prev,
+                                        [`${account.id}_${checklist.id}`]: true,
+                                    }));
+                                }
+                                try {
+                                    const apiService = await import(
+                                        "../../servicesApi/apiService"
+                                    );
+                                    await apiService.default.post(
+                                        "/account-checklist-status",
+                                        {
+                                            account_id: account.id,
+                                            checklist_id: checklist.id,
+                                            is_completed: true,
+                                        }
+                                    );
+                                    if (onRefresh) onRefresh();
+                                } catch (err) {
+                                    alert(
+                                        "Failed to mark checklist as complete."
+                                    );
                                     if (
                                         typeof window.setOptimisticCompleted ===
                                         "function"
                                     ) {
                                         window.setOptimisticCompleted(
-                                            (prev) => ({
-                                                ...prev,
-                                                [`${account.id}_${checklist.id}`]: true,
-                                            })
-                                        );
-                                    }
-                                    try {
-                                        const apiService = await import(
-                                            "../../servicesApi/apiService"
-                                        );
-                                        await apiService.default.post(
-                                            "/account-checklist-status",
-                                            {
-                                                account_id: account.id,
-                                                checklist_id: checklist.id,
-                                                is_completed: true,
+                                            (prev) => {
+                                                const copy = { ...prev };
+                                                delete copy[
+                                                    `${account.id}_${checklist.id}`
+                                                ];
+                                                return copy;
                                             }
                                         );
-                                        if (onRefresh) onRefresh();
-                                    } catch (err) {
-                                        alert(
-                                            "Failed to mark checklist as complete."
-                                        );
-                                        if (
-                                            typeof window.setOptimisticCompleted ===
-                                            "function"
-                                        ) {
-                                            window.setOptimisticCompleted(
-                                                (prev) => {
-                                                    const copy = { ...prev };
-                                                    delete copy[
-                                                        `${account.id}_${checklist.id}`
-                                                    ];
-                                                    return copy;
-                                                }
-                                            );
-                                        }
                                     }
                                 }
-                            }}
-                            className="form-checkbox h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer mr-1"
-                        />
-                        Notes
-                    </button>
+                            }
+                        }}
+                        className="form-checkbox h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer mr-1"
+                    />
+                    <span
+                        role="button"
+                        tabIndex={0}
+                        title="Add/View Notes"
+                        className={`inline-flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 ${
+                            isComplete ? "text-green-700" : "text-gray-700"
+                        }`}
+                        onClick={() =>
+                            handleOpenNotesModal({
+                                accountId: account.id,
+                                workOrder: step.workOrder,
+                                workOrderType: step.stepName,
+                                checklistId: checklist.id,
+                                checklistName: checklist.name,
+                                onRefresh,
+                            })
+                        }
+                        onKeyPress={(e) => {
+                            if (e.key === "Enter" || e.key === " ") {
+                                handleOpenNotesModal({
+                                    accountId: account.id,
+                                    workOrder: step.workOrder,
+                                    workOrderType: step.stepName,
+                                    checklistId: checklist.id,
+                                    checklistName: checklist.name,
+                                    onRefresh,
+                                });
+                            }
+                        }}
+                    >
+                        {/* Uniform Notes Icon (Sticky Note style, no border) */}
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="w-5 h-5"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                        >
+                            <path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v14H7V5h10zm-2 4H9v2h6V9zm0 4H9v2h6v-2z" />
+                        </svg>
+                    </span>
                 </div>
             )}
         </>
@@ -177,6 +240,58 @@ const ChecklistTable = ({
 }) => {
     const { isChecklistComplete, setOptimisticCompleted } =
         useChecklistCompletion();
+    const [uploadModal, setUploadModal] = React.useState({
+        open: false,
+        checklist: null,
+        step: null,
+        sub: null,
+    });
+
+    const handleOpenUploadModal = (checklist, step, sub) => {
+        setUploadModal({ open: true, checklist, step, sub });
+    };
+    const handleCloseUploadModal = () => {
+        setUploadModal({ open: false, checklist: null, step: null, sub: null });
+    };
+    const handleUploadFileForChecklist = async (file, checklist, step, sub) => {
+        const accountIds = paginatedAccounts.map((acc) => acc.id);
+        const formData = new FormData();
+        formData.append("file", file);
+        formData.append("checklist_id", checklist.id);
+        // Ensure work_order_id is a primitive value (number or string)
+        let workOrderId = step.workOrder;
+        if (typeof workOrderId === "object" && workOrderId !== null) {
+            workOrderId = workOrderId.work_order_id || workOrderId.id || "";
+        }
+        formData.append("work_order_id", workOrderId);
+        formData.append("submilestone_id", sub.id);
+        accountIds.forEach((id) => formData.append("account_ids[]", id));
+        try {
+            await apiService.post(
+                "/work-orders/upload-to-all-accounts",
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+            // Mark checklist as complete for each account (like UploadFilesOnlyModal)
+            for (const accountId of accountIds) {
+                await apiService.post("/account-checklist-status/bulk", {
+                    account_id: accountId,
+                    checklist_ids: [checklist.id],
+                    is_completed: true,
+                    completed_at: new Date().toISOString(),
+                });
+            }
+            alert("File uploaded for all accounts!");
+            handleCloseUploadModal();
+            if (onRefresh) onRefresh();
+        } catch (err) {
+            alert("Upload failed.");
+        }
+    };
 
     // Memoized filtered steps based on user assignment
     const filteredSteps = React.useMemo(() => {
@@ -363,9 +478,41 @@ const ChecklistTable = ({
         );
     }
 
+    // Scroll position preservation
+    const scrollContainerRef = React.useRef(null);
+    // Use a unique key for this table (could be improved if multiple tables)
+    const SCROLL_KEY = "checklistTableScroll";
+
+    // Restore scroll position on mount
+    React.useEffect(() => {
+        const saved = localStorage.getItem(SCROLL_KEY);
+        if (scrollContainerRef.current && saved) {
+            try {
+                const { left, top } = JSON.parse(saved);
+                scrollContainerRef.current.scrollLeft = left;
+                scrollContainerRef.current.scrollTop = top;
+            } catch {}
+        }
+    }, []);
+
+    // Save scroll position on scroll
+    const handleScroll = React.useCallback(() => {
+        if (scrollContainerRef.current) {
+            localStorage.setItem(
+                SCROLL_KEY,
+                JSON.stringify({
+                    left: scrollContainerRef.current.scrollLeft,
+                    top: scrollContainerRef.current.scrollTop,
+                })
+            );
+        }
+    }, []);
+
     return (
         <div className="w-full h-full overflow-hidden">
             <div
+                ref={scrollContainerRef}
+                onScroll={handleScroll}
                 className={`shadow-lg rounded-lg border border-gray-200 bg-white h-full overflow-x-auto overflow-y-auto ${
                     totalColumns <= 4 ? "max-w-fit" : ""
                 }`}
@@ -514,6 +661,53 @@ const ChecklistTable = ({
                                                         </svg>
                                                         Remarks / Files
                                                     </span>
+                                                    {checklist.requires_document && (
+                                                        <span
+                                                            role="button"
+                                                            tabIndex={0}
+                                                            title="Upload file for all accounts"
+                                                            className="ml-2 cursor-pointer text-white hover:text-blue-200"
+                                                            onClick={() =>
+                                                                handleOpenUploadModal(
+                                                                    checklist,
+                                                                    step,
+                                                                    sub
+                                                                )
+                                                            }
+                                                            onKeyPress={(e) => {
+                                                                if (
+                                                                    e.key ===
+                                                                        "Enter" ||
+                                                                    e.key ===
+                                                                        " "
+                                                                ) {
+                                                                    handleOpenUploadModal(
+                                                                        checklist,
+                                                                        step,
+                                                                        sub
+                                                                    );
+                                                                }
+                                                            }}
+                                                        >
+                                                            {/* Upload Icon */}
+                                                            <svg
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                className="w-4 h-4"
+                                                                fill="none"
+                                                                viewBox="0 0 24 24"
+                                                                stroke="currentColor"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={
+                                                                        2
+                                                                    }
+                                                                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M16 12l-4-4m0 0l-4 4m4-4v12"
+                                                                />
+                                                            </svg>
+                                                        </span>
+                                                    )}
                                                 </div>
                                             </th>,
                                         ]
@@ -676,6 +870,15 @@ const ChecklistTable = ({
                     </tbody>
                 </table>
             </div>
+            {uploadModal.open && (
+                <UploadFileForChecklistModal
+                    checklist={uploadModal.checklist}
+                    step={uploadModal.step}
+                    sub={uploadModal.sub}
+                    onUpload={handleUploadFileForChecklist}
+                    onClose={handleCloseUploadModal}
+                />
+            )}
         </div>
     );
 };
