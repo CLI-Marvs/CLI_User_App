@@ -69,6 +69,7 @@ import SurveyReviewView from "./views/pages/surveyrelatedreportsViews/SurveyRevi
 import SurveyMainReportView from "./views/pages/surveyrelatedreportsViews/SurveyMainReportView";
 import SurveySummaryView from "./views/pages/surveyrelatedreportsViews/SurveySummaryView";
 import AdminSettingsView from "./views/pages/transactionViews/AdminSettingsView";
+import TransactionViewLogs from "./views/pages/transactionViews/TransactionViewLogs";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, children }) => {
@@ -254,6 +255,10 @@ const App = () => {
                                             path: "markup",
                                             element: <MarkupSettingsView />,
                                         },
+                                        {
+                                            path: "version-logs",
+                                            element: <TransactionViewLogs />,
+                                        },
                                     ],
                                 },
                                 {
@@ -269,9 +274,9 @@ const App = () => {
                                             element: <CheckStreamReportsView />,
                                         },
                                         {
-                                             path: "check-generator/admin-settings",
-                                             element: <AdminSettingsView />,
-                                        }
+                                            path: "check-generator/admin-settings",
+                                            element: <AdminSettingsView />,
+                                        },
                                     ],
                                 },
                             ],
