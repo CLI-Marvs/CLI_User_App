@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { createPortal } from 'react-dom';
+import { createPortal } from "react-dom";
 import { IoIosArrowDown } from "react-icons/io";
 import { MdChevronRight } from "react-icons/md";
 import { GoPlus } from "react-icons/go";
@@ -52,11 +52,15 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
-        if (showReportsSubmenu && reportsButtonRef.current && reportsMenuRef.current) {
+        if (
+            showReportsSubmenu &&
+            reportsButtonRef.current &&
+            reportsMenuRef.current
+        ) {
             const buttonRect = reportsButtonRef.current.getBoundingClientRect();
             const menu = reportsMenuRef.current;
 
-            menu.style.position = 'fixed';
+            menu.style.position = "fixed";
             menu.style.top = `${buttonRect.top}px`;
             menu.style.left = `${buttonRect.right + 8}px`;
         }
@@ -118,9 +122,11 @@ const Sidebar = () => {
             /^\/inquirymanagement\/report\/survey\/[\w-]+$/.test(pathname);
 
         // Fixed switch statement logic
-        if (pathname === "/superadmin/userrightsandpermissions" ||
+        if (
+            pathname === "/superadmin/userrightsandpermissions" ||
             pathname === "/super-admin/user-rights-and-permissions" ||
-            pathname.startsWith("/super-admin")) {
+            pathname.startsWith("/super-admin")
+        ) {
             setInquiryOpen(false);
             setIsInvoiceOpen(false);
             setSuperAdminOpen(true);
@@ -135,7 +141,10 @@ const Sidebar = () => {
             setInquiryOpen(true);
             setSuperAdminOpen(false);
             setIsSalesOpen(false);
-        } else if (pathname === "/sales/customer" || pathname.startsWith("/sales")) {
+        } else if (
+            pathname === "/sales/customer" ||
+            pathname.startsWith("/sales")
+        ) {
             setIsSalesOpen(true);
             setInquiryOpen(false);
             setIsInvoiceOpen(false);
@@ -298,20 +307,26 @@ const Sidebar = () => {
                                         document.getElementById("portal-root")
                                     )}
                             </div>
-                            <Link to="/inquirymanagement/settings/bannersettings">
-                                <ListItem
-                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px]  ${
-                                        location.pathname.startsWith(
-                                            "/inquirymanagement/settings"
-                                        )
-                                            ? "bg-white text-custom-solidgreen font-semibold"
-                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
-                                    }`}
-                                    onClick={() => handleItemClick("/settings")}
-                                >
-                                    Settings
-                                </ListItem>
-                            </Link>
+                            {ALLOWED_EMPLOYEES_CRS.includes(
+                                userLoggedInEmail
+                            ) && (
+                                <Link to="/inquirymanagement/settings/bannersettings">
+                                    <ListItem
+                                        className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px]  ${
+                                            location.pathname.startsWith(
+                                                "/inquirymanagement/settings"
+                                            )
+                                                ? "bg-white text-custom-solidgreen font-semibold"
+                                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen "
+                                        }`}
+                                        onClick={() =>
+                                            handleItemClick("/settings")
+                                        }
+                                    >
+                                        Settings
+                                    </ListItem>
+                                </Link>
+                            )}
                         </div>
                     )}
                     <Link to="/transaction/receivables/transactions">
