@@ -43,6 +43,7 @@ use App\Jobs\BuyerReplyInResolveOrClose;
 use App\Jobs\SendFeedbackNotificationJob;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Jobs\NotifyAssignedCliOfResolvedInquiryJob;
+use App\Mail\DirectEmailResponse;
 
 class ConcernController extends Controller
 {
@@ -371,61 +372,6 @@ class ConcernController extends Controller
     }
 
 
-    //* For saving to gdrive
-    // public function addConcernPublic(Request $request)
-    // {
-    //     try {
-    //         $files = $request->file('files');
-    //         $lastConcern = Concerns::latest()->first();
-    //         $nextId = $lastConcern ? $lastConcern->id + 1 : 1;
-    //         $formattedId = str_pad($nextId, 7, '0', STR_PAD_LEFT);
-
-    //         $ticketId = 'Ticket#24' . $formattedId;
-
-
-    //         $concerns = new Concerns();
-    //         $concerns->details_concern = $request->details_concern;
-    //         $concerns->property = $request->property;
-    //         $concerns->details_message = $request->message;
-    //         $concerns->status = "unresolved";
-    //         $concerns->ticket_id = $ticketId;
-    //         $concerns->user_type = $request->user_type;
-    //         $concerns->buyer_name = $request->fname . ' ' . $request->lname;
-    //         $concerns->mobile_number = $request->mobile_number;
-    //         $concerns->contract_number = $request->contract_number;
-    //         $concerns->unit_number = $request->unit_number;
-    //         $concerns->buyer_email = $request->buyer_email;
-    //         $concerns->inquiry_type = "from_admin";
-    //         $concerns->save();
-
-    //         $this->inquiryReceivedLogs($request, $ticketId);
-
-    //         $fileLinks = [];
-    //         if ($files) {
-    //             foreach ($files as $file) {
-    //                 $fileLink = $this->store($file);
-    //                 $fileLinks[] = $fileLink;
-    //             }
-    //         }
-
-    //         $attachment = !empty($fileLinks) ? json_encode($fileLinks) : null;
-    //         $messages = new Messages();
-    //         $messages->admin_email = $request->admin_email;
-    //         $messages->admin_id = $request->admin_id;
-    //         $messages->attachment = $attachment;
-    //         $messages->ticket_id = $concerns->ticket_id;
-    //         $messages->details_message = $request->message;
-    //         $messages->save();
-
-
-
-    //         return response()->json('Successfully added');
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
-
-
     //*For Cloud Storage
     public function addConcernPublic(Request $request)
     {
@@ -471,12 +417,11 @@ class ConcernController extends Controller
 
             $ticketId = 'Ticket#' . $this->dynamicTicketYear . $formattedId;
 
-
             $concerns = new Concerns();
             $concerns->details_concern = $request->details_concern;
             $concerns->property = $request->property;
             $concerns->details_message = $validatedData['message'];
-            $concerns->status = "unresolved";
+            $concerns->status = $request->status ?? "unresolved";
             $concerns->ticket_id = $ticketId;
             $concerns->user_type = $request->user_type;
             if ($request->user_type === "Others") {
@@ -496,7 +441,35 @@ class ConcernController extends Controller
             $concerns->channels = $request->channels;
             $concerns->suffix_name = $request->suffix;
             $concerns->inquiry_type = "from_admin";
+            $concerns->walkin_transaction_id = $request->walkin_transaction_id ?? null;
+            if ($request->source_from === 'Walk-in') {
+                $assignTo = json_decode($request->assign_to, true);
+                if ($assignTo) {
+                    $this->assignAssigneesToConcern(
+                        is_array($assignTo) ? [$assignTo] : [$assignTo],
+                        $ticketId,
+                        $assignTo['email'],
+                        $assignTo['department']
+                    );
+                }
+                $concerns->assign_to = json_encode(is_array($assignTo) && isset($assignTo[0]) ? $assignTo : [$assignTo]);
+            }
+
             $concerns->save();
+
+            // Update walk-in transaction if an ID was provided so the transaction stores the ticket id
+            if ($request->has('walkin_transaction_id') && $request->walkin_transaction_id) {
+                try {
+                    DB::table('walkin_transactions')
+                        ->where('id', $request->walkin_transaction_id)
+                        ->update([
+                            'ticket_id' => $concerns->ticket_id,
+                            'updated_at' => now(),
+                        ]);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to update walkin transaction for concern: ' . $e->getMessage());
+                }
+            }
 
             $this->inquiryReceivedLogs($request, $ticketId);
             $this->concernsCreatedBy($user, $concerns->id);
@@ -517,7 +490,6 @@ class ConcernController extends Controller
                 SendFeedbackNotificationJob::dispatch($data, $request->buyer_email);
             }
 
-
             $attachment = !empty($filesData) ? json_encode($filesData) : null;
             $messages = new Messages();
             $messages->buyer_email = $request->buyer_email;
@@ -536,6 +508,23 @@ class ConcernController extends Controller
         }
     }
 
+    private function assignAssigneesToConcern($assignees, $ticketId, $assignBy, $assignByDepartment)
+    {
+        $assigneeNames = [];
+        foreach ($assignees as $assignee) {
+            $assigneeNames[] = $assignee['name'];
+            $inquiryAssignee = new InquiryAssignee();
+            $inquiryAssignee->ticket_id = $ticketId;
+            $inquiryAssignee->email = $assignee['email'];
+            $inquiryAssignee->save();
+        }
+
+        // Log the assignment
+        $this->inquiryAssigneeLogs((object)[
+            'assign_by' => $assignBy,
+            'assign_by_department' => $assignByDepartment,
+        ], $assigneeNames, $ticketId);
+    }
 
     public function addConcernFromPreviousInquiry(Request $request)
     {
@@ -885,6 +874,19 @@ class ConcernController extends Controller
             $query = Concerns::query();
             $this->applyFilters($query, $request, $employee);
 
+            $countsQuery = Concerns::query();
+            $this->applyFilters($countsQuery, $request, $employee, true);
+
+            $countsQuery->getQuery()->orders = null;
+
+            $counts = $countsQuery->select(
+                DB::raw("COUNT(*) as total"),
+                DB::raw("COALESCE(SUM(CASE WHEN status = 'Resolved' THEN 1 ELSE 0 END), 0) as resolved_count"),
+                DB::raw("COALESCE(SUM(CASE WHEN status = 'unresolved' THEN 1 ELSE 0 END), 0) as unresolved_count"),
+                DB::raw("COALESCE(SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END), 0) as closed_count")
+            )->first();
+
+
             $latestLogs = $this->getLatestLogsSubquery();
             $latestMessages = $this->getLatestMessage();
             $pinnedSubquery = $this->getPinnedConcernsSubquery($employee);
@@ -912,13 +914,47 @@ class ConcernController extends Controller
                 )
                 ->paginate(20);
 
-            \Log::info($allConcerns);
+            $allConcerns->counts = $counts;
 
-            /* dd($allConcerns); */
-
-            return response()->json($allConcerns);
+            return response()->json([
+                'data' => $allConcerns->items(),
+                'counts' => $counts,
+                'current_page' => $allConcerns->currentPage(),
+                'last_page' => $allConcerns->lastPage(),
+                'per_page' => $allConcerns->perPage(),
+                'total' => $allConcerns->total(),
+            ]);
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getCountAllConcerns(Request $request)
+    {
+        try {
+
+            $totalCount = Concerns::count();
+
+
+            $resolvedCount = Concerns::where('status', 'Resolved')->count();
+            $closedCount = Concerns::where('status', 'Closed')->count();
+            $unresolvedCount = Concerns::where('status', 'unresolved')->count();
+
+
+            $response = [
+                'counts' => [
+                    'all' => $totalCount,
+                    'resolved' => $resolvedCount,
+                    'closed' => $closedCount,
+                    'unresolved' => $unresolvedCount,
+                ],
+            ];
+
+            \Log::info($response);
+
+            return response()->json($response);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error occurred.', 'error' => $e->getMessage()], 500);
         }
     }
 
@@ -933,7 +969,7 @@ class ConcernController extends Controller
             });
     }
 
-    private function applyFilters($query, Request $request, $employee)
+    private function applyFilters($query, Request $request, $employee, $forCounts = false)
     {
         $days = $request->query("days", null);
         $status = $request->query("status", null);
@@ -964,6 +1000,10 @@ class ConcernController extends Controller
 
         if ($employee->department !== 'Customer Relations - Services') {
             $query->whereIn('concerns.ticket_id', $ticketIds);
+        }
+
+        if ($forCounts) {
+            return;
         }
 
         $this->daysAndStatusFilter($status, $days, $query);
@@ -1087,9 +1127,16 @@ class ConcernController extends Controller
             }
         }
 
-        if (!empty($searchParams['startDate'])) {
+        if (!empty($searchParams['startDate']) || !empty($searchParams['endDate'])) {
             $startDate = Carbon::parse($searchParams['startDate'])->setTimezone('Asia/Manila');
-            $query->whereDate('concerns.created_at', '=', $startDate);
+            $endDate = Carbon::parse($searchParams['endDate'])->setTimezone('Asia/Manila');
+            if ($startDate && $endDate) {
+                $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+            } elseif ($startDate) {
+                $query->whereDate('created_at', '>=', $startDate);
+            } elseif ($endDate) {
+                $query->whereDate('created_at', '<=', $endDate);
+            }
         }
 
         if (!empty($searchParams['selectedYear'])) {
@@ -1101,14 +1148,18 @@ class ConcernController extends Controller
         }
 
         if (!empty($searchParams['departments'])) {
-            $departments = $searchParams['departments'];
+            if ($searchParams['departments'] !== "Unassigned") {
+                $departments = $searchParams['departments'];
 
-            if (!is_array($departments)) {
-                $departments = explode(',', $departments);
-            }
+                if (!is_array($departments)) {
+                    $departments = explode(',', $departments);
+                }
 
-            foreach ($departments as $department) {
-                $query->whereJsonContains('assign_to', [['department' => $department]]);
+                foreach ($departments as $department) {
+                    $query->whereJsonContains('assign_to', [['department' => $department]]);
+                }
+            } else {
+                $query->whereNull('assign_to');
             }
         }
 
@@ -1395,6 +1446,7 @@ class ConcernController extends Controller
 
     public function inquiryAssigneeLogs($request, $assignees, $ticketId)
     {
+
         try {
             $inquiry = new InquiryLogs();
             $formattedAssignees = implode(', ', $assignees);
@@ -1429,6 +1481,8 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
+
     public function removeInquiryAssigneeLog($request)
     {
         try {
@@ -1624,9 +1678,6 @@ class ConcernController extends Controller
     public function testApi(Request $request)
     {
         try {
-            \Log::info('testApi', [
-                'content' => $request->all()
-            ]);
             $testData = new BankTransaction();
 
             $testData->bank_name = $request->input('burks');
@@ -1640,6 +1691,8 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
+
     public function removeAssignee(Request $request)
     {
         try {
@@ -1689,70 +1742,7 @@ class ConcernController extends Controller
             return response()->json(['message' => 'Error.', 'error' => $e->getMessage()], 500);
         }
     }
-    // public function removeAssignee(Request $request)
-    // {
-    //     try {
-    //         $user = $request->user();
-    //         $userDepartment = $user->department;
 
-    //         if ($userDepartment !== "CRS") {
-    //             return response()->json(['message' => 'Unauthorized user']);
-    //         }
-
-    //         $assignee = InquiryAssignee::where('ticket_id', $request->ticketId)
-    //             ->where('email', $request->email)
-    //             ->first();
-
-    //         if ($assignee) {
-    //             $assignee->delete();
-    //             $newTicketId = str_replace('#', '', $request->ticketId);
-    //             $data = [
-    //                 'ticketId' => $newTicketId,
-    //                 'email' => $request->email,
-    //             ];
-    //             RemoveAssignees::dispatch($data);
-    //             return response()->json(['message' => 'Assignee removed successfully']);
-    //         }
-
-    //         return response()->json(['message' => 'No assignee found']);
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'Error.', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
-
-
-
-
-    //*For Reassigning
-    // public function reassignInquiry(Request $request)
-    // {
-    //     try {
-    //         $emailContent = "Hey " . $request->firstname . ", inquiry " . $request->ticketId . " has been assigned to you.";
-    //         $prevInquiry = InquiryAssignee::where('ticket_id', $request->ticketId)->first();
-
-
-    //         $concern = Concerns::where("ticket_id", $request->ticketId)->first();
-    //         $concern->resolve_from = $request->department;
-    //         $concern->assign_to = $request->department;
-    //         $concern->save();
-
-    //         $prevInquiry->email = $request->email;
-    //         $prevInquiry->save();
-
-    //         $this->inquiryAssigneeLogs($request);
-    //         /*   JobToPersonnelAssign::dispatch($request->email, $emailContent, $request->email); */
-
-    //         $data = [
-    //             'firstname' => $request->firstname,
-    //          /*    'ticketId' => str_replace('#', '', $request->ticketId), */
-    //             'concernId' => $request->concernId,
-    //         ];
-    //         InquiryAssignedLogs::dispatch($data);
-    //         return response()->json('Successfully reassign');
-    //     } catch (\Exception $e) {
-    //         return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
-    //     }
-    // }
     public function getInquiryLogs($ticketId)
     {
         try {
@@ -1847,7 +1837,9 @@ class ConcernController extends Controller
             $buyer_name = $request->buyer_name;
             $concerns->communication_type = $request->communication_type;
             $concerns->status = "Resolved";
-            $concerns->survey_link = $selectedSurveyType['surveyName']; //Save the survey name to database
+            if ($selectedSurveyType && isset($selectedSurveyType['surveyLink'])) {
+                $concerns->survey_link = $selectedSurveyType['surveyLink'];
+            }
             $buyer_lastname = $request->buyer_lastname;
             $message_id = $request->message_id;
             $concerns->save();
@@ -1863,10 +1855,6 @@ class ConcernController extends Controller
                         'status' => 'Resolved'
                     ];
 
-                    \Log::info([
-                        'datasssssss' => $data,
-                    ]);
-
                     NotifyAssignedCliOfResolvedInquiryJob::dispatch(
                         $assignee['employee_email'],
                         $assignee['name'],
@@ -1880,9 +1868,18 @@ class ConcernController extends Controller
 
             MarkResolvedToCustomerJob::dispatch($request->ticket_id, $buyerEmail, $buyer_lastname, $message_id, $admin_name, $department, $modifiedTicketId, $selectedSurveyType);
 
-
-            if ($selectedSurveyType['surveyName'] !== 'N/A') {
-                SendSurveyLinkEmailJob::dispatch($buyerEmail,  $request->buyer_name, $selectedSurveyType, 'resolve', $modifiedTicketId);
+            if (
+                isset($selectedSurveyType['surveyName']) &&
+                $selectedSurveyType['surveyName'] !== 'N/A' ||
+                strtolower($selectedSurveyType['surveyName']) !== 'n/a'
+            ) {
+                SendSurveyLinkEmailJob::dispatch(
+                    $buyerEmail,
+                    $request->buyer_name,
+                    $selectedSurveyType,
+                    'resolve',
+                    $modifiedTicketId
+                );
             }
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
@@ -1967,7 +1964,7 @@ class ConcernController extends Controller
     {
         $user = $request->user();
 
-        $employees = Employee::select('firstname', 'employee_email', 'department', 'lastname')->get();
+        $employees = Employee::select('id', 'firstname', 'employee_email', 'department', 'lastname')->get();
         return response()->json($employees);
     }
 
@@ -1985,51 +1982,74 @@ class ConcernController extends Controller
 
     public function getMonthlyReports(Request $request)
     {
-
+        // Get the parameters from the request
         $year = $request->year ?? Carbon::now()->year;
         $department = $request->department;
         $project = $request->property;
         $month = $request->month;
-        /* $monthNumber = Carbon::parse($request->propertyMonth)->month; */
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
         $query = Concerns::select(
             DB::raw('EXTRACT(MONTH FROM created_at) as month'),
+            DB::raw('EXTRACT(YEAR FROM created_at) as year'),
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
             DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
             DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
+        );
 
-        )
-            /* ->whereMonth('created_at', $monthNumber) */
-            ->whereYear('created_at', $year);
-
-        if ($department && $department !== 'All') {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+        if ($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
         }
 
+        // Apply department filter
+        if ($department && $department !== 'All') {
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
+        }
+
+        // Apply month filter
         if ($month && $month !== 'All') {
             $query->whereMonth('created_at', $month);
         }
 
+        // Apply project filter
         if ($project && $project !== 'All') {
             $query->where('property', $project);
         }
 
-        $reports = $query->groupBy('month')
-            ->orderBy('month')
-            ->get()
-            ->keyBy('month');
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
+        }
 
-        $allMonths = collect(range(1, 12))->map(function ($month) use ($reports) {
+        // Group by month and order by month
+        $reports = $query->groupBy('month', 'year')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get();
+
+
+        $allMonths = $reports->map(function ($report) {
             return [
-                'month' => $month,
-                'resolved' => $reports->get($month)?->resolved ?? 0,
-                'unresolved' => $reports->get($month)?->unresolved ?? 0,
-                'closed' => $reports->get($month)?->closed ?? 0,
+                'month' => $report->month, // Directly use the month without formatting
+                'year' => $report->year,   // Directly use the year
+                'resolved' => $report->resolved ?? 0,
+                'unresolved' => $report->unresolved ?? 0,
+                'closed' => $report->closed ?? 0,
             ];
         });
 
+        // Return the response as JSON
         return response()->json($allMonths);
     }
+
 
 
     public function getInquiriesPerProperty(Request $request)
@@ -2038,14 +2058,21 @@ class ConcernController extends Controller
         $month = $request->month;
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
+
+
         $query = Concerns::select(
             DB::raw('property'),
             /*   DB::raw('EXTRACT(MONTH FROM created_at) as month'), */
             DB::raw('SUM(case when status = \'Resolved\' then 1 else 0 end) as Resolved'),
             DB::raw('SUM(case when status = \'unresolved\' then 1 else 0 end) as Unresolved'),
             DB::raw('SUM(case when status = \'Closed\' then 1 else 0 end) as Closed')
-        )
-            ->whereYear('created_at', $year);
+        );
+
+        if ($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
 
         if ($project && $project !== 'All') {
             if ($project === "N/A") {
@@ -2063,12 +2090,26 @@ class ConcernController extends Controller
         }
 
         if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
         $concerns = $query->groupBy('property')->get();
         return response()->json($concerns);
     }
+
+
 
     public function getInquiriesPerDepartment(Request $request)
     {
@@ -2076,40 +2117,88 @@ class ConcernController extends Controller
         $month = $request->month;
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
         $query = Concerns::select(
-            DB::raw("COALESCE(
-                (SELECT jsonb_array_elements(assign_to::jsonb)->>'department' 
-                 LIMIT 1), 
-                'Customer Relations - Services'
-            ) as department"),
-            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved'),
+            DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department' as department"),
             DB::raw('COUNT(DISTINCT CASE WHEN status = \'unresolved\' THEN id ELSE NULL END) as unresolved'),
-            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed')
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Closed\' THEN id ELSE NULL END) as closed'),
+            DB::raw('COUNT(DISTINCT CASE WHEN status = \'Resolved\' THEN id ELSE NULL END) as resolved')
         )
-            ->whereYear('created_at', $year)
             ->whereNotNull('status');
 
+        if ($year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
+
+        if ($month !== 'All') {
+            $query->whereMonth('created_at', $month);
+        }
         if ($project && $project !== 'All') {
             $query->where('property', $project);
         }
 
-        if ($month && $month !== 'All') {
-            $query->whereMonth('created_at', $month);
-        }
 
         if ($department && $department !== 'All') {
-            $query->whereRaw("assign_to::jsonb @> ?", [json_encode([['department' => $department]])]);
+            if ($department === 'Unassigned') {
+                $query->whereRaw("assign_to::jsonb @> ?", [json_encode([['department' => null]])]);
+            } else {
+                $query->whereRaw("
+                    EXISTS (
+                        SELECT 1 FROM jsonb_array_elements(assign_to::jsonb) AS elem
+                        WHERE elem->>'department' = ?
+                    )
+                ", [$department]);
+            }
         }
 
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
+        }
+
+
+
+        // Query for total unresolved, closed, resolved, and unassigned concerns
+        $totalUnassigned = Concerns::selectRaw("
+        COUNT(DISTINCT CASE WHEN status = 'unresolved' AND assign_to IS NULL THEN id ELSE NULL END) as total_unresolved,
+        COUNT(DISTINCT CASE WHEN status = 'Closed' AND assign_to IS NULL THEN id ELSE NULL END) as total_closed,
+        COUNT(DISTINCT CASE WHEN status = 'Resolved' AND assign_to IS NULL THEN id ELSE NULL END) as total_resolved,
+        COUNT(DISTINCT CASE WHEN assign_to IS NULL THEN id ELSE NULL END) as total_unassigned,
+        COUNT(DISTINCT id) as total_all
+    ")
+            ->whereNotNull('status');
+
+        if ($project && $project !== 'All') {
+            $totalUnassigned->where('property', $project);
+        }
+        if ($year !== 'All') {
+            $totalUnassigned->whereYear('created_at', $year);
+        }
+
+        if ($month !== 'All') {
+            $totalUnassigned->whereMonth('created_at', $month);
+        }
+        $totalCounts = $totalUnassigned->first();
+
         $concerns = $query
-            ->groupBy('department')
-            ->orderBy('department') // Optional: For consistent ordering
+            ->groupBy(DB::raw("jsonb_array_elements(assign_to::jsonb)->>'department'"))
+            ->orderBy('department')
             ->get();
 
-        return response()->json($concerns);
+        return response()->json([
+            'departments' => $concerns,
+            'totalUnassigned' => $totalCounts,
+        ]);
     }
-
 
     /**
      * Get Inquiries per channel data
@@ -2120,14 +2209,18 @@ class ConcernController extends Controller
         $month = $request->month;
         $project = $request->property;
         $year = $request->year ?? Carbon::now()->year;
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
 
-        $query = Concerns::select('channels', DB::raw('COUNT(*) as total'))
+        $query = Concerns::select('channels', DB::raw('COUNT(*) as total'));
 
-            ->whereYear('created_at', $year);
+        if ($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
 
         if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
         if ($month && $month !== 'All') {
@@ -2136,6 +2229,18 @@ class ConcernController extends Controller
 
         if ($project && $project !== 'All') {
             $query->where('property', $project);
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
         $query->orderByRaw("
@@ -2164,9 +2269,9 @@ class ConcernController extends Controller
             return $item;
         });
 
-
         return response()->json($inquiryChannels);
     }
+
 
     public function getCommunicationType(Request $request)
     {
@@ -2174,16 +2279,19 @@ class ConcernController extends Controller
         $department = $request->department;
         $month = $request->month;
         $project = $request->property;
+        $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+        $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
 
 
         // Query to count each <communication_t></communication_t>ype grouped by property
-        $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'))
+        $query = Concerns::select('communication_type', DB::raw('COUNT(*) as total'));
 
-            ->whereYear('created_at', $year);
-
+        if ($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
 
         if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
         if ($month && $month !== 'All') {
@@ -2192,6 +2300,18 @@ class ConcernController extends Controller
 
         if ($project && $project !== 'All') {
             $query->where('property', $project);
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
         $query->orderByRaw("
@@ -2205,7 +2325,6 @@ class ConcernController extends Controller
         ");
 
         $communicationTypes = $query->groupBy('communication_type')->get();
-
 
         $mappedCommunicationTypes = $communicationTypes->map(function ($item) {
             switch ($item->communication_type) {
@@ -2228,9 +2347,9 @@ class ConcernController extends Controller
             return $item;
         });
 
+        
         return response()->json($mappedCommunicationTypes);
     }
-
 
 
     public function getInquiriesByCategory(Request $request)
@@ -2241,17 +2360,21 @@ class ConcernController extends Controller
             $department = $request->department;
             $month = $request->month;
             $year = $request->year ?? Carbon::now()->year;
+            $startDate = $request->startDate ? Carbon::parse($request->startDate)->setTimezone('Asia/Manila')->toDateString() : null;
+            $endDate = $request->endDate ? Carbon::parse($request->endDate)->setTimezone('Asia/Manila')->toDateString() : null;
         } catch (\Exception $e) {
             return response()->json(['error' => 'Invalid month format'], 400);
         }
 
         $department = $request->department;
-        $query = Concerns::select('details_concern', DB::raw('COUNT(*) as total'))
+        $query = Concerns::select('details_concern', DB::raw('COUNT(*) as total'));
 
-            ->whereYear('created_at', $year);
+        if ($year && $year !== 'All') {
+            $query->whereYear('created_at', $year);
+        }
 
         if ($department && $department !== "All") {
-            $query->whereRaw("resolve_from::jsonb @> ?", json_encode([['department' => $department]]));
+            $query->whereRaw("assign_to::jsonb @> ?", json_encode([['department' => $department]]));
         }
 
         if ($project && $project !== 'All') {
@@ -2260,6 +2383,18 @@ class ConcernController extends Controller
 
         if ($month && $month !== 'All') {
             $query->whereMonth('created_at', $month);
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween(DB::raw('DATE(created_at)'), [$startDate, $endDate]);
+        }
+        // If only start date is provided, filter from start date to present
+        elseif ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate); // Using whereDate for exact date match
+        }
+        // If only end date is provided, filter from start to end date
+        elseif ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate); // Using whereDate for exact date match
         }
 
         $concerns = $query->groupBy('details_concern')->get();
@@ -2530,9 +2665,9 @@ class ConcernController extends Controller
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
+
     public function fromBuyerEmail($buyerData, $buyerDataErratum)
     {
-
         $responses  = [];
 
         if (!empty($buyerData)) {
@@ -2603,6 +2738,7 @@ class ConcernController extends Controller
 
         return $responses;
     }
+
 
     public function buyerReplyNotif($ticketId, $concernId, $message)
     {

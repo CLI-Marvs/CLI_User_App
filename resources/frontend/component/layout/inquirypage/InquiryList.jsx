@@ -13,6 +13,10 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useSearchParams, useLocation } from "react-router-dom";
 import Spinner from "../../../util/Spinner";
+import Skeletons from "../../Skeletons";
+import { CircularProgress } from "@mui/material";
+import { sortByNameAlphabetically } from "./utils/sort";
+
 const InquiryList = () => {
     const location = useLocation();
 
@@ -43,11 +47,15 @@ const InquiryList = () => {
         searchFilter,
         user,
         dataCount,
+        dataFilterCount,
+        setDataFilterCount,
         setSpecificAssigneeCsr,
         specificAssigneeCsr,
         department,
         loading,
         allEmployees,
+        countAllConcerns,
+        getCountAllConcerns,
         selectedOption,
         setSelectedOption,
         activeDayButton,
@@ -56,8 +64,19 @@ const InquiryList = () => {
         setSearchSummary,
         resultSearchActive,
         setResultSearchActive,
+        daysActive,
+        setDaysActive,
+        startDate,
+        setStartDate,
+        endDate,
+        setEndDate,
+        setAssignedToMeActive,
+        assignedToMeActive,
+
         /*  setHasAttachments,
         hasAttachments */
+        userAccessData,
+        canWrite,
     } = useStateContext();
 
     const propertyParam = searchFilter?.selectedProperty;
@@ -66,6 +85,8 @@ const InquiryList = () => {
     const channelsParam = searchFilter?.channels;
     const categoryParam = searchFilter?.category;
     const departmentParam = searchFilter?.departments;
+    const startDateParam = searchFilter?.startDate;
+    const endDateParam = searchFilter?.endDate;
     const monthParam = searchFilter?.selectedMonth;
     const yearParam = searchFilter?.selectedYear;
 
@@ -83,13 +104,16 @@ const InquiryList = () => {
     const [selectedMonth, setSelectedMonth] = useState("");
     const [hasAttachments, setHasAttachments] = useState(false);
     const { propertyNamesList, categories } = useStateContext();
-    const [assignedToMeActive, setAssignedToMeActive] = useState(false);
-    const [startDate, setStartDate] = useState(null);
+
     const [isFilterVisible, setIsFilterVisible] = useState(false);
     const [isOpen, setIsOpen] = useState(false);
     const [lastActivity, setLastActivity] = useState(null);
     const filterBoxRef = useRef(null);
     const [isOpenSelect, setIsOpenSelect] = useState(false);
+
+    const canAddInquiry =
+        canWrite("Inquiry Management") ||
+        user?.department === "Customer Relations - Services";
 
     const handleSelect = (option) => {
         onChange(option);
@@ -105,18 +129,27 @@ const InquiryList = () => {
 
     const handleRefresh = () => {
         setResultSearchActive(false);
-        if (daysFilter) {
-            setDaysFilter(null);
-            setActiveDayButton(null);
-        } else if (statusFilter) {
-            setStatusFilter("All");
-        } else if (searchFilter) {
+
+        // Reset day filter states
+        setDaysFilter(null);
+        setActiveDayButton(null);
+        setDaysActive(false);
+
+        // Reset other filters
+        if (statusFilter) {
+            setSelectedOption("All");
+            setStatusFilter(null);
+        }
+        if (searchFilter) {
             setSearchFilter({});
-        } else if (specificAssigneeCsr) {
+        }
+        if (specificAssigneeCsr) {
             setSpecificAssigneeCsr("");
             setAssignedToMeActive(false);
         }
+
         setStartDate(null);
+        setEndDate(null);
 
         if (specificAssigneeCsr !== "" && daysFilter !== null) {
             setSpecificAssigneeCsr("");
@@ -126,6 +159,7 @@ const InquiryList = () => {
 
         getAllConcerns();
     };
+
 
     const displayAll = () => {
         setDaysFilter(null);
@@ -143,10 +177,6 @@ const InquiryList = () => {
 
     const toggleFilterBox = () => {
         setIsFilterVisible((prev) => !prev);
-    };
-
-    const handleDateChange = (date) => {
-        setStartDate(date);
     };
 
     const handleClickOutside = (event) => {
@@ -214,8 +244,10 @@ const InquiryList = () => {
     // };
 
     const handleDayClick = (day) => {
+        setDaysActive(true);
         setActiveDayButton((prev) => {
             if (prev === day) {
+                setDaysActive(!daysActive);
                 setDaysFilter("");
                 return null;
             }
@@ -237,6 +269,7 @@ const InquiryList = () => {
 
     const handleAssignedToMeClick = () => {
         setAssignedToMeActive(!assignedToMeActive);
+        setDaysActive(!daysActive);
         if (assignedToMeActive) {
             setSpecificAssigneeCsr("");
             setCurrentPage(0);
@@ -260,51 +293,44 @@ const InquiryList = () => {
             .replace(/\b\w/g, (char) => char.toUpperCase());
     };
 
-       const formattedPropertyNames = [
-           "N/A",
-           ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
-               ? propertyNamesList
-                     .filter((item) => !item.toLowerCase().includes("phase"))
-                     .map((item) => {
-                         // First trim to remove any whitespace or \n
-                         let formattedItem = item.trim();
+    const formattedPropertyNames = [
+        "N/A",
+        ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
+            ? propertyNamesList
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => {
+                    let formattedItem = formatFunc(item);
 
-                         // Apply the formatting function
-                         formattedItem = formatFunc(formattedItem);
+                    // Capitalize each word in the string
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return (
+                                word.charAt(0).toUpperCase() +
+                                word.slice(1).toLowerCase()
+                            );
+                        })
+                        .join(" ");
 
-                         // Split and clean each word
-                         formattedItem = formattedItem
-                             .split(" ")
-                             .map((word) => word.trim()) // Trim each word
-                             .filter((word) => word.length > 0) // Remove empty strings
-                             .map((word) => {
-                                 // Check for specific words that need to be fully capitalized
-                                 if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                     return word.toUpperCase();
-                                 }
-                                 // Capitalize the first letter of all other words
-                                 return (
-                                     word.charAt(0).toUpperCase() +
-                                     word.slice(1).toLowerCase()
-                                 );
-                             })
-                             .join(" ");
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
 
-                         // Replace specific names if needed
-                         if (formattedItem === "Casamira South") {
-                             formattedItem = "Casa Mira South";
-                         }
-
-                         // Final trim to ensure no leftover spaces
-                         return formattedItem.trim();
-                     })
-                     .sort((a, b) => {
-                         if (a === "N/A") return -1;
-                         if (b === "N/A") return 1;
-                         return a.localeCompare(b);
-                     })
-               : []),
-       ];
+                    return formattedItem;
+                })
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
+            : []),
+    ];
 
     const monthNames = {
         "01": "January",
@@ -368,7 +394,7 @@ const InquiryList = () => {
     };
 
     const handleSearch = () => {
-        setResultSearchActive(true);
+
         let summaryParts = []; // Array to hold each part of the summary
 
         if (category) summaryParts.push(`Category: ${category}`);
@@ -385,14 +411,20 @@ const InquiryList = () => {
                 channels === "Walk in"
                     ? "Walk-in"
                     : channels === "Social media"
-                    ? "Social Media"
-                    : channels;
+                        ? "Social Media"
+                        : channels;
             summaryParts.push(`Channel: ${formattedChannels}`);
         }
         if (departments) summaryParts.push(`Department: ${departments}`);
         if (ticket) summaryParts.push(`Ticket: ${ticket}`);
-        if (startDate)
+        if (startDate && endDate) {
             summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+            summaryParts.push(`End Date: ${formatDate(endDate)}`);
+        } else if (startDate) {
+            summaryParts.push(`Start Date: ${formatDate(startDate)}`);
+        } else if (endDate) {
+            summaryParts.push(`End Date: ${formatDate(endDate)}`);
+        }
         if (selectedProperty)
             summaryParts.push(`Property: ${selectedProperty}`);
         if (selectedMonth)
@@ -401,6 +433,12 @@ const InquiryList = () => {
         if (hasAttachments) summaryParts.push(`Attachments: Yes`);
 
         setSearchSummary(summaryParts);
+
+        if (summaryParts.length > 0) {
+            setResultSearchActive(true);
+        } else {
+            setResultSearchActive(false);
+        }
 
         setSearchFilter({
             name,
@@ -412,6 +450,7 @@ const InquiryList = () => {
             departments,
             ticket,
             startDate,
+            endDate,
             selectedProperty,
             hasAttachments,
             selectedMonth,
@@ -434,88 +473,11 @@ const InquiryList = () => {
         setSelectedYear("");
         setSelectedMonth("");
         setDepartments("");
+        setStartDate(null);
+        setEndDate(null);
     };
 
-    useEffect(
-        () => {
-            /*   console.log("categoryParam", categoryParam);
-        console.log("statusParam", statusParam);
-        console.log("monthParam", monthParam);
-        console.log("yearParam", yearParam);
-        console.log("departmentParam", departmentParam);
-        console.log("channelsParam", channelsParam);
- */
 
-            if (
-                propertyParam ||
-                statusParam ||
-                monthParam ||
-                yearParam ||
-                departmentParam ||
-                channelsParam ||
-                categoryParam
-            ) {
-                setResultSearchActive(true);
-
-                let summaryParts = []; // Array to hold each part of the summary
-
-                if (categoryParam)
-                    summaryParts.push(`Category: ${categoryParam}`);
-                if (statusParam) {
-                    const displayStatus =
-                        statusParam === "unresolved"
-                            ? "Unresolved"
-                            : statusParam;
-                    summaryParts.push(`Status: ${displayStatus}`);
-                }
-                if (name) summaryParts.push(`Name: ${name}`);
-                if (typeParam) summaryParts.push(`Type: ${typeParam}`);
-                if (email) summaryParts.push(`Email: ${email}`);
-                if (channelsParam) {
-                    // Format 'Walk in' to 'Walk-in'
-                    const formattedChannel =
-                        channelsParam === "Walk in"
-                            ? "Walk-in"
-                            : channelsParam === "Social media"
-                            ? "Social Media"
-                            : channelsParam;
-                    summaryParts.push(`Channel: ${formattedChannel}`);
-                }
-                if (departmentParam)
-                    summaryParts.push(`Department: ${departmentParam}`);
-                if (ticket) summaryParts.push(`Ticket: ${ticket}`);
-                if (startDate)
-                    summaryParts.push(`Start Date: ${formatDate(startDate)}`);
-                if (propertyParam)
-                    summaryParts.push(`Property: ${propertyParam}`);
-                if (yearParam) summaryParts.push(`Year: ${yearParam}`);
-                if (monthParam)
-                    summaryParts.push(`Month: ${formatMonth(monthParam)}`);
-                if (hasAttachments) summaryParts.push(`Attachments: Yes`);
-
-                setSearchSummary(summaryParts);
-
-                /*   setSearchFilter({
-            name,
-            category: categoryParam,
-            type: typeParam,
-            status: statusParam,
-            email,
-            channels: channelsParam,
-            departments: departmentParam,
-            ticket,
-            startDate,
-            selectedProperty: propertyParam,
-            hasAttachments,
-            selectedMonth: monthParam,
-            selectedYear: yearParam,
-        }); */
-            }
-        },
-        [
-            /* propertyParam, statusParam, departmentParam, monthParam, yearParam */
-        ]
-    );
 
     useEffect(() => {
         if (isFilterVisible) {
@@ -534,6 +496,7 @@ const InquiryList = () => {
 
     useEffect(() => {
         updateLastActivity();
+        getCountAllConcerns();
         getAllConcerns();
     }, [
         searchFilter,
@@ -545,61 +508,60 @@ const InquiryList = () => {
 
     return (
         <>
-            <div className="h-screen max-w-full bg-custom-grayFA px-[20px]">
+            <div className="relative h-screen max-w-full bg-custom-grayFA px-[20px] z-10">
                 <div className="bg-custom-grayFA">
                     <div className="relative flex justify-start gap-3 pt-1">
-                        <div className="relative w-[604px]">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth="1.5"
-                                stroke="currentColor"
-                                className="size-4 absolute left-3 top-4 text-gray-500"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                        {canWrite && (
+                            <div className="relative w-[604px]">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth="1.5"
+                                    stroke="currentColor"
+                                    className="size-4 absolute left-3 top-4 text-gray-500"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                                    />
+                                </svg>
+                                <input
+                                    type="text"
+                                    readOnly={true}
+                                    onClick={toggleFilterBox}
+                                    className="h-[47px] w-[606px] bg-custom-grayF1 rounded-[10px] pl-9 pr-6 text-sm"
+                                    placeholder="Search"
                                 />
-                            </svg>
-                            <input
-                                type="text"
-                                readOnly={true}
-                                onClick={toggleFilterBox}
-                                className="h-[47px] w-[606px] bg-custom-grayF1 rounded-[10px] pl-9 pr-6 text-sm"
-                                placeholder="Search"
-                            />
-                            <svg
-                                onClick={toggleFilterBox}
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={1.5}
-                                stroke="currentColor"
-                                className="size-[24px] absolute right-3 top-3 text-custom-bluegreen hover:bg-gray-200 cursor-pointer"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5"
-                                />
-                            </svg>
-                        </div>
+                                <svg
+                                    onClick={toggleFilterBox}
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    strokeWidth={1.5}
+                                    stroke="currentColor"
+                                    className="size-[24px] absolute right-3 top-3 text-custom-bluegreen hover:bg-gray-200 cursor-pointer"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        d="M6 13.5V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m12-3V3.75m0 9.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 3.75V16.5m-6-9V3.75m0 3.75a1.5 1.5 0 0 1 0 3m0-3a1.5 1.5 0 0 0 0 3m0 9.75V10.5"
+                                    />
+                                </svg>
+                            </div>
+                        )}
                         <div className="flex items-center">
-                            {user?.department ===
-                                "Customer Relations - Services" && (
+                            {canAddInquiry && (
                                 <button
                                     onClick={handleOpenModal}
-                                    className="h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]"
+                                    className="h-[38px] w-[121px] gradient-btn5 text-white text-xs rounded-[10px]"
                                 >
-                                    {" "}
                                     <span className="text-[18px]">+</span> Add
                                     Inquiry
                                 </button>
                             )}
                         </div>
-
                         {isFilterVisible && (
                             <div
                                 ref={filterBoxRef}
@@ -643,7 +605,8 @@ const InquiryList = () => {
                                                 <option value=" ">
                                                     Select Category
                                                 </option>
-                                                {categories && categories.map(
+                                                {categories && 
+                                                sortByNameAlphabetically(categories, ["Other Concerns"]).map(
                                                     (category) => (
                                                         <option
                                                             key={category.id}
@@ -745,7 +708,7 @@ const InquiryList = () => {
                                     <div className="flex relative">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
-                                            Channels
+                                            Channel
                                         </label>
                                         <div className="flex bg-red-900 justify-start w-full relative">
                                             <label
@@ -763,7 +726,7 @@ const InquiryList = () => {
                                             >
                                                 <option value="">
                                                     {" "}
-                                                    Select Channels
+                                                    Select Channel
                                                 </option>
                                                 <option value="Email">
                                                     Email
@@ -778,7 +741,7 @@ const InquiryList = () => {
                                                     Website
                                                 </option>
                                                 <option value="Social media">
-                                                    Social media
+                                                    Social Media
                                                 </option>
                                                 <option value="Branch Tablet">
                                                     Branch Table
@@ -831,11 +794,12 @@ const InquiryList = () => {
                                                             .filter(
                                                                 (department) =>
                                                                     department !==
-                                                                        null &&
+                                                                    null &&
                                                                     department !==
-                                                                        undefined &&
-                                                                    department !==
-                                                                        "NULL"
+                                                                    undefined &&
+                                                                    department !== "NULL" &&
+                                                                    department !== "IT" &&
+                                                                    department !== "Digital Innovation"
                                                             )
                                                     ),
                                                 ]
@@ -854,6 +818,48 @@ const InquiryList = () => {
                                                             </option>
                                                         )
                                                     )}
+                                                <option value="Unassigned">
+                                                    {" "}
+                                                    Unassigned
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex relative">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Property
+                                        </label>
+                                        <div className="fle justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
+                                            </label>
+                                            <select
+                                                className="w-full border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                onChange={handleSelectProperty}
+                                                value={selectedProperty}
+                                            >
+                                                <option value="">
+                                                    Select Property
+                                                </option>
+                                                {formattedPropertyNames.map(
+                                                    (item, index) => {
+                                                        return (
+                                                            <option
+                                                                key={index}
+                                                                value={item}
+                                                            >
+                                                                {item}
+                                                            </option>
+                                                        );
+                                                    }
+                                                )}
                                             </select>
                                         </div>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
@@ -893,50 +899,87 @@ const InquiryList = () => {
                                             <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
                                                 Date
                                             </label>
-                                            <div className="relative">
-                                                <DatePicker
-                                                    selected={startDate}
-                                                    onChange={handleDateChange}
-                                                    className="border-b-1 outline-none w-[146px] text-sm px-[8px]"
-                                                    calendarClassName="custom-calendar"
-                                                />
+                                            <div className="flex gap-[15px]">
+                                                <div className="flex">
+                                                    <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-max pr-[10px]">
+                                                        From
+                                                    </label>
+                                                    <div className="relative">
+                                                        <DatePicker
+                                                            selected={startDate}
+                                                            onChange={(
+                                                                date
+                                                            ) => {
+                                                                setStartDate(
+                                                                    date
+                                                                );
+                                                                setSelectedYear(
+                                                                    ""
+                                                                );
+                                                                setSelectedMonth(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                            onFocus={() => {
+                                                                setSelectedYear(
+                                                                    ""
+                                                                );
+                                                                setSelectedMonth(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                            className="border-b-1 outline-none w-[180px] text-sm px-[8px]"
+                                                            calendarClassName="custom-calendar"
+                                                        />
 
-                                                <img
-                                                    src={DateLogo}
-                                                    alt="date"
-                                                    className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
-                                                />
+                                                        <img
+                                                            src={DateLogo}
+                                                            alt="date"
+                                                            className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex">
+                                                    <label className="flex justify-end items-end text-custom-bluegreen text-[12px] w-max px-[10px]">
+                                                        To
+                                                    </label>
+                                                    <div className="relative">
+                                                        <DatePicker
+                                                            selected={endDate}
+                                                            onChange={(
+                                                                date
+                                                            ) => {
+                                                                setEndDate(
+                                                                    date
+                                                                );
+                                                                setSelectedYear(
+                                                                    ""
+                                                                );
+                                                                setSelectedMonth(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                            onFocus={() => {
+                                                                setSelectedYear(
+                                                                    ""
+                                                                );
+                                                                setSelectedMonth(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                            className="border-b-1 outline-none w-full text-sm px-[8px]"
+                                                            calendarClassName="custom-calendar"
+                                                            minDate={startDate}
+                                                        />
+
+                                                        <img
+                                                            src={DateLogo}
+                                                            alt="date"
+                                                            className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="flex relative">
-                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
-                                                {" "}
-                                                Property
-                                            </label>
-                                            <select
-                                                className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
-                                                onChange={handleSelectProperty}
-                                                value={selectedProperty}
-                                            >
-                                                <option value="">
-                                                    Select Property
-                                                </option>
-                                                {formattedPropertyNames.map(
-                                                    (item, index) => {
-                                                        return (
-                                                            <option
-                                                                key={index}
-                                                                value={item}
-                                                            >
-                                                                {item}
-                                                            </option>
-                                                        );
-                                                    }
-                                                )}
-                                            </select>
-                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                <IoIosArrowDown />
-                                            </span>
                                         </div>
                                     </div>
                                     <div className="flex gap-3">
@@ -948,11 +991,13 @@ const InquiryList = () => {
                                                 <select
                                                     className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
                                                     value={selectedYear}
-                                                    onChange={(e) =>
+                                                    onChange={(e) => {
                                                         setSelectedYear(
                                                             e.target.value
-                                                        )
-                                                    }
+                                                        );
+                                                        setStartDate(null);
+                                                        setEndDate(null);
+                                                    }}
                                                 >
                                                     <option value="">
                                                         {" "}
@@ -978,18 +1023,20 @@ const InquiryList = () => {
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="flex relative">
-                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
+                                        <div className="flex relative ">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] px-[15px]">
                                                 {" "}
                                                 Month
                                             </label>
                                             <select
                                                 className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
-                                                onChange={(e) =>
+                                                onChange={(e) => {
                                                     setSelectedMonth(
                                                         e.target.value
-                                                    )
-                                                }
+                                                    );
+                                                    setStartDate(null);
+                                                    setEndDate(null);
+                                                }}
                                                 value={selectedMonth}
                                             >
                                                 <option value="">
@@ -1038,9 +1085,6 @@ const InquiryList = () => {
                             </div>
                         )}
                     </div>
-                    {/*  <div className="flex items-center">
-                        <button onClick={handleOpenModal} className='h-[38px] w-[121px] gradient-btn5 text-white  text-xs rounded-[10px]'> <span className='text-[18px]'>+</span> Add Inquiry</button>
-                    </div> */}
                     {resultSearchActive && (
                         <div className="flex flex-col gap-1 p-2 mt-[15px] bg-white w-max rounded-[8px] shadow-custom7 text-sm">
                             <div className="flex flex-col">
@@ -1068,7 +1112,7 @@ const InquiryList = () => {
                         </div>
                     )}
                 </div>
-                <div className="max-w-[1260px] ">
+                <div className="max-w-[1260px]">
                     <div className="flex justify-between items-center h-12 mt-[15px] px-6 bg-white rounded-t-lg mb-1 ">
                         <div className="relative mr-4 ">
                             <button
@@ -1076,12 +1120,14 @@ const InquiryList = () => {
                                 onClick={toggleDropdown}
                             >
                                 {isOpen ? <IoIosArrowUp /> : <IoIosArrowDown />}{" "}
-                                {resultSearchActive ? (
+                                {resultSearchActive ||
+                                    daysActive ||
+                                    assignedToMeActive ? (
                                     dataCount && dataCount === 0 ? (
                                         <p>No Records Found</p>
                                     ) : (
                                         <p>
-                                            {dataCount}{" "}
+                                            {dataFilterCount}{" "}
                                             {data?.length > 1
                                                 ? "Results"
                                                 : "Result"}{" "}
@@ -1089,21 +1135,29 @@ const InquiryList = () => {
                                         </p>
                                     )
                                 ) : (
-                                    <p>{selectedOption}</p>
+                                    <p>
+                                        {selectedOption} (
+                                        {loading ? (
+                                            <CircularProgress size={14} />
+                                        ) : (
+                                           dataFilterCount
+                                        )}
+                                        )
+                                    </p>
                                 )}
                             </button>
 
                             {/* Dropdown Menu */}
                             {isOpen && (
                                 <div className="absolute top-full mt-2 w-48 bg-white border border-gray-200 shadow-lg rounded-md">
-                                    <ul className="py-2">
+                                    <ul className="py-2 ">
                                         <li
-                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                            className={`px-4 py-2 hover:bg-gray-100 cursor-pointer`}
                                             onClick={() =>
                                                 handleOptionClick("All")
                                             }
                                         >
-                                            All
+                                           All ({dataCount?.total ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1111,7 +1165,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Resolved")
                                             }
                                         >
-                                            Resolved
+                                           Resolved ({dataCount?.resolved_count ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1119,7 +1173,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Closed")
                                             }
                                         >
-                                            Closed
+                                            Closed ({dataCount?.closed_count ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1127,7 +1181,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Unresolved")
                                             }
                                         >
-                                            Unresolved
+                                            Unresolved ({dataCount?.unresolved_count ?? <CircularProgress size={14} />})
                                         </li>
                                     </ul>
                                 </div>
@@ -1138,51 +1192,46 @@ const InquiryList = () => {
                                 <div className="flex items-center space-x-2">
                                     {user?.department ===
                                         "Customer Relations - Services" && (
-                                        <button
-                                            onClick={handleAssignedToMeClick}
-                                            className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${
-                                                assignedToMeActive
-                                                    ? "bglightgreen-btn"
-                                                    : "gradient-btn2hover "
-                                            }`}
-                                        >
-                                            <p
-                                                className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${
-                                                    assignedToMeActive
+                                            <button
+                                                onClick={handleAssignedToMeClick}
+                                                className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${assignedToMeActive
                                                         ? "bglightgreen-btn"
-                                                        : "bg-white hover:bg-custom-lightestgreen"
-                                                }
-                                        `}
+                                                        : "gradient-btn2hover "
+                                                    }`}
                                             >
-                                                Assigned to me
-                                            </p>
-                                        </button>
-                                    )}
+                                                <p
+                                                    className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${assignedToMeActive
+                                                            ? "bglightgreen-btn"
+                                                            : "bg-white hover:bg-custom-lightestgreen"
+                                                        }
+                                        `}
+                                                >
+                                                    Assigned to me
+                                                </p>
+                                            </button>
+                                        )}
                                     {dayButtonLabels.map((label) => (
                                         <button
                                             key={label}
                                             onClick={() =>
                                                 handleDayClick(label)
                                             }
-                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${
-                                                activeDayButton === label
+                                            className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label
                                                     ? "bglightgreen-btn hover:bg-custom-lightgreen"
                                                     : "gradient-btn2hover border-custom-lightgreen"
-                                            } hover:bg-custom-lightestgreen ${
-                                                label === "3+ Days"
+                                                } hover:bg-custom-lightestgreen ${label === "3+ Days"
                                                     ? "w-[76px]"
                                                     : label === "2 Days"
-                                                    ? "w-[69px]"
-                                                    : "w-[60px]"
-                                            }`}
+                                                        ? "w-[69px]"
+                                                        : "w-[60px]"
+                                                }`}
                                         >
                                             <p
                                                 className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]
-                                            ${
-                                                activeDayButton === label
-                                                    ? "bglightgreen-btn"
-                                                    : "bg-white hover:bg-custom-lightestgreen"
-                                            }
+                                            ${activeDayButton === label
+                                                        ? "bglightgreen-btn"
+                                                        : "bg-white hover:bg-custom-lightestgreen"
+                                                    }
                                             `}
                                             >
                                                 {label}

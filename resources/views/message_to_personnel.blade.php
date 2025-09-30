@@ -136,7 +136,8 @@
                 Dashboard.</a> </span> </p>
 
 
-    <hr style="border: none; border-top: 1px solid #000; width: 50%; margin: 10px 0 10px 0;">
+    <hr style="border: none; border-top: 1px solid #000; margin: 10px 0; width: 100%; max-width: 620px;">
+
 
 
     <p style="margin-top: 5px;">
@@ -147,7 +148,7 @@
             Please do not reply directly to this email as your message will not be received.
         </strong>
     </p>
-    
+
     <p style="margin: 0; padding: 0;">Thank you,</p>
     <p style="margin: 0; padding: 0;">Cebu Landmasters, Inc.</p>
     <br>

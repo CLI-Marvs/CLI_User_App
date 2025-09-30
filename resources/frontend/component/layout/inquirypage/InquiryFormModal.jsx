@@ -7,6 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { toast } from "react-toastify";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
 import { showToast } from "../../../util/toastUtil";
+import { sortByNameAlphabetically } from "./utils/sort";
 
 const formDataState = {
     fname: "",
@@ -663,7 +664,7 @@ const InquiryFormModal = ({ modalRef }) => {
                                 >
                                     <option value="">(Select)</option>
                                     {categories &&
-                                        categories.map((category) => (
+                                        sortByNameAlphabetically(categories, ["Other Concerns"]).map((category) => (
                                             <option key={category.id}>
                                                 {category.name}
                                             </option>

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { use, useEffect, useRef, useState } from "react";
 import Backbtn from "../../../../../public/Images/Expand_up.svg";
 import { FaTrash } from "react-icons/fa";
 import UserMessages from "./UserMessages";
@@ -18,7 +18,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { toast } from "react-toastify";
-import { showToast } from "../../../util/toastUtil";
+import { showToast } from "../../../util/toastUtil"
 import Alert from "../mainComponent/Alert";
 import AddInfoModal from "./AddInfoModal";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
@@ -27,8 +27,12 @@ import ThreadInquiryFormModal from "./ThreadInquiryFormModal";
 import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
 import { ALLOWED_DEPARTMENT } from "../../../constant/data/allowedDepartment";
 
+import { useSurvey } from '@/context/Survey/SurveyContext';
+
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import SendSurveyModal from "./SendSurveyModal";
+import { sortByNameAlphabetically } from "./utils/sort";
 
 const InquiryThread = () => {
     const [attachedFiles, setAttachedFiles] = useState([]);
@@ -51,6 +55,8 @@ const InquiryThread = () => {
     const [hasAttachments, setHasAttachments] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const { propertyNamesList } = useStateContext();
+    const [endDate, setEndDate] = useState(null);
+
     /*   const [dataConcern, setDataConcern] = useState({}); */
     const {
         messages,
@@ -69,12 +75,15 @@ const InquiryThread = () => {
         isUserTypeChange,
         categories,
     } = useStateContext();
+
+    const { surveyStatus, fetchSurveyStatus } = useSurvey();
     const [chatMessage, setChatMessage] = useState("");
     const userLoggedInEmail = user?.employee_email;
     const userLoggedInDepartment = user?.department; //Holds the user's department
     const [isSearchLoading, setIsSearchLoading] = useState(false);
     const modalRef = useRef(null);
     const modalRef2 = useRef(null);
+    const modalRef3 = useRef(null);
     const resolveModalRef = useRef(null);
     const closeModalRef = useRef(null);
     const navigate = useNavigate();
@@ -84,6 +93,27 @@ const InquiryThread = () => {
     const ticketId = decodeURIComponent(params.id);
     const [dataConcern, setDataConcern] = useState(itemsData || {});
     const [emailMessageID, setEmailMessageID] = useState(null);
+
+
+    function getSurveyFullLink() {
+
+        if (
+            dataConcern?.survey_link &&
+            dataConcern?.survey_link !== "none" &&
+            dataConcern?.survey_link !== "null"
+        ) {
+            const id = ticketId.replace("Ticket#", "").trim();
+            return `${dataConcern.survey_link}/${id}/manual`;
+        }
+        return null;
+    }
+
+    const fullLink = getSurveyFullLink();
+
+    useEffect(() => {
+        fetchSurveyStatus(ticketId);
+    }, [dataConcern]);
+
     const handleDateChange = (date) => {
         setStartDate(date);
     };
@@ -102,16 +132,24 @@ const InquiryThread = () => {
         }));
     };
 
+
+
+    /* useEffect(() => {
+       console.log(surveyStatus);
+    }, [ticketId]); */
+
     useEffect(() => {
         const storedData = JSON.parse(localStorage.getItem("dataConcern"));
         const updatedData = JSON.parse(localStorage.getItem("updatedData"));
 
         if (storedData) {
             setDataConcern(storedData);
+            getSurveyFullLink();
         }
 
         if (updatedData) {
             setDataConcern(updatedData);
+            getSurveyFullLink();
         }
     }, []);
 
@@ -152,45 +190,38 @@ const InquiryThread = () => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => {
-                      // First trim to remove any whitespace or \n
-                      let formattedItem = item.trim();
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => {
+                    let formattedItem = formatFunc(item);
 
-                      // Apply the formatting function
-                      formattedItem = formatFunc(formattedItem);
+                    // Capitalize each word in the string
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return (
+                                word.charAt(0).toUpperCase() +
+                                word.slice(1).toLowerCase()
+                            );
+                        })
+                        .join(" ");
 
-                      // Split and clean each word
-                      formattedItem = formattedItem
-                          .split(" ")
-                          .map((word) => word.trim()) // Trim each word
-                          .filter((word) => word.length > 0) // Remove empty strings
-                          .map((word) => {
-                              // Check for specific words that need to be fully capitalized
-                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                  return word.toUpperCase();
-                              }
-                              // Capitalize the first letter of all other words
-                              return (
-                                  word.charAt(0).toUpperCase() +
-                                  word.slice(1).toLowerCase()
-                              );
-                          })
-                          .join(" ");
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
 
-                      // Replace specific names if needed
-                      if (formattedItem === "Casamira South") {
-                          formattedItem = "Casa Mira South";
-                      }
-
-                      // Final trim to ensure no leftover spaces
-                      return formattedItem.trim();
-                  })
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                    return formattedItem;
+                })
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -223,6 +254,12 @@ const InquiryThread = () => {
     const handleOpenAddInfoModal = () => {
         if (modalRef2.current) {
             modalRef2.current.showModal();
+        }
+    };
+
+    const handleSendSurveyModal = () => {
+        if (modalRef3.current) {
+            modalRef3.current.showModal();
         }
     };
 
@@ -456,8 +493,8 @@ const InquiryThread = () => {
 
     const combineThreadMessages = messages[ticketId]
         ? messages[ticketId]
-              .flat()
-              .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            .flat()
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
         : [];
     const getLatestMessageFromBuyer = combineThreadMessages.find(
         (item) => item.buyer_email
@@ -592,7 +629,7 @@ const InquiryThread = () => {
                         {isFilterVisible && (
                             <div
                                 ref={filterBoxRef}
-                                className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[560px]"
+                                className="absolute left-0 mt-12 p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-[604px]"
                             >
                                 <div className="flex flex-col gap-2">
                                     <div className="flex">
@@ -602,11 +639,11 @@ const InquiryThread = () => {
                                         </label>
                                         <input
                                             type="text"
-                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                             value={name}
                                             onChange={(e) =>
                                                 setName(e.target.value)
                                             }
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
                                         />
                                     </div>
                                     <div className="flex relative">
@@ -625,7 +662,7 @@ const InquiryThread = () => {
                                                 Select Category
                                             </option>
                                             {categories &&
-                                                categories.map((category) => (
+                                                sortByNameAlphabetically(categories, ["Other Concerns"]).map((category) => (
                                                     <option key={category.id}>
                                                         {category.name}
                                                     </option>
@@ -669,6 +706,9 @@ const InquiryThread = () => {
                                                 <option value="Suggestion or Recommendation">
                                                     Suggestion or Recommendation
                                                 </option>
+                                                <option value="No Type">
+                                                    No Type
+                                                </option>
                                             </select>
                                         </div>
 
@@ -701,7 +741,7 @@ const InquiryThread = () => {
                                                 <option value="Resolved">
                                                     Resolved
                                                 </option>
-                                                <option value="Unresolved">
+                                                <option value="unresolved">
                                                     Unresolved
                                                 </option>
                                                 <option value="Closed">
@@ -709,10 +749,12 @@ const InquiryThread = () => {
                                                 </option>
                                             </select>
                                         </div>
+
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
                                             <IoIosArrowDown />
                                         </span>
                                     </div>
+
                                     <div className="flex relative">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
@@ -732,7 +774,8 @@ const InquiryThread = () => {
                                                     setChannels(e.target.value)
                                                 }
                                             >
-                                                <option value=" ">
+                                                <option value="">
+                                                    {" "}
                                                     Select Channel
                                                 </option>
                                                 <option value="Email">
@@ -741,23 +784,27 @@ const InquiryThread = () => {
                                                 <option value="Call">
                                                     Call
                                                 </option>
-                                                <option value="Walk-in">
+                                                <option value="Walk in">
                                                     Walk-in
                                                 </option>
                                                 <option value="Website">
                                                     Website
                                                 </option>
                                                 <option value="Social media">
-                                                    Social media
+                                                    Social Media
                                                 </option>
                                                 <option value="Branch Tablet">
-                                                    Branch Tablet
+                                                    Branch Table
                                                 </option>
                                                 <option value="Internal Endorsement">
                                                     Internal Endorsement
                                                 </option>
+                                                <option value="No Channel">
+                                                    No Channel
+                                                </option>
                                             </select>
                                         </div>
+
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
                                             <IoIosArrowDown />
                                         </span>
@@ -797,11 +844,13 @@ const InquiryThread = () => {
                                                             .filter(
                                                                 (department) =>
                                                                     department !==
-                                                                        null &&
+                                                                    null &&
                                                                     department !==
-                                                                        undefined &&
+                                                                    undefined &&
                                                                     department !==
-                                                                        "NULL"
+                                                                    "NULL" &&
+                                                                    department !== "IT" &&
+                                                                    department !== "Digital Innovation"
                                                             )
                                                     ),
                                                 ]
@@ -820,67 +869,30 @@ const InquiryThread = () => {
                                                             </option>
                                                         )
                                                     )}
+                                                <option value="Unassigned">
+                                                    {" "}
+                                                    Unassigned
+                                                </option>
                                             </select>
                                         </div>
                                         <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
                                             <IoIosArrowDown />
                                         </span>
                                     </div>
-                                    <div className="flex">
+                                    <div className="flex relative">
                                         <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
                                             {" "}
-                                            Email
+                                            Property
                                         </label>
-                                        <input
-                                            type="text"
-                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
-                                            value={email}
-                                            onChange={(e) =>
-                                                setEmail(e.target.value)
-                                            }
-                                        />
-                                    </div>
-                                    <div className="flex">
-                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
-                                            {" "}
-                                            Ticket
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
-                                            value={ticket}
-                                            onChange={(e) =>
-                                                setTicket(e.target.value)
-                                            }
-                                        />
-                                    </div>
-                                    <div className="flex gap-3">
-                                        <div className="flex">
-                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[93px]">
-                                                Date
-                                            </label>
-                                            <div className="relative">
-                                                <DatePicker
-                                                    selected={startDate}
-                                                    onChange={handleDateChange}
-                                                    className="border-b-1 outline-none w-[146px] text-sm px-[8px]"
-                                                    calendarClassName="custom-calendar"
-                                                />
-
-                                                <img
-                                                    src={DateLogo}
-                                                    alt="date"
-                                                    className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="flex relative">
-                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
-                                                {" "}
-                                                Property
+                                        <div className="fle justify-start w-full relative">
+                                            <label
+                                                htmlFor=""
+                                                className="w-full border-b-2"
+                                            >
+                                                {""}
                                             </label>
                                             <select
-                                                className="w-[179px] border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                className="w-full border-b-1 outline-none appearance-none text-sm px-[8px]"
                                                 onChange={handleSelectProperty}
                                                 value={selectedProperty}
                                             >
@@ -900,9 +912,125 @@ const InquiryThread = () => {
                                                     }
                                                 )}
                                             </select>
-                                            <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
-                                                <IoIosArrowDown />
-                                            </span>
+                                        </div>
+                                        <span className="absolute inset-y-0 right-0 flex items-center  pl-3 pointer-events-none">
+                                            <IoIosArrowDown />
+                                        </span>
+                                    </div>
+                                    <div className="flex">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Email
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={email}
+                                            onChange={(e) =>
+                                                setEmail(e.target.value)
+                                            }
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
+                                        />
+                                    </div>
+                                    <div className="flex">
+                                        <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[114px]">
+                                            {" "}
+                                            Ticket
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={ticket}
+                                            onChange={(e) =>
+                                                setTicket(e.target.value)
+                                            }
+                                            className="w-full  border-b-1 outline-none text-sm px-[8px]"
+                                        />
+                                    </div>
+                                    <div className="flex gap-3">
+                                        <div className="flex">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[94px]">
+                                                Date
+                                            </label>
+                                            <div className="flex gap-[15px]">
+                                                <div className="flex">
+                                                    <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-max pr-[10px]">
+                                                        From
+                                                    </label>
+                                                    <div className="relative">
+                                                        <DatePicker
+                                                            selected={startDate}
+                                                            onChange={(
+                                                                date
+                                                            ) => {
+                                                                setStartDate(
+                                                                    date
+                                                                );
+                                                                setSelectedYear(
+                                                                    ""
+                                                                );
+                                                                setSelectedMonth(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                            onFocus={() => {
+                                                                setSelectedYear(
+                                                                    ""
+                                                                );
+                                                                setSelectedMonth(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                            className="border-b-1 outline-none w-[180px] text-sm px-[8px]"
+                                                            calendarClassName="custom-calendar"
+                                                        />
+
+                                                        <img
+                                                            src={DateLogo}
+                                                            alt="date"
+                                                            className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <div className="flex">
+                                                    <label className="flex justify-end items-end text-custom-bluegreen text-[12px] w-max px-[10px]">
+                                                        To
+                                                    </label>
+                                                    <div className="relative">
+                                                        <DatePicker
+                                                            selected={endDate}
+                                                            onChange={(
+                                                                date
+                                                            ) => {
+                                                                setEndDate(
+                                                                    date
+                                                                );
+                                                                setSelectedYear(
+                                                                    ""
+                                                                );
+                                                                setSelectedMonth(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                            onFocus={() => {
+                                                                setSelectedYear(
+                                                                    ""
+                                                                );
+                                                                setSelectedMonth(
+                                                                    ""
+                                                                );
+                                                            }}
+                                                            className="border-b-1 outline-none w-full text-sm px-[8px]"
+                                                            calendarClassName="custom-calendar"
+                                                            minDate={startDate}
+                                                        />
+
+                                                        <img
+                                                            src={DateLogo}
+                                                            alt="date"
+                                                            className="absolute top-[45%] right-0 transform -translate-y-1/2 text-custom-bluegreen size-6 cursor-pointer pointer-events-none"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="flex gap-3">
@@ -914,11 +1042,13 @@ const InquiryThread = () => {
                                                 <select
                                                     className="w-full border-b-1 outline-none appearance-none text-sm absolute px-[8px]"
                                                     value={selectedYear}
-                                                    onChange={(e) =>
+                                                    onChange={(e) => {
                                                         setSelectedYear(
                                                             e.target.value
-                                                        )
-                                                    }
+                                                        );
+                                                        setStartDate(null);
+                                                        setEndDate(null);
+                                                    }}
                                                 >
                                                     <option value="">
                                                         {" "}
@@ -944,18 +1074,20 @@ const InquiryThread = () => {
                                                 </span>
                                             </div>
                                         </div>
-                                        <div className="flex relative">
-                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] w-[65px]">
+                                        <div className="flex relative ">
+                                            <label className="flex justify-start items-end text-custom-bluegreen text-[12px] px-[15px]">
                                                 {" "}
                                                 Month
                                             </label>
                                             <select
-                                                className="w-[179px] border-b-1 outline-none appearance-none text-sm px-[8px]"
-                                                onChange={(e) =>
+                                                className="w-[220px] border-b-1 outline-none appearance-none text-sm px-[8px]"
+                                                onChange={(e) => {
                                                     setSelectedMonth(
                                                         e.target.value
-                                                    )
-                                                }
+                                                    );
+                                                    setStartDate(null);
+                                                    setEndDate(null);
+                                                }}
                                                 value={selectedMonth}
                                             >
                                                 <option value="">
@@ -997,12 +1129,7 @@ const InquiryThread = () => {
                                             className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
                                             onClick={handleSearch}
                                         >
-                                            {/* Search */}
-                                            {isSearchLoading ? (
-                                                <CircularProgress className="spinnerSize" />
-                                            ) : (
-                                                <>Search</>
-                                            )}
+                                            Search
                                         </button>
                                     </div>
                                 </div>
@@ -1069,12 +1196,12 @@ const InquiryThread = () => {
                                                                     );
                                                                 const truncatedName =
                                                                     baseName.length >
-                                                                    30
+                                                                        30
                                                                         ? baseName.slice(
-                                                                              0,
-                                                                              30
-                                                                          ) +
-                                                                          "..."
+                                                                            0,
+                                                                            30
+                                                                        ) +
+                                                                        "..."
                                                                         : baseName;
                                                                 return (
                                                                     <div
@@ -1160,12 +1287,11 @@ const InquiryThread = () => {
                                                                 loading
                                                             }
                                                             className={`flex w-[82px] h-[28px] rounded-[5px] text-white text-xs justify-center items-center 
-                                                        ${
-                                                            loading ||
-                                                            !chatMessage.trim()
-                                                                ? "bg-gray-400 cursor-not-allowed"
-                                                                : "gradient-background3 hover:shadow-custom4"
-                                                        } 
+                                                        ${loading ||
+                                                                    !chatMessage.trim()
+                                                                    ? "bg-gray-400 cursor-not-allowed"
+                                                                    : "gradient-background3 hover:shadow-custom4"
+                                                                } 
                                                     `}
                                                         >
                                                             {loading ? (
@@ -1264,64 +1390,64 @@ const InquiryThread = () => {
                                                                 </div>
                                                                 {attachedFiles.length >
                                                                     0 && (
-                                                                    <div className="mb-2 ">
-                                                                        {attachedFiles.map(
-                                                                            (
-                                                                                file,
-                                                                                index
-                                                                            ) => {
-                                                                                const fileName =
-                                                                                    file.name;
-                                                                                const fileExtension =
-                                                                                    fileName.slice(
-                                                                                        fileName.lastIndexOf(
-                                                                                            "."
-                                                                                        )
-                                                                                    );
-                                                                                const baseName =
-                                                                                    fileName.slice(
-                                                                                        0,
-                                                                                        fileName.lastIndexOf(
-                                                                                            "."
-                                                                                        )
-                                                                                    );
-                                                                                const truncatedName =
-                                                                                    baseName.length >
-                                                                                    30
-                                                                                        ? baseName.slice(
-                                                                                              0,
-                                                                                              30
-                                                                                          ) +
-                                                                                          "..."
-                                                                                        : baseName;
-                                                                                return (
-                                                                                    <div
-                                                                                        key={
-                                                                                            index
-                                                                                        }
-                                                                                        className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
-                                                                                    >
-                                                                                        <span className="text-sm text-gray-700">
-                                                                                            {truncatedName +
-                                                                                                fileExtension}
-                                                                                        </span>
-                                                                                        <button
-                                                                                            type="button"
-                                                                                            onClick={() =>
-                                                                                                removeFile(
-                                                                                                    file.name
-                                                                                                )
+                                                                        <div className="mb-2 ">
+                                                                            {attachedFiles.map(
+                                                                                (
+                                                                                    file,
+                                                                                    index
+                                                                                ) => {
+                                                                                    const fileName =
+                                                                                        file.name;
+                                                                                    const fileExtension =
+                                                                                        fileName.slice(
+                                                                                            fileName.lastIndexOf(
+                                                                                                "."
+                                                                                            )
+                                                                                        );
+                                                                                    const baseName =
+                                                                                        fileName.slice(
+                                                                                            0,
+                                                                                            fileName.lastIndexOf(
+                                                                                                "."
+                                                                                            )
+                                                                                        );
+                                                                                    const truncatedName =
+                                                                                        baseName.length >
+                                                                                            30
+                                                                                            ? baseName.slice(
+                                                                                                0,
+                                                                                                30
+                                                                                            ) +
+                                                                                            "..."
+                                                                                            : baseName;
+                                                                                    return (
+                                                                                        <div
+                                                                                            key={
+                                                                                                index
                                                                                             }
-                                                                                            className="text-red-500"
+                                                                                            className="flex items-center justify-between mb-2 p-2 border bg-white rounded"
                                                                                         >
-                                                                                            Remove
-                                                                                        </button>
-                                                                                    </div>
-                                                                                );
-                                                                            }
-                                                                        )}
-                                                                    </div>
-                                                                )}
+                                                                                            <span className="text-sm text-gray-700">
+                                                                                                {truncatedName +
+                                                                                                    fileExtension}
+                                                                                            </span>
+                                                                                            <button
+                                                                                                type="button"
+                                                                                                onClick={() =>
+                                                                                                    removeFile(
+                                                                                                        file.name
+                                                                                                    )
+                                                                                                }
+                                                                                                className="text-red-500"
+                                                                                            >
+                                                                                                Remove
+                                                                                            </button>
+                                                                                        </div>
+                                                                                    );
+                                                                                }
+                                                                            )}
+                                                                        </div>
+                                                                    )}
                                                             </div>
                                                         </div>
                                                     )}
@@ -1335,23 +1461,20 @@ const InquiryThread = () => {
                                                 <span className="font-semibold">
                                                     {
                                                         /* capitalizeWords() */
-                                                        `${
-                                                            dataConcern?.buyer_firstname ||
-                                                            ""
-                                                        } ${
-                                                            dataConcern?.buyer_middlename ||
-                                                            ""
-                                                        } ${
-                                                            dataConcern?.buyer_lastname ||
-                                                            ""
+                                                        `${dataConcern?.buyer_firstname ||
+                                                        ""
+                                                        } ${dataConcern?.buyer_middlename ||
+                                                        ""
+                                                        } ${dataConcern?.buyer_lastname ||
+                                                        ""
                                                         }`
-                                                    }{" "}
+                                                    }{""}
                                                     {
                                                         /* capitalizeWords() */
                                                         dataConcern?.suffix_name
                                                     }
                                                 </span>
-                                                . Please use the comment section
+                                            . Please use the comment section
                                                 for CLI internal communication.
                                             </p>
                                         </div>
@@ -1362,35 +1485,67 @@ const InquiryThread = () => {
                             {!ALLOWED_DEPARTMENT.includes(
                                 userLoggedInDepartment
                             ) && (
-                                <div className="relative py-2">
-                                    <div className="text-[11px] text-[#B54D4D]">
-                                        <p>
-                                            <span className="font-semibold">
-                                                Note: Only CRS, Turnovers,
-                                                Accounts Management, Sales, and
-                                                Registration & Documentation
-                                                teams can reply directly to
-                                                inquiries, use the comment
-                                                section for internal
-                                                communication.
-                                            </span>
-                                        </p>
+                                    <div className="relative py-2">
+                                        <div className="text-[11px] text-[#B54D4D]">
+                                            <p>
+                                                <span className="font-semibold">
+                                                    Note: Only CRS, Turnovers,
+                                                    Accounts Management, Sales, and
+                                                    Registration & Documentation
+                                                    teams can reply directly to
+                                                    inquiries, use the comment
+                                                    section for internal
+                                                    communication.
+                                                </span>
+                                            </p>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
 
                             <div className="border my-2 border-t-1 border-custom-lightestgreen"></div>
                             <div className="w-full flex justify-end gap-[13px] items-center">
-                                {(dataConcern?.status === "Resolved" ||
-                                    dataConcern?.status === "Closed") && (
-                                    <span
-                                        className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
-                                        onClick={handleOpenAddInfoModal}
-                                    >
-                                        Create new ticket
-                                    </span>
-                                )}
+                                {(dataConcern?.status === "Resolved" || dataConcern?.status === "Closed") && (
+                                    <div className="flex items-center gap-[14px]">
+                                        {surveyStatus === "submitted" ? (
+                                            <div className="flex justify-start items-center px-[8px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
+                                                <p>Survey Submitted</p>
+                                                <IoIosCheckmarkCircle className="size-[18px] text-custom-lightgreen" />
+                                            </div>
+                                        ) : dataConcern?.survey_link !== null ? (    //resolved in CRS inquiry
+                                            fullLink && (
+                                                <div className="flex items-center">
+                                                    <a
+                                                        href={fullLink}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="w-auto font-semibold text-[13px] text-custom-lightgreen underline cursor-pointer"
+                                                    >
+                                                        Input Survey Data
+                                                    </a>
+                                                </div>
 
+                                            )
+                                        ) : (      //resolved in Walin-in
+                                            dataConcern?.status === "Resolved" && (
+                                                <div className="flex items-center">
+                                                    <button
+                                                        onClick={handleSendSurveyModal}
+                                                        className="w-auto font-semibold text-[13px] text-custom-lightgreen underline cursor-pointer"
+                                                    >
+                                                        Input Survey Data
+                                                    </button>
+                                                </div>
+                                            )
+                                        )}
+
+                                        <span
+                                            className="w-auto font-semibold text-[13px] text-[#1A73E8] underline cursor-pointer"
+                                            onClick={handleOpenAddInfoModal}
+                                        >
+                                            Create new ticket
+                                        </span>
+                                    </div>
+                                )}
                                 {dataConcern?.status === "Resolved" ? (
                                     <div className="flex justify-start items-center w-[122px] font-semibold text-[13px] text-custom-lightgreen space-x-1">
                                         <p>Ticket Resolved</p>
@@ -1563,7 +1718,6 @@ const InquiryThread = () => {
                     onupdate={handleUpdate}
                 />
             </div>
-
             <div>
                 <CloseModal
                     modalRef={closeModalRef}
@@ -1572,12 +1726,17 @@ const InquiryThread = () => {
                     onupdate={handleUpdate}
                 />
             </div>
-
             <div>
                 <ThreadInquiryFormModal
                     modalRef={modalRef2}
                     messageRef={getLatestMessageFromBuyer}
                     dataConcern={dataConcern}
+                />
+            </div>
+            <div>
+                <SendSurveyModal
+                    ticketId={ticketId}
+                    modalRef={modalRef3}
                 />
             </div>
         </>

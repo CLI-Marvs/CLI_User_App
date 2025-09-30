@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import CLILogo from "../../../../../public/Images/CLILogo.png";
 import Kent from "../../../../../public/Images/kent.png";
 import apiService from "../../servicesApi/apiService";
@@ -12,16 +13,20 @@ import { startsWith } from "lodash";
 import Alert from "@mui/material/Alert";
 import { MdOutlineMail } from "react-icons/md";
 import FeedbackModal from "./FeedbackModal";
-import Skeleton from 'react-loading-skeleton'
-import 'react-loading-skeleton/dist/skeleton.css'
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
+import { useSurvey } from "../../../context/Survey/SurveyContext";
 
 const Navbar = () => {
-    const { data, ticketId, navBarData, loading, user, getNavBarData } = useStateContext();
+    const { id } = useParams();
+
+    const { data, ticketId, navBarData, loading, user, getNavBarData } =
+        useStateContext();
+    const { survey_title, fetchSurveyTitle, survey_loading } = useSurvey();
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
     const modalRef = useRef(null);
     const dropdownRef = useRef(null);
-
 
     const pathnames = location.pathname.split("/").filter((x) => x);
 
@@ -30,6 +35,15 @@ const Navbar = () => {
             modalRef.current.showModal();
         }
     };
+
+    useEffect(() => {
+        if (
+            (id && location.pathname.includes("/survey/")) ||
+            location.pathname.includes("/surveysettings/")
+        ) {
+            fetchSurveyTitle(id);
+        }
+    }, [id, location.pathname]);
 
     useEffect(() => {
         if (isOpen) {
@@ -42,11 +56,9 @@ const Navbar = () => {
         };
     }, [isOpen]);
 
-
     useEffect(() => {
         getNavBarData();
     }, [ticketId]);
-
 
     /* const capitalizeWords = (name) => {
         if (name) {
@@ -61,7 +73,6 @@ const Navbar = () => {
         }
     }; */
 
-
     const breadcrumbs = [
         ...pathnames.map((value, index) => {
             const routeTo = `/${pathnames.slice(0, index + 1).join("/")}`;
@@ -71,7 +82,7 @@ const Navbar = () => {
             );
 
             if (value.toLowerCase() === "inquirymanagement") {
-                breadcrumbLabel = "Inquiry Management";
+                breadcrumbLabel = "Customer Relations";
                 // Non-linkable
                 return (
                     <span
@@ -135,7 +146,20 @@ const Navbar = () => {
                 );
             }
 
-            if (value.toLowerCase() === "transactionmanagement") {
+            if (value.toLowerCase() === "branch-settings") {
+                breadcrumbLabel = "Branch Settings";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "transaction") {
                 breadcrumbLabel = "Transaction Management";
                 // Non-linkable
                 return (
@@ -148,16 +172,180 @@ const Navbar = () => {
                 );
             }
 
-            if (value.toLowerCase() === "inquirylist") {
-                breadcrumbLabel = "Inquiries";
+            if (value.toLowerCase() === "report") {
+                breadcrumbLabel = "Reports";
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
             }
 
+            if (value.toLowerCase() === "sales") {
+                breadcrumbLabel = "Sales Management";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+            if (breadcrumbLabel === "Customer") {
+                breadcrumbLabel = "Customer Masterlist";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+            if (breadcrumbLabel === "Details") {
+                breadcrumbLabel = "Customer Details";
+                // Non-linkable
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "property-pricing") {
+                breadcrumbLabel = "Property Pricing";
+            }
+            if (value.toLowerCase() === "workflow-notification") {
+                breadcrumbLabel = "Workflow Notification";
+            }
+            if (
+                value.toLowerCase() === "master-lists" ||
+                value.toLowerCase() === "basic-pricing"
+            ) {
+                breadcrumbLabel = "Price List";
+            }
+
+            if (value.toLowerCase() === "surveysettings") {
+                breadcrumbLabel = "Survey Settings";
+            }
+
+            if (value.toLowerCase() === "surveyform") {
+                breadcrumbLabel = "Survey Form";
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            if (id && value === id) {
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {survey_loading ? (
+                            <Skeleton width={200} />
+                        ) : (
+                            survey_title || id
+                        )}
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "payment-scheme") {
+                breadcrumbLabel = "Payment Scheme";
+            }
+            if (value.toLowerCase() === "price-versioning") {
+                breadcrumbLabel = "Price Versioning";
+            }
+            if (value.toLowerCase() === "promotional-pricing") {
+                breadcrumbLabel = "Promotional Pricing";
+            }
+            if (value.toLowerCase() === "super-admin") {
+                breadcrumbLabel = "Super Admin";
+            }
+            if (value.toLowerCase() === "user-rights-and-permissions") {
+                breadcrumbLabel = "User Rights & Permissions";
+            }
+            if (value.toLowerCase() === "property-settings") {
+                breadcrumbLabel = "Property Settings";
+            }
+            if (value.toLowerCase() === "inquirylist") {
+                breadcrumbLabel = "Feedback";
+            }
+
+            if (value.toLowerCase() === "sales/customer") {
+                breadcrumbLabel = "Customer Masterlist";
+            }
             if (value.toLowerCase() === "transactionrecords") {
                 breadcrumbLabel = "Transaction Records";
             }
+            if (value.toLowerCase() === "bank-monitoring") {
+                breadcrumbLabel = "Bank Monitoring";
+            }
+            if (value.toLowerCase() === "bank-statements") {
+                breadcrumbLabel = "Bank Statements";
+            }
+            if (value.toLowerCase() === "check-generator") {
+                breadcrumbLabel = "Check Generator";
+                return (
+                    <Link
+                        key={routeTo}
+                        to="/transaction/tools/check-generator/check-writer"
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </Link>
+                );
+            }
+
+            if (value.toLowerCase() === "tools") {
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        {breadcrumbLabel}
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "admin-settings") {
+                breadcrumbLabel = "Admin Settings";
+            }
+            if (value.toLowerCase() === "check-writer") {
+                return (
+                    <span
+                        key={routeTo}
+                        className="text-custom-solidgreen cursor-default"
+                    >
+                        Check Writer
+                    </span>
+                );
+            }
+
+            if (value.toLowerCase() === "receivables") {
+                breadcrumbLabel = "Receivables/Incoming";
+            }
+            if (value.toLowerCase() === "posting") {
+                breadcrumbLabel = "Auto Posting";
+            }
 
             if (value.toLowerCase() === "thread") {
-                breadcrumbLabel = "Inquiries";
+                breadcrumbLabel = "Feedback";
                 return (
                     <Link
                         key={routeTo}
@@ -169,7 +357,9 @@ const Navbar = () => {
                 );
             }
 
-            
+            if (routeTo.startsWith("/sales/details/")) {
+                return null; // Skip rendering this breadcrumb
+            }
 
             if (breadcrumbLabel.startsWith("Ticket#")) {
                 const ticketId = breadcrumbLabel;
@@ -177,7 +367,6 @@ const Navbar = () => {
                     data?.find((item) => item.ticket_id === ticketId) || {};
 
                 const concernData = navBarData[ticketId] || [];
-
 
                 if (concernData.length === 0) {
                     // Render skeleton while loading
@@ -192,14 +381,20 @@ const Navbar = () => {
                         key={routeTo}
                         className="text-custom-solidgreen cursor-default"
                     >
-                        {/* capitalizeWords()*/
+                        {
+                            /* capitalizeWords()*/
                             `${concernData?.buyer_firstname || ""} ${
                                 concernData?.buyer_middlename || ""
                             } ${concernData?.buyer_lastname || ""}`
                         }{" "}
-                        {/* capitalizeWords()*/concernData?.suffix_name || ""} {""}
-                        {concernData?.details_concern ? (concernData?.details_concern) : ""} {" "} 
-                        {concernData?.email_subject ? `[Direct Email] (Email Subject: ${concernData?.email_subject})` : ""}
+                        {/* capitalizeWords()*/ concernData?.suffix_name || ""}{" "}
+                        {""}
+                        {concernData?.details_concern
+                            ? concernData?.details_concern
+                            : ""}{" "}
+                        {concernData?.email_subject
+                            ? `[Direct Email] (Email Subject: ${concernData?.email_subject})`
+                            : ""}
                         {concernData?.property || ""} ({concernData?.ticket_id})
                     </span>
                 );
@@ -223,6 +418,7 @@ const Navbar = () => {
                 /*    localStorage.removeItem("selectedUnit");
         sessionStorage.removeItem("modalAlreadyShown"); */
                 localStorage.removeItem("authToken");
+                sessionStorage.removeItem("userAccessData");
                 window.location.href = "/";
             } else {
                 console.log("Logout failed");
@@ -231,7 +427,6 @@ const Navbar = () => {
             console.log("Error", error);
         }
     };
-
 
     const handleClickOutside = (event) => {
         if (
@@ -242,10 +437,9 @@ const Navbar = () => {
         }
     };
 
-   
     return (
         <>
-            <div className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
+            <nav className="flex h-[100px] pr-16 w-screen bg-custom-grayFA">
                 <div className="flex w-full">
                     <div className="flex">
                         <div className="flex justify-center items-center">
@@ -320,7 +514,7 @@ const Navbar = () => {
                                 </div>
                             )} */}
                         </div>
-                        <div className="flex items-center">
+                        <div className="hidden items-center">
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 fill="none"
@@ -356,7 +550,7 @@ const Navbar = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            </nav>
             <div>
                 <FeedbackModal modalRef={modalRef} />
             </div>

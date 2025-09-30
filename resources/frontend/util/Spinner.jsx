@@ -1,12 +1,12 @@
-import { CircularProgress } from '@mui/material'
-import React from 'react'
+import { CircularProgress } from "@mui/material";
+import React from "react";
 
-const Spinner = () => {
-  return (
-    <div>
-      <CircularProgress />
-    </div>
-  )
-}
+const Spinner = ({ className, color }) => {
+    return (
+        <div>
+            <CircularProgress color={color} className="spinnerSize" />
+        </div>
+    );
+};
 
-export default Spinner
+export default Spinner;

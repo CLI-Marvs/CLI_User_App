@@ -2,10 +2,10 @@ import React, { useEffect, useState, useMemo } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
-import Alert from "../mainComponent/Alert";
+import Alert from "../../Alert";
 import { showToast } from "../../../util/toastUtil";
 import { PREDEFINED_USER_TYPES } from "../../../constant/data/preDefinedUserTypes";
-
+import { sortByNameAlphabetically } from "./utils/sort";
 /**
  * Function to normalizeData, that returns;
  * Strip out fields that needed to compare (like `id`, `status`, `created_at`, `updated_at`, etc.)
@@ -52,6 +52,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         getInquiryLogs,
         isUserTypeChange,
         setIsUserTypeChange,
+        getNavBarData,
         categories,
     } = useStateContext();
 
@@ -285,6 +286,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             await Promise.all([
                 getInquiryLogs(dataConcern.ticket_id),
                 getAllConcerns(),
+                getNavBarData(dataConcern.ticket_id),
             ]);
         } catch (error) {
             console.log("error", error);
@@ -297,6 +299,23 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             admin_remarks: message,
         }));
     }, [message]);
+
+    const isUpdateDisabled = (dataToUpdate, isUserTypeChange, hasChanges) => {
+        // Case 1: No changes made at all
+        if (!isUserTypeChange && !hasChanges) {
+            return true;
+        }
+
+        // Case 2: Selected "Others" but didn't specify other_user_type
+        if (
+            dataToUpdate?.user_type === "Others" &&
+            !dataToUpdate?.other_user_type?.trim()
+        ) {
+            return true;
+        }
+
+        return false;
+    };
 
     return (
         <dialog
@@ -516,7 +535,7 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     <option value="Walk in">Walk-in</option>
                                     <option value="Website">Website</option>
                                     <option value="Social media">
-                                        Social media
+                                        Social Media
                                     </option>
                                     <option value="Branch Tablet">
                                         Branch Tablet
@@ -545,7 +564,9 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 >
                                     <option value="">(Select)</option>
                                     {categories &&
-                                        categories.map((category) => (
+                                        sortByNameAlphabetically(categories, [
+                                            "Other Concerns",
+                                        ]).map((category) => (
                                             <option key={category.id}>
                                                 {category.name}
                                             </option>
@@ -659,19 +680,29 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                             {user?.department ===
                                 "Customer Relations - Services" && (
                                 <button
-                                    disabled={!isUserTypeChange && !hasChanges}
+                                    disabled={isUpdateDisabled(
+                                        dataToUpdate,
+                                        isUserTypeChange,
+                                        hasChanges
+                                    )}
                                     className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
                                     type="button"
                                     onClick={handleShowUpdateAlert}
                                     style={{
-                                        opacity:
-                                            !isUserTypeChange && !hasChanges
-                                                ? 0.5
-                                                : 1,
-                                        cursor:
-                                            !isUserTypeChange && !hasChanges
-                                                ? "not-allowed"
-                                                : "pointer",
+                                        opacity: isUpdateDisabled(
+                                            dataToUpdate,
+                                            isUserTypeChange,
+                                            hasChanges
+                                        )
+                                            ? 0.5
+                                            : 1,
+                                        cursor: isUpdateDisabled(
+                                            dataToUpdate,
+                                            isUserTypeChange,
+                                            hasChanges
+                                        )
+                                            ? "not-allowed"
+                                            : "pointer",
                                     }}
                                 >
                                     Update

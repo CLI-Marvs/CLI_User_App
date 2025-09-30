@@ -1,0 +1,83 @@
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
+import CheckGeneratorDropdown from "./financials/CheckGeneratorDropdown";
+
+const TransactionSidebar = () => {
+    const { pathname } = useLocation();
+
+    const menuMap = {
+        "/transaction/receivables": [
+            {
+                name: "Transactions",
+                path: "/transaction/receivables/transactions",
+            },
+            {
+                name: "Reports",
+                path: "/transaction/receivables/reports",
+            },
+            /* { name: "Invoices", path: "/transaction/receivables/invoices" },
+            { name: "Auto Posting", path: "/transaction/receivables/posting" }, */
+        ],
+        /*  "/transaction/bank-monitoring": [
+            {
+                name: "Bank Statements",
+                path: "/transaction/bank-monitoring/bank-statements",
+            },
+        ], */
+        "/transaction/settings": [
+            {
+                name: "Markup Settings",
+                path: "/transaction/settings/markup",
+            },
+            {
+                name: "Version Logs",
+                path: "/transaction/settings/version-logs",
+            },
+        ],
+        "/transaction/tools": [
+            {
+                name: "Check Generator Dropdown",
+                component: <CheckGeneratorDropdown />,
+            },
+        ],
+    };
+
+    const basePath = Object.keys(menuMap).find((key) =>
+        pathname.startsWith(key)
+    );
+    const currentMenu = basePath ? menuMap[basePath] : [];
+
+    return (
+        <div className="group px-3 py-5 rounded-[10px] bg-[#EFEFEF] transition-all duration-300 w-[189px] h-full space-y-3">
+            {currentMenu.map(({ name, path, component }) => {
+                if (component) {
+                    return <div key={name}>{component}</div>;
+                }
+
+                const isActive = pathname === path;
+
+                return (
+                    <Link to={path} key={path}>
+                        <div
+                            className={`flex items-center justify-center px-[18px] py-[8px] cursor-pointer sidebar_content ${
+                                isActive
+                                    ? "bg-white shadow-custom12 rounded-xl"
+                                    : ""
+                            }`}
+                        >
+                            <span
+                                className={`text-base font-semibold ${
+                                    isActive ? "text-black" : "text-[#8A8888]"
+                                }`}
+                            >
+                                {name}
+                            </span>
+                        </div>
+                    </Link>
+                );
+            })}
+        </div>
+    );
+};
+
+export default TransactionSidebar;
