@@ -15,10 +15,10 @@ const TransactionSidebar = () => {
                 name: "Reports",
                 path: "/transaction/receivables/reports",
             },
-              /* { name: "Invoices", path: "/transaction/receivables/invoices" },
+            /* { name: "Invoices", path: "/transaction/receivables/invoices" },
             { name: "Auto Posting", path: "/transaction/receivables/posting" }, */
         ],
-       /*  "/transaction/bank-monitoring": [
+        /*  "/transaction/bank-monitoring": [
             {
                 name: "Bank Statements",
                 path: "/transaction/bank-monitoring/bank-statements",
@@ -28,6 +28,10 @@ const TransactionSidebar = () => {
             {
                 name: "Markup Settings",
                 path: "/transaction/settings/markup",
+            },
+            {
+                name: "Version Logs",
+                path: "/transaction/settings/version-logs",
             },
         ],
         "/transaction/tools": [
