@@ -28,7 +28,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
 
     const { user } = useStateContext();
-    const { accounts, workOrderTypes, fetchWorkOrderGroups, fetchAccounts } =
+    const { accounts, workOrderTypes, fetchWorkOrderGroups, fetchAccounts, fetchWorkOrderTypes } =
         useDocumentManagementContext();
 
     useEffect(() => {
@@ -101,11 +101,17 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             setAccountSearchTerm("");
             setIsProjectDropdownOpen(false);
             setIsAccountDropdownOpen(false);
-        } else if (isOpen && selectedProject) {
+        } else if (isOpen) {
+            // Refresh work order types when modal opens to ensure latest data
+            if (fetchWorkOrderTypes) {
+                fetchWorkOrderTypes();
+            }
             // Refresh milestone structure when modal opens and project is selected
-            fetchProjectMilestoneStructure();
+            if (selectedProject) {
+                fetchProjectMilestoneStructure();
+            }
         }
-    }, [isOpen, fetchProjectMilestoneStructure, selectedProject]);
+    }, [isOpen, fetchProjectMilestoneStructure, selectedProject, fetchWorkOrderTypes]);
 
     const firstWorkOrderType = useMemo(() => {
         if (!workOrderTypes || workOrderTypes.length === 0) {
@@ -469,6 +475,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                 setIsModalOpen(true);
                 if (fetchWorkOrderGroups) {
                     fetchWorkOrderGroups();
+                }
+                if (fetchWorkOrderTypes) {
+                    fetchWorkOrderTypes(); // Refresh work order types after creation
                 }
 
                 if (response.status === 201) {

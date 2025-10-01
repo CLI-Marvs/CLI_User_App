@@ -2,22 +2,12 @@ import React, { useState } from 'react'
 
 import ReactPaginate from 'react-paginate'
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from 'react-icons/md'
-import Dec_2_24 from './logs/Dec_2_24'
-import Dec_18_24 from './logs/Dec_18_24'
-import Jan_27_25 from './logs/Jan_27_25'
-const VersionLogUpdates = () => {
 
-    const items = [
-        { id: 1, content: <Jan_27_25 /> },
-        { id: 2, content: <Dec_18_24 /> },
-        { id: 3, content: <Dec_2_24 /> },
+const VersionLogUpdates = ({ items }) => {
 
 
-        // Add more items as needed...
-    ];
-
-    const itemsPerPage = 2; // Number of items to display per page
-    const [currentPage, setCurrentPage] = useState(0); // Zero-based index
+    const itemsPerPage = 5;
+    const [currentPage, setCurrentPage] = useState(0);
 
     const pageCount = Math.ceil(items.length / itemsPerPage);
 
@@ -26,7 +16,7 @@ const VersionLogUpdates = () => {
     const currentItems = items.slice(startIndex, startIndex + itemsPerPage);
 
     const handlePageClick = (event) => {
-        setCurrentPage(event.selected); // ReactPaginate provides `selected` (zero-based index)
+        setCurrentPage(event.selected);
     };
 
 
@@ -39,7 +29,7 @@ const VersionLogUpdates = () => {
                 {/* Render the paginated items */}
                 <div className="w-[1033px] flex flex-col gap-4">
                     {currentItems.map((item) => (
-                        <div key={item.id} >
+                        <div key={item.id}>
                             {item.content}
                             <div className="w-full border border-t-[1px] border-[#EDEBE9]"></div>
                         </div>

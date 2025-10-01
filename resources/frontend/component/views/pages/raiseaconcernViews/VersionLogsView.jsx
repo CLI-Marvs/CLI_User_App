@@ -1,10 +1,11 @@
 import React from 'react'
-import VersionLogUpdates from '../../../layout/versionlogupdatespage/VersionLogUpdates'
+
+import CrsLogs from '@/component/layout/versionlogupdatespage/logs/CrsLogs'
 
 const VersionLogsView = () => {
   return (
     <div>
-        <VersionLogUpdates/>
+        <CrsLogs />
     </div>
   )
 }
