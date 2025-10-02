@@ -8,6 +8,7 @@ use App\Models\Checklist;
 use App\Models\WorkOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class WorkOrderTypeSettingsController extends Controller
 {
@@ -76,18 +77,32 @@ class WorkOrderTypeSettingsController extends Controller
     public function destroyWorkOrderType(WorkOrderType $workOrderType)
     {
         try {
-            // Check if there are any work orders using this work order type
-            $workOrderCount = $workOrderType->workOrders()->count();
+            DB::beginTransaction();
 
-            if ($workOrderCount > 0) {
+            // Check if there are any active (non-soft-deleted) work orders using this work order type
+            $activeWorkOrderCount = $workOrderType->workOrders()->whereNull('deleted_at')->count();
+
+            if ($activeWorkOrderCount > 0) {
+                DB::rollback();
                 return response()->json([
-                    'error' => 'Cannot delete this work order type because it is being used by ' . $workOrderCount . ' work order(s). Please reassign or remove those work orders first.'
+                    'error' => 'Cannot delete this work order type because it is being used by ' . $activeWorkOrderCount . ' active work order(s). Please reassign or remove those work orders first.'
                 ], 422);
             }
 
+            // Force delete any soft-deleted work orders to remove foreign key constraint
+            // Since they're already soft-deleted, permanently removing them is acceptable
+            $softDeletedWorkOrders = $workOrderType->workOrders()->onlyTrashed();
+            if ($softDeletedWorkOrders->count() > 0) {
+                $softDeletedWorkOrders->forceDelete();
+            }
+
+            // Now delete the work order type (submilestones and checklists will cascade)
             $workOrderType->delete();
+
+            DB::commit();
             return response()->json(null, 204);
         } catch (\Exception $e) {
+            DB::rollback();
             return response()->json([
                 'error' => 'Failed to delete work order type: ' . $e->getMessage()
             ], 500);

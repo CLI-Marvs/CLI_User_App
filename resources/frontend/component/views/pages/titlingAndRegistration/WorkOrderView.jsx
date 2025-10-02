@@ -121,6 +121,8 @@ const WorkOrderView = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [selectedWorkOrderForDelete, setSelectedWorkOrderForDelete] =
         useState(null);
+    // Local loading state for groups so we can distinguish between "still fetching" vs "fetched empty"
+    const [groupsLoading, setGroupsLoading] = useState(true);
 
     // Date formatting function for consistent M/D/YYYY format
     const formatDate = (dateString) => {
@@ -139,8 +141,20 @@ const WorkOrderView = () => {
     const [groupDetailsData, setGroupDetailsData] = useState(null);
     const [isGroupDetailsLoading, setIsGroupDetailsLoading] = useState(false);
 
+    // Initial fetch with local loading indicator (context does not expose a dedicated loading flag for groups)
     useEffect(() => {
-        fetchWorkOrderGroups();
+        let isMounted = true;
+        (async () => {
+            try {
+                setGroupsLoading(true);
+                await fetchWorkOrderGroups();
+            } finally {
+                if (isMounted) setGroupsLoading(false);
+            }
+        })();
+        return () => {
+            isMounted = false;
+        };
     }, [fetchWorkOrderGroups]);
 
     useEffect(() => {
@@ -173,6 +187,7 @@ const WorkOrderView = () => {
 
     const handleRefreshAndClearFilters = async () => {
         setIsRefreshing(true);
+        setGroupsLoading(true);
         setSearchQuery("");
         setFilterAssignee("");
         setFilterStatus("");
@@ -183,6 +198,7 @@ const WorkOrderView = () => {
             await fetchWorkOrderGroups();
         } finally {
             setTimeout(() => setIsRefreshing(false), 600);
+            setGroupsLoading(false);
         }
     };
 
@@ -642,10 +658,10 @@ const WorkOrderView = () => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                        {!workOrdersLoading && currentData.length === 0 ? (
+                        {!groupsLoading && currentData.length === 0 ? (
                             <tr>
                                 <td
-                                    colSpan="9"
+                                    colSpan="6"
                                     className="px-6 py-12 text-center text-gray-500"
                                 >
                                     <div className="flex flex-col items-center justify-center">
@@ -668,6 +684,32 @@ const WorkOrderView = () => {
                                         <p className="text-sm text-gray-400">
                                             Create a new work order to get
                                             started
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : groupsLoading ? (
+                            <tr>
+                                <td
+                                    colSpan="6"
+                                    className="px-6 py-8 text-center text-gray-500"
+                                >
+                                    <div className="flex flex-col items-center justify-center animate-pulse">
+                                        <svg
+                                            className="w-10 h-10 text-gray-300 mb-3"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={1.5}
+                                                d="M12 6v6l4 2"
+                                            />
+                                        </svg>
+                                        <p className="text-sm text-gray-400">
+                                            Loading work order groups...
                                         </p>
                                     </div>
                                 </td>
