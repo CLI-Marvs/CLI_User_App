@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, {
+    createContext,
+    useContext,
+    useState,
+    useCallback,
+    useRef,
+} from "react";
 import apiService from "../../../resources/frontend/component/servicesApi/apiService";
 
 const MyWorkOrdersContext = createContext();
@@ -16,14 +22,16 @@ export const MyWorkOrdersProvider = ({ children }) => {
         useState(null);
 
     // Fetch all work order groups (no pagination, matches DocumentManagementContext)
+    const hasFetchedRef = useRef(false);
+
     const fetchWorkOrderGroups = useCallback(
         async (force = false) => {
             const now = Date.now();
             const tenMinutes = 10 * 60 * 1000;
+
             if (
                 !force &&
-                workOrderGroups &&
-                workOrderGroups.length > 0 &&
+                hasFetchedRef.current &&
                 workOrderGroupsLastFetched &&
                 now - workOrderGroupsLastFetched < tenMinutes
             ) {
@@ -36,13 +44,11 @@ export const MyWorkOrdersProvider = ({ children }) => {
                 const response = await apiService.get(
                     "/work-orders/get-work-order-groups"
                 );
-                setWorkOrderGroups(response.data.data || []);
-                setWorkOrdersTotal(
-                    Array.isArray(response.data.data)
-                        ? response.data.data.length
-                        : 0
-                );
+                const data = response.data?.data || [];
+                setWorkOrderGroups(Array.isArray(data) ? data : []);
+                setWorkOrdersTotal(Array.isArray(data) ? data.length : 0);
                 setWorkOrderGroupsLastFetched(Date.now());
+                hasFetchedRef.current = true;
             } catch (err) {
                 setWorkOrdersError(
                     err.message || "Failed to fetch work orders"
@@ -53,7 +59,7 @@ export const MyWorkOrdersProvider = ({ children }) => {
                 setWorkOrdersLoading(false);
             }
         },
-        [workOrderGroups, workOrderGroupsLastFetched]
+        [workOrderGroupsLastFetched]
     );
 
     // Manual force refresh function

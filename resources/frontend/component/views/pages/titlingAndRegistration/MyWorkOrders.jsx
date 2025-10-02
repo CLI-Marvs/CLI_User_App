@@ -93,20 +93,18 @@ const MyWorkOrdersContent = () => {
     const [dueDateFilter, setDueDateFilter] = useState("");
     const [lastUpdatedFilter, setLastUpdatedFilter] = useState("");
 
-    // Only fetch if not already loaded or stale (10 min), otherwise use cached
+    // Initial / stale fetch (mount + stale boundary). Avoid including workOrderGroups in deps to prevent loops.
     useEffect(() => {
+        if (!workOrderGroupsLastFetched) {
+            fetchWorkOrderGroups();
+            return;
+        }
         const now = Date.now();
         const tenMinutes = 10 * 60 * 1000;
-        if (
-            !workOrderGroupsLastFetched ||
-            !Array.isArray(workOrderGroups) ||
-            workOrderGroups.length === 0 ||
-            now - workOrderGroupsLastFetched > tenMinutes
-        ) {
+        if (now - workOrderGroupsLastFetched > tenMinutes) {
             fetchWorkOrderGroups();
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [fetchWorkOrderGroups, workOrderGroups, workOrderGroupsLastFetched]);
+    }, [workOrderGroupsLastFetched, fetchWorkOrderGroups]);
 
     // If you want to force refresh on sort change, uncomment below:
     // useEffect(() => {
