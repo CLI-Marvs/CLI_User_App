@@ -8,9 +8,9 @@ const ProjectAssigneeComponent = () => {
     const [projects, setProjects] = useState([]);
     const [employees, setEmployees] = useState([]);
     const [projectSubmilestones, setProjectSubmilestones] = useState([]);
-    const [selectedProject, setSelectedProject] = useState("");
-    const [selectedSubmilestone, setSelectedSubmilestone] = useState("");
-    const [selectedEmployees, setSelectedEmployees] = useState("");
+    const [selectedProjects, setSelectedProjects] = useState([]);
+    const [selectedSubmilestones, setSelectedSubmilestones] = useState([]);
+    const [selectedEmployees, setSelectedEmployees] = useState([]);
     const [loadingStates, setLoadingStates] = useState({
         list: true,
         assign: false,
@@ -28,6 +28,7 @@ const ProjectAssigneeComponent = () => {
     const [expandedMilestones, setExpandedMilestones] = useState({}); // Tracks expanded milestone rows
     const [projectMilestones, setProjectMilestones] = useState({});
     const [assignees, setAssignees] = useState({});
+    const [assignmentMode, setAssignmentMode] = useState("replace"); // "replace" or "add"
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -81,34 +82,54 @@ const ProjectAssigneeComponent = () => {
         setCurrentPage(1);
     }, [projects.length]);
 
-    const fetchSubmilestonesForProject = useCallback((projectName) => {
-        if (!projectName) {
+    const fetchSubmilestonesForProjects = useCallback(async (projectNames) => {
+        if (!projectNames || projectNames.length === 0) {
             setProjectSubmilestones([]);
             return;
         }
         setLoadingStates((s) => ({ ...s, submilestones: true }));
-        apiService
-            .get(`/projects/${encodeURIComponent(projectName)}/submilestones`)
-            .then((res) => {
-                setProjectSubmilestones(res.data);
-            })
-            .catch((err) => {
-                console.error(
-                    `Failed to fetch submilestones for ${projectName}`,
-                    err
-                );
-                setProjectSubmilestones([]);
-            })
-            .finally(() => {
-                setLoadingStates((s) => ({ ...s, submilestones: false }));
-            });
+
+        try {
+            // Fetch submilestones for all projects
+            const promises = projectNames.map((projectName) =>
+                apiService.get(
+                    `/projects/${encodeURIComponent(projectName)}/submilestones`
+                )
+            );
+
+            const results = await Promise.all(promises);
+
+            // Combine all submilestones from different projects
+            const allSubmilestones = results.reduce((acc, res) => {
+                return acc.concat(res.data || []);
+            }, []);
+
+            // Remove duplicates based on milestone id
+            const uniqueSubmilestones = allSubmilestones.reduce(
+                (acc, milestone) => {
+                    if (!acc.some((m) => m.id === milestone.id)) {
+                        acc.push(milestone);
+                    }
+                    return acc;
+                },
+                []
+            );
+
+            setProjectSubmilestones(uniqueSubmilestones);
+        } catch (err) {
+            console.error("Failed to fetch submilestones for projects:", err);
+            setProjectSubmilestones([]);
+        } finally {
+            setLoadingStates((s) => ({ ...s, submilestones: false }));
+        }
     }, []);
 
     useEffect(() => {
-        fetchSubmilestonesForProject(selectedProject);
-        setSelectedSubmilestone("");
+        // Fetch submilestones for all selected projects
+        fetchSubmilestonesForProjects(selectedProjects);
+        setSelectedSubmilestones([]);
         setSelectedEmployees([]);
-    }, [selectedProject, fetchSubmilestonesForProject]);
+    }, [selectedProjects, fetchSubmilestonesForProjects]);
 
     const fetchAssignees = useCallback(async (projectName, submilestoneId) => {
         const key = `${projectName}-${submilestoneId}`;
@@ -200,36 +221,90 @@ const ProjectAssigneeComponent = () => {
     const handleEmployeeToggle = useCallback((employeeId) => {
         const employeeIdStr = employeeId.toString();
         setSelectedEmployees((prev) => {
-            // If clicking the same employee, deselect (empty string)
-            // If clicking a different employee, select that one
-            return prev === employeeIdStr ? "" : employeeIdStr;
+            if (prev.includes(employeeIdStr)) {
+                // Remove if already selected
+                return prev.filter((id) => id !== employeeIdStr);
+            } else {
+                // Add to selection
+                return [...prev, employeeIdStr];
+            }
         });
-        // Clear search term and close dropdown when selecting an employee
+        // Clear search term when selecting an employee, but keep dropdown open for multiple selection
         setSearchTerm("");
-        setIsDropdownOpen(false);
     }, []);
 
-    const handleAssign = useCallback(() => {
-        if (!selectedProject || !selectedSubmilestone || !selectedEmployees)
+    const handleAssign = useCallback(async () => {
+        if (
+            selectedProjects.length === 0 ||
+            selectedSubmilestones.length === 0 ||
+            selectedEmployees.length === 0
+        )
             return;
 
         setLoadingStates((s) => ({ ...s, assign: true }));
-        apiService
-            .put(
-                `/projects/${encodeURIComponent(
-                    selectedProject
-                )}/milestones/${selectedSubmilestone}/assignees`,
-                {
-                    employee_ids: [selectedEmployees],
-                }
-            )
-            .then((res) => {
-                setSelectedEmployees("");
-                setSearchTerm("");
-                setIsDropdownOpen(false);
 
-                const key = `${selectedProject}-${selectedSubmilestone}`;
-                const newAssignees = res.data.assignees;
+        try {
+            // Create assignment promises for all combinations of projects, milestones, and employees
+            const assignmentPromises = [];
+
+            for (const projectName of selectedProjects) {
+                for (const milestoneId of selectedSubmilestones) {
+                    let employeeIdsToAssign = [...selectedEmployees];
+
+                    // If in "add" mode, fetch existing assignees first
+                    if (assignmentMode === "add") {
+                        try {
+                            const existingResponse = await apiService.get(
+                                `/projects/${encodeURIComponent(
+                                    projectName
+                                )}/milestones/${milestoneId}/assignees`
+                            );
+                            const existingEmployeeIds =
+                                existingResponse.data.map((assignee) =>
+                                    assignee.id.toString()
+                                );
+
+                            // Merge existing and new employee IDs, removing duplicates
+                            employeeIdsToAssign = [
+                                ...new Set([
+                                    ...existingEmployeeIds,
+                                    ...selectedEmployees,
+                                ]),
+                            ];
+                        } catch (err) {
+                            console.warn(
+                                `Could not fetch existing assignees for ${projectName}-${milestoneId}, proceeding with new assignees only:`,
+                                err
+                            );
+                        }
+                    }
+
+                    assignmentPromises.push(
+                        apiService
+                            .put(
+                                `/projects/${encodeURIComponent(
+                                    projectName
+                                )}/milestones/${milestoneId}/assignees`,
+                                {
+                                    employee_ids: employeeIdsToAssign,
+                                }
+                            )
+                            .then((res) => ({
+                                projectName,
+                                milestoneId,
+                                response: res,
+                            }))
+                    );
+                }
+            }
+
+            // Execute all assignments
+            const results = await Promise.all(assignmentPromises);
+
+            // Update state for each successful assignment
+            results.forEach(({ projectName, milestoneId, response }) => {
+                const key = `${projectName}-${milestoneId}`;
+                const newAssignees = response.data.assignees;
 
                 // Update the detailed assignee list for the expanded milestone view
                 setAssignees((prev) => ({
@@ -238,27 +313,39 @@ const ProjectAssigneeComponent = () => {
                 }));
 
                 // Update the specific milestone's count within the projectMilestones state
-                // This will make the count update in the UI without a full refresh.
                 setProjectMilestones((prev) => {
-                    const currentMilestones = prev[selectedProject] || [];
+                    const currentMilestones = prev[projectName] || [];
                     const updatedMilestones = currentMilestones.map((m) =>
-                        m.id.toString() === selectedSubmilestone
+                        m.id.toString() === milestoneId
                             ? { ...m, assignees_count: newAssignees.length }
                             : m
                     );
-                    return { ...prev, [selectedProject]: updatedMilestones };
+                    return { ...prev, [projectName]: updatedMilestones };
                 });
+            });
 
-                fetchProjects(); // Refetch projects to update the total assignee count for the project row
-            })
-            .catch((err) => {
-                console.error("Failed to assign employees", err);
-            })
-            .finally(() => setLoadingStates((s) => ({ ...s, assign: false })));
+            // Clear selections after successful assignment
+            setSelectedEmployees([]);
+            setSelectedProjects([]);
+            setSelectedSubmilestones([]);
+            setSearchTerm("");
+            setProjectSearchTerm("");
+            setMilestoneSearchTerm("");
+            setIsDropdownOpen(false);
+            setIsProjectDropdownOpen(false);
+            setIsMilestoneDropdownOpen(false);
+
+            fetchProjects(); // Refetch projects to update the total assignee count for the project row
+        } catch (err) {
+            console.error("Failed to assign employees", err);
+        } finally {
+            setLoadingStates((s) => ({ ...s, assign: false }));
+        }
     }, [
-        selectedProject,
-        selectedSubmilestone,
+        selectedProjects,
+        selectedSubmilestones,
         selectedEmployees,
+        assignmentMode,
         fetchProjects,
     ]);
 
@@ -270,7 +357,9 @@ const ProjectAssigneeComponent = () => {
     }, [employees]);
 
     const selectedEmployeeDetails = useMemo(() => {
-        return selectedEmployees ? employeeMap[selectedEmployees] : null;
+        return selectedEmployees
+            .map((empId) => employeeMap[empId])
+            .filter(Boolean);
     }, [selectedEmployees, employeeMap]);
 
     const filteredEmployees = employees.filter((employee) =>
@@ -278,10 +367,10 @@ const ProjectAssigneeComponent = () => {
     );
 
     const selectedProjectDetails = useMemo(() => {
-        return (
-            projects.find((p) => p.property_name === selectedProject) || null
+        return projects.filter((p) =>
+            selectedProjects.includes(p.property_name)
         );
-    }, [selectedProject, projects]);
+    }, [selectedProjects, projects]);
 
     const filteredProjects = projects.filter((project) =>
         project.property_name
@@ -290,18 +379,24 @@ const ProjectAssigneeComponent = () => {
     );
 
     const handleProjectToggle = useCallback((projectName) => {
-        setSelectedProject((prev) => (prev === projectName ? "" : projectName));
-        setIsProjectDropdownOpen(false);
+        setSelectedProjects((prev) => {
+            if (prev.includes(projectName)) {
+                // Remove if already selected
+                return prev.filter((name) => name !== projectName);
+            } else {
+                // Add to selection
+                return [...prev, projectName];
+            }
+        });
+        // Keep dropdown open for multiple selection
         setProjectSearchTerm("");
     }, []);
 
     const selectedMilestoneDetails = useMemo(() => {
-        return (
-            projectSubmilestones.find(
-                (sm) => sm.id.toString() === selectedSubmilestone
-            ) || null
+        return projectSubmilestones.filter((sm) =>
+            selectedSubmilestones.includes(sm.id.toString())
         );
-    }, [selectedSubmilestone, projectSubmilestones]);
+    }, [selectedSubmilestones, projectSubmilestones]);
 
     const filteredMilestones = projectSubmilestones.filter(
         (milestone) =>
@@ -315,10 +410,16 @@ const ProjectAssigneeComponent = () => {
 
     const handleMilestoneToggle = useCallback((milestoneId) => {
         const milestoneIdStr = milestoneId.toString();
-        setSelectedSubmilestone((prev) =>
-            prev === milestoneIdStr ? "" : milestoneIdStr
-        );
-        setIsMilestoneDropdownOpen(false);
+        setSelectedSubmilestones((prev) => {
+            if (prev.includes(milestoneIdStr)) {
+                // Remove if already selected
+                return prev.filter((id) => id !== milestoneIdStr);
+            } else {
+                // Add to selection
+                return [...prev, milestoneIdStr];
+            }
+        });
+        // Keep dropdown open for multiple selection
         setMilestoneSearchTerm("");
     }, []);
 
@@ -337,7 +438,7 @@ const ProjectAssigneeComponent = () => {
 
     return (
         <div className="min-h-screen bg-gray-50 py-8">
-            <div className="max-w-7xl px-4 sm:px-6 lg:px-0 py-8">
+            <div className="max-w-7xl px-4 sm:px-6 lg:px-0 py-8 h-full">
                 {/* Header Section */}
                 <div className="bg-white border-b border-gray-50 rounded-lg mb-8">
                     <div className="py-6 border-b border-gray-200">
@@ -351,9 +452,9 @@ const ProjectAssigneeComponent = () => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
                     {/* Assignment Section */}
-                    <div className="lg:col-span-1 bg-white shadow-sm border border-gray-200 rounded-lg self-start">
+                    <div className="lg:col-span-1 bg-white shadow-sm border border-gray-200 rounded-lg h-fit">
                         <div className="px-6 py-4 border-b border-gray-200">
                             <h2 className="text-lg font-semibold text-gray-900">
                                 Assign Employees
@@ -363,12 +464,14 @@ const ProjectAssigneeComponent = () => {
                             {/* Project Selection */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700">
-                                    Target Project{" "}
+                                    Target Projects{" "}
                                     <span className="text-red-500">*</span>
                                 </label>
+
                                 <div className="relative">
-                                    {!selectedProjectDetails && (
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <div className="flex flex-wrap items-center min-h-[42px] w-full px-3 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200 bg-white shadow-sm">
+                                        {/* Search Icon */}
+                                        <div className="flex-shrink-0 mr-2">
                                             <svg
                                                 className="h-4 w-4 text-gray-400"
                                                 fill="none"
@@ -383,76 +486,66 @@ const ProjectAssigneeComponent = () => {
                                                 />
                                             </svg>
                                         </div>
-                                    )}
 
-                                    {/* Selected Project Tag inside input */}
-                                    {selectedProjectDetails && (
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm">
-                                                <span className="mr-1">
-                                                    {
-                                                        selectedProjectDetails.property_name
-                                                    }
-                                                </span>
-                                                <button
-                                                    onClick={() =>
-                                                        handleProjectToggle(
-                                                            selectedProjectDetails.property_name
-                                                        )
-                                                    }
-                                                    className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto"
-                                                    disabled={
-                                                        loadingStates.assign
-                                                    }
+                                        {/* Selected Projects Chips */}
+                                        {selectedProjectDetails.map(
+                                            (project) => (
+                                                <div
+                                                    key={project.property_name}
+                                                    className="inline-flex items-center px-2 py-1 mr-2 mb-1 mt-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm"
                                                 >
-                                                    <svg
-                                                        className="w-3 h-3"
-                                                        fill="currentColor"
-                                                        viewBox="0 0 20 20"
+                                                    <span className="mr-1">
+                                                        {project.property_name}
+                                                    </span>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleProjectToggle(
+                                                                project.property_name
+                                                            )
+                                                        }
+                                                        className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200"
+                                                        disabled={
+                                                            loadingStates.assign
+                                                        }
                                                     >
-                                                        <path
-                                                            fillRule="evenodd"
-                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                            clipRule="evenodd"
-                                                        />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
+                                                        <svg
+                                                            className="w-3 h-3"
+                                                            fill="currentColor"
+                                                            viewBox="0 0 20 20"
+                                                        >
+                                                            <path
+                                                                fillRule="evenodd"
+                                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                clipRule="evenodd"
+                                                            />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            )
+                                        )}
 
-                                    <input
-                                        type="text"
-                                        placeholder={
-                                            selectedProjectDetails
-                                                ? ""
-                                                : "Search for a project..."
-                                        }
-                                        value={projectSearchTerm}
-                                        onChange={(e) =>
-                                            setProjectSearchTerm(e.target.value)
-                                        }
-                                        onFocus={() =>
-                                            setIsProjectDropdownOpen(true)
-                                        }
-                                        className={`w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
-                                            selectedProjectDetails
-                                                ? "pl-32"
-                                                : "pl-10"
-                                        }`}
-                                        style={{
-                                            paddingLeft: selectedProjectDetails
-                                                ? `${
-                                                      selectedProjectDetails
-                                                          .property_name
-                                                          .length *
-                                                          8 +
-                                                      60
-                                                  }px`
-                                                : "40px",
-                                        }}
-                                        disabled={loadingStates.assign}
-                                    />
+                                        {/* Input Field */}
+                                        <input
+                                            type="text"
+                                            placeholder={
+                                                selectedProjectDetails.length >
+                                                0
+                                                    ? ""
+                                                    : "Search for projects..."
+                                            }
+                                            value={projectSearchTerm}
+                                            onChange={(e) =>
+                                                setProjectSearchTerm(
+                                                    e.target.value
+                                                )
+                                            }
+                                            onFocus={() =>
+                                                setIsProjectDropdownOpen(true)
+                                            }
+                                            className="flex-1 min-w-[120px] border-0 outline-none bg-transparent text-gray-900 placeholder-gray-400"
+                                            disabled={loadingStates.assign}
+                                        />
+                                    </div>
                                     {projectSearchTerm && (
                                         <button
                                             onClick={() => {
@@ -520,18 +613,16 @@ const ProjectAssigneeComponent = () => {
                                                             >
                                                                 <div className="flex-shrink-0">
                                                                     <input
-                                                                        type="radio"
-                                                                        name="project-selection"
-                                                                        checked={
-                                                                            selectedProject ===
+                                                                        type="checkbox"
+                                                                        checked={selectedProjects.includes(
                                                                             project.property_name
-                                                                        }
+                                                                        )}
                                                                         onChange={() =>
                                                                             handleProjectToggle(
                                                                                 project.property_name
                                                                             )
                                                                         }
-                                                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 transition-colors duration-200"
+                                                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
                                                                     />
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
@@ -541,8 +632,9 @@ const ProjectAssigneeComponent = () => {
                                                                         }
                                                                     </span>
                                                                 </div>
-                                                                {selectedProject ===
-                                                                    project.property_name && (
+                                                                {selectedProjects.includes(
+                                                                    project.property_name
+                                                                ) && (
                                                                     <div className="flex-shrink-0">
                                                                         <svg
                                                                             className="w-4 h-4 text-green-500"
@@ -578,12 +670,14 @@ const ProjectAssigneeComponent = () => {
                             {/* Submilestone Selection */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700">
-                                    Target Milestone{" "}
+                                    Target Milestones{" "}
                                     <span className="text-red-500">*</span>
                                 </label>
+
                                 <div className="relative">
-                                    {!selectedMilestoneDetails && (
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <div className="flex flex-wrap items-center min-h-[42px] w-full px-3 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200 bg-white shadow-sm">
+                                        {/* Search Icon */}
+                                        <div className="flex-shrink-0 mr-2">
                                             <svg
                                                 className="h-4 w-4 text-gray-400"
                                                 fill="none"
@@ -598,81 +692,79 @@ const ProjectAssigneeComponent = () => {
                                                 />
                                             </svg>
                                         </div>
-                                    )}
 
-                                    {/* Selected Milestone Tag inside input */}
-                                    {selectedMilestoneDetails && (
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm max-w-48">
-                                                <span className="mr-1 truncate">
-                                                    {
-                                                        selectedMilestoneDetails
-                                                            .work_order_type
-                                                            ?.type_name
-                                                    }{" "}
-                                                    -{" "}
-                                                    {
-                                                        selectedMilestoneDetails.name
-                                                    }
-                                                </span>
-                                                <button
-                                                    onClick={() =>
-                                                        handleMilestoneToggle(
-                                                            selectedMilestoneDetails.id
-                                                        )
-                                                    }
-                                                    className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto flex-shrink-0"
-                                                    disabled={
-                                                        loadingStates.assign
-                                                    }
+                                        {/* Selected Milestones Chips */}
+                                        {selectedMilestoneDetails.map(
+                                            (milestone) => (
+                                                <div
+                                                    key={milestone.id}
+                                                    className="inline-flex items-center px-2 py-1 mr-2 mb-1 mt-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm max-w-48"
                                                 >
-                                                    <svg
-                                                        className="w-3 h-3"
-                                                        fill="currentColor"
-                                                        viewBox="0 0 20 20"
+                                                    <span className="mr-1 truncate">
+                                                        {
+                                                            milestone
+                                                                .work_order_type
+                                                                ?.type_name
+                                                        }{" "}
+                                                        - {milestone.name}
+                                                    </span>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleMilestoneToggle(
+                                                                milestone.id
+                                                            )
+                                                        }
+                                                        className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 flex-shrink-0"
+                                                        disabled={
+                                                            loadingStates.assign
+                                                        }
                                                     >
-                                                        <path
-                                                            fillRule="evenodd"
-                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                            clipRule="evenodd"
-                                                        />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    <input
-                                        type="text"
-                                        placeholder={
-                                            selectedMilestoneDetails
-                                                ? ""
-                                                : loadingStates.submilestones
-                                                ? "Loading milestones..."
-                                                : "Search for a milestone..."
-                                        }
-                                        value={milestoneSearchTerm}
-                                        onChange={(e) =>
-                                            setMilestoneSearchTerm(
-                                                e.target.value
+                                                        <svg
+                                                            className="w-3 h-3"
+                                                            fill="currentColor"
+                                                            viewBox="0 0 20 20"
+                                                        >
+                                                            <path
+                                                                fillRule="evenodd"
+                                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                clipRule="evenodd"
+                                                            />
+                                                        </svg>
+                                                    </button>
+                                                </div>
                                             )
-                                        }
-                                        onFocus={() =>
-                                            !loadingStates.submilestones &&
-                                            selectedProject &&
-                                            setIsMilestoneDropdownOpen(true)
-                                        }
-                                        className={`w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
-                                            selectedMilestoneDetails
-                                                ? "pl-52"
-                                                : "pl-10"
-                                        }`}
-                                        disabled={
-                                            !selectedProject ||
-                                            loadingStates.submilestones ||
-                                            loadingStates.assign
-                                        }
-                                    />
+                                        )}
+
+                                        {/* Input Field */}
+                                        <input
+                                            type="text"
+                                            placeholder={
+                                                selectedMilestoneDetails.length >
+                                                0
+                                                    ? ""
+                                                    : loadingStates.submilestones
+                                                    ? "Loading milestones..."
+                                                    : "Search for milestones..."
+                                            }
+                                            value={milestoneSearchTerm}
+                                            onChange={(e) =>
+                                                setMilestoneSearchTerm(
+                                                    e.target.value
+                                                )
+                                            }
+                                            onFocus={() =>
+                                                !loadingStates.submilestones &&
+                                                selectedProjects.length > 0 &&
+                                                setIsMilestoneDropdownOpen(true)
+                                            }
+                                            className="flex-1 min-w-[120px] border-0 outline-none bg-transparent text-gray-900 placeholder-gray-400"
+                                            disabled={
+                                                selectedProjects.length === 0 ||
+                                                loadingStates.submilestones ||
+                                                loadingStates.assign
+                                            }
+                                        />
+                                    </div>
                                     {milestoneSearchTerm && (
                                         <button
                                             onClick={() => {
@@ -699,7 +791,7 @@ const ProjectAssigneeComponent = () => {
                                 </div>
 
                                 {isMilestoneDropdownOpen &&
-                                    selectedProject &&
+                                    selectedProjects.length > 0 &&
                                     !loadingStates.submilestones && (
                                         <div className="relative">
                                             <div className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-hidden">
@@ -747,18 +839,16 @@ const ProjectAssigneeComponent = () => {
                                                                 >
                                                                     <div className="flex-shrink-0">
                                                                         <input
-                                                                            type="radio"
-                                                                            name="milestone-selection"
-                                                                            checked={
-                                                                                selectedSubmilestone ===
+                                                                            type="checkbox"
+                                                                            checked={selectedSubmilestones.includes(
                                                                                 milestone.id.toString()
-                                                                            }
+                                                                            )}
                                                                             onChange={() =>
                                                                                 handleMilestoneToggle(
                                                                                     milestone.id
                                                                                 )
                                                                             }
-                                                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 transition-colors duration-200"
+                                                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
                                                                         />
                                                                     </div>
                                                                     <div className="flex-1 min-w-0">
@@ -774,8 +864,9 @@ const ProjectAssigneeComponent = () => {
                                                                             }
                                                                         </span>
                                                                     </div>
-                                                                    {selectedSubmilestone ===
-                                                                        milestone.id.toString() && (
+                                                                    {selectedSubmilestones.includes(
+                                                                        milestone.id.toString()
+                                                                    ) && (
                                                                         <div className="flex-shrink-0">
                                                                             <svg
                                                                                 className="w-4 h-4 text-green-500"
@@ -811,12 +902,14 @@ const ProjectAssigneeComponent = () => {
                             {/* Employee Selection */}
                             <div className="space-y-2">
                                 <label className="block text-sm font-medium text-gray-700">
-                                    Select Employee{" "}
+                                    Select Employees{" "}
                                     <span className="text-red-500">*</span>
                                 </label>
+
                                 <div className="relative">
-                                    {!selectedEmployeeDetails && (
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <div className="flex flex-wrap items-center min-h-[42px] w-full px-3 py-2 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all duration-200 bg-white shadow-sm">
+                                        {/* Search Icon */}
+                                        <div className="flex-shrink-0 mr-2">
                                             <svg
                                                 className="h-4 w-4 text-gray-400"
                                                 fill="none"
@@ -831,73 +924,64 @@ const ProjectAssigneeComponent = () => {
                                                 />
                                             </svg>
                                         </div>
-                                    )}
 
-                                    {/* Selected Employee Tag inside input */}
-                                    {selectedEmployeeDetails && (
-                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm">
-                                                <span className="mr-1">
-                                                    {
-                                                        selectedEmployeeDetails.fullname
-                                                    }
-                                                </span>
-                                                <button
-                                                    onClick={() =>
-                                                        handleEmployeeToggle(
-                                                            selectedEmployeeDetails.id
-                                                        )
-                                                    }
-                                                    className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto"
-                                                    disabled={
-                                                        loadingStates.assign
-                                                    }
+                                        {/* Selected Employees Chips */}
+                                        {selectedEmployeeDetails.map(
+                                            (employee) => (
+                                                <div
+                                                    key={employee.id}
+                                                    className="inline-flex items-center px-2 py-1 mr-2 mb-1 mt-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm"
                                                 >
-                                                    <svg
-                                                        className="w-3 h-3"
-                                                        fill="currentColor"
-                                                        viewBox="0 0 20 20"
+                                                    <span className="mr-1">
+                                                        {employee.fullname}
+                                                    </span>
+                                                    <button
+                                                        onClick={() =>
+                                                            handleEmployeeToggle(
+                                                                employee.id
+                                                            )
+                                                        }
+                                                        className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200"
+                                                        disabled={
+                                                            loadingStates.assign
+                                                        }
                                                     >
-                                                        <path
-                                                            fillRule="evenodd"
-                                                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                                            clipRule="evenodd"
-                                                        />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    )}
+                                                        <svg
+                                                            className="w-3 h-3"
+                                                            fill="currentColor"
+                                                            viewBox="0 0 20 20"
+                                                        >
+                                                            <path
+                                                                fillRule="evenodd"
+                                                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                                                clipRule="evenodd"
+                                                            />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            )
+                                        )}
 
-                                    <input
-                                        type="text"
-                                        placeholder={
-                                            selectedEmployeeDetails
-                                                ? ""
-                                                : "Search for an employee..."
-                                        }
-                                        value={searchTerm}
-                                        onChange={(e) =>
-                                            setSearchTerm(e.target.value)
-                                        }
-                                        onFocus={() => setIsDropdownOpen(true)}
-                                        className={`w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
-                                            selectedEmployeeDetails
-                                                ? "pl-32"
-                                                : "pl-10"
-                                        }`}
-                                        style={{
-                                            paddingLeft: selectedEmployeeDetails
-                                                ? `${
-                                                      selectedEmployeeDetails
-                                                          .fullname.length *
-                                                          8 +
-                                                      60
-                                                  }px`
-                                                : "40px",
-                                        }}
-                                        disabled={loadingStates.assign}
-                                    />
+                                        {/* Input Field */}
+                                        <input
+                                            type="text"
+                                            placeholder={
+                                                selectedEmployeeDetails.length >
+                                                0
+                                                    ? ""
+                                                    : "Search for employees..."
+                                            }
+                                            value={searchTerm}
+                                            onChange={(e) =>
+                                                setSearchTerm(e.target.value)
+                                            }
+                                            onFocus={() =>
+                                                setIsDropdownOpen(true)
+                                            }
+                                            className="flex-1 min-w-[120px] border-0 outline-none bg-transparent text-gray-900 placeholder-gray-400"
+                                            disabled={loadingStates.assign}
+                                        />
+                                    </div>
                                     {searchTerm && (
                                         <button
                                             onClick={() => {
@@ -963,18 +1047,16 @@ const ProjectAssigneeComponent = () => {
                                                             >
                                                                 <div className="flex-shrink-0">
                                                                     <input
-                                                                        type="radio"
-                                                                        name="employee-selection"
-                                                                        checked={
-                                                                            selectedEmployees ===
+                                                                        type="checkbox"
+                                                                        checked={selectedEmployees.includes(
                                                                             emp.id.toString()
-                                                                        }
+                                                                        )}
                                                                         onChange={() =>
                                                                             handleEmployeeToggle(
                                                                                 emp.id
                                                                             )
                                                                         }
-                                                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 transition-colors duration-200"
+                                                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
                                                                     />
                                                                 </div>
                                                                 <div className="flex-1 min-w-0">
@@ -984,8 +1066,9 @@ const ProjectAssigneeComponent = () => {
                                                                         }
                                                                     </span>
                                                                 </div>
-                                                                {selectedEmployees ===
-                                                                    emp.id.toString() && (
+                                                                {selectedEmployees.includes(
+                                                                    emp.id.toString()
+                                                                ) && (
                                                                     <div className="flex-shrink-0">
                                                                         <svg
                                                                             className="w-4 h-4 text-green-500"
@@ -1016,33 +1099,120 @@ const ProjectAssigneeComponent = () => {
                                 )}
                             </div>
 
+                            {/* Assignment Mode Selection */}
+                            <div className="pt-4 border-t space-y-3">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    Assignment Mode
+                                </label>
+                                <div className="space-y-2">
+                                    <label className="flex items-center">
+                                        <input
+                                            type="radio"
+                                            name="assignment-mode"
+                                            value="replace"
+                                            checked={
+                                                assignmentMode === "replace"
+                                            }
+                                            onChange={(e) =>
+                                                setAssignmentMode(
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                            disabled={loadingStates.assign}
+                                        />
+                                        <span className="ml-2 text-sm text-gray-700">
+                                            Replace existing assignees
+                                        </span>
+                                    </label>
+                                    <label className="flex items-center">
+                                        <input
+                                            type="radio"
+                                            name="assignment-mode"
+                                            value="add"
+                                            checked={assignmentMode === "add"}
+                                            onChange={(e) =>
+                                                setAssignmentMode(
+                                                    e.target.value
+                                                )
+                                            }
+                                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                            disabled={loadingStates.assign}
+                                        />
+                                        <span className="ml-2 text-sm text-gray-700">
+                                            Add to existing assignees
+                                        </span>
+                                    </label>
+                                </div>
+                                <div className="text-xs text-gray-500 bg-gray-50 p-2 rounded">
+                                    {assignmentMode === "replace"
+                                        ? "⚠️ This will replace all current assignees with the selected employees."
+                                        : "✅ This will add the selected employees to existing assignees without removing anyone."}
+                                </div>
+                            </div>
+
                             {/* Assign Button */}
-                            <div className="pt-4 border-t">
+                            <div className="pt-4">
                                 <button
                                     onClick={handleAssign}
                                     disabled={
-                                        !selectedProject ||
-                                        !selectedSubmilestone ||
-                                        !selectedEmployees ||
+                                        selectedProjects.length === 0 ||
+                                        selectedSubmilestones.length === 0 ||
+                                        selectedEmployees.length === 0 ||
                                         loadingStates.assign
                                     }
                                     className="w-full px-4 py-2 gradient-btn5 text-white font-medium rounded-md disabled:bg-gray-400"
                                 >
                                     {loadingStates.assign
                                         ? "Assigning..."
-                                        : "Assign Employee"}
+                                        : assignmentMode === "replace"
+                                        ? "Replace Assignees"
+                                        : "Add Assignees"}
                                 </button>
                             </div>
                         </div>
                     </div>
 
                     {/* Projects Table */}
-                    <div className="lg:col-span-2 bg-white shadow-sm border rounded-lg">
+                    <div
+                        className="lg:col-span-2 bg-white shadow-sm border rounded-lg flex flex-col h-full"
+                        style={{ minHeight: "600px" }}
+                    >
                         <div className="px-6 py-4 border-b">
                             <div className="flex justify-between items-center">
-                                <h3 className="text-lg font-semibold text-gray-900">
-                                    Current Project Assignments
-                                </h3>
+                                <div className="flex items-center space-x-3">
+                                    <h3 className="text-lg font-semibold text-gray-900">
+                                        Current Project Assignments
+                                    </h3>
+                                    <button
+                                        onClick={fetchProjects}
+                                        disabled={loadingStates.list}
+                                        className="inline-flex items-center p-2 text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                                        title={
+                                            loadingStates.list
+                                                ? "Refreshing..."
+                                                : "Refresh table data"
+                                        }
+                                    >
+                                        <svg
+                                            className={`w-4 h-4 ${
+                                                loadingStates.list
+                                                    ? "animate-spin"
+                                                    : ""
+                                            }`}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                strokeWidth={2}
+                                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                            />
+                                        </svg>
+                                    </button>
+                                </div>
                                 {projects.length > 0 && (
                                     <div className="text-sm text-gray-500">
                                         Showing {startIndex + 1}-
@@ -1052,14 +1222,43 @@ const ProjectAssigneeComponent = () => {
                                 )}
                             </div>
                         </div>
-                        <div className="overflow-hidden">
+                        <div className="flex flex-col h-full overflow-hidden">
                             {loadingStates.list ? (
-                                <div className="text-center py-12">
-                                    Loading projects...
+                                <div className="flex-1 flex items-center justify-center py-12">
+                                    <div className="text-center">
+                                        <svg
+                                            className="w-8 h-8 animate-spin text-blue-500 mx-auto mb-2"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <circle
+                                                className="opacity-25"
+                                                cx="12"
+                                                cy="12"
+                                                r="10"
+                                                stroke="currentColor"
+                                                strokeWidth="4"
+                                            />
+                                            <path
+                                                className="opacity-75"
+                                                fill="currentColor"
+                                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                            />
+                                        </svg>
+                                        <p className="text-gray-600">
+                                            Loading projects...
+                                        </p>
+                                    </div>
                                 </div>
                             ) : projects.length > 0 ? (
                                 <>
-                                    <div className="overflow-x-auto max-h-96 overflow-y-auto">
+                                    <div
+                                        className="flex-1 overflow-x-auto overflow-y-auto"
+                                        style={{
+                                            maxHeight: "calc(100vh - 400px)",
+                                            minHeight: "400px",
+                                        }}
+                                    >
                                         <table className="min-w-full divide-y divide-gray-200">
                                             <thead className="bg-gray-50 sticky top-0 z-10">
                                                 <tr>

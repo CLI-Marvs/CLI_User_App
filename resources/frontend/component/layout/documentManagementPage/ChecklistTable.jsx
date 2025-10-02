@@ -237,7 +237,9 @@ const ChecklistTable = ({
     onRefresh,
     currentPage = 1,
     itemsPerPage = 25,
+    hideCompletedChecklists = false, // New prop to hide completed checklists
 }) => {
+    // ALL HOOKS MUST BE DEFINED AT THE TOP - BEFORE ANY CONDITIONAL LOGIC
     const { isChecklistComplete, setOptimisticCompleted } =
         useChecklistCompletion();
     const [uploadModal, setUploadModal] = React.useState({
@@ -246,6 +248,36 @@ const ChecklistTable = ({
         step: null,
         sub: null,
     });
+
+    // Scroll position preservation hooks
+    const scrollContainerRef = React.useRef(null);
+    // Use a unique key for this table (could be improved if multiple tables)
+    const SCROLL_KEY = "checklistTableScroll";
+
+    // Restore scroll position on mount
+    React.useEffect(() => {
+        const saved = localStorage.getItem(SCROLL_KEY);
+        if (scrollContainerRef.current && saved) {
+            try {
+                const { left, top } = JSON.parse(saved);
+                scrollContainerRef.current.scrollLeft = left;
+                scrollContainerRef.current.scrollTop = top;
+            } catch {}
+        }
+    }, []);
+
+    // Save scroll position on scroll
+    const handleScroll = React.useCallback(() => {
+        if (scrollContainerRef.current) {
+            localStorage.setItem(
+                SCROLL_KEY,
+                JSON.stringify({
+                    left: scrollContainerRef.current.scrollLeft,
+                    top: scrollContainerRef.current.scrollTop,
+                })
+            );
+        }
+    }, []);
 
     const handleOpenUploadModal = (checklist, step, sub) => {
         setUploadModal({ open: true, checklist, step, sub });
@@ -293,54 +325,132 @@ const ChecklistTable = ({
         }
     };
 
-    // Memoized filtered steps based on user assignment
+    // Memoized filtered steps based on user assignment and completed checklist filter
     const filteredSteps = React.useMemo(() => {
         return (steps || [])
             .map((step) => ({
                 ...step,
-                subMilestones: step.subMilestones.filter((milestone) => {
-                    if (!currentUserId) return true;
+                subMilestones: step.subMilestones
+                    .filter((milestone) => {
+                        if (!currentUserId) return true;
 
-                    // Check if assigned to current user through various assignment methods
-                    const hasAssignees = milestone.milestone_assignees;
+                        // Check if assigned to current user through various assignment methods
+                        const hasAssignees = milestone.milestone_assignees;
 
-                    if (hasAssignees && hasAssignees.length > 0) {
-                        const accountPropertyNames = accounts
-                            .map(
-                                (account) =>
-                                    account.property_name ||
-                                    account.project ||
-                                    account.account_name
-                            )
-                            .filter(Boolean);
+                        if (hasAssignees && hasAssignees.length > 0) {
+                            const accountPropertyNames = accounts
+                                .map(
+                                    (account) =>
+                                        account.property_name ||
+                                        account.project ||
+                                        account.account_name
+                                )
+                                .filter(Boolean);
 
-                        return hasAssignees.some((assignee) => {
-                            const userMatches =
-                                assignee.employee_id === currentUserId;
-                            const propertyMatches =
-                                accountPropertyNames.includes(
-                                    assignee.property_name
-                                );
-                            return userMatches && propertyMatches;
-                        });
-                    }
+                            return hasAssignees.some((assignee) => {
+                                const userMatches =
+                                    assignee.employee_id === currentUserId;
+                                const propertyMatches =
+                                    accountPropertyNames.includes(
+                                        assignee.property_name
+                                    );
+                                return userMatches && propertyMatches;
+                            });
+                        }
 
-                    return (
-                        milestone.assigned_to === currentUserId ||
-                        milestone.assignees?.includes(currentUserId) ||
-                        milestone.assigned_users?.some(
-                            (user) =>
-                                user.id === currentUserId ||
-                                user === currentUserId
-                        ) ||
-                        milestone.assignee_id === currentUserId ||
-                        milestone.user_id === currentUserId ||
-                        milestone.assigned_user_id === currentUserId
-                    );
-                }),
+                        return (
+                            milestone.assigned_to === currentUserId ||
+                            milestone.assignees?.includes(currentUserId) ||
+                            milestone.assigned_users?.some(
+                                (user) =>
+                                    user.id === currentUserId ||
+                                    user === currentUserId
+                            ) ||
+                            milestone.assignee_id === currentUserId ||
+                            milestone.user_id === currentUserId ||
+                            milestone.assigned_user_id === currentUserId
+                        );
+                    })
+                    .map((milestone) => {
+                        let filteredChecklists = milestone.checklists || [];
+
+                        if (hideCompletedChecklists) {
+                            filteredChecklists = filteredChecklists.filter(
+                                (checklist) => {
+                                    // Check if this checklist is completed for ALL accounts
+                                    const isCompletedForAllAccounts =
+                                        accounts.every((account) => {
+                                            const uploadedDoc = (
+                                                account.uploaded_documents || []
+                                            ).find(
+                                                (doc) =>
+                                                    doc.file_title ===
+                                                    checklist.name
+                                            );
+                                            const accountChecklistStatus = (
+                                                account.account_checklist_statuses ||
+                                                []
+                                            ).find(
+                                                (status) =>
+                                                    status.checklist_id ===
+                                                    checklist.id
+                                            );
+
+                                            if (checklist.requires_document) {
+                                                return (
+                                                    uploadedDoc ||
+                                                    (accountChecklistStatus &&
+                                                        accountChecklistStatus.is_completed)
+                                                );
+                                            } else {
+                                                return (
+                                                    accountChecklistStatus &&
+                                                    accountChecklistStatus.is_completed
+                                                );
+                                            }
+                                        });
+
+                                    // Only show checklist if it's NOT completed for all accounts
+                                    return !isCompletedForAllAccounts;
+                                }
+                            );
+                        }
+
+                        return {
+                            ...milestone,
+                            checklists: filteredChecklists,
+                        };
+                    })
+                    .filter(
+                        (milestone) => (milestone.checklists || []).length > 0
+                    ),
+                // Don't filter out milestones - keep them even if they have no visible checklists
+                // This ensures the table structure remains intact and accounts are always visible
             }))
             .filter((step) => step.subMilestones.length > 0);
-    }, [steps, accounts, currentUserId]);
+
+        // Ensure we always have at least one step to maintain table structure
+        // If all steps are filtered out by the hideCompletedChecklists filter,
+        // we'll show a minimal structure to keep the account column visible
+        if (result.length === 0 && steps.length > 0) {
+            // Return the first step with minimal structure to maintain the account column
+            const firstStep = steps[0];
+            return [
+                {
+                    ...firstStep,
+                    subMilestones: [
+                        {
+                            id: "placeholder",
+                            name: "No Active Checklists",
+                            checklists: [],
+                        },
+                    ],
+                },
+            ];
+        }
+
+        return result;
+    }, [steps, accounts, currentUserId, hideCompletedChecklists]);
 
     // Memoized mapping of sub-milestone IDs to their parent step index
     const subMilestoneStepMap = React.useMemo(() => {
@@ -435,7 +545,7 @@ const ChecklistTable = ({
 
     // Calculate total columns for styling
     const totalColumns = React.useMemo(() => {
-        return filteredSteps.reduce(
+        const cols = filteredSteps.reduce(
             (sum, step) =>
                 sum +
                 step.subMilestones.reduce(
@@ -444,10 +554,16 @@ const ChecklistTable = ({
                 ),
             0
         );
+        // Ensure we always have at least 1 column to maintain table structure
+        return Math.max(cols, 1);
     }, [filteredSteps]);
 
-    // Early return for no accounts
-    if (filteredAccounts.length === 0) {
+    // Check if we have accounts but no visible checklists due to filtering
+    const hasAccountsButNoChecklists =
+        accounts.length > 0 && totalColumns <= 1 && hideCompletedChecklists;
+
+    // Early return for no accounts (but not when filter is just hiding checklists)
+    if (filteredAccounts.length === 0 && !hasAccountsButNoChecklists) {
         return (
             <div className="shadow-lg rounded-lg border border-gray-200 bg-white h-full flex items-center justify-center">
                 <div className="px-4 py-12 text-center text-gray-500">
@@ -478,35 +594,37 @@ const ChecklistTable = ({
         );
     }
 
-    // Scroll position preservation
-    const scrollContainerRef = React.useRef(null);
-    // Use a unique key for this table (could be improved if multiple tables)
-    const SCROLL_KEY = "checklistTableScroll";
-
-    // Restore scroll position on mount
-    React.useEffect(() => {
-        const saved = localStorage.getItem(SCROLL_KEY);
-        if (scrollContainerRef.current && saved) {
-            try {
-                const { left, top } = JSON.parse(saved);
-                scrollContainerRef.current.scrollLeft = left;
-                scrollContainerRef.current.scrollTop = top;
-            } catch {}
-        }
-    }, []);
-
-    // Save scroll position on scroll
-    const handleScroll = React.useCallback(() => {
-        if (scrollContainerRef.current) {
-            localStorage.setItem(
-                SCROLL_KEY,
-                JSON.stringify({
-                    left: scrollContainerRef.current.scrollLeft,
-                    top: scrollContainerRef.current.scrollTop,
-                })
-            );
-        }
-    }, []);
+    // Show message when filter hides all checklists but accounts exist
+    if (hasAccountsButNoChecklists) {
+        return (
+            <div className="shadow-lg rounded-lg border border-gray-200 bg-white h-full flex items-center justify-center">
+                <div className="px-4 py-12 text-center text-gray-500">
+                    <div className="flex flex-col items-center justify-center">
+                        <svg
+                            className="w-12 h-12 text-green-400 mb-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                            />
+                        </svg>
+                        <p className="text-lg font-medium text-gray-900 mb-1">
+                            All Checklists Completed!
+                        </p>
+                        <p className="text-sm text-gray-500">
+                            All checklists assigned to you have been completed.
+                            Uncheck "Hide Completed Checklists" to view them.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="w-full h-full overflow-hidden">

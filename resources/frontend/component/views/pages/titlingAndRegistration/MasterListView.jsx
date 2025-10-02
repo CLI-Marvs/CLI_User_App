@@ -297,12 +297,12 @@ export default function PaginatedTable() {
     const [activeFilters, setActiveFilters] = useState([]);
     const [masterList, setMasterList] = useState([]);
     const [lastAddedIds, setLastAddedIds] = useState([]);
-    const [filterOption, setFilterOption] = useState("All");
+    const [filterOption, setFilterOption] = useState("all");
     const [undoStack, setUndoStack] = useState([]);
     const filterOptions = [
         { label: "All", value: "all" },
-        { label: "Finished", value: "finished" },
-        { label: "Unfinished", value: "unfinished" },
+        { label: "Complete", value: "complete" },
+        { label: "Incomplete", value: "incomplete" },
     ];
     const docMgmt = useDocumentManagementContext();
     const {
@@ -1062,7 +1062,6 @@ export default function PaginatedTable() {
         // Use masterListFilteredRows to get all financing options, not just current page
         const allData = masterListFilteredRows || [];
         allData.forEach((item) => {
-            // Use the correct field name: finance
             const financingName = item.finance;
             if (financingName && financingName.toString().trim()) {
                 financingSet.add(financingName.toString().trim());
@@ -1084,10 +1083,37 @@ export default function PaginatedTable() {
         if (!date) return "";
         const d = new Date(date);
         const year = d.getFullYear();
-        const month = d.getMonth() + 1; // No padding for single digit months
-        const day = d.getDate(); // No padding for single digit days
+        const month = d.getMonth() + 1; 
+        const day = d.getDate(); 
         return `${month}/${day}/${year}`;
     }
+
+    // Helper to normalize checklist status from various possible formats
+    const getChecklistStatus = (row) => {
+        const status =
+            row.checklistStatus ?? 
+            row.checklist_status ?? 
+            row.checklist_status_flag ??
+            row.checklistFlag ??
+            row.checkliststatus ??
+            row.checklist;
+
+        if (typeof status === "boolean") return status;
+        if (typeof status === "number") return status === 1;
+        if (typeof status === "string") {
+            const normalized = status.toLowerCase().trim();
+            return [
+                "true",
+                "1",
+                "yes",
+                "y",
+                "t",
+                "completed",
+                "complete",
+            ].includes(normalized);
+        }
+        return false;
+    };
 
     useEffect(() => {
         const filters = [
@@ -1270,18 +1296,17 @@ export default function PaginatedTable() {
         if (!masterListFilteredRows) return [];
 
         let data = [...masterListFilteredRows];
+
+        const originalLength = data.length;
+
         switch (filterOption) {
-            case "All":
+            case "all":
                 break;
-            case "Finished":
-                data = data.filter((row) =>
-                    masterListContracts.has(row.contractNumber)
-                );
+            case "complete":
+                data = data.filter((row) => getChecklistStatus(row) === true);
                 break;
-            case "Unfinished":
-                data = data.filter(
-                    (row) => !masterListContracts?.has(row.contractNumber)
-                );
+            case "incomplete":
+                data = data.filter((row) => getChecklistStatus(row) === false);
                 break;
             default:
                 break;
@@ -1439,7 +1464,7 @@ export default function PaginatedTable() {
         clearFilters();
 
         // Reset dropdown filter to "All"
-        setFilterOption("All");
+        setFilterOption("all");
 
         // Close project dropdown
         setIsProjectDropdownOpen(false);
@@ -1494,7 +1519,10 @@ export default function PaginatedTable() {
                                         }}
                                     >
                                         <span className="truncate text-left flex-1 normal-case">
-                                            {filterOption}
+                                            {filterOptions.find(
+                                                (opt) =>
+                                                    opt.value === filterOption
+                                            )?.label || filterOption}
                                         </span>
                                         <ChevronDownIcon className="w-4 h-4 flex-shrink-0 text-gray-500" />
                                     </Button>
@@ -1504,10 +1532,10 @@ export default function PaginatedTable() {
                                         <MenuItem
                                             key={option.value}
                                             onClick={() =>
-                                                setFilterOption(option.label)
+                                                setFilterOption(option.value)
                                             }
                                             className={`flex items-center justify-center h-9 w-full p-4 ${
-                                                filterOption === option.label
+                                                filterOption === option.value
                                                     ? "bg-custom-lightestgreen text-gray-900"
                                                     : "text-gray-700"
                                             }`}
@@ -2096,6 +2124,7 @@ export default function PaginatedTable() {
                                                         to_month,
                                                         takeOutdate,
                                                         douExpiry,
+                                                        checklistStatus,
                                                     },
                                                     index
                                                 ) => {
@@ -2121,14 +2150,41 @@ export default function PaginatedTable() {
                                                             contractNumber
                                                         );
 
+                                                    // Get the current row data to check status
+                                                    const currentRowData = {
+                                                        id,
+                                                        user,
+                                                        contractNumber,
+                                                        propertyName,
+                                                        unitNumber,
+                                                        finance,
+                                                        to_year,
+                                                        to_month,
+                                                        takeOutdate,
+                                                        douExpiry,
+                                                        checklistStatus,
+                                                    };
+
+                                                    const isComplete =
+                                                        getChecklistStatus(
+                                                            currentRowData
+                                                        );
+
+                                                    // Define background colors for status
+                                                    const getStatusBackgroundColor =
+                                                        () => {
+                                                            if (isChecked) {
+                                                                return "bg-slate-200"; // Keep checked row color
+                                                            }
+                                                            return isComplete
+                                                                ? "bg-green-50 hover:bg-green-100" // Light green for complete
+                                                                : "bg-white hover:bg-gray-50"; // White for incomplete
+                                                        };
+
                                                     return (
                                                         <tr
                                                             key={`${contractNumber}-${globalIndex}`}
-                                                            className={`${classes} ${
-                                                                isChecked
-                                                                    ? "bg-slate-200 text-[#348017] text-base font-normal"
-                                                                    : "text-[#348017] text-base font-normal"
-                                                            } cursor-pointer`}
+                                                            className={`${classes} ${getStatusBackgroundColor()} text-[#348017] text-base font-normal cursor-pointer transition-colors duration-200`}
                                                             onClick={() =>
                                                                 setIsChecked(
                                                                     !isChecked

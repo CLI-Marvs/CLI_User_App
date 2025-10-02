@@ -94,6 +94,7 @@ export const DocumentManagementProvider = ({ children }) => {
                 category: row.category,
                 to_year: row.to_year,
                 to_month: row.to_month,
+                checklistStatus: row.checklist_status, // Add the missing field
             }));
             setTakenOutMasterListTableRows(mappedRows);
         } catch (error) {

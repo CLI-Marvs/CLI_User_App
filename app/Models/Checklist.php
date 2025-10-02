@@ -17,6 +17,7 @@ class Checklist extends Model
         'submilestone_id',
         'name',
         'requires_document',
+        'is_buyer_related',
     ];
 
     /**
@@ -26,6 +27,7 @@ class Checklist extends Model
      */
     protected $casts = [
         'requires_document' => 'boolean',
+        'is_buyer_related' => 'boolean',
     ];
 
     /**

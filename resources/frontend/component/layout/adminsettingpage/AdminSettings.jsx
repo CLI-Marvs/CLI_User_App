@@ -691,6 +691,7 @@ const AdminSettings = () => {
                         name: formData.name,
                         submilestone_id: parentId,
                         requires_document: Boolean(formData.requires_document),
+                        is_buyer_related: Boolean(formData.is_buyer_related),
                     };
                     break;
                 default:
@@ -901,6 +902,14 @@ const AdminSettings = () => {
                             "This checklist item requires document upload",
                         helpText:
                             "Check this if users need to upload a document to complete this item",
+                    },
+                    {
+                        name: "is_buyer_related",
+                        label: "Buyer Related",
+                        type: "checkbox",
+                        checkboxLabel: "This checklist item is buyer related",
+                        helpText:
+                            "Check this if this checklist item is specifically for buyer-related processes",
                     },
                 ],
             },
@@ -1427,6 +1436,38 @@ const AdminSettings = () => {
                                                                                                                         </svg>
                                                                                                                         Remarks
                                                                                                                         Only
+                                                                                                                    </span>
+                                                                                                                )}
+                                                                                                                {chk.is_buyer_related ? (
+                                                                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 flex-shrink-0 ml-2">
+                                                                                                                        <svg
+                                                                                                                            className="w-3 h-3 mr-1"
+                                                                                                                            fill="currentColor"
+                                                                                                                            viewBox="0 0 20 20"
+                                                                                                                        >
+                                                                                                                            <path
+                                                                                                                                fillRule="evenodd"
+                                                                                                                                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                                                                                                                clipRule="evenodd"
+                                                                                                                            />
+                                                                                                                        </svg>
+                                                                                                                        Buyer
+                                                                                                                        Related
+                                                                                                                    </span>
+                                                                                                                ) : (
+                                                                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 flex-shrink-0 ml-2">
+                                                                                                                        <svg
+                                                                                                                            className="w-3 h-3 mr-1"
+                                                                                                                            fill="currentColor"
+                                                                                                                            viewBox="0 0 20 20"
+                                                                                                                        >
+                                                                                                                            <path
+                                                                                                                                fillRule="evenodd"
+                                                                                                                                d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z"
+                                                                                                                                clipRule="evenodd"
+                                                                                                                            />
+                                                                                                                        </svg>
+                                                                                                                        Internal
                                                                                                                     </span>
                                                                                                                 )}
                                                                                                             </div>

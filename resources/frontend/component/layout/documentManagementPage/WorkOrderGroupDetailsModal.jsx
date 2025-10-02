@@ -47,6 +47,16 @@ const WorkOrderGroupDetailsModal = ({
     });
     const [isRefreshing, setIsRefreshing] = useState(false);
 
+    // New filter states
+    const [buyerFilter, setBuyerFilter] = useState("All");
+    const [showStepView, setShowStepView] = useState(true);
+    const [assigneeFilter, setAssigneeFilter] = useState("All");
+    const [availableAssignees, setAvailableAssignees] = useState([]);
+    const [visibleSteps, setVisibleSteps] = useState(new Set()); // Track which steps are visible
+    const [stepAssigneeFilter, setStepAssigneeFilter] = useState("All"); // Filter steps by assignee
+    const [hideCompletedChecklists, setHideCompletedChecklists] =
+        useState(false); // Hide completed checklists filter
+
     // AddFilesModal state
     const [isAddFilesModalOpen, setIsAddFilesModalOpen] = useState(false);
     const [selectedAccountId, setSelectedAccountId] = useState(null);
@@ -177,6 +187,58 @@ const WorkOrderGroupDetailsModal = ({
         setFilesModalOpen(true);
     };
 
+    // Extract available steps from the group data
+    const availableSteps = useMemo(() => {
+        if (!group || !group.work_orders) return [];
+
+        return [...group.work_orders]
+            .sort(
+                (a, b) =>
+                    (a.work_order_type?.sequence ?? 0) -
+                    (b.work_order_type?.sequence ?? 0)
+            )
+            .map((wo) => ({
+                id: wo.work_order_type_id, // Use work_order_type_id to match with submilestone filtering
+                stepName: wo.work_order_type?.type_name || `Step`,
+                sequence: wo.work_order_type?.sequence ?? 0,
+            }));
+    }, [group]);
+
+    // Initialize visible steps when available steps change
+    React.useEffect(() => {
+        if (availableSteps.length > 0) {
+            // Show all steps by default
+            setVisibleSteps(new Set(availableSteps.map((step) => step.id)));
+        }
+    }, [availableSteps]);
+
+    // Extract available assignees from the group data
+    const assignees = useMemo(() => {
+        if (!group) return [];
+
+        // Use the project_assignees from the enhanced API response
+        if (group.project_assignees && Array.isArray(group.project_assignees)) {
+            return group.project_assignees.map((assignee) => ({
+                id: assignee.id,
+                name:
+                    assignee.name ||
+                    `${assignee.firstname || ""} ${
+                        assignee.lastname || ""
+                    }`.trim(),
+                firstname: assignee.firstname,
+                lastname: assignee.lastname,
+            }));
+        }
+
+        console.log("No project assignees found in API response");
+        return [];
+    }, [group]);
+
+    // Update available assignees when data changes
+    React.useEffect(() => {
+        setAvailableAssignees(assignees);
+    }, [assignees]);
+
     // --- Milestone progression updater: must be above all usages ---
     const updateMilestoneProgression = async (accountId, newSubmilestoneId) => {
         try {
@@ -238,7 +300,8 @@ const WorkOrderGroupDetailsModal = ({
                     (b.work_order_type?.sequence ?? 0)
             )
             .map((wo) => ({
-                id: wo.work_order_id,
+                id: wo.work_order_type_id, // Use work_order_type_id to match with submilestone filtering
+                workOrderId: wo.work_order_id, // Keep original work order ID for reference
                 stepName: wo.work_order_type?.type_name || `Step`,
                 sequence: wo.work_order_type?.sequence ?? 0,
                 subMilestones:
@@ -246,14 +309,78 @@ const WorkOrderGroupDetailsModal = ({
                 workOrder: wo,
             }));
 
-        // 2. Prepare column headers for each step and its sub-milestones
-        const columnHeaders = steps.map((step) => ({
-            stepName: step.stepName,
-            subMilestones:
-                step.subMilestones.length > 0
-                    ? step.subMilestones.map((m) => m.name)
-                    : ["Progress"],
-        }));
+        // 2. Prepare column headers for each step and its sub-milestones (only for visible steps)
+        const columnHeaders = steps
+            .filter((step) => visibleSteps.has(step.id))
+            .map((step) => {
+                let filteredSubMilestones = step.subMilestones;
+
+                // Filter milestones by assignee if step assignee filter is active
+                if (stepAssigneeFilter !== "All") {
+                    const selectedAssigneeId = parseInt(stepAssigneeFilter);
+                    filteredSubMilestones = step.subMilestones.filter(
+                        (milestone) => {
+                            if (!milestone.milestone_assignees) return false;
+
+                            return milestone.milestone_assignees.some(
+                                (assignee) => {
+                                    const matchesEmployeeId =
+                                        assignee.employee_id ===
+                                        selectedAssigneeId;
+                                    const matchesProperty =
+                                        !group.property_name ||
+                                        assignee.property_name ===
+                                            group.property_name;
+                                    return matchesEmployeeId && matchesProperty;
+                                }
+                            );
+                        }
+                    );
+                }
+
+                // Filter milestones by buyer-related checklists
+                if (buyerFilter !== "All") {
+                    filteredSubMilestones = filteredSubMilestones.filter(
+                        (milestone) => {
+                            if (
+                                !milestone.checklists ||
+                                milestone.checklists.length === 0
+                            )
+                                return false;
+
+                            const hasBuyerRelatedChecklist =
+                                milestone.checklists.some(
+                                    (checklist) =>
+                                        checklist.is_buyer_related === true
+                                );
+                            const hasNonBuyerRelatedChecklist =
+                                milestone.checklists.some(
+                                    (checklist) =>
+                                        checklist.is_buyer_related === false
+                                );
+
+                            if (buyerFilter === "Buyer Related") {
+                                return hasBuyerRelatedChecklist;
+                            } else if (buyerFilter === "Non-buyer") {
+                                return hasNonBuyerRelatedChecklist;
+                            }
+                            return true;
+                        }
+                    );
+                }
+
+                return {
+                    stepName: step.stepName,
+                    stepId: step.id,
+                    subMilestones:
+                        filteredSubMilestones.length > 0
+                            ? filteredSubMilestones.map((m) => m.name)
+                            : [],
+                    allSubMilestones: step.subMilestones, // Keep reference to all milestones
+                    filteredSubMilestones: filteredSubMilestones, // Filtered milestones for reference
+                };
+            })
+            .filter((col) => col.subMilestones.length > 0); // Remove steps with no milestones after filtering
 
         // 3. Gather accounts and build milestone completion data
         const accountMap = {};
@@ -286,8 +413,64 @@ const WorkOrderGroupDetailsModal = ({
 
                 // Mark milestones as completed or current
                 let values;
-                if (step.subMilestones.length > 0) {
-                    values = step.subMilestones.map((sub) => {
+
+                // Get filtered milestones based on assignee filter
+                let milestonesToProcess = step.subMilestones;
+                if (stepAssigneeFilter !== "All") {
+                    const selectedAssigneeId = parseInt(stepAssigneeFilter);
+                    milestonesToProcess = step.subMilestones.filter(
+                        (milestone) => {
+                            if (!milestone.milestone_assignees) return false;
+
+                            return milestone.milestone_assignees.some(
+                                (assignee) => {
+                                    const matchesEmployeeId =
+                                        assignee.employee_id ===
+                                        selectedAssigneeId;
+                                    const matchesProperty =
+                                        !group.property_name ||
+                                        assignee.property_name ===
+                                            group.property_name;
+                                    return matchesEmployeeId && matchesProperty;
+                                }
+                            );
+                        }
+                    );
+                }
+
+                // Filter milestones by buyer-related checklists
+                if (buyerFilter !== "All") {
+                    milestonesToProcess = milestonesToProcess.filter(
+                        (milestone) => {
+                            if (
+                                !milestone.checklists ||
+                                milestone.checklists.length === 0
+                            )
+                                return false;
+
+                            const hasBuyerRelatedChecklist =
+                                milestone.checklists.some(
+                                    (checklist) =>
+                                        checklist.is_buyer_related === true
+                                );
+                            const hasNonBuyerRelatedChecklist =
+                                milestone.checklists.some(
+                                    (checklist) =>
+                                        checklist.is_buyer_related === false
+                                );
+
+                            if (buyerFilter === "Buyer Related") {
+                                return hasBuyerRelatedChecklist;
+                            } else if (buyerFilter === "Non-buyer") {
+                                return hasNonBuyerRelatedChecklist;
+                            }
+                            return true;
+                        }
+                    );
+                }
+
+                if (milestonesToProcess.length > 0) {
+                    values = milestonesToProcess.map((sub) => {
                         const items = sub.checklists || [];
                         if (!items || items.length === 0) return 0;
 
@@ -323,77 +506,141 @@ const WorkOrderGroupDetailsModal = ({
         });
 
         const tableRows = Object.values(accountMap).map((account) => {
-            // Build stepData as before
-            const stepData = steps.map((step) => {
-                return (
-                    account.milestoneData[step.id] ||
-                    (step.subMilestones.length > 0
-                        ? step.subMilestones.map(() => "")
-                        : [""])
-                );
-            });
+            // Build stepData only for visible steps
+            const stepData = steps
+                .filter((step) => visibleSteps.has(step.id))
+                .map((step) => {
+                    return (
+                        account.milestoneData[step.id] ||
+                        (step.subMilestones.length > 0
+                            ? step.subMilestones.map(() => "")
+                            : [""])
+                    );
+                });
 
-            // Build checklistInfos: array of info for each submilestone cell (in step order)
+            // Build checklistInfos: array of info for each submilestone cell (only for visible steps)
             const checklistInfos = [];
-            steps.forEach((step) => {
-                step.subMilestones.forEach((sub) => {
-                    const checklists = sub.checklists || [];
-                    const uploadedDocs = account.uploaded_documents || [];
-                    let currentChecklistItem = null;
-                    let completedCount = 0;
-                    const completedChecklists = [];
-                    const pendingChecklists = [];
-                    for (const checklist of checklists) {
-                        const hasUploadedDoc = uploadedDocs.some(
-                            (doc) => doc.file_title === checklist.name
+            steps
+                .filter((step) => visibleSteps.has(step.id))
+                .forEach((step) => {
+                    // Get filtered milestones based on assignee filter
+                    let milestonesToProcess = step.subMilestones;
+                    if (stepAssigneeFilter !== "All") {
+                        const selectedAssigneeId = parseInt(stepAssigneeFilter);
+                        milestonesToProcess = step.subMilestones.filter(
+                            (milestone) => {
+                                if (!milestone.milestone_assignees)
+                                    return false;
+
+                                return milestone.milestone_assignees.some(
+                                    (assignee) => {
+                                        const matchesEmployeeId =
+                                            assignee.employee_id ===
+                                            selectedAssigneeId;
+                                        const matchesProperty =
+                                            !group.property_name ||
+                                            assignee.property_name ===
+                                                group.property_name;
+                                        return (
+                                            matchesEmployeeId && matchesProperty
+                                        );
+                                    }
+                                );
+                            }
                         );
-                        const accountChecklistStatus = (
-                            account.account_checklist_statuses || []
-                        ).find(
-                            (status) => status.checklist_id === checklist.id
+                    }
+
+                    // Filter milestones by buyer-related checklists
+                    if (buyerFilter !== "All") {
+                        milestonesToProcess = milestonesToProcess.filter(
+                            (milestone) => {
+                                if (
+                                    !milestone.checklists ||
+                                    milestone.checklists.length === 0
+                                )
+                                    return false;
+
+                                const hasBuyerRelatedChecklist =
+                                    milestone.checklists.some(
+                                        (checklist) =>
+                                            checklist.is_buyer_related === true
+                                    );
+                                const hasNonBuyerRelatedChecklist =
+                                    milestone.checklists.some(
+                                        (checklist) =>
+                                            checklist.is_buyer_related === false
+                                    );
+
+                                if (buyerFilter === "Buyer Related") {
+                                    return hasBuyerRelatedChecklist;
+                                } else if (buyerFilter === "Non-buyer") {
+                                    return hasNonBuyerRelatedChecklist;
+                                }
+                                return true;
+                            }
                         );
-                        const hasCompletedStatus =
-                            accountChecklistStatus &&
-                            accountChecklistStatus.is_completed;
-                        if (hasUploadedDoc || hasCompletedStatus) {
-                            completedCount++;
-                            completedChecklists.push({
-                                ...checklist,
-                                completedVia: hasUploadedDoc
-                                    ? "document"
-                                    : "status",
-                                completedDate: hasUploadedDoc
-                                    ? uploadedDocs.find(
-                                          (doc) =>
-                                              doc.file_title === checklist.name
-                                      )?.created_at
-                                    : accountChecklistStatus?.updated_at,
-                            });
-                        } else {
-                            pendingChecklists.push(checklist);
-                            if (!currentChecklistItem) {
-                                currentChecklistItem = checklist;
+                    }
+
+                    milestonesToProcess.forEach((sub) => {
+                        const checklists = sub.checklists || [];
+                        const uploadedDocs = account.uploaded_documents || [];
+                        let currentChecklistItem = null;
+                        let completedCount = 0;
+                        const completedChecklists = [];
+                        const pendingChecklists = [];
+                        for (const checklist of checklists) {
+                            const hasUploadedDoc = uploadedDocs.some(
+                                (doc) => doc.file_title === checklist.name
+                            );
+                            const accountChecklistStatus = (
+                                account.account_checklist_statuses || []
+                            ).find(
+                                (status) => status.checklist_id === checklist.id
+                            );
+                            const hasCompletedStatus =
+                                accountChecklistStatus &&
+                                accountChecklistStatus.is_completed;
+                            if (hasUploadedDoc || hasCompletedStatus) {
+                                completedCount++;
+                                completedChecklists.push({
+                                    ...checklist,
+                                    completedVia: hasUploadedDoc
+                                        ? "document"
+                                        : "status",
+                                    completedDate: hasUploadedDoc
+                                        ? uploadedDocs.find(
+                                              (doc) =>
+                                                  doc.file_title ===
+                                                  checklist.name
+                                          )?.created_at
+                                        : accountChecklistStatus?.updated_at,
+                                });
+                            } else {
+                                pendingChecklists.push(checklist);
+                                if (!currentChecklistItem) {
+                                    currentChecklistItem = checklist;
+                                }
                             }
                         }
-                    }
-                    checklistInfos.push({
-                        stepName: step.stepName,
-                        milestoneName: sub.name,
-                        totalChecklists: checklists.length,
-                        completedCount: completedCount,
-                        currentChecklistItem: currentChecklistItem,
-                        completedChecklists: completedChecklists,
-                        pendingChecklists: pendingChecklists,
-                        progressPercentage:
-                            checklists.length > 0
-                                ? Math.round(
-                                      (completedCount / checklists.length) * 100
-                                  )
-                                : 0,
-                        subMilestoneId: sub.id,
+                        checklistInfos.push({
+                            stepName: step.stepName,
+                            milestoneName: sub.name,
+                            totalChecklists: checklists.length,
+                            completedCount: completedCount,
+                            currentChecklistItem: currentChecklistItem,
+                            completedChecklists: completedChecklists,
+                            pendingChecklists: pendingChecklists,
+                            progressPercentage:
+                                checklists.length > 0
+                                    ? Math.round(
+                                          (completedCount / checklists.length) *
+                                              100
+                                      )
+                                    : 0,
+                            subMilestoneId: sub.id,
+                        });
                     });
                 });
-            });
 
             // Find current submilestone information
             let currentChecklistInfo = null;
@@ -512,7 +759,7 @@ const WorkOrderGroupDetailsModal = ({
             };
         });
 
-        // Filter rows based on search term and status
+        // Filter rows based on search term, status, buyer type, and assignee
         const filteredRows = tableRows.filter((row) => {
             const searchMatch =
                 searchTerm === "" ||
@@ -525,7 +772,35 @@ const WorkOrderGroupDetailsModal = ({
             const statusMatch =
                 statusFilter === "All" || row.status === statusFilter;
 
-            return searchMatch && statusMatch;
+            // Note: Buyer filter now filters columns instead of rows
+            const buyerMatch = true;
+
+            // Assignee filter logic
+            const assigneeMatch = (() => {
+                if (assigneeFilter === "All") return true;
+
+                // Check if any step in this row has the selected assignee
+                const account = Object.values(accountMap).find(
+                    (acc) => acc.id === row.key
+                );
+                if (!account) return true;
+
+                // Check work order assignee
+                if (
+                    account.latestStep?.workOrder?.assignee?.id?.toString() ===
+                    assigneeFilter
+                ) {
+                    return true;
+                }
+
+                // Check account-specific assignees if they exist
+                const accountAssignees = account.assignees || [];
+                return accountAssignees.some(
+                    (assignee) => assignee.id?.toString() === assigneeFilter
+                );
+            })();
+
+            return searchMatch && statusMatch && buyerMatch && assigneeMatch;
         });
 
         const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
@@ -564,7 +839,16 @@ const WorkOrderGroupDetailsModal = ({
             steps,
             checklistTableAccounts,
         };
-    }, [group, searchTerm, itemsPerPage, statusFilter]);
+    }, [
+        group,
+        searchTerm,
+        itemsPerPage,
+        statusFilter,
+        buyerFilter,
+        assigneeFilter,
+        visibleSteps,
+        stepAssigneeFilter,
+    ]);
 
     const paginatedData = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
@@ -588,6 +872,97 @@ const WorkOrderGroupDetailsModal = ({
     const handleStatusFilterChange = (value) => {
         setStatusFilter(value);
         setCurrentPage(1);
+    };
+
+    // New filter handlers
+    const handleBuyerFilterChange = (value) => {
+        setBuyerFilter(value);
+        setCurrentPage(1);
+    };
+
+    const handleStepViewToggle = (checked) => {
+        setShowStepView(checked);
+    };
+
+    const handleStepVisibilityToggle = (stepId) => {
+        setVisibleSteps((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(stepId)) {
+                newSet.delete(stepId);
+            } else {
+                newSet.add(stepId);
+            }
+            return newSet;
+        });
+    };
+
+    const handleToggleAllSteps = (checked) => {
+        if (checked) {
+            setVisibleSteps(new Set(availableSteps.map((step) => step.id)));
+        } else {
+            setVisibleSteps(new Set());
+        }
+    };
+
+    const handleAssigneeFilterChange = (value) => {
+        setAssigneeFilter(value);
+        setCurrentPage(1);
+    };
+
+    const handleStepAssigneeFilterChange = (value) => {
+        setStepAssigneeFilter(value);
+
+        // Auto-update visible steps based on assignee filter
+        if (value === "All") {
+            // Show all steps when "All" is selected
+            setVisibleSteps(new Set(availableSteps.map((step) => step.id)));
+        } else {
+            // Filter steps to only show those assigned to the selected assignee
+            if (group?.submilestonesByType) {
+                const selectedAssigneeId = parseInt(value);
+                const stepsWithAssignee = new Set();
+
+                Object.keys(group.submilestonesByType).forEach((stepId) => {
+                    const milestones = group.submilestonesByType[stepId];
+
+                    const hasAssignee = milestones.some((milestone) => {
+                        if (!milestone.milestone_assignees) return false;
+
+                        return milestone.milestone_assignees.some(
+                            (assignee) => {
+                                const matchesEmployeeId =
+                                    assignee.employee_id === selectedAssigneeId;
+                                const matchesProperty =
+                                    !group.property_name ||
+                                    assignee.property_name ===
+                                        group.property_name;
+
+                                return matchesEmployeeId && matchesProperty;
+                            }
+                        );
+                    });
+
+                    if (hasAssignee) {
+                        stepsWithAssignee.add(parseInt(stepId));
+                    }
+                });
+
+                console.log(
+                    `Filtered steps for assignee ${selectedAssigneeId}:`,
+                    Array.from(stepsWithAssignee)
+                );
+                setVisibleSteps(stepsWithAssignee);
+            } else {
+                console.log(
+                    "Submilestone data not available for step filtering"
+                );
+                setVisibleSteps(new Set(availableSteps.map((step) => step.id)));
+            }
+        }
+    };
+
+    const handleHideCompletedChecklistsChange = (value) => {
+        setHideCompletedChecklists(value);
     };
 
     const handleOpenNotesModal = (notesData) => {
@@ -624,6 +999,21 @@ const WorkOrderGroupDetailsModal = ({
         if (isRefreshing || !onRefresh) return;
 
         setIsRefreshing(true);
+
+        // Reset all filters to default values
+        setSearchTerm("");
+        setStatusFilter("All");
+        setBuyerFilter("All");
+        setAssigneeFilter("All");
+        setStepAssigneeFilter("All");
+        setHideCompletedChecklists(false);
+        setCurrentPage(1);
+
+        // Reset visible steps to show all
+        if (availableSteps.length > 0) {
+            setVisibleSteps(new Set(availableSteps.map((step) => step.id)));
+        }
+
         try {
             await onRefresh();
         } catch (error) {
@@ -747,10 +1137,35 @@ const WorkOrderGroupDetailsModal = ({
                 onItemsPerPageChange={handleItemsPerPageChange}
                 statusFilter={statusFilter}
                 onStatusFilterChange={handleStatusFilterChange}
+                buyerFilter={buyerFilter}
+                onBuyerFilterChange={handleBuyerFilterChange}
+                showStepView={showStepView}
+                onStepViewToggle={handleStepViewToggle}
+                assigneeFilter={assigneeFilter}
+                onAssigneeFilterChange={handleAssigneeFilterChange}
+                availableAssignees={availableAssignees}
+                // Step visibility props
+                availableSteps={availableSteps}
+                visibleSteps={visibleSteps}
+                onStepVisibilityToggle={handleStepVisibilityToggle}
+                onToggleAllSteps={handleToggleAllSteps}
+                // Step assignee filter props
+                stepAssigneeFilter={stepAssigneeFilter}
+                onStepAssigneeFilterChange={handleStepAssigneeFilterChange}
                 onRefresh={handleRefresh}
                 isRefreshing={isRefreshing}
                 hideItemsPerPage={false}
                 hideStatusFilter={showChecklistTable}
+                hideBuyerFilter={false}
+                hideStepViewToggle={false}
+                hideAssigneeFilter={false}
+                hideStepVisibility={showChecklistTable}
+                hideStepAssigneeFilter={showChecklistTable}
+                hideCompletedChecklists={hideCompletedChecklists}
+                onHideCompletedChecklistsChange={
+                    handleHideCompletedChecklistsChange
+                }
+                hideCompletedChecklistsFilter={!showChecklistTable}
             />
 
             {/* Milestone Progression Notification */}
@@ -820,6 +1235,7 @@ const WorkOrderGroupDetailsModal = ({
                             onRefresh={onRefresh}
                             currentPage={currentPage}
                             itemsPerPage={itemsPerPage}
+                            hideCompletedChecklists={hideCompletedChecklists}
                         />
 
                         {isAddFilesModalOpen && (
@@ -833,6 +1249,41 @@ const WorkOrderGroupDetailsModal = ({
                             />
                         )}
                     </>
+                ) : !showStepView ? (
+                    <div className="flex items-center justify-center h-96 bg-gray-50">
+                        <div className="text-center">
+                            <svg
+                                className="mx-auto h-12 w-12 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                />
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                />
+                            </svg>
+                            <Typography
+                                variant="h6"
+                                color="gray"
+                                className="mt-4"
+                            >
+                                Step View Hidden
+                            </Typography>
+                            <Typography color="gray" className="mt-2 text-sm">
+                                Enable "Show Step View" to see the detailed step
+                                table.
+                            </Typography>
+                        </div>
+                    </div>
                 ) : paginatedData.length > 0 ? (
                     <div className="h-full">
                         <table className="w-full text-left border-separate border-spacing-0 bg-white">
@@ -1017,7 +1468,9 @@ const WorkOrderGroupDetailsModal = ({
                                     <WorkOrderMilestoneRow
                                         key={row.key}
                                         row={row}
-                                        steps={steps}
+                                        steps={steps.filter((step) =>
+                                            visibleSteps.has(step.id)
+                                        )}
                                         getStatusBadge={getStatusBadge}
                                         handleOpenNotesModal={
                                             handleOpenNotesModal
