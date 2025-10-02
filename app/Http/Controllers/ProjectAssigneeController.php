@@ -245,4 +245,55 @@ class ProjectAssigneeController extends Controller
 
         return response()->json($result);
     }
+
+    /**
+     * Get project assignees for work order group integration.
+     * This method can be called by other controllers to get assignee data.
+     */
+    public static function getProjectAssigneesForProperty(string $propertyName)
+    {
+        $employeeIds = DB::table('project_milestone_assignees')
+            ->where('property_name', $propertyName)
+            ->distinct()
+            ->pluck('employee_id');
+
+        $assignees = Employee::whereIn('id', $employeeIds)
+            ->get(['id', 'firstname', 'lastname', 'fullname']);
+
+        return $assignees->map(function ($employee) {
+            $fullName = trim($employee->fullname);
+            if (empty($fullName)) {
+                $fullName = trim(($employee->firstname ?? '') . ' ' . ($employee->lastname ?? ''));
+            }
+
+            return [
+                'id' => $employee->id,
+                'name' => $fullName,
+                'firstname' => $employee->firstname,
+                'lastname' => $employee->lastname,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get milestone assignments for a specific property and assignee.
+     * Used for step filtering in work order groups.
+     */
+    public static function getAssigneeStepMilestones(string $propertyName, int $employeeId = null)
+    {
+        $query = DB::table('project_milestone_assignees')
+            ->join('submilestones', 'project_milestone_assignees.submilestone_id', '=', 'submilestones.id')
+            ->where('project_milestone_assignees.property_name', $propertyName);
+
+        if ($employeeId) {
+            $query->where('project_milestone_assignees.employee_id', $employeeId);
+        }
+
+        return $query->select(
+            'submilestones.work_order_type_id',
+            'submilestones.id as submilestone_id',
+            'submilestones.name as submilestone_name',
+            'project_milestone_assignees.employee_id'
+        )->get()->groupBy('work_order_type_id');
+    }
 }

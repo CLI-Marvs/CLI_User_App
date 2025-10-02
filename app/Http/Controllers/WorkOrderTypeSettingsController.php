@@ -168,6 +168,7 @@ class WorkOrderTypeSettingsController extends Controller
             'submilestone_id' => 'required|exists:submilestones,id',
             'name' => 'required|string|max:255',
             'requires_document' => 'boolean',
+            'is_buyer_related' => 'boolean',
         ]);
         $checklist = Checklist::create($validated);
         return response()->json($checklist, 201);
@@ -181,6 +182,7 @@ class WorkOrderTypeSettingsController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'requires_document' => 'boolean',
+            'is_buyer_related' => 'boolean',
         ]);
         $checklist->update($validated);
         return response()->json($checklist);

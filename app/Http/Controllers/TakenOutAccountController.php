@@ -143,7 +143,8 @@ class TakenOutAccountController extends Controller
                 'unit_no',
                 'category',
                 'to_year',
-                'to_month'
+                'to_month',
+                'checklist_status'
             )
             ->get();
         // \Log::info('MasterList:', $masterList->toArray()); // Optional debug

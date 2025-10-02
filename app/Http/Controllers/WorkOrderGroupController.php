@@ -16,7 +16,10 @@ class WorkOrderGroupController extends Controller
     {
         // Find the group and eager load its work orders and related data
         // We no longer need `completedChecklists`, but we do need the accounts.
-        $group = WorkOrderGroup::with(['workOrders.accounts:id,contract_no,account_name,property_name,unit_no,financing,take_out_date,dou_expiry,added_status,checklist_status,current_submilestone_id', 'workOrders.workOrderType.submilestones.checklists'])
+        $group = WorkOrderGroup::with([
+            'workOrders.accounts:id,contract_no,account_name,property_name,unit_no,financing,take_out_date,dou_expiry,added_status,checklist_status,current_submilestone_id',
+            'workOrders.workOrderType.submilestones.checklists:id,submilestone_id,name,requires_document,is_buyer_related'
+        ])
             ->findOrFail($groupId);
 
         // Get all unique account IDs from the work order group to fetch their documents efficiently.
@@ -53,7 +56,7 @@ class WorkOrderGroupController extends Controller
         // Get all submilestones and group them by their work order type ID
         // Include the project milestone assignees relationship and checklist status for the current accounts
         $allSubmilestones = Submilestone::with([
-            'checklists:id,submilestone_id,name,requires_document',
+            'checklists:id,submilestone_id,name,requires_document,is_buyer_related',
             'checklists.accountChecklistStatuses' => function ($query) use ($accountIds) {
                 $query->whereIn('account_id', $accountIds);
             },
@@ -113,13 +116,42 @@ class WorkOrderGroupController extends Controller
             }
         }
 
-    return response()->json([
-        'id' => $group->id,
-        'due_date' => $group->due_date,
-        'status' => $group->status,   
-        'work_orders' => $workOrdersForResponse,
-        'submilestonesByType' => $submilestonesByType,
-    ]);
+        // Extract all unique assignees for this project (property)
+        $projectProperty = $group->workOrders->first()?->accounts->first()?->property_name;
+        $projectAssignees = [];
+
+        if ($projectProperty) {
+            // Get all unique assignees for this project across all milestones
+            $uniqueAssignees = collect();
+            foreach ($allSubmilestones as $milestones) {
+                foreach ($milestones as $milestone) {
+                    foreach ($milestone->projectMilestoneAssignees as $assignee) {
+                        if ($assignee->property_name === $projectProperty && $assignee->employee) {
+                            $uniqueAssignees->push($assignee->employee);
+                        }
+                    }
+                }
+            }
+
+            $projectAssignees = $uniqueAssignees->unique('id')->map(function ($employee) {
+                return [
+                    'id' => $employee->id,
+                    'name' => $employee->fullname ?: trim(($employee->firstname ?? '') . ' ' . ($employee->lastname ?? '')),
+                    'firstname' => $employee->firstname,
+                    'lastname' => $employee->lastname,
+                ];
+            })->values()->toArray();
+        }
+
+        return response()->json([
+            'id' => $group->id,
+            'due_date' => $group->due_date,
+            'status' => $group->status,
+            'work_orders' => $workOrdersForResponse,
+            'submilestonesByType' => $submilestonesByType,
+            'project_assignees' => $projectAssignees,
+            'property_name' => $projectProperty,
+        ]);
     }
 
     /**
