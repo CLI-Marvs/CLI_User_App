@@ -437,10 +437,10 @@ const ProjectAssigneeComponent = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen py-8">
             <div className="max-w-7xl px-4 sm:px-6 lg:px-0 py-8 h-full">
                 {/* Header Section */}
-                <div className="bg-white border-b border-gray-50 rounded-lg mb-8">
+                <div className=" border-b border-gray-50 rounded-lg mb-8">
                     <div className="py-6 border-b border-gray-200">
                         <h1 className="text-3xl font-bold leading-tight text-gray-900">
                             Project Assignee Management
