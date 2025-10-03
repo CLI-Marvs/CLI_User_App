@@ -13,6 +13,9 @@ import {
 } from "@material-tailwind/react";
 import FilterIcon from "../../../../../../public/Images/filterIcon.svg";
 import File from "../../../../../../public/Images/fileIcon.svg";
+import DateLogo from "../../../../../../public/Images/Date_range.svg";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { motion, AnimatePresence } from "framer-motion";
 import View from "../../../../../../public/Images/view.svg";
 import Edit from "../../../../../../public/Images/Subtract.svg";
@@ -30,6 +33,7 @@ const TABLE_HEAD = [
     { head: "Project" },
     { head: "Status" },
     { head: "Date Created" },
+    { head: "Date Updated" },
     { head: "Due Date" },
     { head: "Actions" },
 ];
@@ -68,6 +72,17 @@ const ProfileIcon = () => {
     return <img src={Profile} className="size-4" />;
 };
 
+const FilterSearchIcon = ({ onClick }) => {
+    return (
+        <img
+            src={FilterIcon}
+            alt="Filter"
+            className="size-4 cursor-pointer"
+            onClick={onClick}
+        />
+    );
+};
+
 const WorkOrderView = () => {
     // Helper to get project names for a group (similar to MyWorkOrders)
     const getProjectNames = (group) => {
@@ -100,6 +115,11 @@ const WorkOrderView = () => {
     const dropdownRef = useRef(null);
     const [filterAssignee, setFilterAssignee] = useState("");
     const [filterStatus, setFilterStatus] = useState("");
+    const [filterProject, setFilterProject] = useState("");
+    const [projectSearchTerm, setProjectSearchTerm] = useState("");
+    const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
+    const [selectedDateFilter, setSelectedDateFilter] = useState("");
+    const [selectedDate, setSelectedDate] = useState("");
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [selectedWorkOrderForView, setSelectedWorkOrderForView] =
@@ -191,6 +211,11 @@ const WorkOrderView = () => {
         setSearchQuery("");
         setFilterAssignee("");
         setFilterStatus("");
+        setFilterProject("");
+        setProjectSearchTerm("");
+        setSelectedDateFilter("");
+        setSelectedDate("");
+        setIsProjectDropdownOpen(false);
         setWorkOrderFilterOption("All");
         setIsFilterVisible(false);
         setCurrentPage(1);
@@ -209,13 +234,41 @@ const WorkOrderView = () => {
                 !dropdownRef.current.contains(event.target)
             ) {
                 setIsFilterVisible(false);
+                setIsProjectDropdownOpen(false);
             }
         };
         document.addEventListener("mousedown", handleOutsideClick);
         return () => {
             document.removeEventListener("mousedown", handleOutsideClick);
         };
-    }, []);
+    }, [isProjectDropdownOpen]);
+
+    // Get unique projects from all groups
+    const getUniqueProjects = () => {
+        const projects = new Set();
+        (Array.isArray(tableRowsData) ? tableRowsData : []).forEach((group) => {
+            const projectName = getProjectNames(group);
+            if (projectName && projectName !== "No Project") {
+                // Split by comma in case there are multiple projects
+                projectName.split(", ").forEach((project) => {
+                    projects.add(project.trim());
+                });
+            }
+        });
+        return Array.from(projects).sort();
+    };
+
+    // Filter projects based on search term
+    const filteredProjects = getUniqueProjects().filter((project) =>
+        project.toLowerCase().includes(projectSearchTerm.toLowerCase())
+    );
+
+    // Helper function to handle project selection
+    const handleProjectToggle = (projectName) => {
+        setFilterProject(projectName);
+        setProjectSearchTerm(projectName);
+        setIsProjectDropdownOpen(false);
+    };
 
     // Filter groups based on search and filter criteria
     const filteredGroups = (
@@ -237,7 +290,50 @@ const WorkOrderView = () => {
             (group.status || "").toLowerCase().replace(/\s+/g, "_") ===
                 workOrderFilterOption.toLowerCase().replace(/\s+/g, "_");
 
-        return searchMatch && statusFilterMatch;
+        // Project filter
+        const projectFilterMatch =
+            filterProject === "" ||
+            getProjectNames(group)
+                .toLowerCase()
+                .includes(filterProject.toLowerCase());
+
+        // Date filter
+        const dateMatch = (() => {
+            if (!selectedDateFilter || !selectedDate) return true;
+
+            const targetDate = new Date(selectedDate);
+            let groupDate;
+
+            if (selectedDateFilter === "Date Created") {
+                groupDate = new Date(group.created_at);
+            } else if (selectedDateFilter === "Date Updated") {
+                groupDate = new Date(group.updated_at);
+            } else if (selectedDateFilter === "Due Date") {
+                groupDate = new Date(group.due_date);
+            } else {
+                return true;
+            }
+
+            // Compare dates (ignoring time)
+            return (
+                groupDate.getFullYear() === targetDate.getFullYear() &&
+                groupDate.getMonth() === targetDate.getMonth() &&
+                groupDate.getDate() === targetDate.getDate()
+            );
+        })();
+
+        // Additional status filter from dropdown
+        const statusDropdownMatch =
+            filterStatus === "" ||
+            (group.status || "").toLowerCase() === filterStatus.toLowerCase();
+
+        return (
+            searchMatch &&
+            statusFilterMatch &&
+            projectFilterMatch &&
+            dateMatch &&
+            statusDropdownMatch
+        );
     });
 
     const startIndex = (currentPage - 1) * rowsPerPage;
@@ -464,7 +560,7 @@ const WorkOrderView = () => {
                         viewBox="0 0 24 24"
                         strokeWidth="1.5"
                         stroke="currentColor"
-                        className="size-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500"
+                        className="size-4 absolute left-3 top-4 text-gray-500"
                     >
                         <path
                             strokeLinecap="round"
@@ -481,11 +577,34 @@ const WorkOrderView = () => {
                         placeholder="Search Work Order No....."
                     />
 
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                        <RefreshIcon
-                            onClick={handleRefreshAndClearFilters}
-                            isRefreshing={isRefreshing}
-                        />
+                    <div className="absolute right-3 top-3 flex justify-end">
+                        <div className="cursor-pointer mr-2">
+                            <FilterSearchIcon onClick={toggleFilterBox} />
+                        </div>
+                        <button
+                            className="cursor-pointer"
+                            onClick={
+                                isRefreshing
+                                    ? undefined
+                                    : handleRefreshAndClearFilters
+                            }
+                            disabled={isRefreshing}
+                        >
+                            <svg
+                                stroke="currentColor"
+                                fill="currentColor"
+                                strokeWidth="0"
+                                viewBox="0 0 24 24"
+                                height="1em"
+                                width="1em"
+                                xmlns="http://www.w3.org/2000/svg"
+                                className={isRefreshing ? "animate-spin" : ""}
+                                style={{ transition: "color 0.2s" }}
+                            >
+                                <path fill="none" d="M0 0h24v24H0z"></path>
+                                <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08A5.99 5.99 0 0 1 12 18c-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"></path>
+                            </svg>
+                        </button>
                     </div>
                     <AnimatePresence>
                         {isFilterVisible && (
@@ -495,49 +614,214 @@ const WorkOrderView = () => {
                                 animate={{ opacity: 1, y: 0 }}
                                 exit={{ opacity: 0, y: -10 }}
                                 transition={{ duration: 0.15 }}
-                                className="absolute top-[110%] left-0 mt-1 p-4 bg-white border border-gray-300 shadow-lg rounded-lg z-10 w-full max-w-sm"
+                                className="absolute top-[110%] left-0 mt-1 p-6 sm:p-8 bg-white border border-gray-300 shadow-lg rounded-lg z-50 w-full max-w-full"
                             >
-                                <Typography
-                                    variant="h6"
-                                    color="blue-gray"
-                                    className="mb-3 text-center"
-                                >
-                                    Filter Work Orders
-                                </Typography>
                                 <div className="flex flex-col gap-4">
-                                    <div>
-                                        <label
-                                            htmlFor="filterStatus"
-                                            className="text-sm font-medium text-gray-700 block mb-1"
-                                        >
+                                    <div className="flex flex-col sm:flex-row">
+                                        <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
+                                            Project
+                                        </label>
+                                        <div className="relative w-full">
+                                            <input
+                                                type="text"
+                                                value={projectSearchTerm}
+                                                onChange={(e) =>
+                                                    setProjectSearchTerm(
+                                                        e.target.value
+                                                    )
+                                                }
+                                                onFocus={() =>
+                                                    setIsProjectDropdownOpen(
+                                                        true
+                                                    )
+                                                }
+                                                placeholder={
+                                                    filterProject ||
+                                                    "Search or select project..."
+                                                }
+                                                className="w-full border-b outline-none text-sm px-2 py-1"
+                                            />
+                                            <svg
+                                                className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 transition-transform cursor-pointer ${
+                                                    isProjectDropdownOpen
+                                                        ? "rotate-180"
+                                                        : ""
+                                                }`}
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                                onClick={() =>
+                                                    setIsProjectDropdownOpen(
+                                                        !isProjectDropdownOpen
+                                                    )
+                                                }
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M19 9l-7 7-7-7"
+                                                />
+                                            </svg>
+                                            {isProjectDropdownOpen && (
+                                                <div className="absolute top-full left-0 w-full bg-white border border-gray-300 rounded-b-md shadow-lg z-50 max-h-60 overflow-y-auto">
+                                                    <div className="max-h-48 overflow-y-auto">
+                                                        {filteredProjects.length >
+                                                        0 ? (
+                                                            filteredProjects.map(
+                                                                (project) => (
+                                                                    <div
+                                                                        key={
+                                                                            project
+                                                                        }
+                                                                        className="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+                                                                        onClick={() =>
+                                                                            handleProjectToggle(
+                                                                                project
+                                                                            )
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            project
+                                                                        }
+                                                                    </div>
+                                                                )
+                                                            )
+                                                        ) : (
+                                                            <div className="px-3 py-2 text-gray-500 text-sm">
+                                                                No projects
+                                                                found
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-col sm:flex-row">
+                                        <label className="text-custom-bluegreen text-[12px] sm:w-[114px] mb-1 sm:mb-0">
                                             Status
                                         </label>
                                         <select
-                                            id="filterStatus"
                                             value={filterStatus}
                                             onChange={(e) =>
                                                 setFilterStatus(e.target.value)
                                             }
-                                            className="w-full border border-gray-300 rounded-md p-2 text-sm outline-none focus:ring-1 focus:ring-custom-bluegreen focus:border-custom-bluegreen"
+                                            className="w-full border-b outline-none text-sm px-2"
                                         >
                                             <option value="">
                                                 All Statuses
                                             </option>
                                             <option value="Pending">
+                                                Pending
+                                            </option>
+                                            <option value="In Progress">
                                                 In Progress
                                             </option>
                                             <option value="Complete">
                                                 Complete
                                             </option>
+                                            <option value="Overdue">
+                                                Overdue
+                                            </option>
+                                            <option value="Cancelled">
+                                                Cancelled
+                                            </option>
                                         </select>
                                     </div>
-                                    <Button
-                                        onClick={handleApplyFiltersFromDropdown}
-                                        size="sm"
-                                        className="mt-2 gradient-btn w-full"
-                                    >
-                                        Apply Filters
-                                    </Button>
+
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                                        <div className="flex flex-col sm:flex-row sm:items-center w-full">
+                                            <label className="text-custom-bluegreen text-[12px] w-[114px] mb-1 sm:mb-0">
+                                                Date Filter
+                                            </label>
+                                            <select
+                                                value={selectedDateFilter}
+                                                onChange={(e) => {
+                                                    setSelectedDateFilter(
+                                                        e.target.value
+                                                    );
+                                                    if (e.target.value === "") {
+                                                        setSelectedDate("");
+                                                    }
+                                                }}
+                                                className="w-full border-b outline-none text-sm px-2"
+                                            >
+                                                <option value=""></option>
+                                                <option value="Date Created">
+                                                    Date Created
+                                                </option>
+                                                <option value="Date Updated">
+                                                    Date Updated
+                                                </option>
+                                                <option value="Due Date">
+                                                    Due Date
+                                                </option>
+                                            </select>
+                                        </div>
+
+                                        <div className="flex flex-col sm:flex-row sm:items-center w-full">
+                                            <label className="text-custom-bluegreen text-[12px] sm:w-auto mb-1 sm:mb-0 sm:mr-3">
+                                                Date
+                                            </label>
+                                            <div className="relative w-full border-b outline-none">
+                                                <DatePicker
+                                                    selected={selectedDate}
+                                                    onChange={(date) => {
+                                                        if (
+                                                            !selectedDateFilter
+                                                        ) {
+                                                            alert(
+                                                                "Please select a Date Filter first (Date Created, Date Updated, or Due Date) before choosing a date."
+                                                            );
+                                                            return;
+                                                        }
+                                                        setSelectedDate(date);
+                                                    }}
+                                                    onFocus={() => {
+                                                        if (
+                                                            !selectedDateFilter
+                                                        ) {
+                                                            alert(
+                                                                "Please select a Date Filter first (Date Created, Date Updated, or Due Date) before choosing a date."
+                                                            );
+                                                        }
+                                                    }}
+                                                    className={`w-full pr-10 text-sm text-center ${
+                                                        !selectedDateFilter
+                                                            ? "cursor-not-allowed opacity-50"
+                                                            : ""
+                                                    }`}
+                                                    calendarClassName="custom-calendar"
+                                                    disabled={
+                                                        !selectedDateFilter
+                                                    }
+                                                    placeholderText={
+                                                        !selectedDateFilter
+                                                            ? "Select Date Filter first"
+                                                            : "Select date"
+                                                    }
+                                                />
+                                                <img
+                                                    src={DateLogo}
+                                                    alt="date"
+                                                    className="absolute bottom-[1px] right-2 size-5 pointer-events-none"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex justify-end mt-4">
+                                        <button
+                                            onClick={
+                                                handleApplyFiltersFromDropdown
+                                            }
+                                            className="h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm"
+                                        >
+                                            Search
+                                        </button>
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
@@ -580,11 +864,12 @@ const WorkOrderView = () => {
             <Card className="w-full overflow-hidden rounded-md border-0 bg-white backdrop-blur-sm">
                 <table className="w-full table-fixed bg-white rounded-md shadow-inner">
                     <colgroup>
-                        <col style={{ width: "20%" }} />
-                        <col style={{ width: "18%" }} />
-                        <col style={{ width: "14%" }} />
-                        <col style={{ width: "14%" }} />
-                        <col style={{ width: "14%" }} />
+                        <col style={{ width: "16%" }} />
+                        <col style={{ width: "16%" }} />
+                        <col style={{ width: "12%" }} />
+                        <col style={{ width: "12%" }} />
+                        <col style={{ width: "12%" }} />
+                        <col style={{ width: "12%" }} />
                         <col style={{ width: "20%" }} />
                     </colgroup>
                     <thead className="sticky top-0 z-10 bg-custom-bluegreen">
@@ -635,6 +920,17 @@ const WorkOrderView = () => {
                             </th>
                             <th className="text-white h-[44px] px-3 py-1">
                                 <div className="flex items-center space-x-2">
+                                    <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
+                                    <Typography
+                                        variant="small"
+                                        className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
+                                    >
+                                        Date Updated
+                                    </Typography>
+                                </div>
+                            </th>
+                            <th className="text-white h-[44px] px-3 py-1">
+                                <div className="flex items-center space-x-2">
                                     <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
                                     <Typography
                                         variant="small"
@@ -661,7 +957,7 @@ const WorkOrderView = () => {
                         {!groupsLoading && currentData.length === 0 ? (
                             <tr>
                                 <td
-                                    colSpan="6"
+                                    colSpan="7"
                                     className="px-6 py-12 text-center text-gray-500"
                                 >
                                     <div className="flex flex-col items-center justify-center">
@@ -691,7 +987,7 @@ const WorkOrderView = () => {
                         ) : groupsLoading ? (
                             <tr>
                                 <td
-                                    colSpan="6"
+                                    colSpan="7"
                                     className="px-6 py-8 text-center text-gray-500"
                                 >
                                     <div className="flex flex-col items-center justify-center animate-pulse">
@@ -783,6 +1079,16 @@ const WorkOrderView = () => {
                                                     <span className="font-medium">
                                                         {formatDate(
                                                             group.created_at
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
+                                                <div className="flex items-center space-x-1">
+                                                    <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
+                                                    <span className="font-medium">
+                                                        {formatDate(
+                                                            group.updated_at
                                                         )}
                                                     </span>
                                                 </div>

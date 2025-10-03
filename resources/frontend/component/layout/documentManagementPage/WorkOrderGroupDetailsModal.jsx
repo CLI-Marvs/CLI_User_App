@@ -506,17 +506,100 @@ const WorkOrderGroupDetailsModal = ({
         });
 
         const tableRows = Object.values(accountMap).map((account) => {
-            // Build stepData only for visible steps
+            // Build stepData only for visible steps AND filtered by buyer filter
             const stepData = steps
                 .filter((step) => visibleSteps.has(step.id))
                 .map((step) => {
-                    return (
-                        account.milestoneData[step.id] ||
-                        (step.subMilestones.length > 0
-                            ? step.subMilestones.map(() => "")
-                            : [""])
-                    );
-                });
+                    // Get filtered milestones based on assignee filter
+                    let milestonesToProcess = step.subMilestones;
+                    if (stepAssigneeFilter !== "All") {
+                        const selectedAssigneeId = parseInt(stepAssigneeFilter);
+                        milestonesToProcess = step.subMilestones.filter(
+                            (milestone) => {
+                                if (!milestone.milestone_assignees)
+                                    return false;
+
+                                return milestone.milestone_assignees.some(
+                                    (assignee) => {
+                                        const matchesEmployeeId =
+                                            assignee.employee_id ===
+                                            selectedAssigneeId;
+                                        const matchesProperty =
+                                            !group.property_name ||
+                                            assignee.property_name ===
+                                                group.property_name;
+                                        return (
+                                            matchesEmployeeId && matchesProperty
+                                        );
+                                    }
+                                );
+                            }
+                        );
+                    }
+
+                    // Filter milestones by buyer-related checklists (SAME AS COLUMN HEADERS)
+                    if (buyerFilter !== "All") {
+                        milestonesToProcess = milestonesToProcess.filter(
+                            (milestone) => {
+                                if (
+                                    !milestone.checklists ||
+                                    milestone.checklists.length === 0
+                                )
+                                    return false;
+
+                                const hasBuyerRelatedChecklist =
+                                    milestone.checklists.some(
+                                        (checklist) =>
+                                            checklist.is_buyer_related === true
+                                    );
+                                const hasNonBuyerRelatedChecklist =
+                                    milestone.checklists.some(
+                                        (checklist) =>
+                                            checklist.is_buyer_related === false
+                                    );
+
+                                if (buyerFilter === "Buyer Related") {
+                                    return hasBuyerRelatedChecklist;
+                                } else if (buyerFilter === "Non-buyer") {
+                                    return hasNonBuyerRelatedChecklist;
+                                }
+                                return true;
+                            }
+                        );
+                    }
+
+                    // Use the filtered milestones for stepData calculation
+                    if (milestonesToProcess.length > 0) {
+                        return milestonesToProcess.map((sub) => {
+                            const items = sub.checklists || [];
+                            if (!items || items.length === 0) return 0;
+
+                            const uploadedDocs =
+                                account.uploaded_documents || [];
+                            const completedCount = items.filter((item) => {
+                                const hasUploadedDoc = uploadedDocs.some(
+                                    (doc) => doc.file_title === item.name
+                                );
+                                const accountChecklistStatus = (
+                                    account.account_checklist_statuses || []
+                                ).find(
+                                    (status) => status.checklist_id === item.id
+                                );
+                                const hasCompletedStatus =
+                                    accountChecklistStatus &&
+                                    accountChecklistStatus.is_completed;
+                                return hasUploadedDoc || hasCompletedStatus;
+                            }).length;
+
+                            return Math.round(
+                                (completedCount / items.length) * 100
+                            );
+                        });
+                    } else {
+                        return []; // Return empty array for steps with no matching milestones
+                    }
+                })
+                .filter((stepValues) => stepValues.length > 0); // Remove empty steps
 
             // Build checklistInfos: array of info for each submilestone cell (only for visible steps)
             const checklistInfos = [];
@@ -1468,9 +1551,61 @@ const WorkOrderGroupDetailsModal = ({
                                     <WorkOrderMilestoneRow
                                         key={row.key}
                                         row={row}
-                                        steps={steps.filter((step) =>
-                                            visibleSteps.has(step.id)
-                                        )}
+                                        steps={steps.filter((step) => {
+                                            if (!visibleSteps.has(step.id))
+                                                return false;
+
+                                            // Apply the same buyer filter logic to steps passed to the row component
+                                            if (buyerFilter !== "All") {
+                                                const hasMatchingMilestones =
+                                                    step.subMilestones.some(
+                                                        (milestone) => {
+                                                            if (
+                                                                !milestone.checklists ||
+                                                                milestone
+                                                                    .checklists
+                                                                    .length ===
+                                                                    0
+                                                            )
+                                                                return false;
+
+                                                            const hasBuyerRelatedChecklist =
+                                                                milestone.checklists.some(
+                                                                    (
+                                                                        checklist
+                                                                    ) =>
+                                                                        checklist.is_buyer_related ===
+                                                                        true
+                                                                );
+                                                            const hasNonBuyerRelatedChecklist =
+                                                                milestone.checklists.some(
+                                                                    (
+                                                                        checklist
+                                                                    ) =>
+                                                                        checklist.is_buyer_related ===
+                                                                        false
+                                                                );
+
+                                                            if (
+                                                                buyerFilter ===
+                                                                "Buyer Related"
+                                                            ) {
+                                                                return hasBuyerRelatedChecklist;
+                                                            } else if (
+                                                                buyerFilter ===
+                                                                "Non-buyer"
+                                                            ) {
+                                                                return hasNonBuyerRelatedChecklist;
+                                                            }
+                                                            return true;
+                                                        }
+                                                    );
+
+                                                return hasMatchingMilestones;
+                                            }
+
+                                            return true;
+                                        })}
                                         getStatusBadge={getStatusBadge}
                                         handleOpenNotesModal={
                                             handleOpenNotesModal
