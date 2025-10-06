@@ -36,15 +36,13 @@ const WorkOrderMilestoneRow = ({
     return (
         <>
             <tr key={row.key} className={`transition-colors`}>
-                <td className={stickyTdClass}>
-                    <div className="flex items-center gap-2">
-                        <span
-                            className="text-sm font-medium text-gray-900 truncate"
-                            title={row.accountName}
-                        >
-                            {row.accountName}
-                        </span>
-                    </div>
+                <td className="px-3 py-2 font-medium text-gray-900 bg-white border border-gray-200 min-w-[180px] text-left">
+                    <span
+                        className="text-sm font-medium text-gray-900 block w-full text-left"
+                        title={row.accountName}
+                    >
+                        {row.accountName}
+                    </span>
                 </td>
                 {Array.isArray(row.stepData) &&
                     row.stepData.map((step, i) => {
