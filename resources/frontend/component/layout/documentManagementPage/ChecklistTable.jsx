@@ -328,8 +328,9 @@ const ChecklistTable = ({
     // Memoized filtered steps based on user assignment and completed checklist filter
     const filteredSteps = React.useMemo(() => {
         return (steps || [])
-            .map((step) => ({
+            .map((step, originalStepIndex) => ({
                 ...step,
+                originalStepIndex, // Preserve original step index before filtering
                 subMilestones: step.subMilestones
                     .filter((milestone) => {
                         if (!currentUserId) return true;
@@ -472,6 +473,7 @@ const ChecklistTable = ({
 
             for (let stepIdx = 0; stepIdx < filteredSteps.length; stepIdx++) {
                 const step = filteredSteps[stepIdx];
+                const originalStepIdx = step.originalStepIndex;
 
                 for (const sub of step.subMilestones) {
                     // Check if assigned to user
@@ -501,10 +503,76 @@ const ChecklistTable = ({
                     if (!assignedToUser) continue;
 
                     // For the first step, always show
-                    if (stepIdx === 0) return true;
+                    if (originalStepIdx === 0) return true;
 
-                    // Show if this is the account's current step
-                    if (stepIdx === currentStepIndex) return true;
+                    // Show if this is the account's current step AND all previous steps are completed
+                    if (stepIdx === currentStepIndex) {
+                        // Check if all previous ORIGINAL steps are completed before showing this step
+                        for (
+                            let prevOriginalStepIdx = 0;
+                            prevOriginalStepIdx < originalStepIdx;
+                            prevOriginalStepIdx++
+                        ) {
+                            const prevStep = steps[prevOriginalStepIdx]; // Use original steps array
+                            if (!prevStep) continue;
+                            for (const prevSub of prevStep.subMilestones ||
+                                []) {
+                                // Check if this submilestone is assigned to current user
+                                const hasAssignees =
+                                    prevSub.milestone_assignees;
+                                let assignedToCurrentUser = false;
+
+                                if (hasAssignees && hasAssignees.length > 0) {
+                                    assignedToCurrentUser = hasAssignees.some(
+                                        (assignee) =>
+                                            assignee.employee_id ===
+                                            currentUserId
+                                    );
+                                } else {
+                                    assignedToCurrentUser =
+                                        prevSub.assigned_to === currentUserId ||
+                                        prevSub.assignees?.includes(
+                                            currentUserId
+                                        ) ||
+                                        prevSub.assigned_users?.some(
+                                            (user) =>
+                                                user.id === currentUserId ||
+                                                user === currentUserId
+                                        ) ||
+                                        prevSub.assignee_id === currentUserId ||
+                                        prevSub.user_id === currentUserId ||
+                                        prevSub.assigned_user_id ===
+                                            currentUserId;
+                                }
+
+                                // Only check checklists if this submilestone is assigned to current user
+                                if (!assignedToCurrentUser) continue;
+                                const prevChecklists = prevSub.checklists || [];
+                                for (const prevChecklist of prevChecklists) {
+                                    const prevUploadedDoc = (
+                                        account.uploaded_documents || []
+                                    ).find(
+                                        (doc) =>
+                                            doc.file_title ===
+                                            prevChecklist.name
+                                    );
+                                    const prevAccountChecklistStatus = (
+                                        account.account_checklist_statuses || []
+                                    ).find(
+                                        (status) =>
+                                            status.checklist_id ===
+                                            prevChecklist.id
+                                    );
+                                    const prevIsComplete =
+                                        prevUploadedDoc ||
+                                        (prevAccountChecklistStatus &&
+                                            prevAccountChecklistStatus.is_completed);
+                                    if (!prevIsComplete) return false; // Don't show this step if previous steps aren't complete
+                                }
+                            }
+                        }
+                        return true; // All previous steps completed, show this step
+                    }
 
                     // Show if all checklists in this sub-milestone are completed
                     const checklists = sub.checklists || [];
@@ -864,7 +932,7 @@ const ChecklistTable = ({
                                         </div>
                                     </td>
                                     {filteredSteps.map((step, stepIdx) =>
-                                        step.subMilestones.map((sub) =>
+                                        step.subMilestones.map((sub, subIdx) =>
                                             (sub.checklists || []).map(
                                                 (checklist, checklistIdx) => {
                                                     const uploadedDoc = (
@@ -964,19 +1032,194 @@ const ChecklistTable = ({
 
                                                     // For STEP 1, always show action buttons regardless of sequence
                                                     // For other steps, check sequence + current step logic
+                                                    // Use originalStepIndex to maintain true step sequence regardless of user assignments
+                                                    const originalStepIdx =
+                                                        step.originalStepIndex;
                                                     let showActionButtons = false;
-                                                    if (stepIdx === 0) {
+                                                    if (originalStepIdx === 0) {
                                                         // Step 1: All checklists are accessible simultaneously
                                                         showActionButtons = true;
-                                                    } else if (
-                                                        stepIdx ===
-                                                        currentStepIndex
-                                                    ) {
-                                                        // Other steps: Only show if previous checklists are complete (sequential)
-                                                        showActionButtons =
-                                                            isPreviousChecklistComplete(
-                                                                checklistIdx
-                                                            );
+                                                    } else {
+                                                        // First, check if ALL previous steps are completed
+                                                        // Check against ALL original steps, not just filtered ones
+                                                        const allPreviousStepsCompleted =
+                                                            (() => {
+                                                                for (
+                                                                    let prevOriginalStepIdx = 0;
+                                                                    prevOriginalStepIdx <
+                                                                    originalStepIdx;
+                                                                    prevOriginalStepIdx++
+                                                                ) {
+                                                                    const prevOriginalStep =
+                                                                        steps[
+                                                                            prevOriginalStepIdx
+                                                                        ]; // Use original steps array
+                                                                    if (
+                                                                        !prevOriginalStep
+                                                                    )
+                                                                        continue; // Skip if step doesn't exist
+
+                                                                    for (const prevSub of prevOriginalStep.subMilestones ||
+                                                                        []) {
+                                                                        // Check if this submilestone is assigned to current user
+                                                                        const hasAssignees =
+                                                                            prevSub.milestone_assignees;
+                                                                        let assignedToCurrentUser = false;
+
+                                                                        if (
+                                                                            hasAssignees &&
+                                                                            hasAssignees.length >
+                                                                                0
+                                                                        ) {
+                                                                            assignedToCurrentUser =
+                                                                                hasAssignees.some(
+                                                                                    (
+                                                                                        assignee
+                                                                                    ) =>
+                                                                                        assignee.employee_id ===
+                                                                                        currentUserId
+                                                                                );
+                                                                        } else {
+                                                                            assignedToCurrentUser =
+                                                                                prevSub.assigned_to ===
+                                                                                    currentUserId ||
+                                                                                prevSub.assignees?.includes(
+                                                                                    currentUserId
+                                                                                ) ||
+                                                                                prevSub.assigned_users?.some(
+                                                                                    (
+                                                                                        user
+                                                                                    ) =>
+                                                                                        user.id ===
+                                                                                            currentUserId ||
+                                                                                        user ===
+                                                                                            currentUserId
+                                                                                ) ||
+                                                                                prevSub.assignee_id ===
+                                                                                    currentUserId ||
+                                                                                prevSub.user_id ===
+                                                                                    currentUserId ||
+                                                                                prevSub.assigned_user_id ===
+                                                                                    currentUserId;
+                                                                        }
+
+                                                                        // Only check checklists if this submilestone is assigned to current user
+                                                                        if (
+                                                                            !assignedToCurrentUser
+                                                                        )
+                                                                            continue;
+
+                                                                        const prevChecklists =
+                                                                            prevSub.checklists ||
+                                                                            [];
+                                                                        for (const prevChecklist of prevChecklists) {
+                                                                            const prevUploadedDoc =
+                                                                                (
+                                                                                    account.uploaded_documents ||
+                                                                                    []
+                                                                                ).find(
+                                                                                    (
+                                                                                        doc
+                                                                                    ) =>
+                                                                                        doc.file_title ===
+                                                                                        prevChecklist.name
+                                                                                );
+                                                                            const prevAccountChecklistStatus =
+                                                                                (
+                                                                                    account.account_checklist_statuses ||
+                                                                                    []
+                                                                                ).find(
+                                                                                    (
+                                                                                        status
+                                                                                    ) =>
+                                                                                        status.checklist_id ===
+                                                                                        prevChecklist.id
+                                                                                );
+                                                                            const prevIsComplete =
+                                                                                isChecklistComplete(
+                                                                                    account.id,
+                                                                                    prevChecklist.id,
+                                                                                    prevUploadedDoc,
+                                                                                    prevAccountChecklistStatus,
+                                                                                    prevChecklist.requires_document
+                                                                                );
+                                                                            if (
+                                                                                !prevIsComplete
+                                                                            )
+                                                                                return false;
+                                                                        }
+                                                                    }
+                                                                }
+                                                                return true;
+                                                            })();
+
+                                                        // Only proceed if all previous steps are completed
+                                                        if (
+                                                            allPreviousStepsCompleted
+                                                        ) {
+                                                            // Check if all previous submilestones in current step are completed
+                                                            const allPreviousSubmilestonesCompleted =
+                                                                (() => {
+                                                                    for (
+                                                                        let prevSubIdx = 0;
+                                                                        prevSubIdx <
+                                                                        subIdx;
+                                                                        prevSubIdx++
+                                                                    ) {
+                                                                        const prevSub =
+                                                                            step
+                                                                                .subMilestones[
+                                                                                prevSubIdx
+                                                                            ];
+                                                                        const prevSubChecklists =
+                                                                            prevSub.checklists ||
+                                                                            [];
+                                                                        for (const prevSubChecklist of prevSubChecklists) {
+                                                                            const prevSubUploadedDoc =
+                                                                                (
+                                                                                    account.uploaded_documents ||
+                                                                                    []
+                                                                                ).find(
+                                                                                    (
+                                                                                        doc
+                                                                                    ) =>
+                                                                                        doc.file_title ===
+                                                                                        prevSubChecklist.name
+                                                                                );
+                                                                            const prevSubAccountChecklistStatus =
+                                                                                (
+                                                                                    account.account_checklist_statuses ||
+                                                                                    []
+                                                                                ).find(
+                                                                                    (
+                                                                                        status
+                                                                                    ) =>
+                                                                                        status.checklist_id ===
+                                                                                        prevSubChecklist.id
+                                                                                );
+                                                                            const prevSubIsComplete =
+                                                                                isChecklistComplete(
+                                                                                    account.id,
+                                                                                    prevSubChecklist.id,
+                                                                                    prevSubUploadedDoc,
+                                                                                    prevSubAccountChecklistStatus,
+                                                                                    prevSubChecklist.requires_document
+                                                                                );
+                                                                            if (
+                                                                                !prevSubIsComplete
+                                                                            )
+                                                                                return false;
+                                                                        }
+                                                                    }
+                                                                    return true;
+                                                                })();
+
+                                                            showActionButtons =
+                                                                allPreviousSubmilestonesCompleted &&
+                                                                isPreviousChecklistComplete(
+                                                                    checklistIdx
+                                                                );
+                                                        }
                                                     }
 
                                                     return [
