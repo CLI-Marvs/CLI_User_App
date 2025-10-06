@@ -68,7 +68,14 @@ const MyWorkOrdersContent = () => {
     const handleRefresh = async () => {
         setIsRefreshing(true);
         setWorkOrderGroups([]); // Clear old data to prevent flicker/overlap
-        await forceRefreshWorkOrders();
+
+        // Build current filters for refresh
+        const filters = {};
+        if (statusFilter) {
+            filters.status = statusFilter;
+        }
+
+        await forceRefreshWorkOrders(filters);
         setIsRefreshing(false);
     };
     const { user } = useStateContext(); // Get current user from context
@@ -96,15 +103,25 @@ const MyWorkOrdersContent = () => {
     // Initial / stale fetch (mount + stale boundary). Avoid including workOrderGroups in deps to prevent loops.
     useEffect(() => {
         if (!workOrderGroupsLastFetched) {
-            fetchWorkOrderGroups();
+            // Build initial filters
+            const filters = {};
+            if (statusFilter) {
+                filters.status = statusFilter;
+            }
+            fetchWorkOrderGroups(false, filters);
             return;
         }
         const now = Date.now();
         const tenMinutes = 10 * 60 * 1000;
         if (now - workOrderGroupsLastFetched > tenMinutes) {
-            fetchWorkOrderGroups();
+            // Build filters for stale refresh
+            const filters = {};
+            if (statusFilter) {
+                filters.status = statusFilter;
+            }
+            fetchWorkOrderGroups(false, filters);
         }
-    }, [workOrderGroupsLastFetched, fetchWorkOrderGroups]);
+    }, [workOrderGroupsLastFetched, fetchWorkOrderGroups, statusFilter]);
 
     // If you want to force refresh on sort change, uncomment below:
     // useEffect(() => {
@@ -116,8 +133,16 @@ const MyWorkOrdersContent = () => {
     };
 
     const handleStatusFilterChange = (e) => {
-        setStatusFilter(e.target.value);
+        const newStatus = e.target.value;
+        setStatusFilter(newStatus);
         setWorkOrdersCurrentPage(1);
+
+        // Call API with new filter
+        const filters = {};
+        if (newStatus) {
+            filters.status = newStatus;
+        }
+        fetchWorkOrderGroups(true, filters);
     };
 
     const handleSortChange = (e) => {
@@ -152,6 +177,9 @@ const MyWorkOrdersContent = () => {
         setWorkOrdersSortBy("created_at");
         setWorkOrdersSortOrder("desc");
         setWorkOrdersCurrentPage(1);
+
+        // Refresh data without any filters
+        fetchWorkOrderGroups(true, {});
     };
 
     const hasActiveFilters = () => {
@@ -235,12 +263,10 @@ const MyWorkOrdersContent = () => {
             });
         }
 
-        // Filter by status
+        // Filter by status (group status, not individual work order status)
         if (statusFilter) {
-            filtered = filtered.filter((group) =>
-                (group.work_orders || []).some(
-                    (wo) => wo.status === statusFilter
-                )
+            filtered = filtered.filter(
+                (group) => group.status === statusFilter
             );
         }
 
@@ -626,9 +652,24 @@ const MyWorkOrdersContent = () => {
                             className={`px-3 py-2 border-b border-gray-100 rounded-t-xl bg-gray-50`}
                         >
                             <div className="flex items-center justify-between">
-                                <h3 className="text-sm font-semibold text-gray-800">
-                                    WO #{group.id}
-                                </h3>
+                                <div className="flex items-center space-x-2">
+                                    <div
+                                        className={`w-2 h-2 rounded-full ${
+                                            group.status === "Complete"
+                                                ? "bg-green-500"
+                                                : "bg-blue-500"
+                                        }`}
+                                    ></div>
+                                    <h3
+                                        className={`text-sm font-semibold ${
+                                            group.status === "Complete"
+                                                ? "text-green-600"
+                                                : "text-gray-800"
+                                        }`}
+                                    >
+                                        WO #{group.id}
+                                    </h3>
+                                </div>
                             </div>
                         </div>
 
@@ -826,8 +867,22 @@ const MyWorkOrdersContent = () => {
                                         >
                                             <td className="px-3 py-2 font-bold text-base text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
                                                 <div className="flex items-center space-x-2">
-                                                    <div className="w-2 h-2 bg-blue-500 rounded-full opacity-70"></div>
-                                                    <span className="font-mono tracking-wide">
+                                                    <div
+                                                        className={`w-2 h-2 rounded-full opacity-70 ${
+                                                            group.status ===
+                                                            "Complete"
+                                                                ? "bg-green-500"
+                                                                : "bg-blue-500"
+                                                        }`}
+                                                    ></div>
+                                                    <span
+                                                        className={`font-mono tracking-wide ${
+                                                            group.status ===
+                                                            "Complete"
+                                                                ? "text-green-600"
+                                                                : ""
+                                                        }`}
+                                                    >
                                                         {String(
                                                             group.id
                                                         ).padStart(7)}
@@ -836,7 +891,14 @@ const MyWorkOrdersContent = () => {
                                             </td>
                                             <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
                                                 <div className="flex items-center space-x-1">
-                                                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                                    <div
+                                                        className={`w-2 h-2 rounded-full ${
+                                                            group.status ===
+                                                            "Complete"
+                                                                ? "bg-green-500"
+                                                                : "bg-green-500"
+                                                        }`}
+                                                    ></div>
                                                     <span className="font-medium">
                                                         {latestWO?.accounts &&
                                                         latestWO.accounts
@@ -865,7 +927,14 @@ const MyWorkOrdersContent = () => {
                                             </td>
                                             <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
                                                 <div className="flex items-center space-x-1">
-                                                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                                                    <div
+                                                        className={`w-2 h-2 rounded-full ${
+                                                            group.status ===
+                                                            "Complete"
+                                                                ? "bg-green-500"
+                                                                : "bg-amber-500"
+                                                        }`}
+                                                    ></div>
                                                     <span className="font-medium">
                                                         {group.due_date
                                                             ? formatDate(
@@ -877,7 +946,14 @@ const MyWorkOrdersContent = () => {
                                             </td>
                                             <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
                                                 <div className="flex items-center space-x-1">
-                                                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                                                    <div
+                                                        className={`w-2 h-2 rounded-full ${
+                                                            group.status ===
+                                                            "Complete"
+                                                                ? "bg-green-500"
+                                                                : "bg-purple-500"
+                                                        }`}
+                                                    ></div>
                                                     <span className="font-medium">
                                                         {group.updated_at
                                                             ? formatDate(

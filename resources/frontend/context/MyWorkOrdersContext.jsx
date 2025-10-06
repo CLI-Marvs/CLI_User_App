@@ -25,7 +25,7 @@ export const MyWorkOrdersProvider = ({ children }) => {
     const hasFetchedRef = useRef(false);
 
     const fetchWorkOrderGroups = useCallback(
-        async (force = false) => {
+        async (force = false, filters = {}) => {
             const now = Date.now();
             const tenMinutes = 10 * 60 * 1000;
 
@@ -33,7 +33,8 @@ export const MyWorkOrdersProvider = ({ children }) => {
                 !force &&
                 hasFetchedRef.current &&
                 workOrderGroupsLastFetched &&
-                now - workOrderGroupsLastFetched < tenMinutes
+                now - workOrderGroupsLastFetched < tenMinutes &&
+                Object.keys(filters).length === 0 // Only skip if no filters are applied
             ) {
                 setWorkOrdersLoading(false);
                 return;
@@ -41,8 +42,15 @@ export const MyWorkOrdersProvider = ({ children }) => {
             setWorkOrdersLoading(true);
             setWorkOrdersError(null);
             try {
+                // Build query parameters
+                const params = {};
+                if (filters.status) {
+                    params.status = filters.status;
+                }
+
                 const response = await apiService.get(
-                    "/work-orders/get-work-order-groups"
+                    "/work-orders/get-work-order-groups",
+                    { params }
                 );
                 const data = response.data?.data || [];
                 setWorkOrderGroups(Array.isArray(data) ? data : []);
@@ -63,9 +71,12 @@ export const MyWorkOrdersProvider = ({ children }) => {
     );
 
     // Manual force refresh function
-    const forceRefreshWorkOrders = useCallback(async () => {
-        await fetchWorkOrderGroups(true);
-    }, [fetchWorkOrderGroups]);
+    const forceRefreshWorkOrders = useCallback(
+        async (filters = {}) => {
+            await fetchWorkOrderGroups(true, filters);
+        },
+        [fetchWorkOrderGroups]
+    );
 
     return (
         <MyWorkOrdersContext.Provider
