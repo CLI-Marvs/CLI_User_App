@@ -101,42 +101,12 @@ const WorkOrderGroupDetailsModal = ({
                 );
 
                 if (allMilestonesCompleted) {
-                    // Find next step
-                    const currentStepIndex = steps.findIndex(
-                        (s) => s.id === currentStep.id
-                    );
-                    const nextStep = steps[currentStepIndex + 1];
-
-                    if (nextStep && nextStep.subMilestones.length > 0) {
-                        // Move to first milestone of next step
-                        return nextStep.subMilestones[0].id;
-                    }
+                    // Milestone progression logic here
                 }
             }
         }
 
         return null;
-    };
-
-    // Helper function to check if a milestone is completed
-    const checkMilestoneCompletion = (account, milestone) => {
-        const checklists = milestone.checklists || [];
-        if (checklists.length === 0) return false;
-
-        const uploadedDocs = account.uploaded_documents || [];
-        const completedCount = checklists.filter((checklist) => {
-            const hasUploadedDoc = uploadedDocs.some(
-                (doc) => doc.file_title === checklist.name
-            );
-            const accountChecklistStatus = (
-                account.account_checklist_statuses || []
-            ).find((status) => status.checklist_id === checklist.id);
-            const hasCompletedStatus =
-                accountChecklistStatus && accountChecklistStatus.is_completed;
-            return hasUploadedDoc || hasCompletedStatus;
-        }).length;
-
-        return completedCount === checklists.length;
     };
 
     // Handler to show files modal for an account
@@ -1239,7 +1209,7 @@ const WorkOrderGroupDetailsModal = ({
                 isRefreshing={isRefreshing}
                 hideItemsPerPage={false}
                 hideStatusFilter={showChecklistTable}
-                hideBuyerFilter={false}
+                hideBuyerFilter={showChecklistTable}
                 hideStepViewToggle={false}
                 hideAssigneeFilter={false}
                 hideStepVisibility={showChecklistTable}
@@ -1379,16 +1349,18 @@ const WorkOrderGroupDetailsModal = ({
                                         rowSpan={3}
                                     >
                                         <div className="flex items-center gap-2">
-                                            <svg
-                                                className="w-4 h-4"
-                                                fill="currentColor"
-                                                viewBox="0 0 20 20"
-                                            >
-                                                <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
-                                            </svg>
-                                            <span className="text-xs font-semibold">
-                                                ACCOUNT NAME
-                                            </span>
+                                            <div className="flex flex-col items-center justify-center w-full">
+                                                <svg
+                                                    className="w-4 h-4 mb-1"
+                                                    fill="currentColor"
+                                                    viewBox="0 0 20 20"
+                                                >
+                                                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                                                </svg>
+                                                <span className="text-xs font-semibold text-center block">
+                                                    ACCOUNT NAME
+                                                </span>
+                                            </div>
                                         </div>
                                     </th>
                                     {columnHeaders.map((col, idx) => (

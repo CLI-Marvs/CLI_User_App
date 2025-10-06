@@ -77,7 +77,7 @@ const FilterSearchIcon = ({ onClick }) => {
         <img
             src={FilterIcon}
             alt="Filter"
-            className="size-4 cursor-pointer"
+            className="size-6 cursor-pointer"
             onClick={onClick}
         />
     );

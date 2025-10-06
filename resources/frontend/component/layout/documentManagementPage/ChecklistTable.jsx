@@ -856,7 +856,7 @@ const ChecklistTable = ({
                                         <div className="flex items-center">
                                             <div className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-2 flex-shrink-0"></div>
                                             <span
-                                                className="font-medium text-gray-800 text-sm truncate"
+                                                className="font-medium text-gray text-sm truncate"
                                                 title={account.account_name}
                                             >
                                                 {account.account_name}
