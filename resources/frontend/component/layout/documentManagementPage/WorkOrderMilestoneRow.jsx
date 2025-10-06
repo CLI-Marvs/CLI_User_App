@@ -214,34 +214,57 @@ const WorkOrderMilestoneRow = ({
                     </div>
                 </td>
                 <td className="px-2 py-2 text-xs text-gray-600 border-l border-b border-gray-200">
-                    <div className="flex items-center gap-1 max-w-[150px]">
-                        <span className="truncate" title={row.remarks}>
-                            {row.remarks}
-                        </span>
-                        <button
-                            type="button"
-                            className="text-gray-500 hover:text-gray-800"
-                            onClick={() => handleOpenNotesModal(row.notesData)}
-                            style={{
-                                padding: 0,
-                                background: "none",
-                                border: "none",
-                            }}
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-4 w-4"
-                                viewBox="0 0 20 20"
-                                fill="currentColor"
+                    <div className="flex items-center justify-center">
+                        {row.remarks && row.remarks !== "-" ? (
+                            <div className="flex items-center gap-1 max-w-[150px]">
+                                <span className="truncate" title={row.remarks}>
+                                    {row.remarks}
+                                </span>
+                                <button
+                                    type="button"
+                                    className="text-gray-500 hover:text-gray-800"
+                                    onClick={() =>
+                                        handleOpenNotesModal(row.notesData)
+                                    }
+                                    style={{
+                                        padding: 0,
+                                        background: "none",
+                                        border: "none",
+                                    }}
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-4 w-4"
+                                        viewBox="0 0 24 24"
+                                        fill="currentColor"
+                                    >
+                                        <path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v14H7V5h10zm-2 4H9v2h6V9zm0 4H9v2h6v-2z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                className="text-gray-500 hover:text-gray-800"
+                                onClick={() =>
+                                    handleOpenNotesModal(row.notesData)
+                                }
+                                style={{
+                                    padding: 0,
+                                    background: "none",
+                                    border: "none",
+                                }}
                             >
-                                <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" />
-                                <path
-                                    fillRule="evenodd"
-                                    d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
-                                    clipRule="evenodd"
-                                />
-                            </svg>
-                        </button>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-4 w-4"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                >
+                                    <path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v14H7V5h10zm-2 4H9v2h6V9zm0 4H9v2h6v-2z" />
+                                </svg>
+                            </button>
+                        )}
                     </div>
                 </td>
                 <td className="px-2 py-2 border-l border-b border-gray-200">

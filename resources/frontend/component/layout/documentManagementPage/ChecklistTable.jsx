@@ -905,30 +905,62 @@ const ChecklistTable = ({
                                                     const remarksColumnBgColor = `bg-${baseColor}-100`;
 
                                                     // Check if previous checklists in this milestone are complete (for sequential logic)
-                                                    const isPreviousChecklistComplete = (checklistIndex) => {
-                                                        if (checklistIndex === 0) return true; // First checklist is always accessible
-                                                        
-                                                        // Check all previous checklists in the same milestone
-                                                        for (let i = 0; i < checklistIndex; i++) {
-                                                            const prevChecklist = sub.checklists[i];
-                                                            const prevUploadedDoc = (account.uploaded_documents || []).find(
-                                                                (doc) => doc.file_title === prevChecklist.name
-                                                            );
-                                                            const prevAccountChecklistStatus = (account.account_checklist_statuses || []).find(
-                                                                (status) => status.checklist_id === prevChecklist.id
-                                                            );
-                                                            const prevIsComplete = isChecklistComplete(
-                                                                account.id,
-                                                                prevChecklist.id,
-                                                                prevUploadedDoc,
-                                                                prevAccountChecklistStatus,
-                                                                prevChecklist.requires_document
-                                                            );
-                                                            
-                                                            if (!prevIsComplete) return false;
-                                                        }
-                                                        return true;
-                                                    };
+                                                    const isPreviousChecklistComplete =
+                                                        (checklistIndex) => {
+                                                            if (
+                                                                checklistIndex ===
+                                                                0
+                                                            )
+                                                                return true; // First checklist is always accessible
+
+                                                            // Check all previous checklists in the same milestone
+                                                            for (
+                                                                let i = 0;
+                                                                i <
+                                                                checklistIndex;
+                                                                i++
+                                                            ) {
+                                                                const prevChecklist =
+                                                                    sub
+                                                                        .checklists[
+                                                                        i
+                                                                    ];
+                                                                const prevUploadedDoc =
+                                                                    (
+                                                                        account.uploaded_documents ||
+                                                                        []
+                                                                    ).find(
+                                                                        (doc) =>
+                                                                            doc.file_title ===
+                                                                            prevChecklist.name
+                                                                    );
+                                                                const prevAccountChecklistStatus =
+                                                                    (
+                                                                        account.account_checklist_statuses ||
+                                                                        []
+                                                                    ).find(
+                                                                        (
+                                                                            status
+                                                                        ) =>
+                                                                            status.checklist_id ===
+                                                                            prevChecklist.id
+                                                                    );
+                                                                const prevIsComplete =
+                                                                    isChecklistComplete(
+                                                                        account.id,
+                                                                        prevChecklist.id,
+                                                                        prevUploadedDoc,
+                                                                        prevAccountChecklistStatus,
+                                                                        prevChecklist.requires_document
+                                                                    );
+
+                                                                if (
+                                                                    !prevIsComplete
+                                                                )
+                                                                    return false;
+                                                            }
+                                                            return true;
+                                                        };
 
                                                     // For STEP 1, always show action buttons regardless of sequence
                                                     // For other steps, check sequence + current step logic
@@ -936,9 +968,15 @@ const ChecklistTable = ({
                                                     if (stepIdx === 0) {
                                                         // Step 1: All checklists are accessible simultaneously
                                                         showActionButtons = true;
-                                                    } else if (stepIdx === currentStepIndex) {
+                                                    } else if (
+                                                        stepIdx ===
+                                                        currentStepIndex
+                                                    ) {
                                                         // Other steps: Only show if previous checklists are complete (sequential)
-                                                        showActionButtons = isPreviousChecklistComplete(checklistIdx);
+                                                        showActionButtons =
+                                                            isPreviousChecklistComplete(
+                                                                checklistIdx
+                                                            );
                                                     }
 
                                                     return [
