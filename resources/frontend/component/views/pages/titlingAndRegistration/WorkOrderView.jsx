@@ -914,7 +914,7 @@ const WorkOrderView = () => {
                                         variant="small"
                                         className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
                                     >
-                                        Date Created
+                                        Created
                                     </Typography>
                                 </div>
                             </th>
@@ -925,7 +925,7 @@ const WorkOrderView = () => {
                                         variant="small"
                                         className="!font-bold text-white leading-none tracking-wide uppercase text-xs"
                                     >
-                                        Date Updated
+                                        Updated
                                     </Typography>
                                 </div>
                             </th>
