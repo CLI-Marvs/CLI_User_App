@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\TakenOutAccount;
+use App\Models\WorkOrderLog;
+use App\Models\WorkOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -146,8 +148,17 @@ class TakenOutAccountController extends Controller
                 'to_month',
                 'checklist_status'
             )
-            ->get();
-        // \Log::info('MasterList:', $masterList->toArray()); // Optional debug
+            ->get()
+            ->map(function ($account) {
+                // Check if account exists in account_log table (meaning it's assigned to a work order)
+                $hasWorkOrderLogs = \DB::table('account_log')
+                    ->where('account_id', $account->id)
+                    ->exists();
+
+                $account->has_active_work_orders = $hasWorkOrderLogs;
+                return $account;
+            });
+
         return response()->json($masterList);
     }
 

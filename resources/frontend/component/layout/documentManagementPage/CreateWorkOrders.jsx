@@ -28,8 +28,13 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
 
     const { user } = useStateContext();
-    const { accounts, workOrderTypes, fetchWorkOrderGroups, fetchAccounts, fetchWorkOrderTypes } =
-        useDocumentManagementContext();
+    const {
+        accounts,
+        workOrderTypes,
+        fetchWorkOrderGroups,
+        fetchAccounts,
+        fetchWorkOrderTypes,
+    } = useDocumentManagementContext();
 
     useEffect(() => {
         // Since accounts and workOrderTypes are managed by DocumentManagementContext,
@@ -111,7 +116,12 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                 fetchProjectMilestoneStructure();
             }
         }
-    }, [isOpen, fetchProjectMilestoneStructure, selectedProject, fetchWorkOrderTypes]);
+    }, [
+        isOpen,
+        fetchProjectMilestoneStructure,
+        selectedProject,
+        fetchWorkOrderTypes,
+    ]);
 
     const firstWorkOrderType = useMemo(() => {
         if (!workOrderTypes || workOrderTypes.length === 0) {
@@ -181,7 +191,11 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     }, []);
 
     const handleSelectAllAccounts = useCallback(() => {
-        setSelectedAccounts(filteredAccountsForDropdown);
+        // Only select accounts that don't have active work orders
+        const availableAccounts = filteredAccountsForDropdown.filter(
+            (account) => !account.has_active_work_orders
+        );
+        setSelectedAccounts(availableAccounts);
         setIsAccountDropdownOpen(false);
     }, [filteredAccountsForDropdown]);
 
@@ -479,6 +493,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                 if (fetchWorkOrderTypes) {
                     fetchWorkOrderTypes(); // Refresh work order types after creation
                 }
+                if (fetchAccounts) {
+                    fetchAccounts(); // Refresh accounts to update has_active_work_orders flags
+                }
 
                 if (response.status === 201) {
                     const newWorkOrderId = response.data.data.work_order_id;
@@ -600,9 +617,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
 
                                         {/* Selected Project Tag inside input */}
                                         {selectedProjectDetails && (
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm">
-                                                    <span className="mr-1">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none overflow-hidden">
+                                                <div className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-custom-lightestgreen border text-custom-solidgreen shadow-sm max-w-[200px]">
+                                                    <span className="mr-1 truncate">
                                                         {selectedProjectDetails}
                                                     </span>
                                                     <button
@@ -611,7 +628,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                                 selectedProjectDetails
                                                             )
                                                         }
-                                                        className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto"
+                                                        className="text-custom-solidgreen hover:text-red-600 transition-colors duration-200 pointer-events-auto flex-shrink-0"
                                                     >
                                                         <svg
                                                             className="w-3 h-3"
@@ -647,19 +664,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                             }
                                             className={`w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${
                                                 selectedProjectDetails
-                                                    ? "pl-32 pr-20"
+                                                    ? "pl-56 pr-20"
                                                     : "pl-10 pr-20"
                                             }`}
-                                            style={{
-                                                paddingLeft:
-                                                    selectedProjectDetails
-                                                        ? `${
-                                                              selectedProjectDetails.length *
-                                                                  8 +
-                                                              60
-                                                          }px`
-                                                        : "40px",
-                                            }}
                                         />
 
                                         {/* Clear button */}
@@ -850,7 +857,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
 
                                         {/* Selected Accounts Tags inside input */}
                                         {selectedAccounts.length > 0 && (
-                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none overflow-x-auto">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none overflow-hidden">
                                                 <div className="flex gap-1 items-center">
                                                     {selectedAccounts
                                                         .slice(0, 3)
@@ -967,13 +974,25 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                         <p className="text-sm font-medium text-gray-700">
                                                             Select Accounts (
                                                             {
-                                                                filteredAccountsForDropdown.length
+                                                                filteredAccountsForDropdown.filter(
+                                                                    (acc) =>
+                                                                        !acc.has_active_work_orders
+                                                                ).length
                                                             }{" "}
-                                                            available)
+                                                            available,{" "}
+                                                            {
+                                                                filteredAccountsForDropdown.filter(
+                                                                    (acc) =>
+                                                                        acc.has_active_work_orders
+                                                                ).length
+                                                            }{" "}
+                                                            assigned)
                                                         </p>
                                                         <div className="flex gap-2">
-                                                            {filteredAccountsForDropdown.length >
-                                                                0 && (
+                                                            {filteredAccountsForDropdown.filter(
+                                                                (acc) =>
+                                                                    !acc.has_active_work_orders
+                                                            ).length > 0 && (
                                                                 <button
                                                                     onClick={
                                                                         handleSelectAllAccounts
@@ -981,6 +1000,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                                     className="text-xs text-blue-600 hover:text-blue-800 font-medium"
                                                                 >
                                                                     Select All
+                                                                    Available
                                                                 </button>
                                                             )}
                                                             {selectedAccounts.length >
@@ -1071,7 +1091,11 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                                         key={
                                                                             account.id
                                                                         }
-                                                                        className="group px-4 py-3 cursor-pointer hover:bg-blue-50 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200"
+                                                                        className={`group px-4 py-3 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200 ${
+                                                                            account.has_active_work_orders
+                                                                                ? "cursor-not-allowed opacity-60 bg-gray-50"
+                                                                                : "cursor-pointer hover:bg-blue-50"
+                                                                        }`}
                                                                     >
                                                                         <div className="flex-shrink-0">
                                                                             <input
@@ -1083,16 +1107,29 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                                                         acc.id ===
                                                                                         account.id
                                                                                 )}
+                                                                                disabled={
+                                                                                    account.has_active_work_orders
+                                                                                }
                                                                                 onChange={() =>
                                                                                     handleAccountToggle(
                                                                                         account
                                                                                     )
                                                                                 }
-                                                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
+                                                                                className={`h-4 w-4 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200 ${
+                                                                                    account.has_active_work_orders
+                                                                                        ? "text-gray-400 cursor-not-allowed"
+                                                                                        : "text-blue-600"
+                                                                                }`}
                                                                             />
                                                                         </div>
                                                                         <div className="flex-1 min-w-0">
-                                                                            <span className="select-none font-medium text-gray-900 group-hover:text-blue-700 transition-colors duration-200">
+                                                                            <span
+                                                                                className={`select-none font-medium transition-colors duration-200 ${
+                                                                                    account.has_active_work_orders
+                                                                                        ? "text-gray-500"
+                                                                                        : "text-gray-900 group-hover:text-blue-700"
+                                                                                }`}
+                                                                            >
                                                                                 {
                                                                                     lastName
                                                                                 }
@@ -1102,7 +1139,17 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                                                         {
                                                                                             unit
                                                                                         }
+
                                                                                         )
+                                                                                    </span>
+                                                                                )}
+                                                                                {account.has_active_work_orders && (
+                                                                                    <span className="ml-2 text-xs text-red-600 font-medium">
+                                                                                        (Already
+                                                                                        has
+                                                                                        active
+                                                                                        work
+                                                                                        order)
                                                                                     </span>
                                                                                 )}
                                                                             </span>

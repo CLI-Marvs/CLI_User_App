@@ -1363,23 +1363,47 @@ const WorkOrderGroupDetailsModal = ({
                                             </div>
                                         </div>
                                     </th>
-                                    {columnHeaders.map((col, idx) => (
+                                    {columnHeaders.map((col, idx) => {
+                                        // Check if this step is the current step for any account
+                                        const isCurrentStepForAnyAccount = paginatedData.some(row => {
+                                            return col.subMilestones.some(
+                                                (sub) => sub.id === row.currentSubMilestoneId
+                                            );
+                                        });
+                                        
+                                        return (
                                         <th
                                             key={idx}
                                             colSpan={
                                                 col.subMilestones.length * 2
                                             }
-                                            className="text-center px-2 py-2 font-medium border-x border-white min-w-[100px] bg-custom-bluegreen"
+                                            className={`text-center px-2 py-2 font-medium border-x border-white min-w-[100px] relative ${
+                                                isCurrentStepForAnyAccount
+                                                    ? "bg-blue-600 border-2 border-blue-800 shadow-lg ring-2 ring-blue-300 ring-opacity-50 z-30"
+                                                    : "bg-custom-bluegreen"
+                                            }`}
                                             style={{
-                                                backgroundColor:
-                                                    "var(--tw-bg-opacity, 1)",
+                                                backgroundColor: isCurrentStepForAnyAccount 
+                                                    ? "#2563eb" 
+                                                    : "var(--tw-bg-opacity, 1)",
                                             }}
                                         >
-                                            <span className="text-xs font-semibold uppercase tracking-wide">
+                                            <span className={`text-xs font-semibold uppercase tracking-wide ${
+                                                isCurrentStepForAnyAccount ? "text-white" : ""
+                                            }`}>
                                                 {col.stepName}
                                             </span>
+                                            {isCurrentStepForAnyAccount && (
+                                                <>
+                                                    <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-white rounded-full animate-pulse border border-blue-200 shadow-sm"></div>
+                                                    <div className="absolute top-0.5 right-0.5 px-1 py-0.5 bg-white text-blue-800 text-[8px] rounded font-bold shadow-sm leading-none">
+                                                        CURRENT
+                                                    </div>
+                                                </>
+                                            )}
                                         </th>
-                                    ))}
+                                        );
+                                    })}
                                     <th
                                         className="px-2 py-2 font-medium border-l border-white min-w-[80px] bg-custom-bluegreen"
                                         style={{
