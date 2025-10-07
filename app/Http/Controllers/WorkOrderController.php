@@ -288,6 +288,20 @@ class WorkOrderController extends Controller
             return response()->json(['error' => 'Employee not found'], 404);
         }
     }
+    // Temporary debugging endpoint
+    public function debugSubmilestones($workOrderTypeId)
+    {
+        $submilestones = Submilestone::where('work_order_type_id', $workOrderTypeId)
+            ->select('id', 'name', 'sequence', 'work_order_type_id')
+            ->orderBy('sequence')
+            ->get();
+
+        return response()->json([
+            'work_order_type_id' => $workOrderTypeId,
+            'submilestones' => $submilestones
+        ]);
+    }
+
     public function createWorkOrders(Request $request)
     {
         Log::info('Received request data:', $request->all());
@@ -301,6 +315,11 @@ class WorkOrderController extends Controller
             'account_assignments.*.account_id' => 'required|integer|exists:taken_out_accounts,id',
             'account_assignments.*.employee_ids' => 'required|array|min:1',
             'account_assignments.*.employee_ids.*' => 'integer|exists:employee,id',
+            'milestone_assignments' => 'nullable|array',
+            'milestone_assignments.*.step_name' => 'required|string',
+            'milestone_assignments.*.milestone_name' => 'required|string',
+            'milestone_assignments.*.selected_assignee_ids' => 'required|array|min:1',
+            'milestone_assignments.*.selected_assignee_ids.*' => 'integer|exists:employee,id',
         ]);
         Log::info('Validated data:', $validatedData);
 
@@ -346,17 +365,96 @@ class WorkOrderController extends Controller
             $account->save();
         }
 
-        // Insert account-assignee mapping (support multiple employees per account)
-        if (!empty($validatedData['account_assignments'])) {
-            foreach ($validatedData['account_assignments'] as $assignment) {
-                foreach ($assignment['employee_ids'] as $employeeId) {
-                    \DB::table('work_order_account_assignee')->insert([
-                        'work_order_id' => $workOrder->work_order_id,
-                        'account_id' => $assignment['account_id'],
-                        'employee_id' => $employeeId,
-                        'created_at' => now(),
-                        'updated_at' => now(),
+        // Insert account-assignee mapping with milestone-specific assignments
+        if (!empty($validatedData['milestone_assignments'])) {
+            Log::info('Processing milestone assignments:', $validatedData['milestone_assignments']);
+
+            // Build a map of milestone assignments for quick lookup
+            $milestoneAssigneeMap = [];
+            foreach ($validatedData['milestone_assignments'] as $milestoneAssignment) {
+                Log::info('Looking for submilestone:', [
+                    'milestone_name' => $milestoneAssignment['milestone_name'],
+                    'work_order_type_id' => $validatedData['work_order_type_id']
+                ]);
+
+                // Find the submilestone by name and work order type
+                $submilestone = Submilestone::where('work_order_type_id', $validatedData['work_order_type_id'])
+                    ->where('name', $milestoneAssignment['milestone_name'])
+                    ->first();
+
+                if ($submilestone) {
+                    Log::info('Found submilestone:', ['id' => $submilestone->id, 'name' => $submilestone->name]);
+                    $milestoneAssigneeMap[$submilestone->id] = $milestoneAssignment['selected_assignee_ids'];
+                } else {
+                    Log::warning('Submilestone not found for:', [
+                        'milestone_name' => $milestoneAssignment['milestone_name'],
+                        'work_order_type_id' => $validatedData['work_order_type_id']
                     ]);
+                }
+            }
+
+            Log::info('Final milestone assignee map:', $milestoneAssigneeMap);
+
+            // Only process selected assignees from milestone assignments
+            foreach ($validatedData['account_assignments'] as $assignment) {
+                // Get all unique selected assignee IDs from all milestones
+                $allSelectedAssigneeIds = [];
+                foreach ($milestoneAssigneeMap as $submilestoneId => $selectedAssigneeIds) {
+                    $allSelectedAssigneeIds = array_merge($allSelectedAssigneeIds, $selectedAssigneeIds);
+                }
+                $allSelectedAssigneeIds = array_unique($allSelectedAssigneeIds);
+
+                Log::info('Processing selected assignees for account:', [
+                    'account_id' => $assignment['account_id'],
+                    'selected_assignees' => $allSelectedAssigneeIds
+                ]);
+
+                // Only process employees that were actually selected in milestone assignments
+                foreach ($allSelectedAssigneeIds as $employeeId) {
+                    // Find which milestone(s) this employee is assigned to
+                    $assignedMilestones = [];
+                    foreach ($milestoneAssigneeMap as $submilestoneId => $selectedAssigneeIds) {
+                        if (in_array($employeeId, $selectedAssigneeIds)) {
+                            $assignedMilestones[] = $submilestoneId;
+                        }
+                    }
+
+                    Log::info('Employee milestone assignments:', [
+                        'employee_id' => $employeeId,
+                        'assigned_milestones' => $assignedMilestones
+                    ]);
+
+                    // Create entries for each milestone this employee is assigned to
+                    foreach ($assignedMilestones as $submilestoneId) {
+                        $insertData = [
+                            'work_order_id' => $workOrder->work_order_id,
+                            'account_id' => $assignment['account_id'],
+                            'employee_id' => $employeeId,
+                            'submilestone_id' => $submilestoneId,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ];
+
+                        Log::info('Inserting work_order_account_assignee:', $insertData);
+
+                        \DB::table('work_order_account_assignee')->insert($insertData);
+                    }
+                }
+            }
+        } else {
+            // Fallback: use the old logic if no milestone assignments are provided
+            if (!empty($validatedData['account_assignments'])) {
+                foreach ($validatedData['account_assignments'] as $assignment) {
+                    foreach ($assignment['employee_ids'] as $employeeId) {
+                        \DB::table('work_order_account_assignee')->insert([
+                            'work_order_id' => $workOrder->work_order_id,
+                            'account_id' => $assignment['account_id'],
+                            'employee_id' => $employeeId,
+                            'submilestone_id' => null,
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
                 }
             }
         }

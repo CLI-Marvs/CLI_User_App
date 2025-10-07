@@ -9,6 +9,7 @@ const WorkOrderMilestoneRow = ({
     onShowFiles,
     currentChecklistInfo,
     onMilestoneProgression,
+    isFiltered = false, // New prop to indicate if any filters are active
 }) => {
     const [showTooltip, setShowTooltip] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -47,41 +48,128 @@ const WorkOrderMilestoneRow = ({
                 {Array.isArray(row.stepData) &&
                     row.stepData.map((step, i) => {
                         const currentStep = steps[i];
-                        const isCurrentStep =
-                            currentStep &&
-                            currentStep.subMilestones.some(
-                                (sub) => sub.id === row.currentSubMilestoneId
-                            );
+
+                        // We'll determine current submilestone at the individual cell level
+                        // This variable is no longer used for step-level highlighting
+                        const isCurrentStep = false;
                         return step.map((completion, j) => {
                             const currentSubmilestone =
                                 currentStep?.subMilestones[j];
-                            const isCurrent =
-                                isCurrentStep &&
-                                currentSubmilestone &&
-                                currentSubmilestone.id ===
-                                    row.currentSubMilestoneId;
 
-                            // Show tooltip for all CURRENT cells in the step
-                            // Instead of using the same currentChecklistInfo for all, use the correct info for the hovered cell
+                            // Determine if this specific submilestone cell is current
+                            // Only show current indicators when no filters are active
+                            let isCurrentSubmilestone = false;
+                            if (
+                                !isFiltered &&
+                                row.checklistInfos &&
+                                Array.isArray(row.checklistInfos) &&
+                                currentSubmilestone
+                            ) {
+                                // Find the checklist info for this specific submilestone
+                                const submilestoneInfo =
+                                    row.checklistInfos.find(
+                                        (info) =>
+                                            info.subMilestoneId ===
+                                            currentSubmilestone.id
+                                    );
+
+                                if (submilestoneInfo) {
+                                    // This submilestone is current if:
+                                    // 1. It's not 100% complete AND
+                                    // 2. All previous submilestones (in sequence) are 100% complete
+
+                                    if (
+                                        submilestoneInfo.progressPercentage <
+                                        100
+                                    ) {
+                                        // Check if all previous submilestones are complete
+                                        let allPreviousComplete = true;
+
+                                        // Get all submilestones from all previous steps and current step up to this one
+                                        for (
+                                            let prevStepIndex = 0;
+                                            prevStepIndex <= i;
+                                            prevStepIndex++
+                                        ) {
+                                            const prevStep =
+                                                steps[prevStepIndex];
+                                            if (
+                                                prevStep &&
+                                                prevStep.subMilestones
+                                            ) {
+                                                const endIndex =
+                                                    prevStepIndex === i
+                                                        ? j
+                                                        : prevStep.subMilestones
+                                                              .length;
+                                                for (
+                                                    let prevSubIndex = 0;
+                                                    prevSubIndex < endIndex;
+                                                    prevSubIndex++
+                                                ) {
+                                                    const prevSubmilestone =
+                                                        prevStep.subMilestones[
+                                                            prevSubIndex
+                                                        ];
+                                                    const prevInfo =
+                                                        row.checklistInfos.find(
+                                                            (info) =>
+                                                                info.subMilestoneId ===
+                                                                prevSubmilestone.id
+                                                        );
+                                                    if (
+                                                        prevInfo &&
+                                                        prevInfo.progressPercentage <
+                                                            100
+                                                    ) {
+                                                        allPreviousComplete = false;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                            if (!allPreviousComplete) break;
+                                        }
+
+                                        isCurrentSubmilestone =
+                                            allPreviousComplete;
+                                    }
+                                }
+                            }
+
+                            // Fallback to old logic if checklistInfos not available (but still respect filter state)
+                            if (
+                                !isFiltered &&
+                                !row.checklistInfos &&
+                                currentSubmilestone &&
+                                row.currentSubMilestoneId
+                            ) {
+                                isCurrentSubmilestone =
+                                    currentSubmilestone.id ===
+                                    row.currentSubMilestoneId;
+                            }
+
+                            // Show tooltip for current submilestone cells
                             let checklistInfoForCell = null;
                             if (
-                                isCurrentStep &&
                                 row.checklistInfos &&
-                                Array.isArray(row.checklistInfos)
+                                Array.isArray(row.checklistInfos) &&
+                                currentSubmilestone
                             ) {
                                 // Try to find the checklist info for this submilestone
                                 checklistInfoForCell = row.checklistInfos.find(
                                     (info) =>
                                         info &&
                                         info.subMilestoneId ===
-                                            currentSubmilestone?.id
+                                            currentSubmilestone.id
                                 );
-                            } else if (isCurrentStep && currentChecklistInfo) {
+                            } else if (
+                                isCurrentSubmilestone &&
+                                currentChecklistInfo
+                            ) {
                                 checklistInfoForCell = currentChecklistInfo;
                             }
 
-                            const attachTooltip =
-                                isCurrentStep && checklistInfoForCell;
+                            const attachTooltip = checklistInfoForCell;
 
                             // Apply green background only to step cells if complete
                             const isRowComplete =
@@ -91,7 +179,7 @@ const WorkOrderMilestoneRow = ({
                             const cellContent = (
                                 <td
                                     className={`px-0 py-0 relative ${
-                                        isCurrentStep && !isRowComplete
+                                        isCurrentSubmilestone && !isRowComplete
                                             ? "border-2 border-blue-600 shadow-lg ring-2 ring-blue-300 ring-opacity-50 z-30"
                                             : "border border-gray-200"
                                     } ${
@@ -102,7 +190,8 @@ const WorkOrderMilestoneRow = ({
                                     colSpan={2}
                                     style={{
                                         backgroundColor:
-                                            isCurrentStep && !isRowComplete
+                                            isCurrentSubmilestone &&
+                                            !isRowComplete
                                                 ? "#dbeafe"
                                                 : isRowComplete
                                                 ? ""
@@ -145,7 +234,7 @@ const WorkOrderMilestoneRow = ({
                                         <div className="flex-1 px-2 py-2 text-center border-r border-gray-100">
                                             <span
                                                 className={`text-xs ${
-                                                    isCurrentStep &&
+                                                    isCurrentSubmilestone &&
                                                     (!row.status ||
                                                         row.status.toLowerCase() !==
                                                             "complete")
@@ -166,7 +255,7 @@ const WorkOrderMilestoneRow = ({
                                         <div className="flex-1 px-2 py-2 text-center">
                                             <span
                                                 className={`text-xs ${
-                                                    isCurrentStep &&
+                                                    isCurrentSubmilestone &&
                                                     (!row.status ||
                                                         row.status.toLowerCase() !==
                                                             "complete")
@@ -187,7 +276,7 @@ const WorkOrderMilestoneRow = ({
                                             </span>
                                         </div>
                                     </div>
-                                    {isCurrentStep &&
+                                    {isCurrentSubmilestone &&
                                         (!row.status ||
                                             row.status.toLowerCase() !==
                                                 "complete") && (

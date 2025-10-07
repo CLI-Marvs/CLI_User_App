@@ -18,6 +18,7 @@ class WorkOrderGroupController extends Controller
         // We no longer need `completedChecklists`, but we do need the accounts.
         $group = WorkOrderGroup::with([
             'workOrders.accounts:id,contract_no,account_name,property_name,unit_no,financing,take_out_date,dou_expiry,added_status,checklist_status,current_submilestone_id',
+            'workOrders.accounts.workOrderAccountAssignees.employee',
             'workOrders.workOrderType.submilestones.checklists:id,submilestone_id,name,requires_document,is_buyer_related'
         ])
             ->findOrFail($groupId);
@@ -46,6 +47,20 @@ class WorkOrderGroupController extends Controller
                 $account->uploaded_documents = $allUploadedDocuments->get($account->id, collect());
                 // Attach the collection of checklist statuses, or an empty collection if none exist.
                 $account->account_checklist_statuses = $allAccountChecklistStatuses->get($account->id, collect());
+                // Transform work order account assignees to match expected format
+                $account->work_order_account_assignees = $account->workOrderAccountAssignees->map(function ($assignee) {
+                    return [
+                        'id' => $assignee->id,
+                        'work_order_id' => $assignee->work_order_id,
+                        'account_id' => $assignee->account_id,
+                        'employee_id' => $assignee->employee_id,
+                        'submilestone_id' => $assignee->submilestone_id,
+                        'employee' => $assignee->employee ? [
+                            'id' => $assignee->employee->id,
+                            'fullname' => $assignee->employee->fullname,
+                        ] : null,
+                    ];
+                });
             });
         });
 
@@ -60,7 +75,8 @@ class WorkOrderGroupController extends Controller
             'checklists.accountChecklistStatuses' => function ($query) use ($accountIds) {
                 $query->whereIn('account_id', $accountIds);
             },
-            'projectMilestoneAssignees.employee'
+            'projectMilestoneAssignees.employee',
+            'workOrderAccountAssignees.employee'
         ])
             ->orderBy('work_order_type_id')
             ->orderBy('id')
@@ -98,11 +114,25 @@ class WorkOrderGroupController extends Controller
                         'id' => $sm->id,
                         'name' => $sm->name,
                         'checklists' => $sm->checklists,
-                        // Add milestone assignees data
+                        // Add milestone assignees data (legacy system)
                         'milestone_assignees' => $sm->projectMilestoneAssignees->map(function ($assignee) {
                             return [
                                 'employee_id' => $assignee->employee_id,
                                 'property_name' => $assignee->property_name,
+                                'employee' => $assignee->employee ? [
+                                    'id' => $assignee->employee->id,
+                                    'fullname' => $assignee->employee->fullname,
+                                ] : null,
+                            ];
+                        }),
+                        // Add work order account assignees data (new system)
+                        'work_order_account_assignees' => $sm->workOrderAccountAssignees->map(function ($assignee) {
+                            return [
+                                'id' => $assignee->id,
+                                'work_order_id' => $assignee->work_order_id,
+                                'account_id' => $assignee->account_id,
+                                'employee_id' => $assignee->employee_id,
+                                'submilestone_id' => $assignee->submilestone_id,
                                 'employee' => $assignee->employee ? [
                                     'id' => $assignee->employee->id,
                                     'fullname' => $assignee->employee->fullname,

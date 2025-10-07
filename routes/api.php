@@ -99,6 +99,7 @@ Route::middleware('auth:sanctum')->group(function () {
      */
     Route::prefix('work-orders')->group(function () {
         Route::post('create-work-order', [WorkOrderController::class, 'createWorkOrders']);
+
         Route::get('get-assignee', [WorkOrderController::class, 'getAssignee']);
         Route::get('assignee/{id}', [WorkOrderController::class, 'getAssigneeById']);
         Route::get('get-work-orders', [WorkOrderController::class, 'getWorkOrders']);
@@ -416,3 +417,4 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 });
+Route::get('debug-submilestones/{workOrderTypeId}', [WorkOrderController::class, 'debugSubmilestones']);
