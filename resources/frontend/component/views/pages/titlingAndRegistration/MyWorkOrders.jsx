@@ -1034,7 +1034,7 @@ const MyWorkOrdersContent = () => {
                 className="font-normal"
             >
                 Page {workOrdersCurrentPage} of{" "}
-                {Math.ceil(workOrdersTotal / workOrdersPerPage)}
+                {Math.ceil(workOrdersTotal / (workOrdersPerPage || 10))}
             </Typography>
             <ReactPaginate
                 previousLabel={
@@ -1042,7 +1042,9 @@ const MyWorkOrdersContent = () => {
                 }
                 nextLabel={<MdKeyboardArrowRight className="text-[#404B52]" />}
                 breakLabel={"..."}
-                pageCount={Math.ceil(workOrdersTotal / workOrdersPerPage)}
+                pageCount={Math.ceil(
+                    workOrdersTotal / (workOrdersPerPage || 10)
+                )}
                 marginPagesDisplayed={2}
                 pageRangeDisplayed={2}
                 onPageChange={(data) => {
@@ -1257,11 +1259,13 @@ const MyWorkOrdersContent = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {[...Array(workOrdersPerPage)].map(
-                                                (_, i) => (
-                                                    <SkeletonTableRow key={i} />
-                                                )
-                                            )}
+                                            {[
+                                                ...Array(
+                                                    workOrdersPerPage || 10
+                                                ),
+                                            ].map((_, i) => (
+                                                <SkeletonTableRow key={i} />
+                                            ))}
                                         </tbody>
                                     </table>
                                 </div>
