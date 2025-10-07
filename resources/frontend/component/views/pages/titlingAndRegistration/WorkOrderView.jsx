@@ -102,7 +102,7 @@ const WorkOrderView = () => {
         return "No Project";
     };
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage] = useState(5);
+    const [rowsPerPage] = useState(10);
     const [searchQuery, setSearchQuery] = useState("");
     const [workOrderFilterOption, setWorkOrderFilterOption] = useState("All");
     const workOrderFilterOptions = [

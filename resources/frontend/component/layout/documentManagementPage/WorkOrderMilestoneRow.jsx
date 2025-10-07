@@ -36,7 +36,7 @@ const WorkOrderMilestoneRow = ({
     return (
         <>
             <tr key={row.key} className={`transition-colors`}>
-                <td className="px-3 py-2 font-medium text-gray-900 bg-white border border-gray-200 min-w-[180px] text-left">
+                <td className="px-3 py-2 font-medium text-gray-900 sticky left-0 bg-white z-40 border-r border-gray-200 shadow-lg min-w-[180px] text-left">
                     <span
                         className="text-sm font-medium text-gray-900 block w-full text-left"
                         title={row.accountName}

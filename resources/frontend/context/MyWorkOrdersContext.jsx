@@ -14,7 +14,7 @@ export const MyWorkOrdersProvider = ({ children }) => {
     const [workOrdersLoading, setWorkOrdersLoading] = useState(true);
     const [workOrdersError, setWorkOrdersError] = useState(null);
     const [workOrdersCurrentPage, setWorkOrdersCurrentPage] = useState(1);
-    const [workOrdersPerPage, setWorkOrdersPerPage] = useState(6);
+    const [workOrdersPerPage, setWorkOrdersPerPage] = useState(10);
     const [workOrdersTotal, setWorkOrdersTotal] = useState(0);
     const [workOrdersSortBy, setWorkOrdersSortBy] = useState("created_at");
     const [workOrdersSortOrder, setWorkOrdersSortOrder] = useState("desc");

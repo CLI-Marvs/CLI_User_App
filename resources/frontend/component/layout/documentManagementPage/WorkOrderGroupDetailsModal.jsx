@@ -1338,13 +1338,13 @@ const WorkOrderGroupDetailsModal = ({
                         </div>
                     </div>
                 ) : paginatedData.length > 0 ? (
-                    <div className="h-full">
-                        <table className="w-full text-left border-separate border-spacing-0 bg-white">
+                    <div className="h-full overflow-x-auto overflow-y-auto">
+                        <table className="w-full text-left border-separate border-spacing-0 bg-white min-w-max">
                             <thead className="sticky top-0 z-50 bg-custom-bluegreen">
                                 {/* Row 1: Step headers */}
                                 <tr className="bg-custom-bluegreen text-white">
                                     <th
-                                        className="px-3 py-2 font-medium sticky left-0 bg-custom-bluegreen z-50 border-r border-white min-w-[180px]"
+                                        className="px-3 py-2 font-medium sticky left-0 bg-custom-bluegreen z-50 border-r border-white min-w-[180px] shadow-lg"
                                         style={{ backgroundColor: "#175D5F" }}
                                         rowSpan={3}
                                     >
