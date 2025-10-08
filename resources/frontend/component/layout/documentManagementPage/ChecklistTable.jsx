@@ -12,6 +12,7 @@ const ActionButtons = ({
     handleOpenNotesModal,
     onRefresh,
     showActionButtons,
+    setOptimisticCompleted,
 }) => {
     if (!showActionButtons) return null;
 
@@ -101,51 +102,55 @@ const ActionButtons = ({
                     <input
                         type="checkbox"
                         checked={!!isComplete}
-                        disabled={!!isComplete}
-                        title="Mark checklist as done"
+                        disabled={false}
+                        title={
+                            isComplete
+                                ? "Unmark checklist (make incomplete)"
+                                : "Mark checklist as done"
+                        }
                         onChange={async (e) => {
-                            if (e.target.checked && !isComplete) {
-                                if (
-                                    typeof window.setOptimisticCompleted ===
-                                    "function"
-                                ) {
-                                    window.setOptimisticCompleted((prev) => ({
-                                        ...prev,
-                                        [`${account.id}_${checklist.id}`]: true,
-                                    }));
-                                }
-                                try {
-                                    const apiService = await import(
-                                        "../../servicesApi/apiService"
-                                    );
-                                    await apiService.default.post(
-                                        "/account-checklist-status",
-                                        {
-                                            account_id: account.id,
-                                            checklist_id: checklist.id,
-                                            is_completed: true,
-                                        }
-                                    );
-                                    if (onRefresh) onRefresh();
-                                } catch (err) {
-                                    alert(
-                                        "Failed to mark checklist as complete."
-                                    );
-                                    if (
-                                        typeof window.setOptimisticCompleted ===
-                                        "function"
-                                    ) {
-                                        window.setOptimisticCompleted(
-                                            (prev) => {
-                                                const copy = { ...prev };
-                                                delete copy[
-                                                    `${account.id}_${checklist.id}`
-                                                ];
-                                                return copy;
-                                            }
-                                        );
+                            const newCompletionState = e.target.checked;
+
+                            // Optimistic update
+                            setOptimisticCompleted((prev) => ({
+                                ...prev,
+                                [`${account.id}_${checklist.id}`]:
+                                    newCompletionState,
+                            }));
+
+                            try {
+                                const apiService = await import(
+                                    "../../servicesApi/apiService"
+                                );
+                                await apiService.default.post(
+                                    "/account-checklist-status",
+                                    {
+                                        account_id: account.id,
+                                        checklist_id: checklist.id,
+                                        is_completed: newCompletionState,
                                     }
-                                }
+                                );
+                                if (onRefresh) onRefresh();
+                            } catch (err) {
+                                alert(
+                                    newCompletionState
+                                        ? "Failed to mark checklist as complete."
+                                        : "Failed to mark checklist as incomplete."
+                                );
+                                // Revert optimistic update on error
+                                setOptimisticCompleted((prev) => {
+                                    const copy = { ...prev };
+                                    if (newCompletionState) {
+                                        delete copy[
+                                            `${account.id}_${checklist.id}`
+                                        ];
+                                    } else {
+                                        copy[
+                                            `${account.id}_${checklist.id}`
+                                        ] = true;
+                                    }
+                                    return copy;
+                                });
                             }
                         }}
                         className="form-checkbox h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 cursor-pointer mr-1"
@@ -1488,6 +1493,9 @@ const ChecklistTable = ({
                                                                     }
                                                                     showActionButtons={
                                                                         showActionButtons
+                                                                    }
+                                                                    setOptimisticCompleted={
+                                                                        setOptimisticCompleted
                                                                     }
                                                                 />
                                                             </div>

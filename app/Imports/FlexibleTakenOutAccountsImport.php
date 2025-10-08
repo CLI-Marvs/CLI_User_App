@@ -82,6 +82,7 @@ class FlexibleTakenOutAccountsImport implements ToCollection, WithMultipleSheets
             'property_name' => ['property name', 'property_name', 'propertyname', 'property', 'project name', 'project'],
             'unit_no' => ['unit no', 'unit_no', 'unitno', 'unit number', 'unit #', 'unit'],
             'financing' => ['financing', 'finance', 'loan type', 'payment type'],
+            'psd' => ['psd', 'PSD', 'psd date', 'psd_date'],
             'category' => ['category'],
             'to_year' => ['to year', 'to_year', 'year', 'toyear', 'to yr'],
             'to_month' => ['to month', 'to_month', 'month', 'tomonth', 'to mnth'],
@@ -159,6 +160,10 @@ class FlexibleTakenOutAccountsImport implements ToCollection, WithMultipleSheets
         foreach ($columnMapping as $colIndex => $dbField) {
             $value = $row->get($colIndex);
             $mappedData[$dbField] = $this->cleanCellValue($value);
+        }
+        // Ensure PSD is present even if not mapped
+        if (!isset($mappedData['psd'])) {
+            $mappedData['psd'] = null;
         }
 
         // Convert dates and track conversion failures

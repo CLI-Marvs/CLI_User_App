@@ -305,4 +305,213 @@ class WorkOrderGroupController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Get all accounts summary across all work order groups
+     */
+    public function getAllAccountsSummary()
+    {
+        try {
+            // Get all work order groups using the same logic as individual showDetails
+            $allGroups = WorkOrderGroup::with([
+                'workOrders.accounts:id,contract_no,account_name,property_name,unit_no,financing,psd,take_out_date,dou_expiry,added_status,checklist_status,current_submilestone_id',
+                'workOrders.accounts.workOrderAccountAssignees.employee',
+                'workOrders.workOrderType.submilestones.checklists:id,submilestone_id,name,requires_document,is_buyer_related'
+            ])->get();
+
+            // Collect ALL unique account IDs from ALL work order groups
+            $allAccountIds = collect();
+            foreach ($allGroups as $group) {
+                $accountIds = $group->workOrders->flatMap(function ($workOrder) {
+                    return $workOrder->accounts->pluck('id');
+                })->unique()->values();
+                $allAccountIds = $allAccountIds->merge($accountIds);
+            }
+            $allAccountIds = $allAccountIds->unique()->values();
+
+            // Fetch all uploaded documents and checklist statuses for ALL accounts
+            $allUploadedDocuments = WorkOrderDocument::with('uploadedBy')
+                ->whereIn('account_id', $allAccountIds)
+                ->get()
+                ->groupBy('account_id');
+
+            $allAccountChecklistStatuses = AccountChecklistStatus::whereIn('account_id', $allAccountIds)
+                ->get()
+                ->groupBy('account_id');
+
+            // Attach documents and checklist statuses to ALL accounts in ALL groups
+            foreach ($allGroups as $group) {
+                $group->workOrders->each(function ($workOrder) use ($allUploadedDocuments, $allAccountChecklistStatuses) {
+                    $workOrder->accounts->each(function ($account) use ($allUploadedDocuments, $allAccountChecklistStatuses) {
+                        $account->uploaded_documents = $allUploadedDocuments->get($account->id, collect());
+                        $account->account_checklist_statuses = $allAccountChecklistStatuses->get($account->id, collect());
+                        $account->work_order_account_assignees = $account->workOrderAccountAssignees->map(function ($assignee) {
+                            return [
+                                'id' => $assignee->id,
+                                'work_order_id' => $assignee->work_order_id,
+                                'account_id' => $assignee->account_id,
+                                'employee_id' => $assignee->employee_id,
+                                'submilestone_id' => $assignee->submilestone_id,
+                                'employee' => $assignee->employee ? [
+                                    'id' => $assignee->employee->id,
+                                    'fullname' => $assignee->employee->fullname,
+                                ] : null,
+                            ];
+                        });
+                    });
+                });
+            }
+
+            // Get all possible steps (WorkOrderType) ordered by sequence - SAME AS INDIVIDUAL
+            $allSteps = WorkOrderType::orderBy('sequence')->get();
+
+            // Get all submilestones and group them by work order type ID - SAME AS INDIVIDUAL
+            $allSubmilestones = Submilestone::with([
+                'checklists:id,submilestone_id,name,requires_document,is_buyer_related',
+                'checklists.accountChecklistStatuses' => function ($query) use ($allAccountIds) {
+                    $query->whereIn('account_id', $allAccountIds);
+                },
+                'projectMilestoneAssignees.employee',
+                'workOrderAccountAssignees.employee'
+            ])
+                ->orderBy('work_order_type_id')
+                ->orderBy('id')
+                ->get()
+                ->groupBy('work_order_type_id');
+
+            // Build submilestones map - EXACT SAME LOGIC AS INDIVIDUAL
+            $submilestonesByType = [];
+            foreach ($allSteps as $step) {
+                $typeId = $step->id;
+                if (isset($allSubmilestones[$typeId])) {
+                    $submilestonesByType[$typeId] = $allSubmilestones[$typeId]->map(function ($sm) {
+                        return [
+                            'id' => $sm->id,
+                            'name' => $sm->name,
+                            'checklists' => $sm->checklists,
+                            'milestone_assignees' => $sm->projectMilestoneAssignees->map(function ($assignee) {
+                                return [
+                                    'employee_id' => $assignee->employee_id,
+                                    'property_name' => $assignee->property_name,
+                                    'employee' => $assignee->employee ? [
+                                        'id' => $assignee->employee->id,
+                                        'fullname' => $assignee->employee->fullname,
+                                    ] : null,
+                                ];
+                            }),
+                            'work_order_account_assignees' => $sm->workOrderAccountAssignees->map(function ($assignee) {
+                                return [
+                                    'id' => $assignee->id,
+                                    'work_order_id' => $assignee->work_order_id,
+                                    'account_id' => $assignee->account_id,
+                                    'employee_id' => $assignee->employee_id,
+                                    'submilestone_id' => $assignee->submilestone_id,
+                                    'employee' => $assignee->employee ? [
+                                        'id' => $assignee->employee->id,
+                                        'fullname' => $assignee->employee->fullname,
+                                    ] : null,
+                                ];
+                            }),
+                        ];
+                    })->values()->toArray();
+                } else {
+                    $submilestonesByType[$typeId] = [];
+                }
+            }
+
+            // Collect and combine accounts by work order type (like individual showDetails)
+            $workOrdersByType = collect();
+            foreach ($allGroups as $group) {
+                foreach ($group->workOrders as $workOrder) {
+                    $typeId = $workOrder->work_order_type_id;
+
+                    if ($workOrdersByType->has($typeId)) {
+                        // Merge accounts with existing work order of this type
+                        $existingWorkOrder = $workOrdersByType->get($typeId);
+                        $existingWorkOrder['accounts'] = $existingWorkOrder['accounts']->merge($workOrder->accounts)->unique('id');
+                        $workOrdersByType->put($typeId, $existingWorkOrder);
+                    } else {
+                        // First work order of this type
+                        $workOrdersByType->put($typeId, [
+                            'work_order_id' => $workOrder->work_order_id,
+                            'work_order_type_id' => $typeId,
+                            'status' => $workOrder->status,
+                            'accounts' => $workOrder->accounts,
+                            'work_order_type' => $workOrder->workOrderType,
+                        ]);
+                    }
+                }
+            }
+
+            // Build work_orders response - SAME LOGIC as individual showDetails
+            $workOrdersForResponse = $allSteps->map(function ($step) use ($workOrdersByType) {
+                if ($workOrdersByType->has($step->id)) {
+                    return $workOrdersByType->get($step->id);
+                } else {
+                    return [
+                        'work_order_id' => null,
+                        'work_order_type_id' => $step->id,
+                        'status' => 'Not Started',
+                        'accounts' => [],
+                        'work_order_type' => $step,
+                    ];
+                }
+            });
+
+            // Extract project assignees - SAME LOGIC AS INDIVIDUAL
+            $allAccountsForAssignees = collect();
+            foreach ($workOrdersForResponse as $workOrder) {
+                if (is_array($workOrder) && isset($workOrder['accounts'])) {
+                    $accounts = is_object($workOrder['accounts']) ? $workOrder['accounts'] : collect($workOrder['accounts']);
+                    $allAccountsForAssignees = $allAccountsForAssignees->merge($accounts);
+                } else if (is_object($workOrder) && isset($workOrder->accounts)) {
+                    $allAccountsForAssignees = $allAccountsForAssignees->merge($workOrder->accounts);
+                }
+            }
+
+            $firstAccount = $allAccountsForAssignees->first();
+            $projectProperty = is_array($firstAccount) ? ($firstAccount['property_name'] ?? null) : ($firstAccount->property_name ?? null);
+            $projectAssignees = [];
+
+            if ($projectProperty) {
+                $uniqueAssignees = collect();
+                foreach ($allSubmilestones as $milestones) {
+                    foreach ($milestones as $milestone) {
+                        foreach ($milestone->projectMilestoneAssignees as $assignee) {
+                            if ($assignee->property_name === $projectProperty && $assignee->employee) {
+                                $uniqueAssignees->push($assignee->employee);
+                            }
+                        }
+                    }
+                }
+
+                $projectAssignees = $uniqueAssignees->unique('id')->map(function ($employee) {
+                    return [
+                        'id' => $employee->id,
+                        'name' => $employee->fullname ?: trim(($employee->firstname ?? '') . ' ' . ($employee->lastname ?? '')),
+                        'firstname' => $employee->firstname,
+                        'lastname' => $employee->lastname,
+                    ];
+                })->values()->toArray();
+            }
+
+            // Return EXACT SAME STRUCTURE as individual showDetails
+            return response()->json([
+                'id' => 'all-groups-summary',
+                'due_date' => null,
+                'status' => 'Summary of All Groups',
+                'work_orders' => $workOrdersForResponse,
+                'submilestonesByType' => $submilestonesByType,
+                'project_assignees' => $projectAssignees,
+                'property_name' => $projectProperty,
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to get all accounts summary',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
 }

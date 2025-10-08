@@ -17,6 +17,7 @@ class MasterList extends Model
         'propertyname',
         'unitno',
         'financing',
+        'psd',
         'takeoutdate',
         'douexpiry',
     ];

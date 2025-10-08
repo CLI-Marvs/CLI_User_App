@@ -10,6 +10,8 @@ const WorkOrderMilestoneRow = ({
     currentChecklistInfo,
     onMilestoneProgression,
     isFiltered = false, // New prop to indicate if any filters are active
+    hideNotesColumn = false, // New prop to hide notes column
+    hideActionsColumn = false, // New prop to hide actions column
 }) => {
     const [showTooltip, setShowTooltip] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -57,10 +59,15 @@ const WorkOrderMilestoneRow = ({
                                 currentStep?.subMilestones[j];
 
                             // Determine if this specific submilestone cell is current
-                            // Only show current indicators when no filters are active
+                            // Only show current indicators when no filters are active AND row is not complete
                             let isCurrentSubmilestone = false;
+                            const isAccountComplete =
+                                String(row.status || "").toLowerCase() ===
+                                "complete";
+
                             if (
                                 !isFiltered &&
+                                !isAccountComplete &&
                                 row.checklistInfos &&
                                 Array.isArray(row.checklistInfos) &&
                                 currentSubmilestone
@@ -136,9 +143,10 @@ const WorkOrderMilestoneRow = ({
                                 }
                             }
 
-                            // Fallback to old logic if checklistInfos not available (but still respect filter state)
+                            // Fallback to old logic if checklistInfos not available (but still respect filter state and completion)
                             if (
                                 !isFiltered &&
+                                !isAccountComplete &&
                                 !row.checklistInfos &&
                                 currentSubmilestone &&
                                 row.currentSubMilestoneId
@@ -174,7 +182,7 @@ const WorkOrderMilestoneRow = ({
                             // Apply green background only to step cells if complete
                             const isRowComplete =
                                 row.status &&
-                                row.status.toLowerCase() === "complete";
+                                String(row.status).toLowerCase() === "complete";
 
                             const cellContent = (
                                 <td
@@ -219,7 +227,7 @@ const WorkOrderMilestoneRow = ({
                                                 : "opacity-20"
                                         } ${
                                             row.status &&
-                                            row.status.toLowerCase() ===
+                                            String(row.status).toLowerCase() ===
                                                 "complete"
                                                 ? ""
                                                 : completion === 100
@@ -236,7 +244,9 @@ const WorkOrderMilestoneRow = ({
                                                 className={`text-xs ${
                                                     isCurrentSubmilestone &&
                                                     (!row.status ||
-                                                        row.status.toLowerCase() !==
+                                                        String(
+                                                            row.status
+                                                        ).toLowerCase() !==
                                                             "complete")
                                                         ? "text-blue-800 font-semibold"
                                                         : "text-gray-600"
@@ -257,7 +267,9 @@ const WorkOrderMilestoneRow = ({
                                                 className={`text-xs ${
                                                     isCurrentSubmilestone &&
                                                     (!row.status ||
-                                                        row.status.toLowerCase() !==
+                                                        String(
+                                                            row.status
+                                                        ).toLowerCase() !==
                                                             "complete")
                                                         ? "text-blue-800 font-semibold"
                                                         : "text-gray-600"
@@ -278,7 +290,7 @@ const WorkOrderMilestoneRow = ({
                                     </div>
                                     {isCurrentSubmilestone &&
                                         (!row.status ||
-                                            row.status.toLowerCase() !==
+                                            String(row.status).toLowerCase() !==
                                                 "complete") && (
                                             <>
                                                 <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-blue-600 rounded-full animate-pulse border border-white shadow-sm"></div>
@@ -302,13 +314,40 @@ const WorkOrderMilestoneRow = ({
                         {getStatusBadge(row.status)}
                     </div>
                 </td>
-                <td className="px-2 py-2 text-xs text-gray-600 border-l border-b border-gray-200">
-                    <div className="flex items-center justify-center">
-                        {row.remarks && row.remarks !== "-" ? (
-                            <div className="flex items-center gap-1 max-w-[150px]">
-                                <span className="truncate" title={row.remarks}>
-                                    {row.remarks}
-                                </span>
+                {!hideNotesColumn && (
+                    <td className="px-2 py-2 text-xs text-gray-600 border-l border-b border-gray-200">
+                        <div className="flex items-center justify-center">
+                            {row.remarks && row.remarks !== "-" ? (
+                                <div className="flex items-center gap-1 max-w-[150px]">
+                                    <span
+                                        className="truncate"
+                                        title={row.remarks}
+                                    >
+                                        {row.remarks}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className="text-gray-500 hover:text-gray-800"
+                                        onClick={() =>
+                                            handleOpenNotesModal(row.notesData)
+                                        }
+                                        style={{
+                                            padding: 0,
+                                            background: "none",
+                                            border: "none",
+                                        }}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-4 w-4"
+                                            viewBox="0 0 24 24"
+                                            fill="currentColor"
+                                        >
+                                            <path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v14H7V5h10zm-2 4H9v2h6V9zm0 4H9v2h6v-2z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            ) : (
                                 <button
                                     type="button"
                                     className="text-gray-500 hover:text-gray-800"
@@ -330,57 +369,37 @@ const WorkOrderMilestoneRow = ({
                                         <path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v14H7V5h10zm-2 4H9v2h6V9zm0 4H9v2h6v-2z" />
                                     </svg>
                                 </button>
-                            </div>
-                        ) : (
+                            )}
+                        </div>
+                    </td>
+                )}
+                {!hideActionsColumn && (
+                    <td className="px-2 py-2 border-l border-b border-gray-200">
+                        <div className="flex justify-center gap-1">
                             <button
                                 type="button"
-                                className="text-gray-500 hover:text-gray-800"
-                                onClick={() =>
-                                    handleOpenNotesModal(row.notesData)
-                                }
-                                style={{
-                                    padding: 0,
-                                    background: "none",
-                                    border: "none",
-                                }}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs font-medium rounded"
+                                onClick={onShowFiles}
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-4 w-4"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                >
-                                    <path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v14H7V5h10zm-2 4H9v2h6V9zm0 4H9v2h6v-2z" />
-                                </svg>
+                                Files
                             </button>
-                        )}
-                    </div>
-                </td>
-                <td className="px-2 py-2 border-l border-b border-gray-200">
-                    <div className="flex justify-center gap-1">
-                        <button
-                            type="button"
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs font-medium rounded"
-                            onClick={onShowFiles}
-                        >
-                            Files
-                        </button>
-                        {/* {currentChecklistInfo &&
-                            currentChecklistInfo.progressPercentage === 100 && (
-                                <button
-                                    type="button"
-                                    className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 text-xs font-medium rounded"
-                                    onClick={() =>
-                                        onMilestoneProgression &&
-                                        onMilestoneProgression(row.key)
-                                    }
-                                    title="Progress to next milestone"
-                                >
-                                    Next
-                                </button>
-                            )} */}
-                    </div>
-                </td>
+                            {/* {currentChecklistInfo &&
+                                currentChecklistInfo.progressPercentage === 100 && (
+                                    <button
+                                        type="button"
+                                        className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 text-xs font-medium rounded"
+                                        onClick={() =>
+                                            onMilestoneProgression &&
+                                            onMilestoneProgression(row.key)
+                                        }
+                                        title="Progress to next milestone"
+                                    >
+                                        Next
+                                    </button>
+                                )} */}
+                        </div>
+                    </td>
+                )}
             </tr>
 
             {/* Custom Tooltip */}

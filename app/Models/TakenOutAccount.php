@@ -22,6 +22,7 @@ class TakenOutAccount extends Model
         'property_name',
         'unit_no',
         'financing',
+        'psd',
         'take_out_date',
         'dou_expiry',
         'added_status',

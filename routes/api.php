@@ -199,6 +199,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/projects/{projectName}/milestone-structure', [ProjectAssigneeController::class, 'getProjectMilestoneStructure'])->where('projectName', '.*');
     //for workorder group
     Route::get('/work-order-groups/{groupId}/details', [WorkOrderGroupController::class, 'showDetails']);
+    Route::get('/work-order-groups/all-accounts-summary', [WorkOrderGroupController::class, 'getAllAccountsSummary']);
     Route::post('/work-order-groups/{id}/update-status', [WorkOrderGroupController::class, 'updateStatus']);
     Route::post('/work-order-groups/update-all-status', [WorkOrderGroupController::class, 'updateAllStatus']);
     Route::get('/work-order-groups/status-summary', [WorkOrderGroupController::class, 'getStatusSummary']);

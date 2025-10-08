@@ -673,43 +673,49 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                     fetchAccounts();
                 }
 
-                // LOG FEATURE: Create log entries for all new work orders
-                for (let i = 0; i < responses.length; i++) {
-                    const response = responses[i];
-                    const workOrderData = workOrdersToCreate[i];
-                    const newWorkOrderId = response.data.data.work_order_id;
+                // NOTE FEATURE: Create a single consolidated note for all new work orders
+                const logWorkOrderIds = responses.map(
+                    (response) => response.data.data.work_order_id
+                );
+                const workOrderNames = workOrdersToCreate.map(
+                    (workOrderData) => workOrderData.work_order
+                );
 
-                    const logData = {
-                        work_order_id: newWorkOrderId,
-                        log_type: workOrderData.work_order,
-                        log_message: `Work Order #${newWorkOrderId} created for ${workOrderData.work_order}.`,
-                        account_ids: selectedAccounts.map(
-                            (account) => account.id
-                        ),
-                        created_by_user_id: user.id,
-                    };
+                // Use the first work order ID for the note entry (or the group ID if available)
+                const primaryWorkOrderId = logWorkOrderIds[0];
+                const logWorkOrderGroupId =
+                    responses[0].data.data.work_order_group_id;
 
-                    try {
-                        const logResponse = await apiService.post(
-                            "/work-order-logs",
-                            logData
-                        );
-                        if (
-                            logResponse.status !== 201 &&
-                            logResponse.data?.message !==
-                                "Log created successfully."
-                        ) {
-                            console.error(
-                                "Error creating work order log:",
-                                logResponse
-                            );
-                        }
-                    } catch (logError) {
+                const consolidatedNoteData = {
+                    work_order_id: logWorkOrderGroupId || primaryWorkOrderId,
+                    log_type: "Work Order Creation",
+                    note_text: `Work Orders created: ${workOrderNames.join(
+                        ", "
+                    )} for ${selectedAccounts.length} account(s).`,
+                    note_type: "System Generated",
+                    created_by_user_id: user.id,
+                };
+
+                try {
+                    const noteResponse = await apiService.post(
+                        "/work-orders/notes/add",
+                        consolidatedNoteData
+                    );
+                    if (
+                        noteResponse.status !== 201 &&
+                        noteResponse.data?.message !==
+                            "Note and attachments added successfully."
+                    ) {
                         console.error(
-                            "Exception while creating work order log:",
-                            logError
+                            "Error creating consolidated work order note:",
+                            noteResponse
                         );
                     }
+                } catch (noteError) {
+                    console.error(
+                        "Exception while creating consolidated work order note:",
+                        noteError
+                    );
                 }
             } else {
                 const failedResponses = responses.filter(

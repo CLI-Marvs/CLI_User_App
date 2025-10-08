@@ -351,6 +351,10 @@ class AccountChecklistStatusController extends Controller
             return;
 
         $currentSubmilestoneId = $account->current_submilestone_id;
+        $currentSubmilestone = Submilestone::find($currentSubmilestoneId);
+
+        if (!$currentSubmilestone)
+            return;
 
         $checklistIds = Checklist::where('submilestone_id', $currentSubmilestoneId)->pluck('id');
         $completedCount = AccountChecklistStatus::where('account_id', $accountId)
@@ -360,8 +364,6 @@ class AccountChecklistStatusController extends Controller
 
         if ($checklistIds->count() > 0 && $completedCount === $checklistIds->count()) {
             // Advance to next submilestone
-            $currentSubmilestone = Submilestone::find($currentSubmilestoneId);
-
             $nextSubmilestone = Submilestone::where('work_order_type_id', $currentSubmilestone->work_order_type_id)
                 ->where('id', '>', $currentSubmilestoneId)
                 ->orderBy('id')
@@ -373,6 +375,60 @@ class AccountChecklistStatusController extends Controller
 
                 Log::info("Account {$accountId} advanced to Submilestone ID {$nextSubmilestone->id}");
             }
+        } else {
+            // Check if we need to move back to a previous submilestone
+            // If the current submilestone has incomplete checklists, 
+            // find the last submilestone with all checklists completed
+            $this->_regressToAppropriateMilestone($accountId, $currentSubmilestone);
+        }
+    }
+
+    /**
+     * Regress the account to the appropriate submilestone when checklists are unchecked
+     */
+    protected function _regressToAppropriateMilestone(int $accountId, Submilestone $currentSubmilestone)
+    {
+        $account = TakenOutAccount::find($accountId);
+        if (!$account)
+            return;
+
+        // Get all submilestones in the same work order type, ordered by sequence
+        $allSubmilestones = Submilestone::where('work_order_type_id', $currentSubmilestone->work_order_type_id)
+            ->orderBy('id', 'asc')
+            ->get();
+
+        $appropriateSubmilestone = null;
+
+        // Find the last submilestone where all checklists are completed
+        foreach ($allSubmilestones as $submilestone) {
+            $checklistIds = Checklist::where('submilestone_id', $submilestone->id)->pluck('id');
+
+            if ($checklistIds->count() === 0) {
+                // No checklists in this submilestone, consider it complete
+                $appropriateSubmilestone = $submilestone;
+                continue;
+            }
+
+            $completedCount = AccountChecklistStatus::where('account_id', $accountId)
+                ->whereIn('checklist_id', $checklistIds)
+                ->where('is_completed', true)
+                ->count();
+
+            if ($completedCount === $checklistIds->count()) {
+                // All checklists in this submilestone are complete
+                $appropriateSubmilestone = $submilestone;
+            } else {
+                // Found the first submilestone with incomplete checklists
+                break;
+            }
+        }
+
+        // Only update if we found a different appropriate submilestone
+        if ($appropriateSubmilestone && $appropriateSubmilestone->id !== $account->current_submilestone_id) {
+            $account->current_submilestone_id = $appropriateSubmilestone->id;
+            $account->save();
+
+            Log::info("Account {$accountId} regressed to Submilestone ID {$appropriateSubmilestone->id} due to incomplete checklists");
         }
     }
 

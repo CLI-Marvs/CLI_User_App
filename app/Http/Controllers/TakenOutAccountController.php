@@ -139,6 +139,7 @@ class TakenOutAccountController extends Controller
                 'contract_no',
                 'account_name',
                 'financing',
+                'psd',
                 'take_out_date',
                 'dou_expiry',
                 'property_name',
