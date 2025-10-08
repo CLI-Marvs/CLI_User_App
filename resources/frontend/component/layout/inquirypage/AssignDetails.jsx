@@ -47,7 +47,7 @@ const AssignDetails = ({ logMessages, ticketId }) => {
             setFolderName("concerns/");
         } else if (APP_URL === "https://admin-uat.cebulandmasters.com") {
             setFolderName("concerns-uat/");
-        } else if (APP_URL === "https://admin.cebulandmasters.com") {
+        } else if (APP_URL === "https://masters-connect.cebulandmasters.com") {
             setFolderName("concerns-attachments/");
         }
     }, []);

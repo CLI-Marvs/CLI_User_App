@@ -9,7 +9,7 @@ use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Mail\Mailables\Envelope;
- 
+
 
 class FeedbackReplyNotificationMail extends Mailable
 {
@@ -31,10 +31,10 @@ class FeedbackReplyNotificationMail extends Mailable
      * Get the message envelope.
      * Create an envelope object for the message.
      */
-         
+
     public function envelope(): Envelope
     {
-    
+
         //Check Environment Based on app_url
 
         if (config('services.app_url') === 'http://localhost:8001') {
@@ -50,7 +50,7 @@ class FeedbackReplyNotificationMail extends Mailable
                 subject: "[Test] [CLI Inquiry] Transaction {$this->data['ticket_id']}",
             );
         }
-        
+
         if (config('services.app_url') === 'https://admin-uat.cebulandmasters.com') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
@@ -58,7 +58,7 @@ class FeedbackReplyNotificationMail extends Mailable
             );
         }
 
-        if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
+        if (config('services.app_url') === 'https://masters-connect.cebulandmasters.com') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "[CLI Inquiry] Transaction {$this->data['ticket_id']}",
@@ -96,4 +96,3 @@ class FeedbackReplyNotificationMail extends Mailable
         return [];
     }
 }
-

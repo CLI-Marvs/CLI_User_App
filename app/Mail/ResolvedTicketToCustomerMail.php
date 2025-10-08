@@ -49,7 +49,7 @@ class ResolvedTicketToCustomerMail extends Mailable
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "[Test] [CLI Inquiry] Transaction {$this->ticket_id}",
             );
-        } 
+        }
 
 
         if (config('services.app_url') === 'https://admin-uat.cebulandmasters.com') {
@@ -57,9 +57,9 @@ class ResolvedTicketToCustomerMail extends Mailable
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "[SML] [CLI Inquiry] Transaction {$this->ticket_id}",
             );
-        } 
+        }
 
-        if(config('services.app_url') === 'https://admin.cebulandmasters.com') { 
+        if (config('services.app_url') === 'https://masters-connect.cebulandmasters.com') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "[CLI Inquiry] Transaction {$this->ticket_id}",

@@ -12,8 +12,8 @@ import apiService from "../../servicesApi/apiService";
 const UserMessages = ({ items, dataConcern }) => {
     const attachmentData = JSON.parse(items?.attachment || "[]");
     const APP_URL = import.meta.env.VITE_API_BASE_URL;
-    const [loadingStates, setLoadingStates] = useState({});  //Each file's loading state is managed independently in the loadingStates object.
-    const [folderName, setFolderName] = useState('');
+    const [loadingStates, setLoadingStates] = useState({}); //Each file's loading state is managed independently in the loadingStates object.
+    const [folderName, setFolderName] = useState("");
 
     const params = useParams();
     const ticketId = decodeURIComponent(params.id);
@@ -21,21 +21,24 @@ const UserMessages = ({ items, dataConcern }) => {
     const formattedTime = moment(items.created_at).format("hh:mm A");
 
     /**
- *  Get the file URL from localStorage when the page loads
- */
+     *  Get the file URL from localStorage when the page loads
+     */
     useEffect(() => {
-        if (APP_URL === 'http://localhost:8001' || APP_URL === 'https://admin-dev.cebulandmasters.com') {
-            setFolderName('concerns/');
-        } else if (APP_URL === 'https://admin-uat.cebulandmasters.com') {
-            setFolderName('concerns-uat/');
-        } else if (APP_URL === 'https://admin.cebulandmasters.com') {
-            setFolderName('concerns-attachments/');
+        if (
+            APP_URL === "http://localhost:8001" ||
+            APP_URL === "https://admin-dev.cebulandmasters.com"
+        ) {
+            setFolderName("concerns/");
+        } else if (APP_URL === "https://admin-uat.cebulandmasters.com") {
+            setFolderName("concerns-uat/");
+        } else if (APP_URL === "https://masters-connect.cebulandmasters.com") {
+            setFolderName("concerns-attachments/");
         }
-    }, [])
+    }, []);
 
     /*
-      * Function to handle download of the file from the google cloud
-      */
+     * Function to handle download of the file from the google cloud
+     */
     const handleDownloadFile = async (attachmentUrl) => {
         // Get the file name including the path after 'concerns/'
         const concernsPathIndex =
@@ -77,7 +80,6 @@ const UserMessages = ({ items, dataConcern }) => {
         }
     };
 
-
     /*   const location = useLocation();
     const { dataConcern } = location?.state || {}; */
     /*  const dataConcern = data?.find((item) => item.ticket_id === ticketId) || {}; */
@@ -102,12 +104,13 @@ const UserMessages = ({ items, dataConcern }) => {
                     </p>
                     <p className=" text-sm text-custom-gray81 flex gap-1">
                         <span>From:</span>
-                        {/* capitalizeWords() */
+                        {
+                            /* capitalizeWords() */
                             `${dataConcern?.buyer_firstname || ""} ${
                                 dataConcern?.buyer_middlename || ""
                             } ${dataConcern?.buyer_lastname || ""}`
                         }{" "}
-                        {/* capitalizeWords()*/dataConcern?.suffix_name}
+                        {/* capitalizeWords()*/ dataConcern?.suffix_name}
                     </p>
                     <p className=" text-sm text-custom-gray81 flex gap-1">
                         {dataConcern.buyer_email} <span>|</span>{" "}
@@ -118,7 +121,8 @@ const UserMessages = ({ items, dataConcern }) => {
             <div className="w-full mt-[10px]">
                 <div className="w-full h-auto gradient-background1 rounded-b-[10px] rounded-r-[10px]  p-[20px] pl-[31px] text-xs text-white">
                     <div className="break-words whitespace-pre-wrap">
-                        <p className=""
+                        <p
+                            className=""
                             dangerouslySetInnerHTML={{
                                 __html: items.details_message,
                             }}
@@ -173,10 +177,15 @@ const UserMessages = ({ items, dataConcern }) => {
                                         </span>
                                     </Link>
                                     <div>
-                                        
                                         <button
-                                            onClick={() => handleDownloadFile(attachment.url)}
-                                            disabled={loadingStates[attachment.url]}
+                                            onClick={() =>
+                                                handleDownloadFile(
+                                                    attachment.url
+                                                )
+                                            }
+                                            disabled={
+                                                loadingStates[attachment.url]
+                                            }
                                             type="submit"
                                             className="h-6 w-6 text-custom-solidgreen hover:text-gray-700 cursor-pointer"
                                         >
