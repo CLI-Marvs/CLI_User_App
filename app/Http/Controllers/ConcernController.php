@@ -70,7 +70,7 @@ class ConcernController extends Controller
             $this->folderName = 'concerns-uat/';
         }
 
-        if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
+        if (config('services.app_url') === 'https://masters-connect.cebulandmasters.com') {
             $this->keyJson = config('services.gcs_prod.key_json');
             $this->bucket = 'concerns-bucket';
             $this->folderName = 'concerns-attachments/';
@@ -1619,8 +1619,8 @@ class ConcernController extends Controller
                     }
 
 
-                    if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
-                        $adminLink = 'https://admin.cebulandmasters.com';
+                    if (config('services.app_url') === 'https://masters-connect.cebulandmasters.com') {
+                        $adminLink = 'https://masters-connect.cebulandmasters.com';
                     }
                     $dataToEmail = [
                         'ticketId' => $modifiedTicketId,
@@ -2347,7 +2347,7 @@ class ConcernController extends Controller
             return $item;
         });
 
-        
+
         return response()->json($mappedCommunicationTypes);
     }
 

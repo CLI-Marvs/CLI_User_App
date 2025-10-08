@@ -11,11 +11,10 @@ import { useNavigate, Link } from "react-router-dom";
 const AdminMessages = ({ items }) => {
     //State
     const APP_URL = import.meta.env.VITE_API_BASE_URL;
-    const [loadingStates, setLoadingStates] = useState({});  //Each file's loading state is managed independently in the loadingStates object.
+    const [loadingStates, setLoadingStates] = useState({}); //Each file's loading state is managed independently in the loadingStates object.
     const { user } = useStateContext();
     const attachmentData = JSON.parse(items.attachment || "[]");
-    const [folderName, setFolderName] = useState('');
-
+    const [folderName, setFolderName] = useState("");
 
     const navigate = useNavigate();
     const dynamicName =
@@ -26,22 +25,21 @@ const AdminMessages = ({ items }) => {
     const formattedDate = moment(items.created_at).format("MMMM D, YYYY");
     const formattedTime = moment(items.created_at).format("hh:mm A");
 
-
     /**
      *  Get the file URL from localStorage when the page loads
      */
     useEffect(() => {
-        if (APP_URL === 'http://localhost:8001' || APP_URL === 'https://admin-dev.cebulandmasters.com') {
-            setFolderName('concerns/');
-        } else if (APP_URL === 'https://admin-uat.cebulandmasters.com') {
-            setFolderName('concerns-uat/');
-        } else if (APP_URL === 'https://admin.cebulandmasters.com') {
-            setFolderName('concerns-attachments/');
+        if (
+            APP_URL === "http://localhost:8001" ||
+            APP_URL === "https://admin-dev.cebulandmasters.com"
+        ) {
+            setFolderName("concerns/");
+        } else if (APP_URL === "https://admin-uat.cebulandmasters.com") {
+            setFolderName("concerns-uat/");
+        } else if (APP_URL === "https://masters-connect.cebulandmasters.com") {
+            setFolderName("concerns-attachments/");
         }
-    }, [])
-
-
-
+    }, []);
 
     /*
      * Function to handle download of the file from the google cloud
@@ -163,8 +161,14 @@ const AdminMessages = ({ items }) => {
                                     </Link>
                                     <div>
                                         <button
-                                            onClick={() => handleDownloadFile(attachment.url)}
-                                            disabled={loadingStates[attachment.url]}
+                                            onClick={() =>
+                                                handleDownloadFile(
+                                                    attachment.url
+                                                )
+                                            }
+                                            disabled={
+                                                loadingStates[attachment.url]
+                                            }
                                             type="submit"
                                             className="h-6 w-6 text-custom-solidgreen hover:text-gray-700 cursor-pointer"
                                         >
@@ -178,7 +182,6 @@ const AdminMessages = ({ items }) => {
                                 </div>
                             );
                         })}
-
                 </div>
             </div>
         </div>
