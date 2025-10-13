@@ -1083,16 +1083,16 @@ export default function PaginatedTable() {
         if (!date) return "";
         const d = new Date(date);
         const year = d.getFullYear();
-        const month = d.getMonth() + 1; 
-        const day = d.getDate(); 
+        const month = d.getMonth() + 1;
+        const day = d.getDate();
         return `${month}/${day}/${year}`;
     }
 
     // Helper to normalize checklist status from various possible formats
     const getChecklistStatus = (row) => {
         const status =
-            row.checklistStatus ?? 
-            row.checklist_status ?? 
+            row.checklistStatus ??
+            row.checklist_status ??
             row.checklist_status_flag ??
             row.checklistFlag ??
             row.checkliststatus ??
@@ -2089,7 +2089,15 @@ export default function PaginatedTable() {
                                                         <div
                                                             className={`flex items-center gap-2 ${
                                                                 head ===
-                                                                "Financing"
+                                                                    "Financing" ||
+                                                                head ===
+                                                                    "TO Year" ||
+                                                                head ===
+                                                                    "TO Month" ||
+                                                                head ===
+                                                                    "Takeout Date" ||
+                                                                head ===
+                                                                    "DOU Expiry"
                                                                     ? "justify-center pl-0"
                                                                     : "pl-4"
                                                             }`}
@@ -2120,6 +2128,7 @@ export default function PaginatedTable() {
                                                         propertyName,
                                                         unitNumber,
                                                         finance,
+                                                        psd,
                                                         to_year,
                                                         to_month,
                                                         takeOutdate,
@@ -2258,10 +2267,7 @@ export default function PaginatedTable() {
                                                                     classes
                                                                 }
                                                             >
-                                                                <Typography
-                                                                    variant="small"
-                                                                    className="text-base font-normal text-center"
-                                                                >
+                                                                <div className="text-center">
                                                                     <span
                                                                         className={`w-[80px] h-[30px] px-[12px] py-1 rounded-[50px] inline-block font-montserrat
                                                 ${
@@ -2276,7 +2282,19 @@ export default function PaginatedTable() {
                                                                             finance
                                                                         }{" "}
                                                                     </span>
-                                                                </Typography>
+                                                                    {psd &&
+                                                                        psd
+                                                                            .toString()
+                                                                            .toLowerCase()
+                                                                            .trim() ===
+                                                                            "with psd" && (
+                                                                            <div className="text-xs font-light mt-1 text-custom-solidgreen">
+                                                                                {
+                                                                                    psd
+                                                                                }
+                                                                            </div>
+                                                                        )}
+                                                                </div>
                                                             </td>
                                                             <td
                                                                 className={
@@ -2309,7 +2327,7 @@ export default function PaginatedTable() {
                                                             >
                                                                 <Typography
                                                                     variant="small"
-                                                                    className="text-base font-normal"
+                                                                    className="text-base font-normal text-center"
                                                                 >
                                                                     {formatDate(
                                                                         takeOutdate
@@ -2323,7 +2341,7 @@ export default function PaginatedTable() {
                                                             >
                                                                 <Typography
                                                                     variant="small"
-                                                                    className="text-base font-normal"
+                                                                    className="text-base font-normal text-center"
                                                                 >
                                                                     {formatDate(
                                                                         douExpiry

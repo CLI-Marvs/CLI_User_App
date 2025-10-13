@@ -44,6 +44,7 @@ use App\Http\Controllers\EmployeeEvaluationController;
 use App\Http\Controllers\ExecutiveDashBoardController;
 use App\Http\Controllers\MilestoneProgressionController;
 use App\Http\Controllers\ProjectAssigneeController;
+use App\Http\Controllers\AllAccountsController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -99,6 +100,7 @@ Route::middleware('auth:sanctum')->group(function () {
      */
     Route::prefix('work-orders')->group(function () {
         Route::post('create-work-order', [WorkOrderController::class, 'createWorkOrders']);
+
         Route::get('get-assignee', [WorkOrderController::class, 'getAssignee']);
         Route::get('assignee/{id}', [WorkOrderController::class, 'getAssigneeById']);
         Route::get('get-work-orders', [WorkOrderController::class, 'getWorkOrders']);
@@ -145,6 +147,7 @@ Route::middleware('auth:sanctum')->group(function () {
      * Submilestones
      */
     Route::get('/submilestones-details', [SubmilestoneController::class, 'getByWorkOrderType']);
+    Route::post('/submilestones/batch', [SubmilestoneController::class, 'getBatch']);
     /**
      * Account Checklist Status
      */
@@ -198,10 +201,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/projects/{projectName}/milestone-structure', [ProjectAssigneeController::class, 'getProjectMilestoneStructure'])->where('projectName', '.*');
     //for workorder group
     Route::get('/work-order-groups/{groupId}/details', [WorkOrderGroupController::class, 'showDetails']);
+    Route::get('/work-order-groups/all-accounts-summary', [WorkOrderGroupController::class, 'getAllAccountsSummary']);
     Route::post('/work-order-groups/{id}/update-status', [WorkOrderGroupController::class, 'updateStatus']);
     Route::post('/work-order-groups/update-all-status', [WorkOrderGroupController::class, 'updateAllStatus']);
     Route::get('/work-order-groups/status-summary', [WorkOrderGroupController::class, 'getStatusSummary']);
     Route::post('/work-order-groups/{id}/check-accounts-completion', [WorkOrderGroupController::class, 'checkAccountsCompletion']);
+
     // Bulk update work order deadlines and accounts for a group
     Route::put('work-orders/group/{groupId}/bulk-update-deadline', [WorkOrderController::class, 'bulkUpdateDeadline']);
     // Update account milestone progression
@@ -416,3 +421,8 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
 });
+
+// All accounts endpoint (moved outside auth middleware for testing)
+Route::get('/all-accounts-with-details', [AllAccountsController::class, 'getAllAccountsWithDetails']);
+
+Route::get('debug-submilestones/{workOrderTypeId}', [WorkOrderController::class, 'debugSubmilestones']);

@@ -9,6 +9,10 @@ const WorkOrderMilestoneRow = ({
     onShowFiles,
     currentChecklistInfo,
     onMilestoneProgression,
+    isFiltered = false, // New prop to indicate if any filters are active
+    hideNotesColumn = false, // New prop to hide notes column
+    hideActionsColumn = false, // New prop to hide actions column
+    isNonSequential = false, // New prop to indicate non-sequential behavior (for STEP 1)
 }) => {
     const [showTooltip, setShowTooltip] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -47,51 +51,159 @@ const WorkOrderMilestoneRow = ({
                 {Array.isArray(row.stepData) &&
                     row.stepData.map((step, i) => {
                         const currentStep = steps[i];
-                        const isCurrentStep =
-                            currentStep &&
-                            currentStep.subMilestones.some(
-                                (sub) => sub.id === row.currentSubMilestoneId
-                            );
+
+                        // We'll determine current submilestone at the individual cell level
+                        // This variable is no longer used for step-level highlighting
+                        const isCurrentStep = false;
                         return step.map((completion, j) => {
                             const currentSubmilestone =
                                 currentStep?.subMilestones[j];
-                            const isCurrent =
-                                isCurrentStep &&
-                                currentSubmilestone &&
-                                currentSubmilestone.id ===
-                                    row.currentSubMilestoneId;
 
-                            // Show tooltip for all CURRENT cells in the step
-                            // Instead of using the same currentChecklistInfo for all, use the correct info for the hovered cell
+                            // Determine if this specific submilestone cell is current
+                            // Only show current indicators when no filters are active AND row is not complete
+                            let isCurrentSubmilestone = false;
+                            const isAccountComplete =
+                                String(row.status || "").toLowerCase() ===
+                                "complete";
+
+                            if (
+                                !isFiltered &&
+                                !isAccountComplete &&
+                                row.checklistInfos &&
+                                Array.isArray(row.checklistInfos) &&
+                                currentSubmilestone
+                            ) {
+                                // Find the checklist info for this specific submilestone
+                                const submilestoneInfo =
+                                    row.checklistInfos.find(
+                                        (info) =>
+                                            info.subMilestoneId ===
+                                            currentSubmilestone.id
+                                    );
+
+                                if (submilestoneInfo) {
+                                    if (
+                                        submilestoneInfo.progressPercentage <
+                                        100
+                                    ) {
+                                        // Determine if this is STEP 1 (first step by sequence)
+                                        const isFirstStep =
+                                            i === 0 ||
+                                            (currentStep &&
+                                                currentStep.sequence === 1);
+
+                                        if (isFirstStep) {
+                                            // STEP 1: Non-sequential - All submilestones are available at the same time
+                                            // Show current indicator if this submilestone is incomplete
+                                            isCurrentSubmilestone = true;
+                                        } else {
+                                            // Other steps: Sequential behavior
+                                            // This submilestone is current if:
+                                            // 1. It's not 100% complete AND
+                                            // 2. All previous submilestones (in sequence) are 100% complete
+
+                                            // Check if all previous submilestones are complete
+                                            let allPreviousComplete = true;
+
+                                            // Get all submilestones from all previous steps and current step up to this one
+                                            for (
+                                                let prevStepIndex = 0;
+                                                prevStepIndex <= i;
+                                                prevStepIndex++
+                                            ) {
+                                                const prevStep =
+                                                    steps[prevStepIndex];
+                                                if (
+                                                    prevStep &&
+                                                    prevStep.subMilestones
+                                                ) {
+                                                    const endIndex =
+                                                        prevStepIndex === i
+                                                            ? j
+                                                            : prevStep
+                                                                  .subMilestones
+                                                                  .length;
+                                                    for (
+                                                        let prevSubIndex = 0;
+                                                        prevSubIndex < endIndex;
+                                                        prevSubIndex++
+                                                    ) {
+                                                        const prevSubmilestone =
+                                                            prevStep
+                                                                .subMilestones[
+                                                                prevSubIndex
+                                                            ];
+                                                        const prevInfo =
+                                                            row.checklistInfos.find(
+                                                                (info) =>
+                                                                    info.subMilestoneId ===
+                                                                    prevSubmilestone.id
+                                                            );
+                                                        if (
+                                                            prevInfo &&
+                                                            prevInfo.progressPercentage <
+                                                                100
+                                                        ) {
+                                                            allPreviousComplete = false;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                if (!allPreviousComplete) break;
+                                            }
+
+                                            isCurrentSubmilestone =
+                                                allPreviousComplete;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Fallback to old logic if checklistInfos not available (but still respect filter state and completion)
+                            if (
+                                !isFiltered &&
+                                !isAccountComplete &&
+                                !row.checklistInfos &&
+                                currentSubmilestone &&
+                                row.currentSubMilestoneId
+                            ) {
+                                isCurrentSubmilestone =
+                                    currentSubmilestone.id ===
+                                    row.currentSubMilestoneId;
+                            }
+
+                            // Show tooltip for current submilestone cells
                             let checklistInfoForCell = null;
                             if (
-                                isCurrentStep &&
                                 row.checklistInfos &&
-                                Array.isArray(row.checklistInfos)
+                                Array.isArray(row.checklistInfos) &&
+                                currentSubmilestone
                             ) {
                                 // Try to find the checklist info for this submilestone
                                 checklistInfoForCell = row.checklistInfos.find(
                                     (info) =>
                                         info &&
                                         info.subMilestoneId ===
-                                            currentSubmilestone?.id
+                                            currentSubmilestone.id
                                 );
-                            } else if (isCurrentStep && currentChecklistInfo) {
+                            } else if (
+                                isCurrentSubmilestone &&
+                                currentChecklistInfo
+                            ) {
                                 checklistInfoForCell = currentChecklistInfo;
                             }
 
-                            const attachTooltip =
-                                isCurrentStep && checklistInfoForCell;
+                            const attachTooltip = checklistInfoForCell;
 
                             // Apply green background only to step cells if complete
                             const isRowComplete =
                                 row.status &&
-                                row.status.toLowerCase() === "complete";
+                                String(row.status).toLowerCase() === "complete";
 
                             const cellContent = (
                                 <td
                                     className={`px-0 py-0 relative ${
-                                        isCurrentStep && !isRowComplete
+                                        isCurrentSubmilestone && !isRowComplete
                                             ? "border-2 border-blue-600 shadow-lg ring-2 ring-blue-300 ring-opacity-50 z-30"
                                             : "border border-gray-200"
                                     } ${
@@ -102,7 +214,8 @@ const WorkOrderMilestoneRow = ({
                                     colSpan={2}
                                     style={{
                                         backgroundColor:
-                                            isCurrentStep && !isRowComplete
+                                            isCurrentSubmilestone &&
+                                            !isRowComplete
                                                 ? "#dbeafe"
                                                 : isRowComplete
                                                 ? ""
@@ -130,7 +243,7 @@ const WorkOrderMilestoneRow = ({
                                                 : "opacity-20"
                                         } ${
                                             row.status &&
-                                            row.status.toLowerCase() ===
+                                            String(row.status).toLowerCase() ===
                                                 "complete"
                                                 ? ""
                                                 : completion === 100
@@ -145,9 +258,11 @@ const WorkOrderMilestoneRow = ({
                                         <div className="flex-1 px-2 py-2 text-center border-r border-gray-100">
                                             <span
                                                 className={`text-xs ${
-                                                    isCurrentStep &&
+                                                    isCurrentSubmilestone &&
                                                     (!row.status ||
-                                                        row.status.toLowerCase() !==
+                                                        String(
+                                                            row.status
+                                                        ).toLowerCase() !==
                                                             "complete")
                                                         ? "text-blue-800 font-semibold"
                                                         : "text-gray-600"
@@ -166,9 +281,11 @@ const WorkOrderMilestoneRow = ({
                                         <div className="flex-1 px-2 py-2 text-center">
                                             <span
                                                 className={`text-xs ${
-                                                    isCurrentStep &&
+                                                    isCurrentSubmilestone &&
                                                     (!row.status ||
-                                                        row.status.toLowerCase() !==
+                                                        String(
+                                                            row.status
+                                                        ).toLowerCase() !==
                                                             "complete")
                                                         ? "text-blue-800 font-semibold"
                                                         : "text-gray-600"
@@ -187,9 +304,9 @@ const WorkOrderMilestoneRow = ({
                                             </span>
                                         </div>
                                     </div>
-                                    {isCurrentStep &&
+                                    {isCurrentSubmilestone &&
                                         (!row.status ||
-                                            row.status.toLowerCase() !==
+                                            String(row.status).toLowerCase() !==
                                                 "complete") && (
                                             <>
                                                 <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-blue-600 rounded-full animate-pulse border border-white shadow-sm"></div>
@@ -213,13 +330,40 @@ const WorkOrderMilestoneRow = ({
                         {getStatusBadge(row.status)}
                     </div>
                 </td>
-                <td className="px-2 py-2 text-xs text-gray-600 border-l border-b border-gray-200">
-                    <div className="flex items-center justify-center">
-                        {row.remarks && row.remarks !== "-" ? (
-                            <div className="flex items-center gap-1 max-w-[150px]">
-                                <span className="truncate" title={row.remarks}>
-                                    {row.remarks}
-                                </span>
+                {!hideNotesColumn && (
+                    <td className="px-2 py-2 text-xs text-gray-600 border-l border-b border-gray-200">
+                        <div className="flex items-center justify-center">
+                            {row.remarks && row.remarks !== "-" ? (
+                                <div className="flex items-center gap-1 max-w-[150px]">
+                                    <span
+                                        className="truncate"
+                                        title={row.remarks}
+                                    >
+                                        {row.remarks}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className="text-gray-500 hover:text-gray-800"
+                                        onClick={() =>
+                                            handleOpenNotesModal(row.notesData)
+                                        }
+                                        style={{
+                                            padding: 0,
+                                            background: "none",
+                                            border: "none",
+                                        }}
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            className="h-4 w-4"
+                                            viewBox="0 0 24 24"
+                                            fill="currentColor"
+                                        >
+                                            <path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v14H7V5h10zm-2 4H9v2h6V9zm0 4H9v2h6v-2z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            ) : (
                                 <button
                                     type="button"
                                     className="text-gray-500 hover:text-gray-800"
@@ -241,57 +385,37 @@ const WorkOrderMilestoneRow = ({
                                         <path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v14H7V5h10zm-2 4H9v2h6V9zm0 4H9v2h6v-2z" />
                                     </svg>
                                 </button>
-                            </div>
-                        ) : (
+                            )}
+                        </div>
+                    </td>
+                )}
+                {!hideActionsColumn && (
+                    <td className="px-2 py-2 border-l border-b border-gray-200">
+                        <div className="flex justify-center gap-1">
                             <button
                                 type="button"
-                                className="text-gray-500 hover:text-gray-800"
-                                onClick={() =>
-                                    handleOpenNotesModal(row.notesData)
-                                }
-                                style={{
-                                    padding: 0,
-                                    background: "none",
-                                    border: "none",
-                                }}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs font-medium rounded"
+                                onClick={onShowFiles}
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-4 w-4"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                >
-                                    <path d="M17 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 2v14H7V5h10zm-2 4H9v2h6V9zm0 4H9v2h6v-2z" />
-                                </svg>
+                                Files
                             </button>
-                        )}
-                    </div>
-                </td>
-                <td className="px-2 py-2 border-l border-b border-gray-200">
-                    <div className="flex justify-center gap-1">
-                        <button
-                            type="button"
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs font-medium rounded"
-                            onClick={onShowFiles}
-                        >
-                            Files
-                        </button>
-                        {/* {currentChecklistInfo &&
-                            currentChecklistInfo.progressPercentage === 100 && (
-                                <button
-                                    type="button"
-                                    className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 text-xs font-medium rounded"
-                                    onClick={() =>
-                                        onMilestoneProgression &&
-                                        onMilestoneProgression(row.key)
-                                    }
-                                    title="Progress to next milestone"
-                                >
-                                    Next
-                                </button>
-                            )} */}
-                    </div>
-                </td>
+                            {/* {currentChecklistInfo &&
+                                currentChecklistInfo.progressPercentage === 100 && (
+                                    <button
+                                        type="button"
+                                        className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 text-xs font-medium rounded"
+                                        onClick={() =>
+                                            onMilestoneProgression &&
+                                            onMilestoneProgression(row.key)
+                                        }
+                                        title="Progress to next milestone"
+                                    >
+                                        Next
+                                    </button>
+                                )} */}
+                        </div>
+                    </td>
+                )}
             </tr>
 
             {/* Custom Tooltip */}

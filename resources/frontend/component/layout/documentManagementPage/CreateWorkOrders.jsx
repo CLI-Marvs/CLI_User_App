@@ -27,6 +27,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
     const [accountSearchTerm, setAccountSearchTerm] = useState("");
     const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
 
+    // State for tracking selected assignees per milestone
+    const [selectedAssignees, setSelectedAssignees] = useState({});
+
     const { user } = useStateContext();
     const {
         accounts,
@@ -46,8 +49,45 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             fetchProjectMilestoneStructure();
         } else {
             setProjectMilestoneStructure([]);
+            setSelectedAssignees({}); // Reset assignee selections when project changes
         }
     }, [selectedProject]);
+
+    // Initialize selectedAssignees when milestone structure loads
+    useEffect(() => {
+        if (projectMilestoneStructure && projectMilestoneStructure.length > 0) {
+            const initialSelection = {};
+            projectMilestoneStructure.forEach((step, stepIndex) => {
+                if (step.milestones && Array.isArray(step.milestones)) {
+                    step.milestones.forEach((milestone, milestoneIndex) => {
+                        const key = `${stepIndex}-${milestoneIndex}`;
+                        if (
+                            milestone.assignees &&
+                            Array.isArray(milestone.assignees)
+                        ) {
+                            if (milestone.assignees.length === 1) {
+                                // For milestones with 1 assignee, select that assignee by default
+                                initialSelection[key] = [
+                                    milestone.assignees[0].id,
+                                ];
+                            } else if (milestone.assignees.length > 1) {
+                                // For milestones with 2+ assignees, select all by default (user can uncheck)
+                                initialSelection[key] = milestone.assignees.map(
+                                    (assignee) => assignee.id
+                                );
+                            } else {
+                                // No assignees
+                                initialSelection[key] = [];
+                            }
+                        } else {
+                            initialSelection[key] = [];
+                        }
+                    });
+                }
+            });
+            setSelectedAssignees(initialSelection);
+        }
+    }, [projectMilestoneStructure]);
 
     // Function to refresh projects data
     const refreshProjects = useCallback(async () => {
@@ -106,6 +146,7 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             setAccountSearchTerm("");
             setIsProjectDropdownOpen(false);
             setIsAccountDropdownOpen(false);
+            setSelectedAssignees({}); // Reset assignee selections when modal closes
         } else if (isOpen) {
             // Refresh work order types when modal opens to ensure latest data
             if (fetchWorkOrderTypes) {
@@ -190,6 +231,27 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
         );
     }, []);
 
+    // Handler for assignee checkbox selection
+    const handleAssigneeToggle = useCallback(
+        (stepIndex, milestoneIndex, assigneeId) => {
+            const key = `${stepIndex}-${milestoneIndex}`;
+            setSelectedAssignees((prev) => {
+                const current = prev[key] || [];
+                const isSelected = current.includes(assigneeId);
+
+                if (isSelected) {
+                    // Remove assignee
+                    const updated = current.filter((id) => id !== assigneeId);
+                    return { ...prev, [key]: updated };
+                } else {
+                    // Add assignee
+                    return { ...prev, [key]: [...current, assigneeId] };
+                }
+            });
+        },
+        []
+    );
+
     const handleSelectAllAccounts = useCallback(() => {
         // Only select accounts that don't have active work orders
         const availableAccounts = filteredAccountsForDropdown.filter(
@@ -201,6 +263,16 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
 
     // Helper function to check if all requirements are met for work order creation
     const canCreateWorkOrder = useMemo(() => {
+        // Check if project is selected
+        if (!selectedProject || selectedProject.trim() === "") {
+            return false;
+        }
+
+        // Check if due date is selected
+        if (!dueDate) {
+            return false;
+        }
+
         // Check if project milestone structure exists
         if (
             !projectMilestoneStructure ||
@@ -209,17 +281,21 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             return false;
         }
 
-        // Check if all milestones have assignees and checklists
-        return projectMilestoneStructure.every((step) => {
+        // Check if all milestones have selected assignees and checklists
+        return projectMilestoneStructure.every((step, stepIndex) => {
             if (!step.milestones || !Array.isArray(step.milestones)) {
                 return false;
             }
-            return step.milestones.every((milestone) => {
-                // Check if milestone has assignees
-                const hasAssignees =
+            return step.milestones.every((milestone, milestoneIndex) => {
+                const key = `${stepIndex}-${milestoneIndex}`;
+                const selectedForMilestone = selectedAssignees[key] || [];
+
+                // Check if milestone has selected assignees
+                const hasSelectedAssignees =
                     milestone.assignees &&
                     Array.isArray(milestone.assignees) &&
-                    milestone.assignees.length > 0;
+                    milestone.assignees.length > 0 &&
+                    selectedForMilestone.length > 0;
 
                 // Check if milestone has checklists
                 const hasChecklists =
@@ -227,10 +303,15 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                     Array.isArray(milestone.checklists) &&
                     milestone.checklists.length > 0;
 
-                return hasAssignees && hasChecklists;
+                return hasSelectedAssignees && hasChecklists;
             });
         });
-    }, [projectMilestoneStructure]);
+    }, [
+        selectedProject,
+        dueDate,
+        projectMilestoneStructure,
+        selectedAssignees,
+    ]);
 
     // Keep the original function for backward compatibility and specific checks
     const allMilestonesHaveAssignees = useMemo(() => {
@@ -241,19 +322,23 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             return false;
         }
 
-        return projectMilestoneStructure.every((step) => {
+        return projectMilestoneStructure.every((step, stepIndex) => {
             if (!step.milestones || !Array.isArray(step.milestones)) {
                 return false;
             }
-            return step.milestones.every((milestone) => {
+            return step.milestones.every((milestone, milestoneIndex) => {
+                const key = `${stepIndex}-${milestoneIndex}`;
+                const selectedForMilestone = selectedAssignees[key] || [];
+
                 return (
                     milestone.assignees &&
                     Array.isArray(milestone.assignees) &&
-                    milestone.assignees.length > 0
+                    milestone.assignees.length > 0 &&
+                    selectedForMilestone.length > 0
                 );
             });
         });
-    }, [projectMilestoneStructure]);
+    }, [projectMilestoneStructure, selectedAssignees]);
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -351,83 +436,97 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             return;
         }
 
-        // Validate that all milestones have at least one assignee
-        const milestonesWithoutAssignees = [];
-        projectMilestoneStructure.forEach((step) => {
+        // Check which milestones have selected assignees (don't require all to have selections)
+        const milestonesWithSelectedAssignees = [];
+        projectMilestoneStructure.forEach((step, stepIndex) => {
             if (step.milestones && Array.isArray(step.milestones)) {
-                step.milestones.forEach((milestone) => {
+                step.milestones.forEach((milestone, milestoneIndex) => {
+                    const key = `${stepIndex}-${milestoneIndex}`;
+                    const selectedForMilestone = selectedAssignees[key] || [];
+
                     if (
-                        !milestone.assignees ||
-                        !Array.isArray(milestone.assignees) ||
-                        milestone.assignees.length === 0
+                        milestone.assignees &&
+                        Array.isArray(milestone.assignees) &&
+                        milestone.assignees.length > 0 &&
+                        selectedForMilestone.length > 0
                     ) {
-                        milestonesWithoutAssignees.push({
+                        milestonesWithSelectedAssignees.push({
+                            stepId: step.id,
                             stepName: step.step_name,
                             milestoneName: milestone.milestone_name,
+                            selectedCount: selectedForMilestone.length,
                         });
                     }
                 });
             }
         });
 
-        if (milestonesWithoutAssignees.length > 0) {
-            const milestoneList = milestonesWithoutAssignees
-                .map((item) => `• ${item.stepName} > ${item.milestoneName}`)
-                .join("\n");
-
+        if (milestonesWithSelectedAssignees.length === 0) {
             alert(
-                `Cannot create work order. The following milestones have no assignees:\n\n${milestoneList}\n\nPlease assign employees to all milestones before creating a work order.`
+                "Please select at least one assignee from any milestone before creating work orders."
             );
             return;
         }
 
-        // Get all assignees from all milestones
-        const allProjectAssignees = [];
-        projectMilestoneStructure.forEach((step) => {
+        // Get selected assignees from all milestones
+        const allSelectedAssignees = [];
+        projectMilestoneStructure.forEach((step, stepIndex) => {
             if (step.milestones && Array.isArray(step.milestones)) {
-                step.milestones.forEach((milestone) => {
+                step.milestones.forEach((milestone, milestoneIndex) => {
+                    const key = `${stepIndex}-${milestoneIndex}`;
+                    const selectedForMilestone = selectedAssignees[key] || [];
+
                     if (
                         milestone.assignees &&
-                        Array.isArray(milestone.assignees)
+                        Array.isArray(milestone.assignees) &&
+                        selectedForMilestone.length > 0
                     ) {
                         milestone.assignees.forEach((assignee) => {
                             if (
                                 assignee &&
                                 assignee.id &&
                                 assignee.full_name &&
-                                !allProjectAssignees.find(
+                                selectedForMilestone.includes(assignee.id) &&
+                                !allSelectedAssignees.find(
                                     (emp) => emp.id === assignee.id
                                 )
                             ) {
-                                allProjectAssignees.push(assignee);
+                                allSelectedAssignees.push(assignee);
                             }
                         });
                     }
                 });
             }
         });
-
-        if (allProjectAssignees.length === 0) {
+        if (allSelectedAssignees.length === 0) {
             alert(
-                "The selected project has no assigned employees. Please assign employees to this project first."
+                "No assignees are selected. Please select at least one assignee from the milestone structure."
             );
             return;
         }
 
-        // Assign each account to all unique employees assigned in any milestone (support multiple assignees per account)
+        // Assign each account to all selected employees (support multiple assignees per account)
         const accountAssignments = selectedAccounts.map((account) => {
             const employeeIds = [];
-            projectMilestoneStructure.forEach((step) => {
+            projectMilestoneStructure.forEach((step, stepIndex) => {
                 if (step.milestones && Array.isArray(step.milestones)) {
-                    step.milestones.forEach((milestone) => {
+                    step.milestones.forEach((milestone, milestoneIndex) => {
+                        const key = `${stepIndex}-${milestoneIndex}`;
+                        const selectedForMilestone =
+                            selectedAssignees[key] || [];
+
                         if (
                             milestone.assignees &&
-                            Array.isArray(milestone.assignees)
+                            Array.isArray(milestone.assignees) &&
+                            selectedForMilestone.length > 0
                         ) {
                             milestone.assignees.forEach((assignee) => {
                                 if (
                                     assignee &&
                                     assignee.id &&
+                                    selectedForMilestone.includes(
+                                        assignee.id
+                                    ) &&
                                     !employeeIds.includes(assignee.id)
                                 ) {
                                     employeeIds.push(assignee.id);
@@ -462,97 +561,182 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             return;
         }
 
-        const formData = {
-            work_order: firstWorkOrderType.type_name,
-            account_ids: selectedAccounts
-                .map((account) => account.id)
-                .filter((id) => id), // Filter out null/undefined IDs
-            work_order_type_id: firstWorkOrderType.id,
-            work_order_deadline: formattedDueDate,
-            status: "In Progress",
-            description: "",
-            priority: "Medium",
-            created_by_user_id: user.id,
-            account_assignments: accountAssignments,
-        };
+        // Group milestone assignments by work order type (step) and create multiple work orders
+        const workOrderTypesWithAssignments = {};
+
+        projectMilestoneStructure.forEach((step, stepIndex) => {
+            if (step.milestones && Array.isArray(step.milestones)) {
+                step.milestones.forEach((milestone, milestoneIndex) => {
+                    const key = `${stepIndex}-${milestoneIndex}`;
+                    const selectedForMilestone = selectedAssignees[key] || [];
+
+                    if (selectedForMilestone.length > 0) {
+                        if (!workOrderTypesWithAssignments[step.id]) {
+                            workOrderTypesWithAssignments[step.id] = {
+                                step: step,
+                                milestoneAssignments: [],
+                            };
+                        }
+
+                        workOrderTypesWithAssignments[
+                            step.id
+                        ].milestoneAssignments.push({
+                            step_name: step.step_name,
+                            milestone_name: milestone.milestone_name,
+                            selected_assignee_ids: selectedForMilestone,
+                        });
+                    }
+                });
+            }
+        });
+
+        // Create a separate work order for each work order type that has assignments
+        const workOrdersToCreate = Object.values(
+            workOrderTypesWithAssignments
+        ).map(({ step, milestoneAssignments }) => {
+            // For each work order type, get account assignments from the milestones in that step
+            const stepAccountAssignments = selectedAccounts.map((account) => {
+                const employeeIds = [];
+                milestoneAssignments.forEach((milestone) => {
+                    milestone.selected_assignee_ids.forEach((employeeId) => {
+                        if (!employeeIds.includes(employeeId)) {
+                            employeeIds.push(employeeId);
+                        }
+                    });
+                });
+
+                return {
+                    account_id: account.id,
+                    employee_ids: employeeIds,
+                };
+            });
+
+            return {
+                work_order: step.step_name,
+                account_ids: selectedAccounts
+                    .map((account) => account.id)
+                    .filter((id) => id),
+                work_order_type_id: step.id,
+                work_order_deadline: formattedDueDate,
+                status: "In Progress",
+                description: "",
+                priority: "Medium",
+                created_by_user_id: user.id,
+                account_assignments: stepAccountAssignments,
+                milestone_assignments: milestoneAssignments,
+            };
+        });
+
+        if (workOrdersToCreate.length === 0) {
+            alert(
+                "No work orders to create. Please select assignees for at least one milestone."
+            );
+            return;
+        }
 
         try {
-            const response = await apiService.post(
-                "/work-orders/create-work-order",
-                formData
+            // Create all work orders
+            const responses = await Promise.all(
+                workOrdersToCreate.map((workOrderData) =>
+                    apiService.post(
+                        "/work-orders/create-work-order",
+                        workOrderData
+                    )
+                )
             );
 
-            if (response.status === 201) {
-                const newWorkOrderId = response.data.data.work_order_id;
-                const workOrderGroupId = response.data.data.work_order_group_id;
-                setWorkOrderId(workOrderGroupId || newWorkOrderId);
+            // Check if all were successful
+            const allSuccessful = responses.every(
+                (response) => response.status === 201
+            );
+
+            if (allSuccessful) {
+                const workOrderIds = responses.map(
+                    (response) => response.data.data.work_order_id
+                );
+                const workOrderGroupIds = responses.map(
+                    (response) => response.data.data.work_order_group_id
+                );
+
+                // Use the first work order group ID for display
+                const firstWorkOrderGroupId = workOrderGroupIds[0];
+                setWorkOrderId(firstWorkOrderGroupId || workOrderIds[0]);
                 setIsModalOpen(true);
+
                 if (fetchWorkOrderGroups) {
                     fetchWorkOrderGroups();
                 }
                 if (fetchWorkOrderTypes) {
-                    fetchWorkOrderTypes(); // Refresh work order types after creation
+                    fetchWorkOrderTypes();
                 }
                 if (fetchAccounts) {
-                    fetchAccounts(); // Refresh accounts to update has_active_work_orders flags
+                    fetchAccounts();
                 }
 
-                if (response.status === 201) {
-                    const newWorkOrderId = response.data.data.work_order_id;
-                    const workOrderGroupId =
-                        response.data.data.work_order_group_id;
-                    setWorkOrderId(workOrderGroupId || newWorkOrderId);
-                    setIsModalOpen(true);
-                    if (fetchWorkOrderGroups) {
-                        fetchWorkOrderGroups();
-                    }
+                // NOTE FEATURE: Create a single consolidated note for all new work orders
+                const logWorkOrderIds = responses.map(
+                    (response) => response.data.data.work_order_id
+                );
+                const workOrderNames = workOrdersToCreate.map(
+                    (workOrderData) => workOrderData.work_order
+                );
 
-                    // LOG FEATURE: Create a log entry for the new work order
-                    const logData = {
-                        work_order_id: newWorkOrderId,
-                        log_type: firstWorkOrderType?.type_name,
-                        log_message: `Work Order #${newWorkOrderId} created.`,
-                        account_ids: selectedAccounts.map(
-                            (account) => account.id
-                        ),
-                        created_by_user_id: user.id,
-                    };
+                // Use the first work order ID for the note entry (or the group ID if available)
+                const primaryWorkOrderId = logWorkOrderIds[0];
+                const logWorkOrderGroupId =
+                    responses[0].data.data.work_order_group_id;
 
-                    try {
-                        const logResponse = await apiService.post(
-                            "/work-order-logs",
-                            logData
-                        );
-                        if (
-                            logResponse.status === 201 ||
-                            logResponse.data?.message ===
-                                "Log created successfully."
-                        ) {
-                            // Optionally handle log success
-                        } else {
-                            console.error(
-                                "Error creating work order log:",
-                                logResponse
-                            );
-                        }
-                    } catch (logError) {
+                const consolidatedNoteData = {
+                    work_order_id: logWorkOrderGroupId || primaryWorkOrderId,
+                    log_type: "Work Order Creation",
+                    note_text: `Work Orders created: ${workOrderNames.join(
+                        ", "
+                    )} for ${selectedAccounts.length} account(s).`,
+                    note_type: "System Generated",
+                    created_by_user_id: user.id,
+                };
+
+                try {
+                    const noteResponse = await apiService.post(
+                        "/work-orders/notes/add",
+                        consolidatedNoteData
+                    );
+                    if (
+                        noteResponse.status !== 201 &&
+                        noteResponse.data?.message !==
+                            "Note and attachments added successfully."
+                    ) {
                         console.error(
-                            "Exception while creating work order log:",
-                            logError
+                            "Error creating consolidated work order note:",
+                            noteResponse
                         );
                     }
+                } catch (noteError) {
+                    console.error(
+                        "Exception while creating consolidated work order note:",
+                        noteError
+                    );
                 }
             } else {
+                const failedResponses = responses.filter(
+                    (response) => response.status !== 201
+                );
                 console.error(
-                    "Error creating work order:",
-                    response.error ||
-                        response.message ||
-                        response ||
-                        "Unknown error"
+                    "Some work orders failed to create:",
+                    failedResponses
+                );
+                alert(
+                    "Some work orders could not be created. Please try again."
                 );
             }
         } catch (error) {
-            console.error("Error creating work order:", error.message || error);
+            console.error(
+                "Error creating work orders:",
+                error.message || error
+            );
+            alert(
+                "An error occurred while creating work orders. Please try again."
+            );
         }
 
         return true; // Always return true, even if the work order creation fails
@@ -1318,36 +1502,87 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                                             (
                                                                                 assignee,
                                                                                 assigneeIndex
-                                                                            ) => (
-                                                                                <div
-                                                                                    key={
-                                                                                        assigneeIndex
-                                                                                    }
-                                                                                    className="flex items-start text-xs"
-                                                                                >
-                                                                                    <span className="text-gray-400 mr-2 mt-0.5 select-none whitespace-pre">
-                                                                                        {milestoneIndex ===
-                                                                                        step
-                                                                                            .milestones
-                                                                                            .length -
-                                                                                            1
-                                                                                            ? "    "
-                                                                                            : "│   "}
-                                                                                        {assigneeIndex ===
-                                                                                        milestone
-                                                                                            .assignees
-                                                                                            .length -
-                                                                                            1
-                                                                                            ? "└──"
-                                                                                            : "├──"}
-                                                                                    </span>
-                                                                                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs leading-tight">
-                                                                                        {
-                                                                                            assignee.full_name
+                                                                            ) => {
+                                                                                const key = `${stepIndex}-${milestoneIndex}`;
+                                                                                const selectedForMilestone =
+                                                                                    selectedAssignees[
+                                                                                        key
+                                                                                    ] ||
+                                                                                    [];
+                                                                                const isSelected =
+                                                                                    selectedForMilestone.includes(
+                                                                                        assignee.id
+                                                                                    );
+                                                                                const showCheckbox =
+                                                                                    milestone
+                                                                                        .assignees
+                                                                                        .length >=
+                                                                                    2;
+
+                                                                                return (
+                                                                                    <div
+                                                                                        key={
+                                                                                            assigneeIndex
                                                                                         }
-                                                                                    </span>
-                                                                                </div>
-                                                                            )
+                                                                                        className="flex items-start text-xs"
+                                                                                    >
+                                                                                        <span className="text-gray-400 mr-2 mt-0.5 select-none whitespace-pre">
+                                                                                            {milestoneIndex ===
+                                                                                            step
+                                                                                                .milestones
+                                                                                                .length -
+                                                                                                1
+                                                                                                ? "    "
+                                                                                                : "│   "}
+                                                                                            {assigneeIndex ===
+                                                                                            milestone
+                                                                                                .assignees
+                                                                                                .length -
+                                                                                                1
+                                                                                                ? "└──"
+                                                                                                : "├──"}
+                                                                                        </span>
+                                                                                        <div className="flex items-center gap-2">
+                                                                                            {showCheckbox && (
+                                                                                                <input
+                                                                                                    type="checkbox"
+                                                                                                    checked={
+                                                                                                        isSelected
+                                                                                                    }
+                                                                                                    onChange={() =>
+                                                                                                        handleAssigneeToggle(
+                                                                                                            stepIndex,
+                                                                                                            milestoneIndex,
+                                                                                                            assignee.id
+                                                                                                        )
+                                                                                                    }
+                                                                                                    className="h-3 w-3 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
+                                                                                                    title={`${
+                                                                                                        isSelected
+                                                                                                            ? "Unselect"
+                                                                                                            : "Select"
+                                                                                                    } ${
+                                                                                                        assignee.full_name
+                                                                                                    }`}
+                                                                                                />
+                                                                                            )}
+                                                                                            <span
+                                                                                                className={`px-2 py-1 rounded-full text-xs leading-tight ${
+                                                                                                    showCheckbox
+                                                                                                        ? isSelected
+                                                                                                            ? "bg-green-100 text-green-800"
+                                                                                                            : "bg-gray-100 text-gray-600"
+                                                                                                        : "bg-green-100 text-green-800"
+                                                                                                }`}
+                                                                                            >
+                                                                                                {
+                                                                                                    assignee.full_name
+                                                                                                }
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                );
+                                                                            }
                                                                         )}
 
                                                                     {/* Show messages for milestones with missing requirements */}
@@ -1532,9 +1767,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                         <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-800 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none whitespace-nowrap z-50">
                                             {!canCreateWorkOrder &&
                                             selectedAccounts.length === 0
-                                                ? "Select accounts and ensure all milestones have assignees & checklists"
+                                                ? "Complete all required fields: project, accounts, due date, and assignee selection"
                                                 : !canCreateWorkOrder
-                                                ? "All milestones must have assignees and checklists"
+                                                ? "Complete required fields: project, due date, and ensure all milestones have assignees & checklists"
                                                 : "Select at least one account"}
                                             <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
                                         </div>

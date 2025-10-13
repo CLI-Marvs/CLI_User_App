@@ -89,6 +89,7 @@ export const DocumentManagementProvider = ({ children }) => {
                 propertyName: row.property_name,
                 unitNumber: row.unit_no,
                 finance: row.financing,
+                psd: row.psd,
                 takeOutdate: row.take_out_date,
                 douExpiry: row.dou_expiry,
                 category: row.category,

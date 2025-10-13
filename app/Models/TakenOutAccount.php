@@ -22,6 +22,7 @@ class TakenOutAccount extends Model
         'property_name',
         'unit_no',
         'financing',
+        'psd',
         'take_out_date',
         'dou_expiry',
         'added_status',
@@ -56,6 +57,29 @@ class TakenOutAccount extends Model
         return $this->hasMany(AccountChecklistStatus::class, 'account_id');
     }
 
+    /**
+     * Get work order account assignees for this account
+     */
+    public function workOrderAccountAssignees()
+    {
+        return $this->hasMany(WorkOrderAccountAssignee::class, 'account_id');
+    }
+
+    /**
+     * Get uploaded documents for this account
+     */
+    public function uploadedDocuments()
+    {
+        return $this->hasMany(WorkOrderDocument::class, 'account_id');
+    }
+
+    /**
+     * Get account checklist statuses for this account
+     */
+    public function accountChecklistStatuses()
+    {
+        return $this->hasMany(AccountChecklistStatus::class, 'account_id');
+    }
 
     protected $guarded = [];
 }

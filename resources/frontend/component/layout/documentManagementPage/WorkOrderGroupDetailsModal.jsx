@@ -200,7 +200,6 @@ const WorkOrderGroupDetailsModal = ({
             }));
         }
 
-        console.log("No project assignees found in API response");
         return [];
     }, [group]);
 
@@ -290,18 +289,27 @@ const WorkOrderGroupDetailsModal = ({
                     const selectedAssigneeId = parseInt(stepAssigneeFilter);
                     filteredSubMilestones = step.subMilestones.filter(
                         (milestone) => {
-                            if (!milestone.milestone_assignees) return false;
+                            // Use work_order_account_assignees instead of milestone_assignees
+                            if (
+                                !milestone.work_order_account_assignees ||
+                                milestone.work_order_account_assignees
+                                    .length === 0
+                            ) {
+                                return false;
+                            }
 
-                            return milestone.milestone_assignees.some(
+                            // Check if the selected assignee is assigned to this milestone for this work order
+                            return milestone.work_order_account_assignees.some(
                                 (assignee) => {
-                                    const matchesEmployeeId =
+                                    return (
                                         assignee.employee_id ===
-                                        selectedAssigneeId;
-                                    const matchesProperty =
-                                        !group.property_name ||
-                                        assignee.property_name ===
-                                            group.property_name;
-                                    return matchesEmployeeId && matchesProperty;
+                                            selectedAssigneeId &&
+                                        assignee.submilestone_id ===
+                                            milestone.id &&
+                                        assignee.work_order_id ===
+                                            (step.workOrder?.work_order_id ||
+                                                step.workOrder?.id)
+                                    );
                                 }
                             );
                         }
@@ -390,18 +398,27 @@ const WorkOrderGroupDetailsModal = ({
                     const selectedAssigneeId = parseInt(stepAssigneeFilter);
                     milestonesToProcess = step.subMilestones.filter(
                         (milestone) => {
-                            if (!milestone.milestone_assignees) return false;
+                            // Use work_order_account_assignees instead of milestone_assignees
+                            if (
+                                !milestone.work_order_account_assignees ||
+                                milestone.work_order_account_assignees
+                                    .length === 0
+                            ) {
+                                return false;
+                            }
 
-                            return milestone.milestone_assignees.some(
+                            // Check if the selected assignee is assigned to this milestone for this work order
+                            return milestone.work_order_account_assignees.some(
                                 (assignee) => {
-                                    const matchesEmployeeId =
+                                    return (
                                         assignee.employee_id ===
-                                        selectedAssigneeId;
-                                    const matchesProperty =
-                                        !group.property_name ||
-                                        assignee.property_name ===
-                                            group.property_name;
-                                    return matchesEmployeeId && matchesProperty;
+                                            selectedAssigneeId &&
+                                        assignee.submilestone_id ===
+                                            milestone.id &&
+                                        assignee.work_order_id ===
+                                            (step.workOrder?.work_order_id ||
+                                                step.workOrder?.id)
+                                    );
                                 }
                             );
                         }
@@ -486,20 +503,27 @@ const WorkOrderGroupDetailsModal = ({
                         const selectedAssigneeId = parseInt(stepAssigneeFilter);
                         milestonesToProcess = step.subMilestones.filter(
                             (milestone) => {
-                                if (!milestone.milestone_assignees)
+                                // Use work_order_account_assignees instead of milestone_assignees
+                                if (
+                                    !milestone.work_order_account_assignees ||
+                                    milestone.work_order_account_assignees
+                                        .length === 0
+                                ) {
                                     return false;
+                                }
 
-                                return milestone.milestone_assignees.some(
+                                // Check if the selected assignee is assigned to this milestone for this work order
+                                return milestone.work_order_account_assignees.some(
                                     (assignee) => {
-                                        const matchesEmployeeId =
-                                            assignee.employee_id ===
-                                            selectedAssigneeId;
-                                        const matchesProperty =
-                                            !group.property_name ||
-                                            assignee.property_name ===
-                                                group.property_name;
                                         return (
-                                            matchesEmployeeId && matchesProperty
+                                            assignee.employee_id ===
+                                                selectedAssigneeId &&
+                                            assignee.submilestone_id ===
+                                                milestone.id &&
+                                            assignee.work_order_id ===
+                                                (step.workOrder
+                                                    ?.work_order_id ||
+                                                    step.workOrder?.id)
                                         );
                                     }
                                 );
@@ -582,20 +606,27 @@ const WorkOrderGroupDetailsModal = ({
                         const selectedAssigneeId = parseInt(stepAssigneeFilter);
                         milestonesToProcess = step.subMilestones.filter(
                             (milestone) => {
-                                if (!milestone.milestone_assignees)
+                                // Use work_order_account_assignees instead of milestone_assignees
+                                if (
+                                    !milestone.work_order_account_assignees ||
+                                    milestone.work_order_account_assignees
+                                        .length === 0
+                                ) {
                                     return false;
+                                }
 
-                                return milestone.milestone_assignees.some(
+                                // Check if the selected assignee is assigned to this milestone for this work order
+                                return milestone.work_order_account_assignees.some(
                                     (assignee) => {
-                                        const matchesEmployeeId =
-                                            assignee.employee_id ===
-                                            selectedAssigneeId;
-                                        const matchesProperty =
-                                            !group.property_name ||
-                                            assignee.property_name ===
-                                                group.property_name;
                                         return (
-                                            matchesEmployeeId && matchesProperty
+                                            assignee.employee_id ===
+                                                selectedAssigneeId &&
+                                            assignee.submilestone_id ===
+                                                milestone.id &&
+                                            assignee.work_order_id ===
+                                                (step.workOrder
+                                                    ?.work_order_id ||
+                                                    step.workOrder?.id)
                                         );
                                     }
                                 );
@@ -979,18 +1010,21 @@ const WorkOrderGroupDetailsModal = ({
                     const milestones = group.submilestonesByType[stepId];
 
                     const hasAssignee = milestones.some((milestone) => {
-                        if (!milestone.milestone_assignees) return false;
+                        // Use work_order_account_assignees instead of milestone_assignees
+                        if (
+                            !milestone.work_order_account_assignees ||
+                            milestone.work_order_account_assignees.length === 0
+                        ) {
+                            return false;
+                        }
 
-                        return milestone.milestone_assignees.some(
+                        return milestone.work_order_account_assignees.some(
                             (assignee) => {
-                                const matchesEmployeeId =
-                                    assignee.employee_id === selectedAssigneeId;
-                                const matchesProperty =
-                                    !group.property_name ||
-                                    assignee.property_name ===
-                                        group.property_name;
-
-                                return matchesEmployeeId && matchesProperty;
+                                return (
+                                    assignee.employee_id ===
+                                        selectedAssigneeId &&
+                                    assignee.submilestone_id === milestone.id
+                                );
                             }
                         );
                     });
@@ -999,16 +1033,8 @@ const WorkOrderGroupDetailsModal = ({
                         stepsWithAssignee.add(parseInt(stepId));
                     }
                 });
-
-                console.log(
-                    `Filtered steps for assignee ${selectedAssigneeId}:`,
-                    Array.from(stepsWithAssignee)
-                );
                 setVisibleSteps(stepsWithAssignee);
             } else {
-                console.log(
-                    "Submilestone data not available for step filtering"
-                );
                 setVisibleSteps(new Set(availableSteps.map((step) => step.id)));
             }
         }
@@ -1617,6 +1643,19 @@ const WorkOrderGroupDetailsModal = ({
                                         }
                                         onMilestoneProgression={
                                             handleMilestoneProgression
+                                        }
+                                        isFiltered={
+                                            // Check if any filters are active
+                                            searchTerm.trim() !== "" ||
+                                            statusFilter !== "All" ||
+                                            buyerFilter !== "All" ||
+                                            assigneeFilter !== "All" ||
+                                            stepAssigneeFilter !== "All" ||
+                                            hideCompletedChecklists ||
+                                            // Check if column visibility (visibleSteps) is filtered
+                                            (group?.work_orders &&
+                                                visibleSteps.size <
+                                                    group.work_orders.length)
                                         }
                                     />
                                 ))}

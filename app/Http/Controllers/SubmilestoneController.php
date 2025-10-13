@@ -189,4 +189,28 @@ class SubmilestoneController extends Controller
             'message' => 'Assignee removed successfully.'
         ]);
     }
+
+    /**
+     * Get submilestones by batch of IDs.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getBatch(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'integer|exists:submilestones,id',
+        ]);
+
+        $submilestones = Submilestone::whereIn('id', $request->input('ids'))
+            ->select('id', 'name', 'work_order_type_id')
+            ->with('workOrderType:id,type_name')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'data' => $submilestones
+        ]);
+    }
 }

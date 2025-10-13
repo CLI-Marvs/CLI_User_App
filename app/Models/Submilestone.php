@@ -29,4 +29,12 @@ class Submilestone extends Model
     {
         return $this->hasMany(ProjectMilestoneAssignee::class, 'submilestone_id');
     }
+
+    /**
+     * Get work order account assignees for this submilestone
+     */
+    public function workOrderAccountAssignees()
+    {
+        return $this->hasMany(WorkOrderAccountAssignee::class, 'submilestone_id');
+    }
 }
