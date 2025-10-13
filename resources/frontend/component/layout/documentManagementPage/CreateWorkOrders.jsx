@@ -635,15 +635,68 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
         }
 
         try {
-            // Create all work orders
-            const responses = await Promise.all(
-                workOrdersToCreate.map((workOrderData) =>
-                    apiService.post(
+            // OPTION 2: Create work orders sequentially, passing group ID after first creation
+            let workOrderGroupId = null;
+            const responses = [];
+            const workOrderIds = [];
+
+            for (let i = 0; i < workOrdersToCreate.length; i++) {
+                const workOrderData = { ...workOrdersToCreate[i] };
+
+                // If we have a group ID from the first work order, include it in the request
+                if (workOrderGroupId) {
+                    workOrderData.work_order_group_id = workOrderGroupId;
+                }
+
+                try {
+                    const response = await apiService.post(
                         "/work-orders/create-work-order",
                         workOrderData
-                    )
-                )
-            );
+                    );
+
+                    responses.push(response);
+
+                    // Capture the group ID from the first work order
+                    if (i === 0 && response.status === 201) {
+                        workOrderGroupId =
+                            response.data.data.work_order_group_id;
+                    }
+
+                    // Capture work order ID
+                    if (response.status === 201) {
+                        workOrderIds.push(response.data.data.work_order_id);
+                    }
+
+                    // If any creation fails, stop and handle the error
+                    if (response.status !== 201) {
+                        console.error(
+                            `Failed to create work order ${i + 1}:`,
+                            response
+                        );
+                        alert(
+                            `Failed to create work order ${i + 1} of ${
+                                workOrdersToCreate.length
+                            }. Please try again.`
+                        );
+
+                        // Optionally: You might want to delete/rollback the already created work orders here
+                        // This depends on your backend's capabilities
+
+                        return false;
+                    }
+                } catch (error) {
+                    console.error(`Error creating work order ${i + 1}:`, error);
+                    alert(
+                        `Error creating work order ${i + 1} of ${
+                            workOrdersToCreate.length
+                        }. Please try again.`
+                    );
+
+                    // Optionally: You might want to delete/rollback the already created work orders here
+
+                    return false;
+                }
+            }
 
             // Check if all were successful
             const allSuccessful = responses.every(
@@ -651,16 +704,8 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
             );
 
             if (allSuccessful) {
-                const workOrderIds = responses.map(
-                    (response) => response.data.data.work_order_id
-                );
-                const workOrderGroupIds = responses.map(
-                    (response) => response.data.data.work_order_group_id
-                );
-
-                // Use the first work order group ID for display
-                const firstWorkOrderGroupId = workOrderGroupIds[0];
-                setWorkOrderId(firstWorkOrderGroupId || workOrderIds[0]);
+                // Use the work order group ID for display
+                setWorkOrderId(workOrderGroupId || workOrderIds[0]);
                 setIsModalOpen(true);
 
                 if (fetchWorkOrderGroups) {
@@ -674,20 +719,12 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                 }
 
                 // NOTE FEATURE: Create a single consolidated note for all new work orders
-                const logWorkOrderIds = responses.map(
-                    (response) => response.data.data.work_order_id
-                );
                 const workOrderNames = workOrdersToCreate.map(
                     (workOrderData) => workOrderData.work_order
                 );
 
-                // Use the first work order ID for the note entry (or the group ID if available)
-                const primaryWorkOrderId = logWorkOrderIds[0];
-                const logWorkOrderGroupId =
-                    responses[0].data.data.work_order_group_id;
-
                 const consolidatedNoteData = {
-                    work_order_id: logWorkOrderGroupId || primaryWorkOrderId,
+                    work_order_id: workOrderGroupId || workOrderIds[0],
                     log_type: "Work Order Creation",
                     note_text: `Work Orders created: ${workOrderNames.join(
                         ", "
