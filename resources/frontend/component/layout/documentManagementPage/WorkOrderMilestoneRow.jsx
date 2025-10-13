@@ -12,6 +12,7 @@ const WorkOrderMilestoneRow = ({
     isFiltered = false, // New prop to indicate if any filters are active
     hideNotesColumn = false, // New prop to hide notes column
     hideActionsColumn = false, // New prop to hide actions column
+    isNonSequential = false, // New prop to indicate non-sequential behavior (for STEP 1)
 }) => {
     const [showTooltip, setShowTooltip] = useState(false);
     const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
@@ -81,64 +82,79 @@ const WorkOrderMilestoneRow = ({
                                     );
 
                                 if (submilestoneInfo) {
-                                    // This submilestone is current if:
-                                    // 1. It's not 100% complete AND
-                                    // 2. All previous submilestones (in sequence) are 100% complete
-
                                     if (
                                         submilestoneInfo.progressPercentage <
                                         100
                                     ) {
-                                        // Check if all previous submilestones are complete
-                                        let allPreviousComplete = true;
+                                        // Determine if this is STEP 1 (first step by sequence)
+                                        const isFirstStep =
+                                            i === 0 ||
+                                            (currentStep &&
+                                                currentStep.sequence === 1);
 
-                                        // Get all submilestones from all previous steps and current step up to this one
-                                        for (
-                                            let prevStepIndex = 0;
-                                            prevStepIndex <= i;
-                                            prevStepIndex++
-                                        ) {
-                                            const prevStep =
-                                                steps[prevStepIndex];
-                                            if (
-                                                prevStep &&
-                                                prevStep.subMilestones
+                                        if (isFirstStep) {
+                                            // STEP 1: Non-sequential - All submilestones are available at the same time
+                                            // Show current indicator if this submilestone is incomplete
+                                            isCurrentSubmilestone = true;
+                                        } else {
+                                            // Other steps: Sequential behavior
+                                            // This submilestone is current if:
+                                            // 1. It's not 100% complete AND
+                                            // 2. All previous submilestones (in sequence) are 100% complete
+
+                                            // Check if all previous submilestones are complete
+                                            let allPreviousComplete = true;
+
+                                            // Get all submilestones from all previous steps and current step up to this one
+                                            for (
+                                                let prevStepIndex = 0;
+                                                prevStepIndex <= i;
+                                                prevStepIndex++
                                             ) {
-                                                const endIndex =
-                                                    prevStepIndex === i
-                                                        ? j
-                                                        : prevStep.subMilestones
-                                                              .length;
-                                                for (
-                                                    let prevSubIndex = 0;
-                                                    prevSubIndex < endIndex;
-                                                    prevSubIndex++
+                                                const prevStep =
+                                                    steps[prevStepIndex];
+                                                if (
+                                                    prevStep &&
+                                                    prevStep.subMilestones
                                                 ) {
-                                                    const prevSubmilestone =
-                                                        prevStep.subMilestones[
-                                                            prevSubIndex
-                                                        ];
-                                                    const prevInfo =
-                                                        row.checklistInfos.find(
-                                                            (info) =>
-                                                                info.subMilestoneId ===
-                                                                prevSubmilestone.id
-                                                        );
-                                                    if (
-                                                        prevInfo &&
-                                                        prevInfo.progressPercentage <
-                                                            100
+                                                    const endIndex =
+                                                        prevStepIndex === i
+                                                            ? j
+                                                            : prevStep
+                                                                  .subMilestones
+                                                                  .length;
+                                                    for (
+                                                        let prevSubIndex = 0;
+                                                        prevSubIndex < endIndex;
+                                                        prevSubIndex++
                                                     ) {
-                                                        allPreviousComplete = false;
-                                                        break;
+                                                        const prevSubmilestone =
+                                                            prevStep
+                                                                .subMilestones[
+                                                                prevSubIndex
+                                                            ];
+                                                        const prevInfo =
+                                                            row.checklistInfos.find(
+                                                                (info) =>
+                                                                    info.subMilestoneId ===
+                                                                    prevSubmilestone.id
+                                                            );
+                                                        if (
+                                                            prevInfo &&
+                                                            prevInfo.progressPercentage <
+                                                                100
+                                                        ) {
+                                                            allPreviousComplete = false;
+                                                            break;
+                                                        }
                                                     }
                                                 }
+                                                if (!allPreviousComplete) break;
                                             }
-                                            if (!allPreviousComplete) break;
-                                        }
 
-                                        isCurrentSubmilestone =
-                                            allPreviousComplete;
+                                            isCurrentSubmilestone =
+                                                allPreviousComplete;
+                                        }
                                     }
                                 }
                             }

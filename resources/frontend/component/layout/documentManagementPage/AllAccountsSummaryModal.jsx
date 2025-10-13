@@ -1,4 +1,6 @@
 import React, { useMemo, useState, useEffect, Fragment } from "react";
+import ReactPaginate from "react-paginate";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import WorkOrderMilestoneRow from "./WorkOrderMilestoneRow";
 import EnhancedControlBar from "./EnhancedControlBar";
 import NotesAndUpdatesModal from "./NotesAndUpdatesModal";
@@ -16,6 +18,31 @@ import {
 import apiService from "../../../../frontend/component/servicesApi/apiService";
 
 const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
+    // ...existing code...
+    // EnhancedControlBar expects onChange handlers for each filter
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1);
+    };
+    const handleStatusFilterChange = (value) => {
+        setStatusFilter(value);
+        setCurrentPage(1);
+    };
+    const handleBuyerFilterChange = (value) => {
+        setBuyerFilter(value);
+        setCurrentPage(1);
+    };
+    const handleStepAssigneeFilterChange = (value) => {
+        setStepAssigneeFilter(value);
+        setCurrentPage(1);
+    };
+    const handleItemsPerPageChange = (value) => {
+        setItemsPerPage(parseInt(value));
+        setCurrentPage(1);
+    };
+    const handleHideCompletedChecklistsChange = (checked) => {
+        setHideCompletedChecklists(checked);
+    };
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(50);
     const [searchTerm, setSearchTerm] = useState("");
@@ -66,10 +93,9 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
         setIsRefreshing(false);
     };
 
-    // Use EXACT same logic as WorkOrderGroupDetailsModal
+    // Filtering logic refactored to match WorkOrderGroupDetailsModal
     const { columnHeaders, tableRows, filteredRows, totalPages, steps } =
         useMemo(() => {
-            // Return empty structure if no data (same as WorkOrderGroupDetailsModal)
             if (!allAccountsData || !allAccountsData.work_orders)
                 return {
                     columnHeaders: [],
@@ -79,8 +105,8 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                     steps: [],
                 };
 
-            // 1. Gather all steps (work orders) and sort by sequence - EXACT SAME LOGIC
-            const steps = [...allAccountsData.work_orders]
+            // 1. Gather all steps (work orders) and sort by sequence
+            let steps = [...allAccountsData.work_orders]
                 .sort(
                     (a, b) =>
                         (a.work_order_type?.sequence ?? 0) -
@@ -98,7 +124,45 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                     workOrder: wo,
                 }));
 
-            // 2. Create an account map to collect unique accounts - SAME LOGIC
+            // 2. Apply buyer filter to subMilestones (column filtering)
+            // NOTE: Removed stepAssigneeFilter from column filtering - it should only filter rows
+            steps = steps.map((step) => {
+                let filteredSubMilestones = step.subMilestones;
+
+                // Buyer filter only (removed stepAssigneeFilter)
+                if (buyerFilter !== "All") {
+                    filteredSubMilestones = filteredSubMilestones.filter(
+                        (milestone) => {
+                            if (
+                                !milestone.checklists ||
+                                milestone.checklists.length === 0
+                            )
+                                return false;
+                            const hasBuyerRelatedChecklist =
+                                milestone.checklists.some(
+                                    (checklist) =>
+                                        checklist.is_buyer_related === true
+                                );
+                            const hasNonBuyerRelatedChecklist =
+                                milestone.checklists.some(
+                                    (checklist) =>
+                                        checklist.is_buyer_related === false
+                                );
+                            if (buyerFilter === "Buyer Related")
+                                return hasBuyerRelatedChecklist;
+                            else if (buyerFilter === "Non-buyer")
+                                return hasNonBuyerRelatedChecklist;
+                            return true;
+                        }
+                    );
+                }
+                return {
+                    ...step,
+                    subMilestones: filteredSubMilestones,
+                };
+            });
+
+            // 3. Create an account map to collect unique accounts
             const accountMap = {};
             allAccountsData.work_orders.forEach((workOrder) => {
                 if (workOrder.accounts && Array.isArray(workOrder.accounts)) {
@@ -109,7 +173,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                 workOrderIds: [workOrder.work_order_id],
                             };
                         } else {
-                            // Merge work order IDs if account exists in multiple work orders
                             if (
                                 !accountMap[account.id].workOrderIds.includes(
                                     workOrder.work_order_id
@@ -124,24 +187,49 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                 }
             });
 
-            // 3. Build table rows - EXACT SAME LOGIC AS WorkOrderGroupDetailsModal
+            // 4. Build table rows using filtered steps/subMilestones
             const tableRows = Object.values(accountMap).map((account) => {
+                // Store assignee information for this account
+                const accountAssignees = new Set();
+
+                // Collect all assignees for this specific account across ALL work orders and submilestones
+                allAccountsData.work_orders.forEach((wo) => {
+                    // Only check if this account is part of this work order
+                    const accountInWorkOrder =
+                        wo.accounts &&
+                        wo.accounts.some((acc) => acc.id === account.id);
+
+                    if (accountInWorkOrder) {
+                        const submilestones =
+                            allAccountsData.submilestonesByType?.[
+                                wo.work_order_type_id
+                            ] || [];
+                        submilestones.forEach((milestone) => {
+                            // Check work_order_account_assignees for this specific account
+                            (
+                                milestone.work_order_account_assignees || []
+                            ).forEach((assignee) => {
+                                // STRICT matching: Only add if account_id explicitly matches
+                                // If account_id is not present or null, we don't assume it applies to all accounts
+                                if (assignee.account_id === account.id) {
+                                    accountAssignees.add(assignee.employee_id);
+                                }
+                            });
+                        });
+                    }
+                });
+
                 const stepData = steps.map((step) => {
                     return step.subMilestones.map((sub) => {
                         const items = sub.checklists || [];
                         if (!items || items.length === 0) return 0;
-
                         const uploadedDocs = account.uploaded_documents || [];
                         const accountChecklistStatuses =
                             account.account_checklist_statuses || [];
-
                         const completedCount = items.filter((item) => {
-                            // Check if document is uploaded
                             const hasUploadedDoc = uploadedDocs.some(
                                 (doc) => doc.file_title === item.name
                             );
-
-                            // Check if checklist status is marked complete
                             const hasStatusComplete =
                                 accountChecklistStatuses.some((status) => {
                                     return (
@@ -150,27 +238,23 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                             status.status === "complete")
                                     );
                                 });
-
                             return hasUploadedDoc || hasStatusComplete;
                         }).length;
-
                         return items.length > 0
                             ? Math.round((completedCount / items.length) * 100)
                             : 0;
                     });
                 });
 
-                // Build checklistInfos for current step indicator - SAME AS WorkOrderGroupDetailsModal
+                // checklistInfos for current step indicator
                 const checklistInfos = steps.flatMap((step) => {
                     return step.subMilestones.map((sub) => {
                         const items = sub.checklists || [];
                         const uploadedDocs = account.uploaded_documents || [];
                         const accountChecklistStatuses =
                             account.account_checklist_statuses || [];
-
                         const completedChecklists = [];
                         const pendingChecklists = [];
-
                         items.forEach((item) => {
                             const hasUploadedDoc = uploadedDocs.some(
                                 (doc) => doc.file_title === item.name
@@ -183,7 +267,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                             status.status === "complete")
                                     );
                                 });
-
                             if (hasUploadedDoc || hasStatusComplete) {
                                 completedChecklists.push({
                                     id: item.id,
@@ -199,7 +282,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                 });
                             }
                         });
-
                         const progressPercentage =
                             items.length > 0
                                 ? Math.round(
@@ -208,7 +290,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                           100
                                   )
                                 : 0;
-
                         return {
                             subMilestoneId: sub.id,
                             stepName: step.stepName,
@@ -231,7 +312,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                     status: account.checklist_status || "In Progress",
                     stepData: stepData,
                     currentSubMilestoneId: account.current_submilestone_id,
-                    checklistInfos: checklistInfos, // Add checklistInfos for current step indicator
+                    checklistInfos: checklistInfos,
                     remarks: account.remarks || "-",
                     notesData: {
                         accountId: account.id,
@@ -244,10 +325,12 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                         )?.work_order_type,
                     },
                     uploadedDocuments: account.uploaded_documents || [],
+                    assignedEmployeeIds: Array.from(accountAssignees), // Store the assigned employee IDs
+                    workOrderIds: account.workOrderIds || [],
                 };
             });
 
-            // 4. Apply filters - SAME LOGIC AS WorkOrderGroupDetailsModal
+            // 5. Apply row filters (search, status, assignee)
             const filteredRows = tableRows.filter((row) => {
                 const searchMatch =
                     searchTerm === "" ||
@@ -264,25 +347,98 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                         .toLowerCase()
                         .includes(searchTerm.toLowerCase());
 
-                const statusMatch =
-                    statusFilter === "All" ||
-                    String(row.status || "")
-                        .toLowerCase()
-                        .includes(statusFilter.toLowerCase());
+                // Handle status filtering for both boolean and string values
+                let statusMatch = true;
+                if (statusFilter !== "All") {
+                    if (statusFilter.toLowerCase() === "complete") {
+                        // Match for complete status (boolean true or string containing "complete")
+                        statusMatch =
+                            row.status === true ||
+                            String(row.status || "")
+                                .toLowerCase()
+                                .includes("complete");
+                    } else if (
+                        statusFilter.toLowerCase().includes("progress")
+                    ) {
+                        // Match for in progress status (boolean false or string containing "progress")
+                        statusMatch =
+                            row.status === false ||
+                            String(row.status || "")
+                                .toLowerCase()
+                                .includes("progress");
+                    } else {
+                        // Default string matching for other status values
+                        statusMatch = String(row.status || "")
+                            .toLowerCase()
+                            .includes(statusFilter.toLowerCase());
+                    }
+                }
 
-                const buyerMatch =
-                    buyerFilter === "All" ||
-                    (row.accountName || "")
-                        .toLowerCase()
-                        .includes(buyerFilter.toLowerCase());
+                // Handle assignee filtering - only show accounts assigned to selected assignee
+                let assigneeMatch = true;
+                if (stepAssigneeFilter && stepAssigneeFilter !== "All") {
+                    const selectedAssigneeId = parseInt(stepAssigneeFilter);
 
-                return searchMatch && statusMatch && buyerMatch;
+                    // First check if we have assignedEmployeeIds collected
+                    if (
+                        row.assignedEmployeeIds &&
+                        row.assignedEmployeeIds.length > 0
+                    ) {
+                        assigneeMatch =
+                            row.assignedEmployeeIds.includes(
+                                selectedAssigneeId
+                            );
+                    } else {
+                        // Fallback: Check directly in the data
+                        assigneeMatch = false;
+
+                        // Check all work orders for this account
+                        for (const workOrder of allAccountsData.work_orders) {
+                            // Check if this account is in this work order
+                            const accountInWorkOrder =
+                                workOrder.accounts &&
+                                workOrder.accounts.some(
+                                    (acc) => acc.id === row.key
+                                );
+
+                            if (accountInWorkOrder) {
+                                // Check submilestones for assignees
+                                const submilestones =
+                                    allAccountsData.submilestonesByType?.[
+                                        workOrder.work_order_type_id
+                                    ] || [];
+                                for (const milestone of submilestones) {
+                                    const hasAssignee = (
+                                        milestone.work_order_account_assignees ||
+                                        []
+                                    ).some((assignee) => {
+                                        // More flexible matching - check if employee_id matches and either:
+                                        // 1. account_id matches, OR
+                                        // 2. no account_id specified (meaning it applies to all accounts in the work order)
+                                        return (
+                                            assignee.employee_id ===
+                                                selectedAssigneeId &&
+                                            (!assignee.account_id ||
+                                                assignee.account_id === row.key)
+                                        );
+                                    });
+                                    if (hasAssignee) {
+                                        assigneeMatch = true;
+                                        break;
+                                    }
+                                }
+                                if (assigneeMatch) break;
+                            }
+                        }
+                    }
+                }
+
+                return searchMatch && statusMatch && assigneeMatch;
             });
 
             const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
-
             return {
-                columnHeaders: [], // Not needed for this implementation
+                columnHeaders: [],
                 tableRows,
                 filteredRows,
                 totalPages,
@@ -293,10 +449,103 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
             searchTerm,
             statusFilter,
             buyerFilter,
+            stepAssigneeFilter,
             itemsPerPage,
         ]);
 
-    // Paginated data - SAME AS WorkOrderGroupDetailsModal
+    // Column visibility and assignee filter states for EnhancedControlBar (must be after steps is defined)
+    const [showStepView, setShowStepView] = useState(true);
+    const [visibleSteps, setVisibleSteps] = useState(new Set());
+    const [availableAssignees, setAvailableAssignees] = useState([]);
+
+    // Update visibleSteps when steps change
+    useEffect(() => {
+        if (steps && steps.length > 0) {
+            setVisibleSteps(new Set(steps.map((step) => step.id)));
+        }
+    }, [steps]);
+
+    // Extract available assignees from allAccountsData
+    useEffect(() => {
+        if (!allAccountsData || !allAccountsData.work_orders) {
+            setAvailableAssignees([]);
+            return;
+        }
+        // Gather unique assignees from all work orders and submilestones
+        const assigneeMap = {};
+        allAccountsData.work_orders.forEach((wo) => {
+            const submilestones =
+                allAccountsData.submilestonesByType?.[wo.work_order_type_id] ||
+                [];
+            submilestones.forEach((milestone) => {
+                (milestone.work_order_account_assignees || []).forEach(
+                    (assignee) => {
+                        if (!assigneeMap[assignee.employee_id]) {
+                            // Try multiple name properties from the assignee object
+                            const name =
+                                assignee.employee?.name ||
+                                assignee.employee?.full_name ||
+                                assignee.employee?.fullname ||
+                                assignee.user?.name ||
+                                assignee.user?.full_name ||
+                                assignee.user?.fullname ||
+                                assignee.user?.username ||
+                                assignee.name ||
+                                assignee.full_name ||
+                                assignee.fullname ||
+                                assignee.username ||
+                                assignee.employee_name ||
+                                assignee.display_name ||
+                                assignee.email ||
+                                (assignee.employee?.firstname &&
+                                assignee.employee?.lastname
+                                    ? `${assignee.employee.firstname} ${assignee.employee.lastname}`.trim()
+                                    : null) ||
+                                (assignee.user?.firstname &&
+                                assignee.user?.lastname
+                                    ? `${assignee.user.firstname} ${assignee.user.lastname}`.trim()
+                                    : null) ||
+                                (assignee.firstname && assignee.lastname
+                                    ? `${assignee.firstname} ${assignee.lastname}`.trim()
+                                    : null) ||
+                                `Assignee ${assignee.employee_id}`;
+
+                            assigneeMap[assignee.employee_id] = {
+                                id: assignee.employee_id,
+                                name,
+                            };
+                        }
+                    }
+                );
+            });
+        });
+        setAvailableAssignees(Object.values(assigneeMap));
+    }, [allAccountsData]);
+
+    // Handlers for EnhancedControlBar
+    const handleStepViewToggle = (checked) => {
+        setShowStepView(checked);
+    };
+    const handleStepVisibilityToggle = (stepId) => {
+        setVisibleSteps((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(stepId)) {
+                newSet.delete(stepId);
+            } else {
+                newSet.add(stepId);
+            }
+            return newSet;
+        });
+    };
+    const handleToggleAllSteps = (checked) => {
+        if (checked) {
+            setVisibleSteps(new Set(steps.map((step) => step.id)));
+        } else {
+            setVisibleSteps(new Set());
+        }
+    };
+
+    // Paginated data
     const paginatedData = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         return filteredRows.slice(startIndex, startIndex + itemsPerPage);
@@ -359,20 +608,19 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
         return Array.from(buyers).slice(0, 20); // Limit for performance
     };
 
-    // Status badge function (similar to WorkOrderGroupDetailsModal)
+    // Status badge function
     const getStatusBadge = (status) => {
-        // Ensure status is a string before calling toLowerCase
-        const statusStr = String(status || "").toLowerCase();
         const baseClasses =
             "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium";
 
-        if (statusStr === "complete") {
+        // Handle boolean status values (true = complete, false = in progress)
+        if (status === true || status === "true") {
             return (
-                <span className={`${baseClasses} bg-gray-300 text-gray-600`}>
-                    {/* Grey oblong for completed status */}●
+                <span className={`${baseClasses} bg-green-100 text-green-800`}>
+                    Complete
                 </span>
             );
-        } else if (statusStr === "in progress") {
+        } else if (status === false || status === "false") {
             return (
                 <span
                     className={`${baseClasses} bg-yellow-100 text-yellow-800`}
@@ -380,16 +628,59 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                     In Progress
                 </span>
             );
-        } else if (statusStr === "not started") {
+        }
+
+        // Handle string status values
+        const statusStr = String(status || "")
+            .toLowerCase()
+            .trim();
+
+        if (
+            statusStr.includes("complete") ||
+            statusStr === "completed" ||
+            statusStr === "done" ||
+            statusStr === "finished" ||
+            statusStr === "closed" ||
+            statusStr === "resolved"
+        ) {
+            return (
+                <span className={`${baseClasses} bg-green-100 text-green-800`}>
+                    Complete
+                </span>
+            );
+        } else if (
+            statusStr.includes("progress") ||
+            statusStr === "ongoing" ||
+            statusStr === "active" ||
+            statusStr === "working" ||
+            statusStr.includes("in-progress")
+        ) {
+            return (
+                <span
+                    className={`${baseClasses} bg-yellow-100 text-yellow-800`}
+                >
+                    In Progress
+                </span>
+            );
+        } else if (
+            statusStr.includes("not started") ||
+            statusStr === "pending" ||
+            statusStr === "new" ||
+            statusStr === "waiting" ||
+            statusStr === "queued"
+        ) {
             return (
                 <span className={`${baseClasses} bg-gray-100 text-gray-800`}>
                     Not Started
                 </span>
             );
         } else {
+            // Default to in progress for unknown values
             return (
-                <span className={`${baseClasses} bg-blue-100 text-blue-800`}>
-                    {status || "Unknown"}
+                <span
+                    className={`${baseClasses} bg-yellow-100 text-yellow-800`}
+                >
+                    In Progress
                 </span>
             );
         }
@@ -403,10 +694,24 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                 open={isOpen}
                 handler={onClose}
                 size="xxl"
-                className="bg-transparent shadow-none"
+                className="bg-transparent shadow-none fixed inset-0 z-[9999] flex items-center justify-center w-screen h-screen"
             >
-                <div className="bg-white rounded-lg shadow-xl w-[99vw] h-[99vh] mx-auto">
-                    <DialogHeader className="flex items-center justify-between pb-4 border-b border-gray-200 bg-gradient-to-r from-custom-bluegreen to-custom-lightgreen text-white rounded-t-lg">
+                <div
+                    className="bg-white shadow-xl w-screen h-screen mx-0"
+                    style={{
+                        position: "relative",
+                        paddingBottom: "64px",
+                        borderTopLeftRadius: 0,
+                        borderTopRightRadius: 0,
+                    }}
+                >
+                    <DialogHeader
+                        className="flex items-center justify-between pb-4 border-b border-gray-200 bg-gradient-to-r from-custom-bluegreen to-custom-lightgreen text-white"
+                        style={{
+                            borderTopLeftRadius: 0,
+                            borderTopRightRadius: 0,
+                        }}
+                    >
                         <div className="flex items-center gap-3">
                             <svg
                                 className="w-6 h-6"
@@ -478,7 +783,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                         </div>
                     </DialogHeader>
 
-                    <DialogBody className="p-0 h-[calc(99vh-120px)] overflow-hidden flex flex-col">
+                    <DialogBody className="p-0 h-full overflow-hidden flex flex-col">
                         {isLoading ? (
                             <div className="flex items-center justify-center h-96">
                                 <div className="text-center">
@@ -528,43 +833,63 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                 <div className="flex-shrink-0">
                                     <EnhancedControlBar
                                         searchTerm={searchTerm}
-                                        setSearchTerm={setSearchTerm}
-                                        statusFilter={statusFilter}
-                                        setStatusFilter={setStatusFilter}
-                                        buyerFilter={buyerFilter}
-                                        setBuyerFilter={setBuyerFilter}
-                                        stepAssigneeFilter={stepAssigneeFilter}
-                                        setStepAssigneeFilter={
-                                            setStepAssigneeFilter
-                                        }
-                                        currentPage={currentPage}
-                                        setCurrentPage={setCurrentPage}
-                                        totalPages={totalPages}
+                                        onSearchChange={handleSearchChange}
                                         itemsPerPage={itemsPerPage}
-                                        setItemsPerPage={setItemsPerPage}
-                                        filteredItemsCount={filteredRows.length}
-                                        totalItemsCount={tableRows.length}
+                                        onItemsPerPageChange={
+                                            handleItemsPerPageChange
+                                        }
+                                        statusFilter={statusFilter}
+                                        onStatusFilterChange={
+                                            handleStatusFilterChange
+                                        }
+                                        buyerFilter={buyerFilter}
+                                        onBuyerFilterChange={
+                                            handleBuyerFilterChange
+                                        }
+                                        stepAssigneeFilter={stepAssigneeFilter}
+                                        onStepAssigneeFilterChange={
+                                            handleStepAssigneeFilterChange
+                                        }
+                                        showStepView={showStepView}
+                                        onStepViewToggle={handleStepViewToggle}
+                                        availableAssignees={availableAssignees}
+                                        availableSteps={steps}
+                                        visibleSteps={visibleSteps}
+                                        onStepVisibilityToggle={
+                                            handleStepVisibilityToggle
+                                        }
+                                        onToggleAllSteps={handleToggleAllSteps}
                                         onRefresh={handleRefresh}
                                         isRefreshing={isRefreshing}
+                                        hideItemsPerPage={false}
                                         hideStatusFilter={false}
                                         hideBuyerFilter={false}
-                                        hideStepVisibility={true}
-                                        hideStepAssigneeFilter={true}
-                                        hideCompletedChecklistsFilter={false}
+                                        hideStepViewToggle={false}
+                                        hideAssigneeFilter={false}
+                                        hideStepVisibility={false}
+                                        hideStepAssigneeFilter={false}
                                         hideCompletedChecklists={
                                             hideCompletedChecklists
                                         }
-                                        setHideCompletedChecklists={
-                                            setHideCompletedChecklists
+                                        onHideCompletedChecklistsChange={
+                                            handleHideCompletedChecklistsChange
                                         }
-                                        statusOptions={getUniqueStatuses()}
-                                        buyerOptions={getUniqueBuyers()}
+                                        hideCompletedChecklistsFilter={true}
                                     />
                                 </div>
 
                                 {/* Milestone Table */}
-                                <div className="flex-1 overflow-hidden">
-                                    <div className="overflow-auto h-full">
+                                <div
+                                    className="flex-1 p-6 bg-white overflow-hidden"
+                                    style={{ minHeight: 0 }}
+                                >
+                                    <div
+                                        className="w-full h-full overflow-auto bg-white rounded-lg border border-gray-200 shadow-sm"
+                                        style={{
+                                            maxHeight: "100%",
+                                            maxWidth: "100%",
+                                        }}
+                                    >
                                         <table className="w-full text-left border-separate border-spacing-0 bg-white min-w-max">
                                             <thead className="sticky top-0 z-50 bg-custom-bluegreen">
                                                 {/* Row 1: Step headers */}
@@ -592,76 +917,43 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                                             </div>
                                                         </div>
                                                     </th>
-                                                    {steps.map((step, idx) => {
-                                                        // Check if this step is the current step for any account (excluding completed accounts)
-                                                        // Use the EXACT same logic as original WorkOrderGroupDetailsModal, but with completion check
-                                                        const isCurrentStepForAnyAccount =
-                                                            paginatedData.some(
-                                                                (row) => {
-                                                                    // Skip completed accounts (this is the key addition)
-                                                                    const isAccountComplete =
-                                                                        String(
-                                                                            row.status ||
-                                                                                ""
-                                                                        ).toLowerCase() ===
-                                                                        "complete";
-                                                                    if (
-                                                                        isAccountComplete
-                                                                    )
-                                                                        return false;
-
-                                                                    // Use the simple logic from WorkOrderGroupDetailsModal
-                                                                    return step.subMilestones.some(
-                                                                        (sub) =>
-                                                                            sub.id ===
-                                                                            row.currentSubMilestoneId
-                                                                    );
-                                                                }
-                                                            );
-
-                                                        return (
-                                                            <th
-                                                                key={idx}
-                                                                colSpan={
-                                                                    step
-                                                                        .subMilestones
-                                                                        .length *
-                                                                    2
-                                                                }
-                                                                className={`text-center px-2 py-2 font-medium border-x border-white min-w-[100px] relative ${
-                                                                    isCurrentStepForAnyAccount
-                                                                        ? "bg-blue-600 border-2 border-blue-800 shadow-lg ring-2 ring-blue-300 ring-opacity-50 z-30"
-                                                                        : "bg-custom-bluegreen"
-                                                                }`}
-                                                                style={{
-                                                                    backgroundColor:
-                                                                        isCurrentStepForAnyAccount
-                                                                            ? "#2563eb"
-                                                                            : "var(--tw-bg-opacity, 1)",
-                                                                }}
-                                                            >
-                                                                <span
-                                                                    className={`text-xs font-semibold uppercase tracking-wide ${
-                                                                        isCurrentStepForAnyAccount
-                                                                            ? "text-white"
-                                                                            : ""
-                                                                    }`}
-                                                                >
-                                                                    {
-                                                                        step.stepName
+                                                    {[...steps]
+                                                        .filter(
+                                                            (step) =>
+                                                                visibleSteps.has(
+                                                                    step.id
+                                                                ) &&
+                                                                step.subMilestones &&
+                                                                step
+                                                                    .subMilestones
+                                                                    .length > 0
+                                                        )
+                                                        .map((step, idx) => {
+                                                            return (
+                                                                <th
+                                                                    key={
+                                                                        step.id
                                                                     }
-                                                                </span>
-                                                                {isCurrentStepForAnyAccount && (
-                                                                    <>
-                                                                        <div className="absolute top-0.5 left-0.5 w-2 h-2 bg-white rounded-full animate-pulse border border-blue-200 shadow-sm"></div>
-                                                                        <div className="absolute top-0.5 right-0.5 px-1 py-0.5 bg-white text-blue-800 text-[8px] rounded font-bold shadow-sm leading-none">
-                                                                            CURRENT
-                                                                        </div>
-                                                                    </>
-                                                                )}
-                                                            </th>
-                                                        );
-                                                    })}
+                                                                    colSpan={
+                                                                        step
+                                                                            .subMilestones
+                                                                            .length *
+                                                                        2
+                                                                    }
+                                                                    className="text-center px-2 py-2 font-medium border-x border-white min-w-[100px] bg-custom-bluegreen"
+                                                                    style={{
+                                                                        backgroundColor:
+                                                                            "var(--tw-bg-opacity, 1)",
+                                                                    }}
+                                                                >
+                                                                    <span className="text-xs font-semibold uppercase tracking-wide">
+                                                                        {
+                                                                            step.stepName
+                                                                        }
+                                                                    </span>
+                                                                </th>
+                                                            );
+                                                        })}
                                                     <th
                                                         className="px-2 py-2 font-medium border-l border-white min-w-[80px] bg-custom-bluegreen"
                                                         style={{
@@ -690,97 +982,214 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
 
                                                 {/* Row 2: Sub-milestone headers */}
                                                 <tr className="bg-custom-bluegreen text-white">
-                                                    {steps.map((step, idx) =>
-                                                        step.subMilestones.map(
-                                                            (milestone, i) => (
-                                                                <th
-                                                                    key={`${idx}-${i}`}
-                                                                    colSpan={2}
-                                                                    className="text-center px-2 py-1 font-medium border-x border-y border-white min-w-[180px] bg-custom-bluegreen"
-                                                                    style={{
-                                                                        backgroundColor:
-                                                                            "var(--tw-bg-opacity, 1)",
-                                                                    }}
-                                                                >
-                                                                    <span
-                                                                        className="text-xs font-medium block"
-                                                                        title={
-                                                                            milestone.name
-                                                                        }
-                                                                    >
-                                                                        {
-                                                                            milestone.name
-                                                                        }
-                                                                    </span>
-                                                                </th>
+                                                    {[...steps]
+                                                        .filter((step) =>
+                                                            visibleSteps.has(
+                                                                step.id
                                                             )
                                                         )
-                                                    )}
+                                                        .map((step, idx) =>
+                                                            step.subMilestones.map(
+                                                                (
+                                                                    milestone,
+                                                                    i
+                                                                ) => (
+                                                                    <th
+                                                                        key={`${step.id}-${milestone.id}`}
+                                                                        colSpan={
+                                                                            2
+                                                                        }
+                                                                        className="text-center px-2 py-1 font-medium border-x border-y border-white min-w-[180px] bg-custom-bluegreen"
+                                                                        style={{
+                                                                            backgroundColor:
+                                                                                "var(--tw-bg-opacity, 1)",
+                                                                        }}
+                                                                    >
+                                                                        <span
+                                                                            className="text-xs font-medium block"
+                                                                            title={
+                                                                                milestone.name
+                                                                            }
+                                                                        >
+                                                                            {
+                                                                                milestone.name
+                                                                            }
+                                                                        </span>
+                                                                    </th>
+                                                                )
+                                                            )
+                                                        )}
                                                 </tr>
 
                                                 {/* Row 3: Date sub-headers */}
                                                 <tr className="bg-custom-bluegreen text-white">
-                                                    {steps.map((step, idx) =>
-                                                        step.subMilestones.map(
-                                                            (milestone, i) => (
-                                                                <React.Fragment
-                                                                    key={`${idx}-${i}-dates`}
-                                                                >
-                                                                    <th
-                                                                        className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px] bg-custom-bluegreen"
-                                                                        style={{
-                                                                            backgroundColor:
-                                                                                "var(--tw-bg-opacity, 1)",
-                                                                        }}
-                                                                    >
-                                                                        <span className="text-xs font-medium">
-                                                                            Date
-                                                                            Created
-                                                                        </span>
-                                                                    </th>
-                                                                    <th
-                                                                        className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px] bg-custom-bluegreen"
-                                                                        style={{
-                                                                            backgroundColor:
-                                                                                "var(--tw-bg-opacity, 1)",
-                                                                        }}
-                                                                    >
-                                                                        <span className="text-xs font-medium">
-                                                                            Date
-                                                                            Completed
-                                                                        </span>
-                                                                    </th>
-                                                                </React.Fragment>
+                                                    {[...steps]
+                                                        .filter((step) =>
+                                                            visibleSteps.has(
+                                                                step.id
                                                             )
                                                         )
-                                                    )}
+                                                        .map((step, idx) =>
+                                                            step.subMilestones.map(
+                                                                (
+                                                                    milestone,
+                                                                    i
+                                                                ) => (
+                                                                    <React.Fragment
+                                                                        key={`${step.id}-${milestone.id}-dates`}
+                                                                    >
+                                                                        <th
+                                                                            className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px] bg-custom-bluegreen"
+                                                                            style={{
+                                                                                backgroundColor:
+                                                                                    "var(--tw-bg-opacity, 1)",
+                                                                            }}
+                                                                        >
+                                                                            <span className="text-xs font-medium">
+                                                                                Date
+                                                                                Created
+                                                                            </span>
+                                                                        </th>
+                                                                        <th
+                                                                            className="text-center px-1 py-1 font-medium border-x border-white min-w-[90px] bg-custom-bluegreen"
+                                                                            style={{
+                                                                                backgroundColor:
+                                                                                    "var(--tw-bg-opacity, 1)",
+                                                                            }}
+                                                                        >
+                                                                            <span className="text-xs font-medium">
+                                                                                Date
+                                                                                Completed
+                                                                            </span>
+                                                                        </th>
+                                                                    </React.Fragment>
+                                                                )
+                                                            )
+                                                        )}
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                {paginatedData.map((row) => (
-                                                    <WorkOrderMilestoneRow
-                                                        key={row.key}
-                                                        row={row}
-                                                        steps={steps}
-                                                        getStatusBadge={
-                                                            getStatusBadge
-                                                        }
-                                                        currentChecklistInfo={
-                                                            row.currentChecklistInfo
-                                                        }
-                                                        onMilestoneProgression={() => {}}
-                                                        isFiltered={
-                                                            searchTerm.trim() !==
-                                                                "" ||
-                                                            statusFilter !==
-                                                                "All" ||
-                                                            buyerFilter !==
-                                                                "All"
-                                                        }
-                                                        hideNotesColumn={true}
-                                                        hideActionsColumn={true}
-                                                    />
-                                                ))}
+                                                {paginatedData.map((row) => {
+                                                    // Filter stepData to match visibleSteps and subMilestones
+                                                    const filteredStepData =
+                                                        steps
+                                                            .filter((step) =>
+                                                                visibleSteps.has(
+                                                                    step.id
+                                                                )
+                                                            )
+                                                            .map(
+                                                                (
+                                                                    step,
+                                                                    stepIdx
+                                                                ) => {
+                                                                    return step.subMilestones.map(
+                                                                        (
+                                                                            sub,
+                                                                            subIdx
+                                                                        ) => {
+                                                                            const originalStepIdx =
+                                                                                steps.findIndex(
+                                                                                    (
+                                                                                        s
+                                                                                    ) =>
+                                                                                        s.id ===
+                                                                                        step.id
+                                                                                );
+                                                                            if (
+                                                                                row
+                                                                                    .stepData[
+                                                                                    originalStepIdx
+                                                                                ] &&
+                                                                                typeof row
+                                                                                    .stepData[
+                                                                                    originalStepIdx
+                                                                                ][
+                                                                                    subIdx
+                                                                                ] !==
+                                                                                    "undefined"
+                                                                            ) {
+                                                                                return row
+                                                                                    .stepData[
+                                                                                    originalStepIdx
+                                                                                ][
+                                                                                    subIdx
+                                                                                ];
+                                                                            }
+                                                                            return null;
+                                                                        }
+                                                                    );
+                                                                }
+                                                            );
+                                                    // Also filter checklistInfos for visible steps/subMilestones
+                                                    const filteredChecklistInfos =
+                                                        row.checklistInfos.filter(
+                                                            (info) => {
+                                                                return steps
+                                                                    .filter(
+                                                                        (
+                                                                            step
+                                                                        ) =>
+                                                                            visibleSteps.has(
+                                                                                step.id
+                                                                            )
+                                                                    )
+                                                                    .some(
+                                                                        (
+                                                                            step
+                                                                        ) =>
+                                                                            step.subMilestones.some(
+                                                                                (
+                                                                                    sub
+                                                                                ) =>
+                                                                                    sub.id ===
+                                                                                    info.subMilestoneId
+                                                                            )
+                                                                    );
+                                                            }
+                                                        );
+                                                    return (
+                                                        <WorkOrderMilestoneRow
+                                                            key={row.key}
+                                                            row={{
+                                                                ...row,
+                                                                stepData:
+                                                                    filteredStepData,
+                                                                checklistInfos:
+                                                                    filteredChecklistInfos,
+                                                            }}
+                                                            steps={steps.filter(
+                                                                (step) =>
+                                                                    visibleSteps.has(
+                                                                        step.id
+                                                                    )
+                                                            )}
+                                                            getStatusBadge={
+                                                                getStatusBadge
+                                                            }
+                                                            currentChecklistInfo={
+                                                                row.currentChecklistInfo
+                                                            }
+                                                            onMilestoneProgression={() => {}}
+                                                            isFiltered={
+                                                                searchTerm.trim() !==
+                                                                    "" ||
+                                                                statusFilter !==
+                                                                    "All" ||
+                                                                buyerFilter !==
+                                                                    "All" ||
+                                                                stepAssigneeFilter !==
+                                                                    "All"
+                                                            }
+                                                            hideNotesColumn={
+                                                                true
+                                                            }
+                                                            hideActionsColumn={
+                                                                true
+                                                            }
+                                                        />
+                                                    );
+                                                })}
                                             </tbody>
                                         </table>
                                     </div>
@@ -789,14 +1198,14 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                         )}
                     </DialogBody>
 
-                    <DialogFooter className="border-t border-gray-200 bg-gray-50">
+                    <DialogFooter className="shrink-0 border-t bg-white p-2">
                         <div className="flex items-center justify-between w-full">
                             <Typography
                                 variant="small"
                                 color="gray"
-                                className="font-normal"
+                                className="font-normal text-xs"
                             >
-                                {filteredRows.length > 0 && (
+                                {filteredRows.length > 0 ? (
                                     <>
                                         Showing{" "}
                                         {(currentPage - 1) * itemsPerPage + 1}{" "}
@@ -816,16 +1225,47 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                                 </>
                                             )}
                                     </>
+                                ) : (
+                                    "No accounts to display"
                                 )}
                             </Typography>
-                            <Button
-                                variant="text"
-                                color="gray"
-                                onClick={onClose}
-                                className="font-medium"
-                            >
-                                Close
-                            </Button>
+                            <div className="flex items-center gap-4">
+                                {filteredRows.length > 0 && (
+                                    <ReactPaginate
+                                        previousLabel={
+                                            <MdKeyboardArrowLeft className="text-[#404B52]" />
+                                        }
+                                        nextLabel={
+                                            <MdKeyboardArrowRight className="text-[#404B52]" />
+                                        }
+                                        breakLabel={"..."}
+                                        pageCount={totalPages}
+                                        marginPagesDisplayed={2}
+                                        pageRangeDisplayed={2}
+                                        onPageChange={(data) => {
+                                            setCurrentPage(data.selected + 1);
+                                        }}
+                                        containerClassName={"flex gap-2"}
+                                        previousClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
+                                        nextClassName="border border-[#EEEEEE] text-custom-bluegreen font-semibold w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:text-white hover:bg-custom-lightgreen"
+                                        pageClassName="border border-[#EEEEEE] text-black w-[26px] h-[24px] rounded-[4px] flex justify-center items-center hover:bg-custom-lightgreen text-[12px]"
+                                        activeClassName="w-[26px] h-[24px] border border-[#EEEEEE] bg-custom-lightgreen text-white rounded-[4px] text-[12px]"
+                                        pageLinkClassName="w-full h-full flex justify-center items-center"
+                                        activeLinkClassName="w-full h-full flex justify-center items-center"
+                                        disabledLinkClassName="text-gray-300 cursor-not-allowed"
+                                        forcePage={currentPage - 1}
+                                    />
+                                )}
+                                <Button
+                                    variant="text"
+                                    color="red"
+                                    onClick={onClose}
+                                    className="font-medium text-sm py-1 px-3"
+                                    size="sm"
+                                >
+                                    Close
+                                </Button>
+                            </div>
                         </div>
                     </DialogFooter>
                 </div>

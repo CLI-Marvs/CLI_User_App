@@ -65,5 +65,21 @@ class TakenOutAccount extends Model
         return $this->hasMany(WorkOrderAccountAssignee::class, 'account_id');
     }
 
+    /**
+     * Get uploaded documents for this account
+     */
+    public function uploadedDocuments()
+    {
+        return $this->hasMany(WorkOrderDocument::class, 'account_id');
+    }
+
+    /**
+     * Get account checklist statuses for this account
+     */
+    public function accountChecklistStatuses()
+    {
+        return $this->hasMany(AccountChecklistStatus::class, 'account_id');
+    }
+
     protected $guarded = [];
 }

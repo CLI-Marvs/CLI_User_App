@@ -541,104 +541,105 @@ const ChecklistTable = ({
                     }
                 );
 
-                // Filter submilestones to only show those where the user is assigned to the SPECIFIC work order for this step
-                const filteredSubMilestones = step.subMilestones.filter(
+                // Show ALL submilestones, but mark which ones the user is assigned to
+                const processedSubMilestones = step.subMilestones.map(
                     (milestone) => {
-                        // Check if user is assigned to this specific milestone for this specific work order
-                        if (
-                            !milestone.work_order_account_assignees ||
-                            milestone.work_order_account_assignees.length === 0
-                        ) {
-                            console.log(
-                                `  Milestone ${milestone.id}: No work_order_account_assignees data`
-                            );
-                            return false;
-                        }
-
-                        const stepWorkOrderId =
-                            step.workOrder?.work_order_id || step.workOrder?.id;
-                        const isAssignedToThisWorkOrder =
-                            milestone.work_order_account_assignees.some(
-                                (assignee) =>
-                                    assignee.employee_id === currentUserId &&
-                                    assignee.submilestone_id === milestone.id &&
-                                    assignee.work_order_id === stepWorkOrderId
-                            );
+                        // Use the existing helper function to check user assignment
+                        const isUserAssigned = isUserAssignedToMilestone(
+                            milestone,
+                            step.workOrder
+                        );
 
                         console.log(
-                            `  Milestone ${milestone.id} (work_order: ${stepWorkOrderId}): assigned = ${isAssignedToThisWorkOrder}`
+                            `  Milestone ${milestone.id} (work_order: ${
+                                step.workOrder?.work_order_id ||
+                                step.workOrder?.id
+                            }): user assigned = ${isUserAssigned}`,
+                            {
+                                milestoneId: milestone.id,
+                                milestoneName: milestone.milestone_name,
+                                currentUserId,
+                                workOrderId:
+                                    step.workOrder?.work_order_id ||
+                                    step.workOrder?.id,
+                                assigneesCount:
+                                    milestone.work_order_account_assignees
+                                        ?.length || 0,
+                                assignees:
+                                    milestone.work_order_account_assignees?.map(
+                                        (a) => ({
+                                            employee_id: a.employee_id,
+                                            submilestone_id: a.submilestone_id,
+                                            work_order_id: a.work_order_id,
+                                        })
+                                    ) || [],
+                            }
                         );
-                        return isAssignedToThisWorkOrder;
+
+                        let filteredChecklists = milestone.checklists || [];
+
+                        if (hideCompletedChecklists) {
+                            filteredChecklists = filteredChecklists.filter(
+                                (checklist) => {
+                                    // Check if this checklist is completed for ALL accounts
+                                    const isCompletedForAllAccounts =
+                                        accounts.every((account) => {
+                                            const uploadedDoc = (
+                                                account.uploaded_documents || []
+                                            ).find(
+                                                (doc) =>
+                                                    doc.file_title ===
+                                                    checklist.name
+                                            );
+                                            const accountChecklistStatus = (
+                                                account.account_checklist_statuses ||
+                                                []
+                                            ).find(
+                                                (status) =>
+                                                    status.checklist_id ===
+                                                    checklist.id
+                                            );
+
+                                            if (checklist.requires_document) {
+                                                return (
+                                                    uploadedDoc ||
+                                                    (accountChecklistStatus &&
+                                                        accountChecklistStatus.is_completed)
+                                                );
+                                            } else {
+                                                return (
+                                                    accountChecklistStatus &&
+                                                    accountChecklistStatus.is_completed
+                                                );
+                                            }
+                                        });
+
+                                    // Only show checklist if it's NOT completed for all accounts
+                                    return !isCompletedForAllAccounts;
+                                }
+                            );
+                        }
+
+                        return {
+                            ...milestone,
+                            checklists: filteredChecklists,
+                            isUserAssigned, // Mark whether user is assigned to this milestone
+                        };
                     }
                 );
 
                 console.log(
-                    `  Filtered submilestones: ${
-                        filteredSubMilestones.length
+                    `  Processed submilestones: ${
+                        processedSubMilestones.length
                     }/${step.subMilestones?.length || 0}`
                 );
 
                 const processedStep = {
                     ...step,
-                    originalStepIndex, // Preserve original step index before filtering
-                    subMilestones: filteredSubMilestones
-                        .map((milestone) => {
-                            let filteredChecklists = milestone.checklists || [];
-
-                            if (hideCompletedChecklists) {
-                                filteredChecklists = filteredChecklists.filter(
-                                    (checklist) => {
-                                        // Check if this checklist is completed for ALL accounts
-                                        const isCompletedForAllAccounts =
-                                            accounts.every((account) => {
-                                                const uploadedDoc = (
-                                                    account.uploaded_documents ||
-                                                    []
-                                                ).find(
-                                                    (doc) =>
-                                                        doc.file_title ===
-                                                        checklist.name
-                                                );
-                                                const accountChecklistStatus = (
-                                                    account.account_checklist_statuses ||
-                                                    []
-                                                ).find(
-                                                    (status) =>
-                                                        status.checklist_id ===
-                                                        checklist.id
-                                                );
-
-                                                if (
-                                                    checklist.requires_document
-                                                ) {
-                                                    return (
-                                                        uploadedDoc ||
-                                                        (accountChecklistStatus &&
-                                                            accountChecklistStatus.is_completed)
-                                                    );
-                                                } else {
-                                                    return (
-                                                        accountChecklistStatus &&
-                                                        accountChecklistStatus.is_completed
-                                                    );
-                                                }
-                                            });
-
-                                        // Only show checklist if it's NOT completed for all accounts
-                                        return !isCompletedForAllAccounts;
-                                    }
-                                );
-                            }
-
-                            return {
-                                ...milestone,
-                                checklists: filteredChecklists,
-                            };
-                        })
-                        .filter(
-                            (milestone) =>
-                                (milestone.checklists || []).length > 0
-                        ),
+                    originalStepIndex, // Preserve original step index
+                    subMilestones: processedSubMilestones.filter(
+                        (milestone) => (milestone.checklists || []).length > 0
+                    ),
                 };
 
                 console.log(
@@ -701,22 +702,27 @@ const ChecklistTable = ({
             // Check if this account has any work order assignments that match the filtered steps
             for (let stepIdx = 0; stepIdx < filteredSteps.length; stepIdx++) {
                 const step = filteredSteps[stepIdx];
-                const stepWorkOrderId =
-                    step.workOrder?.work_order_id || step.workOrder?.id;
 
-                // Check if this account has work order assignments for this specific work order
-                const hasAssignmentForThisWorkOrder =
-                    account.work_order_account_assignees?.some(
-                        (assignee) =>
-                            assignee.employee_id === currentUserId &&
-                            assignee.work_order_id === stepWorkOrderId
-                    );
+                // Get all work order IDs for this step (step.workOrders contains all work order IDs)
+                const stepWorkOrderIds = step.workOrders || [
+                    step.workOrder?.work_order_id || step.workOrder?.id,
+                ];
 
-                if (hasAssignmentForThisWorkOrder) {
-                    console.log(
-                        `  Account ${account.id} has assignment for work order ${stepWorkOrderId} in step ${step.stepName}`
-                    );
-                    return true;
+                // Check if this account has work order assignments for any of the work orders in this step
+                for (const stepWorkOrderId of stepWorkOrderIds) {
+                    const hasAssignmentForThisWorkOrder =
+                        account.work_order_account_assignees?.some(
+                            (assignee) =>
+                                assignee.employee_id === currentUserId &&
+                                assignee.work_order_id === stepWorkOrderId
+                        );
+
+                    if (hasAssignmentForThisWorkOrder) {
+                        console.log(
+                            `  Account ${account.id} has assignment for work order ${stepWorkOrderId} in step ${step.stepName}`
+                        );
+                        return true;
+                    }
                 }
             }
 
@@ -1188,11 +1194,12 @@ const ChecklistTable = ({
                                                         step.originalStepIndex;
                                                     let showActionButtons = false;
 
-                                                    // STEP 1 is NON-SEQUENTIAL: Show all action buttons simultaneously
+                                                    // STEP 1 is NON-SEQUENTIAL: Show action buttons only if user is assigned
                                                     if (originalStepIdx === 0) {
-                                                        showActionButtons = true;
+                                                        showActionButtons =
+                                                            sub.isUserAssigned;
                                                         console.log(
-                                                            `Step 1 (non-sequential): Always show action buttons for checklist ${checklist.name}`
+                                                            `Step 1 (non-sequential): Show action buttons for checklist ${checklist.name} - isUserAssigned: ${sub.isUserAssigned}`
                                                         );
                                                     } else {
                                                         // STEPS 2+ are SEQUENTIAL: Must complete previous steps and checklists in order
@@ -1419,9 +1426,10 @@ const ChecklistTable = ({
 
                                                             showActionButtons =
                                                                 allPreviousSubmilestonesCompleted &&
-                                                                allPreviousChecklistsCompleted;
+                                                                allPreviousChecklistsCompleted &&
+                                                                sub.isUserAssigned; // Only show if user is assigned to this milestone
                                                             console.log(
-                                                                `  Sequential check result: allPreviousSubmilestonesCompleted=${allPreviousSubmilestonesCompleted}, allPreviousChecklistsCompleted=${allPreviousChecklistsCompleted}, showActionButtons=${showActionButtons}`
+                                                                `  Sequential check result: allPreviousSubmilestonesCompleted=${allPreviousSubmilestonesCompleted}, allPreviousChecklistsCompleted=${allPreviousChecklistsCompleted}, isUserAssigned=${sub.isUserAssigned}, showActionButtons=${showActionButtons}`
                                                             );
                                                         } else {
                                                             console.log(

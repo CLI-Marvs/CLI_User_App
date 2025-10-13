@@ -16,6 +16,7 @@ import ProcessWorkOrderModal from "../../../layout/documentManagementPage/Proces
 import _ from "lodash";
 import AddFilesModal from "../../../layout/documentManagementPage/AddFilesModal";
 import WorkOrderGroupDetailsModal from "../../../layout/documentManagementPage/WorkOrderGroupDetailsModal";
+import AllAccountsChecklistModal from "../../../layout/documentManagementPage/AllAccountsChecklistModal";
 import { useStateContext } from "../../../../context/contextprovider";
 import { useMyWorkOrdersContext } from "../../../../context/MyWorkOrdersContext";
 
@@ -92,6 +93,10 @@ const MyWorkOrdersContent = () => {
         useState(false);
     const [groupDetailsData, setGroupDetailsData] = useState(null);
     const [isGroupDetailsLoading, setIsGroupDetailsLoading] = useState(null);
+    const [
+        isAllAccountsChecklistModalOpen,
+        setIsAllAccountsChecklistModalOpen,
+    ] = useState(false);
     // No local hasLoadedMyWorkOrders; rely on context state
 
     // Filter states
@@ -479,6 +484,14 @@ const MyWorkOrdersContent = () => {
         setSelectedStepName(stepName);
         setIsAddFilesModalOpen(true);
         // Don't close the group details modal - keep the ChecklistTable visible
+    };
+
+    const handleOpenAllAccountsChecklistModal = () => {
+        setIsAllAccountsChecklistModalOpen(true);
+    };
+
+    const handleCloseAllAccountsChecklistModal = () => {
+        setIsAllAccountsChecklistModalOpen(false);
     };
 
     const TABLE_HEAD = [
@@ -1077,6 +1090,27 @@ const MyWorkOrdersContent = () => {
                                 Manage and track your assigned work orders
                             </p>
                         </div>
+                        <div className="flex items-center gap-3">
+                            <button
+                                onClick={handleOpenAllAccountsChecklistModal}
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-gradient-to-r from-custom-bluegreen to-custom-lightgreen hover:from-custom-lightgreen hover:to-custom-bluegreen focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-custom-bluegreen transition-all duration-200 shadow-sm hover:shadow-md"
+                            >
+                                <svg
+                                    className="w-4 h-4 mr-2"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+                                    />
+                                </svg>
+                                All Accounts Checklist
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -1384,6 +1418,11 @@ const MyWorkOrdersContent = () => {
                             workOrderData={selectedWorkOrderData}
                         />
                     )}
+                <AllAccountsChecklistModal
+                    isOpen={isAllAccountsChecklistModalOpen}
+                    onClose={handleCloseAllAccountsChecklistModal}
+                    currentUserId={user?.id}
+                />
             </div>
         </div>
     );

@@ -151,12 +151,14 @@ class TakenOutAccountController extends Controller
             )
             ->get()
             ->map(function ($account) {
-                // Check if account exists in account_log table (meaning it's assigned to a work order)
-                $hasWorkOrderLogs = \DB::table('account_log')
-                    ->where('account_id', $account->id)
+                // Check if account has any active (non-completed) work orders
+                $hasActiveWorkOrders = \DB::table('work_order_account')
+                    ->join('work_orders', 'work_order_account.work_order_id', '=', 'work_orders.work_order_id')
+                    ->where('work_order_account.account_id', $account->id)
+                    ->where('work_orders.status', '!=', 'Complete')
                     ->exists();
 
-                $account->has_active_work_orders = $hasWorkOrderLogs;
+                $account->has_active_work_orders = $hasActiveWorkOrders;
                 return $account;
             });
 
