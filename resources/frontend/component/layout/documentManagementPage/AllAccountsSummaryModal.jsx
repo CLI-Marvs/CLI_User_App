@@ -18,7 +18,25 @@ import {
 import apiService from "../../../../frontend/component/servicesApi/apiService";
 
 const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
-    // ...existing code...
+    // State declarations
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(50);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [statusFilter, setStatusFilter] = useState("All");
+    const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
+    const [selectedAccountForNotes, setSelectedAccountForNotes] = useState(null);
+    const [filesModalOpen, setFilesModalOpen] = useState(false);
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [selectedAccountInfo, setSelectedAccountInfo] = useState({});
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [allAccountsData, setAllAccountsData] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Filter states
+    const [buyerFilter, setBuyerFilter] = useState("All");
+    const [stepAssigneeFilter, setStepAssigneeFilter] = useState("All");
+    const [hideCompletedChecklists, setHideCompletedChecklists] = useState(false);
+
     // EnhancedControlBar expects onChange handlers for each filter
     const handleSearchChange = (e) => {
         setSearchTerm(e.target.value);
@@ -42,26 +60,8 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
     };
     const handleHideCompletedChecklistsChange = (checked) => {
         setHideCompletedChecklists(checked);
+        setCurrentPage(1); // FIXED: Reset page when filter changes
     };
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(50);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [statusFilter, setStatusFilter] = useState("All");
-    const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
-    const [selectedAccountForNotes, setSelectedAccountForNotes] =
-        useState(null);
-    const [filesModalOpen, setFilesModalOpen] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useState([]);
-    const [selectedAccountInfo, setSelectedAccountInfo] = useState({});
-    const [isRefreshing, setIsRefreshing] = useState(false);
-    const [allAccountsData, setAllAccountsData] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-
-    // Filter states
-    const [buyerFilter, setBuyerFilter] = useState("All");
-    const [stepAssigneeFilter, setStepAssigneeFilter] = useState("All");
-    const [hideCompletedChecklists, setHideCompletedChecklists] =
-        useState(false);
 
     // Fetch all accounts data from all work order groups
     const fetchAllAccountsData = async () => {
@@ -125,11 +125,10 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                 }));
 
             // 2. Apply buyer filter to subMilestones (column filtering)
-            // NOTE: Removed stepAssigneeFilter from column filtering - it should only filter rows
             steps = steps.map((step) => {
                 let filteredSubMilestones = step.subMilestones;
 
-                // Buyer filter only (removed stepAssigneeFilter)
+                // Buyer filter only
                 if (buyerFilter !== "All") {
                     filteredSubMilestones = filteredSubMilestones.filter(
                         (milestone) => {
@@ -210,7 +209,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                 milestone.work_order_account_assignees || []
                             ).forEach((assignee) => {
                                 // STRICT matching: Only add if account_id explicitly matches
-                                // If account_id is not present or null, we don't assume it applies to all accounts
                                 if (assignee.account_id === account.id) {
                                     accountAssignees.add(assignee.employee_id);
                                 }
@@ -325,7 +323,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                         )?.work_order_type,
                     },
                     uploadedDocuments: account.uploaded_documents || [],
-                    assignedEmployeeIds: Array.from(accountAssignees), // Store the assigned employee IDs
+                    assignedEmployeeIds: Array.from(accountAssignees),
                     workOrderIds: account.workOrderIds || [],
                 };
             });
@@ -351,7 +349,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                 let statusMatch = true;
                 if (statusFilter !== "All") {
                     if (statusFilter.toLowerCase() === "complete") {
-                        // Match for complete status (boolean true or string containing "complete")
                         statusMatch =
                             row.status === true ||
                             String(row.status || "")
@@ -360,26 +357,23 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                     } else if (
                         statusFilter.toLowerCase().includes("progress")
                     ) {
-                        // Match for in progress status (boolean false or string containing "progress")
                         statusMatch =
                             row.status === false ||
                             String(row.status || "")
                                 .toLowerCase()
                                 .includes("progress");
                     } else {
-                        // Default string matching for other status values
                         statusMatch = String(row.status || "")
                             .toLowerCase()
                             .includes(statusFilter.toLowerCase());
                     }
                 }
 
-                // Handle assignee filtering - only show accounts assigned to selected assignee
+                // Handle assignee filtering
                 let assigneeMatch = true;
                 if (stepAssigneeFilter && stepAssigneeFilter !== "All") {
                     const selectedAssigneeId = parseInt(stepAssigneeFilter);
 
-                    // First check if we have assignedEmployeeIds collected
                     if (
                         row.assignedEmployeeIds &&
                         row.assignedEmployeeIds.length > 0
@@ -389,12 +383,9 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                 selectedAssigneeId
                             );
                     } else {
-                        // Fallback: Check directly in the data
                         assigneeMatch = false;
 
-                        // Check all work orders for this account
                         for (const workOrder of allAccountsData.work_orders) {
-                            // Check if this account is in this work order
                             const accountInWorkOrder =
                                 workOrder.accounts &&
                                 workOrder.accounts.some(
@@ -402,7 +393,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                 );
 
                             if (accountInWorkOrder) {
-                                // Check submilestones for assignees
                                 const submilestones =
                                     allAccountsData.submilestonesByType?.[
                                         workOrder.work_order_type_id
@@ -412,9 +402,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                         milestone.work_order_account_assignees ||
                                         []
                                     ).some((assignee) => {
-                                        // More flexible matching - check if employee_id matches and either:
-                                        // 1. account_id matches, OR
-                                        // 2. no account_id specified (meaning it applies to all accounts in the work order)
                                         return (
                                             assignee.employee_id ===
                                                 selectedAssigneeId &&
@@ -453,7 +440,14 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
             itemsPerPage,
         ]);
 
-    // Column visibility and assignee filter states for EnhancedControlBar (must be after steps is defined)
+    // FIXED: Validate pagination when totalPages changes (moved after totalPages is defined)
+    useEffect(() => {
+        if (currentPage > totalPages && totalPages > 0) {
+            setCurrentPage(1);
+        }
+    }, [currentPage, totalPages]);
+
+    // Column visibility and assignee filter states
     const [showStepView, setShowStepView] = useState(true);
     const [visibleSteps, setVisibleSteps] = useState(new Set());
     const [availableAssignees, setAvailableAssignees] = useState([]);
@@ -471,7 +465,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
             setAvailableAssignees([]);
             return;
         }
-        // Gather unique assignees from all work orders and submilestones
         const assigneeMap = {};
         allAccountsData.work_orders.forEach((wo) => {
             const submilestones =
@@ -481,7 +474,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                 (milestone.work_order_account_assignees || []).forEach(
                     (assignee) => {
                         if (!assigneeMap[assignee.employee_id]) {
-                            // Try multiple name properties from the assignee object
                             const name =
                                 assignee.employee?.name ||
                                 assignee.employee?.full_name ||
@@ -545,11 +537,13 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
         }
     };
 
-    // Paginated data
+    // FIXED: Paginated data with validation
     const paginatedData = useMemo(() => {
-        const startIndex = (currentPage - 1) * itemsPerPage;
-        return filteredRows.slice(startIndex, startIndex + itemsPerPage);
-    }, [filteredRows, currentPage, itemsPerPage]);
+        const validCurrentPage = Math.min(Math.max(1, currentPage), totalPages || 1);
+        const startIndex = (validCurrentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        return filteredRows.slice(startIndex, endIndex);
+    }, [filteredRows, currentPage, itemsPerPage, totalPages]);
 
     // Handle file management
     const handleAddFiles = (
@@ -578,7 +572,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
     };
 
     const handleShowFilesModal = (row) => {
-        // Show the uploaded documents for this account
         const uploadedDocs = row.uploadedDocuments || [];
         setSelectedFiles(uploadedDocs);
         setSelectedAccountInfo({
@@ -605,7 +598,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
         const buyers = new Set(
             tableRows.map((row) => row.accountName).filter(Boolean)
         );
-        return Array.from(buyers).slice(0, 20); // Limit for performance
+        return Array.from(buyers).slice(0, 20);
     };
 
     // Status badge function
@@ -613,7 +606,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
         const baseClasses =
             "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium";
 
-        // Handle boolean status values (true = complete, false = in progress)
         if (status === true || status === "true") {
             return (
                 <span className={`${baseClasses} bg-green-100 text-green-800`}>
@@ -630,7 +622,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
             );
         }
 
-        // Handle string status values
         const statusStr = String(status || "")
             .toLowerCase()
             .trim();
@@ -675,7 +666,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                 </span>
             );
         } else {
-            // Default to in progress for unknown values
             return (
                 <span
                     className={`${baseClasses} bg-yellow-100 text-yellow-800`}
@@ -697,16 +687,15 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                 className="bg-transparent shadow-none fixed inset-0 z-[9999] flex items-center justify-center w-screen h-screen"
             >
                 <div
-                    className="bg-white shadow-xl w-screen h-screen mx-0"
+                    className="bg-white shadow-xl w-screen h-screen mx-0 flex flex-col"
                     style={{
                         position: "relative",
-                        paddingBottom: "64px",
                         borderTopLeftRadius: 0,
                         borderTopRightRadius: 0,
                     }}
                 >
                     <DialogHeader
-                        className="flex items-center justify-between pb-4 border-b border-gray-200 bg-gradient-to-r from-custom-bluegreen to-custom-lightgreen text-white"
+                        className="flex-shrink-0 flex items-center justify-between pb-4 border-b border-gray-200 bg-gradient-to-r from-custom-bluegreen to-custom-lightgreen text-white"
                         style={{
                             borderTopLeftRadius: 0,
                             borderTopRightRadius: 0,
@@ -783,7 +772,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                         </div>
                     </DialogHeader>
 
-                    <DialogBody className="p-0 h-full overflow-hidden flex flex-col">
+                    <DialogBody className="p-0 flex-1 overflow-hidden flex flex-col" style={{ minHeight: 0 }}>
                         {isLoading ? (
                             <div className="flex items-center justify-center h-96">
                                 <div className="text-center">
@@ -828,7 +817,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="h-full flex flex-col overflow-hidden">
+                            <div className="flex-1 flex flex-col overflow-hidden" style={{ minHeight: 0 }}>
                                 {/* Enhanced Control Bar */}
                                 <div className="flex-shrink-0">
                                     <EnhancedControlBar
@@ -1070,7 +1059,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                             </thead>
                                             <tbody>
                                                 {paginatedData.map((row) => {
-                                                    // Filter stepData to match visibleSteps and subMilestones
                                                     const filteredStepData =
                                                         steps
                                                             .filter((step) =>
@@ -1121,7 +1109,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                                                     );
                                                                 }
                                                             );
-                                                    // Also filter checklistInfos for visible steps/subMilestones
                                                     const filteredChecklistInfos =
                                                         row.checklistInfos.filter(
                                                             (info) => {
@@ -1198,7 +1185,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                         )}
                     </DialogBody>
 
-                    <DialogFooter className="shrink-0 border-t bg-white p-2">
+                    <DialogFooter className="flex-shrink-0 border-t bg-white p-2" style={{ minHeight: '60px' }}>
                         <div className="flex items-center justify-between w-full">
                             <Typography
                                 variant="small"
@@ -1230,7 +1217,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                 )}
                             </Typography>
                             <div className="flex items-center gap-4">
-                                {filteredRows.length > 0 && (
+                                {filteredRows && filteredRows.length > 0 && (
                                     <ReactPaginate
                                         previousLabel={
                                             <MdKeyboardArrowLeft className="text-[#404B52]" />
@@ -1253,7 +1240,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                         pageLinkClassName="w-full h-full flex justify-center items-center"
                                         activeLinkClassName="w-full h-full flex justify-center items-center"
                                         disabledLinkClassName="text-gray-300 cursor-not-allowed"
-                                        forcePage={currentPage - 1}
+                                        forcePage={Math.max(0, Math.min(currentPage - 1, totalPages - 1))}
                                     />
                                 )}
                                 <Button
