@@ -459,5 +459,75 @@ class AccountChecklistStatusController extends Controller
         }
     }
 
+    /**
+ * Bulk update checklist status for multiple accounts with a single checklist
+ * Used when toggling all checkboxes under a checklist column
+ */
+public function bulkUpdateAccounts(Request $request)
+{
+    $validated = $request->validate([
+        'account_ids' => 'required|array',
+        'account_ids.*' => 'integer|exists:taken_out_accounts,id',
+        'checklist_id' => 'required|integer|exists:checklists,id',
+        'is_completed' => 'required|boolean',
+    ]);
+
+    Log::info('AccountChecklistStatusController: Bulk update accounts request', [
+        'account_ids' => $validated['account_ids'],
+        'checklist_id' => $validated['checklist_id'],
+        'is_completed' => $validated['is_completed'],
+    ]);
+
+    $now = now();
+    $isCompleted = $validated['is_completed'];
+    $completedAt = $isCompleted ? $now : null;
+
+    // Get checklist info once for efficiency
+    $checklist = Checklist::with('submilestone')->find($validated['checklist_id']);
+    $workOrderTypeId = $checklist && $checklist->submilestone 
+        ? $checklist->submilestone->work_order_type_id 
+        : null;
+
+    // Process each account
+    foreach ($validated['account_ids'] as $accountId) {
+        // Update or create the checklist status
+        AccountChecklistStatus::updateOrCreate(
+            [
+                'account_id' => $accountId,
+                'checklist_id' => $validated['checklist_id'],
+            ],
+            [
+                'is_completed' => $isCompleted,
+                'completed_at' => $completedAt,
+                'updated_at' => $now,
+            ]
+        );
+
+        // Check and trigger next step if applicable
+        if ($workOrderTypeId) {
+            $workOrder = WorkOrder::where('work_order_type_id', $workOrderTypeId)
+                ->whereHas('accounts', function ($query) use ($accountId) {
+                    $query->where('taken_out_accounts.id', $accountId);
+                })->first();
+
+            if ($workOrder) {
+                $this->_checkAndTriggerNextStep($accountId, $workOrder);
+            }
+        }
+
+        // Check and update overall completion status
+        $this->_checkAndUpdateOverallCompletion($accountId);
+    }
+
+    Log::info('Bulk update accounts completed successfully', [
+        'updated_count' => count($validated['account_ids']),
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'updated_count' => count($validated['account_ids']),
+    ]);
+}
+
 
 }
