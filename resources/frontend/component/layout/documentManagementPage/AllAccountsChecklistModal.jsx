@@ -74,7 +74,7 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await apiService.get("/all-accounts-with-details");
+            const response = await apiService.get("/all-accounts-details");
             if (response.data.success) {
                 setAllAccountsData(response.data.data);
                 console.log(
