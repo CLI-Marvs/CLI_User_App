@@ -9,8 +9,8 @@ const EnhancedControlBar = ({
     onStatusFilterChange,
     onRefresh,
     isRefreshing,
-    hideItemsPerPage = false, // New prop to hide items per page control
-    hideStatusFilter = false, // New prop to hide status filter
+    hideItemsPerPage = false,
+    hideStatusFilter = false,
     // New filter props
     buyerFilter,
     onBuyerFilterChange,
@@ -18,7 +18,7 @@ const EnhancedControlBar = ({
     onStepViewToggle,
     assigneeFilter,
     onAssigneeFilterChange,
-    availableAssignees = [], // List of assignees for dropdown
+    availableAssignees = [],
     // Step visibility props
     availableSteps = [],
     visibleSteps = new Set(),
@@ -27,6 +27,7 @@ const EnhancedControlBar = ({
     // Step assignee filter props
     stepAssigneeFilter = "All",
     onStepAssigneeFilterChange,
+    stepAssigneeFilterLabel = "Steps by:", // NEW PROP with default value
     hideBuyerFilter = false,
     hideStepViewToggle = false,
     hideAssigneeFilter = false,
@@ -163,7 +164,7 @@ const EnhancedControlBar = ({
                                     htmlFor="step-assignee-filter"
                                     className="text-sm font-medium text-gray-700 whitespace-nowrap"
                                 >
-                                    Steps by:
+                                    {stepAssigneeFilterLabel}
                                 </label>
                                 <select
                                     id="step-assignee-filter"
@@ -295,15 +296,6 @@ const EnhancedControlBar = ({
                                             </div>
                                             <div className="p-2">
                                                 {availableSteps.map((step) => {
-                                                    // Find the assignee for this step (you may need to adjust this logic based on your data structure)
-                                                    const stepAssignee =
-                                                        availableAssignees.find(
-                                                            (assignee) => {
-                                                                // This logic assumes you can match step assignees - adjust as needed
-                                                                return true; // Placeholder - implement actual logic
-                                                            }
-                                                        );
-
                                                     return (
                                                         <label
                                                             key={step.id}

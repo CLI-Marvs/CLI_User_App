@@ -24,7 +24,8 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState("All");
     const [isNotesModalOpen, setIsNotesModalOpen] = useState(false);
-    const [selectedAccountForNotes, setSelectedAccountForNotes] = useState(null);
+    const [selectedAccountForNotes, setSelectedAccountForNotes] =
+        useState(null);
     const [filesModalOpen, setFilesModalOpen] = useState(false);
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [selectedAccountInfo, setSelectedAccountInfo] = useState({});
@@ -35,7 +36,8 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
     // Filter states
     const [buyerFilter, setBuyerFilter] = useState("All");
     const [stepAssigneeFilter, setStepAssigneeFilter] = useState("All");
-    const [hideCompletedChecklists, setHideCompletedChecklists] = useState(false);
+    const [hideCompletedChecklists, setHideCompletedChecklists] =
+        useState(false);
 
     // EnhancedControlBar expects onChange handlers for each filter
     const handleSearchChange = (e) => {
@@ -60,7 +62,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
     };
     const handleHideCompletedChecklistsChange = (checked) => {
         setHideCompletedChecklists(checked);
-        setCurrentPage(1); // FIXED: Reset page when filter changes
+        setCurrentPage(1);
     };
 
     // Fetch all accounts data from all work order groups
@@ -93,7 +95,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
         setIsRefreshing(false);
     };
 
-    // Filtering logic refactored to match WorkOrderGroupDetailsModal
+    // Filtering logic
     const { columnHeaders, tableRows, filteredRows, totalPages, steps } =
         useMemo(() => {
             if (!allAccountsData || !allAccountsData.work_orders)
@@ -125,6 +127,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                 }));
 
             // 2. Apply buyer filter to subMilestones (column filtering)
+            // NOTE: We do NOT filter by assignee here - we show all columns
             steps = steps.map((step) => {
                 let filteredSubMilestones = step.subMilestones;
 
@@ -191,7 +194,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                 // Store assignee information for this account
                 const accountAssignees = new Set();
 
-                // Collect all assignees for this specific account across ALL work orders and submilestones
+                // UPDATED: Collect all assignees for this specific account across ALL work orders and submilestones
                 allAccountsData.work_orders.forEach((wo) => {
                     // Only check if this account is part of this work order
                     const accountInWorkOrder =
@@ -208,8 +211,10 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                             (
                                 milestone.work_order_account_assignees || []
                             ).forEach((assignee) => {
-                                // STRICT matching: Only add if account_id explicitly matches
-                                if (assignee.account_id === account.id) {
+                                // UPDATED LOGIC: Include assignees that either:
+                                // 1. Have no account_id (general assignees for the work order)
+                                // 2. Have account_id that matches this account
+                                if (!assignee.account_id || assignee.account_id === account.id) {
                                     accountAssignees.add(assignee.employee_id);
                                 }
                             });
@@ -369,55 +374,14 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                     }
                 }
 
-                // Handle assignee filtering
+                // UPDATED: Simplified assignee filtering - show all accounts handled by this assignee
                 let assigneeMatch = true;
                 if (stepAssigneeFilter && stepAssigneeFilter !== "All") {
                     const selectedAssigneeId = parseInt(stepAssigneeFilter);
-
-                    if (
-                        row.assignedEmployeeIds &&
-                        row.assignedEmployeeIds.length > 0
-                    ) {
-                        assigneeMatch =
-                            row.assignedEmployeeIds.includes(
-                                selectedAssigneeId
-                            );
-                    } else {
-                        assigneeMatch = false;
-
-                        for (const workOrder of allAccountsData.work_orders) {
-                            const accountInWorkOrder =
-                                workOrder.accounts &&
-                                workOrder.accounts.some(
-                                    (acc) => acc.id === row.key
-                                );
-
-                            if (accountInWorkOrder) {
-                                const submilestones =
-                                    allAccountsData.submilestonesByType?.[
-                                        workOrder.work_order_type_id
-                                    ] || [];
-                                for (const milestone of submilestones) {
-                                    const hasAssignee = (
-                                        milestone.work_order_account_assignees ||
-                                        []
-                                    ).some((assignee) => {
-                                        return (
-                                            assignee.employee_id ===
-                                                selectedAssigneeId &&
-                                            (!assignee.account_id ||
-                                                assignee.account_id === row.key)
-                                        );
-                                    });
-                                    if (hasAssignee) {
-                                        assigneeMatch = true;
-                                        break;
-                                    }
-                                }
-                                if (assigneeMatch) break;
-                            }
-                        }
-                    }
+                    
+                    // Simply check if the selected assignee is in the account's assignee list
+                    assigneeMatch = row.assignedEmployeeIds && 
+                                    row.assignedEmployeeIds.includes(selectedAssigneeId);
                 }
 
                 return searchMatch && statusMatch && assigneeMatch;
@@ -440,7 +404,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
             itemsPerPage,
         ]);
 
-    // FIXED: Validate pagination when totalPages changes (moved after totalPages is defined)
+    // Validate pagination when totalPages changes
     useEffect(() => {
         if (currentPage > totalPages && totalPages > 0) {
             setCurrentPage(1);
@@ -537,9 +501,12 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
         }
     };
 
-    // FIXED: Paginated data with validation
+    // Paginated data with validation
     const paginatedData = useMemo(() => {
-        const validCurrentPage = Math.min(Math.max(1, currentPage), totalPages || 1);
+        const validCurrentPage = Math.min(
+            Math.max(1, currentPage),
+            totalPages || 1
+        );
         const startIndex = (validCurrentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         return filteredRows.slice(startIndex, endIndex);
@@ -581,24 +548,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
             propertyName: row.propertyName,
             unitNo: row.unitNo,
         });
-    };
-
-    // Get unique statuses for filter
-    const getUniqueStatuses = () => {
-        if (!tableRows || tableRows.length === 0) return [];
-        const statuses = new Set(
-            tableRows.map((row) => String(row.status || "")).filter(Boolean)
-        );
-        return Array.from(statuses);
-    };
-
-    // Get unique buyers for filter
-    const getUniqueBuyers = () => {
-        if (!tableRows || tableRows.length === 0) return [];
-        const buyers = new Set(
-            tableRows.map((row) => row.accountName).filter(Boolean)
-        );
-        return Array.from(buyers).slice(0, 20);
     };
 
     // Status badge function
@@ -772,7 +721,10 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                         </div>
                     </DialogHeader>
 
-                    <DialogBody className="p-0 flex-1 overflow-hidden flex flex-col" style={{ minHeight: 0 }}>
+                    <DialogBody
+                        className="p-0 flex-1 overflow-hidden flex flex-col"
+                        style={{ minHeight: 0 }}
+                    >
                         {isLoading ? (
                             <div className="flex items-center justify-center h-96">
                                 <div className="text-center">
@@ -817,7 +769,10 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex-1 flex flex-col overflow-hidden" style={{ minHeight: 0 }}>
+                            <div
+                                className="flex-1 flex flex-col overflow-hidden"
+                                style={{ minHeight: 0 }}
+                            >
                                 {/* Enhanced Control Bar */}
                                 <div className="flex-shrink-0">
                                     <EnhancedControlBar
@@ -864,6 +819,7 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                             handleHideCompletedChecklistsChange
                                         }
                                         hideCompletedChecklistsFilter={true}
+                                        stepAssigneeFilterLabel="Accounts by:"
                                     />
                                 </div>
 
@@ -1185,7 +1141,10 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                         )}
                     </DialogBody>
 
-                    <DialogFooter className="flex-shrink-0 border-t bg-white p-2" style={{ minHeight: '60px' }}>
+                    <DialogFooter
+                        className="flex-shrink-0 border-t bg-white p-2"
+                        style={{ minHeight: "60px" }}
+                    >
                         <div className="flex items-center justify-between w-full">
                             <Typography
                                 variant="small"
@@ -1240,7 +1199,13 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                         pageLinkClassName="w-full h-full flex justify-center items-center"
                                         activeLinkClassName="w-full h-full flex justify-center items-center"
                                         disabledLinkClassName="text-gray-300 cursor-not-allowed"
-                                        forcePage={Math.max(0, Math.min(currentPage - 1, totalPages - 1))}
+                                        forcePage={Math.max(
+                                            0,
+                                            Math.min(
+                                                currentPage - 1,
+                                                totalPages - 1
+                                            )
+                                        )}
                                     />
                                 )}
                                 <Button

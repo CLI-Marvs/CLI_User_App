@@ -399,12 +399,16 @@ const ChecklistTable = ({
 
     const isUserAssignedToMilestone = React.useCallback(
         (milestone, workOrder = null) => {
-            if (!currentUserId) return true;
+            // If no currentUserId, hide everything (be strict)
+            if (!currentUserId) {
+                return false;
+            }
 
             const workOrderId = workOrder
                 ? workOrder.work_order_id || workOrder.id
                 : null;
 
+            // Priority 1: Check work_order_account_assignees (most specific)
             if (
                 milestone.work_order_account_assignees &&
                 milestone.work_order_account_assignees.length > 0
@@ -420,9 +424,15 @@ const ChecklistTable = ({
                         return matches;
                     }
                 );
+                
                 if (isAssigned) return true;
+                
+                // If work_order_account_assignees exists but user not found, don't fall through
+                // Only check other assignment types if this array is empty
+                return false;
             }
 
+            // Priority 2: Check account-level assignments
             if (workOrderId && accounts.length > 0) {
                 const accountAssigned = accounts.some((account) => {
                     if (account.work_order_account_assignees) {
@@ -438,9 +448,11 @@ const ChecklistTable = ({
                     }
                     return false;
                 });
+                
                 if (accountAssigned) return true;
             }
 
+            // Priority 3: Check legacy milestone_assignees
             const hasAssignees = milestone.milestone_assignees;
 
             if (hasAssignees && hasAssignees.length > 0) {
@@ -460,9 +472,14 @@ const ChecklistTable = ({
                     );
                     return userMatches && propertyMatches;
                 });
+                
                 if (legacyAssigned) return true;
+                
+                // If milestone_assignees exists but user not found, don't show
+                return false;
             }
 
+            // Priority 4: Fallback checks - only if no specific assignment arrays exist
             const fallbackResult =
                 milestone.assigned_to === currentUserId ||
                 milestone.assignees?.includes(currentUserId) ||
@@ -473,6 +490,8 @@ const ChecklistTable = ({
                 milestone.assignee_id === currentUserId ||
                 milestone.user_id === currentUserId ||
                 milestone.assigned_user_id === currentUserId;
+            
+            // If no assignment information at all, hide it
             return fallbackResult;
         },
         [currentUserId, accounts]
@@ -510,14 +529,23 @@ const ChecklistTable = ({
     );
 
     const filteredSteps = React.useMemo(() => {
+        console.log('=== Filtering Steps ===');
+        console.log('currentUserId:', currentUserId);
+        console.log('total steps:', steps.length);
+        
         const result = (steps || [])
             .map((step, originalStepIndex) => {
+                console.log('Processing step:', step.stepName);
+                
                 const processedSubMilestones = step.subMilestones.map(
                     (milestone) => {
                         const isUserAssigned = isUserAssignedToMilestone(
                             milestone,
                             step.workOrder
                         );
+                        
+                        console.log(`  Submilestone "${milestone.name}" - assigned: ${isUserAssigned}`);
+                        
                         let filteredChecklists = milestone.checklists || [];
 
                         if (hideCompletedChecklists) {
@@ -571,16 +599,30 @@ const ChecklistTable = ({
                 const processedStep = {
                     ...step,
                     originalStepIndex,
+                    // CRITICAL: Filter by BOTH having checklists AND being assigned
                     subMilestones: processedSubMilestones.filter(
-                        (milestone) => (milestone.checklists || []).length > 0
+                        (milestone) => {
+                            const hasChecklists = (milestone.checklists || []).length > 0;
+                            const result = hasChecklists && milestone.isUserAssigned;
+                            
+                            if (!result) {
+                                console.log(`    Filtering OUT "${milestone.name}" - hasChecklists: ${hasChecklists}, isUserAssigned: ${milestone.isUserAssigned}`);
+                            }
+                            
+                            return result;
+                        }
                     ),
                 };
                 return processedStep;
             })
             .filter((step) => {
                 const hasAssignedSubmilestones = step.subMilestones.length > 0;
+                console.log(`Step "${step.stepName}" has ${step.subMilestones.length} assigned submilestones`);
                 return hasAssignedSubmilestones;
             });
+
+        console.log('Final filtered steps:', result.length);
+        console.log('===================');
 
         if (result.length === 0 && steps.length > 0) {
             const firstStep = steps[0];
@@ -599,7 +641,7 @@ const ChecklistTable = ({
         }
 
         return result;
-    }, [steps, accounts, currentUserId, hideCompletedChecklists]);
+    }, [steps, accounts, currentUserId, hideCompletedChecklists, isUserAssignedToMilestone]);
 
     const subMilestoneStepMap = React.useMemo(() => {
         const map = {};
