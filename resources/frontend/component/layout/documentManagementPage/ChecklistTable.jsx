@@ -529,13 +529,9 @@ const ChecklistTable = ({
     );
 
     const filteredSteps = React.useMemo(() => {
-        console.log('=== Filtering Steps ===');
-        console.log('currentUserId:', currentUserId);
-        console.log('total steps:', steps.length);
         
         const result = (steps || [])
             .map((step, originalStepIndex) => {
-                console.log('Processing step:', step.stepName);
                 
                 const processedSubMilestones = step.subMilestones.map(
                     (milestone) => {
@@ -543,8 +539,6 @@ const ChecklistTable = ({
                             milestone,
                             step.workOrder
                         );
-                        
-                        console.log(`  Submilestone "${milestone.name}" - assigned: ${isUserAssigned}`);
                         
                         let filteredChecklists = milestone.checklists || [];
 
@@ -606,7 +600,7 @@ const ChecklistTable = ({
                             const result = hasChecklists && milestone.isUserAssigned;
                             
                             if (!result) {
-                                console.log(`    Filtering OUT "${milestone.name}" - hasChecklists: ${hasChecklists}, isUserAssigned: ${milestone.isUserAssigned}`);
+                                // console.log(`    Filtering OUT "${milestone.name}" - hasChecklists: ${hasChecklists}, isUserAssigned: ${milestone.isUserAssigned}`);
                             }
                             
                             return result;
@@ -617,12 +611,8 @@ const ChecklistTable = ({
             })
             .filter((step) => {
                 const hasAssignedSubmilestones = step.subMilestones.length > 0;
-                console.log(`Step "${step.stepName}" has ${step.subMilestones.length} assigned submilestones`);
                 return hasAssignedSubmilestones;
             });
-
-        console.log('Final filtered steps:', result.length);
-        console.log('===================');
 
         if (result.length === 0 && steps.length > 0) {
             const firstStep = steps[0];
