@@ -59,7 +59,6 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                     submilestoneMap[submilestone.id] = submilestone;
                 });
                 setSubmilestones(submilestoneMap);
-                console.log("Fetched submilestones:", submilestoneMap);
             } else {
                 console.error("Failed to fetch submilestones:", response.data);
             }
@@ -77,10 +76,6 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
             const response = await apiService.get("/all-accounts-details");
             if (response.data.success) {
                 setAllAccountsData(response.data.data);
-                console.log(
-                    "Debug - All accounts data loaded:",
-                    response.data.data
-                );
 
                 // Extract unique submilestone IDs from the data
                 const submilestoneIds = new Set();
@@ -447,10 +442,6 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
 
                 if (assignee) {
                     const targetWorkOrderId = assignee.work_order_id;
-                    console.log(
-                        "Debug - Found targetWorkOrderId from assignee:",
-                        targetWorkOrderId
-                    );
 
                     // Find which group contains this work order
                     const groups = allAccountsData?.groups || [];
@@ -462,22 +453,11 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                         );
                         if (hasWorkOrder) {
                             workOrderGroupId = group.id;
-                            console.log(
-                                "Debug - Found workOrderGroupId:",
-                                workOrderGroupId,
-                                "for workOrder:",
-                                targetWorkOrderId
-                            );
                             break;
                         }
                     }
                 }
             }
-
-            console.log("Debug - Final workOrderGroupId:", workOrderGroupId);
-            console.log("Debug - Account:", account);
-            console.log("Debug - Step:", step);
-            console.log("Debug - ColumnInfo:", columnInfo);
 
             if (!workOrderGroupId) {
                 console.error(
@@ -489,11 +469,6 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                 alert("Unable to find work order group details for this step.");
                 return;
             }
-
-            console.log(
-                "Opening work order group details for ID:",
-                workOrderGroupId
-            );
 
             // Fetch the work order group details for this specific work order group
             const response = await apiService.get(
@@ -741,108 +716,197 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                             </div>
                         ) : (
                             <div className="h-full flex flex-col">
-                                {/* Filter Controls */}
-                                <div className="flex-shrink-0 p-4 border-b border-gray-200 bg-gray-50">
-                                    <div className="flex items-center justify-between gap-4">
-                                        <div className="flex items-center gap-4 flex-1">
-                                            <div className="relative flex-1 max-w-xs">
+                                {/* Filter Controls - NEW MODERN DESIGN */}
+                                <div className="bg-gradient-to-br from-gray-50 to-white border-b border-gray-200 shadow-md">
+                                    {/* Main Control Bar */}
+                                    <div className="px-6 py-4">
+                                        {/* Top Row: Search, Primary Filters, Actions */}
+                                        <div className="flex flex-wrap items-center gap-3">
+                                            {/* Enhanced Search */}
+                                            <div className="relative flex-1 min-w-[280px] max-w-md">
+                                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                                    <svg
+                                                        className="h-5 w-5 text-gray-400"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                                                        />
+                                                    </svg>
+                                                </div>
                                                 <input
                                                     type="text"
-                                                    placeholder="Search accounts..."
+                                                    placeholder="Search accounts, properties, contracts..."
                                                     value={searchTerm}
                                                     onChange={(e) => {
-                                                        setSearchTerm(
-                                                            e.target.value
-                                                        );
+                                                        setSearchTerm(e.target.value);
                                                         setCurrentPage(1);
                                                     }}
-                                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-custom-lightgreen focus:border-custom-lightgreen transition-all duration-200 text-sm bg-white placeholder-gray-400 shadow-sm hover:border-gray-300 hover:shadow-md"
                                                 />
-                                                <svg
-                                                    className="absolute left-3 top-2.5 w-4 h-4 text-gray-400"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                                    />
-                                                </svg>
+                                                {searchTerm && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setSearchTerm("");
+                                                            setCurrentPage(1);
+                                                        }}
+                                                        className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+                                                    >
+                                                        <svg
+                                                            className="h-5 w-5"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M6 18L18 6M6 6l12 12"
+                                                            />
+                                                        </svg>
+                                                    </button>
+                                                )}
                                             </div>
 
-                                            <select
-                                                value={statusFilter}
-                                                onChange={(e) => {
-                                                    setStatusFilter(
-                                                        e.target.value
-                                                    );
-                                                    setCurrentPage(1);
-                                                }}
-                                                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
-                                            >
-                                                <option value="all">
-                                                    All Status
-                                                </option>
-                                                <option value="completed">
-                                                    Completed
-                                                </option>
-                                                <option value="in-progress">
-                                                    In Progress
-                                                </option>
-                                                <option value="pending">
-                                                    Pending
-                                                </option>
-                                            </select>
+                                            {/* Quick Filters Group */}
+                                            <div className="flex flex-wrap items-center gap-2">
+                                                {/* Status Filter */}
+                                                <div className="group relative">
+                                                    <select
+                                                        value={statusFilter}
+                                                        onChange={(e) => {
+                                                            setStatusFilter(e.target.value);
+                                                            setCurrentPage(1);
+                                                        }}
+                                                        className="appearance-none pl-4 pr-10 py-2.5 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-custom-lightgreen focus:border-custom-lightgreen transition-all duration-200 text-sm bg-white font-medium text-gray-700 hover:border-gray-300 hover:shadow-md cursor-pointer"
+                                                    >
+                                                        <option value="all">All Status</option>
+                                                        <option value="completed">Completed</option>
+                                                        <option value="in-progress">In Progress</option>
+                                                        <option value="pending">Pending</option>
+                                                    </select>
+                                                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                                        <svg
+                                                            className="h-4 w-4 text-gray-400 group-hover:text-gray-600"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M19 9l-7 7-7-7"
+                                                            />
+                                                        </svg>
+                                                    </div>
+                                                </div>
 
-                                            <label className="flex items-center gap-2 text-sm">
-                                                <input
-                                                    type="checkbox"
-                                                    checked={
-                                                        hideCompletedChecklists
-                                                    }
-                                                    onChange={(e) => {
-                                                        setHideCompletedChecklists(
-                                                            e.target.checked
-                                                        );
-                                                        setCurrentPage(1);
-                                                    }}
-                                                    className="form-checkbox h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                                                />
-                                                Hide Completed
-                                            </label>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <label className="text-sm text-gray-600">
-                                                Items per page:
-                                                <select
-                                                    value={itemsPerPage}
-                                                    onChange={(e) => {
-                                                        setItemsPerPage(
-                                                            parseInt(
-                                                                e.target.value
-                                                            )
-                                                        );
-                                                        setCurrentPage(1);
-                                                    }}
-                                                    className="ml-2 border border-gray-300 rounded px-2 py-1 text-sm"
+                                                {/* Hide Completed Checklists */}
+                                                <label className="flex items-center gap-2 px-3 py-2.5 border-2 border-gray-200 rounded-lg bg-white cursor-pointer hover:border-gray-300 hover:shadow-md transition-all duration-200 group">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={hideCompletedChecklists}
+                                                        onChange={(e) => {
+                                                            setHideCompletedChecklists(e.target.checked);
+                                                            setCurrentPage(1);
+                                                        }}
+                                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors"
+                                                    />
+                                                    <span className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                                                        Hide Completed
+                                                    </span>
+                                                </label>
+
+                                                {/* Clear All Filters */}
+                                                {(searchTerm || statusFilter !== "all" || hideCompletedChecklists) && (
+                                                    <button
+                                                        onClick={() => {
+                                                            setSearchTerm("");
+                                                            setStatusFilter("all");
+                                                            setHideCompletedChecklists(false);
+                                                            setCurrentPage(1);
+                                                        }}
+                                                        className="flex items-center gap-2 px-3 py-2.5 bg-red-50 border-2 border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-100 hover:border-red-300 transition-all duration-200"
+                                                        title="Clear all active filters"
+                                                    >
+                                                        <svg
+                                                            className="h-4 w-4"
+                                                            fill="none"
+                                                            stroke="currentColor"
+                                                            viewBox="0 0 24 24"
+                                                        >
+                                                            <path
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                                strokeWidth={2}
+                                                                d="M6 18L18 6M6 6l12 12"
+                                                            />
+                                                        </svg>
+                                                        <span className="hidden sm:inline">Clear Filters</span>
+                                                    </button>
+                                                )}
+                                            </div>
+
+                                            {/* Action Buttons */}
+                                            <div className="flex items-center gap-2 ml-auto">
+                                                {/* Refresh Button */}
+                                                <button
+                                                    onClick={handleRefresh}
+                                                    disabled={isRefreshing}
+                                                    className={`relative flex items-center justify-center px-4 py-2.5 rounded-lg border-2 font-medium transition-all duration-300 ${
+                                                        isRefreshing
+                                                            ? "bg-blue-50 border-blue-300 text-blue-600"
+                                                            : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:shadow-md"
+                                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                                    title="Refresh data"
                                                 >
-                                                    <option value={10}>
-                                                        10
-                                                    </option>
-                                                    <option value={25}>
-                                                        25
-                                                    </option>
-                                                    <option value={50}>
-                                                        50
-                                                    </option>
-                                                    <option value={100}>
-                                                        100
-                                                    </option>
-                                                </select>
-                                            </label>
+                                                    <svg
+                                                        className={`h-5 w-5 transition-all duration-300 ${
+                                                            isRefreshing ? "animate-spin" : ""
+                                                        }`}
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                    >
+                                                        <path
+                                                            strokeLinecap="round"
+                                                            strokeLinejoin="round"
+                                                            strokeWidth={2}
+                                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                                                        />
+                                                    </svg>
+                                                </button>
+
+                                                {/* Items Per Page */}
+                                                <div className="flex items-center gap-2 px-3 py-2.5 border-2 border-gray-200 rounded-lg bg-white hover:border-gray-300 hover:shadow-md transition-all duration-200">
+                                                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                                                        Show
+                                                    </span>
+                                                    <select
+                                                        value={itemsPerPage}
+                                                        onChange={(e) => {
+                                                            setItemsPerPage(parseInt(e.target.value));
+                                                            setCurrentPage(1);
+                                                        }}
+                                                        className="appearance-none border-0 px-2 py-0.5 focus:ring-2 focus:ring-custom-lightgreen transition-all duration-200 text-sm bg-transparent font-bold text-gray-700 cursor-pointer"
+                                                    >
+                                                        <option value={10}>10</option>
+                                                        <option value={25}>25</option>
+                                                        <option value={50}>50</option>
+                                                        <option value={100}>100</option>
+                                                    </select>
+                                                    <span className="text-xs font-medium text-gray-500">
+                                                        rows
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -1256,15 +1320,6 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                         forcePage={currentPage - 1}
                                     />
                                 )}
-                                <Button
-                                    variant="text"
-                                    color="red"
-                                    onClick={handleMainModalClose}
-                                    className="font-medium text-sm py-1 px-3"
-                                    size="sm"
-                                >
-                                    Close
-                                </Button>
                             </div>
                         </div>
                     </DialogFooter>

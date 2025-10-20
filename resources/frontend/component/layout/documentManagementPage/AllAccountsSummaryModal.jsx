@@ -1208,15 +1208,6 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                         )}
                                     />
                                 )}
-                                <Button
-                                    variant="text"
-                                    color="red"
-                                    onClick={onClose}
-                                    className="font-medium text-sm py-1 px-3"
-                                    size="sm"
-                                >
-                                    Close
-                                </Button>
                             </div>
                         </div>
                     </DialogFooter>
