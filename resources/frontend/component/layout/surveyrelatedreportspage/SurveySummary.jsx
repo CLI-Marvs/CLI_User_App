@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import SummaryBar from './surveyComponents/SummaryBar';
-
+import { FiMessageSquare } from "react-icons/fi";
 import { useNavigate, useParams } from 'react-router-dom';
 import apiService from '../../servicesApi/apiService';
 import SummaryLine from './surveyComponents/SummaryLine';
@@ -10,6 +10,8 @@ import SummaryTextboxTable from './surveyComponents/SummaryTextboxTable';
 import SummaryVerticalBar from './surveyComponents/SummaryVerticalBar';
 import SummaryRatingDetails from './surveyComponents/SummaryRatingDetails';
 import { BiSolidLeftArrow } from 'react-icons/bi';
+import IndividualTable from './surveyComponents/IndividualTable';
+import { Select } from '@mui/material';
 const SurveySummary = () => {
 
     const { id } = useParams();
@@ -159,12 +161,115 @@ const SurveySummary = () => {
 
     return (
         <div className='h-screen max-w-full bg-custom-grayFA'>
-            <div className='flex flex-col'>
-                <div>
-                    <div onClick={navigateToSurveyList} className='flex justify-center rounded-[10px] w-[32.96px] h-[32.96px] bg-custom-lightgreen text-white items-center cursor-pointer shrink-0 hover:shadow-custom3'>
-                        <BiSolidLeftArrow className='size-[13px]' />
+            <div className='mb-2'>
+                <div onClick={navigateToSurveyList} className='flex justify-center rounded-[10px] w-[32.96px] h-[32.96px] bg-custom-lightgreen text-white items-center cursor-pointer shrink-0 hover:shadow-custom3'>
+                    <BiSolidLeftArrow className='size-[13px]' />
+                </div>
+            </div>
+            <div className='px-[32px] py-[24px] bg-white'>
+                <div className='flex flex-col gap-[6px]'>
+                    <div>
+                        <p className='text-[36px]'>CSAT Survey Turnover Dashboard</p>
+                    </div>
+                    <div>
+                        <p>Updated Oct 15, 11:33 AM</p>
                     </div>
                 </div>
+            </div>
+            <div className='p-[32px]'>
+                <div className='flex flex-col gap-[40px] mb-[35px]'>
+                    <div className='p-[20px] w-full bg-white'>
+                        <div className='flex'>
+                            <div className='w-[120px] flex justify-center items-center border'>
+                                <p>filters</p>
+                            </div>
+                            <div className='w-full'>
+                                <input type="text" className='w-full h-[32px] border' />
+                            </div>
+                            <div>
+                                <Select className='w-[120px] h-[31px]'>
+                                    <option value="">1 per page</option>
+                                    <option value="1">5 per page</option>
+                                    <option value="2">51 per page</option>
+                                </Select>
+                            </div>
+                            <div className='flex justify-center items-center w-[120px]'>
+                                <p>11 results</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex gap-6">
+                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
+                            <div className='flex flex-col justify-between h-full'>
+                                <div className='flex justify-between'>
+                                    <div className='flex flex-col gap-3'>
+                                        <div>
+                                            <p className='text-[#9A9A9A] text-sm'>Total Responses</p>
+                                        </div>
+                                        <div>
+                                            <p className='montserrat-regular text-[36px] text-[#323232]'>111</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
+                                            <div className='flex justify-center h-full w-full items-center text-[#348017]'>
+                                                <FiMessageSquare className='size-[20px]' />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
+                                    <p className='text-blue-400'>12.5%</p>
+                                    <p className="text-sm text-[#9A9A9A]">vs last month</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white"></div>
+                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white"></div>
+                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white"></div>
+
+                    </div>
+                </div>
+                <div className='p-[20px] flex flex-col gap-4 bg-white'>
+                    <div className='flex justify-between '>
+                        <div className='flex flex-col gap-[4px]'>
+                            <div>
+                                <p className='montserrat-medium text-[24px]'>Response Overview</p>
+                            </div>
+                            <div>
+                                <p className='text-sm'>111 responses . Showing 1 -51</p>
+                            </div>
+                        </div>
+                        <div className='flex gap-2 items-center'>
+                            <div>
+                                <button className='bg-custom-lightgreen text-white w-[122px] h-[35px]'>Export PDF</button>
+                            </div>
+                            <div>
+                                <Select className=' w-[120px] h-[36px]'>
+                                    <option value="">1 per page</option>
+                                    <option value="1">5 per page</option>
+                                    <option value="2">51 per page</option>
+                                </Select>
+                            </div>
+                        </div>
+                    </div>
+                    <div className='flex gap-2'>
+                        <input type="text" className='w-full border' />
+                        <button className='border w-[180px] h-[36px] rounded-[10px]'>date range</button>
+                        <Select className='w-[120px] h-[36px]'>
+                            <option value="">1 per page</option>
+                            <option value="1">5 per page</option>
+                            <option value="2">51 per page</option>
+                        </Select>
+                    </div>
+                </div>
+                <div>
+                    <IndividualTable />
+                </div>
+            </div>
+            {/* ==================================================================================================================================================== */}
+            {/* <div className='flex flex-col'>
+
                 <div className='flex w-full mt-[10px] p-[3px]'>
                     <div className='h-[500px] p-[8px] rounded-[10px] shadow-custom7 border-[2px] w-full'>
                         <div className='mt-[20px] mb-[20px]'>
@@ -207,8 +312,7 @@ const SurveySummary = () => {
                         </div>
                     );
                 })}
-
-            </div>
+            </div> */}
         </div>
     )
 }
