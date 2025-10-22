@@ -18,6 +18,7 @@ import { Select } from '@mui/material';
 import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
 import { RiEqualFill } from "react-icons/ri";
 import { useSurvey } from '../../../context/Survey/SurveyContext';
+import Skeleton from 'react-loading-skeleton';
 const SurveySummary = () => {
 
     const { id } = useParams();
@@ -36,6 +37,8 @@ const SurveySummary = () => {
         fetchMonthlyResponseChange,
         fetchSurveysRatings,
         fetchHighLowCount,
+        survey_title,
+        survey_loading,
     } = useSurvey();
 
     const navigateToSurveyList = () => {
@@ -211,7 +214,15 @@ const SurveySummary = () => {
             <div className='px-[32px] py-[24px] bg-white'>
                 <div className='flex flex-col gap-[6px]'>
                     <div>
-                        <p className='text-[36px]'>CSAT Survey Turnover Dashboard</p>
+                        <p className='text-[36px] montserrat-bold'>
+                            {survey_loading ? 
+                            <Skeleton width={300} /> 
+                            : 
+                            (
+                                <span>{survey_title} Dashboard</span>
+                            )} 
+                    
+                        </p>
                     </div>
                     <div>
                         <p>Updated Oct 15, 11:33 AM</p>
@@ -241,7 +252,7 @@ const SurveySummary = () => {
                         </div>
                     </div>
                     <div className="flex gap-6">
- {/* ======================================================total responses================================================================================= */}
+                        {/* ======================================================total responses================================================================================= */}
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
                             <div className='flex flex-col justify-between h-full'>
                                 <div className='flex justify-between'>
@@ -270,7 +281,6 @@ const SurveySummary = () => {
                                                 ? 'text-red-500'
                                                 : 'text-[#3B82F6]'
                                         }
-                                    
                                     `}
                                     >
                                         {
@@ -287,8 +297,8 @@ const SurveySummary = () => {
                                 </div>
                             </div>
                         </div>
-
-{/* ======================================================average rating================================================================================= */}
+ 
+                        {/* ======================================================average rating================================================================================= */}
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
                             <div className='flex flex-col justify-between h-full'>
                                 <div className='flex justify-between'>
@@ -315,7 +325,7 @@ const SurveySummary = () => {
                             </div>
                         </div>
 
-   {/* ======================================================5-star rating================================================================================= */}
+                        {/* ======================================================5-star rating================================================================================= */}
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
                             <div className='flex flex-col justify-between h-full'>
                                 <div className='flex justify-between'>
@@ -324,13 +334,13 @@ const SurveySummary = () => {
                                             <p className='text-[#9A9A9A] text-sm'>5-Star Rating</p>
                                         </div>
                                         <div>
-                                        <p className='montserrat-regular text-[36px] text-[#323232]'>{highLowCount?.highest_rated_count}</p>
+                                            <p className='montserrat-regular text-[36px] text-[#323232]'>{highLowCount?.highest_rated_count}</p>
                                         </div>
                                     </div>
                                     <div>
                                         <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
                                             <div className='flex justify-center h-full w-full items-center text-[#348017]'>
-                                               <FaRegStar className='size-[20px]' />
+                                                <FaRegStar className='size-[20px]' />
                                             </div>
                                         </div>
                                     </div>
@@ -340,7 +350,7 @@ const SurveySummary = () => {
                                 </div>
                             </div>
                         </div>
-{/*============================================================1 tar rating============================================================================ */}
+                        {/*============================================================1 tar rating============================================================================ */}
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
                             <div className='flex flex-col justify-between h-full'>
                                 <div className='flex justify-between'>
@@ -355,7 +365,7 @@ const SurveySummary = () => {
                                     <div>
                                         <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
                                             <div className='flex justify-center h-full w-full items-center text-[#348017]'>
-                                               <RiErrorWarningLine className='size-[32px]' />
+                                                <RiErrorWarningLine className='size-[32px]' />
                                             </div>
                                         </div>
                                     </div>
