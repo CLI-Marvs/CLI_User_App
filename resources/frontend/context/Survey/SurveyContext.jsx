@@ -92,6 +92,16 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
+  const fetchHighLowCount = async (survey_list_id) => {
+    try {
+      const response = await apiService.get(`/highest-low-count/${survey_list_id}`);
+      const highestLowCount = response.data;
+      return highestLowCount;
+    } catch (error) {
+      console.error('Error fetching highest and lowest count', error);
+    }
+  };
+
 
   return (
     <SurveyContext.Provider value={
@@ -110,7 +120,7 @@ export const SurveyProvider = ({ children }) => {
         fetchRespondentsCount,
         fetchMonthlyResponseChange,
         fetchSurveysRatings,
-        
+        fetchHighLowCount,
       }
     }>
       {children}

@@ -242,6 +242,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/total-responses/{survey_list_id}', [SurveyController::class, 'getTotalResponses']);
     Route::get('/monthly-response-change/{survey_list_id}', [SurveyController::class, 'getMonthlyResponseChange']);
     Route::get('/average-rating/{survey_list_id}', [SurveyController::class, 'getAverageRating']);
+    Route::get('/highest-low-count/{survey_list_id}', [SurveyController::class, 'getHighLowCount']);
 
 
     //Employee Department

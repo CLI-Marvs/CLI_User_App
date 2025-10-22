@@ -11,6 +11,8 @@ import SummaryVerticalBar from './surveyComponents/SummaryVerticalBar';
 import SummaryRatingDetails from './surveyComponents/SummaryRatingDetails';
 import { BiSolidLeftArrow } from 'react-icons/bi';
 import { LuTrendingUp } from "react-icons/lu";
+import { FaRegStar } from "react-icons/fa";
+import { RiErrorWarningLine } from "react-icons/ri";
 import IndividualTable from './surveyComponents/IndividualTable';
 import { Select } from '@mui/material';
 import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
@@ -26,12 +28,14 @@ const SurveySummary = () => {
     const [respondents, setRespondents] = useState(0);
     const [monthlyResponseChange, setMonthlyResponseChange] = useState(null);
     const [averageRating, setAverageRating] = useState(null);
+    const [highLowCount, setHighLowCount] = useState(null);
 
 
-    const { 
-        fetchRespondentsCount, 
+    const {
+        fetchRespondentsCount,
         fetchMonthlyResponseChange,
         fetchSurveysRatings,
+        fetchHighLowCount,
     } = useSurvey();
 
     const navigateToSurveyList = () => {
@@ -54,10 +58,16 @@ const SurveySummary = () => {
         setAverageRating(averageRating);
     };
 
+    const fetchHighLowCounts = async () => {
+        const highLowCount = await fetchHighLowCount(surveyId);
+        setHighLowCount(highLowCount);
+    };
+
     useEffect(() => {
         fetchRespondents();
         fetchMonthlyResponse();
         fetchAverageRating();
+        fetchHighLowCounts();
     }, []);
 
 
@@ -187,11 +197,6 @@ const SurveySummary = () => {
         return { groups, ungrouped };
     }
 
-
-
-
-
-
     const { groups: groupedTables, ungrouped: ungroupedQuestions } = surveySummary?.questions
         ? groupQuestionsByOptions(surveySummary.questions)
         : { groups: [], ungrouped: [] };
@@ -236,6 +241,7 @@ const SurveySummary = () => {
                         </div>
                     </div>
                     <div className="flex gap-6">
+ {/* ======================================================total responses================================================================================= */}
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
                             <div className='flex flex-col justify-between h-full'>
                                 <div className='flex justify-between'>
@@ -282,7 +288,7 @@ const SurveySummary = () => {
                             </div>
                         </div>
 
-
+{/* ======================================================average rating================================================================================= */}
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
                             <div className='flex flex-col justify-between h-full'>
                                 <div className='flex justify-between'>
@@ -297,19 +303,68 @@ const SurveySummary = () => {
                                     <div>
                                         <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
                                             <div className='flex justify-center h-full w-full items-center text-[#348017]'>
-                                               <LuTrendingUp className='size-[20px]' />
+                                                <LuTrendingUp className='size-[20px]' />
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
                                     <p className=" text-[#9A9A9A]">Out of 5 stars</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white"></div>
-                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white"></div>
+
+   {/* ======================================================5-star rating================================================================================= */}
+                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
+                            <div className='flex flex-col justify-between h-full'>
+                                <div className='flex justify-between'>
+                                    <div className='flex flex-col gap-3'>
+                                        <div>
+                                            <p className='text-[#9A9A9A] text-sm'>5-Star Rating</p>
+                                        </div>
+                                        <div>
+                                        <p className='montserrat-regular text-[36px] text-[#323232]'>{highLowCount?.highest_rated_count}</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
+                                            <div className='flex justify-center h-full w-full items-center text-[#348017]'>
+                                               <FaRegStar className='size-[20px]' />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
+                                    <p className=" text-[#9A9A9A]">Highest rating responses</p>
+                                </div>
+                            </div>
+                        </div>
+{/*============================================================1 tar rating============================================================================ */}
+                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
+                            <div className='flex flex-col justify-between h-full'>
+                                <div className='flex justify-between'>
+                                    <div className='flex flex-col gap-3'>
+                                        <div>
+                                            <p className='text-[#9A9A9A] text-sm'>1-Star Rating</p>
+                                        </div>
+                                        <div>
+                                            <p className='montserrat-regular text-[36px] text-[#323232]'>{highLowCount?.lowest_rated_count}</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
+                                            <div className='flex justify-center h-full w-full items-center text-[#348017]'>
+                                               <RiErrorWarningLine className='size-[32px]' />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
+                                    <p className=" text-[#9A9A9A]">Lowest rating responses</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div className='p-[20px] flex flex-col gap-4 bg-white'>

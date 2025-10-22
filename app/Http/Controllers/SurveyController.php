@@ -888,7 +888,7 @@ class SurveyController extends Controller
     {
         $survey = Survey_list::find($id);
 
-        
+
         $average = ExperienceRating::where(function ($q) use ($survey) {
             $q->where('survey_title', $survey->survey_title)
                 ->orWhere('survey_link', $survey->survey_link);
@@ -906,6 +906,32 @@ class SurveyController extends Controller
 
         return response()->json([
             'average_rating' => $averageString,
+        ]);
+    }
+
+    public function getHighLowCount($id)
+    {
+        $survey = Survey_list::find($id);
+
+        // Count ratings equal to 5 (highest)
+        $highestCount = ExperienceRating::where(function ($q) use ($survey) {
+            $q->where('survey_title', $survey->survey_title)
+                ->orWhere('survey_link', $survey->survey_link);
+        })
+            ->where('rating', 5)
+            ->count();
+
+        // Count ratings equal to 1 (lowest)
+        $lowestCount = ExperienceRating::where(function ($q) use ($survey) {
+            $q->where('survey_title', $survey->survey_title)
+                ->orWhere('survey_link', $survey->survey_link);
+        })
+            ->where('rating', 1)
+            ->count();
+
+        return response()->json([
+            'highest_rated_count' => $highestCount,
+            'lowest_rated_count' => $lowestCount,
         ]);
     }
 }
