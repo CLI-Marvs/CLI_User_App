@@ -765,4 +765,49 @@ class SurveyController extends Controller
             'data' => $ratings,
         ]);
     }
+
+    public function getTotalResponses($id)
+    {
+        $survey = Survey_list::find($id);
+
+        if (!$survey) {
+            return response()->json(['message' => 'Survey not found'], 404);
+        }
+
+        // 1️⃣ rating not null
+        // 1️⃣ rating not null + same survey (title OR link)
+        $query1 = ExperienceRating::select('id')
+            ->whereNotNull('rating')
+            ->where(function ($q) use ($survey) {
+                $q->where('survey_title', $survey->survey_title)
+                    ->orWhere('survey_link', $survey->survey_link);
+            });
+
+        // 2️⃣ rating null + status submitted + same survey (title OR link)
+        $query2 = ExperienceRating::select('id')
+            ->whereNull('rating')
+            ->where('status', 'submitted')
+            ->where(function ($q) use ($survey) {
+                $q->where('survey_title', $survey->survey_title)
+                    ->orWhere('survey_link', $survey->survey_link);
+            });
+
+        // 3️⃣ rating null + status null + same survey (title OR link)
+        $query3 = ExperienceRating::select('id')
+            ->whereNull('rating')
+            ->whereNull('status')
+            ->where(function ($q) use ($survey) {
+                $q->where('survey_title', $survey->survey_title)
+                    ->orWhere('survey_link', $survey->survey_link);
+            });
+
+        // Combine all and count unique records
+        $totalRespondents = $query1
+            ->union($query2)
+            ->union($query3)
+            ->count();
+
+        
+        return response()->json($totalRespondents);
+    }
 }

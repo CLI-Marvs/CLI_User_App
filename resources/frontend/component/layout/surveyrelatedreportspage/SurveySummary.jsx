@@ -12,6 +12,7 @@ import SummaryRatingDetails from './surveyComponents/SummaryRatingDetails';
 import { BiSolidLeftArrow } from 'react-icons/bi';
 import IndividualTable from './surveyComponents/IndividualTable';
 import { Select } from '@mui/material';
+import { useSurvey } from '../../../context/Survey/SurveyContext';
 const SurveySummary = () => {
 
     const { id } = useParams();
@@ -19,10 +20,23 @@ const SurveySummary = () => {
     const [surveyId, setSurveyId] = useState(id || null);
     const [surveySummary, setSurveySummary] = useState(null);
     const [ratingCounts, setRatingCounts] = useState([]);
+    const [respondents, setRespondents] = useState(0);
+
 
     const navigateToSurveyList = () => {
         navigate(-1);
     };
+
+    const { fetchRespondentsCount } = useSurvey();
+
+    const fetchRespondents = async () => {
+        const totalRespondents = await fetchRespondentsCount(surveyId);
+        setRespondents(totalRespondents);
+    };
+
+    useEffect(() => { fetchRespondents(); }, []);
+
+    
 
     useEffect(() => {
         if (!surveyId) return;
@@ -207,7 +221,7 @@ const SurveySummary = () => {
                                             <p className='text-[#9A9A9A] text-sm'>Total Responses</p>
                                         </div>
                                         <div>
-                                            <p className='montserrat-regular text-[36px] text-[#323232]'>111</p>
+                                            <p className='montserrat-regular text-[36px] text-[#323232]'>{respondents}</p>
                                         </div>
                                     </div>
                                     <div>

@@ -10,6 +10,7 @@ export const SurveyProvider = ({ children }) => {
   const [surveyLinks, setSurveyLinks] = useState([]);
   const [surveyStatus, setSurveyStatus] = useState("");
   const [statusLoading, setStatusLoading] = useState(false);
+  
 
   const fetchSurveyTitle = async (survey_list_id) => {
     setLoading(true);
@@ -59,6 +60,17 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
+
+  const fetchRespondentsCount = async (survey_list_id) => {
+    try {
+      const response = await apiService.get(`/total-responses/${survey_list_id}`);
+      const totalRespondents = response.data;
+      return totalRespondents;
+    } catch (error) {
+      console.error('Error fetching total respondents:', error);
+    }
+  };
+
   return (
     <SurveyContext.Provider value={
       {
@@ -72,7 +84,8 @@ export const SurveyProvider = ({ children }) => {
         fetchSurveyStatus,
         surveyStatus,
         statusLoading,
-        setStatusLoading
+        setStatusLoading,
+        fetchRespondentsCount
         
       }
     }>
