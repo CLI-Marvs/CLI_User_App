@@ -71,6 +71,17 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
+
+  const fetchMonthlyResponseChange = async (survey_list_id) => {
+    try {
+      const response = await apiService.get(`/monthly-response-change/${survey_list_id}`);
+      const monthlyResponseChange = response.data;
+      return monthlyResponseChange;
+    } catch (error) {
+      console.error('Error fetching monthly response change:', error);
+    }
+  };
+
   return (
     <SurveyContext.Provider value={
       {
@@ -85,7 +96,8 @@ export const SurveyProvider = ({ children }) => {
         surveyStatus,
         statusLoading,
         setStatusLoading,
-        fetchRespondentsCount
+        fetchRespondentsCount,
+        fetchMonthlyResponseChange
         
       }
     }>

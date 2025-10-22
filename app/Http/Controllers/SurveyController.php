@@ -774,8 +774,6 @@ class SurveyController extends Controller
             return response()->json(['message' => 'Survey not found'], 404);
         }
 
-        // 1️⃣ rating not null
-        // 1️⃣ rating not null + same survey (title OR link)
         $query1 = ExperienceRating::select('id')
             ->whereNotNull('rating')
             ->where(function ($q) use ($survey) {
@@ -783,7 +781,7 @@ class SurveyController extends Controller
                     ->orWhere('survey_link', $survey->survey_link);
             });
 
-        // 2️⃣ rating null + status submitted + same survey (title OR link)
+
         $query2 = ExperienceRating::select('id')
             ->whereNull('rating')
             ->where('status', 'submitted')
@@ -792,7 +790,7 @@ class SurveyController extends Controller
                     ->orWhere('survey_link', $survey->survey_link);
             });
 
-        // 3️⃣ rating null + status null + same survey (title OR link)
+
         $query3 = ExperienceRating::select('id')
             ->whereNull('rating')
             ->whereNull('status')
@@ -801,13 +799,88 @@ class SurveyController extends Controller
                     ->orWhere('survey_link', $survey->survey_link);
             });
 
-        // Combine all and count unique records
+
         $totalRespondents = $query1
             ->union($query2)
             ->union($query3)
             ->count();
 
-        
+
         return response()->json($totalRespondents);
+    }
+
+
+    public function getMonthlyResponseChange($id)
+    {
+        $survey = Survey_list::find($id);
+
+
+        $currentMonthStart = now()->startOfMonth();
+        $currentMonthEnd = now()->endOfMonth();
+        $lastMonthStart = now()->subMonth()->startOfMonth();
+        $lastMonthEnd = now()->subMonth()->endOfMonth();
+
+
+        $surveyCondition = function ($q) use ($survey) {
+            $q->where('survey_title', $survey->survey_title)
+                ->orWhere('survey_link', $survey->survey_link);
+        };
+
+        $currentCount = ExperienceRating::where($surveyCondition)
+            ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
+            ->where(function ($q) {
+                $q->whereNotNull('rating')
+                    ->orWhere(function ($q2) {
+                        $q2->whereNull('rating')
+                            ->where('status', 'submitted');
+                    })
+                    ->orWhere(function ($q3) {
+                        $q3->whereNull('rating')
+                            ->whereNull('status');
+                    });
+            })
+            ->count();
+
+
+        $lastCount = ExperienceRating::where($surveyCondition)
+            ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
+            ->where(function ($q) {
+                $q->whereNotNull('rating')
+                    ->orWhere(function ($q2) {
+                        $q2->whereNull('rating')
+                            ->where('status', 'submitted');
+                    })
+                    ->orWhere(function ($q3) {
+                        $q3->whereNull('rating')
+                            ->whereNull('status');
+                    });
+            })
+            ->count();
+
+
+        $percentageChange = 0;
+        if ($lastCount > 0 || $currentCount > 0) {
+            $totalRespondents = $currentCount + $lastCount;
+
+            if ($totalRespondents > 0) {
+                $percentageChange = (($currentCount - $lastCount) / $totalRespondents) * 100;
+            } else {
+                $percentageChange = 0;
+            }
+        } else {
+            $percentageChange = 0;
+        }
+
+        $direction = $percentageChange >= 0 ? 'positive' : 'negative';
+
+        
+        $percentageString = abs(round($percentageChange, 2)) . '%';
+
+        return response()->json([
+            'current_month' => $currentCount,
+            'last_month' => $lastCount,
+            'percentage_change' => $percentageString,
+            'direction' => $direction,
+        ]);
     }
 }

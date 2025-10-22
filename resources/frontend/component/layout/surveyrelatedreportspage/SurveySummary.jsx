@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { use, useEffect, useState } from 'react'
 import SummaryBar from './surveyComponents/SummaryBar';
 import { FiMessageSquare } from "react-icons/fi";
 import { useNavigate, useParams } from 'react-router-dom';
@@ -12,6 +12,8 @@ import SummaryRatingDetails from './surveyComponents/SummaryRatingDetails';
 import { BiSolidLeftArrow } from 'react-icons/bi';
 import IndividualTable from './surveyComponents/IndividualTable';
 import { Select } from '@mui/material';
+import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
+import { RiEqualFill } from "react-icons/ri";
 import { useSurvey } from '../../../context/Survey/SurveyContext';
 const SurveySummary = () => {
 
@@ -21,22 +23,31 @@ const SurveySummary = () => {
     const [surveySummary, setSurveySummary] = useState(null);
     const [ratingCounts, setRatingCounts] = useState([]);
     const [respondents, setRespondents] = useState(0);
+    const [monthlyResponseChange, setMonthlyResponseChange] = useState(null);
 
+
+    const { fetchRespondentsCount, fetchMonthlyResponseChange } = useSurvey();
 
     const navigateToSurveyList = () => {
         navigate(-1);
     };
 
-    const { fetchRespondentsCount } = useSurvey();
 
     const fetchRespondents = async () => {
         const totalRespondents = await fetchRespondentsCount(surveyId);
         setRespondents(totalRespondents);
     };
 
-    useEffect(() => { fetchRespondents(); }, []);
+    const fetchMonthlyResponse = async () => {
+        const monthlyResponseChange = await fetchMonthlyResponseChange(surveyId);
+        setMonthlyResponseChange(monthlyResponseChange);
+    };
 
-    
+    useEffect(() => {
+        fetchRespondents();
+        fetchMonthlyResponse();
+    }, []);
+
 
     useEffect(() => {
         if (!surveyId) return;
@@ -232,16 +243,35 @@ const SurveySummary = () => {
                                         </div>
                                     </div>
                                 </div>
+                                {/* TODO: When the filter is applied, this should be hidden */}
                                 <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
-                                    <p className='text-blue-400'>12.5%</p>
-                                    <p className="text-sm text-[#9A9A9A]">vs last month</p>
+                                    <p className={`flex items-center 
+                                        ${monthlyResponseChange?.direction === 'positive'
+                                            ? 'text-[#3B82F6]'
+                                            : monthlyResponseChange?.direction === 'negative'
+                                                ? 'text-red-500'
+                                                : 'text-[#3B82F6]'
+                                        }
+                                    
+                                    `}
+                                    >
+                                        {
+                                            monthlyResponseChange?.direction === 'positive'
+                                                ? <IoMdArrowUp className='size-[15px]' />
+                                                : monthlyResponseChange?.direction === 'negative'
+                                                    ? <IoMdArrowDown className='size-[15px]'/>
+                                                    : <RiEqualFill className='size-[15px]' />
+                                            }
+                                        &nbsp;
+                                        {monthlyResponseChange?.percentage_change}
+                                        </p>
+                                    <p className=" text-[#9A9A9A]">vs last month</p>
                                 </div>
                             </div>
                         </div>
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white"></div>
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white"></div>
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white"></div>
-
                     </div>
                 </div>
                 <div className='p-[20px] flex flex-col gap-4 bg-white'>
