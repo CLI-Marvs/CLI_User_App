@@ -10,6 +10,7 @@ import SummaryTextboxTable from './surveyComponents/SummaryTextboxTable';
 import SummaryVerticalBar from './surveyComponents/SummaryVerticalBar';
 import SummaryRatingDetails from './surveyComponents/SummaryRatingDetails';
 import { BiSolidLeftArrow } from 'react-icons/bi';
+import { LuTrendingUp } from "react-icons/lu";
 import IndividualTable from './surveyComponents/IndividualTable';
 import { Select } from '@mui/material';
 import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
@@ -24,9 +25,14 @@ const SurveySummary = () => {
     const [ratingCounts, setRatingCounts] = useState([]);
     const [respondents, setRespondents] = useState(0);
     const [monthlyResponseChange, setMonthlyResponseChange] = useState(null);
+    const [averageRating, setAverageRating] = useState(null);
 
 
-    const { fetchRespondentsCount, fetchMonthlyResponseChange } = useSurvey();
+    const { 
+        fetchRespondentsCount, 
+        fetchMonthlyResponseChange,
+        fetchSurveysRatings,
+    } = useSurvey();
 
     const navigateToSurveyList = () => {
         navigate(-1);
@@ -43,9 +49,15 @@ const SurveySummary = () => {
         setMonthlyResponseChange(monthlyResponseChange);
     };
 
+    const fetchAverageRating = async () => {
+        const averageRating = await fetchSurveysRatings(surveyId);
+        setAverageRating(averageRating);
+    };
+
     useEffect(() => {
         fetchRespondents();
         fetchMonthlyResponse();
+        fetchAverageRating();
     }, []);
 
 
@@ -259,17 +271,43 @@ const SurveySummary = () => {
                                             monthlyResponseChange?.direction === 'positive'
                                                 ? <IoMdArrowUp className='size-[15px]' />
                                                 : monthlyResponseChange?.direction === 'negative'
-                                                    ? <IoMdArrowDown className='size-[15px]'/>
+                                                    ? <IoMdArrowDown className='size-[15px]' />
                                                     : <RiEqualFill className='size-[15px]' />
-                                            }
+                                        }
                                         &nbsp;
                                         {monthlyResponseChange?.percentage_change}
-                                        </p>
+                                    </p>
                                     <p className=" text-[#9A9A9A]">vs last month</p>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white"></div>
+
+
+                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
+                            <div className='flex flex-col justify-between h-full'>
+                                <div className='flex justify-between'>
+                                    <div className='flex flex-col gap-3'>
+                                        <div>
+                                            <p className='text-[#9A9A9A] text-sm'>Average Rating</p>
+                                        </div>
+                                        <div>
+                                            <p className='montserrat-regular text-[36px] text-[#323232]'>{averageRating?.average_rating}/5</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
+                                            <div className='flex justify-center h-full w-full items-center text-[#348017]'>
+                                               <LuTrendingUp className='size-[20px]' />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
+                                    <p className=" text-[#9A9A9A]">Out of 5 stars</p>
+                                </div>
+                            </div>
+                        </div>
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white"></div>
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white"></div>
                     </div>

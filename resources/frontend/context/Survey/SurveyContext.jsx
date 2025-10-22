@@ -82,6 +82,17 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
+   const fetchSurveysRatings = async (survey_list_id) => {
+    try {
+      const response = await apiService.get(`/average-rating/${survey_list_id}`);
+      const surveysRatings = response.data;
+      return surveysRatings;
+    } catch (error) {
+      console.error('Error fetching surveys ratings', error);
+    }
+  };
+
+
   return (
     <SurveyContext.Provider value={
       {
@@ -97,7 +108,8 @@ export const SurveyProvider = ({ children }) => {
         statusLoading,
         setStatusLoading,
         fetchRespondentsCount,
-        fetchMonthlyResponseChange
+        fetchMonthlyResponseChange,
+        fetchSurveysRatings,
         
       }
     }>

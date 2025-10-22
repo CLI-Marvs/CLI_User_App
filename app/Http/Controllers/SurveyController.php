@@ -873,7 +873,7 @@ class SurveyController extends Controller
 
         $direction = $percentageChange >= 0 ? 'positive' : 'negative';
 
-        
+
         $percentageString = abs(round($percentageChange, 2)) . '%';
 
         return response()->json([
@@ -881,6 +881,31 @@ class SurveyController extends Controller
             'last_month' => $lastCount,
             'percentage_change' => $percentageString,
             'direction' => $direction,
+        ]);
+    }
+
+    public function getAverageRating($id)
+    {
+        $survey = Survey_list::find($id);
+
+        
+        $average = ExperienceRating::where(function ($q) use ($survey) {
+            $q->where('survey_title', $survey->survey_title)
+                ->orWhere('survey_link', $survey->survey_link);
+        })
+            ->whereNotNull('rating')
+            ->avg('rating');
+
+        if (!$average) {
+            $averageString = "0";
+        } else {
+            $averageString = fmod($average, 1) == 0
+                ? (string) intval($average)
+                : number_format($average, 1);
+        }
+
+        return response()->json([
+            'average_rating' => $averageString,
         ]);
     }
 }
