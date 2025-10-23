@@ -744,7 +744,9 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                     placeholder="Search accounts, properties, contracts..."
                                                     value={searchTerm}
                                                     onChange={(e) => {
-                                                        setSearchTerm(e.target.value);
+                                                        setSearchTerm(
+                                                            e.target.value
+                                                        );
                                                         setCurrentPage(1);
                                                     }}
                                                     className="w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-custom-lightgreen focus:border-custom-lightgreen transition-all duration-200 text-sm bg-white placeholder-gray-400 shadow-sm hover:border-gray-300 hover:shadow-md"
@@ -781,15 +783,25 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                     <select
                                                         value={statusFilter}
                                                         onChange={(e) => {
-                                                            setStatusFilter(e.target.value);
+                                                            setStatusFilter(
+                                                                e.target.value
+                                                            );
                                                             setCurrentPage(1);
                                                         }}
                                                         className="appearance-none pl-4 pr-10 py-2.5 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-custom-lightgreen focus:border-custom-lightgreen transition-all duration-200 text-sm bg-white font-medium text-gray-700 hover:border-gray-300 hover:shadow-md cursor-pointer"
                                                     >
-                                                        <option value="all">All Status</option>
-                                                        <option value="completed">Completed</option>
-                                                        <option value="in-progress">In Progress</option>
-                                                        <option value="pending">Pending</option>
+                                                        <option value="all">
+                                                            All Status
+                                                        </option>
+                                                        <option value="completed">
+                                                            Completed
+                                                        </option>
+                                                        <option value="in-progress">
+                                                            In Progress
+                                                        </option>
+                                                        <option value="pending">
+                                                            Pending
+                                                        </option>
                                                     </select>
                                                     <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
                                                         <svg
@@ -812,9 +824,13 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                 <label className="flex items-center gap-2 px-3 py-2.5 border-2 border-gray-200 rounded-lg bg-white cursor-pointer hover:border-gray-300 hover:shadow-md transition-all duration-200 group">
                                                     <input
                                                         type="checkbox"
-                                                        checked={hideCompletedChecklists}
+                                                        checked={
+                                                            hideCompletedChecklists
+                                                        }
                                                         onChange={(e) => {
-                                                            setHideCompletedChecklists(e.target.checked);
+                                                            setHideCompletedChecklists(
+                                                                e.target.checked
+                                                            );
                                                             setCurrentPage(1);
                                                         }}
                                                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors"
@@ -825,12 +841,18 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                 </label>
 
                                                 {/* Clear All Filters */}
-                                                {(searchTerm || statusFilter !== "all" || hideCompletedChecklists) && (
+                                                {(searchTerm ||
+                                                    statusFilter !== "all" ||
+                                                    hideCompletedChecklists) && (
                                                     <button
                                                         onClick={() => {
                                                             setSearchTerm("");
-                                                            setStatusFilter("all");
-                                                            setHideCompletedChecklists(false);
+                                                            setStatusFilter(
+                                                                "all"
+                                                            );
+                                                            setHideCompletedChecklists(
+                                                                false
+                                                            );
                                                             setCurrentPage(1);
                                                         }}
                                                         className="flex items-center gap-2 px-3 py-2.5 bg-red-50 border-2 border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-100 hover:border-red-300 transition-all duration-200"
@@ -849,7 +871,9 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                                 d="M6 18L18 6M6 6l12 12"
                                                             />
                                                         </svg>
-                                                        <span className="hidden sm:inline">Clear Filters</span>
+                                                        <span className="hidden sm:inline">
+                                                            Clear Filters
+                                                        </span>
                                                     </button>
                                                 )}
                                             </div>
@@ -869,7 +893,9 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                 >
                                                     <svg
                                                         className={`h-5 w-5 transition-all duration-300 ${
-                                                            isRefreshing ? "animate-spin" : ""
+                                                            isRefreshing
+                                                                ? "animate-spin"
+                                                                : ""
                                                         }`}
                                                         fill="none"
                                                         stroke="currentColor"
@@ -892,15 +918,28 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                     <select
                                                         value={itemsPerPage}
                                                         onChange={(e) => {
-                                                            setItemsPerPage(parseInt(e.target.value));
+                                                            setItemsPerPage(
+                                                                parseInt(
+                                                                    e.target
+                                                                        .value
+                                                                )
+                                                            );
                                                             setCurrentPage(1);
                                                         }}
                                                         className="appearance-none border-0 px-2 py-0.5 focus:ring-2 focus:ring-custom-lightgreen transition-all duration-200 text-sm bg-transparent font-bold text-gray-700 cursor-pointer"
                                                     >
-                                                        <option value={10}>10</option>
-                                                        <option value={25}>25</option>
-                                                        <option value={50}>50</option>
-                                                        <option value={100}>100</option>
+                                                        <option value={10}>
+                                                            10
+                                                        </option>
+                                                        <option value={25}>
+                                                            25
+                                                        </option>
+                                                        <option value={50}>
+                                                            50
+                                                        </option>
+                                                        <option value={100}>
+                                                            100
+                                                        </option>
                                                     </select>
                                                     <span className="text-xs font-medium text-gray-500">
                                                         rows
@@ -912,7 +951,7 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                 </div>
 
                                 {/* Matrix Table */}
-                                <div className="flex-1 p-6 bg-white overflow-hidden min-h-0">
+                                <div className="flex-1 flex flex-col min-h-0 p-0 bg-white overflow-hidden">
                                     {isGroupDetailsLoading && (
                                         <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
                                             <div className="text-center">
@@ -927,8 +966,8 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                             </div>
                                         </div>
                                     )}
-                                    <div className="h-full overflow-auto bg-white rounded-lg border border-gray-200 shadow-sm">
-                                        <table className="w-full border-collapse min-w-max">
+                                    <div className="flex-1 min-h-0 overflow-auto bg-white rounded-none border-0 shadow-none">
+                                        <table className="w-full border-collapse min-w-max ">
                                             <thead className="sticky top-0 z-20 bg-gray-50">
                                                 {/* Work Order Type Headers */}
                                                 <tr className="border-b border-gray-200">
@@ -1096,7 +1135,7 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                                                 row.accountName
                                                                             }
                                                                         </div>
-                                                                        <div className="text-xs text-gray-500">
+                                                                        <div className="text-xs text-gray-700">
                                                                             {
                                                                                 row.propertyName
                                                                             }{" "}
@@ -1106,7 +1145,7 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                                                 row.unitNo
                                                                             }
                                                                         </div>
-                                                                        <div className="text-xs text-gray-400">
+                                                                        <div className="text-xs text-gray-700">
                                                                             Contract:{" "}
                                                                             {
                                                                                 row.contractNo

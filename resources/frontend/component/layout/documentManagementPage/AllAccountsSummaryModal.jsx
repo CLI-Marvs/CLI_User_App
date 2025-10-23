@@ -214,7 +214,10 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                 // UPDATED LOGIC: Include assignees that either:
                                 // 1. Have no account_id (general assignees for the work order)
                                 // 2. Have account_id that matches this account
-                                if (!assignee.account_id || assignee.account_id === account.id) {
+                                if (
+                                    !assignee.account_id ||
+                                    assignee.account_id === account.id
+                                ) {
                                     accountAssignees.add(assignee.employee_id);
                                 }
                             });
@@ -378,10 +381,11 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                 let assigneeMatch = true;
                 if (stepAssigneeFilter && stepAssigneeFilter !== "All") {
                     const selectedAssigneeId = parseInt(stepAssigneeFilter);
-                    
+
                     // Simply check if the selected assignee is in the account's assignee list
-                    assigneeMatch = row.assignedEmployeeIds && 
-                                    row.assignedEmployeeIds.includes(selectedAssigneeId);
+                    assigneeMatch =
+                        row.assignedEmployeeIds &&
+                        row.assignedEmployeeIds.includes(selectedAssigneeId);
                 }
 
                 return searchMatch && statusMatch && assigneeMatch;
@@ -824,15 +828,13 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                 </div>
 
                                 {/* Milestone Table */}
-                                <div
-                                    className="flex-1 p-6 bg-white overflow-hidden"
-                                    style={{ minHeight: 0 }}
-                                >
+                                <div className="flex-1 flex flex-col bg-white overflow-hidden min-h-0">
                                     <div
-                                        className="w-full h-full overflow-auto bg-white rounded-lg border border-gray-200 shadow-sm"
+                                        className="flex-1 w-full overflow-auto bg-white rounded-lg border border-gray-200 shadow-sm min-h-0"
                                         style={{
                                             maxHeight: "100%",
                                             maxWidth: "100%",
+                                            minHeight: 0,
                                         }}
                                     >
                                         <table className="w-full text-left border-separate border-spacing-0 bg-white min-w-max">
