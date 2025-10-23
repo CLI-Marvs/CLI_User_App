@@ -662,7 +662,6 @@ const ExecutiveDashboard = () => {
                     </ResponsiveContainer>
                 </div>
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2 bg-white rounded-lg shadow-md overflow-hidden">
                     <div className="px-5 pt-5 pb-2 flex justify-between items-center">
@@ -689,9 +688,7 @@ const ExecutiveDashboard = () => {
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Work Order
                                         </th>
-                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            STEP
-                                        </th>
+                                        {/* STEP column removed */}
                                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                             Status
                                         </th>
@@ -710,11 +707,7 @@ const ExecutiveDashboard = () => {
                                                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                     {row.workOrderId}
                                                 </td>
-                                                <td className="px-4 py-4 whitespace-nowrap">
-                                                    <span className="px-2 py-1 text-xs font-medium border border-gray-300 rounded-full">
-                                                        {row.type}
-                                                    </span>
-                                                </td>
+                                                {/* STEP cell removed */}
                                                 <td className="px-4 py-4 whitespace-nowrap">
                                                     <span
                                                         className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${
