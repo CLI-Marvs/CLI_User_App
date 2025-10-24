@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import SummaryBar from './surveyComponents/SummaryBar';
 import { FiMessageSquare } from "react-icons/fi";
 import { useNavigate, useParams } from 'react-router-dom';
@@ -19,6 +19,8 @@ import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
 import { RiEqualFill } from "react-icons/ri";
 import { useSurvey } from '../../../context/Survey/SurveyContext';
 import Skeleton from 'react-loading-skeleton';
+import FormResponsesTab from './surveyComponents/FormResponsesTab';
+import DateRangeFilter from './surveyComponents/DateRangeFilter';
 const SurveySummary = () => {
 
     const { id } = useParams();
@@ -30,8 +32,19 @@ const SurveySummary = () => {
     const [monthlyResponseChange, setMonthlyResponseChange] = useState(null);
     const [averageRating, setAverageRating] = useState(null);
     const [highLowCount, setHighLowCount] = useState(null);
+    const [activeTab, setActiveTab] = useState('form');
+    const modalRef = useRef(null);
 
 
+    const openModal = () => {
+        modalRef.current.showModal();
+    };
+
+
+    const closeModal = () => {
+        modalRef.current.close();
+    };
+    
     const {
         fetchRespondentsCount,
         fetchMonthlyResponseChange,
@@ -214,14 +227,14 @@ const SurveySummary = () => {
             <div className='px-[32px] py-[24px] bg-white'>
                 <div className='flex flex-col gap-[6px]'>
                     <div>
-                        <p className='text-[36px] montserrat-bold'>
-                            {survey_loading ? 
-                            <Skeleton width={300} /> 
-                            : 
-                            (
-                                <span>{survey_title} Dashboard</span>
-                            )} 
-                    
+                        <p className='text-[36px] montserrat-semibold'>
+                            {survey_loading ?
+                                <Skeleton width={300} />
+                                :
+                                (
+                                    <span>{survey_title} Dashboard</span>
+                                )}
+
                         </p>
                     </div>
                     <div>
@@ -238,6 +251,14 @@ const SurveySummary = () => {
                             </div>
                             <div className='w-full'>
                                 <input type="text" className='w-full h-[32px] border' />
+                            </div>
+                            <div>
+                                <button
+                                    onClick={openModal}
+                                    className="border w-[180px] h-[36px] rounded-[10px]"
+                                >
+                                    Date Range
+                                </button>
                             </div>
                             <div>
                                 <Select className='w-[120px] h-[31px]'>
@@ -297,7 +318,7 @@ const SurveySummary = () => {
                                 </div>
                             </div>
                         </div>
- 
+
                         {/* ======================================================average rating================================================================================= */}
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
                             <div className='flex flex-col justify-between h-full'>
@@ -377,42 +398,46 @@ const SurveySummary = () => {
                         </div>
                     </div>
                 </div>
-                <div className='p-[20px] flex flex-col gap-4 bg-white'>
-                    <div className='flex justify-between '>
-                        <div className='flex flex-col gap-[4px]'>
-                            <div>
-                                <p className='montserrat-medium text-[24px]'>Response Overview</p>
-                            </div>
-                            <div>
-                                <p className='text-sm'>111 responses . Showing 1 -51</p>
-                            </div>
-                        </div>
-                        <div className='flex gap-2 items-center'>
-                            <div>
-                                <button className='bg-custom-lightgreen text-white w-[122px] h-[35px]'>Export PDF</button>
-                            </div>
-                            <div>
-                                <Select className=' w-[120px] h-[36px]'>
-                                    <option value="">1 per page</option>
-                                    <option value="1">5 per page</option>
-                                    <option value="2">51 per page</option>
-                                </Select>
-                            </div>
-                        </div>
+                <div className="flex flex-col w-full gap-6">
+
+                    <div className="flex gap-4  pb-2">
+                        <button
+                            onClick={() => setActiveTab('form')}
+                            className={`w-[160px] border px-5 py-2 rounded-t-md transition-all duration-200
+                                ${activeTab === 'form'
+                                    ? 'bg-custom-solidgreen text-white border-custom-solidgreen'
+                                    : 'bg-white text-[#323232] hover:bg-gray-100'
+                                }`}
+                        >
+                            Form Responses
+                        </button>
+
+                        <button
+                            onClick={() => setActiveTab('emoji')}
+                            className={`w-[200px] border px-5 py-2 rounded-t-md transition-all duration-200
+                                ${activeTab === 'emoji'
+                                    ? 'bg-custom-solidgreen text-white border-custom-solidgreen'
+                                    : 'bg-white text-[#323232] hover:bg-gray-100'
+                                }`}
+                        >
+                            Emoji Only Responses
+                        </button>
                     </div>
-                    <div className='flex gap-2'>
-                        <input type="text" className='w-full border' />
-                        <button className='border w-[180px] h-[36px] rounded-[10px]'>date range</button>
-                        <Select className='w-[120px] h-[36px]'>
-                            <option value="">1 per page</option>
-                            <option value="1">5 per page</option>
-                            <option value="2">51 per page</option>
-                        </Select>
+
+
+                    <div>
+                        {activeTab === 'form' && (
+                            <FormResponsesTab />
+                        )}
+                        {activeTab === 'emoji' && (
+                            <SummaryRatingDetails />
+                        )}
                     </div>
                 </div>
                 <div>
-                    <IndividualTable />
+                    <DateRangeFilter closeModal={closeModal} modalRef={modalRef} />
                 </div>
+
             </div>
             {/* ==================================================================================================================================================== */}
             {/* <div className='flex flex-col'>
