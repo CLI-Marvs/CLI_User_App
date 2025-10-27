@@ -2,7 +2,7 @@ import React from 'react'
 import IndividualTable from './IndividualTable'
 import { Select } from '@mui/material'
 
-const FormResponsesTab = () => {
+const FormResponsesTab = ({ surveyResponses }) => {
     return (
         <div>
             <div className='p-[20px] flex flex-col gap-4 bg-white'>
@@ -39,7 +39,7 @@ const FormResponsesTab = () => {
                 </div>
             </div>
             <div>
-                <IndividualTable />
+                <IndividualTable surveyResponses={surveyResponses} />
             </div>
         </div>
     )

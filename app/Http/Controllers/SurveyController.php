@@ -934,4 +934,141 @@ class SurveyController extends Controller
             'lowest_rated_count' => $lowestCount,
         ]);
     }
+
+    public function getSurveyResponses($survey_list_id)
+    {
+        try {
+            // 1️⃣ Get survey info
+            $survey = DB::table('surveys_list')
+                ->where('id', $survey_list_id)
+                ->select('id', 'survey_title', 'survey_link')
+                ->first();
+
+            if (!$survey) {
+                return response()->json(['error' => 'Survey not found'], 404);
+            }
+
+            // 2️⃣ Get all questions
+            $questions = DB::table('survey_questions')
+                ->join('survey_forms', 'survey_questions.form_id', '=', 'survey_forms.id')
+                ->where('survey_forms.survey_id', $survey_list_id)
+                ->select('survey_questions.id', 'survey_questions.question')
+                ->orderBy('survey_questions.id')
+                ->get();
+
+            $responseData = [];
+
+            // 3️⃣ SCENARIO 1 — Normal survey submissions (only status = 'submitted')
+            $experienceRatings = DB::table('experience_ratings')
+                ->where(function ($q) use ($survey) {
+                    $q->where('survey_title', $survey->survey_title)
+                        ->orWhere('survey_link', $survey->survey_link);
+                })
+                ->where('status', 'submitted')
+                ->select('id', 'ticket_id', 'email', 'survey_title as survey_owner', 'created_at', 'status', 'survey_link')
+                ->get();
+
+               
+
+            foreach ($experienceRatings as $rating) {
+                $row = [
+                    'timestamp'    => $rating->created_at,
+                    'email'        => $rating->email,
+                    'ticket_id'    => $rating->ticket_id,
+                    'survey_owner' => $rating->survey_owner,
+                    'status'       => $rating->status ?? 'N/A',
+                ];
+
+                // ✅ Get answers for this experience rating
+                $answers = DB::table('survey_answers')
+                    ->where('experience_rating_id', $rating->id)
+                    ->select('question_id', 'answer_value')
+                    ->get();
+
+                // ✅ Get all question IDs from answers
+                $questionIds = $answers->pluck('question_id')->unique()->toArray();
+
+                // ✅ Fetch question texts for those IDs
+                $questionsMap = DB::table('survey_questions')
+                    ->whereIn('id', $questionIds)
+                    ->pluck('question', 'id'); // returns [question_id => question_text]
+
+                // ✅ Map answers with their corresponding question text
+                foreach ($answers as $answer) {
+                    $questionText = $questionsMap[$answer->question_id] ?? 'Unknown Question';
+                    $row[$questionText] = $answer->answer_value ?? '';
+                }
+
+                $responseData[$rating->ticket_id] = $row;
+            }
+
+
+            // 4️⃣ SCENARIO 2 — Imported (Google Form)
+            $importedAnswers = DB::table('survey_answers as sa')
+                ->join('experience_ratings as er', DB::raw("CAST(sa.ticket_id AS TEXT)"), '=', DB::raw("CAST(er.ticket_id AS TEXT)"))
+                ->where(function ($q) use ($survey) {
+                    $q->where('er.survey_title', $survey->survey_title)
+                        ->orWhere('er.survey_link', $survey->survey_link);
+                })
+                ->where(function ($q) {
+                    $q->where('er.status', 'submitted')
+                        ->orWhereNull('er.status');
+                })
+                ->select('sa.ticket_id', 'er.email', 'er.created_at', 'er.survey_title as survey_owner', 'er.status', 'sa.question', 'sa.answer_value')
+                ->get()
+                ->groupBy('ticket_id');
+
+
+
+            foreach ($importedAnswers as $ticketId => $answers) {
+                if (isset($responseData[$ticketId])) continue;
+
+                $first = $answers->first();
+                $row = [
+                    'timestamp'    => $first->created_at,
+                    'email'        => $first->email,
+                    'ticket_id'    => $ticketId,
+                    'survey_owner' => $first->survey_owner,
+                    'status'       => $first->status ?? 'N/A',
+                ];
+
+
+
+                foreach ($questions as $question) {
+                    $answer = $answers->first(function ($a) use ($question) {
+                        // Get just the question number and main text (before any parenthetical notes)
+                        $cleanAnswerQuestion = preg_replace('/\s*\([^)]*\)\s*/', '', $a->question);
+                        $cleanQuestion = preg_replace('/\s*\([^)]*\)\s*/', '', $question->question);
+
+                        // Normalize whitespace
+                        $cleanAnswerQuestion = preg_replace('/\s+/', ' ', trim($cleanAnswerQuestion));
+                        $cleanQuestion = preg_replace('/\s+/', ' ', trim($cleanQuestion));
+
+                        return strtolower($cleanAnswerQuestion) === strtolower($cleanQuestion);
+                    });
+
+                    $row[$question->question] = $answer?->answer_value ?? '';
+                }
+
+
+
+                $responseData[$ticketId] = $row;
+            }
+
+            // 5️⃣ Sort by latest timestamp
+            $sortedData = collect($responseData)->values()->sortByDesc('timestamp')->values();
+
+            // 6️⃣ Return response
+            return response()->json([
+                'survey_title' => $survey->survey_title,
+                'headers' => array_merge(
+                    ['timestamp', 'email', 'ticket_id', 'survey_owner', 'status'],
+                    $questions->pluck('question')->toArray()
+                ),
+                'data' => $sortedData->values(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

@@ -102,6 +102,16 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
+  const fetchSurveyResponses = async (survey_list_id) => {
+    try {
+      const response = await apiService.get(`/survey-responses/${survey_list_id}`);
+      const responses = response.data;
+      return responses;
+    } catch (error) {
+      console.error('Error fetching survey responses', error);
+    }
+  };
+
 
   return (
     <SurveyContext.Provider value={
@@ -121,6 +131,7 @@ export const SurveyProvider = ({ children }) => {
         fetchMonthlyResponseChange,
         fetchSurveysRatings,
         fetchHighLowCount,
+        fetchSurveyResponses,
       }
     }>
       {children}

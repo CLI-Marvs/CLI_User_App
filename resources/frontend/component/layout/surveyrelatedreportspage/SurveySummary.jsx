@@ -33,8 +33,10 @@ const SurveySummary = () => {
     const [averageRating, setAverageRating] = useState(null);
     const [highLowCount, setHighLowCount] = useState(null);
     const [activeTab, setActiveTab] = useState('form');
-    const modalRef = useRef(null);
+    const [surveyResponses, setSurveyResponses] = useState([]);
 
+
+    const modalRef = useRef(null);
 
     const openModal = () => {
         modalRef.current.showModal();
@@ -44,7 +46,7 @@ const SurveySummary = () => {
     const closeModal = () => {
         modalRef.current.close();
     };
-    
+
     const {
         fetchRespondentsCount,
         fetchMonthlyResponseChange,
@@ -52,6 +54,7 @@ const SurveySummary = () => {
         fetchHighLowCount,
         survey_title,
         survey_loading,
+        fetchSurveyResponses,
     } = useSurvey();
 
     const navigateToSurveyList = () => {
@@ -79,11 +82,21 @@ const SurveySummary = () => {
         setHighLowCount(highLowCount);
     };
 
+    const fetchSurveyResponse = async () => {
+        const totalRespondents = await fetchSurveyResponses(surveyId);
+        setSurveyResponses(totalRespondents);
+    };
+
+    
+
+
+
     useEffect(() => {
         fetchRespondents();
         fetchMonthlyResponse();
         fetchAverageRating();
         fetchHighLowCounts();
+        fetchSurveyResponse();
     }, []);
 
 
@@ -218,7 +231,7 @@ const SurveySummary = () => {
         : { groups: [], ungrouped: [] };
 
     return (
-        <div className='h-screen max-w-full bg-custom-grayFA'>
+        <div className='h-screen max-w-full bg-custom-grayFA viewport-container' >
             <div className='mb-2'>
                 <div onClick={navigateToSurveyList} className='flex justify-center rounded-[10px] w-[32.96px] h-[32.96px] bg-custom-lightgreen text-white items-center cursor-pointer shrink-0 hover:shadow-custom3'>
                     <BiSolidLeftArrow className='size-[13px]' />
@@ -272,6 +285,7 @@ const SurveySummary = () => {
                             </div>
                         </div>
                     </div>
+                    {/* ======================================================KPI Widgets================================================================================= */}
                     <div className="flex gap-6">
                         {/* ======================================================total responses================================================================================= */}
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
@@ -397,6 +411,7 @@ const SurveySummary = () => {
                             </div>
                         </div>
                     </div>
+                    {/* ======================================================================================================================================= */}
                 </div>
                 <div className="flex flex-col w-full gap-6">
 
@@ -423,20 +438,16 @@ const SurveySummary = () => {
                             Emoji Only Responses
                         </button>
                     </div>
-
-
                     <div>
                         {activeTab === 'form' && (
-                            <FormResponsesTab />
+                            <FormResponsesTab surveyResponses={surveyResponses} />
                         )}
                         {activeTab === 'emoji' && (
                             <SummaryRatingDetails />
                         )}
                     </div>
                 </div>
-                <div>
-                    <DateRangeFilter closeModal={closeModal} modalRef={modalRef} />
-                </div>
+
 
             </div>
             {/* ==================================================================================================================================================== */}
@@ -485,6 +496,9 @@ const SurveySummary = () => {
                     );
                 })}
             </div> */}
+            <div>
+                <DateRangeFilter closeModal={closeModal} modalRef={modalRef} />
+            </div>
         </div>
     )
 }

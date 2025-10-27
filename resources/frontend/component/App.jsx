@@ -116,15 +116,20 @@ const App = () => {
 
     const Layout = () => {
         return (
-            <div className="bg-white relative max-h-screen flex flex-col h-screen">
-                <Navbar />
-                <div className="relative flex flex-1 overflow-hidden z-30">
-                    <Sidebar />
-                    <div className="flex-1 overflow-y-auto bg-custom-grayFA z-20">
-                        <Outlet />
+            <div className="app-scale">
+                <div className="app-content">
+                    <div className="bg-white relative max-h-screen flex flex-col h-screen">
+                        <Navbar />
+                        <div className="relative flex flex-1 overflow-hidden z-30">
+                            <Sidebar />
+                            <div className="flex-1 overflow-y-auto bg-custom-grayFA z-20">
+                                <Outlet />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
         );
     };
 
