@@ -13,14 +13,18 @@ import { BiSolidLeftArrow } from 'react-icons/bi';
 import { LuTrendingUp } from "react-icons/lu";
 import { FaRegStar } from "react-icons/fa";
 import { RiErrorWarningLine } from "react-icons/ri";
+import { CiFaceSmile } from "react-icons/ci";
 import IndividualTable from './surveyComponents/IndividualTable';
 import { Select } from '@mui/material';
 import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
+import { IoFunnelOutline } from "react-icons/io5";
+import { HiMiniMagnifyingGlass } from "react-icons/hi2";
 import { RiEqualFill } from "react-icons/ri";
 import { useSurvey } from '../../../context/Survey/SurveyContext';
 import Skeleton from 'react-loading-skeleton';
 import FormResponsesTab from './surveyComponents/FormResponsesTab';
 import DateRangeFilter from './surveyComponents/DateRangeFilter';
+import EmojiResponsesTab from './surveyComponents/EmojiResponsesTab';
 const SurveySummary = () => {
 
     const { id } = useParams();
@@ -32,6 +36,7 @@ const SurveySummary = () => {
     const [monthlyResponseChange, setMonthlyResponseChange] = useState(null);
     const [averageRating, setAverageRating] = useState(null);
     const [highLowCount, setHighLowCount] = useState(null);
+    const [surveyRatings, setSurveyRatings] = useState(null);
     const [activeTab, setActiveTab] = useState('form');
     const [surveyResponses, setSurveyResponses] = useState([]);
 
@@ -55,6 +60,8 @@ const SurveySummary = () => {
         survey_title,
         survey_loading,
         fetchSurveyResponses,
+        ratingDetails,
+        fetchSurveyRatingDetails,
     } = useSurvey();
 
     const navigateToSurveyList = () => {
@@ -87,8 +94,10 @@ const SurveySummary = () => {
         setSurveyResponses(totalRespondents);
     };
 
-    
-
+    const fetchSurveyRatings = async () => {
+        const surveyRatings = await fetchSurveyRatingDetails(surveyId);
+        setSurveyRatings(surveyRatings);
+    };
 
 
     useEffect(() => {
@@ -97,6 +106,7 @@ const SurveySummary = () => {
         fetchAverageRating();
         fetchHighLowCounts();
         fetchSurveyResponse();
+        fetchSurveyRatings();
     }, []);
 
 
@@ -257,13 +267,13 @@ const SurveySummary = () => {
             </div>
             <div className='p-[32px]'>
                 <div className='flex flex-col gap-[40px] mb-[35px]'>
-                    <div className='p-[20px] w-full bg-white'>
-                        <div className='flex'>
-                            <div className='w-[120px] flex justify-center items-center border'>
-                                <p>filters</p>
+                    <div className='p-[20px] w-full bg-white border-[.6px] border-[#F4F4F4] h-[81px] rounded-[10px] '>
+                        <div className='flex text-[#9A9A9A]'>
+                            <div className='h-[40px] w-[120px] flex justify-center items-center gap-2 '>
+                                <p><IoFunnelOutline /></p><p>filters</p>
                             </div>
-                            <div className='w-full'>
-                                <input type="text" className='w-full h-[32px] border' />
+                            <div className='w-full flex items-center gap-2 border px-[12px] border-[#F4F4F4]'>
+                                <HiMiniMagnifyingGlass className='size-[16px]' /><input placeholder='Search email, ticket, or feedback...' type="text" className='w-full h-[32px] outline-none text-black' />
                             </div>
                             <div>
                                 <button
@@ -279,9 +289,6 @@ const SurveySummary = () => {
                                     <option value="1">5 per page</option>
                                     <option value="2">51 per page</option>
                                 </Select>
-                            </div>
-                            <div className='flex justify-center items-center w-[120px]'>
-                                <p>11 results</p>
                             </div>
                         </div>
                     </div>
@@ -415,27 +422,41 @@ const SurveySummary = () => {
                 </div>
                 <div className="flex flex-col w-full gap-6">
 
-                    <div className="flex gap-4  pb-2">
+                    <div className="flex gap-4 ">
                         <button
                             onClick={() => setActiveTab('form')}
-                            className={`w-[160px] border px-5 py-2 rounded-t-md transition-all duration-200
+                            className={` h-[37px] border px-5 py-2 rounded-[4px] transition-all duration-200 flex gap-[8px] items-center
                                 ${activeTab === 'form'
                                     ? 'bg-custom-solidgreen text-white border-custom-solidgreen'
                                     : 'bg-white text-[#323232] hover:bg-gray-100'
                                 }`}
                         >
+                            <FiMessageSquare className='size-[20px]' />
                             Form Responses
+                            <span className={`flex items-center  min-w-[24px] h-[20px] rounded-[4px] py-[2px] px-[8px] text-sm 
+                                ${activeTab === 'form'
+                                    ? 'bg-white text-black'
+                                    : 'bg-custom-solidgreen text-white'
+                                }
+                                `}>{surveyResponses?.data?.length}</span>
                         </button>
 
                         <button
                             onClick={() => setActiveTab('emoji')}
-                            className={`w-[200px] border px-5 py-2 rounded-t-md transition-all duration-200
+                            className={` h-[37px] border px-5 py-2 rounded-[4px] transition-all duration-200 flex gap-[8px] items-center
                                 ${activeTab === 'emoji'
                                     ? 'bg-custom-solidgreen text-white border-custom-solidgreen'
                                     : 'bg-white text-[#323232] hover:bg-gray-100'
                                 }`}
                         >
-                            Emoji Only Responses
+                           <CiFaceSmile className='size-[20px]' />
+                           Emoji Only Responses
+                            <span className={`flex items-center  min-w-[24px] h-[20px] rounded-[4px] py-[2px] px-[8px] text-sm 
+                                ${activeTab === 'emoji'
+                                    ? 'bg-white text-black'
+                                    : 'bg-custom-solidgreen text-white'
+                                }
+                                `}>{surveyRatings?.data?.length}</span>
                         </button>
                     </div>
                     <div>
@@ -443,12 +464,10 @@ const SurveySummary = () => {
                             <FormResponsesTab surveyResponses={surveyResponses} />
                         )}
                         {activeTab === 'emoji' && (
-                            <SummaryRatingDetails />
+                            <EmojiResponsesTab />
                         )}
                     </div>
                 </div>
-
-
             </div>
             {/* ==================================================================================================================================================== */}
             {/* <div className='flex flex-col'>

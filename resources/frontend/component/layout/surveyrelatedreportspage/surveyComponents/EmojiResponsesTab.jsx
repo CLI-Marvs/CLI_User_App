@@ -1,5 +1,6 @@
 import React from 'react'
 import SummaryRatingDetails from './SummaryRatingDetails'
+import { Select } from '@mui/material'
 
 const EmojiResponsesTab = () => {
     return (

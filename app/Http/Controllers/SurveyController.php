@@ -1019,7 +1019,6 @@ class SurveyController extends Controller
                 ->groupBy('ticket_id');
 
 
-
             foreach ($importedAnswers as $ticketId => $answers) {
                 if (isset($responseData[$ticketId])) continue;
 
@@ -1031,7 +1030,6 @@ class SurveyController extends Controller
                     'survey_owner' => $first->survey_owner,
                     'status'       => $first->status ?? 'N/A',
                 ];
-
 
 
                 foreach ($questions as $question) {

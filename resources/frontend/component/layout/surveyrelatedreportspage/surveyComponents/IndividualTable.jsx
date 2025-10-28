@@ -79,7 +79,7 @@ const IndividualTable = ({ surveyResponses }) => {
             <div className="overflow-auto">
                 <TooltipProvider delayDuration={0}>
                     <div className="relative">
-                        <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                        <div className="overflow-x-auto border ">
                             <table className="w-full border-collapse text-sm text-left">
                                 <thead className="bg-custom-lightestgreen h-[40px]">
                                     <tr>

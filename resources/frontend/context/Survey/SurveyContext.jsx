@@ -29,11 +29,10 @@ export const SurveyProvider = ({ children }) => {
   const fetchSurveyRatingDetails = async (survey_list_id) => {
     try {
       const response = await apiService.get(`/survey-rating-details/${survey_list_id}`);
-
-      setRatingDetails(response.data.data);
+      const responseData = response.data;
+      return responseData;
     } catch (error) {
       console.error('Error fetching survey rating details:', error);
-      setRatingDetails([]);
     }
   };
 
