@@ -99,6 +99,8 @@ const SurveySummary = () => {
         setSurveyRatings(surveyRatings);
     };
 
+    
+
 
     useEffect(() => {
         fetchRespondents();
@@ -464,7 +466,7 @@ const SurveySummary = () => {
                             <FormResponsesTab surveyResponses={surveyResponses} />
                         )}
                         {activeTab === 'emoji' && (
-                            <EmojiResponsesTab />
+                            <EmojiResponsesTab surveyRatings={surveyRatings} />
                         )}
                     </div>
                 </div>

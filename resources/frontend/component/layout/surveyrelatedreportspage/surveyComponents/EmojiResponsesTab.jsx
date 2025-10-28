@@ -2,7 +2,7 @@ import React from 'react'
 import SummaryRatingDetails from './SummaryRatingDetails'
 import { Select } from '@mui/material'
 
-const EmojiResponsesTab = () => {
+const EmojiResponsesTab = ({ surveyRatings }) => {
     return (
         <div>
             <div className='p-[20px] flex flex-col gap-4 bg-white'>
@@ -39,7 +39,7 @@ const EmojiResponsesTab = () => {
                 </div>
             </div>
             <div>
-               <SummaryRatingDetails />
+               <SummaryRatingDetails surveyRatings={surveyRatings} />
             </div>
         </div>
     )
