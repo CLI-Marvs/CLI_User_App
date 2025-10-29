@@ -1,8 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import SummaryRatingDetails from './SummaryRatingDetails'
 import { Select } from '@mui/material'
 
-const EmojiResponsesTab = ({ surveyRatings }) => {
+const EmojiResponsesTab = ({ surveyRatings, searchTerm }) => {
+
+    const [localSearchTerm, setLocalSearchTermValue] = useState("");
+
     return (
         <div>
             <div className='p-[20px] flex flex-col gap-4 bg-white'>
@@ -29,7 +32,13 @@ const EmojiResponsesTab = ({ surveyRatings }) => {
                     </div>
                 </div>
                 <div className='flex gap-2'>
-                    <input type="text" className='w-full border' />
+                    <input
+                        placeholder='Search email, ticket, or feedback...'
+                        type="text"
+                        className='w-full h-[32px] outline-none text-black'
+                        value={localSearchTerm}
+                        onChange={(e) => setLocalSearchTermValue(e.target.value)}
+                    />
                     <button className='border w-[180px] h-[36px] rounded-[10px]'>date range</button>
                     <Select className='w-[120px] h-[36px]'>
                         <option value="">1 per page</option>
@@ -39,7 +48,7 @@ const EmojiResponsesTab = ({ surveyRatings }) => {
                 </div>
             </div>
             <div>
-               <SummaryRatingDetails surveyRatings={surveyRatings} />
+                <SummaryRatingDetails surveyRatings={surveyRatings} searchTerm={searchTerm} localSearchTerm={localSearchTerm} />
             </div>
         </div>
     )

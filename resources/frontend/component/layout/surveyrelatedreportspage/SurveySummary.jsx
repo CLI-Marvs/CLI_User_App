@@ -39,6 +39,7 @@ const SurveySummary = () => {
     const [surveyRatings, setSurveyRatings] = useState(null);
     const [activeTab, setActiveTab] = useState('form');
     const [surveyResponses, setSurveyResponses] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
 
 
     const modalRef = useRef(null);
@@ -99,7 +100,7 @@ const SurveySummary = () => {
         setSurveyRatings(surveyRatings);
     };
 
-    
+
 
 
     useEffect(() => {
@@ -275,7 +276,14 @@ const SurveySummary = () => {
                                 <p><IoFunnelOutline /></p><p>filters</p>
                             </div>
                             <div className='w-full flex items-center gap-2 border px-[12px] border-[#F4F4F4]'>
-                                <HiMiniMagnifyingGlass className='size-[16px]' /><input placeholder='Search email, ticket, or feedback...' type="text" className='w-full h-[32px] outline-none text-black' />
+                                <HiMiniMagnifyingGlass className='size-[16px]' />
+                                <input
+                                    placeholder='Search email, ticket, or feedback...'
+                                    type="text"
+                                    className='w-full h-[32px] outline-none text-black'
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
                             </div>
                             <div>
                                 <button
@@ -329,10 +337,10 @@ const SurveySummary = () => {
                                     >
                                         {
                                             monthlyResponseChange?.direction === 'positive'
-                                                ? <IoMdArrowUp className='size-[15px]' />
+                                                ? <IoMdArrowUp className='size-[17px]' />
                                                 : monthlyResponseChange?.direction === 'negative'
-                                                    ? <IoMdArrowDown className='size-[15px]' />
-                                                    : <RiEqualFill className='size-[15px]' />
+                                                    ? <IoMdArrowDown className='size-[17px]' />
+                                                    : <RiEqualFill className='size-[17px]' />
                                         }
                                         &nbsp;
                                         {monthlyResponseChange?.percentage_change}
@@ -451,8 +459,8 @@ const SurveySummary = () => {
                                     : 'bg-white text-[#323232] hover:bg-gray-100'
                                 }`}
                         >
-                           <CiFaceSmile className='size-[20px]' />
-                           Emoji Only Responses
+                            <CiFaceSmile className='size-[20px]' />
+                            Emoji Only Responses
                             <span className={`flex items-center  min-w-[24px] h-[20px] rounded-[4px] py-[2px] px-[8px] text-sm 
                                 ${activeTab === 'emoji'
                                     ? 'bg-white text-black'
@@ -463,10 +471,10 @@ const SurveySummary = () => {
                     </div>
                     <div>
                         {activeTab === 'form' && (
-                            <FormResponsesTab surveyResponses={surveyResponses} />
+                            <FormResponsesTab surveyResponses={surveyResponses} searchTerm={searchTerm}/>
                         )}
                         {activeTab === 'emoji' && (
-                            <EmojiResponsesTab surveyRatings={surveyRatings} />
+                            <EmojiResponsesTab surveyRatings={surveyRatings} searchTerm={searchTerm} />
                         )}
                     </div>
                 </div>
