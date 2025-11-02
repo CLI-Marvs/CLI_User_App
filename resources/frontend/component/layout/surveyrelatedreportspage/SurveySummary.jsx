@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useMemo } from 'react'
 import SummaryBar from './surveyComponents/SummaryBar';
 import { FiMessageSquare } from "react-icons/fi";
 import { useNavigate, useParams } from 'react-router-dom';
@@ -42,6 +42,8 @@ const SurveySummary = () => {
     const [surveyResponses, setSurveyResponses] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [dateFilter, setDateFilter] = useState(null);
+    const [satisfaction, setSatisfaction] = useState(null);
+    const [satisfactClear, setSatisfactClear] = useState(false);
 
     const modalRef = useRef(null);
 
@@ -96,22 +98,35 @@ const SurveySummary = () => {
         setSurveyResponses(totalRespondents);
     };
 
-    const fetchSurveyRatings = async () => {
-        const surveyRatings = await fetchSurveyRatingDetails(surveyId);
+    const fetchSurveyRatings = async (filter = null) => {
+        const surveyRatings = await fetchSurveyRatingDetails(surveyId, filter);
         setSurveyRatings(surveyRatings);
     };
 
 
+    const activeFilters = useMemo(() => {
+        const filters = {};
 
+        if (dateFilter?.startDate && dateFilter?.endDate) {
+            filters.startDate = dateFilter.startDate;
+            filters.endDate = dateFilter.endDate;
+        }
+
+        if (satisfaction) {
+            filters.satisfaction = satisfaction;
+        }
+
+        return Object.keys(filters).length > 0 ? filters : null;
+    }, [dateFilter, satisfaction]);
 
     useEffect(() => {
-        fetchRespondents();
-        fetchMonthlyResponse();
-        fetchAverageRating();
-        fetchHighLowCounts();
-        fetchSurveyResponse();
-        fetchSurveyRatings();
-    }, []);
+        fetchRespondents(activeFilters);
+        fetchMonthlyResponse(activeFilters);
+        fetchAverageRating(activeFilters);
+        fetchHighLowCounts(activeFilters);
+        fetchSurveyResponse(activeFilters);
+        fetchSurveyRatings(activeFilters);
+    }, [activeFilters]);
 
 
     useEffect(() => {
@@ -259,6 +274,12 @@ const SurveySummary = () => {
     const handleFilterClear = () => {
         setDateFilter(null);
         fetchSurveyResponse();
+        fetchSurveyRatingDetails();
+    };
+
+    const handleClearSatisfaction = () => {
+        setSatisfaction(null);
+        fetchSurveyRatingDetails();
     };
 
 
@@ -290,36 +311,58 @@ const SurveySummary = () => {
             <div className='p-[32px]'>
                 <div className='flex flex-col gap-[40px] mb-[35px]'>
                     <div className='p-[20px] w-full bg-white border-[.6px] border-[#F4F4F4] h-[81px] rounded-[10px] '>
-                        <div className='flex text-[#9A9A9A]'>
-                            <div className='h-[40px] w-[120px] flex justify-center items-center gap-2 '>
-                                <p><IoFunnelOutline /></p><p>filters</p>
+                        <div className="flex flex-wrap gap-2 text-[#9A9A9A]">
+                            <div className="h-[36px] min-w-[100px] flex justify-center items-center gap-2">
+                                <p><IoFunnelOutline /></p>
+                                <p>filters</p>
                             </div>
-                            <div className='w-full flex items-center gap-2 border px-[12px] border-[#F4F4F4]'>
-                                <HiMiniMagnifyingGlass className='size-[16px]' />
+
+                            <div className="flex-1 flex items-center gap-2 border px-[12px] border-[#F4F4F4] rounded-[4px] min-w-[200px]">
+                                <HiMiniMagnifyingGlass className="size-[16px]" />
                                 <input
-                                    placeholder='Search email, ticket, or feedback...'
+                                    placeholder="Search email, ticket, or feedback..."
                                     type="text"
-                                    className='w-full h-[32px] outline-none text-black'
+                                    className="w-full h-[32px] outline-none text-black"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
                             </div>
-                            <div>
+
+                            <div className="flex-shrink-0">
                                 <button
                                     onClick={openModal}
-                                    className="border w-[180px] h-[36px] rounded-[10px]"
+                                    className="flex justify-start px-3 items-center gap-2 min-w-[140px] border-[.6px] border-[#F4F4F4] h-[36px] rounded-[4px] text-sm"
                                 >
-                                    Date Range
+                                    <LuCalendar />
+                                    <span>Date Range</span>
                                 </button>
                             </div>
-                            <div>
-                                <Select className='w-[120px] h-[31px]'>
-                                    <option value="">1 per page</option>
-                                    <option value="1">5 per page</option>
-                                    <option value="2">51 per page</option>
-                                </Select>
+
+                            <div className="flex items-center min-w-[140px] h-[36px] rounded-[4px] border-[.6px] border-[#F4F4F4] text-black px-[12px] flex-shrink-0">
+                                <select
+                                    name="satisfaction"
+                                    value={satisfaction}
+                                    onChange={(e) => setSatisfaction(e.target.value)}
+                                    className="outline-none text-sm px-[8px] w-full"
+                                >
+                                    <option value="">All satisfaction</option>
+                                    <option value="Very satisfied">Very satisfied</option>
+                                    <option value="Satisfied">Satisfied</option>
+                                    <option value="Neutral">Neutral</option>
+                                    <option value="Disatisfied">Dissatisfied</option>
+                                    <option value="Very dissatisfied">Very dissatisfied</option>
+                                </select>
                             </div>
+                                {satisfaction && (
+                                    <div 
+                                    onClick={handleClearSatisfaction}
+                                    className="flex-shrink-0 flex items-center cursor-pointer">
+                                        X Clear
+                                    </div>
+                                )}
+                           
                         </div>
+
                     </div>
 
 

@@ -12,6 +12,28 @@ export const SurveyProvider = ({ children }) => {
   const [statusLoading, setStatusLoading] = useState(false);
 
 
+  // Helper function to build query string from filters
+  const buildFilterQuery = (filter) => {
+    if (!filter) return '';
+
+    const params = new URLSearchParams();
+
+    if (filter.startDate && filter.endDate) {
+      params.append('startDate', filter.startDate);
+      params.append('endDate', filter.endDate);
+      if (filter.filterType) {
+        params.append('filterType', filter.filterType);
+      }
+    }
+
+    if (filter.satisfaction) {
+      params.append('satisfaction', filter.satisfaction);
+    }
+
+    return params.toString() ? `?${params.toString()}` : '';
+  };
+
+
   const fetchSurveyTitle = async (survey_list_id) => {
     setLoading(true);
     try {
@@ -26,9 +48,10 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
-  const fetchSurveyRatingDetails = async (survey_list_id) => {
+  const fetchSurveyRatingDetails = async (survey_list_id, filter = null) => {
     try {
-      const response = await apiService.get(`/survey-rating-details/${survey_list_id}`);
+      const query = buildFilterQuery(filter);
+      const response = await apiService.get(`/survey-rating-details/${survey_list_id}${query}`);
       const responseData = response.data;
       return responseData;
     } catch (error) {
@@ -103,13 +126,8 @@ export const SurveyProvider = ({ children }) => {
 
   const fetchSurveyResponses = async (survey_list_id, filter = null) => {
     try {
-      let endpoint = `/survey-responses/${survey_list_id}`;
-
-      if (filter && filter.startDate && filter.endDate) {
-        endpoint += `?startDate=${filter.startDate}&endDate=${filter.endDate}&filterType=${filter.filterType}`;
-      }
-
-      const response = await apiService.get(endpoint);
+      const query = buildFilterQuery(filter);
+      const response = await apiService.get(`/survey-responses/${survey_list_id}${query}`);
       const responses = response.data;
       return responses;
     } catch (error) {

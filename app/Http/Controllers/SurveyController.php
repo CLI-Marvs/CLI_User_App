@@ -744,8 +744,11 @@ class SurveyController extends Controller
         ]);
     }
 
-    public function getSurveyRatingDetails($id)
+    public function getSurveyRatingDetails(Request $request, $id)
     {
+        $startDate = $request->query('startDate');
+        $endDate = $request->query('endDate');
+        $satisfaction = $request->query('satisfaction');
 
         $survey = Survey_list::find($id);
 
@@ -753,13 +756,31 @@ class SurveyController extends Controller
             return response()->json(['error' => 'Survey not found'], 404);
         }
 
-
-        $ratings = ExperienceRating::where('survey_link', $survey->survey_link)
+        $ratingsQuery = ExperienceRating::where('survey_link', $survey->survey_link)
             ->whereNotNull('rating')
             ->orderBy('created_at', 'desc')
-            ->select('ticket_id', 'email', 'rating', 'created_at')
-            ->get();
+            ->select('ticket_id', 'email', 'rating', 'created_at');
 
+        // ✅ Add date filter
+        if ($startDate && $endDate) {
+            $ratingsQuery->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        }
+
+        if (!empty($satisfaction)) {  // ✅ Better - handles "", null, "0", etc.
+            $ratingMap = [
+                'Very satisfied' => 5,
+                'Satisfied' => 4,
+                'Neutral' => 3,
+                'Dissatisfied' => 2,
+                'Very dissatisfied' => 1,
+            ];
+
+            if (isset($ratingMap[$satisfaction])) {
+                $ratingsQuery->where('rating', $ratingMap[$satisfaction]);
+            }
+        }
+
+        $ratings = $ratingsQuery->get();
 
         return response()->json([
             'data' => $ratings,
@@ -940,7 +961,7 @@ class SurveyController extends Controller
 
         $startDate = $request->query('startDate');
         $endDate = $request->query('endDate');
-
+        $satisfaction = $request->query('satisfaction');
         try {
             // 1️⃣ Get survey info
             $survey = DB::table('surveys_list')
@@ -972,6 +993,21 @@ class SurveyController extends Controller
 
             if ($startDate && $endDate) {
                 $experienceRatingsQuery->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+            }
+
+            if ($satisfaction) {
+                // Map satisfaction string to rating number
+                $ratingMap = [
+                    'Very satisfied' => 5,
+                    'Satisfied' => 4,
+                    'Neutral' => 3,
+                    'Dissatisfied' => 2,
+                    'Very dissatisfied' => 1,
+                ];
+
+                if (isset($ratingMap[$satisfaction])) {
+                    $experienceRatingsQuery->where('rating', $ratingMap[$satisfaction]);
+                }
             }
 
             $experienceRatings = $experienceRatingsQuery
@@ -1028,6 +1064,20 @@ class SurveyController extends Controller
             // Apply date filter if provided
             if ($startDate && $endDate) {
                 $importedAnswersQuery->whereBetween('er.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+            }
+
+            if ($satisfaction) {
+                $ratingMap = [
+                    'Very satisfied' => 5,
+                    'Satisfied' => 4,
+                    'Neutral' => 3,
+                    'Dissatisfied' => 2,
+                    'Very dissatisfied' => 1,
+                ];
+
+                if (isset($ratingMap[$satisfaction])) {
+                    $importedAnswersQuery->where('er.rating', $ratingMap[$satisfaction]);
+                }
             }
 
             $importedAnswers = $importedAnswersQuery
