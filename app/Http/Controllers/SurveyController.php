@@ -935,8 +935,12 @@ class SurveyController extends Controller
         ]);
     }
 
-    public function getSurveyResponses($survey_list_id)
+    public function getSurveyResponses(Request $request, $survey_list_id)
     {
+
+        $startDate = $request->query('startDate');
+        $endDate = $request->query('endDate');
+
         try {
             // 1️⃣ Get survey info
             $survey = DB::table('surveys_list')
@@ -959,16 +963,22 @@ class SurveyController extends Controller
             $responseData = [];
 
             // 3️⃣ SCENARIO 1 — Normal survey submissions (only status = 'submitted')
-            $experienceRatings = DB::table('experience_ratings')
+            $experienceRatingsQuery = DB::table('experience_ratings')
                 ->where(function ($q) use ($survey) {
                     $q->where('survey_title', $survey->survey_title)
                         ->orWhere('survey_link', $survey->survey_link);
                 })
-                ->where('status', 'submitted')
+                ->where('status', 'submitted');
+
+            if ($startDate && $endDate) {
+                $experienceRatingsQuery->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+            }
+
+            $experienceRatings = $experienceRatingsQuery
                 ->select('id', 'ticket_id', 'email', 'survey_title as survey_owner', 'created_at', 'status', 'survey_link')
                 ->get();
 
-               
+
 
             foreach ($experienceRatings as $rating) {
                 $row = [
@@ -1004,7 +1014,7 @@ class SurveyController extends Controller
 
 
             // 4️⃣ SCENARIO 2 — Imported (Google Form)
-            $importedAnswers = DB::table('survey_answers as sa')
+            $importedAnswersQuery = DB::table('survey_answers as sa')
                 ->join('experience_ratings as er', DB::raw("CAST(sa.ticket_id AS TEXT)"), '=', DB::raw("CAST(er.ticket_id AS TEXT)"))
                 ->where(function ($q) use ($survey) {
                     $q->where('er.survey_title', $survey->survey_title)
@@ -1013,7 +1023,14 @@ class SurveyController extends Controller
                 ->where(function ($q) {
                     $q->where('er.status', 'submitted')
                         ->orWhereNull('er.status');
-                })
+                });
+
+            // Apply date filter if provided
+            if ($startDate && $endDate) {
+                $importedAnswersQuery->whereBetween('er.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+            }
+
+            $importedAnswers = $importedAnswersQuery
                 ->select('sa.ticket_id', 'er.email', 'er.created_at', 'er.survey_title as survey_owner', 'er.status', 'sa.question', 'sa.answer_value')
                 ->get()
                 ->groupBy('ticket_id');

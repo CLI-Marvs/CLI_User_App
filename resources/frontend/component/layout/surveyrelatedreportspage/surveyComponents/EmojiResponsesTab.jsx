@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import SummaryRatingDetails from './SummaryRatingDetails'
 import { Select } from '@mui/material'
+import { HiMiniMagnifyingGlass } from 'react-icons/hi2';
 
 const EmojiResponsesTab = ({ surveyRatings, searchTerm }) => {
 
@@ -32,13 +33,16 @@ const EmojiResponsesTab = ({ surveyRatings, searchTerm }) => {
                     </div>
                 </div>
                 <div className='flex gap-2'>
-                    <input
-                        placeholder='Search email, ticket, or feedback...'
-                        type="text"
-                        className='w-full h-[32px] outline-none text-black'
-                        value={localSearchTerm}
-                        onChange={(e) => setLocalSearchTermValue(e.target.value)}
-                    />
+                    <div className='w-full flex items-center gap-2 border px-[12px] border-[#F4F4F4]'>
+                        <HiMiniMagnifyingGlass className='size-[16px]' />
+                        <input
+                            placeholder='Search email, ticket, or feedback...'
+                            type="text"
+                            className='w-full h-[32px] outline-none text-black'
+                            value={localSearchTerm}
+                            onChange={(e) => setLocalSearchTermValue(e.target.value)}
+                        />
+                    </div>
                     <button className='border w-[180px] h-[36px] rounded-[10px]'>date range</button>
                     <Select className='w-[120px] h-[36px]'>
                         <option value="">1 per page</option>

@@ -10,7 +10,7 @@ export const SurveyProvider = ({ children }) => {
   const [surveyLinks, setSurveyLinks] = useState([]);
   const [surveyStatus, setSurveyStatus] = useState("");
   const [statusLoading, setStatusLoading] = useState(false);
-  
+
 
   const fetchSurveyTitle = async (survey_list_id) => {
     setLoading(true);
@@ -38,7 +38,7 @@ export const SurveyProvider = ({ children }) => {
 
   const fetchSurveyLinks = async () => {
     try {
-      const response = await apiService.get('/survey-links'); 
+      const response = await apiService.get('/survey-links');
       setSurveyLinks(response.data);
     } catch (err) {
       setError('Failed to fetch survey links');
@@ -81,7 +81,7 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
-   const fetchSurveysRatings = async (survey_list_id) => {
+  const fetchSurveysRatings = async (survey_list_id) => {
     try {
       const response = await apiService.get(`/average-rating/${survey_list_id}`);
       const surveysRatings = response.data;
@@ -101,9 +101,15 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
-  const fetchSurveyResponses = async (survey_list_id) => {
+  const fetchSurveyResponses = async (survey_list_id, filter = null) => {
     try {
-      const response = await apiService.get(`/survey-responses/${survey_list_id}`);
+      let endpoint = `/survey-responses/${survey_list_id}`;
+
+      if (filter && filter.startDate && filter.endDate) {
+        endpoint += `?startDate=${filter.startDate}&endDate=${filter.endDate}&filterType=${filter.filterType}`;
+      }
+
+      const response = await apiService.get(endpoint);
       const responses = response.data;
       return responses;
     } catch (error) {

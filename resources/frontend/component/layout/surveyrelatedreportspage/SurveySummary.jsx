@@ -10,7 +10,7 @@ import SummaryTextboxTable from './surveyComponents/SummaryTextboxTable';
 import SummaryVerticalBar from './surveyComponents/SummaryVerticalBar';
 import SummaryRatingDetails from './surveyComponents/SummaryRatingDetails';
 import { BiSolidLeftArrow } from 'react-icons/bi';
-import { LuTrendingUp } from "react-icons/lu";
+import { LuCalendar, LuTrendingUp } from "react-icons/lu";
 import { FaRegStar } from "react-icons/fa";
 import { RiErrorWarningLine } from "react-icons/ri";
 import { CiFaceSmile } from "react-icons/ci";
@@ -19,6 +19,7 @@ import { Select } from '@mui/material';
 import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
 import { IoFunnelOutline } from "react-icons/io5";
 import { HiMiniMagnifyingGlass } from "react-icons/hi2";
+import { IoMdClose } from "react-icons/io";
 import { RiEqualFill } from "react-icons/ri";
 import { useSurvey } from '../../../context/Survey/SurveyContext';
 import Skeleton from 'react-loading-skeleton';
@@ -40,7 +41,7 @@ const SurveySummary = () => {
     const [activeTab, setActiveTab] = useState('form');
     const [surveyResponses, setSurveyResponses] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
-
+    const [dateFilter, setDateFilter] = useState(null);
 
     const modalRef = useRef(null);
 
@@ -50,7 +51,7 @@ const SurveySummary = () => {
 
 
     const closeModal = () => {
-        modalRef.current.close();
+        modalRef.current.closeModal();
     };
 
     const {
@@ -90,8 +91,8 @@ const SurveySummary = () => {
         setHighLowCount(highLowCount);
     };
 
-    const fetchSurveyResponse = async () => {
-        const totalRespondents = await fetchSurveyResponses(surveyId);
+    const fetchSurveyResponse = async (filter = null) => {
+        const totalRespondents = await fetchSurveyResponses(surveyId, filter);
         setSurveyResponses(totalRespondents);
     };
 
@@ -243,6 +244,24 @@ const SurveySummary = () => {
         ? groupQuestionsByOptions(surveySummary.questions)
         : { groups: [], ungrouped: [] };
 
+
+
+
+
+
+    // Handler function to receive the filter from modal
+    const handleDateFilterApply = (filterPayload) => {
+        setDateFilter(filterPayload);
+        // Fetch data with the new filter
+        fetchSurveyResponse(filterPayload);
+    };
+
+    const handleFilterClear = () => {
+        setDateFilter(null);
+        fetchSurveyResponse();
+    };
+
+
     return (
         <div className='h-screen max-w-full bg-custom-grayFA viewport-container' >
             <div className='mb-2'>
@@ -302,6 +321,40 @@ const SurveySummary = () => {
                             </div>
                         </div>
                     </div>
+
+
+                    {dateFilter && (
+                        <div className="flex gap-2 items-center">
+                            <p className="text-sm text-[#9A9A9A]">Active filters:</p>
+                            <div className="border-[.6px] border-[#008DEF33] p-[6px] px-[14px] rounded-[4px] bg-[#F5F9F3] text-custom-solidgreen text-sm font-medium">
+                                <div className="flex gap-2 items-center">
+                                    <div>
+                                        <LuCalendar className="size-[16px]" />
+                                    </div>
+                                    <div>
+                                        {(() => {
+                                            const start = new Date(dateFilter.startDate);
+                                            const end = new Date(dateFilter.endDate);
+
+                                            const formatDate = (date) =>
+                                                date.toLocaleDateString("en-US", {
+                                                    month: "short",
+                                                    day: "numeric",
+                                                    year: "numeric",
+                                                });
+
+                                            return start.getTime() === end.getTime()
+                                                ? formatDate(start)
+                                                : `${formatDate(start)} - ${formatDate(end)}`;
+                                        })()}
+                                    </div>
+                                    <button onClick={handleFilterClear}>
+                                        <IoMdClose />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                     {/* ======================================================KPI Widgets================================================================================= */}
                     <div className="flex gap-6">
                         {/* ======================================================total responses================================================================================= */}
@@ -471,7 +524,7 @@ const SurveySummary = () => {
                     </div>
                     <div>
                         {activeTab === 'form' && (
-                            <FormResponsesTab surveyResponses={surveyResponses} searchTerm={searchTerm}/>
+                            <FormResponsesTab surveyResponses={surveyResponses} searchTerm={searchTerm} />
                         )}
                         {activeTab === 'emoji' && (
                             <EmojiResponsesTab surveyRatings={surveyRatings} searchTerm={searchTerm} />
@@ -526,7 +579,11 @@ const SurveySummary = () => {
                 })}
             </div> */}
             <div>
-                <DateRangeFilter closeModal={closeModal} modalRef={modalRef} />
+                <DateRangeFilter
+                    closeModal={closeModal}
+                    modalRef={modalRef}
+                    onApplyFilter={handleDateFilterApply}
+                />
             </div>
         </div>
     )
