@@ -26,6 +26,7 @@ import Skeleton from 'react-loading-skeleton';
 import FormResponsesTab from './surveyComponents/FormResponsesTab';
 import DateRangeFilter from './surveyComponents/DateRangeFilter';
 import EmojiResponsesTab from './surveyComponents/EmojiResponsesTab';
+import { filter } from 'lodash';
 const SurveySummary = () => {
 
     const { id } = useParams();
@@ -73,23 +74,23 @@ const SurveySummary = () => {
     };
 
 
-    const fetchRespondents = async () => {
-        const totalRespondents = await fetchRespondentsCount(surveyId);
+    const fetchRespondents = async (filter = null) => {
+        const totalRespondents = await fetchRespondentsCount(surveyId, filter);
         setRespondents(totalRespondents);
     };
 
-    const fetchMonthlyResponse = async () => {
-        const monthlyResponseChange = await fetchMonthlyResponseChange(surveyId);
+    const fetchMonthlyResponse = async (filter = null) => {
+        const monthlyResponseChange = await fetchMonthlyResponseChange(surveyId, filter);
         setMonthlyResponseChange(monthlyResponseChange);
     };
 
-    const fetchAverageRating = async () => {
-        const averageRating = await fetchSurveysRatings(surveyId);
+    const fetchAverageRating = async (filter = null) => {
+        const averageRating = await fetchSurveysRatings(surveyId, filter);
         setAverageRating(averageRating);
     };
 
-    const fetchHighLowCounts = async () => {
-        const highLowCount = await fetchHighLowCount(surveyId);
+    const fetchHighLowCounts = async (filter = null) => {
+        const highLowCount = await fetchHighLowCount(surveyId, filter);
         setHighLowCount(highLowCount);
     };
 
@@ -421,6 +422,7 @@ const SurveySummary = () => {
                                     </div>
                                 </div>
                                 {/* TODO: When the filter is applied, this should be hidden */}
+                               {!dateFilter && !satisfaction && (
                                 <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
                                     <p className={`flex items-center 
                                         ${monthlyResponseChange?.direction === 'positive'
@@ -443,6 +445,7 @@ const SurveySummary = () => {
                                     </p>
                                     <p className=" text-[#9A9A9A]">vs last month</p>
                                 </div>
+                                )}
                             </div>
                         </div>
 

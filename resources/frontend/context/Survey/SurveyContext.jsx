@@ -83,9 +83,10 @@ export const SurveyProvider = ({ children }) => {
   };
 
 
-  const fetchRespondentsCount = async (survey_list_id) => {
+  const fetchRespondentsCount = async (survey_list_id, filter = null) => {
     try {
-      const response = await apiService.get(`/total-responses/${survey_list_id}`);
+      const query = buildFilterQuery(filter);
+      const response = await apiService.get(`/total-responses/${survey_list_id}${query}`);
       const totalRespondents = response.data;
       return totalRespondents;
     } catch (error) {
@@ -94,9 +95,10 @@ export const SurveyProvider = ({ children }) => {
   };
 
 
-  const fetchMonthlyResponseChange = async (survey_list_id) => {
+  const fetchMonthlyResponseChange = async (survey_list_id, filter = null) => {
     try {
-      const response = await apiService.get(`/monthly-response-change/${survey_list_id}`);
+      const query = buildFilterQuery(filter);
+      const response = await apiService.get(`/monthly-response-change/${survey_list_id}${query}`);
       const monthlyResponseChange = response.data;
       return monthlyResponseChange;
     } catch (error) {
@@ -104,9 +106,10 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
-  const fetchSurveysRatings = async (survey_list_id) => {
+  const fetchSurveysRatings = async (survey_list_id, filter = null) => {
     try {
-      const response = await apiService.get(`/average-rating/${survey_list_id}`);
+      const query = buildFilterQuery(filter);
+      const response = await apiService.get(`/average-rating/${survey_list_id}${query}`);
       const surveysRatings = response.data;
       return surveysRatings;
     } catch (error) {
@@ -114,9 +117,10 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
-  const fetchHighLowCount = async (survey_list_id) => {
+  const fetchHighLowCount = async (survey_list_id, filter = null) => {
     try {
-      const response = await apiService.get(`/highest-low-count/${survey_list_id}`);
+      const query = buildFilterQuery(filter);
+      const response = await apiService.get(`/highest-low-count/${survey_list_id}${query}`);
       const highestLowCount = response.data;
       return highestLowCount;
     } catch (error) {
