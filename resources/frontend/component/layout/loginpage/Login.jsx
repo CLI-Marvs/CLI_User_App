@@ -32,20 +32,13 @@ const Login = () => {
     }, [location]);
 
     useEffect(() => {
-        const isBannerShown = sessionStorage.getItem("bannerShown");
-
-        if (!isBannerShown) {
-            // Always show banner once when app loads
-            setShowModal(true);
-            sessionStorage.setItem("bannerShown", "true");
-        }
-
         if (
             APP_URL === "http://localhost:8001" ||
             APP_URL === "https://admin-dev.cebulandmasters.com" ||
             APP_URL === "https://admin-uat.cebulandmasters.com"
         ) {
             sessionStorage.setItem("isTestEnvironment", "true");
+            setShowModal(true);
         }
     }, []);
 
@@ -99,7 +92,10 @@ const Login = () => {
                                 <strong>test environment</strong>, which is for
                                 testing and exploration purposes only. To access
                                 the <strong>Live application</strong>, go to{" "}
-                                <a href={APP_URL} className="underline">
+                                <a
+                                    href="https://master-cx.cebulandmasters.com"
+                                    className="underline"
+                                >
                                     master-cx.cebulandmasters.com
                                 </a>
                             </p>
