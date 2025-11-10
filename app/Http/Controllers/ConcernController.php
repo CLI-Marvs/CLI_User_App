@@ -1627,8 +1627,8 @@ class ConcernController extends Controller
                         $adminLink = 'https://admin.cebulandmasters.com';
                     }
 
-                    if (config('services.app_url') === 'https://masters-cx.cebulandmasters.com') {
-                        $adminLink = 'https://masters-cx.cebulandmasters.com';
+                    if (config('services.app_url') === 'https://master-cx.cebulandmasters.com') {
+                        $adminLink = 'https://master-cx.cebulandmasters.com';
                     }
 
                     $dataToEmail = [
