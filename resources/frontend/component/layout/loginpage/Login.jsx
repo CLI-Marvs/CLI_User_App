@@ -32,20 +32,13 @@ const Login = () => {
     }, [location]);
 
     useEffect(() => {
-        const isBannerShown = sessionStorage.getItem("bannerShown");
-
-        if (!isBannerShown) {
-            // Always show banner once when app loads
-            setShowModal(true);
-            sessionStorage.setItem("bannerShown", "true");
-        }
-
         if (
             APP_URL === "http://localhost:8001" ||
             APP_URL === "https://admin-dev.cebulandmasters.com" ||
             APP_URL === "https://admin-uat.cebulandmasters.com"
         ) {
             sessionStorage.setItem("isTestEnvironment", "true");
+            setShowModal(true);
         }
     }, []);
 
