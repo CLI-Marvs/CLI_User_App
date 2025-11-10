@@ -16,7 +16,7 @@ import moment from "moment";
 import { useTransactionReports } from "../hooks/useTransactionQueries";
 
 const cardData = [
-    { label: "Bank Recon Amount", name: "bank_recon_amount"},
+    { label: "Bank Recon Amount", name: "bank_recon_amount" },
     { label: "Net Posting", name: "net_posting_amount" },
     { label: "Bill", name: "amount" },
     { label: "Creditable Withholding Tax", name: "withholding_tax" },
@@ -129,6 +129,7 @@ const Reports = () => {
                 payment_option: p_method,
                 start_date: startDate,
                 end_date: endDate,
+                status: "Succeed",
             },
         }));
         setEnabled(true);
@@ -277,7 +278,14 @@ const Reports = () => {
                                         ₱{formatAmountPH(reportData[item.name])}
                                     </span>
                                     <div className="flex justify-end cursor-pointer">
-                                        <span className="text-[#348017] font-medium" onClick={() => navigateToTransaction("Credit/Debit Card")}>
+                                        <span
+                                            className="text-[#348017] font-medium"
+                                            onClick={() =>
+                                                navigateToTransaction(
+                                                    "Credit/Debit Card"
+                                                )
+                                            }
+                                        >
                                             View Breakdown <span>&gt;</span>
                                         </span>
                                     </div>

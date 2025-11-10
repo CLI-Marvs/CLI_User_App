@@ -53,7 +53,7 @@ class SendSurveyLinkEmail extends Mailable
             );
         }
 
-        if (config('services.app_url') === 'https://masters-connect.cebulandmasters.com') {
+        if (config('services.app_url') === 'https://master-cx.cebulandmasters.com') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "Share Your Feedback - We'd Love to Hear from You!",
