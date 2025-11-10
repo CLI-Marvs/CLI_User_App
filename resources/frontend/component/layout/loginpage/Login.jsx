@@ -99,7 +99,10 @@ const Login = () => {
                                 <strong>test environment</strong>, which is for
                                 testing and exploration purposes only. To access
                                 the <strong>Live application</strong>, go to{" "}
-                                <a href={APP_URL} className="underline">
+                                <a
+                                    href="https://master-cx.cebulandmasters.com"
+                                    className="underline"
+                                >
                                     master-cx.cebulandmasters.com
                                 </a>
                             </p>
