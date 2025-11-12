@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { MdOutlineChevronLeft, MdOutlineChevronRight } from "react-icons/md";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
 import emoji1 from "../../../../../../public/Images/emoji1.png";
 import emoji2 from "../../../../../../public/Images/emoji2.png";
@@ -35,6 +36,7 @@ function getRatingCounts(data) {
 const SummaryRatingDetails = ({ surveyRatings, searchTerm, localSearchTerm }) => {
     const [selectedRating, setSelectedRating] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
+    const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
     const itemsPerPage = 8;
 
     // ✅ ensure data is an array
@@ -74,15 +76,35 @@ const SummaryRatingDetails = ({ surveyRatings, searchTerm, localSearchTerm }) =>
         );
     }, [ratingFilteredData, localSearchTerm]);
 
-    // ✅ Get counts & pagination based on fully filtered data
+    // ✅ 4️⃣ Apply sorting by date
+    const sortedData = useMemo(() => {
+        return [...fullyFilteredData].sort((a, b) => {
+            const dateA = new Date(a.created_at);
+            const dateB = new Date(b.created_at);
+            
+            if (sortOrder === 'asc') {
+                return dateA - dateB; // Oldest first
+            } else {
+                return dateB - dateA; // Newest first
+            }
+        });
+    }, [fullyFilteredData, sortOrder]);
+
+    // ✅ Get counts & pagination based on sorted data
     const ratingCounts = useMemo(() => getRatingCounts(globalFilteredData), [globalFilteredData]);
-    const totalPages = Math.ceil(fullyFilteredData.length / itemsPerPage) || 1;
+    const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const currentRatingDetails = fullyFilteredData.slice(startIndex, endIndex);
+    const currentRatingDetails = sortedData.slice(startIndex, endIndex);
 
     const handlePrev = () => currentPage > 1 && setCurrentPage((p) => p - 1);
     const handleNext = () => currentPage < totalPages && setCurrentPage((p) => p + 1);
+
+    // ✅ Toggle sort order
+    const toggleSortOrder = () => {
+        setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+        setCurrentPage(1); // Reset to first page when sorting
+    };
 
     useEffect(() => {
         setCurrentPage(1);
@@ -97,7 +119,7 @@ const SummaryRatingDetails = ({ surveyRatings, searchTerm, localSearchTerm }) =>
                     placeholder="Search within this table..."
                     value={localSearchTerm}
                     onChange={(e) => {
-                        // you’ll control this input from the parent if needed
+                        // you'll control this input from the parent if needed
                         // or handle state locally by lifting this out
                     }}
                     className="w-full border rounded-md px-3 py-2 text-sm"
@@ -150,7 +172,19 @@ const SummaryRatingDetails = ({ surveyRatings, searchTerm, localSearchTerm }) =>
                     <table className="w-full border-collapse text-sm text-left">
                         <thead className="bg-custom-lightestgreen h-[40px]">
                             <tr>
-                                <th className="px-2 py-2 montserrat-bold w-[200px]">Date</th>
+                                <th className="px-2 py-2 montserrat-bold w-[200px]">
+                                    <button 
+                                        onClick={toggleSortOrder}
+                                        className="flex items-center gap-2 hover:text-gray-700 transition-colors"
+                                    >
+                                        <span>Date</span>
+                                        {sortOrder === 'desc' ? (
+                                            <FaChevronDown className="text-xs" />
+                                        ) : (
+                                            <FaChevronUp className="text-xs" />
+                                        )}
+                                    </button>
+                                </th>
                                 <th className="px-2 py-2 montserrat-bold w-[150px]">Rate</th>
                                 <th className="px-2 py-2 montserrat-bold">Email</th>
                                 <th className="px-2 py-2 montserrat-bold">Ticket ID</th>

@@ -43,7 +43,7 @@ const SurveySummary = () => {
     const [surveyResponses, setSurveyResponses] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [dateFilter, setDateFilter] = useState(null);
-    const [satisfaction, setSatisfaction] = useState(null);
+    const [satisfaction, setSatisfaction] = useState("All satisfaction");
     const [satisfactClear, setSatisfactClear] = useState(false);
 
     const modalRef = useRef(null);
@@ -260,11 +260,6 @@ const SurveySummary = () => {
         ? groupQuestionsByOptions(surveySummary.questions)
         : { groups: [], ungrouped: [] };
 
-
-
-
-
-
     // Handler function to receive the filter from modal
     const handleDateFilterApply = (filterPayload) => {
         setDateFilter(filterPayload);
@@ -279,7 +274,7 @@ const SurveySummary = () => {
     };
 
     const handleClearSatisfaction = () => {
-        setSatisfaction(null);
+        setSatisfaction("All satisfaction");
         fetchSurveyRatingDetails();
     };
 
@@ -301,7 +296,6 @@ const SurveySummary = () => {
                                 (
                                     <span>{survey_title} Dashboard</span>
                                 )}
-
                         </p>
                     </div>
                     <div>
@@ -346,7 +340,7 @@ const SurveySummary = () => {
                                     onChange={(e) => setSatisfaction(e.target.value)}
                                     className="outline-none text-sm px-[8px] w-full"
                                 >
-                                    <option value="">All satisfaction</option>
+                                    <option value="All satisfaction" selected>All satisfaction</option>
                                     <option value="Very satisfied">Very satisfied</option>
                                     <option value="Satisfied">Satisfied</option>
                                     <option value="Neutral">Neutral</option>
@@ -354,19 +348,15 @@ const SurveySummary = () => {
                                     <option value="Very dissatisfied">Very dissatisfied</option>
                                 </select>
                             </div>
-                                {satisfaction && (
-                                    <div 
+                            {satisfaction !== "All satisfaction" && (
+                                <div
                                     onClick={handleClearSatisfaction}
                                     className="flex-shrink-0 flex items-center cursor-pointer">
-                                        X Clear
-                                    </div>
-                                )}
-                           
+                                    X Clear
+                                </div>
+                            )}
                         </div>
-
                     </div>
-
-
                     {dateFilter && (
                         <div className="flex gap-2 items-center">
                             <p className="text-sm text-[#9A9A9A]">Active filters:</p>
@@ -421,30 +411,13 @@ const SurveySummary = () => {
                                         </div>
                                     </div>
                                 </div>
-                                {/* TODO: When the filter is applied, this should be hidden */}
-                               {!dateFilter && !satisfaction && (
-                                <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
-                                    <p className={`flex items-center 
-                                        ${monthlyResponseChange?.direction === 'positive'
-                                            ? 'text-[#3B82F6]'
-                                            : monthlyResponseChange?.direction === 'negative'
-                                                ? 'text-red-500'
-                                                : 'text-[#3B82F6]'
-                                        }
-                                    `}
-                                    >
-                                        {
-                                            monthlyResponseChange?.direction === 'positive'
-                                                ? <IoMdArrowUp className='size-[17px]' />
-                                                : monthlyResponseChange?.direction === 'negative'
-                                                    ? <IoMdArrowDown className='size-[17px]' />
-                                                    : <RiEqualFill className='size-[17px]' />
-                                        }
-                                        &nbsp;
-                                        {monthlyResponseChange?.percentage_change}
-                                    </p>
-                                    <p className=" text-[#9A9A9A]">vs last month</p>
-                                </div>
+                                {!dateFilter  && (
+                                    <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] text-[#9A9A9A] items-center text-[14px]">
+                                        <p className={`flex items-center`}>
+                                            {monthlyResponseChange?.current_month}
+                                        </p>
+                                        <p className=" ">responses this month</p>
+                                    </div>
                                 )}
                             </div>
                         </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import {
     Tooltip,
     TooltipContent,
@@ -6,9 +6,16 @@ import {
     TooltipTrigger,
     TooltipArrow,
 } from "@/components/ui/tooltip"
-import { MdOutlineChevronLeft, MdOutlineChevronRight } from "react-icons/md";
+import { MdOutlineChevronLeft, MdOutlineChevronRight, MdFullscreen, MdFullscreenExit } from "react-icons/md";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import IndividualResponseModal from './IndividualResponseModal';
 
 const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm }) => {
+    const modalRef = useRef(null);
+    const [selectedResponse, setSelectedResponse] = useState(null);
+    const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
+    const [currentPage, setCurrentPage] = useState(1);
+    const [isExpanded, setIsExpanded] = useState(false);
 
     // ✅ Step 1: Validate surveyResponses first
     if (
@@ -61,6 +68,18 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm }) => {
         );
     }
 
+    // ✅ NEW: Sort the filtered data by timestamp
+    const sortedData = [...filteredData].sort((a, b) => {
+        const dateA = new Date(a.timestamp);
+        const dateB = new Date(b.timestamp);
+        
+        if (sortOrder === 'asc') {
+            return dateA - dateB; // Oldest first
+        } else {
+            return dateB - dateA; // Newest first
+        }
+    });
+
     // ✅ Step 5: Continue normal logic
     const filteredHeaders = headers.filter(
         (h) => h.toLowerCase() !== "status"
@@ -89,12 +108,10 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm }) => {
     );
 
     const itemsPerPage = 10;
-    const [currentPage, setCurrentPage] = useState(1);
-
-    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    const totalPages = Math.ceil(sortedData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const currentData = filteredData.slice(startIndex, endIndex);
+    const currentData = sortedData.slice(startIndex, endIndex);
 
     const handlePrev = () => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -104,110 +121,70 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm }) => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
 
-    // ✅ Step 6: Render
+    // ✅ NEW: Toggle sort order
+    const toggleSortOrder = () => {
+        setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+        setCurrentPage(1); // Reset to first page when sorting
+    };
+
+    const handleOpenModal = (response) => {
+        setSelectedResponse(response);
+        modalRef.current.showModal();
+    };
+
+    
     return (
         <>
-            <div className="overflow-auto">
-                <TooltipProvider delayDuration={0}>
-                    <div className="relative">
-                        <div className="overflow-x-auto border">
-                            <table className="w-full border-collapse text-sm text-left">
-                                <thead className="bg-custom-lightestgreen h-[40px]">
-                                    <tr>
-                                        <th className="px-2 pr-6 py-2 montserrat-bold w-[140px]">Timestamp</th>
-                                        <th className="px-2 py-2 montserrat-bold w-[200px]">Email Address</th>
-                                        <th className="px-2 py-2 montserrat-bold w-[120px]">Ticket ID</th>
-                                        <th className="px-2 py-2 montserrat-bold w-[180px]">
-                                            <p className="min-w-[130px]">Survey Owner</p>
-                                        </th>
+            <div className={`${isExpanded ? 'fixed inset-0 z-50 bg-white flex flex-col' : 'relative'}`}>
+                {/* Expand/Collapse Button */}
+                <div className={`flex justify-end p-2 ${isExpanded ? 'border-b bg-gray-50' : ''}`}>
+                    <button
+                        onClick={() => setIsExpanded(!isExpanded)}
+                        className="flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-gray-100 transition-colors shadow-sm"
+                        title={isExpanded ? "Exit fullscreen" : "Expand fullscreen"}
+                    >
+                        {isExpanded ? (
+                            <>
+                                <MdFullscreenExit className="text-lg" />
+                                <span className="text-sm font-medium">Exit Fullscreen</span>
+                            </>
+                        ) : (
+                            <>
+                                <MdFullscreen className="text-lg" />
+                                <span className="text-sm font-medium">Expand</span>
+                            </>
+                        )}
+                    </button>
+                </div>
 
-                                        {/* Table Headers */}
-                                        {(() => {
-                                            const reasonIndex = allQuestions.findIndex(
-                                                (q) =>
-                                                    q.trim().toLowerCase() ===
-                                                    "please provide the reason/s for your rating:"
-                                            );
+                {/* Table Container */}
+                <div className={`${isExpanded ? 'flex-1 overflow-auto px-4' : 'overflow-auto'}`}>
+                    <TooltipProvider delayDuration={0}>
+                        <div className="relative">
+                            <div className="overflow-x-auto border">
+                                <table className="w-full border-collapse text-sm text-left">
+                                    <thead className="bg-custom-lightestgreen h-[40px]">
+                                        <tr>
+                                            <th className="px-2 pr-6 py-2 montserrat-bold w-[140px]">
+                                                <button 
+                                                    onClick={toggleSortOrder}
+                                                    className="flex items-center gap-2 hover:text-gray-700 transition-colors"
+                                                >
+                                                    <span>Timestamp</span>
+                                                    {sortOrder === 'desc' ? (
+                                                        <FaChevronDown className="text-xs" />
+                                                    ) : (
+                                                        <FaChevronUp className="text-xs" />
+                                                    )}
+                                                </button>
+                                            </th>
+                                            <th className="px-2 py-2 montserrat-bold w-[200px]">Email Address</th>
+                                            <th className="px-2 py-2 montserrat-bold w-[120px]">Ticket ID</th>
+                                            <th className="px-2 py-2 montserrat-bold w-[180px]">
+                                                <p className="min-w-[130px]">Survey Owner</p>
+                                            </th>
 
-                                            const sortedQuestions =
-                                                reasonIndex !== -1
-                                                    ? [
-                                                        ...allQuestions.filter(
-                                                            (_, index) => index !== reasonIndex
-                                                        ),
-                                                        allQuestions[reasonIndex],
-                                                    ]
-                                                    : allQuestions;
-
-                                            return sortedQuestions.map((question, index) => {
-                                                const isReason =
-                                                    question.trim().toLowerCase() ===
-                                                    "please provide the reason/s for your rating:";
-                                                const isNumericHeader =
-                                                    /scale\s*of\s*1\s*-\s*10/i.test(
-                                                        question.replace(/\n|↵/g, " ")
-                                                    );
-
-                                                return (
-                                                    <th
-                                                        key={index}
-                                                        className={`px-4 py-2 montserrat-bold ${isReason
-                                                            ? "w-[300px]"
-                                                            : "w-[180px]"
-                                                            }`}
-                                                    >
-                                                        <Tooltip>
-                                                            <TooltipTrigger>
-                                                                <p
-                                                                    className={`w-[120px] ${isNumericHeader
-                                                                        ? "text-center"
-                                                                        : "text-left"
-                                                                        }`}
-                                                                >
-                                                                    {isReason
-                                                                        ? "Reason"
-                                                                        : `Question ${index + 1}`}
-                                                                </p>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent className="bg-white text-black shadow-md max-w-[300px]">
-                                                                <p>{question}</p>
-                                                                <TooltipArrow className="fill-white drop-shadow-md" />
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    </th>
-                                                );
-                                            });
-                                        })()}
-                                    </tr>
-                                </thead>
-
-                                <tbody className="divide-y divide-custom-lightestgreen">
-                                    {currentData.map((response, rowIndex) => (
-                                        <tr
-                                            key={rowIndex}
-                                            className="hover:bg-[#F5F9F3] h-[71px]"
-                                        >
-                                            <td className="px-2 py-2 w-[160px]">
-                                                <div>
-                                                    {new Date(response.timestamp).toLocaleDateString("en-US", {
-                                                        month: "short",
-                                                        day: "numeric",
-                                                        year: "numeric",
-                                                    })}
-                                                </div>
-                                                <div className="text-xs text-[#9A9A9A]">
-                                                    {new Date(response.timestamp).toLocaleTimeString("en-US", {
-                                                        hour: "2-digit",
-                                                        minute: "2-digit",
-                                                    })}
-                                                </div>
-                                            </td>
-
-                                            <td className="px-2 py-2 w-[200px]">{response.email}</td>
-                                            <td className="px-2 py-2 w-[120px]">Ticket#{response.ticket_id}</td>
-                                            <td className="px-2 py-2 w-[150px]">{response.survey_owner}</td>
-
-                                            {/* Question answers */}
+                                            {/* Table Headers */}
                                             {(() => {
                                                 const reasonIndex = allQuestions.findIndex(
                                                     (q) =>
@@ -225,86 +202,178 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm }) => {
                                                         ]
                                                         : allQuestions;
 
-                                                return sortedQuestions.map((question, i) => {
-                                                    const answer = response[question];
-                                                    const color =
-                                                        satisfactionColors[answer] ||
-                                                        numberColor(answer);
-
-                                                    const isNumeric = !isNaN(parseFloat(answer));
+                                                return sortedQuestions.map((question, index) => {
                                                     const isReason =
                                                         question.trim().toLowerCase() ===
                                                         "please provide the reason/s for your rating:";
+                                                    const isNumericHeader =
+                                                        /scale\s*of\s*1\s*-\s*10/i.test(
+                                                            question.replace(/\n|↵/g, " ")
+                                                        );
 
                                                     return (
-                                                        <td
-                                                            key={i}
-                                                            className={`px-2 py-2 ${isReason
+                                                        <th
+                                                            key={index}
+                                                            className={`px-4 py-2 montserrat-bold ${isReason
                                                                 ? "w-[300px]"
                                                                 : "w-[180px]"
-                                                                }`}
+                                                            }`}
                                                         >
-                                                            <div
-                                                                className={`flex items-center h-full px-2 ${isNumeric
-                                                                    ? "justify-center"
-                                                                    : "justify-start"
-                                                                    }`}
-                                                            >
-                                                                {color && !isReason ? (
-                                                                    <span
-                                                                        className={`${color} text-white font-medium px-3 py-[2px] rounded-[4px] inline-block truncate max-w-[400px]`}
+                                                            <Tooltip>
+                                                                <TooltipTrigger>
+                                                                    <p
+                                                                        className={`w-[120px] ${isNumericHeader
+                                                                            ? "text-center"
+                                                                            : "text-left"
+                                                                        }`}
                                                                     >
-                                                                        {answer}
-                                                                    </span>
-                                                                ) : (
-                                                                    <span className="truncate block max-w-[400px] text-gray-700">
-                                                                        {answer || ""}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-                                                        </td>
+                                                                        {isReason
+                                                                            ? "Reason"
+                                                                            : `Question ${index + 1}`}
+                                                                    </p>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent className="bg-white text-black shadow-md max-w-[300px]">
+                                                                    <p>{question}</p>
+                                                                    <TooltipArrow className="fill-white drop-shadow-md" />
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </th>
                                                     );
                                                 });
                                             })()}
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+
+                                    <tbody className="divide-y divide-custom-lightestgreen">
+                                        {currentData.map((response, rowIndex) => (
+                                            <tr
+                                                key={rowIndex}
+                                                onClick={() => handleOpenModal(response)}
+                                                className="hover:bg-[#F5F9F3] h-[71px] cursor-pointer"
+                                            >
+                                                <td className="px-2 py-2 w-[160px]">
+                                                    <div>
+                                                        {new Date(response.timestamp).toLocaleDateString("en-US", {
+                                                            month: "short",
+                                                            day: "numeric",
+                                                            year: "numeric",
+                                                        })}
+                                                    </div>
+                                                    <div className="text-xs text-[#9A9A9A]">
+                                                        {new Date(response.timestamp).toLocaleTimeString("en-US", {
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                        })}
+                                                    </div>
+                                                </td>
+
+                                                <td className="px-2 py-2 w-[200px]">{response.email}</td>
+                                                <td className="px-2 py-2 w-[120px]">Ticket#{response.ticket_id}</td>
+                                                <td className="px-2 py-2 w-[150px]">{response.survey_owner}</td>
+
+                                                {/* Question answers */}
+                                                {(() => {
+                                                    const reasonIndex = allQuestions.findIndex(
+                                                        (q) =>
+                                                            q.trim().toLowerCase() ===
+                                                            "please provide the reason/s for your rating:"
+                                                    );
+
+                                                    const sortedQuestions =
+                                                        reasonIndex !== -1
+                                                            ? [
+                                                                ...allQuestions.filter(
+                                                                    (_, index) => index !== reasonIndex
+                                                                ),
+                                                                allQuestions[reasonIndex],
+                                                            ]
+                                                            : allQuestions;
+
+                                                    return sortedQuestions.map((question, i) => {
+                                                        const answer = response[question];
+                                                        const color =
+                                                            satisfactionColors[answer] ||
+                                                            numberColor(answer);
+
+                                                        const isNumeric = !isNaN(parseFloat(answer));
+                                                        const isReason =
+                                                            question.trim().toLowerCase() ===
+                                                            "please provide the reason/s for your rating:";
+
+                                                        return (
+                                                            <td
+                                                                key={i}
+                                                                className={`px-2 py-2 ${isReason
+                                                                    ? "w-[300px]"
+                                                                    : "w-[180px]"
+                                                                }`}
+                                                            >
+                                                                <div
+                                                                    className={`flex items-center h-full px-2 ${isNumeric
+                                                                        ? "justify-center"
+                                                                        : "justify-start"
+                                                                    }`}
+                                                                >
+                                                                    {color && !isReason ? (
+                                                                        <span
+                                                                            className={`${color} text-white font-medium px-3 py-[2px] rounded-[4px] inline-block truncate max-w-[400px]`}
+                                                                        >
+                                                                            {answer}
+                                                                        </span>
+                                                                    ) : (
+                                                                        <span className="truncate block max-w-[400px] text-gray-700">
+                                                                            {answer || ""}
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            </td>
+                                                        );
+                                                    });
+                                                })()}
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
+                    </TooltipProvider>
+                </div>
+
+                {/* Pagination Footer */}
+                <div className={`p-4 flex justify-between items-center text-sm text-gray-700 ${isExpanded ? 'border-t bg-gray-50' : ''}`}>
+                    <div>
+                        <span className="text-[#9A9A9A]">Page</span> {currentPage}{" "}
+                        <span className="text-[#9A9A9A]">of</span> {totalPages}
                     </div>
-                </TooltipProvider>
+
+                    <div className="flex gap-3 items-center">
+                        <button
+                            onClick={handlePrev}
+                            disabled={currentPage === 1}
+                            className={`flex items-center gap-1 px-3 py-1 border-[.6px] rounded-[4px] font-medium ${currentPage === 1
+                                ? "text-gray-400 border-[#F4F4F4] cursor-not-allowed"
+                                : "hover:bg-gray-100"
+                            }`}
+                        >
+                            <MdOutlineChevronLeft /> Previous
+                        </button>
+
+                        <button
+                            onClick={handleNext}
+                            disabled={currentPage === totalPages}
+                            className={`flex items-center gap-1 px-3 py-1 border-[.6px] rounded-[4px] font-medium ${currentPage === totalPages
+                                ? "text-gray-400 border-[#F4F4F4] cursor-not-allowed"
+                                : "hover:bg-gray-100"
+                            }`}
+                        >
+                            Next <MdOutlineChevronRight />
+                        </button>
+                    </div>
+                </div>
             </div>
-
-            {/* Pagination Footer */}
-            <div className="p-4 flex justify-between items-center text-sm text-gray-700">
-                <div>
-                    <span className=" text-[#9A9A9A]">Page</span> {currentPage}{" "}
-                    <span className=" text-[#9A9A9A]">of</span> {totalPages}
-                </div>
-
-                <div className="flex gap-3 items-center">
-                    <button
-                        onClick={handlePrev}
-                        disabled={currentPage === 1}
-                        className={`flex items-center gap-1 px-3 py-1 border-[.6px] rounded-[4px] font-medium ${currentPage === 1
-                            ? "text-gray-400 border-[#F4F4F4] cursor-not-allowed"
-                            : "hover:bg-gray-100"
-                            }`}
-                    >
-                        <MdOutlineChevronLeft /> Previous
-                    </button>
-
-                    <button
-                        onClick={handleNext}
-                        disabled={currentPage === totalPages}
-                        className={`flex items-center gap-1 px-3 py-1 border-[.6px] rounded-[4px] font-medium ${currentPage === totalPages
-                            ? "text-gray-400 border-[#F4F4F4] cursor-not-allowed"
-                            : "hover:bg-gray-100"
-                            }`}
-                    >
-                        Next <MdOutlineChevronRight />
-                    </button>
-                </div>
+            
+            <div>
+                <IndividualResponseModal modalRef={modalRef} selectedResponse={selectedResponse} />
             </div>
         </>
     );
