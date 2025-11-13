@@ -623,7 +623,7 @@ class SurveyController extends Controller
                 'http://localhost:8001'                  => 'http://localhost:8002/survey',
                 'https://admin-dev.cebulandmasters.com'  => 'https://feedback-dev.cebulandmasters.com/survey',
                 'https://admin-uat.cebulandmasters.com'  => 'https://feedback-uat.cebulandmasters.com/survey',
-                'https://admin.cebulandmasters.com'      => 'https://ask.cebulandmasters.com/survey',
+                'https://master-cx.cebulandmasters.com'      => 'https://ask.cebulandmasters.com/survey',
             ];
 
             $defaultSurveyBaseUrl = 'https://ask.cebulandmasters.com/survey';
@@ -702,19 +702,19 @@ class SurveyController extends Controller
     public function getSurveysWithRatingBreakdown()
     {
         $surveys = Survey_list::select('id', 'survey_title', 'survey_link')
-        ->where('status', true)
-        ->orderBy('created_at', 'asc')
-        ->get();
+            ->where('status', true)
+            ->orderBy('created_at', 'asc')
+            ->get();
 
         $result = $surveys->map(function ($survey) {
-        
+
             $ratingCounts = ExperienceRating::where('survey_link', $survey->survey_link)
                 ->whereNotNull('rating')
                 ->select('rating', DB::raw('COUNT(*) as total'))
                 ->groupBy('rating')
-                ->pluck('total', 'rating'); 
+                ->pluck('total', 'rating');
 
-            
+
             $fullRatingCounts = [];
             for ($i = 1; $i <= 5; $i++) {
                 $fullRatingCounts[$i] = $ratingCounts->get($i, 0);

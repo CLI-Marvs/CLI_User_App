@@ -337,7 +337,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Route::get('/property-name', [PropertyMasterController::class, 'getPropertyName']);
-    // Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
+    Route::post('/download-file', [ConcernController::class, 'downloadFileFromGCS']);
 
     /* Property Master */
     // Route::post('/property-details', [PropertyMasterController::class, 'storePropertyDetail']);
