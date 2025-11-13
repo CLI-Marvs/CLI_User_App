@@ -52,14 +52,14 @@ class SendReplyFromAdmin extends Mailable
             );
         }
 
-        if(config('services.app_url') === 'https://admin-uat.cebulandmasters.com') {
+        if (config('services.app_url') === 'https://admin-uat.cebulandmasters.com') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "[SML] [CLI Inquiry] Transaction {$this->ticket_id}",
             );
         }
 
-        if(config('services.app_url') === 'https://admin.cebulandmasters.com') {
+        if (config('services.app_url') === 'https://master-cx.cebulandmasters.com') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "[CLI Inquiry] Transaction {$this->ticket_id}",

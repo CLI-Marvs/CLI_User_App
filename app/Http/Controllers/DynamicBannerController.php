@@ -30,7 +30,7 @@ class DynamicBannerController extends Controller
             $this->folderName = 'concerns-uat/';
         }
 
-        if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
+        if (config('services.app_url') === 'https://master-cx.cebulandmasters.com') {
             $this->keyJson = config('services.gcs_prod.key_json');
             $this->bucket = 'concerns-bucket';
             $this->folderName = 'concerns-attachments/';
@@ -68,7 +68,7 @@ class DynamicBannerController extends Controller
 
     protected function deleteFromGCS($filePath)
     {
-        
+
         $storage = new \Google\Cloud\Storage\StorageClient();
         $bucket = $storage->bucket($this->bucket);
 
@@ -104,18 +104,18 @@ class DynamicBannerController extends Controller
     public function updateBanner(Request $request)
     {
         try {
-           
+
             $dynamicBanner = DynamicBanner::find($request->id);
             if (!$dynamicBanner) {
                 return response()->json(['message' => 'Banner not found'], 404);
             }
-            
+
             if ($request->hasFile('banner_image')) {
                 $fileLinks = $this->uploadToGCS($request->file('banner_image'));
                 $dynamicBanner->banner_image = $fileLinks['fileLink'];
                 $dynamicBanner->original_file_name = $fileLinks['originalFileName'];
             }
-    
+
             // Update banner link
             $dynamicBanner->banner_link = $request->banner_link;
             $dynamicBanner->save();
@@ -133,16 +133,16 @@ class DynamicBannerController extends Controller
     {
         try {
             $banner = DynamicBanner::find($id);
-    
-            
+
+
             if (!$banner) {
                 return response()->json(['message' => 'Banner not found'], 404);
             }
-    
+
             //$this->deleteFromGCS($banner->banner_image);
-    
+
             $banner->delete();
-    
+
             return response()->json(['message' => 'Banner deleted successfully']);
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error deleting banner', 'error' => $e->getMessage()], 500);

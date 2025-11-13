@@ -23,7 +23,7 @@ class SendSurveyLinkEmail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct($buyer_name, $selectedSurveyType, $buyerEmail, $status,$modifiedTicketId)
+    public function __construct($buyer_name, $selectedSurveyType, $buyerEmail, $status, $modifiedTicketId)
     {
         $this->buyerEmail = $buyerEmail;
         $this->buyer_name = $buyer_name;
@@ -53,7 +53,7 @@ class SendSurveyLinkEmail extends Mailable
             );
         }
 
-        if (config('services.app_url') === 'https://admin.cebulandmasters.com') {
+        if (config('services.app_url') === 'https://master-cx.cebulandmasters.com') {
             return new Envelope(
                 from: new Address('ask@cebulandmasters.com', 'Cebu Landmasters Inc.'),
                 subject: "Share Your Feedback - We'd Love to Hear from You!",

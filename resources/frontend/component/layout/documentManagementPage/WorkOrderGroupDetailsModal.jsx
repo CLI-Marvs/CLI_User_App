@@ -706,6 +706,23 @@ const WorkOrderGroupDetailsModal = ({
                                 }
                             }
                         }
+                        // Find the latest checklist update date for this submilestone
+                        const latestUpdateDate =
+                            completedChecklists.length > 0
+                                ? completedChecklists.reduce(
+                                      (latest, checklist) => {
+                                          const checklistDate = new Date(
+                                              checklist.completedDate
+                                          );
+                                          return !latest ||
+                                              checklistDate > new Date(latest)
+                                              ? checklist.completedDate
+                                              : latest;
+                                      },
+                                      null
+                                  )
+                                : null;
+
                         checklistInfos.push({
                             stepName: step.stepName,
                             milestoneName: sub.name,
@@ -722,6 +739,7 @@ const WorkOrderGroupDetailsModal = ({
                                       )
                                     : 0,
                             subMilestoneId: sub.id,
+                            latestUpdateDate: latestUpdateDate,
                         });
                     });
                 });
@@ -840,6 +858,7 @@ const WorkOrderGroupDetailsModal = ({
                 currentChecklistInfo: currentChecklistInfo,
                 uploaded_documents: account.uploaded_documents || [],
                 checklistInfos,
+                workOrderCreatedAt: account.latestStep?.workOrder?.created_at,
             };
         });
 

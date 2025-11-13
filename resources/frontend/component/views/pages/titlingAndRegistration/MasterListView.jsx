@@ -36,6 +36,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { CircularProgress } from "@mui/material";
 import TitlingAndRegistrationMonitor from "../../../layout/documentManagementPage/TitlingAndRegistrationMonitor";
+import HistoricalImportModal from "./HistoricalImportModal";
 // import Skeleton from "react-loading-skeleton";
 // import "react-loading-skeleton/dist/skeleton.css";
 
@@ -325,6 +326,8 @@ export default function PaginatedTable() {
     const dropdownRef = useRef(null);
     const [isAddingToMasterlist, setIsAddingToMasterlist] = useState(false);
     const [isFileUploading, setIsFileUploading] = useState(false);
+    const [isHistoricalImportModalOpen, setIsHistoricalImportModalOpen] =
+        useState(false);
     const [isChecked, setIsChecked] = useState(false);
     // const [isViewOpen, setIsViewOpen] = useState(false);
     const [showTitlingMonitor, setShowTitlingMonitor] = useState(false);
@@ -1966,11 +1969,7 @@ export default function PaginatedTable() {
                             <button
                                 onClick={() => {
                                     if (!isFileUploading) {
-                                        document
-                                            .getElementById(
-                                                "masterListFileUpload"
-                                            )
-                                            .click();
+                                        setIsHistoricalImportModalOpen(true);
                                     }
                                 }}
                                 className={`h-[47px] w-[130px] bg-[#067AC5] text-white text-sm rounded-[10px] flex items-center justify-center gap-1 ${
@@ -1994,13 +1993,14 @@ export default function PaginatedTable() {
                                     </>
                                 )}
                             </button>
-                            <input
+                            {/* Old file input - now using HistoricalImportModal */}
+                            {/* <input
                                 id="masterListFileUpload"
                                 type="file"
                                 accept=".xlsx, .xls, .csv"
                                 onChange={handleFileUpload}
                                 className="hidden"
-                            />
+                            /> */}
                         </div>
                     </div>
                 )}
@@ -2410,6 +2410,16 @@ export default function PaginatedTable() {
                 pauseOnHover
                 theme="dark"
                 className="custom-toast-container"
+            />
+            {/* Historical Import Modal */}
+            <HistoricalImportModal
+                isOpen={isHistoricalImportModalOpen}
+                onClose={() => setIsHistoricalImportModalOpen(false)}
+                onSuccess={() => {
+                    // Refresh the table data after successful import
+                    fetchMasterList();
+                    setIsHistoricalImportModalOpen(false);
+                }}
             />
         </>
     );

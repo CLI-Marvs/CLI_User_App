@@ -12,8 +12,11 @@ export const ALLOWED_EMPLOYEES_CRS = [
     "kaarmelia@cebulandmasters.com",
     "dataengineer@cebulandmasters.com",
     "qcmahipos@cebulandmasters.com",
-    "dataengineer@cebulandmasters.com",
     "pcbornea@cebulandmasters.com",
     //"pcbornea@cebulandmasters.com",
-    'fluraga@cebulandmasters.com'
+    "fluraga@cebulandmasters.com",
+    "asbuot@cebulandmasters.com",
+    "mlferatero@cebulandmasters.com",
+    "agpepito@cebulandmasters.com",
+    "mfquimada@cebulandmasters.com",
 ];
