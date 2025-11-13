@@ -483,22 +483,10 @@ const Navbar = () => {
                 </div>
 
                 {showBanner && (
-                    <div className="flex w-full h-12">
-                        <div className="bg-red-600 text-white py-3 px-4 rounded-md">
-                            <div className="max-w-7xl my-auto flex items-center justify-between gap-4">
-                                <div className="flex items-center gap-3 flex-1">
-                                    <Info />
-                                    <p className="text-sm montserrat-semibold">
-                                        This is a test environment
-                                    </p>
-                                </div>
-
-                                <button
-                                    className="p-1 hover:bg-white/20 rounded-full transition-colors flex-shrink-0"
-                                    aria-label="Close banner"
-                                ></button>
-                            </div>
-                        </div>
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 z-50 bg-red-500  px-6 py-2 rounded-b-lg shadow-lg text-center">
+                        <p className="text-sm text-white montserrat-semibold ">
+                            This is a test environment.
+                        </p>
                     </div>
                 )}
 
