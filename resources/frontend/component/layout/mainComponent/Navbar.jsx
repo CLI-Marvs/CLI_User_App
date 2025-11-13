@@ -16,9 +16,12 @@ import FeedbackModal from "./FeedbackModal";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useSurvey } from "../../../context/Survey/SurveyContext";
+import { Icon, Info, X } from "lucide-react";
 
 const Navbar = () => {
     const { id } = useParams();
+    const [showBanner, setShowBanner] = useState(false);
+    const APP_URL = import.meta.env.VITE_API_BASE_URL;
 
     const { data, ticketId, navBarData, loading, user, getNavBarData } =
         useStateContext();
@@ -35,6 +38,12 @@ const Navbar = () => {
             modalRef.current.showModal();
         }
     };
+
+    useEffect(() => {
+        if (APP_URL !== "https://master-cx.cebulandmasters.com") {
+            setShowBanner(true);
+        }
+    }, []);
 
     useEffect(() => {
         if (
@@ -472,6 +481,27 @@ const Navbar = () => {
                         </Stack>
                     </div>
                 </div>
+
+                {showBanner && (
+                    <div className="flex w-full h-12">
+                        <div className="bg-red-600 text-white py-3 px-4 rounded-md">
+                            <div className="max-w-7xl my-auto flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 flex-1">
+                                    <Info />
+                                    <p className="text-sm montserrat-semibold">
+                                        This is a test environment
+                                    </p>
+                                </div>
+
+                                <button
+                                    className="p-1 hover:bg-white/20 rounded-full transition-colors flex-shrink-0"
+                                    aria-label="Close banner"
+                                ></button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 <div className="flex items-center justify-end">
                     <div className="flex gap-[7px]">
                         <div className="flex items-center w-[74px] justify-center">

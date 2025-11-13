@@ -32,11 +32,7 @@ const Login = () => {
     }, [location]);
 
     useEffect(() => {
-        if (
-            APP_URL === "http://localhost:8001" ||
-            APP_URL === "https://admin-dev.cebulandmasters.com" ||
-            APP_URL === "https://admin-uat.cebulandmasters.com"
-        ) {
+        if (APP_URL !== "https://master-cx.cebulandmasters.com") {
             sessionStorage.setItem("isTestEnvironment", "true");
             setShowModal(true);
         }
