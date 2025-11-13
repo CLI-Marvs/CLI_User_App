@@ -474,6 +474,7 @@ const SurveySummary = () => {
                                 </div>
                             </div>
                         </div>
+
                         {/*============================================================1 tar rating============================================================================ */}
                         <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
                             <div className='flex flex-col justify-between h-full'>
@@ -503,7 +504,6 @@ const SurveySummary = () => {
                     {/* ======================================================================================================================================= */}
                 </div>
                 <div className="flex flex-col w-full gap-6">
-
                     <div className="flex gap-4 ">
                         <button
                             onClick={() => setActiveTab('form')}

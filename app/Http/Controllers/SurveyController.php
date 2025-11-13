@@ -1120,7 +1120,7 @@ class SurveyController extends Controller
             }
 
             $experienceRatings = $experienceRatingsQuery
-                ->select('id', 'ticket_id', 'email', 'survey_title as survey_owner', 'created_at', 'status', 'survey_link')
+                ->select('id', 'ticket_id','rating', 'email', 'survey_title as survey_owner', 'created_at', 'status', 'survey_link')
                 ->get();
 
 
@@ -1131,6 +1131,7 @@ class SurveyController extends Controller
                     'email'        => $rating->email,
                     'ticket_id'    => $rating->ticket_id,
                     'survey_owner' => $rating->survey_owner,
+                    'rating'       => $rating->rating,
                     'status'       => $rating->status ?? 'N/A',
                 ];
 

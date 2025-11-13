@@ -13,7 +13,7 @@ import IndividualResponseModal from './IndividualResponseModal';
 const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm }) => {
     const modalRef = useRef(null);
     const [selectedResponse, setSelectedResponse] = useState(null);
-    const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
+    const [sortOrder, setSortOrder] = useState('desc'); 
     const [currentPage, setCurrentPage] = useState(1);
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -74,9 +74,9 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm }) => {
         const dateB = new Date(b.timestamp);
         
         if (sortOrder === 'asc') {
-            return dateA - dateB; // Oldest first
+            return dateA - dateB; 
         } else {
-            return dateB - dateA; // Newest first
+            return dateB - dateA; 
         }
     });
 
