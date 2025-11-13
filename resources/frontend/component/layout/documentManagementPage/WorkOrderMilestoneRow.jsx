@@ -268,14 +268,18 @@ const WorkOrderMilestoneRow = ({
                                                         : "text-gray-600"
                                                 }`}
                                             >
-                                                {new Date().toLocaleDateString(
-                                                    "en-US",
-                                                    {
-                                                        month: "2-digit",
-                                                        day: "2-digit",
-                                                        year: "2-digit",
-                                                    }
-                                                )}
+                                                {row.workOrderCreatedAt
+                                                    ? new Date(
+                                                          row.workOrderCreatedAt
+                                                      ).toLocaleDateString(
+                                                          "en-US",
+                                                          {
+                                                              month: "2-digit",
+                                                              day: "2-digit",
+                                                              year: "2-digit",
+                                                          }
+                                                      )
+                                                    : "-"}
                                             </span>
                                         </div>
                                         <div className="flex-1 px-2 py-2 text-center">
@@ -291,8 +295,11 @@ const WorkOrderMilestoneRow = ({
                                                         : "text-gray-600"
                                                 }`}
                                             >
-                                                {completion > 0
-                                                    ? new Date().toLocaleDateString(
+                                                {completion > 0 &&
+                                                checklistInfoForCell?.latestUpdateDate
+                                                    ? new Date(
+                                                          checklistInfoForCell.latestUpdateDate
+                                                      ).toLocaleDateString(
                                                           "en-US",
                                                           {
                                                               month: "2-digit",

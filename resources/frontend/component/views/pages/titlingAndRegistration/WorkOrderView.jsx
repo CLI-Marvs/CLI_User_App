@@ -839,7 +839,7 @@ const WorkOrderView = () => {
                 <div className="flex gap-1.5 flex-shrink-0">
                     <button
                         onClick={() => setIsAllAccountsModalOpen(true)}
-                        className="h-[47px] w-[120px] px-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 font-semibold text-white text-sm rounded-[10px] flex items-center justify-center gap-2 transition-all duration-200"
+                        className="h-[47px] w-[120px] px-3 bg-[#067AC5] font-semibold text-white text-sm rounded-[10px] flex items-center justify-center gap-2 transition-all duration-200"
                         title="View all accounts across all work order groups"
                     >
                         <svg

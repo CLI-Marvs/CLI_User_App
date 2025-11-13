@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\SystemStructureExportController;
 use Illuminate\Http\Request;
 
 use App\Models\DynamicBanner;
@@ -22,6 +23,7 @@ use App\Http\Controllers\DynamicBannerController;
 use App\Http\Controllers\PaymentSchemeController;
 use App\Http\Controllers\PriceBasicDetailController;
 use App\Http\Controllers\TakenOutAccountController;
+use App\Http\Controllers\HistoricalAccountImportController;
 use App\Http\Controllers\PriceListMasterController;
 use App\Http\Controllers\TitlingRegistrationController;
 use App\Http\Controllers\PropertyMasterController;
@@ -134,6 +136,23 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::patch('undo-masterlist', [TakenOutAccountController::class, 'undoMasterListStatus']);
         Route::post('upload-taken-out-accounts', [TakenOutAccountController::class, 'uploadTakenOutAccounts']);
     });
+
+    /**
+     * Historical Account Import - Specialized import for historical, ongoing, and completed accounts
+     */
+    Route::prefix('accounts')->group(function () {
+        Route::post('import-historical', [HistoricalAccountImportController::class, 'importHistoricalAccounts']);
+        Route::post('import-preview', [HistoricalAccountImportController::class, 'previewImport']);
+        Route::get('status-summary', [HistoricalAccountImportController::class, 'getAccountStatusSummary']);
+    });
+
+    /**
+     * System Structure Export (outside accounts prefix)
+     */
+    Route::prefix('system')->group(function () {
+        Route::get('structure', [SystemStructureExportController::class, 'getSystemStructure']);
+        Route::get('download-template', [SystemStructureExportController::class, 'downloadTemplate']);
+    });
     /**
      * Titling & Registration Monitor
      */
@@ -207,8 +226,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/work-order-groups/update-all-status', [WorkOrderGroupController::class, 'updateAllStatus']);
     Route::get('/work-order-groups/status-summary', [WorkOrderGroupController::class, 'getStatusSummary']);
     Route::post('/work-order-groups/{id}/check-accounts-completion', [WorkOrderGroupController::class, 'checkAccountsCompletion']);
-    // All accounts endpoint
+    // All accounts endpoints
     Route::get('/all-accounts-details', [AllAccountsController::class, 'getAllAccountsWithDetails']);
+    Route::get('/all-accounts-details-paginated', [AllAccountsController::class, 'getAllAccountsWithDetailsPaginated']);
     // Bulk update work order deadlines and accounts for a group
     Route::put('work-orders/group/{groupId}/bulk-update-deadline', [WorkOrderController::class, 'bulkUpdateDeadline']);
     // Update account milestone progression

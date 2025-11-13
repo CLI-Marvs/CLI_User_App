@@ -30,12 +30,19 @@ class TakenOutAccount extends Model
         'category',
         'to_year',
         'to_month',
+        'account_status',
+        'current_submilestone_id',
+        'completion_percentage',
+        'imported_at',
+        'import_notes',
     ];
 
     protected $casts = [
         'added_status' => 'boolean',
         'milestone_statuses' => 'array',
         'checklist_status' => 'boolean',
+        'completion_percentage' => 'integer',
+        'imported_at' => 'timestamp',
     ];
 
     public function takenOutAccount()
@@ -79,6 +86,14 @@ class TakenOutAccount extends Model
     public function accountChecklistStatuses()
     {
         return $this->hasMany(AccountChecklistStatus::class, 'account_id');
+    }
+
+    /**
+     * Get the current submilestone for this account
+     */
+    public function currentSubmilestone()
+    {
+        return $this->belongsTo(Submilestone::class, 'current_submilestone_id');
     }
 
     protected $guarded = [];
