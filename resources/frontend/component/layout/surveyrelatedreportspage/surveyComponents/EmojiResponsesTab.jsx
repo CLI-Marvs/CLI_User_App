@@ -7,6 +7,67 @@ const EmojiResponsesTab = ({ surveyRatings, searchTerm }) => {
 
     const [localSearchTerm, setLocalSearchTermValue] = useState("");
 
+    const [currentPage, setCurrentPage] = useState(1); // ✅ Lift state up
+    const [selectedRating, setSelectedRating] = useState(null); // ✅ Lift state up
+
+    // ✅ Calculate filtered data count (matching SummaryRatingDetails logic)
+    const getFilteredCount = () => {
+        const ratingDetails = Array.isArray(surveyRatings?.data) ? surveyRatings.data : [];
+
+        if (ratingDetails.length === 0) return 0;
+
+        // Apply global search filter
+        let filtered = ratingDetails;
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            const labels = {
+                1: 'Very Dissatisfied',
+                2: 'Dissatisfied',
+                3: 'Neutral',
+                4: 'Satisfied',
+                5: 'Very Satisfied'
+            };
+            filtered = filtered.filter(
+                (item) =>
+                    item.email?.toLowerCase().includes(term) ||
+                    item.ticket_id?.toString().includes(term) ||
+                    labels[item.rating]?.toLowerCase().includes(term)
+            );
+        }
+
+        // Apply rating filter
+        if (selectedRating) {
+            filtered = filtered.filter((item) => item.rating === selectedRating);
+        }
+
+        // Apply local search filter
+        if (localSearchTerm) {
+            const localTerm = localSearchTerm.toLowerCase();
+            const labels = {
+                1: 'Very Dissatisfied',
+                2: 'Dissatisfied',
+                3: 'Neutral',
+                4: 'Satisfied',
+                5: 'Very Satisfied'
+            };
+            filtered = filtered.filter(
+                (item) =>
+                    item.email?.toLowerCase().includes(localTerm) ||
+                    item.ticket_id?.toString().includes(localTerm) ||
+                    labels[item.rating]?.toLowerCase().includes(localTerm)
+            );
+        }
+
+        return filtered.length;
+    };
+
+    const filteredCount = getFilteredCount();
+
+    // ✅ Calculate pagination display based on current page
+    const itemsPerPage = 8;
+    const startItem = filteredCount > 0 ? ((currentPage - 1) * itemsPerPage) + 1 : 0;
+    const endItem = Math.min(currentPage * itemsPerPage, filteredCount);
+
     return (
         <div>
             <div className='p-[20px] flex flex-col gap-4 bg-white'>
@@ -16,7 +77,10 @@ const EmojiResponsesTab = ({ surveyRatings, searchTerm }) => {
                             <p className='montserrat-medium text-[24px]'>Response Overview</p>
                         </div>
                         <div>
-                            <p className='text-sm'>111 responses . Showing 1 -51</p>
+                            <p className='text-sm text-[#9A9A9A]'>
+                                {filteredCount} {filteredCount === 1 ? 'response' : 'responses'}
+                                {filteredCount > 0 && ` • Showing ${startItem} - ${endItem}`}
+                            </p>
                         </div>
                     </div>
                     <div className='flex gap-2 items-center'>
@@ -52,7 +116,15 @@ const EmojiResponsesTab = ({ surveyRatings, searchTerm }) => {
                 </div>
             </div>
             <div>
-                <SummaryRatingDetails surveyRatings={surveyRatings} searchTerm={searchTerm} localSearchTerm={localSearchTerm} />
+                <SummaryRatingDetails
+                    surveyRatings={surveyRatings}
+                    searchTerm={searchTerm}
+                    localSearchTerm={localSearchTerm}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    selectedRating={selectedRating}
+                    setSelectedRating={setSelectedRating}
+                />
             </div>
         </div>
     )

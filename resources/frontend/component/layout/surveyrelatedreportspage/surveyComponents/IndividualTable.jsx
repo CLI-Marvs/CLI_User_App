@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef} from 'react'
 import {
     Tooltip,
     TooltipContent,
@@ -10,11 +10,10 @@ import { MdOutlineChevronLeft, MdOutlineChevronRight, MdFullscreen, MdFullscreen
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import IndividualResponseModal from './IndividualResponseModal';
 
-const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm }) => {
+const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, currentPage, setCurrentPage }) => {
     const modalRef = useRef(null);
     const [selectedResponse, setSelectedResponse] = useState(null);
     const [sortOrder, setSortOrder] = useState('desc'); 
-    const [currentPage, setCurrentPage] = useState(1);
     const [isExpanded, setIsExpanded] = useState(false);
 
     // ✅ Step 1: Validate surveyResponses first

@@ -33,9 +33,15 @@ function getRatingCounts(data) {
     return counts;
 }
 
-const SummaryRatingDetails = ({ surveyRatings, searchTerm, localSearchTerm }) => {
-    const [selectedRating, setSelectedRating] = useState(null);
-    const [currentPage, setCurrentPage] = useState(1);
+const SummaryRatingDetails = ({
+    surveyRatings,
+    searchTerm,
+    localSearchTerm,
+    currentPage,          
+    setCurrentPage,        
+    selectedRating,        
+    setSelectedRating      
+}) => {
     const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
     const itemsPerPage = 8;
 
@@ -81,7 +87,7 @@ const SummaryRatingDetails = ({ surveyRatings, searchTerm, localSearchTerm }) =>
         return [...fullyFilteredData].sort((a, b) => {
             const dateA = new Date(a.created_at);
             const dateB = new Date(b.created_at);
-            
+
             if (sortOrder === 'asc') {
                 return dateA - dateB; // Oldest first
             } else {
@@ -132,8 +138,8 @@ const SummaryRatingDetails = ({ surveyRatings, searchTerm, localSearchTerm }) =>
                 <button
                     onClick={() => setSelectedRating(null)}
                     className={`px-3 py-2 border-[.5px] rounded-[4px] flex items-center gap-1 text-sm ${selectedRating === null
-                            ? "bg-custom-solidgreen text-white border-custom-lightgreen"
-                            : "bg-white text-black border-gray-300"
+                        ? "bg-custom-solidgreen text-white border-custom-lightgreen"
+                        : "bg-white text-black border-gray-300"
                         }`}
                 >
                     <span>All</span>
@@ -150,8 +156,8 @@ const SummaryRatingDetails = ({ surveyRatings, searchTerm, localSearchTerm }) =>
                             key={rating}
                             onClick={() => setSelectedRating(Number(rating))}
                             className={`px-3 py-2 border-[.5px] rounded-[4px] flex items-center gap-1 text-sm ${selectedRating === Number(rating)
-                                    ? "bg-custom-solidgreen text-white border-custom-lightgreen"
-                                    : "bg-white text-black border-gray-300"
+                                ? "bg-custom-solidgreen text-white border-custom-lightgreen"
+                                : "bg-white text-black border-gray-300"
                                 }`}
                         >
                             <img src={imageUrl} alt={`Rating ${rating}`} className="w-5 h-5" />
@@ -173,7 +179,7 @@ const SummaryRatingDetails = ({ surveyRatings, searchTerm, localSearchTerm }) =>
                         <thead className="bg-custom-lightestgreen h-[40px]">
                             <tr>
                                 <th className="px-2 py-2 montserrat-bold w-[200px]">
-                                    <button 
+                                    <button
                                         onClick={toggleSortOrder}
                                         className="flex items-center gap-2 hover:text-gray-700 transition-colors"
                                     >
@@ -236,8 +242,8 @@ const SummaryRatingDetails = ({ surveyRatings, searchTerm, localSearchTerm }) =>
                             onClick={handlePrev}
                             disabled={currentPage === 1}
                             className={`flex items-center gap-1 px-3 py-1 border-[.6px] rounded-[4px] font-medium ${currentPage === 1
-                                    ? "text-gray-400 border-[#F4F4F4] cursor-not-allowed"
-                                    : "hover:bg-gray-100"
+                                ? "text-gray-400 border-[#F4F4F4] cursor-not-allowed"
+                                : "hover:bg-gray-100"
                                 }`}
                         >
                             <MdOutlineChevronLeft /> Previous
@@ -247,8 +253,8 @@ const SummaryRatingDetails = ({ surveyRatings, searchTerm, localSearchTerm }) =>
                             onClick={handleNext}
                             disabled={currentPage === totalPages}
                             className={`flex items-center gap-1 px-3 py-1 border-[.6px] rounded-[4px] font-medium ${currentPage === totalPages
-                                    ? "text-gray-400 border-[#F4F4F4] cursor-not-allowed"
-                                    : "hover:bg-gray-100"
+                                ? "text-gray-400 border-[#F4F4F4] cursor-not-allowed"
+                                : "hover:bg-gray-100"
                                 }`}
                         >
                             Next <MdOutlineChevronRight />
