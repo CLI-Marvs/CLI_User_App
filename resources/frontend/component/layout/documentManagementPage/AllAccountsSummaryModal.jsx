@@ -265,14 +265,19 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                             const hasUploadedDoc = uploadedDocs.some(
                                 (doc) => doc.file_title === item.name
                             );
-                            const hasStatusComplete =
-                                accountChecklistStatuses.some((status) => {
+                            const uploadedDoc = uploadedDocs.find(
+                                (doc) => doc.file_title === item.name
+                            );
+                            const checklistStatus =
+                                accountChecklistStatuses.find((status) => {
                                     return (
                                         status.checklist_id === item.id &&
                                         (status.is_completed === true ||
                                             status.status === "complete")
                                     );
                                 });
+                            const hasStatusComplete = !!checklistStatus;
+
                             if (hasUploadedDoc || hasStatusComplete) {
                                 completedChecklists.push({
                                     id: item.id,
@@ -280,6 +285,9 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                     completedVia: hasUploadedDoc
                                         ? "document"
                                         : "remarks",
+                                    completedDate: hasUploadedDoc
+                                        ? uploadedDoc?.created_at
+                                        : checklistStatus?.updated_at,
                                 });
                             } else {
                                 pendingChecklists.push({
@@ -296,6 +304,24 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                                           100
                                   )
                                 : 0;
+
+                        // Find the latest checklist update date for this submilestone
+                        const latestUpdateDate =
+                            completedChecklists.length > 0
+                                ? completedChecklists.reduce(
+                                      (latest, checklist) => {
+                                          const checklistDate = new Date(
+                                              checklist.completedDate
+                                          );
+                                          return !latest ||
+                                              checklistDate > new Date(latest)
+                                              ? checklist.completedDate
+                                              : latest;
+                                      },
+                                      null
+                                  )
+                                : null;
+
                         return {
                             subMilestoneId: sub.id,
                             stepName: step.stepName,
@@ -303,9 +329,54 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                             progressPercentage,
                             completedChecklists,
                             pendingChecklists,
+                            latestUpdateDate: latestUpdateDate,
                         };
                     });
                 });
+
+                // Find the work order for this account
+                const workOrderForAccount = allAccountsData.work_orders.find(
+                    (wo) => account.workOrderIds.includes(wo.work_order_id)
+                );
+
+                // Get the creation date - use the earliest assignee created_at as the work order association date
+                // This represents when the account was first assigned to the work order
+                let accountCreatedAt = null;
+
+                // Try to get from work order group or work order
+                accountCreatedAt =
+                    workOrderForAccount?.work_order_group?.created_at ||
+                    workOrderForAccount?.workOrderGroup?.created_at ||
+                    workOrderForAccount?.group?.created_at ||
+                    workOrderForAccount?.created_at;
+
+                // If not available, get the earliest assignee created_at date
+                if (
+                    !accountCreatedAt &&
+                    account.work_order_account_assignees &&
+                    account.work_order_account_assignees.length > 0
+                ) {
+                    accountCreatedAt =
+                        account.work_order_account_assignees.reduce(
+                            (earliest, assignee) => {
+                                if (
+                                    !earliest ||
+                                    (assignee.created_at &&
+                                        assignee.created_at < earliest)
+                                ) {
+                                    return assignee.created_at;
+                                }
+                                return earliest;
+                            },
+                            null
+                        );
+                }
+
+                // Final fallbacks
+                if (!accountCreatedAt) {
+                    accountCreatedAt =
+                        account.pivot?.created_at || account.created_at;
+                }
 
                 return {
                     key: account.id,
@@ -323,16 +394,13 @@ const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
                     notesData: {
                         accountId: account.id,
                         accountName: account.account_name,
-                        workOrder: allAccountsData.work_orders.find((wo) =>
-                            account.workOrderIds.includes(wo.work_order_id)
-                        ),
-                        workOrderType: allAccountsData.work_orders.find((wo) =>
-                            account.workOrderIds.includes(wo.work_order_id)
-                        )?.work_order_type,
+                        workOrder: workOrderForAccount,
+                        workOrderType: workOrderForAccount?.work_order_type,
                     },
                     uploadedDocuments: account.uploaded_documents || [],
                     assignedEmployeeIds: Array.from(accountAssignees),
                     workOrderIds: account.workOrderIds || [],
+                    workOrderCreatedAt: accountCreatedAt,
                 };
             });
 

@@ -1,6 +1,4 @@
 <?php
-
-use App\Http\Controllers\SystemStructureExportController;
 use Illuminate\Http\Request;
 
 use App\Models\DynamicBanner;
@@ -47,6 +45,7 @@ use App\Http\Controllers\ExecutiveDashBoardController;
 use App\Http\Controllers\MilestoneProgressionController;
 use App\Http\Controllers\ProjectAssigneeController;
 use App\Http\Controllers\AllAccountsController;
+use App\Http\Controllers\SystemStructureExportController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();

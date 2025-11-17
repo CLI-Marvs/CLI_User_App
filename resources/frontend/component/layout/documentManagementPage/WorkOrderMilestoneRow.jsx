@@ -32,9 +32,8 @@ const WorkOrderMilestoneRow = ({
         setShowTooltip(false);
         setHoveredChecklistInfo(null);
     };
-    // Determine if this row should have a bottom border
-    // You can adjust this logic as needed (e.g., pass a prop like isLastRow)
-    const hasBottomBorder = !row.isLastRow; // Example: set row.isLastRow=true for last row
+
+    const hasBottomBorder = !row.isLastRow; 
     const stickyTdClass = `px-3 py-2 font-medium text-gray-900 sticky left-0 bg-white z-40 border-r border-gray-200`;
 
     return (
