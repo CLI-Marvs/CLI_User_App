@@ -356,7 +356,7 @@ const SidebarStep = ({
             </div>
 
             {step.milestones && step.milestones.length > 0 && (
-                <Collapse open={isExpanded}>
+                <Collapse open={isExpanded || false}>
                     <div className="ml-4 mt-1">
                         {step.milestones.map((milestone) => {
                             return (

@@ -846,6 +846,10 @@ const WorkOrderGroupDetailsModal = ({
                 workOrderGroupId: group.id,
             };
 
+            // Get the work order group's created_at date or work order's created_at date
+            const accountCreatedAt =
+                group?.created_at || account.latestStep?.workOrder?.created_at;
+
             return {
                 key: account.id,
                 accountName: account.account_name,
@@ -858,7 +862,7 @@ const WorkOrderGroupDetailsModal = ({
                 currentChecklistInfo: currentChecklistInfo,
                 uploaded_documents: account.uploaded_documents || [],
                 checklistInfos,
-                workOrderCreatedAt: account.latestStep?.workOrder?.created_at,
+                workOrderCreatedAt: accountCreatedAt,
             };
         });
 
@@ -1314,7 +1318,7 @@ const WorkOrderGroupDetailsModal = ({
                                 <path
                                     className="opacity-75"
                                     fill="currentColor"
-                                    d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 0 1 4 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                 ></path>
                             </svg>
                             <Typography color="gray" className="mt-4 text-sm">
