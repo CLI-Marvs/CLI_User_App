@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom';
 import {
     Tooltip,
     TooltipContent,
@@ -309,7 +310,15 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
                                                 </td>
 
                                                 <td className="px-2 py-2 w-[200px]">{response.email}</td>
-                                                <td className="px-2 py-2 w-[120px]">Ticket#{response.ticket_id}</td>
+                                                <td className="px-2 py-2 w-[120px]">
+                                                    <Link
+                                                        to={`/inquirymanagement/thread/Ticket%23${response.ticket_id}`}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        className=" hover:text-blue-800 hover:underline"
+                                                    >
+                                                        Ticket#{response.ticket_id}
+                                                    </Link>
+                                                </td>
                                                 <td className="px-2 py-2 w-[150px]">{response.survey_owner}</td>
 
                                                 {/* Question answers */}

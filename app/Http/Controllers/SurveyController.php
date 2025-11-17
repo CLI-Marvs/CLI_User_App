@@ -839,6 +839,10 @@ class SurveyController extends Controller
                     ->orWhere('survey_link', $survey->survey_link);
             });
 
+        if ($satisfaction && isset($ratingMap[$satisfaction])) {
+            $query2->where('rating', $ratingMap[$satisfaction]);
+        }
+
         // Apply date filter to query2
         if ($startDate && $endDate) {
             $query2->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
@@ -851,6 +855,10 @@ class SurveyController extends Controller
                 $q->where('survey_title', $survey->survey_title)
                     ->orWhere('survey_link', $survey->survey_link);
             });
+
+        if ($satisfaction && isset($ratingMap[$satisfaction])) {
+            $query3->where('rating', $ratingMap[$satisfaction]);
+        }
 
         // Apply date filter to query3
         if ($startDate && $endDate) {
@@ -1120,7 +1128,7 @@ class SurveyController extends Controller
             }
 
             $experienceRatings = $experienceRatingsQuery
-                ->select('id', 'ticket_id','rating', 'email', 'survey_title as survey_owner', 'created_at', 'status', 'survey_link')
+                ->select('id', 'ticket_id', 'rating', 'email', 'survey_title as survey_owner', 'created_at', 'status', 'survey_link')
                 ->get();
 
 
@@ -1157,7 +1165,7 @@ class SurveyController extends Controller
 
                 $responseData[$rating->ticket_id] = $row;
             }
-            
+
 
             // 4️⃣ SCENARIO 2 — Imported (Google Form)
             $importedAnswersQuery = DB::table('survey_answers as sa')
