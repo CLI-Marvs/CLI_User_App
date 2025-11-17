@@ -7,6 +7,8 @@ import emoji2 from "../../../../../../public/Images/emoji2.png";
 import emoji3 from "../../../../../../public/Images/emoji3.png";
 import emoji4 from "../../../../../../public/Images/emoji4.png";
 import emoji5 from "../../../../../../public/Images/emoji5.png";
+import { LuCalendar } from "react-icons/lu";
+import { IoMdClose } from "react-icons/io";
 
 const emojiMap = {
     5: emoji1,
@@ -37,13 +39,15 @@ const SummaryRatingDetails = ({
     surveyRatings,
     searchTerm,
     localSearchTerm,
-    currentPage,          
-    setCurrentPage,        
-    selectedRating,        
-    setSelectedRating      
+    currentPage,
+    setCurrentPage,
+    selectedRating,
+    setSelectedRating,
+    itemsPerPage,
+    localDateFilter,
+    handleFilterClear
 }) => {
     const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
-    const itemsPerPage = 8;
 
     // ✅ ensure data is an array
     const ratingDetails = Array.isArray(surveyRatings?.data)
@@ -116,20 +120,43 @@ const SummaryRatingDetails = ({
         setCurrentPage(1);
     }, [selectedRating, searchTerm, localSearchTerm]);
 
+
+
     return (
         <div className="w-full">
-            {/* ✅ Local Filter Input */}
-            <div className="mb-3">
-                <input
-                    type="text"
-                    placeholder="Search within this table..."
-                    value={localSearchTerm}
-                    onChange={(e) => {
-                        // you'll control this input from the parent if needed
-                        // or handle state locally by lifting this out
-                    }}
-                    className="w-full border rounded-md px-3 py-2 text-sm"
-                />
+            <div className="mb-4">
+                {localDateFilter && (
+                    <div className="flex gap-2 items-center">
+                        <p className="text-sm text-[#9A9A9A]">Active filters:</p>
+                        <div className="border-[.6px] border-[#008DEF33] p-[6px] px-[14px] rounded-[4px] bg-[#F5F9F3] text-custom-solidgreen text-sm font-medium">
+                            <div className="flex gap-2 items-center">
+                                <div>
+                                    <LuCalendar className="size-[16px]" />
+                                </div>
+                                <div>
+                                    {(() => {
+                                        const start = new Date(localDateFilter.startDate);
+                                        const end = new Date(localDateFilter.endDate);
+
+                                        const formatDate = (date) =>
+                                            date.toLocaleDateString("en-US", {
+                                                month: "short",
+                                                day: "numeric",
+                                                year: "numeric",
+                                            });
+
+                                        return start.getTime() === end.getTime()
+                                            ? formatDate(start)
+                                            : `${formatDate(start)} - ${formatDate(end)}`;
+                                    })()}
+                                </div>
+                                <button onClick={handleFilterClear}>
+                                    <IoMdClose />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
 
             {/* ✅ Filter bar */}

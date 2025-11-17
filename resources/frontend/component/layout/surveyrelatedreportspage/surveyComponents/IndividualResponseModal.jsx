@@ -21,8 +21,6 @@ const Emojis = {
 const IndividualResponseModal = ({ modalRef, selectedResponse }) => {
 
 
-    console.log(selectedResponse);
-
     if (!selectedResponse || typeof selectedResponse !== 'object') {
         return null; // or return a loading state: <div>Loading...</div>
     }

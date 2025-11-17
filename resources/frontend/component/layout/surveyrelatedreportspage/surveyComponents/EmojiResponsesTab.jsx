@@ -1,14 +1,54 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import SummaryRatingDetails from './SummaryRatingDetails'
 import { Select } from '@mui/material'
 import { HiMiniMagnifyingGlass } from 'react-icons/hi2';
+import { LuCalendar } from 'react-icons/lu';
+import DateRangeFilter from './DateRangeFilter';
+import { useSurvey } from '@/context/Survey/SurveyContext';
 
-const EmojiResponsesTab = ({ surveyRatings, searchTerm }) => {
+
+const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50];
+const DEFAULT_ITEMS_PER_PAGE = 5;
+
+const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, searchTerm, surveyId, dateFilter }) => {
+
+    const modalRef = useRef(null);
+    const [localDateFilter, setLocalDateFilter] = useState(null);
+
+    const {
+        fetchSurveyRatingDetails,
+    } = useSurvey();
 
     const [localSearchTerm, setLocalSearchTermValue] = useState("");
 
     const [currentPage, setCurrentPage] = useState(1); // ✅ Lift state up
     const [selectedRating, setSelectedRating] = useState(null); // ✅ Lift state up
+    const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
+
+    const openModal = () => {
+        modalRef.current.showModal();
+    };
+
+    const fetchSurveyRatings = async (filter = null) => {
+        const surveyRatings = await fetchSurveyRatingDetails(surveyId, filter);
+        setSurveyRatings(surveyRatings);
+    };
+
+
+    const handleDateFilterApply = (filterPayload) => {
+          setLocalDateFilter(filterPayload);
+          if (filterPayload.startDate == null && filterPayload.endDate == null) {
+              fetchSurveyRatings(dateFilter);
+          } else {
+              fetchSurveyRatings(filterPayload);
+          }
+    };
+
+    const handleFilterClear = () => {
+        setLocalDateFilter(null);
+        fetchSurveyRatings(dateFilter);
+    };
+
 
     // ✅ Calculate filtered data count (matching SummaryRatingDetails logic)
     const getFilteredCount = () => {
@@ -64,9 +104,14 @@ const EmojiResponsesTab = ({ surveyRatings, searchTerm }) => {
     const filteredCount = getFilteredCount();
 
     // ✅ Calculate pagination display based on current page
-    const itemsPerPage = 8;
+
     const startItem = filteredCount > 0 ? ((currentPage - 1) * itemsPerPage) + 1 : 0;
     const endItem = Math.min(currentPage * itemsPerPage, filteredCount);
+
+    const handleItemsPerPageChange = (e) => {
+        setItemsPerPage(Number(e.target.value));
+        setCurrentPage(1);
+    };
 
     return (
         <div>
@@ -85,18 +130,22 @@ const EmojiResponsesTab = ({ surveyRatings, searchTerm }) => {
                     </div>
                     <div className='flex gap-2 items-center'>
                         <div>
-                            <button className='bg-custom-lightgreen text-white w-[122px] h-[35px]'>Export PDF</button>
+                            <button className='bg-custom-lightgreen text-white w-[122px] h-[35px]'>Export Excel</button>
                         </div>
-                        <div>
-                            <Select className=' w-[120px] h-[36px]'>
-                                <option value="">1 per page</option>
-                                <option value="1">5 per page</option>
-                                <option value="2">51 per page</option>
-                            </Select>
-                        </div>
+                        <select
+                            className='w-[120px] h-[36px] border-[.6px] border-[#F4F4F4] rounded-[4px]'
+                            value={itemsPerPage}
+                            onChange={handleItemsPerPageChange}
+                        >
+                            {ITEMS_PER_PAGE_OPTIONS.map(option => (
+                                <option key={option} value={option}>
+                                    {option} per page
+                                </option>
+                            ))}
+                        </select>
                     </div>
                 </div>
-                <div className='flex gap-2'>
+                <div className='flex gap-2 '>
                     <div className='w-full flex items-center gap-2 border px-[12px] border-[#F4F4F4]'>
                         <HiMiniMagnifyingGlass className='size-[16px]' />
                         <input
@@ -107,12 +156,15 @@ const EmojiResponsesTab = ({ surveyRatings, searchTerm }) => {
                             onChange={(e) => setLocalSearchTermValue(e.target.value)}
                         />
                     </div>
-                    <button className='border w-[180px] h-[36px] rounded-[10px]'>date range</button>
-                    <Select className='w-[120px] h-[36px]'>
-                        <option value="">1 per page</option>
-                        <option value="1">5 per page</option>
-                        <option value="2">51 per page</option>
-                    </Select>
+                    <div className="flex-shrink-0">
+                        <button
+                            onClick={openModal}
+                            className="flex justify-start px-3 items-center gap-2 min-w-[140px] border-[.6px] border-[#F4F4F4] h-[36px] rounded-[4px] text-sm text-[#9A9A9A]"
+                        >
+                            <LuCalendar />
+                            <span>Date Range</span>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div>
@@ -124,6 +176,15 @@ const EmojiResponsesTab = ({ surveyRatings, searchTerm }) => {
                     setCurrentPage={setCurrentPage}
                     selectedRating={selectedRating}
                     setSelectedRating={setSelectedRating}
+                    itemsPerPage={itemsPerPage}
+                    localDateFilter={localDateFilter}
+                    handleFilterClear={handleFilterClear}
+                />
+            </div>
+            <div>
+                <DateRangeFilter
+                    modalRef={modalRef}
+                    onApplyFilter={handleDateFilterApply}
                 />
             </div>
         </div>

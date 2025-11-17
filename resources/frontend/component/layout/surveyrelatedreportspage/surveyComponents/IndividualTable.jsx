@@ -1,4 +1,4 @@
-import React, { useState, useRef} from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import {
     Tooltip,
     TooltipContent,
@@ -9,12 +9,20 @@ import {
 import { MdOutlineChevronLeft, MdOutlineChevronRight, MdFullscreen, MdFullscreenExit } from "react-icons/md";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import IndividualResponseModal from './IndividualResponseModal';
+import { LuCalendar } from 'react-icons/lu';
+import { IoMdClose } from 'react-icons/io';
 
-const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, currentPage, setCurrentPage }) => {
+const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, currentPage, setCurrentPage, itemsPerPage, localDateFilter, handleFilterClear }) => {
     const modalRef = useRef(null);
     const [selectedResponse, setSelectedResponse] = useState(null);
-    const [sortOrder, setSortOrder] = useState('desc'); 
+    const [sortOrder, setSortOrder] = useState('desc');
     const [isExpanded, setIsExpanded] = useState(false);
+
+    useEffect(() => {
+        if (selectedResponse && modalRef.current) {
+            modalRef.current.showModal();
+        }
+    }, [selectedResponse]);
 
     // ✅ Step 1: Validate surveyResponses first
     if (
@@ -71,11 +79,11 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
     const sortedData = [...filteredData].sort((a, b) => {
         const dateA = new Date(a.timestamp);
         const dateB = new Date(b.timestamp);
-        
+
         if (sortOrder === 'asc') {
-            return dateA - dateB; 
+            return dateA - dateB;
         } else {
-            return dateB - dateA; 
+            return dateB - dateA;
         }
     });
 
@@ -106,7 +114,6 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
             !["timestamp", "email", "ticket_id", "survey_owner"].includes(key)
     );
 
-    const itemsPerPage = 10;
     const totalPages = Math.ceil(sortedData.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -126,17 +133,52 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
         setCurrentPage(1); // Reset to first page when sorting
     };
 
+
+
     const handleOpenModal = (response) => {
         setSelectedResponse(response);
-        modalRef.current.showModal();
     };
 
-    
+
     return (
         <>
             <div className={`${isExpanded ? 'fixed inset-0 z-50 bg-white flex flex-col' : 'relative'}`}>
                 {/* Expand/Collapse Button */}
-                <div className={`flex justify-end p-2 ${isExpanded ? 'border-b bg-gray-50' : ''}`}>
+                <div className={`flex justify-between p-2 mb-2 ${isExpanded ? 'border-b bg-gray-50' : ''}`}>
+                    <div>
+                        {localDateFilter && (
+                            <div className="flex gap-2 items-center">
+                                <p className="text-sm text-[#9A9A9A]">Active filters:</p>
+                                <div className="border-[.6px] border-[#008DEF33] p-[6px] px-[14px] rounded-[4px] bg-[#F5F9F3] text-custom-solidgreen text-sm font-medium">
+                                    <div className="flex gap-2 items-center">
+                                        <div>
+                                            <LuCalendar className="size-[16px]" />
+                                        </div>
+                                        <div>
+                                            {(() => {
+                                                const start = new Date(localDateFilter.startDate);
+                                                const end = new Date(localDateFilter.endDate);
+
+                                                const formatDate = (date) =>
+                                                    date.toLocaleDateString("en-US", {
+                                                        month: "short",
+                                                        day: "numeric",
+                                                        year: "numeric",
+                                                    });
+
+                                                return start.getTime() === end.getTime()
+                                                    ? formatDate(start)
+                                                    : `${formatDate(start)} - ${formatDate(end)}`;
+                                            })()}
+                                        </div>
+                                        <button onClick={handleFilterClear}>
+                                            <IoMdClose />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
                         className="flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-gray-100 transition-colors shadow-sm"
@@ -165,7 +207,7 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
                                     <thead className="bg-custom-lightestgreen h-[40px]">
                                         <tr>
                                             <th className="px-2 pr-6 py-2 montserrat-bold w-[140px]">
-                                                <button 
+                                                <button
                                                     onClick={toggleSortOrder}
                                                     className="flex items-center gap-2 hover:text-gray-700 transition-colors"
                                                 >
@@ -216,7 +258,7 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
                                                             className={`px-4 py-2 montserrat-bold ${isReason
                                                                 ? "w-[300px]"
                                                                 : "w-[180px]"
-                                                            }`}
+                                                                }`}
                                                         >
                                                             <Tooltip>
                                                                 <TooltipTrigger>
@@ -224,7 +266,7 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
                                                                         className={`w-[120px] ${isNumericHeader
                                                                             ? "text-center"
                                                                             : "text-left"
-                                                                        }`}
+                                                                            }`}
                                                                     >
                                                                         {isReason
                                                                             ? "Reason"
@@ -305,13 +347,13 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
                                                                 className={`px-2 py-2 ${isReason
                                                                     ? "w-[300px]"
                                                                     : "w-[180px]"
-                                                                }`}
+                                                                    }`}
                                                             >
                                                                 <div
                                                                     className={`flex items-center h-full px-2 ${isNumeric
                                                                         ? "justify-center"
                                                                         : "justify-start"
-                                                                    }`}
+                                                                        }`}
                                                                 >
                                                                     {color && !isReason ? (
                                                                         <span
@@ -352,7 +394,7 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
                             className={`flex items-center gap-1 px-3 py-1 border-[.6px] rounded-[4px] font-medium ${currentPage === 1
                                 ? "text-gray-400 border-[#F4F4F4] cursor-not-allowed"
                                 : "hover:bg-gray-100"
-                            }`}
+                                }`}
                         >
                             <MdOutlineChevronLeft /> Previous
                         </button>
@@ -363,14 +405,14 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
                             className={`flex items-center gap-1 px-3 py-1 border-[.6px] rounded-[4px] font-medium ${currentPage === totalPages
                                 ? "text-gray-400 border-[#F4F4F4] cursor-not-allowed"
                                 : "hover:bg-gray-100"
-                            }`}
+                                }`}
                         >
                             Next <MdOutlineChevronRight />
                         </button>
                     </div>
                 </div>
             </div>
-            
+
             <div>
                 <IndividualResponseModal modalRef={modalRef} selectedResponse={selectedResponse} />
             </div>

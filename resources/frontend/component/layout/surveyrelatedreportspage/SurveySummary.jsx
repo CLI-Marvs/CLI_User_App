@@ -52,7 +52,6 @@ const SurveySummary = () => {
         modalRef.current.showModal();
     };
 
-
     const closeModal = () => {
         modalRef.current.closeModal();
     };
@@ -148,7 +147,6 @@ const SurveySummary = () => {
     useEffect(() => {
         const fetchRatingCounts = async () => {
             try {
-
                 const response = await apiService.get(`/experience-ratings/count/${surveyId}`);
                 setRatingCounts(response.data.data);
             } catch (error) {
@@ -411,7 +409,7 @@ const SurveySummary = () => {
                                         </div>
                                     </div>
                                 </div>
-                                {!dateFilter  && (
+                                {!dateFilter && (
                                     <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] text-[#9A9A9A] items-center text-[14px]">
                                         <p className={`flex items-center`}>
                                             {monthlyResponseChange?.current_month}
@@ -543,10 +541,23 @@ const SurveySummary = () => {
                     </div>
                     <div>
                         {activeTab === 'form' && (
-                            <FormResponsesTab surveyResponses={surveyResponses} searchTerm={searchTerm} />
+                            <FormResponsesTab
+                                surveyResponses={surveyResponses}
+                                setSurveyResponses={setSurveyResponses}
+                                searchTerm={searchTerm}
+                                surveyId={surveyId}
+                                dateFilter={dateFilter}
+                                satisfaction={satisfaction}
+                            />
                         )}
                         {activeTab === 'emoji' && (
-                            <EmojiResponsesTab surveyRatings={surveyRatings} searchTerm={searchTerm} />
+                            <EmojiResponsesTab
+                                surveyRatings={surveyRatings}
+                                setSurveyRatings={setSurveyRatings}
+                                searchTerm={searchTerm}
+                                surveyId={surveyId}
+                                dateFilter={dateFilter}
+                            />
                         )}
                     </div>
                 </div>

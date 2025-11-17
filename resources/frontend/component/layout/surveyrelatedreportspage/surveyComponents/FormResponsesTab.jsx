@@ -1,17 +1,78 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef, useEffect } from 'react'
 import IndividualTable from './IndividualTable'
 import { Select } from '@mui/material'
 import { HiMiniMagnifyingGlass } from 'react-icons/hi2'
+import { LuCalendar } from 'react-icons/lu';
+import { useSurvey } from '@/context/Survey/SurveyContext';
+import DateRangeFilter from './DateRangeFilter';
+import { filter } from 'lodash';
 
-const ITEMS_PER_PAGE_OPTIONS = [10, 25, 50];
-const DEFAULT_ITEMS_PER_PAGE = 10;
+
+const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50];
+const DEFAULT_ITEMS_PER_PAGE = 5;
 
 
-const FormResponsesTab = ({ surveyResponses, searchTerm }) => {
+const FormResponsesTab = ({ surveyResponses, setSurveyResponses, searchTerm, surveyId, dateFilter,satisfaction }) => {
+
+    const modalRef = useRef(null);
 
     const [localSearchTerm, setLocalSearchTermValue] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
+    const [localDateFilter, setLocalDateFilter] = useState(null);
+    
+
+    const {
+        fetchSurveyResponses,
+        localSatisfaction,
+        setLocalSatisfaction,
+    } = useSurvey();
+
+    const fetchSurveyResponse = async (filter = null) => {
+        const totalRespondents = await fetchSurveyResponses(surveyId, filter);
+        setSurveyResponses(totalRespondents);
+    };
+
+    const activeFilters = useMemo(() => {
+        const filters = {};
+
+        if (localDateFilter?.startDate && localDateFilter?.endDate) {
+            filters.startDate = localDateFilter.startDate;
+            filters.endDate = localDateFilter.endDate;
+        }
+
+
+
+        if (satisfaction !== "All satisfaction") {
+            filters.satisfaction = satisfaction; 
+        }else if (localSatisfaction !== "All satisfaction") {
+             filters.satisfaction = localSatisfaction;
+        }else {
+            filters.satisfaction = null;
+        }
+
+        return Object.keys(filters).length > 0 ? filters : null;
+    }, [localDateFilter, localSatisfaction]);
+
+    useEffect(() => {
+        console.log(activeFilters);
+        
+        fetchSurveyResponse(activeFilters);
+       
+
+    }, [activeFilters]);
+
+    const openModal = (response) => {
+        if (modalRef.current) {
+            modalRef.current.showModal();
+        }
+    };
+
+    const handleFilterClear = () => {
+        setLocalDateFilter(null);
+        fetchSurveyResponse(dateFilter);
+    };
+
 
     const filteredCount = useMemo(() => {
         if (!surveyResponses?.data || !Array.isArray(surveyResponses.data)) {
@@ -51,8 +112,23 @@ const FormResponsesTab = ({ surveyResponses, searchTerm }) => {
 
     const handleItemsPerPageChange = (e) => {
         setItemsPerPage(Number(e.target.value));
-        setCurrentPage(1); 
+        setCurrentPage(1);
     };
+
+    const handleDateFilterApply = (filterPayload) => {
+        setLocalDateFilter(filterPayload);
+        if (filterPayload.startDate == null && filterPayload.endDate == null) {
+            fetchSurveyResponse(dateFilter);
+        } else {
+            fetchSurveyResponse(filterPayload);
+        }
+    };
+
+    const handleClearSatisfaction = () => {
+        setLocalSatisfaction("All satisfaction");
+        fetchSurveyResponse(dateFilter);
+    };
+
 
     return (
         <div>
@@ -73,7 +149,7 @@ const FormResponsesTab = ({ surveyResponses, searchTerm }) => {
                         </div>
                         <div>
                             <select
-                                className='w-[120px] h-[36px]'
+                                className='w-[120px] h-[36px] border-[.6px] border-[#F4F4F4] rounded-[4px]'
                                 value={itemsPerPage}
                                 onChange={handleItemsPerPageChange}
                             >
@@ -97,12 +173,38 @@ const FormResponsesTab = ({ surveyResponses, searchTerm }) => {
                             onChange={(e) => setLocalSearchTermValue(e.target.value)}
                         />
                     </div>
-                    <button className='border w-[180px] h-[36px] rounded-[10px]'>date range</button>
-                    <Select className='w-[120px] h-[36px]'>
-                        <option value="">1 per page</option>
-                        <option value="1">5 per page</option>
-                        <option value="2">51 per page</option>
-                    </Select>
+                    <div className="flex-shrink-0">
+                        <button
+                            onClick={openModal}
+                            className="flex justify-start px-3 items-center gap-2 min-w-[140px] border-[.6px] border-[#F4F4F4] h-[36px] rounded-[4px] text-sm text-[#9A9A9A]"
+                        >
+                            <LuCalendar />
+                            <span>Date Range</span>
+                        </button>
+                    </div>
+
+                    <div className="flex items-center min-w-[140px] h-[36px] rounded-[4px] border-[.6px] border-[#F4F4F4] text-black px-[12px] flex-shrink-0">
+                        <select
+                            name="localSatisfaction"
+                            value={localSatisfaction}
+                            onChange={(e) => setLocalSatisfaction(e.target.value)}
+                            className="outline-none text-sm px-[8px] w-full"
+                        >
+                            <option value="All satisfaction" selected>All satisfaction</option>
+                            <option value="Very satisfied">Very satisfied</option>
+                            <option value="Satisfied">Satisfied</option>
+                            <option value="Neutral">Neutral</option>
+                            <option value="Disatisfied">Dissatisfied</option>
+                            <option value="Very dissatisfied">Very dissatisfied</option>
+                        </select>
+                    </div>
+                    {localSatisfaction !== "All satisfaction" && (
+                        <div
+                            onClick={handleClearSatisfaction}
+                            className="flex-shrink-0 flex items-center cursor-pointer text-[#9A9A9A]">
+                            X Clear
+                        </div>
+                    )}
                 </div>
             </div>
             <div>
@@ -112,6 +214,15 @@ const FormResponsesTab = ({ surveyResponses, searchTerm }) => {
                     localSearchTerm={localSearchTerm}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
+                    itemsPerPage={itemsPerPage}
+                    localDateFilter={localDateFilter}
+                    handleFilterClear={handleFilterClear}
+                />
+            </div>
+            <div>
+                <DateRangeFilter
+                    modalRef={modalRef}
+                    onApplyFilter={handleDateFilterApply}
                 />
             </div>
         </div>

@@ -10,7 +10,7 @@ export const SurveyProvider = ({ children }) => {
   const [surveyLinks, setSurveyLinks] = useState([]);
   const [surveyStatus, setSurveyStatus] = useState("");
   const [statusLoading, setStatusLoading] = useState(false);
-
+  const [localSatisfaction, setLocalSatisfaction] = useState("All satisfaction");
 
   // Helper function to build query string from filters
   const buildFilterQuery = (filter) => {
@@ -159,6 +159,8 @@ export const SurveyProvider = ({ children }) => {
         fetchSurveysRatings,
         fetchHighLowCount,
         fetchSurveyResponses,
+        localSatisfaction,
+        setLocalSatisfaction,
       }
     }>
       {children}
