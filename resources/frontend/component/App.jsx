@@ -70,6 +70,7 @@ import SurveyMainReportView from "./views/pages/surveyrelatedreportsViews/Survey
 import SurveySummaryView from "./views/pages/surveyrelatedreportsViews/SurveySummaryView";
 import AdminSettingsView from "./views/pages/transactionViews/AdminSettingsView";
 import TransactionViewLogs from "./views/pages/transactionViews/TransactionViewLogs";
+import ScrollToTop from "./views/layout/ScrollToTop";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, children }) => {
@@ -123,6 +124,7 @@ const App = () => {
                         <div className="relative flex flex-1 overflow-hidden z-30">
                             <Sidebar />
                             <div className="flex-1 overflow-y-auto bg-custom-grayFA z-20">
+                                <ScrollToTop />
                                 <Outlet />
                             </div>
                         </div>
@@ -141,6 +143,7 @@ const App = () => {
                         <CrsSettingsSidebar />
                     </div>
                     <div className="relative flex-1 ml-[230px] z-10">
+                        <ScrollToTop />
                         <Outlet />
                     </div>
                 </div>
@@ -157,6 +160,7 @@ const App = () => {
                     </div>
 
                     <div className="ml-[200px] flex-1 overflow-y-auto">
+                        <ScrollToTop />
                         <Outlet />
                     </div>
                 </div>

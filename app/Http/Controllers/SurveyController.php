@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Concerns;
 use App\Models\ExperienceRating;
 use App\Models\Survey_forms;
 use App\Models\Survey_list;
@@ -1254,6 +1255,18 @@ class SurveyController extends Controller
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function getConcernTicket($ticketId)
+    {
+        $ticketId = urldecode($ticketId); // Decode if necessary
+        try {
+            $concern = Concerns::where('ticket_id', $ticketId)->first();
+            return response()->json($concern);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
     }
 }

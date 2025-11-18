@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate } from 'react-router-dom';
 import { MdOutlineChevronLeft, MdOutlineChevronRight } from "react-icons/md";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
@@ -47,6 +48,7 @@ const SummaryRatingDetails = ({
     localDateFilter,
     handleFilterClear
 }) => {
+    const navigate = useNavigate();
     const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
 
     // ✅ ensure data is an array
@@ -243,7 +245,28 @@ const SummaryRatingDetails = ({
                                             )}
                                         </td>
                                         <td className="px-2 py-1">{item.email}</td>
-                                        <td className="px-2 py-1">Ticket#{item.ticket_id}</td>
+                                        <td className="px-2 py-1">
+                                            <button
+                                                onClick={() => navigate(`/inquirymanagement/thread/Ticket%23${item.ticket_id}`, {
+                                                    state: {
+                                                        source: 'survey',
+                                                    }
+                                                })}
+                                                className="hover:text-blue-800 hover:underline cursor-pointer"
+                                            >
+                                                Ticket#{item.ticket_id}
+                                            </button>
+                                        </td>
+                                        {/* <button
+                                                                            onClick={() => navigate(`/inquirymanagement/thread/Ticket%23${response.ticket_id}`, {
+                                                                                state: {
+                                                                                    source: 'survey',
+                                                                                }
+                                                                            })}
+                                                                            className="hover:text-blue-800 hover:underline cursor-pointer"
+                                                                        >
+                                                                            Ticket#{response.ticket_id}
+                                                                        </button> */}
                                     </tr>
                                 ))
                             ) : (

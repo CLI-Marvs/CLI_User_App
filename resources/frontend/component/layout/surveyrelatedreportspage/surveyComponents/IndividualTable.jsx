@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
     Tooltip,
     TooltipContent,
@@ -15,6 +15,7 @@ import { IoMdClose } from 'react-icons/io';
 
 const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, currentPage, setCurrentPage, itemsPerPage, localDateFilter, handleFilterClear }) => {
     const modalRef = useRef(null);
+    const navigate = useNavigate();
     const [selectedResponse, setSelectedResponse] = useState(null);
     const [sortOrder, setSortOrder] = useState('desc');
     const [isExpanded, setIsExpanded] = useState(false);
@@ -311,13 +312,16 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
 
                                                 <td className="px-2 py-2 w-[200px]">{response.email}</td>
                                                 <td className="px-2 py-2 w-[120px]">
-                                                    <Link
-                                                        to={`/inquirymanagement/thread/Ticket%23${response.ticket_id}`}
-                                                        onClick={(e) => e.stopPropagation()}
-                                                        className=" hover:text-blue-800 hover:underline"
+                                                    <button
+                                                        onClick={() => navigate(`/inquirymanagement/thread/Ticket%23${response.ticket_id}`, {
+                                                            state: {
+                                                                source: 'survey',  
+                                                            }
+                                                        })}
+                                                        className="hover:text-blue-800 hover:underline cursor-pointer"
                                                     >
                                                         Ticket#{response.ticket_id}
-                                                    </Link>
+                                                    </button>
                                                 </td>
                                                 <td className="px-2 py-2 w-[150px]">{response.survey_owner}</td>
 

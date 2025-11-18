@@ -54,12 +54,8 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, searchTerm, sur
         return Object.keys(filters).length > 0 ? filters : null;
     }, [localDateFilter, localSatisfaction]);
 
-    useEffect(() => {
-        console.log(activeFilters);
-        
+    useEffect(() => { 
         fetchSurveyResponse(activeFilters);
-       
-
     }, [activeFilters]);
 
     const openModal = (response) => {

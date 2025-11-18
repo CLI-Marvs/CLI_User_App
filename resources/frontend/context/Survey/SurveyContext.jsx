@@ -139,6 +139,17 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
+  const getConcernTicket = async (ticketId) => {
+    try {
+      const encodedTicketId = encodeURIComponent(ticketId); 
+      const response = await apiService.get(`/concern-ticket/${encodedTicketId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching concern ticket', error);
+      return null;
+    }
+  };
+
 
   return (
     <SurveyContext.Provider value={
@@ -161,6 +172,7 @@ export const SurveyProvider = ({ children }) => {
         fetchSurveyResponses,
         localSatisfaction,
         setLocalSatisfaction,
+        getConcernTicket,
       }
     }>
       {children}

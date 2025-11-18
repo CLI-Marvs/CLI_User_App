@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 import { FaRegClock } from "react-icons/fa6";
 import { MdOutlineNumbers } from "react-icons/md";
 import { FiUserCheck } from "react-icons/fi";
@@ -10,6 +11,7 @@ import emoji3 from "../../../../../../public/Images/emoji3.png";
 import emoji4 from "../../../../../../public/Images/emoji4.png";
 import emoji5 from "../../../../../../public/Images/emoji5.png";
 
+
 const Emojis = {
     5: emoji1,
     4: emoji2,
@@ -19,6 +21,8 @@ const Emojis = {
 };
 
 const IndividualResponseModal = ({ modalRef, selectedResponse }) => {
+
+    const navigate = useNavigate();
 
 
     if (!selectedResponse || typeof selectedResponse !== 'object') {
@@ -192,14 +196,20 @@ const IndividualResponseModal = ({ modalRef, selectedResponse }) => {
                             <div className='flex w-[32px] h-[32px] justify-center items-center bg-[#F6F6F6] rounded-[4px]'>
                                 <MdOutlineNumbers className='size-4 text-custom-solidgreen' />
                             </div>
-                            <div className='flex flex-col gap-[6px]'>
+                            <button
+                                onClick={() => navigate(`/inquirymanagement/thread/Ticket%23${selectedResponse?.ticket_id}`, {
+                                    state: {
+                                        source: 'survey',
+                                    }
+                                })}
+                                className='flex flex-col gap-[6px]'>
                                 <div className='text-[#9A9A9A]'>
                                     Ticket ID
                                 </div>
                                 <div className='flex gap-[8px] whitespace-nowrap'>
                                     <span>Ticket#{selectedResponse?.ticket_id}</span>
                                 </div>
-                            </div>
+                            </button>
                         </div>
                     </div>
 
