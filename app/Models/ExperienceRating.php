@@ -17,6 +17,10 @@ class ExperienceRating extends Model
         'ticket_id',
         'rating',
         'status',
+        'survey_owner',
+        'survey_link',
+        'created_at',
+        'updated_at',
     ];
 
     public function surveyAnswers()

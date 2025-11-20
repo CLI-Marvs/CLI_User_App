@@ -132,6 +132,7 @@ export const SurveyProvider = ({ children }) => {
     try {
       const query = buildFilterQuery(filter);
       const response = await apiService.get(`/survey-responses/${survey_list_id}${query}`);
+      console.log(response.data);
       const responses = response.data;
       return responses;
     } catch (error) {

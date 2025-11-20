@@ -1114,7 +1114,7 @@ class SurveyController extends Controller
             }
 
             if ($satisfaction) {
-                // Map satisfaction string to rating number
+                
                 $ratingMap = [
                     'Very satisfied' => 5,
                     'Satisfied' => 4,
@@ -1129,10 +1129,8 @@ class SurveyController extends Controller
             }
 
             $experienceRatings = $experienceRatingsQuery
-                ->select('id', 'ticket_id', 'rating', 'email', 'survey_title as survey_owner', 'created_at', 'status', 'survey_link')
+                ->select('id', 'ticket_id', 'rating', 'email', 'survey_owner', 'created_at', 'status', 'survey_link')
                 ->get();
-
-
 
             foreach ($experienceRatings as $rating) {
                 $row = [
@@ -1200,7 +1198,7 @@ class SurveyController extends Controller
             }
 
             $importedAnswers = $importedAnswersQuery
-                ->select('sa.ticket_id', 'er.email', 'er.created_at', 'er.survey_title as survey_owner', 'er.status', 'sa.question', 'sa.answer_value')
+                ->select('sa.ticket_id', 'er.email', 'er.created_at', 'er.status', 'sa.question', 'sa.answer_value')
                 ->get()
                 ->groupBy(function ($item) {
                     return $item->ticket_id . '_' . $item->created_at;
@@ -1213,7 +1211,6 @@ class SurveyController extends Controller
                     'timestamp'    => $first->created_at,
                     'email'        => $first->email,
                     'ticket_id'    => $first->ticket_id,  // from $first, not the old key
-                    'survey_owner' => $first->survey_owner,
                     'status'       => $first->status ?? 'N/A',
                 ];
 

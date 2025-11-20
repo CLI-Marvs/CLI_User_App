@@ -190,18 +190,18 @@ const IndividualResponseModal = ({ modalRef, selectedResponse }) => {
                             </div>
                         </div>
                     </div>
-
-                    <div className='flex-1  p-4 text-sm border-[.6px] border-[#F4F4F4] rounded-[8px] bg-[#F6F6F630]'>
+                    <button
+                        onClick={() => navigate(`/inquirymanagement/thread/Ticket%23${selectedResponse?.ticket_id}`, {
+                            state: {
+                                source: 'survey',
+                            }
+                        })}
+                        className='flex-1  p-4 text-sm border-[.6px] border-[#F4F4F4] rounded-[8px] hover:border-[1px] hover:border-black bg-[#F6F6F630]'>
                         <div className='flex gap-[12px]'>
                             <div className='flex w-[32px] h-[32px] justify-center items-center bg-[#F6F6F6] rounded-[4px]'>
                                 <MdOutlineNumbers className='size-4 text-custom-solidgreen' />
                             </div>
-                            <button
-                                onClick={() => navigate(`/inquirymanagement/thread/Ticket%23${selectedResponse?.ticket_id}`, {
-                                    state: {
-                                        source: 'survey',
-                                    }
-                                })}
+                            <div
                                 className='flex flex-col gap-[6px]'>
                                 <div className='text-[#9A9A9A]'>
                                     Ticket ID
@@ -209,9 +209,9 @@ const IndividualResponseModal = ({ modalRef, selectedResponse }) => {
                                 <div className='flex gap-[8px] whitespace-nowrap'>
                                     <span>Ticket#{selectedResponse?.ticket_id}</span>
                                 </div>
-                            </button>
+                            </div>
                         </div>
-                    </div>
+                    </button>
 
                     <div className='flex-1  p-4 text-sm border-[.6px] border-[#F4F4F4] rounded-[8px] bg-[#F6F6F630]'>
                         <div className='flex gap-[12px]'>
