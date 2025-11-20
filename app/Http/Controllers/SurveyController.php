@@ -623,6 +623,7 @@ class SurveyController extends Controller
             $map = [
                 'http://localhost:8001'                  => 'http://localhost:8002/survey',
                 'https://admin-dev.cebulandmasters.com'  => 'https://feedback-dev.cebulandmasters.com/survey',
+                'https://admin-dev2.cebulandmasters.com'  => 'https://feedback-dev.cebulandmasters.com/survey',
                 'https://admin-uat.cebulandmasters.com'  => 'https://feedback-uat.cebulandmasters.com/survey',
                 'https://master-cx.cebulandmasters.com'      => 'https://ask.cebulandmasters.com/survey',
             ];

@@ -1549,7 +1549,6 @@ const InquiryThread = () => {
                                                         Input Survey Data
                                                     </a>
                                                 </div>
-
                                             )
                                         ) : (      //resolved in Walin-in
                                             dataConcern?.status === "Resolved" && (
