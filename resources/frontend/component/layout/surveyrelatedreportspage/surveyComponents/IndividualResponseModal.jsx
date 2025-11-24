@@ -20,7 +20,7 @@ const Emojis = {
     1: emoji5,
 };
 
-const IndividualResponseModal = ({ modalRef, selectedResponse }) => {
+const IndividualResponseModal = ({ modalRef, selectedResponse, handleCloseModal }) => {
 
     const navigate = useNavigate();
 
@@ -161,7 +161,9 @@ const IndividualResponseModal = ({ modalRef, selectedResponse }) => {
         >
             <div className='flex flex-col gap-[12px]'>
                 <form method="dialog" className="flex justify-end -mr-1">
-                    <button className="absolute justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA text-custom-bluegreen hover:bg-custombg" >
+                    <button
+                        onClick={handleCloseModal}
+                        className="absolute justify-center w-10 h-10 items-center rounded-full bg-custom-grayFA text-custom-bluegreen hover:bg-custombg" >
                         ✕
                     </button>
                 </form>
@@ -273,10 +275,7 @@ const IndividualResponseModal = ({ modalRef, selectedResponse }) => {
                     )}
                 </div>
                 <div className='flex flex-col gap-2'>
-                    {/* Render all questions except the reason question */}
                     {otherEntries.map((entry, index) => renderQuestion(entry, index))}
-
-                    {/* Render the reason question at the bottom if it exists */}
                     {reasonEntry && renderQuestion(reasonEntry, 'reason')}
                 </div>
             </div>

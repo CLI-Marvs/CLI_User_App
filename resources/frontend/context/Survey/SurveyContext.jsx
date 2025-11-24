@@ -11,6 +11,8 @@ export const SurveyProvider = ({ children }) => {
   const [surveyStatus, setSurveyStatus] = useState("");
   const [statusLoading, setStatusLoading] = useState(false);
   const [localSatisfaction, setLocalSatisfaction] = useState("All satisfaction");
+  const [averageRating, setAverageRating] = useState(null);
+  const [highLowCount, setHighLowCount] = useState(null);
 
   // Helper function to build query string from filters
   const buildFilterQuery = (filter) => {
@@ -142,7 +144,7 @@ export const SurveyProvider = ({ children }) => {
 
   const getConcernTicket = async (ticketId) => {
     try {
-      const encodedTicketId = encodeURIComponent(ticketId); 
+      const encodedTicketId = encodeURIComponent(ticketId);
       const response = await apiService.get(`/concern-ticket/${encodedTicketId}`);
       return response.data;
     } catch (error) {
@@ -174,6 +176,10 @@ export const SurveyProvider = ({ children }) => {
         localSatisfaction,
         setLocalSatisfaction,
         getConcernTicket,
+        averageRating,
+        setAverageRating,
+        highLowCount,
+        setHighLowCount,
       }
     }>
       {children}

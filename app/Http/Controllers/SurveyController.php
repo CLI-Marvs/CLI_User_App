@@ -18,49 +18,63 @@ class SurveyController extends Controller
 {
     public function store(Request $request)
     {
-        $surveyData = $request->input('surveyData');
-        $surveyId = null;  // Initialize the variable to store the survey ID
+        try {
+            DB::beginTransaction();
 
-        foreach ($surveyData as $survey) {
-            // Create the survey and capture its ID
-            $newSurvey = Survey_list::create([
-                'survey_title' => $survey['surveyTitle'] ?? 'Untitled Form',
-                'status' => $survey['status'],
-                'survey_link' => Str::uuid(),
-            ]);
+            $surveyData = $request->input('surveyData');
+            $surveyId = null;  // Initialize the variable to store the survey ID
 
-            // Set the survey ID
-            $surveyId = $newSurvey->id;  // Capture the ID of the newly created survey
-
-            foreach ($survey['data'] as $form) {
-                $newForm = $newSurvey->forms()->create([
-                    'title' => $form['title'],
-                    'description' => $form['description'],
-                    'consentTitle' => $form['consentTitle'],
-                    'consentDescription' => $form['consentDescription'],
+            foreach ($surveyData as $survey) {
+                // Create the survey and capture its ID
+                $newSurvey = Survey_list::create([
+                    'survey_title' => $survey['surveyTitle'] ?? 'Untitled Form',
+                    'status' => $survey['status'],
+                    'survey_link' => Str::uuid(),
                 ]);
 
-                foreach ($form['dataQASet'] as $question) {
-                    $newQuestion = $newForm->questions()->create([
-                        'question' => $question['question'] ?? '',
-                        'input_type' => $question['inputType'],
-                        'required' => $question['required'],
+                // Set the survey ID
+                $surveyId = $newSurvey->id;  // Capture the ID of the newly created survey
+
+                foreach ($survey['data'] as $form) {
+                    $newForm = $newSurvey->forms()->create([
+                        'title' => $form['title'],
+                        'description' => $form['description'],
+                        'consentTitle' => $form['consentTitle'],
+                        'consentDescription' => $form['consentDescription'],
                     ]);
 
-                    foreach ($question['option'] as $option) {
-                        $newQuestion->options()->create([
-                            'text' => $option['text'] ?? '',
+                    foreach ($form['dataQASet'] as $question) {
+                        $newQuestion = $newForm->questions()->create([
+                            'question' => $question['question'] ?? '',
+                            'input_type' => $question['inputType'],
+                            'required' => $question['required'],
                         ]);
+
+                        foreach ($question['option'] as $option) {
+                            $newQuestion->options()->create([
+                                'text' => $option['text'] ?? '',
+                            ]);
+                        }
                     }
                 }
             }
-        }
 
-        // Return the response with the survey ID
-        return response()->json([
-            'message' => 'Survey saved successfully',
-            'survey_id' => $surveyId,  // Include the ID of the newly created survey
-        ]);
+            DB::commit();
+
+            // Return the response with the survey ID
+            return response()->json([
+                'message' => 'Survey saved successfully',
+                'survey_id' => $surveyId,  // Include the ID of the newly created survey
+            ]);
+        } catch (\Exception $e) {
+           
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Error saving survey',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 
@@ -768,7 +782,7 @@ class SurveyController extends Controller
         $ratingsQuery = ExperienceRating::where('survey_link', $survey->survey_link)
             ->whereNotNull('rating')
             ->orderBy('created_at', 'desc')
-            ->select('ticket_id', 'email', 'rating', 'created_at');
+            ->select('ticket_id', 'email', 'rating', 'created_at','status');
 
         // ✅ Add date filter
         if ($startDate && $endDate) {
@@ -1115,7 +1129,7 @@ class SurveyController extends Controller
             }
 
             if ($satisfaction) {
-                
+
                 $ratingMap = [
                     'Very satisfied' => 5,
                     'Satisfied' => 4,
@@ -1149,6 +1163,10 @@ class SurveyController extends Controller
                     ->select('question_id', 'answer_value')
                     ->get();
 
+                $groupedAnswers = $answers->groupBy('question_id')->map(function ($items) {
+                    return $items->pluck('answer_value')->implode(', ');
+                });
+
                 // ✅ Get all question IDs from answers
                 $questionIds = $answers->pluck('question_id')->unique()->toArray();
 
@@ -1158,9 +1176,9 @@ class SurveyController extends Controller
                     ->pluck('question', 'id'); // returns [question_id => question_text]
 
                 // ✅ Map answers with their corresponding question text
-                foreach ($answers as $answer) {
-                    $questionText = $questionsMap[$answer->question_id] ?? 'Unknown Question';
-                    $row[$questionText] = $answer->answer_value ?? '';
+                foreach ($groupedAnswers as $questionId => $concatenatedAnswers) {
+                    $questionText = $questionsMap[$questionId] ?? 'Unknown Question';
+                    $row[$questionText] = $concatenatedAnswers;
                 }
 
                 $responseData[$rating->ticket_id] = $row;

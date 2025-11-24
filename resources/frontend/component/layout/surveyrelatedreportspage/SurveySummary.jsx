@@ -36,8 +36,7 @@ const SurveySummary = () => {
     const [ratingCounts, setRatingCounts] = useState([]);
     const [respondents, setRespondents] = useState(0);
     const [monthlyResponseChange, setMonthlyResponseChange] = useState(null);
-    const [averageRating, setAverageRating] = useState(null);
-    const [highLowCount, setHighLowCount] = useState(null);
+   
     const [surveyRatings, setSurveyRatings] = useState(null);
     const [activeTab, setActiveTab] = useState('form');
     const [surveyResponses, setSurveyResponses] = useState([]);
@@ -58,7 +57,7 @@ const SurveySummary = () => {
 
     const {
         fetchRespondentsCount,
-        fetchMonthlyResponseChange,
+        
         fetchSurveysRatings,
         fetchHighLowCount,
         survey_title,
@@ -66,6 +65,8 @@ const SurveySummary = () => {
         fetchSurveyResponses,
         ratingDetails,
         fetchSurveyRatingDetails,
+        setAverageRating,
+        setHighLowCount,
     } = useSurvey();
 
     const navigateToSurveyList = () => {
@@ -78,10 +79,6 @@ const SurveySummary = () => {
         setRespondents(totalRespondents);
     };
 
-    const fetchMonthlyResponse = async (filter = null) => {
-        const monthlyResponseChange = await fetchMonthlyResponseChange(surveyId, filter);
-        setMonthlyResponseChange(monthlyResponseChange);
-    };
 
     const fetchAverageRating = async (filter = null) => {
         const averageRating = await fetchSurveysRatings(surveyId, filter);
@@ -121,7 +118,6 @@ const SurveySummary = () => {
 
     useEffect(() => {
         fetchRespondents(activeFilters);
-        fetchMonthlyResponse(activeFilters);
         fetchAverageRating(activeFilters);
         fetchHighLowCounts(activeFilters);
         fetchSurveyResponse(activeFilters);
@@ -302,7 +298,7 @@ const SurveySummary = () => {
                 </div>
             </div>
             <div className='p-[32px]'>
-                <div className='flex flex-col gap-[40px] mb-[35px]'>
+                {/* <div className='flex flex-col gap-[40px] mb-[35px]'>
                     <div className='p-[20px] w-full bg-white border-[.6px] border-[#F4F4F4] h-[81px] rounded-[10px] '>
                         <div className="flex flex-wrap gap-2 text-[#9A9A9A]">
                             <div className="h-[36px] min-w-[100px] flex justify-center items-center gap-2">
@@ -387,120 +383,9 @@ const SurveySummary = () => {
                             </div>
                         </div>
                     )}
-                    {/* ======================================================KPI Widgets================================================================================= */}
-                    <div className="flex gap-6">
-                        {/* ======================================================total responses================================================================================= */}
-                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
-                            <div className='flex flex-col justify-between h-full'>
-                                <div className='flex justify-between'>
-                                    <div className='flex flex-col gap-3'>
-                                        <div>
-                                            <p className='text-[#9A9A9A] text-sm'>Total Responses</p>
-                                        </div>
-                                        <div>
-                                            <p className='montserrat-regular text-[36px] text-[#323232]'>{respondents}</p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
-                                            <div className='flex justify-center h-full w-full items-center text-[#348017]'>
-                                                <FiMessageSquare className='size-[20px]' />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                {!dateFilter && (
-                                    <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] text-[#9A9A9A] items-center text-[14px]">
-                                        <p className={`flex items-center`}>
-                                            {monthlyResponseChange?.current_month}
-                                        </p>
-                                        <p className=" ">responses this month</p>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* ======================================================average rating================================================================================= */}
-                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
-                            <div className='flex flex-col justify-between h-full'>
-                                <div className='flex justify-between'>
-                                    <div className='flex flex-col gap-3'>
-                                        <div>
-                                            <p className='text-[#9A9A9A] text-sm'>Average Rating</p>
-                                        </div>
-                                        <div>
-                                            <p className='montserrat-regular text-[36px] text-[#323232]'>{averageRating?.average_rating}/5</p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
-                                            <div className='flex justify-center h-full w-full items-center text-[#348017]'>
-                                                <LuTrendingUp className='size-[20px]' />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
-                                    <p className=" text-[#9A9A9A]">Out of 5 stars</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* ======================================================5-star rating================================================================================= */}
-                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
-                            <div className='flex flex-col justify-between h-full'>
-                                <div className='flex justify-between'>
-                                    <div className='flex flex-col gap-3'>
-                                        <div>
-                                            <p className='text-[#9A9A9A] text-sm'>5-Star Rating</p>
-                                        </div>
-                                        <div>
-                                            <p className='montserrat-regular text-[36px] text-[#323232]'>{highLowCount?.highest_rated_count}</p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
-                                            <div className='flex justify-center h-full w-full items-center text-[#348017]'>
-                                                <FaRegStar className='size-[20px]' />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
-                                    <p className=" text-[#9A9A9A]">Highest rating responses</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/*============================================================1 tar rating============================================================================ */}
-                        <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
-                            <div className='flex flex-col justify-between h-full'>
-                                <div className='flex justify-between'>
-                                    <div className='flex flex-col gap-3'>
-                                        <div>
-                                            <p className='text-[#9A9A9A] text-sm'>1-Star Rating</p>
-                                        </div>
-                                        <div>
-                                            <p className='montserrat-regular text-[36px] text-[#323232]'>{highLowCount?.lowest_rated_count}</p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
-                                            <div className='flex justify-center h-full w-full items-center text-[#348017]'>
-                                                <RiErrorWarningLine className='size-[32px]' />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
-                                    <p className=" text-[#9A9A9A]">Lowest rating responses</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {/* ======================================================================================================================================= */}
-                </div>
+                   
+                </div> */}
+               
                 <div className="flex flex-col w-full gap-6">
                     <div className="flex gap-4 ">
                         <button
@@ -530,7 +415,7 @@ const SurveySummary = () => {
                                 }`}
                         >
                             <CiFaceSmile className='size-[20px]' />
-                            Emoji Only Responses
+                            Emoji Responses
                             <span className={`flex items-center  min-w-[24px] h-[20px] rounded-[4px] py-[2px] px-[8px] text-sm 
                                 ${activeTab === 'emoji'
                                     ? 'bg-white text-black'

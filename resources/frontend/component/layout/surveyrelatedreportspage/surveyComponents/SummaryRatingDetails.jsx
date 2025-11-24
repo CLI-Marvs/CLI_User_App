@@ -220,9 +220,10 @@ const SummaryRatingDetails = ({
                                         )}
                                     </button>
                                 </th>
-                                <th className="px-2 py-2 montserrat-bold w-[150px]">Rate</th>
+                                <th className="px-2 py-2 montserrat-bold w-[150px]">Rating</th>
                                 <th className="px-2 py-2 montserrat-bold">Email</th>
                                 <th className="px-2 py-2 montserrat-bold">Ticket ID</th>
+                                <th className="px-2 py-2 montserrat-bold">Form Response</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-custom-lightestgreen">
@@ -257,6 +258,15 @@ const SummaryRatingDetails = ({
                                                 Ticket#{item.ticket_id}
                                             </button>
                                         </td>
+                                        {item.status === 'submitted' ? (
+                                            <td className="px-2 py-1">
+                                                Yes
+                                            </td>
+                                        ) : (
+                                            <td className="px-2 py-1">
+                                                No
+                                            </td>
+                                        )}
                                         {/* <button
                                                                             onClick={() => navigate(`/inquirymanagement/thread/Ticket%23${response.ticket_id}`, {
                                                                                 state: {

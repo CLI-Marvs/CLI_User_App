@@ -26,7 +26,6 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
         }
     }, [selectedResponse]);
 
-    // ✅ Step 1: Validate surveyResponses first
     if (
         !surveyResponses ||
         !Array.isArray(surveyResponses.data) ||
@@ -39,10 +38,8 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
         );
     }
 
-    // ✅ Step 2: Extract and clean up data
     const { headers, data } = surveyResponses;
-
-    // ✅ Step 3: Apply filtering logic safely
+  
     const filteredData =
         data?.filter((item) => {
             const globalTerm = searchTerm?.toLowerCase() || "";
@@ -64,11 +61,11 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
                     (val) => typeof val === "string" && val.toLowerCase().includes(localTerm)
                 );
 
-            // ✅ Must match both filters (if provided)
+           
             return matchesGlobal && matchesLocal;
         }) || [];
 
-    // ✅ Step 4: If no results after filtering
+    
     if (filteredData.length === 0) {
         return (
             <div className="p-6 text-center text-gray-500">
@@ -77,7 +74,7 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
         );
     }
 
-    // ✅ NEW: Sort the filtered data by timestamp
+    
     const sortedData = [...filteredData].sort((a, b) => {
         const dateA = new Date(a.timestamp);
         const dateB = new Date(b.timestamp);
@@ -89,7 +86,7 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
         }
     });
 
-    // ✅ Step 5: Continue normal logic
+    
     const filteredHeaders = headers.filter(
         (h) => h.toLowerCase() !== "status"
     );
@@ -104,10 +101,10 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
 
     const numberColor = (value) => {
         const num = parseInt(value);
-        if (num >= 9) return "bg-[#4CAF50]"; // 9–10
-        if (num >= 7) return "bg-[#2196F3]"; // 7–8
-        if (num >= 5) return "bg-[#FFC107]"; // 5–6
-        if (num >= 1) return "bg-red-500";   // 1–4
+        if (num >= 9) return "bg-[#4CAF50]"; 
+        if (num >= 7) return "bg-[#2196F3]"; 
+        if (num >= 5) return "bg-[#FFC107]"; 
+        if (num >= 1) return "bg-red-500";  
         return "";
     };
 
@@ -129,10 +126,10 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
 
-    // ✅ NEW: Toggle sort order
+    
     const toggleSortOrder = () => {
         setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-        setCurrentPage(1); // Reset to first page when sorting
+        setCurrentPage(1); 
     };
 
 
@@ -141,11 +138,15 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
         setSelectedResponse(response);
     };
 
+    const handleCloseModal = () => {
+        setSelectedResponse(null);
+        modalRef.current?.close();
+    };
+
 
     return (
         <>
             <div className={`${isExpanded ? 'fixed inset-0 z-50 bg-white flex flex-col' : 'relative'}`}>
-                {/* Expand/Collapse Button */}
                 <div className={`flex justify-between p-2 mb-2 ${isExpanded ? 'border-b bg-gray-50' : ''}`}>
                     <div>
                         {localDateFilter && (
@@ -315,7 +316,7 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
                                                     <button
                                                         onClick={() => navigate(`/inquirymanagement/thread/Ticket%23${response.ticket_id}`, {
                                                             state: {
-                                                                source: 'survey',  
+                                                                source: 'survey',
                                                             }
                                                         })}
                                                         className="hover:text-blue-800 hover:underline cursor-pointer"
@@ -425,9 +426,8 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
                     </div>
                 </div>
             </div>
-
             <div>
-                <IndividualResponseModal modalRef={modalRef} selectedResponse={selectedResponse} />
+                <IndividualResponseModal modalRef={modalRef} selectedResponse={selectedResponse} handleCloseModal={handleCloseModal} />
             </div>
         </>
     );

@@ -2,9 +2,11 @@ import React, { useState, useRef } from 'react'
 import SummaryRatingDetails from './SummaryRatingDetails'
 import { Select } from '@mui/material'
 import { HiMiniMagnifyingGlass } from 'react-icons/hi2';
-import { LuCalendar } from 'react-icons/lu';
+import { LuCalendar, LuTrendingUp } from 'react-icons/lu';
 import DateRangeFilter from './DateRangeFilter';
 import { useSurvey } from '@/context/Survey/SurveyContext';
+import { FaRegStar } from 'react-icons/fa';
+import { RiErrorWarningLine } from 'react-icons/ri';
 
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50];
@@ -17,6 +19,11 @@ const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, searchTerm, survey
 
     const {
         fetchSurveyRatingDetails,
+        fetchSurveysRatings,
+        averageRating,
+        setAverageRating,
+        highLowCount,
+        setHighLowCount,
     } = useSurvey();
 
     const [localSearchTerm, setLocalSearchTermValue] = useState("");
@@ -34,14 +41,24 @@ const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, searchTerm, survey
         setSurveyRatings(surveyRatings);
     };
 
+    const fetchAverageRating = async (filter = null) => {
+        const averageRating = await fetchSurveysRatings(surveyId, filter);
+        setAverageRating(averageRating);
+    };
+
+     const fetchHighLowCounts = async (filter = null) => {
+        const highLowCount = await fetchHighLowCount(surveyId, filter);
+        setHighLowCount(highLowCount);
+    };
+
 
     const handleDateFilterApply = (filterPayload) => {
-          setLocalDateFilter(filterPayload);
-          if (filterPayload.startDate == null && filterPayload.endDate == null) {
-              fetchSurveyRatings(dateFilter);
-          } else {
-              fetchSurveyRatings(filterPayload);
-          }
+        setLocalDateFilter(filterPayload);
+        if (filterPayload.startDate == null && filterPayload.endDate == null) {
+            fetchSurveyRatings(dateFilter);
+        } else {
+            fetchSurveyRatings(filterPayload);
+        }
     };
 
     const handleFilterClear = () => {
@@ -167,6 +184,90 @@ const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, searchTerm, survey
                     </div>
                 </div>
             </div>
+            {/* ======================================================KPI Widgets================================================================================= */}
+            <div className="flex gap-6">
+
+
+                {/* ======================================================average rating================================================================================= */}
+                <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
+                    <div className='flex flex-col justify-between h-full'>
+                        <div className='flex justify-between'>
+                            <div className='flex flex-col gap-3'>
+                                <div>
+                                    <p className='text-[#9A9A9A] text-sm'>Average Rating</p>
+                                </div>
+                                <div>
+                                    <p className='montserrat-regular text-[36px] text-[#323232]'>{averageRating?.average_rating}/5</p>
+                                </div>
+                            </div>
+                            <div>
+                                <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
+                                    <div className='flex justify-center h-full w-full items-center text-[#348017]'>
+                                        <LuTrendingUp className='size-[20px]' />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
+                            <p className=" text-[#9A9A9A]">Out of 5 stars</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ======================================================5-star rating================================================================================= */}
+                <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
+                    <div className='flex flex-col justify-between h-full'>
+                        <div className='flex justify-between'>
+                            <div className='flex flex-col gap-3'>
+                                <div>
+                                    <p className='text-[#9A9A9A] text-sm'>5-Star Rating</p>
+                                </div>
+                                <div>
+                                    <p className='montserrat-regular text-[36px] text-[#323232]'>{highLowCount?.highest_rated_count}</p>
+                                </div>
+                            </div>
+                            <div>
+                                <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
+                                    <div className='flex justify-center h-full w-full items-center text-[#348017]'>
+                                        <FaRegStar className='size-[20px]' />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
+                            <p className=" text-[#9A9A9A]">Highest rating responses</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/*============================================================1 tar rating============================================================================ */}
+                <div className="flex-1 h-[179px] rounded-[10px] border border-[#F4F4F4] p-[24px] bg-white">
+                    <div className='flex flex-col justify-between h-full'>
+                        <div className='flex justify-between'>
+                            <div className='flex flex-col gap-3'>
+                                <div>
+                                    <p className='text-[#9A9A9A] text-sm'>1-Star Rating</p>
+                                </div>
+                                <div>
+                                    <p className='montserrat-regular text-[36px] text-[#323232]'>{highLowCount?.lowest_rated_count}</p>
+                                </div>
+                            </div>
+                            <div>
+                                <div className='w-[40px] h-[40px] rounded-[8px] p-[10px] bg-custom-lightestgreen justify-center items-center'>
+                                    <div className='flex justify-center h-full w-full items-center text-[#348017]'>
+                                        <RiErrorWarningLine className='size-[32px]' />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex gap-[7.2px] h-[30px] border-t border-[#F4F4F4] items-center text-[14px]">
+                            <p className=" text-[#9A9A9A]">Lowest rating responses</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* ======================================================================================================================================= */}
             <div>
                 <SummaryRatingDetails
                     surveyRatings={surveyRatings}
