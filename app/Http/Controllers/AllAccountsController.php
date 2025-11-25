@@ -23,49 +23,50 @@ class AllAccountsController extends Controller
     public function getAllAccountsWithDetails()
     {
         try {
-            // Add short-term caching to avoid repeated expensive queries
-            $cacheKey = 'all_accounts_details_' . md5(serialize(request()->all()));
+            // Increase execution time for this endpoint
+            set_time_limit(120);
 
-            return Cache::remember($cacheKey, 300, function () { // Cache for 5 minutes
-                // Optimize: Load all submilestones in a single query instead of N+1 queries
-                $submilestones = Submilestone::with([
-                    'checklists',
-                    'workOrderAccountAssignees.employee'
-                ])->orderBy('work_order_type_id')->orderBy('id')->get();
+            // Add short-term caching to avoid repeated expensive queries
+            $cacheKey = 'all_accounts_details_v2_' . md5(serialize(request()->all()));
+
+            $responseData = Cache::remember($cacheKey, 300, function () { // Cache for 5 minutes
+                // Optimize: Load only essential submilestone data
+                $submilestones = Submilestone::select(['id', 'name', 'work_order_type_id'])
+                    ->with(['checklists:id,name,submilestone_id,requires_document'])
+                    ->orderBy('work_order_type_id')
+                    ->orderBy('id')
+                    ->get();
 
                 // Group submilestones by work order type
                 $submilestonesByType = $submilestones->groupBy('work_order_type_id');
 
-                // Optimize: More selective eager loading - only load what we actually need
-                $workOrderGroups = WorkOrderGroup::with([
-                    'workOrders' => function ($query) {
-                        $query->select(['work_order_id', 'work_order', 'work_order_type_id', 'work_order_group_id']);
-                    },
-                    'workOrders.workOrderType' => function ($query) {
-                        $query->select(['id', 'type_name', 'sequence']);
-                    },
-                    'workOrders.accounts' => function ($query) {
-                        $query->select([
-                            'taken_out_accounts.id',
-                            'account_name',
-                            'contract_no',
-                            'property_name',
-                            'unit_no',
-                            'financing',
-                            'psd',
-                            'take_out_date',
-                            'dou_expiry',
-                            'checklist_status',
-                            'category',
-                            'to_year',
-                            'to_month'
-                        ]);
-                    },
-                    'workOrders.accounts.uploadedDocuments',
-                    'workOrders.accounts.accountChecklistStatuses',
-                    'workOrders.accounts.workOrderAccountAssignees',
-                    'workOrders.accounts.workOrderAccountAssignees.employee'
-                ])->get();
+                // Optimize: Much more selective eager loading - only essential fields
+                $workOrderGroups = WorkOrderGroup::select(['id'])
+                    ->with([
+                        'workOrders' => function ($query) {
+                            $query->select(['work_order_id', 'work_order', 'work_order_type_id', 'work_order_group_id']);
+                        },
+                        'workOrders.workOrderType' => function ($query) {
+                            $query->select(['id', 'type_name', 'sequence']);
+                        },
+                        'workOrders.accounts' => function ($query) {
+                            $query->select([
+                                'taken_out_accounts.id',
+                                'account_name',
+                                'contract_no',
+                                'property_name',
+                                'unit_no',
+                                'financing',
+                                'category'
+                            ]);
+                        },
+                        'workOrders.accounts.accountChecklistStatuses:id,account_id,checklist_id,is_completed,completed_at',
+                        'workOrders.accounts.workOrderAccountAssignees' => function ($query) {
+                            $query->select(['id', 'work_order_id', 'account_id', 'employee_id', 'submilestone_id']);
+                        },
+                        'workOrders.accounts.workOrderAccountAssignees.employee:id,fullname'
+                    ])
+                    ->get();
 
                 // Optimize: Pre-build data structures to avoid redundant processing
                 $stepsMap = [];
@@ -78,7 +79,7 @@ class AllAccountsController extends Controller
                     $submilestonesByTypeProcessed[$workOrderTypeId] = $submilestones->map(function ($submilestone) {
                         return [
                             'id' => $submilestone->id,
-                            'milestone_name' => $submilestone->milestone_name,
+                            'milestone_name' => $submilestone->name,
                             'work_order_type_id' => $submilestone->work_order_type_id,
                             'checklists' => $submilestone->checklists,
                             'work_order_account_assignees' => $submilestone->workOrderAccountAssignees
@@ -90,7 +91,6 @@ class AllAccountsController extends Controller
                 foreach ($workOrderGroups as $group) {
                     $groupData = [
                         'id' => $group->id,
-                        'group_name' => $group->group_name,
                         'work_orders' => [],
                         'submilestonesByType' => $submilestonesByTypeProcessed
                     ];
@@ -146,14 +146,7 @@ class AllAccountsController extends Controller
                                 'property_name' => $account->property_name,
                                 'unit_no' => $account->unit_no,
                                 'financing' => $account->financing,
-                                'psd' => $account->psd,
-                                'take_out_date' => $account->take_out_date,
-                                'dou_expiry' => $account->dou_expiry,
-                                'checklist_status' => $account->checklist_status,
                                 'category' => $account->category,
-                                'to_year' => $account->to_year,
-                                'to_month' => $account->to_month,
-                                'uploaded_documents' => $account->uploadedDocuments,
                                 'account_checklist_statuses' => $account->accountChecklistStatuses,
                                 'work_order_account_assignees' => $assigneesData
                             ];
@@ -170,23 +163,28 @@ class AllAccountsController extends Controller
                                     'property_name' => $account->property_name,
                                     'unit_no' => $account->unit_no,
                                     'financing' => $account->financing,
-                                    'psd' => $account->psd,
-                                    'take_out_date' => $account->take_out_date,
-                                    'dou_expiry' => $account->dou_expiry,
-                                    'checklist_status' => $account->checklist_status,
                                     'category' => $account->category,
-                                    'to_year' => $account->to_year,
-                                    'to_month' => $account->to_month,
-                                    'uploaded_documents' => $account->uploadedDocuments->toArray(),
                                     'account_checklist_statuses' => $account->accountChecklistStatuses->toArray(),
                                     'work_order_account_assignees' => $assigneesData,
                                     'work_order_ids' => [$workOrder->work_order_id],
-                                    'work_orders' => [$workOrder->toArray()]
+                                    'work_orders' => [
+                                        [
+                                            'work_order_id' => $workOrder->work_order_id,
+                                            'work_order' => $workOrder->work_order,
+                                            'work_order_type_id' => $workOrder->work_order_type_id
+                                        ]
+                                    ]
                                 ];
                             } else {
                                 // Merge data efficiently
-                                $accountMap[$accountKey]['work_order_ids'][] = $workOrder->work_order_id;
-                                $accountMap[$accountKey]['work_orders'][] = $workOrder->toArray();
+                                if (!in_array($workOrder->work_order_id, $accountMap[$accountKey]['work_order_ids'])) {
+                                    $accountMap[$accountKey]['work_order_ids'][] = $workOrder->work_order_id;
+                                    $accountMap[$accountKey]['work_orders'][] = [
+                                        'work_order_id' => $workOrder->work_order_id,
+                                        'work_order' => $workOrder->work_order,
+                                        'work_order_type_id' => $workOrder->work_order_type_id
+                                    ];
+                                }
 
                                 // Merge assignees (avoid duplicates by ID)
                                 $existingIds = array_column($accountMap[$accountKey]['work_order_account_assignees'], 'id');
@@ -217,7 +215,7 @@ class AllAccountsController extends Controller
                 $combinedSteps = collect(array_values($stepsMap))->sortBy('sequence')->values()->all();
 
                 // Prepare final response
-                $responseData = [
+                return [
                     'success' => true,
                     'data' => [
                         'groups' => $responseData,
@@ -231,15 +229,24 @@ class AllAccountsController extends Controller
                         ]
                     ]
                 ];
-
-                return response()->json($responseData);
             });
 
+            return response()->json($responseData);
+
         } catch (\Exception $e) {
+            \Log::error('AllAccountsController::getAllAccountsWithDetails Error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Error fetching all accounts data',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ], 500);
         }
     }
@@ -257,7 +264,7 @@ class AllAccountsController extends Controller
             // Build cache key including pagination and search
             $cacheKey = 'all_accounts_paginated_' . md5($page . '_' . $perPage . '_' . $search);
 
-            return Cache::remember($cacheKey, 180, function () use ($page, $perPage, $search) { // Cache for 3 minutes
+            $result = Cache::remember($cacheKey, 180, function () use ($page, $perPage, $search) { // Cache for 3 minutes
 
                 // Get submilestones first (this query is usually smaller)
                 $submilestones = Submilestone::with(['checklists'])->get()->groupBy('work_order_type_id');
@@ -309,7 +316,7 @@ class AllAccountsController extends Controller
                 // Process the results efficiently
                 $processedData = $this->processWorkOrderGroupsEfficiently($workOrderGroups->items(), $submilestones);
 
-                return response()->json([
+                return [
                     'success' => true,
                     'data' => $processedData,
                     'pagination' => [
@@ -320,8 +327,10 @@ class AllAccountsController extends Controller
                         'from' => $workOrderGroups->firstItem(),
                         'to' => $workOrderGroups->lastItem()
                     ]
-                ]);
+                ];
             });
+
+            return response()->json($result);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -347,7 +356,7 @@ class AllAccountsController extends Controller
             $submilestonesByTypeProcessed[$workOrderTypeId] = $subs->map(function ($sub) {
                 return [
                     'id' => $sub->id,
-                    'milestone_name' => $sub->milestone_name,
+                    'milestone_name' => $sub->name,
                     'work_order_type_id' => $sub->work_order_type_id,
                     'checklists' => $sub->checklists
                 ];
@@ -357,7 +366,6 @@ class AllAccountsController extends Controller
         foreach ($workOrderGroups as $group) {
             $groupData = [
                 'id' => $group->id,
-                'group_name' => $group->group_name,
                 'work_orders' => []
             ];
 

@@ -566,10 +566,113 @@ class WorkOrderController extends Controller
     public function addNoteWithAttachments(Request $request)
     {
         Log::info('Received request to add note with attachments:', $request->all());
+
+        // First, resolve work_order if it's a string (work order number) or find by account + log_type
+        $workOrderId = $request->input('work_order_id');
+        $accountId = $request->input('account_id');
+        $logType = $request->input('log_type');
+
+        // If work_order_id is null but we have account_id and log_type, try to find the work order
+        $debugInfo = [];
+        try {
+            if (empty($workOrderId) && !empty($accountId) && !empty($logType)) {
+                $debugInfo['attempting_lookup'] = true;
+                $debugInfo['account_id'] = $accountId;
+                $debugInfo['log_type'] = $logType;
+
+                $account = TakenOutAccount::find($accountId);
+                if (!$account) {
+                    $debugInfo['account_found'] = false;
+                    return response()->json([
+                        'message' => 'Account not found',
+                        'debug' => $debugInfo
+                    ], 422);
+                }
+
+                $debugInfo['account_found'] = true;
+
+                // Find work order type by log_type name
+                $workOrderType = WorkOrderType::where('type_name', $logType)->first();
+
+                if (!$workOrderType) {
+                    // Log all available work order types for debugging
+                    $availableTypes = WorkOrderType::pluck('type_name')->toArray();
+                    $debugInfo['work_order_type_found'] = false;
+                    $debugInfo['available_types'] = $availableTypes;
+
+                    return response()->json([
+                        'message' => "Work order type '{$logType}' not found in database",
+                        'debug' => $debugInfo
+                    ], 422);
+                }
+
+                $debugInfo['work_order_type_found'] = true;
+                $debugInfo['work_order_type_id'] = $workOrderType->id;
+
+                // Find work order for this account and work order type
+                $workOrder = $account->workOrders()
+                    ->where('work_order_type_id', $workOrderType->id)
+                    ->first();
+
+                if ($workOrder) {
+                    $request->merge(['work_order_id' => $workOrder->work_order_id]);
+                    $debugInfo['work_order_found'] = true;
+                    $debugInfo['work_order_id'] = $workOrder->work_order_id;
+                } else {
+                    // If no work order found for this specific step, use any work order for this account
+                    $anyWorkOrder = $account->workOrders()->first();
+
+                    if ($anyWorkOrder) {
+                        $request->merge(['work_order_id' => $anyWorkOrder->work_order_id]);
+                        $debugInfo['work_order_found'] = 'fallback';
+                        $debugInfo['work_order_id'] = $anyWorkOrder->work_order_id;
+                        $debugInfo['message'] = "Using work order {$anyWorkOrder->work_order} (type {$anyWorkOrder->work_order_type_id}) as fallback for step '{$logType}'";
+
+                        Log::info('Using fallback work order for note', [
+                            'account_id' => $accountId,
+                            'log_type' => $logType,
+                            'requested_work_order_type_id' => $workOrderType->id,
+                            'using_work_order_id' => $anyWorkOrder->work_order_id,
+                            'using_work_order_type_id' => $anyWorkOrder->work_order_type_id
+                        ]);
+                    } else {
+                        $debugInfo['work_order_found'] = false;
+
+                        return response()->json([
+                            'message' => "No work orders found for account '{$account->account_name}'",
+                            'debug' => $debugInfo
+                        ], 422);
+                    }
+                }
+            } elseif (!empty($workOrderId) && !is_numeric($workOrderId)) {
+                // Try to find work order by work_order field (string like "WO-000001-1")
+                $workOrder = WorkOrder::where('work_order', $workOrderId)->first();
+                if ($workOrder) {
+                    $request->merge(['work_order_id' => $workOrder->work_order_id]);
+                    Log::info('Resolved work_order string to work_order_id', [
+                        'work_order' => $workOrderId,
+                        'work_order_id' => $workOrder->work_order_id
+                    ]);
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('Error in work order lookup:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'account_id' => $accountId,
+                'log_type' => $logType
+            ]);
+            return response()->json([
+                'message' => 'Error looking up work order: ' . $e->getMessage(),
+                'debug' => array_merge($debugInfo, ['exception' => $e->getMessage()])
+            ], 500);
+        }
+
+        // Validate - work_order_id can be nullable if we have account_id + log_type
         $validator = Validator::make($request->all(), [
             'note_text' => 'required_without:files|nullable|string|max:500',
             'account_id' => 'nullable|integer|exists:taken_out_accounts,id',
-            'work_order_id' => 'required|integer|exists:work_orders,work_order_id',
+            'work_order_id' => 'nullable|integer|exists:work_orders,work_order_id',
             'log_type' => 'required|string|max:50',
             'note_type' => 'nullable|string|max:50',
             'created_by_user_id' => 'required|integer|exists:employee,id',
@@ -583,6 +686,19 @@ class WorkOrderController extends Controller
             Log::error('Validation failed for adding note:', $validator->errors()->toArray());
             return response()->json(['message' => 'Validation failed.', 'errors' => $validator->errors()], 422);
         }
+
+        // After validation, ensure we have a work_order_id
+        if (empty($request->input('work_order_id'))) {
+            Log::error('Unable to determine work_order_id', [
+                'account_id' => $accountId,
+                'log_type' => $logType
+            ]);
+            return response()->json([
+                'message' => 'Unable to find work order for this account and step.',
+                'errors' => ['work_order_id' => ['Work order not found for the specified account and step.']]
+            ], 422);
+        }
+
         $validatedData = $validator->validated();
         DB::beginTransaction();
         try {

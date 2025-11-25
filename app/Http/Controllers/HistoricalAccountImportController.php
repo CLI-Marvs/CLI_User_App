@@ -32,6 +32,7 @@ class HistoricalAccountImportController extends Controller
             'import_type' => 'required|in:historical,ongoing,completed,new',
             'create_work_orders' => 'nullable|in:0,1,true,false',
             'auto_assign' => 'nullable|in:0,1,true,false',
+            'force_reassign' => 'nullable|in:0,1,true,false',
         ]);
 
         // Add custom file validation
@@ -68,6 +69,7 @@ class HistoricalAccountImportController extends Controller
             $importType = $request->input('import_type', 'new');
             $createWorkOrders = filter_var($request->input('create_work_orders', false), FILTER_VALIDATE_BOOLEAN);
             $autoAssign = filter_var($request->input('auto_assign', true), FILTER_VALIDATE_BOOLEAN);
+            $forceReassign = filter_var($request->input('force_reassign', true), FILTER_VALIDATE_BOOLEAN); // Default true for ongoing imports
 
             Log::info('Starting historical account import', [
                 'import_type' => $importType,
@@ -100,7 +102,9 @@ class HistoricalAccountImportController extends Controller
 
             // Process work order creation for ongoing accounts if requested
             if ($createWorkOrders && $importType === 'ongoing') {
-                $workOrderStats = $this->createWorkOrdersForOngoingAccounts($autoAssign);
+                // Get the account IDs from this import batch
+                $importedAccountIds = $import->getImportedAccountIds();
+                $workOrderStats = $this->createWorkOrdersForOngoingAccounts($autoAssign, $importedAccountIds, $forceReassign);
                 $stats['work_orders'] = $workOrderStats;
             }
 
@@ -133,42 +137,212 @@ class HistoricalAccountImportController extends Controller
     }
 
     /**
-     * Create work orders for ongoing accounts
+     * Create work orders for ongoing accounts - All accounts in ONE work order group
      * 
      * @param bool $autoAssign Whether to auto-assign employees
+     * @param array $accountIds Specific account IDs from this import batch
+     * @param bool $forceReassign Whether to reassign accounts that already have work orders
      * @return array Statistics about work order creation
      */
-    private function createWorkOrdersForOngoingAccounts($autoAssign = true)
+    private function createWorkOrdersForOngoingAccounts($autoAssign = true, $accountIds = [], $forceReassign = true)
     {
         $stats = [
+            'work_order_groups_created' => 0,
             'work_orders_created' => 0,
+            'accounts_added' => 0,
             'assignments_created' => 0,
             'errors' => 0,
             'error_details' => [],
         ];
 
         try {
-            // Get ongoing accounts that need work orders (have current_submilestone_id but no work orders)
-            $ongoingAccounts = TakenOutAccount::where('account_status', 'Ongoing')
+            // Get ongoing accounts from this import batch
+            $query = TakenOutAccount::where('account_status', 'Ongoing')
                 ->whereNotNull('current_submilestone_id')
-                ->whereDoesntHave('workOrders')
-                ->with(['currentSubmilestone.workOrderType'])
-                ->get();
+                ->with(['currentSubmilestone.workOrderType']);
+
+            // If specific account IDs provided, filter by those IDs
+            if (!empty($accountIds)) {
+                $query->whereIn('id', $accountIds);
+            } else {
+                // Fallback: get accounts without work orders
+                $query->whereDoesntHave('workOrders');
+            }
+
+            $ongoingAccounts = $query->get();
+
+            if ($ongoingAccounts->isEmpty()) {
+                Log::info('No ongoing accounts found for work order creation');
+                return $stats;
+            }
 
             Log::info('Found ongoing accounts for work order creation', [
-                'count' => $ongoingAccounts->count()
+                'count' => $ongoingAccounts->count(),
+                'force_reassign' => $forceReassign
             ]);
 
-            DB::transaction(function () use ($ongoingAccounts, $autoAssign, &$stats) {
-                foreach ($ongoingAccounts as $account) {
+            DB::transaction(function () use ($ongoingAccounts, $autoAssign, $forceReassign, &$stats) {
+                // Create ONE work order group for all imported accounts
+                $workOrderGroup = WorkOrderGroup::create([
+                    'status' => 'In Progress',
+                    'due_date' => $ongoingAccounts->min('dou_expiry'), // Use earliest expiry date
+                    'started_at' => now(),
+                ]);
+
+                $stats['work_order_groups_created']++;
+
+                Log::info('Created work order group for batch import', [
+                    'work_order_group_id' => $workOrderGroup->id,
+                    'account_count' => $ongoingAccounts->count()
+                ]);
+
+                // Group accounts by work order type
+                $accountsByWorkOrderType = $ongoingAccounts->groupBy(function ($account) {
+                    return $account->currentSubmilestone->work_order_type_id;
+                });
+
+                Log::info('Grouped accounts by work order type', [
+                    'total_accounts' => $ongoingAccounts->count(),
+                    'work_order_types' => $accountsByWorkOrderType->count(),
+                    'breakdown' => $accountsByWorkOrderType->map->count()->toArray(),
+                ]);
+
+                // Create one work order per work order type
+                foreach ($accountsByWorkOrderType as $workOrderTypeId => $accounts) {
                     try {
-                        $this->createWorkOrderForAccount($account, $autoAssign, $stats);
+                        $workOrderType = WorkOrderType::find($workOrderTypeId);
+
+                        if (!$workOrderType) {
+                            $stats['errors']++;
+                            $stats['error_details'][] = "Work order type not found: {$workOrderTypeId}";
+                            continue;
+                        }
+
+                        // Generate work order number
+                        $workOrderNumber = 'WO-' . str_pad($workOrderGroup->id, 6, '0', STR_PAD_LEFT) . '-' . $workOrderType->id;
+
+                        // Create work order for this work order type
+                        $workOrder = WorkOrder::create([
+                            'work_order' => $workOrderNumber,
+                            'work_order_group_id' => $workOrderGroup->id,
+                            'work_order_type_id' => $workOrderTypeId,
+                            'status' => 'In Progress',
+                            'work_order_deadline' => $accounts->min('dou_expiry'),
+                            'description' => "Batch import - {$workOrderType->type_name} for {$accounts->count()} accounts",
+                            'priority' => 'Medium',
+                            'created_by_user_id' => auth()->id() ?? 1,
+                        ]);
+
+                        $stats['work_orders_created']++;
+
+                        Log::info('Created work order for work order type', [
+                            'work_order_id' => $workOrder->work_order_id,
+                            'work_order_type' => $workOrderType->type_name,
+                            'account_count' => $accounts->count()
+                        ]);
+
+                        // Prepare account IDs for bulk attachment
+                        $accountIdsToAttach = [];
+                        $skippedAccounts = [];
+
+                        Log::info('Processing accounts for work order attachment', [
+                            'work_order_id' => $workOrder->work_order_id,
+                            'total_accounts_to_process' => $accounts->count(),
+                            'force_reassign' => $forceReassign,
+                        ]);
+
+                        // Check for existing work orders and handle based on forceReassign
+                        foreach ($accounts as $account) {
+                            $existingWorkOrders = $account->workOrders()->get();
+
+                            if ($existingWorkOrders->isNotEmpty()) {
+                                if ($forceReassign) {
+                                    // Remove from existing work orders and add to attach list
+                                    $workOrderNumbers = $existingWorkOrders->pluck('work_order')->implode(', ');
+                                    $account->workOrders()->detach();
+                                    $accountIdsToAttach[] = $account->id;
+
+                                    Log::info('Reassigning account from existing work orders', [
+                                        'contract_no' => $account->contract_no,
+                                        'account_id' => $account->id,
+                                        'previous_work_orders' => $workOrderNumbers,
+                                        'new_work_order' => $workOrder->work_order,
+                                    ]);
+                                } else {
+                                    // Skip this account
+                                    $workOrderNumbers = $existingWorkOrders->pluck('work_order')->implode(', ');
+                                    $skippedAccounts[] = [
+                                        'contract_no' => $account->contract_no,
+                                        'work_orders' => $workOrderNumbers
+                                    ];
+
+                                    Log::warning('Account already has work orders - skipping', [
+                                        'contract_no' => $account->contract_no,
+                                        'account_id' => $account->id,
+                                        'existing_work_orders' => $workOrderNumbers,
+                                    ]);
+                                }
+                            } else {
+                                // No existing work orders, add to attach list
+                                $accountIdsToAttach[] = $account->id;
+                            }
+                        }
+
+                        Log::info('Account processing complete - preparing bulk attachment', [
+                            'work_order_id' => $workOrder->work_order_id,
+                            'accounts_to_attach' => count($accountIdsToAttach),
+                            'accounts_skipped' => count($skippedAccounts),
+                            'total_processed' => $accounts->count(),
+                        ]);
+
+                        // Bulk attach all account IDs at once
+                        if (!empty($accountIdsToAttach)) {
+                            $workOrder->accounts()->attach($accountIdsToAttach);
+                            $stats['accounts_added'] += count($accountIdsToAttach);
+
+                            Log::info('Bulk attached accounts to work order', [
+                                'work_order_id' => $workOrder->work_order_id,
+                                'accounts_attached' => count($accountIdsToAttach),
+                                'first_10_account_ids' => array_slice($accountIdsToAttach, 0, 10)
+                            ]);
+                        } else {
+                            Log::warning('No accounts to attach to work order', [
+                                'work_order_id' => $workOrder->work_order_id,
+                                'total_accounts_processed' => $accounts->count(),
+                            ]);
+                        }
+
+                        // Add warnings for skipped accounts
+                        if (!empty($skippedAccounts)) {
+                            $stats['errors'] += count($skippedAccounts);
+                            foreach ($skippedAccounts as $skipped) {
+                                $stats['error_details'][] = "Account {$skipped['contract_no']} already has existing work orders: {$skipped['work_orders']}";
+                            }
+                        }
+
+                        // Auto-assign employees if requested (do this AFTER bulk attach)
+                        if ($autoAssign) {
+                            foreach ($accounts as $account) {
+                                // Only auto-assign if account was actually attached
+                                if (in_array($account->id, $accountIdsToAttach) && $account->currentSubmilestone) {
+                                    try {
+                                        $this->autoAssignEmployees($workOrder, $account, $account->currentSubmilestone, $stats);
+                                    } catch (\Exception $e) {
+                                        Log::error('Failed to auto-assign employees', [
+                                            'contract_no' => $account->contract_no,
+                                            'error' => $e->getMessage(),
+                                        ]);
+                                    }
+                                }
+                            }
+                        }
+
                     } catch (\Exception $e) {
                         $stats['errors']++;
-                        $stats['error_details'][] = "Account {$account->contract_no}: " . $e->getMessage();
+                        $stats['error_details'][] = "Work order type {$workOrderTypeId}: " . $e->getMessage();
 
-                        Log::error('Failed to create work order for account', [
-                            'contract_no' => $account->contract_no,
+                        Log::error('Failed to create work order for work order type', [
+                            'work_order_type_id' => $workOrderTypeId,
                             'error' => $e->getMessage(),
                         ]);
                     }
@@ -186,61 +360,6 @@ class HistoricalAccountImportController extends Controller
         }
 
         return $stats;
-    }
-
-    /**
-     * Create work order for a specific account
-     * 
-     * @param TakenOutAccount $account
-     * @param bool $autoAssign
-     * @param array &$stats
-     */
-    private function createWorkOrderForAccount($account, $autoAssign, &$stats)
-    {
-        if (!$account->currentSubmilestone || !$account->currentSubmilestone->workOrderType) {
-            throw new \Exception('Account missing current submilestone or work order type');
-        }
-
-        $submilestone = $account->currentSubmilestone;
-        $workOrderType = $submilestone->workOrderType;
-
-        // Create work order group
-        $workOrderGroup = WorkOrderGroup::create([
-            'status' => 'In Progress',
-            'due_date' => $account->dou_expiry,
-            'started_at' => now(),
-        ]);
-
-        // Generate work order number
-        $workOrderNumber = 'WO-' . str_pad($workOrderGroup->id, 6, '0', STR_PAD_LEFT);
-
-        // Create work order
-        $workOrder = WorkOrder::create([
-            'work_order' => $workOrderNumber,
-            'work_order_group_id' => $workOrderGroup->id,
-            'work_order_type_id' => $workOrderType->id,
-            'status' => 'In Progress',
-            'work_order_deadline' => $account->dou_expiry,
-            'description' => "Auto-created for ongoing account: {$account->account_name}",
-            'priority' => 'Medium',
-            'created_by_user_id' => auth()->id() ?? 1, // Use authenticated user or default
-        ]);
-
-        // Attach account to work order
-        $workOrder->accounts()->attach($account->id);
-
-        $stats['work_orders_created']++;
-
-        Log::info('Work order created for ongoing account', [
-            'contract_no' => $account->contract_no,
-            'work_order_id' => $workOrder->work_order_id,
-            'work_order_number' => $workOrderNumber,
-        ]);
-
-        // Auto-assign employees if requested
-        if ($autoAssign) {
-            $this->autoAssignEmployees($workOrder, $account, $submilestone, $stats);
-        }
     }
 
     /**
@@ -319,8 +438,16 @@ class HistoricalAccountImportController extends Controller
             $message .= "Updated: {$stats['updated']} accounts. ";
         }
 
+        if (isset($stats['work_orders']['work_order_groups_created']) && $stats['work_orders']['work_order_groups_created'] > 0) {
+            $message .= "Work order groups created: {$stats['work_orders']['work_order_groups_created']}. ";
+        }
+
         if (isset($stats['work_orders']['work_orders_created']) && $stats['work_orders']['work_orders_created'] > 0) {
             $message .= "Work orders created: {$stats['work_orders']['work_orders_created']}. ";
+        }
+
+        if (isset($stats['work_orders']['accounts_added']) && $stats['work_orders']['accounts_added'] > 0) {
+            $message .= "Accounts added to work orders: {$stats['work_orders']['accounts_added']}. ";
         }
 
         if (isset($stats['work_orders']['assignments_created']) && $stats['work_orders']['assignments_created'] > 0) {

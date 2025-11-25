@@ -9,6 +9,7 @@ use App\Models\Checklist;
 use App\Models\AccountChecklistStatus;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
+use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Collection;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
@@ -16,7 +17,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
-class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
+class HistoricalAccountsImport implements ToCollection, WithMultipleSheets, WithCalculatedFormulas
 {
     private $importType;
     private $createWorkOrders;
@@ -30,11 +31,16 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
     private $warnings = [];
     private $importedAccounts = [];
     private $updatedAccounts = [];
+    private $importedAccountIds = [];
 
     public function __construct($importType = 'new', $createWorkOrders = false)
     {
         $this->importType = $importType;
         $this->createWorkOrders = $createWorkOrders;
+
+        // Set higher limits for large imports
+        ini_set('memory_limit', '512M');
+        ini_set('max_execution_time', '300'); // 5 minutes
     }
 
     /**
@@ -78,36 +84,59 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
             'columns_found' => count($columnMapping)
         ]);
 
-        DB::transaction(function () use ($rows, $startRow, $columnMapping) {
-            for ($i = $startRow; $i < $rows->count(); $i++) {
-                $row = $rows[$i];
+        // Validate that all accounts have the same property name
+        $this->validatePropertyNameConsistency($rows, $startRow, $columnMapping);
 
-                if ($this->isEmptyRow($row)) {
-                    continue;
-                }
+        // Process in batches to avoid PostgreSQL lock limits
+        $batchSize = 100; // Process 100 accounts per transaction
+        $currentBatch = 0;
+        $totalRows = $rows->count();
 
-                try {
-                    $mappedData = $this->mapRowData($row, $columnMapping);
-                    
-                    if (!$this->isValidRowData($mappedData)) {
-                        $this->errorCount++;
-                        $this->errors[] = "Row " . ($i + 1) . ": Missing required fields (contract_no and account_name)";
+        for ($i = $startRow; $i < $totalRows; $i += $batchSize) {
+            $currentBatch++;
+            $batchEnd = min($i + $batchSize, $totalRows);
+
+            Log::info("Processing batch {$currentBatch}", [
+                'rows' => "{$i} to {$batchEnd}",
+                'batch_size' => $batchSize
+            ]);
+
+            DB::transaction(function () use ($rows, $i, $batchEnd, $columnMapping) {
+                for ($rowIndex = $i; $rowIndex < $batchEnd; $rowIndex++) {
+                    $row = $rows[$rowIndex];
+
+                    if ($this->isEmptyRow($row)) {
                         continue;
                     }
 
-                    $this->processAccountRecord($mappedData, $i + 1);
+                    try {
+                        $mappedData = $this->mapRowData($row, $columnMapping);
 
-                } catch (\Exception $e) {
-                    $this->errorCount++;
-                    $this->errors[] = "Row " . ($i + 1) . ": " . $e->getMessage();
-                    Log::error('Row processing error', [
-                        'row' => $i + 1,
-                        'error' => $e->getMessage(),
-                        'trace' => $e->getTraceAsString()
-                    ]);
+                        if (!$this->isValidRowData($mappedData)) {
+                            $this->errorCount++;
+                            $this->errors[] = "Row " . ($rowIndex + 1) . ": Missing required fields (contract_no and account_name)";
+                            continue;
+                        }
+
+                        $this->processAccountRecord($mappedData, $rowIndex + 1);
+
+                    } catch (\Exception $e) {
+                        $this->errorCount++;
+                        $this->errors[] = "Row " . ($rowIndex + 1) . ": " . $e->getMessage();
+                        Log::error('Row processing error', [
+                            'row' => $rowIndex + 1,
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                    }
                 }
+            });
+
+            // Small delay between batches to reduce database pressure
+            if ($batchEnd < $totalRows) {
+                usleep(100000); // 0.1 second pause
             }
-        });
+        }
 
         Log::info('Historical import completed', [
             'import_type' => $this->importType,
@@ -119,10 +148,78 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
         ]);
     }
 
+    /**
+     * Validate that all accounts in the file have the same property name
+     * 
+     * @param Collection $rows
+     * @param int $startRow
+     * @param array $columnMapping
+     * @throws \Exception
+     */
+    private function validatePropertyNameConsistency(Collection $rows, $startRow, array $columnMapping)
+    {
+        $propertyNames = [];
+        $propertyNameColIndex = null;
+
+        // Find the property_name column index
+        foreach ($columnMapping as $colIndex => $dbField) {
+            if ($dbField === 'property_name') {
+                $propertyNameColIndex = $colIndex;
+                break;
+            }
+        }
+
+        // If no property_name column found, skip validation
+        if ($propertyNameColIndex === null) {
+            return;
+        }
+
+        // Collect all unique property names from non-empty rows
+        for ($i = $startRow; $i < $rows->count(); $i++) {
+            $row = $rows[$i];
+
+            if ($this->isEmptyRow($row)) {
+                continue;
+            }
+
+            $propertyName = $this->cleanCellValue($row[$propertyNameColIndex] ?? null);
+
+            if (!empty($propertyName)) {
+                $propertyNames[$propertyName] = ($propertyNames[$propertyName] ?? 0) + 1;
+            }
+        }
+
+        // Check if there are multiple different property names
+        if (count($propertyNames) > 1) {
+            $propertyList = [];
+            foreach ($propertyNames as $name => $count) {
+                $propertyList[] = "'{$name}' ({$count} accounts)";
+            }
+
+            $errorMessage = "All accounts in the import file must have the same Property Name. Found multiple property names: " . implode(', ', $propertyList);
+
+            Log::error('Property name consistency validation failed', [
+                'property_names' => $propertyNames,
+                'import_type' => $this->importType
+            ]);
+
+            throw new \Exception($errorMessage);
+        }
+
+        // Log the validated property name
+        if (count($propertyNames) === 1) {
+            $propertyName = array_key_first($propertyNames);
+            Log::info('Property name consistency validated', [
+                'property_name' => $propertyName,
+                'account_count' => $propertyNames[$propertyName]
+            ]);
+        }
+    }
+
     private function processAccountRecord($data, $rowNumber)
     {
         $existingAccount = TakenOutAccount::where('contract_no', $data['contract_no'])->first();
-        
+
         if ($existingAccount) {
             $this->updateExistingAccount($existingAccount, $data, $rowNumber);
         } else {
@@ -134,30 +231,31 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
     {
         try {
             $accountData = $this->prepareAccountData($data);
-            
+
             Log::info('Creating account', [
                 'row' => $rowNumber,
                 'contract_no' => $accountData['contract_no'],
                 'account_status' => $accountData['account_status'],
                 'current_submilestone_id' => $accountData['current_submilestone_id'] ?? null
             ]);
-            
+
             $account = TakenOutAccount::create($accountData);
             $this->postProcessAccount($account, $data, $rowNumber);
-            
+
             $this->importedCount++;
+            $this->importedAccountIds[] = $account->id;
             $this->importedAccounts[] = [
                 'contract_no' => $account->contract_no,
                 'account_name' => $account->account_name,
                 'property_name' => $account->property_name,
                 'status' => $account->account_status
             ];
-            
+
             Log::info('Account created successfully', [
                 'contract_no' => $account->contract_no,
                 'id' => $account->id
             ]);
-            
+
         } catch (\Exception $e) {
             Log::error('Failed to create account', [
                 'row' => $rowNumber,
@@ -175,8 +273,9 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
             $accountData = $this->prepareAccountData($data);
             $account->update($accountData);
             $this->postProcessAccount($account, $data, $rowNumber);
-            
+
             $this->updatedCount++;
+            $this->importedAccountIds[] = $account->id;
             $this->updatedAccounts[] = [
                 'contract_no' => $account->contract_no,
                 'account_name' => $account->account_name,
@@ -184,13 +283,13 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
                 'old_status' => $originalStatus,
                 'new_status' => $account->account_status
             ];
-            
+
             Log::info('Account updated', [
                 'contract_no' => $account->contract_no,
                 'old_status' => $originalStatus,
                 'new_status' => $account->account_status
             ]);
-            
+
         } catch (\Exception $e) {
             throw new \Exception("Failed to update account: " . $e->getMessage());
         }
@@ -219,13 +318,13 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
                 $accountData['checklist_status'] = true;
                 $accountData['added_status'] = true;
                 break;
-                
+
             case 'ongoing':
                 $accountData['account_status'] = 'Ongoing';
                 $accountData['completion_percentage'] = 50;
                 $accountData['added_status'] = true;
                 break;
-                
+
             default: // 'new'
                 $accountData['account_status'] = 'New';
                 $accountData['completion_percentage'] = 0;
@@ -249,15 +348,15 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
     {
         try {
             $this->processChecklistCompletion($account, $data);
-            
+
             if ($account->account_status === 'Ongoing') {
                 $this->updateCompletionPercentage($account);
             }
-            
+
             if ($this->shouldCreateWorkOrder($account) && $this->createWorkOrders) {
                 $this->processWorkOrderCreation($account, $data, $rowNumber);
             }
-            
+
         } catch (\Exception $e) {
             $this->warningCount++;
             $this->warnings[] = "Row $rowNumber: Post-processing warning - " . $e->getMessage();
@@ -272,7 +371,7 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
     private function updateCompletionPercentage($account)
     {
         $totalChecklists = Checklist::whereHas('submilestone.workOrderType')->count();
-        
+
         if ($totalChecklists === 0) {
             return;
         }
@@ -308,25 +407,48 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
     private function markAllChecklistsCompleted($account)
     {
         $allChecklists = Checklist::whereHas('submilestone.workOrderType')->get();
-            
+
+        // Use bulk insert instead of individual updateOrCreate to reduce locks
+        $existingStatuses = AccountChecklistStatus::where('account_id', $account->id)
+            ->pluck('checklist_id')
+            ->toArray();
+
+        $statusesToInsert = [];
+        $now = now();
+
         foreach ($allChecklists as $checklist) {
-            AccountChecklistStatus::updateOrCreate(
-                [
+            if (!in_array($checklist->id, $existingStatuses)) {
+                $statusesToInsert[] = [
                     'account_id' => $account->id,
                     'checklist_id' => $checklist->id,
-                ],
-                [
                     'is_completed' => true,
-                    'completed_at' => now(),
-                ]
-            );
+                    'completed_at' => $now,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
+
+        // Bulk insert new statuses
+        if (!empty($statusesToInsert)) {
+            AccountChecklistStatus::insert($statusesToInsert);
+        }
+
+        // Update existing statuses if any
+        if (!empty($existingStatuses)) {
+            AccountChecklistStatus::where('account_id', $account->id)
+                ->update([
+                    'is_completed' => true,
+                    'completed_at' => $now,
+                    'updated_at' => $now,
+                ]);
         }
     }
 
     private function markChecklistsUpToSubmilestone($account, $currentSubmilestoneId)
     {
         $currentSubmilestone = Submilestone::with('workOrderType')->find($currentSubmilestoneId);
-        
+
         if (!$currentSubmilestone || !$currentSubmilestone->workOrderType) {
             Log::warning('Could not find submilestone or work order type', [
                 'submilestone_id' => $currentSubmilestoneId,
@@ -339,43 +461,71 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
             ->orderBy('sequence')
             ->get();
 
-        $checklistsMarked = 0;
+        $checklistIdsToMark = [];
 
         foreach ($workOrderTypes as $workOrderType) {
             $submilestones = Submilestone::where('work_order_type_id', $workOrderType->id)
                 ->orderBy('id')
                 ->get();
-            
+
             foreach ($submilestones as $submilestone) {
                 if ($workOrderType->id === $currentSubmilestone->workOrderType->id) {
                     if ($submilestone->id > $currentSubmilestoneId) {
                         break;
                     }
                 }
-                
-                $checklists = Checklist::where('submilestone_id', $submilestone->id)->get();
-                
-                foreach ($checklists as $checklist) {
-                    AccountChecklistStatus::updateOrCreate(
-                        [
-                            'account_id' => $account->id,
-                            'checklist_id' => $checklist->id,
-                        ],
-                        [
-                            'is_completed' => true,
-                            'completed_at' => now(),
-                        ]
-                    );
-                    $checklistsMarked++;
-                }
+
+                $checklistIds = Checklist::where('submilestone_id', $submilestone->id)
+                    ->pluck('id')
+                    ->toArray();
+
+                $checklistIdsToMark = array_merge($checklistIdsToMark, $checklistIds);
             }
+        }
+
+        // Bulk insert/update for better performance
+        $existingStatuses = AccountChecklistStatus::where('account_id', $account->id)
+            ->whereIn('checklist_id', $checklistIdsToMark)
+            ->pluck('checklist_id')
+            ->toArray();
+
+        $statusesToInsert = [];
+        $now = now();
+
+        foreach ($checklistIdsToMark as $checklistId) {
+            if (!in_array($checklistId, $existingStatuses)) {
+                $statusesToInsert[] = [
+                    'account_id' => $account->id,
+                    'checklist_id' => $checklistId,
+                    'is_completed' => true,
+                    'completed_at' => $now,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+            }
+        }
+
+        // Bulk insert new statuses
+        if (!empty($statusesToInsert)) {
+            AccountChecklistStatus::insert($statusesToInsert);
+        }
+
+        // Update existing statuses if any
+        if (!empty($existingStatuses)) {
+            AccountChecklistStatus::where('account_id', $account->id)
+                ->whereIn('checklist_id', $existingStatuses)
+                ->update([
+                    'is_completed' => true,
+                    'completed_at' => $now,
+                    'updated_at' => $now,
+                ]);
         }
 
         Log::info('Marked checklists complete up to submilestone', [
             'account_id' => $account->id,
             'contract_no' => $account->contract_no,
             'submilestone_id' => $currentSubmilestoneId,
-            'checklists_marked' => $checklistsMarked
+            'checklists_marked' => count($checklistIdsToMark)
         ]);
     }
 
@@ -399,7 +549,7 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
         if (!empty($data['current_submilestone_id']) && is_numeric($data['current_submilestone_id'])) {
             $submilestoneId = (int) $data['current_submilestone_id'];
             $submilestone = Submilestone::find($submilestoneId);
-            
+
             if ($submilestone) {
                 Log::info('Found submilestone by ID', [
                     'submilestone_id' => $submilestoneId,
@@ -407,14 +557,19 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
                 ]);
                 return $submilestone->id;
             }
-            
-            $this->warningCount++;
-            $this->warnings[] = "Invalid current_submilestone_id: {$submilestoneId}";
-            
-            Log::warning('Invalid submilestone ID', [
-                'provided_id' => $submilestoneId,
-                'available_ids' => Submilestone::pluck('id')->toArray()
-            ]);
+
+            // Only show warning if this is a real account (has contract_no)
+            // Skip warnings for template formula rows
+            if (!empty($data['contract_no'])) {
+                $this->warningCount++;
+                $this->warnings[] = "Invalid current_submilestone_id: {$submilestoneId} for contract {$data['contract_no']}";
+
+                Log::warning('Invalid submilestone ID', [
+                    'contract_no' => $data['contract_no'],
+                    'provided_id' => $submilestoneId,
+                    'available_ids' => Submilestone::pluck('id')->toArray()
+                ]);
+            }
         }
 
         // PRIORITY 2: Work order type ID
@@ -492,15 +647,16 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
 
         for ($i = 0; $i < min(20, $rows->count()); $i++) {
             $row = $rows[$i];
-            
-            if ($this->isEmptyRow($row)) continue;
-            
+
+            if ($this->isEmptyRow($row))
+                continue;
+
             $columnMapping = [];
             $matchedHeaders = 0;
-            
+
             foreach ($row as $colIndex => $cellValue) {
                 $cleanValue = strtolower(trim(str_replace([' ', '_', '-'], '', $cellValue ?? '')));
-                
+
                 foreach ($possibleHeaders as $dbField => $variations) {
                     foreach ($variations as $variation) {
                         $cleanVariation = str_replace([' ', '_', '-'], '', $variation);
@@ -512,7 +668,7 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
                     }
                 }
             }
-            
+
             $hasRequiredHeaders = false;
             foreach ($columnMapping as $dbField) {
                 if (in_array($dbField, ['contract_no', 'account_name'])) {
@@ -520,14 +676,14 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
                     break;
                 }
             }
-            
+
             if ($hasRequiredHeaders && $matchedHeaders >= 2) {
                 Log::info('Found header row', [
                     'row' => $i,
                     'matched' => $matchedHeaders,
                     'mapping' => $columnMapping
                 ]);
-                
+
                 return [
                     'headerRow' => $i,
                     'startRow' => $i + 1,
@@ -542,15 +698,32 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
     private function calculateSimilarity($str1, $str2)
     {
         $maxLen = max(strlen($str1), strlen($str2));
-        if ($maxLen === 0) return 0;
+        if ($maxLen === 0)
+            return 0;
         return similar_text($str1, $str2) / $maxLen;
     }
 
     private function isEmptyRow(Collection $row)
     {
-        return $row->filter(function ($cell) {
-            return !empty(trim($cell ?? ''));
-        })->isEmpty();
+        // Check if row has any non-empty values
+        $hasData = $row->filter(function ($cell) {
+            $trimmed = trim($cell ?? '');
+            // Exclude cells that are "0" as empty (for formulas that return 0)
+            // But keep "0" if it's actually meaningful data
+            return $trimmed !== '' && $trimmed !== '0';
+        })->isNotEmpty();
+
+        // If no data at all, it's empty
+        if (!$hasData) {
+            return true;
+        }
+
+        // Additional check: if first two columns (contract_no and account_name) are empty,
+        // consider it an empty row even if other cells have formulas
+        $firstCell = trim($row[0] ?? '');
+        $secondCell = trim($row[1] ?? '');
+
+        return empty($firstCell) && empty($secondCell);
     }
 
     private function mapRowData(Collection $row, array $columnMapping)
@@ -646,7 +819,7 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
         try {
             $tempImport = new self($this->importType, false);
             Excel::import($tempImport, $file);
-            
+
             return [
                 'isValid' => $tempImport->errorCount === 0,
                 'errors' => $tempImport->errors,
@@ -654,7 +827,7 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
                 'duplicates' => $tempImport->duplicateCount,
                 'previewCount' => $tempImport->importedCount + $tempImport->updatedCount,
             ];
-            
+
         } catch (\Exception $e) {
             return [
                 'isValid' => false,
@@ -687,6 +860,11 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
         return $this->importType;
     }
 
+    public function getImportedAccountIds()
+    {
+        return $this->importedAccountIds;
+    }
+
     private function convertMonthToNumber($monthValue)
     {
         if (empty($monthValue)) {
@@ -699,18 +877,30 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets
         }
 
         $monthMap = [
-            'january' => 1, 'jan' => 1,
-            'february' => 2, 'feb' => 2,
-            'march' => 3, 'mar' => 3,
-            'april' => 4, 'apr' => 4,
+            'january' => 1,
+            'jan' => 1,
+            'february' => 2,
+            'feb' => 2,
+            'march' => 3,
+            'mar' => 3,
+            'april' => 4,
+            'apr' => 4,
             'may' => 5,
-            'june' => 6, 'jun' => 6,
-            'july' => 7, 'jul' => 7,
-            'august' => 8, 'aug' => 8,
-            'september' => 9, 'sep' => 9, 'sept' => 9,
-            'october' => 10, 'oct' => 10,
-            'november' => 11, 'nov' => 11,
-            'december' => 12, 'dec' => 12,
+            'june' => 6,
+            'jun' => 6,
+            'july' => 7,
+            'jul' => 7,
+            'august' => 8,
+            'aug' => 8,
+            'september' => 9,
+            'sep' => 9,
+            'sept' => 9,
+            'october' => 10,
+            'oct' => 10,
+            'november' => 11,
+            'nov' => 11,
+            'december' => 12,
+            'dec' => 12,
         ];
 
         $monthName = strtolower(trim($monthValue));

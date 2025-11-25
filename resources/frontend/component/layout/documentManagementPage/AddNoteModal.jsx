@@ -208,17 +208,19 @@ const AddNoteModal = ({
             setError("Please enter a note or attach at least one file.");
             return;
         }
-        
+
         // Create final note text with checklist name prefix
-        const finalNoteText = checklistName 
-            ? `[${checklistName}] ${noteText}` 
+        const finalNoteText = checklistName
+            ? `[${checklistName}] ${noteText}`
             : noteText;
-            
+
         if (finalNoteText.length > 500) {
-            setError("Note with checklist name prefix cannot exceed 500 characters.");
+            setError(
+                "Note with checklist name prefix cannot exceed 500 characters."
+            );
             return;
         }
-        
+
         if (submilestoneOptions.length > 0 && attachedFiles.length > 0) {
             const filesWithoutTitles = attachedFiles.filter((fw) => !fw.title);
             if (filesWithoutTitles.length > 0) {
@@ -235,7 +237,12 @@ const AddNoteModal = ({
         const formData = new FormData();
         formData.append("note_text", finalNoteText); // Use the final note text with prefix
         formData.append("account_id", selectedAccountId);
-        formData.append("work_order_id", numericWorkOrderId);
+
+        // Only append work_order_id if it's not null/undefined
+        if (numericWorkOrderId) {
+            formData.append("work_order_id", numericWorkOrderId);
+        }
+
         formData.append("log_type", logType);
         formData.append("note_type", "Manual Entry");
 
@@ -310,6 +317,17 @@ const AddNoteModal = ({
 
             onSaveSuccess();
         } catch (err) {
+            console.error("Error saving note:", err);
+            console.error("Error response:", err.response?.data);
+            console.error(
+                "Debug info:",
+                JSON.stringify(err.response?.data?.debug, null, 2)
+            );
+            console.error(
+                "Validation errors:",
+                JSON.stringify(err.response?.data?.errors, null, 2)
+            );
+
             let errorMessage = "Failed to save note. Please try again.";
             if (
                 err.response &&
@@ -317,6 +335,19 @@ const AddNoteModal = ({
                 err.response.data.message
             ) {
                 errorMessage = err.response.data.message;
+
+                // If there are validation errors, show them
+                if (err.response.data.errors) {
+                    const errorDetails = Object.entries(
+                        err.response.data.errors
+                    )
+                        .map(
+                            ([field, messages]) =>
+                                `${field}: ${messages.join(", ")}`
+                        )
+                        .join("\n");
+                    errorMessage += "\n\n" + errorDetails;
+                }
             } else if (err.message) {
                 errorMessage = err.message;
             }
@@ -325,7 +356,6 @@ const AddNoteModal = ({
         } finally {
             setIsSaving(false);
         }
-        fetchWorkOrders();
     };
 
     // Calculate remaining characters considering the prefix that will be added
@@ -409,7 +439,10 @@ const AddNoteModal = ({
                         />
                         <div className="mt-2 flex justify-between items-center">
                             <p className="text-xs text-gray-500">
-                                Maximum 500 characters {checklistName ? `(including "[${checklistName}]" prefix)` : ""}
+                                Maximum 500 characters{" "}
+                                {checklistName
+                                    ? `(including "[${checklistName}]" prefix)`
+                                    : ""}
                             </p>
                             <p
                                 className={`text-xs font-medium ${

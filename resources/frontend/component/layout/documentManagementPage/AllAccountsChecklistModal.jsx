@@ -100,8 +100,10 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
             }
         } catch (error) {
             console.error("Error fetching all accounts data:", error);
+            console.error("Error details:", error.response?.data);
             setError(
-                error.response?.data?.message ||
+                error.response?.data?.error ||
+                    error.response?.data?.message ||
                     "Failed to load all accounts data"
             );
         } finally {
