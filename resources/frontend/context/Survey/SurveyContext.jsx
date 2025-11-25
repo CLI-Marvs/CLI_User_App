@@ -13,8 +13,8 @@ export const SurveyProvider = ({ children }) => {
   const [localSatisfaction, setLocalSatisfaction] = useState("All satisfaction");
   const [averageRating, setAverageRating] = useState(null);
   const [highLowCount, setHighLowCount] = useState(null);
-
-  // Helper function to build query string from filters
+  const [surveyResponsesRating, setSurveyResponsesRating] = useState([]);
+  
   const buildFilterQuery = (filter) => {
     if (!filter) return '';
 
@@ -134,7 +134,6 @@ export const SurveyProvider = ({ children }) => {
     try {
       const query = buildFilterQuery(filter);
       const response = await apiService.get(`/survey-responses/${survey_list_id}${query}`);
-      console.log(response.data);
       const responses = response.data;
       return responses;
     } catch (error) {
@@ -180,6 +179,8 @@ export const SurveyProvider = ({ children }) => {
         setAverageRating,
         highLowCount,
         setHighLowCount,
+        surveyResponsesRating,
+        setSurveyResponsesRating,
       }
     }>
       {children}

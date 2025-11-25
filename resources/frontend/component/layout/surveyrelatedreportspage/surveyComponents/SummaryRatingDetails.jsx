@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, useRef } from "react";
 import { useNavigate } from 'react-router-dom';
 import { MdOutlineChevronLeft, MdOutlineChevronRight } from "react-icons/md";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
@@ -10,6 +10,9 @@ import emoji4 from "../../../../../../public/Images/emoji4.png";
 import emoji5 from "../../../../../../public/Images/emoji5.png";
 import { LuCalendar } from "react-icons/lu";
 import { IoMdClose } from "react-icons/io";
+import { useSurvey } from "@/context/Survey/SurveyContext";
+import IndividualResponseModal from "./IndividualResponseModal";
+import { toast } from "react-toastify";
 
 const emojiMap = {
     5: emoji1,
@@ -49,7 +52,10 @@ const SummaryRatingDetails = ({
     handleFilterClear
 }) => {
     const navigate = useNavigate();
-    const [sortOrder, setSortOrder] = useState('desc'); // 'asc' or 'desc'
+    const [sortOrder, setSortOrder] = useState('desc');
+    const { surveyResponsesRating } = useSurvey();
+    const modalRef = useRef(null);
+    const [selectedResponse, setSelectedResponse] = useState(null);
 
     // ✅ ensure data is an array
     const ratingDetails = Array.isArray(surveyRatings?.data)
@@ -122,6 +128,34 @@ const SummaryRatingDetails = ({
         setCurrentPage(1);
     }, [selectedRating, searchTerm, localSearchTerm]);
 
+    useEffect(() => {
+        if (selectedResponse && modalRef.current) {
+            modalRef.current.showModal();
+        }
+    }, [selectedResponse]);
+
+
+    const handleOpenModal = (item) => {
+        if (item.status === 'submitted') {
+            const matchingSurveyResponse = surveyResponsesRating.data.find(
+                (response) => response.ticket_id === item.ticket_id && response.email === item.email
+            );
+
+            if (matchingSurveyResponse) {
+                setSelectedResponse(matchingSurveyResponse);
+            } else {
+                toast.error("No survey response found");
+            }
+        }
+    };
+
+
+    const handleCloseModal = () => {
+        setSelectedResponse(null);
+        modalRef.current?.close();
+    };
+
+
 
 
     return (
@@ -161,7 +195,6 @@ const SummaryRatingDetails = ({
                 )}
             </div>
 
-            {/* ✅ Filter bar */}
             <div className="mb-4 flex flex-wrap items-center gap-3">
                 {/* All */}
                 <button
@@ -229,7 +262,10 @@ const SummaryRatingDetails = ({
                         <tbody className="divide-y divide-custom-lightestgreen">
                             {currentRatingDetails.length > 0 ? (
                                 currentRatingDetails.map((item, index) => (
-                                    <tr key={index} className="hover:bg-[#F5F9F3] h-[71px]">
+                                    <tr
+                                        key={index}
+                                        onClick={() => handleOpenModal(item)}
+                                        className="hover:bg-[#F5F9F3] h-[71px]">
                                         <td className="px-2 py-1">
                                             {new Date(item.created_at).toLocaleDateString("en-US")}
                                         </td>
@@ -321,6 +357,9 @@ const SummaryRatingDetails = ({
                         </button>
                     </div>
                 </div>
+            </div>
+            <div>
+                <IndividualResponseModal modalRef={modalRef} selectedResponse={selectedResponse} handleCloseModal={handleCloseModal} />
             </div>
         </div>
     );

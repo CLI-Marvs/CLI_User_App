@@ -36,7 +36,7 @@ const SurveySummary = () => {
     const [ratingCounts, setRatingCounts] = useState([]);
     const [respondents, setRespondents] = useState(0);
     const [monthlyResponseChange, setMonthlyResponseChange] = useState(null);
-   
+
     const [surveyRatings, setSurveyRatings] = useState(null);
     const [activeTab, setActiveTab] = useState('form');
     const [surveyResponses, setSurveyResponses] = useState([]);
@@ -57,7 +57,6 @@ const SurveySummary = () => {
 
     const {
         fetchRespondentsCount,
-        
         fetchSurveysRatings,
         fetchHighLowCount,
         survey_title,
@@ -67,6 +66,7 @@ const SurveySummary = () => {
         fetchSurveyRatingDetails,
         setAverageRating,
         setHighLowCount,
+        setSurveyResponsesRating,
     } = useSurvey();
 
     const navigateToSurveyList = () => {
@@ -93,6 +93,7 @@ const SurveySummary = () => {
     const fetchSurveyResponse = async (filter = null) => {
         const totalRespondents = await fetchSurveyResponses(surveyId, filter);
         setSurveyResponses(totalRespondents);
+        setSurveyResponsesRating(totalRespondents);
     };
 
     const fetchSurveyRatings = async (filter = null) => {
@@ -385,7 +386,7 @@ const SurveySummary = () => {
                     )}
                    
                 </div> */}
-               
+
                 <div className="flex flex-col w-full gap-6">
                     <div className="flex gap-4 ">
                         <button
