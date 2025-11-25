@@ -16,9 +16,12 @@ import FeedbackModal from "./FeedbackModal";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useSurvey } from "../../../context/Survey/SurveyContext";
+import { Icon, Info, X } from "lucide-react";
 
 const Navbar = () => {
     const { id } = useParams();
+    const [showBanner, setShowBanner] = useState(false);
+    const APP_URL = import.meta.env.VITE_API_BASE_URL;
 
     const { data, ticketId, navBarData, loading, user, getNavBarData } =
         useStateContext();
@@ -35,6 +38,12 @@ const Navbar = () => {
             modalRef.current.showModal();
         }
     };
+
+    useEffect(() => {
+        if (APP_URL !== "https://master-cx.cebulandmasters.com") {
+            setShowBanner(true);
+        }
+    }, []);
 
     useEffect(() => {
         if (
@@ -564,6 +573,15 @@ const Navbar = () => {
                         </Stack>
                     </div>
                 </div>
+
+                {showBanner && (
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 z-50 bg-red-500  px-6 py-2 rounded-b-lg shadow-lg text-center">
+                        <p className="text-sm text-white montserrat-semibold ">
+                            This is a test environment.
+                        </p>
+                    </div>
+                )}
+
                 <div className="flex items-center justify-end">
                     <div className="flex gap-[7px]">
                         <div className="flex items-center w-[74px] justify-center">
