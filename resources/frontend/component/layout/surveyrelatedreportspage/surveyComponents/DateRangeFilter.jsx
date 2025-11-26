@@ -156,20 +156,20 @@ const DateRangeFilter = ({ modalRef, closeModal, onApplyFilter }) => {
             } else {
                 payload.endDate = calendarDate.from.toLocaleDateString('en-CA');
             }
+        } else {
+            
+            handleClear();
+            if (modalRef.current) {
+                modalRef.current.close();
+            }
+            return; 
         }
 
-
-
-        if (onApplyFilter) {
+        if (onApplyFilter && (payload.startDate && payload.endDate)) {
             onApplyFilter(payload);
         }
-
-        setSelectedYear(null);
-        setAllyears(null);
-        setQuarterYear(null);
-        setSelectedQuarter(null);
-        setCalendarDate(undefined);
-
+        
+        handleClear();
         if (modalRef.current) {
             modalRef.current.close();
         }
@@ -210,10 +210,11 @@ const DateRangeFilter = ({ modalRef, closeModal, onApplyFilter }) => {
                     >
                         <LuCalendar className='size-[16px]' />Quick Select</TabsTrigger>
                     <TabsTrigger
-                        className="w-full h-[29px] text-black rounded-[6px] flex gap-2" vh
+                        className="w-full h-[29px] text-black rounded-[6px] flex gap-2"
                         value="custom"
                     >
-                        <LuCalendarDays className='size-[16px]' />Custom</TabsTrigger>
+                        <LuCalendarDays className='size-[16px]' />Custom
+                    </TabsTrigger>
                 </TabsList>
                 <TabsContent value="quick">
                     <div className='flex flex-col gap-[20px]'>

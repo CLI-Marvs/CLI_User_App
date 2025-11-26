@@ -26,7 +26,10 @@ import Skeleton from 'react-loading-skeleton';
 import FormResponsesTab from './surveyComponents/FormResponsesTab';
 import DateRangeFilter from './surveyComponents/DateRangeFilter';
 import EmojiResponsesTab from './surveyComponents/EmojiResponsesTab';
+import { MdOutlineFileDownload } from "react-icons/md";
 import { filter } from 'lodash';
+import * as XLSX from 'xlsx';
+import { LucideClock4 } from 'lucide-react';
 const SurveySummary = () => {
 
     const { id } = useParams();
@@ -36,11 +39,12 @@ const SurveySummary = () => {
     const [ratingCounts, setRatingCounts] = useState([]);
     const [respondents, setRespondents] = useState(0);
     const [monthlyResponseChange, setMonthlyResponseChange] = useState(null);
+    const [surveyUpdatedTimestamp, setSurveyUpdatedTimestamp] = useState(null);
 
     const [surveyRatings, setSurveyRatings] = useState(null);
     const [activeTab, setActiveTab] = useState('form');
     const [surveyResponses, setSurveyResponses] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");
+
     const [dateFilter, setDateFilter] = useState(null);
     const [satisfaction, setSatisfaction] = useState("All satisfaction");
     const [satisfactClear, setSatisfactClear] = useState(false);
@@ -67,6 +71,7 @@ const SurveySummary = () => {
         setAverageRating,
         setHighLowCount,
         setSurveyResponsesRating,
+        getSurveyUpdatedTimestamp,
     } = useSurvey();
 
     const navigateToSurveyList = () => {
@@ -101,6 +106,11 @@ const SurveySummary = () => {
         setSurveyRatings(surveyRatings);
     };
 
+    const fetchSurveyUpdatedTimestamp = async () => {
+        const updatedTimestamp = await getSurveyUpdatedTimestamp(surveyId);
+        setSurveyUpdatedTimestamp(updatedTimestamp);
+    };
+
 
     const activeFilters = useMemo(() => {
         const filters = {};
@@ -118,6 +128,7 @@ const SurveySummary = () => {
     }, [dateFilter, satisfaction]);
 
     useEffect(() => {
+        fetchSurveyUpdatedTimestamp();
         fetchRespondents(activeFilters);
         fetchAverageRating(activeFilters);
         fetchHighLowCounts(activeFilters);
@@ -262,7 +273,30 @@ const SurveySummary = () => {
         fetchSurveyResponse(filterPayload);
     };
 
-    const handleFilterClear = () => {
+    const exportToExcel = () => {
+
+        const workbook = XLSX.utils.book_new();
+
+        const filteredData1 = surveyResponses.data.map(row => {
+            const { rating, status, ...rest } = row;
+            return rest;
+        });
+        const worksheet1 = XLSX.utils.json_to_sheet(filteredData1);
+        const sheetName1 = "Survey Responses";
+        XLSX.utils.book_append_sheet(workbook, worksheet1, sheetName1);
+
+
+        const worksheet = XLSX.utils.json_to_sheet(surveyRatings.data);
+        const sheetName2 = "Emoji Responses";
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName2);
+
+        const today = new Date();
+        const currentDate = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}-${today.getFullYear()}`;
+        const fileName = `${surveyResponses.survey_title}_${currentDate}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+    };
+
+    /* const handleFilterClear = () => {
         setDateFilter(null);
         fetchSurveyResponse();
         fetchSurveyRatingDetails();
@@ -271,7 +305,7 @@ const SurveySummary = () => {
     const handleClearSatisfaction = () => {
         setSatisfaction("All satisfaction");
         fetchSurveyRatingDetails();
-    };
+    }; */
 
 
     return (
@@ -283,20 +317,48 @@ const SurveySummary = () => {
             </div>
             <div className='px-[32px] py-[24px] bg-white'>
                 <div className='flex flex-col gap-[6px]'>
+                    <div className='flex justify-between'>
+                        <div>
+                            <p className='text-[36px] montserrat-semibold'>
+                                {survey_loading ?
+                                    <Skeleton width={300} />
+                                    :
+                                    (
+                                        <span>{survey_title} Dashboard</span>
+                                    )
+                                }
+                            </p>
+                        </div>
+                        <div>
+                            <button
+                                onClick={exportToExcel}
+                                className='flex justify-center px-[10px] py-[6px] items-center gap-[8px] bg-custom-solidgreen text-white  rounded-[4px]'
+                            >
+                                <span><MdOutlineFileDownload className='size-[23px]' /></span>
+                                <span className='font-medium text-sm'>Export Excel</span>
+                            </button>
+                        </div>
+                    </div>
                     <div>
-                        <p className='text-[36px] montserrat-semibold'>
-                            {survey_loading ?
-                                <Skeleton width={300} />
-                                :
-                                (
-                                    <span>{survey_title} Dashboard</span>
-                                )}
+                        <p className='flex gap-3 items-center'>
+                            <span className='bg-blue-200 text-white p-[6px] rounded-[4px]'>
+                                <LucideClock4 className='text-blue-500' />
+                            </span>
+                            <span className='text-sm text-[#9A9A9A]'>
+                                Updated {surveyUpdatedTimestamp?.latest_timestamp
+                                    ? new Date(surveyUpdatedTimestamp.latest_timestamp).toLocaleString('en-US', {
+                                        month: 'short',
+                                        day: 'numeric',
+                                        hour: 'numeric',
+                                        minute: '2-digit',
+                                        hour12: true
+                                    })
+                                    : 'N/A'}
+                            </span>
                         </p>
                     </div>
-                    <div>
-                        <p>Updated Oct 15, 11:33 AM</p>
-                    </div>
                 </div>
+
             </div>
             <div className='p-[32px]'>
                 {/* <div className='flex flex-col gap-[40px] mb-[35px]'>
@@ -430,7 +492,6 @@ const SurveySummary = () => {
                             <FormResponsesTab
                                 surveyResponses={surveyResponses}
                                 setSurveyResponses={setSurveyResponses}
-                                searchTerm={searchTerm}
                                 surveyId={surveyId}
                                 dateFilter={dateFilter}
                                 satisfaction={satisfaction}
@@ -440,7 +501,6 @@ const SurveySummary = () => {
                             <EmojiResponsesTab
                                 surveyRatings={surveyRatings}
                                 setSurveyRatings={setSurveyRatings}
-                                searchTerm={searchTerm}
                                 surveyId={surveyId}
                                 dateFilter={dateFilter}
                             />

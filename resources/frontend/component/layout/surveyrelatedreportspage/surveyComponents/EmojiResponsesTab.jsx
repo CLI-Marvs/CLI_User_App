@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useMemo, useEffect } from 'react'
 import SummaryRatingDetails from './SummaryRatingDetails'
 import { Select } from '@mui/material'
 import { HiMiniMagnifyingGlass } from 'react-icons/hi2';
@@ -7,15 +7,17 @@ import DateRangeFilter from './DateRangeFilter';
 import { useSurvey } from '@/context/Survey/SurveyContext';
 import { FaRegStar } from 'react-icons/fa';
 import { RiErrorWarningLine } from 'react-icons/ri';
-
+import * as XLSX from 'xlsx';
+import { MdOutlineFileDownload } from 'react-icons/md';
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50];
 const DEFAULT_ITEMS_PER_PAGE = 5;
 
-const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, searchTerm, surveyId, dateFilter }) => {
+const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, surveyId, dateFilter }) => {
 
     const modalRef = useRef(null);
-    const [localDateFilter, setLocalDateFilter] = useState(null);
+
+
 
     const {
         fetchSurveyRatingDetails,
@@ -24,12 +26,15 @@ const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, searchTerm, survey
         setAverageRating,
         highLowCount,
         setHighLowCount,
+        fetchHighLowCount,
+        emojiDateFilter,
+        setEmojiDateFilter,
     } = useSurvey();
 
     const [localSearchTerm, setLocalSearchTermValue] = useState("");
 
-    const [currentPage, setCurrentPage] = useState(1); // ✅ Lift state up
-    const [selectedRating, setSelectedRating] = useState(null); // ✅ Lift state up
+    const [currentPage, setCurrentPage] = useState(1);
+    const [selectedRating, setSelectedRating] = useState(null);
     const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
 
     const openModal = () => {
@@ -46,24 +51,52 @@ const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, searchTerm, survey
         setAverageRating(averageRating);
     };
 
-     const fetchHighLowCounts = async (filter = null) => {
+    const fetchHighLowCounts = async (filter = null) => {
         const highLowCount = await fetchHighLowCount(surveyId, filter);
         setHighLowCount(highLowCount);
     };
 
-
     const handleDateFilterApply = (filterPayload) => {
-        setLocalDateFilter(filterPayload);
-        if (filterPayload.startDate == null && filterPayload.endDate == null) {
-            fetchSurveyRatings(dateFilter);
-        } else {
-            fetchSurveyRatings(filterPayload);
-        }
+        setEmojiDateFilter(filterPayload);
     };
 
     const handleFilterClear = () => {
-        setLocalDateFilter(null);
-        fetchSurveyRatings(dateFilter);
+        setEmojiDateFilter(null);
+        fetchSurveyRatings(null);
+        fetchAverageRating(null);
+        fetchHighLowCounts(null);
+    };
+
+    const activeFilters = useMemo(() => {
+        const filters = {};
+
+        if (emojiDateFilter?.startDate && emojiDateFilter?.endDate) {
+            filters.startDate = emojiDateFilter.startDate;
+            filters.endDate = emojiDateFilter.endDate;
+        }
+
+        return Object.keys(filters).length > 0 ? filters : null;
+    }, [emojiDateFilter]);
+
+    useEffect(() => {
+        fetchSurveyRatings(activeFilters);
+        fetchAverageRating(activeFilters);
+        fetchHighLowCounts(activeFilters);
+    }, [activeFilters]);
+
+    const exportToExcel = () => {
+
+        const workbook = XLSX.utils.book_new();
+
+        const worksheet = XLSX.utils.json_to_sheet(surveyRatings.data);
+
+        const sheetName = surveyRatings.survey_title.substring(0, 31);
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+
+        const today = new Date();
+        const currentDate = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}-${today.getFullYear()}`;
+        const fileName = `${surveyRatings.survey_title}_(survey ratings)_${currentDate}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
     };
 
 
@@ -75,22 +108,6 @@ const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, searchTerm, survey
 
         // Apply global search filter
         let filtered = ratingDetails;
-        if (searchTerm) {
-            const term = searchTerm.toLowerCase();
-            const labels = {
-                1: 'Very Dissatisfied',
-                2: 'Dissatisfied',
-                3: 'Neutral',
-                4: 'Satisfied',
-                5: 'Very Satisfied'
-            };
-            filtered = filtered.filter(
-                (item) =>
-                    item.email?.toLowerCase().includes(term) ||
-                    item.ticket_id?.toString().includes(term) ||
-                    labels[item.rating]?.toLowerCase().includes(term)
-            );
-        }
 
         // Apply rating filter
         if (selectedRating) {
@@ -120,8 +137,6 @@ const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, searchTerm, survey
 
     const filteredCount = getFilteredCount();
 
-    // ✅ Calculate pagination display based on current page
-
     const startItem = filteredCount > 0 ? ((currentPage - 1) * itemsPerPage) + 1 : 0;
     const endItem = Math.min(currentPage * itemsPerPage, filteredCount);
 
@@ -147,7 +162,13 @@ const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, searchTerm, survey
                     </div>
                     <div className='flex gap-2 items-center'>
                         <div>
-                            <button className='bg-custom-lightgreen text-white w-[122px] h-[35px]'>Export Excel</button>
+                            <button
+                                onClick={exportToExcel}
+                                className='flex justify-center px-[10px] py-[6px] items-center gap-[8px] bg-custom-solidgreen text-white  rounded-[4px]'
+                            >
+                                <span><MdOutlineFileDownload className='size-[23px]' /></span>
+                                <span className='font-medium text-sm'>Export Excel</span>
+                            </button>
                         </div>
                         <select
                             className='w-[120px] h-[36px] border-[.6px] border-[#F4F4F4] rounded-[4px]'
@@ -271,14 +292,13 @@ const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, searchTerm, survey
             <div>
                 <SummaryRatingDetails
                     surveyRatings={surveyRatings}
-                    searchTerm={searchTerm}
                     localSearchTerm={localSearchTerm}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
                     selectedRating={selectedRating}
                     setSelectedRating={setSelectedRating}
                     itemsPerPage={itemsPerPage}
-                    localDateFilter={localDateFilter}
+                    localDateFilter={emojiDateFilter}
                     handleFilterClear={handleFilterClear}
                 />
             </div>

@@ -14,6 +14,8 @@ export const SurveyProvider = ({ children }) => {
   const [averageRating, setAverageRating] = useState(null);
   const [highLowCount, setHighLowCount] = useState(null);
   const [surveyResponsesRating, setSurveyResponsesRating] = useState([]);
+  const [localDateFilter, setLocalDateFilter] = useState(null);
+  const [emojiDateFilter, setEmojiDateFilter] = useState(null);
   
   const buildFilterQuery = (filter) => {
     if (!filter) return '';
@@ -152,6 +154,16 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
+  const getSurveyUpdatedTimestamp = async (survey_list_id) => {
+    try {
+      const response = await apiService.get(`/survey-updated-timestamp/${survey_list_id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching survey updated timestamp', error);
+      return null;
+    }
+  };
+
 
   return (
     <SurveyContext.Provider value={
@@ -181,6 +193,11 @@ export const SurveyProvider = ({ children }) => {
         setHighLowCount,
         surveyResponsesRating,
         setSurveyResponsesRating,
+        localDateFilter,
+        setLocalDateFilter,
+        emojiDateFilter,
+        setEmojiDateFilter,
+        getSurveyUpdatedTimestamp,
       }
     }>
       {children}

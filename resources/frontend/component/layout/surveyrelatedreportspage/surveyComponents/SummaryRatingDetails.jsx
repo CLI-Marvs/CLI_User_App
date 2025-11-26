@@ -57,59 +57,46 @@ const SummaryRatingDetails = ({
     const modalRef = useRef(null);
     const [selectedResponse, setSelectedResponse] = useState(null);
 
-    // ✅ ensure data is an array
     const ratingDetails = Array.isArray(surveyRatings?.data)
         ? surveyRatings.data
         : [];
 
-    // ✅ 1️⃣ Apply global search filter
-    const globalFilteredData = useMemo(() => {
-        if (!searchTerm) return ratingDetails;
-        const term = searchTerm.toLowerCase();
+    // ✅ 1️⃣ Apply local search filter
+    const searchFilteredData = useMemo(() => {
+        if (!localSearchTerm) return ratingDetails;
+        const term = localSearchTerm.toLowerCase();
         return ratingDetails.filter(
             (item) =>
                 item.email.toLowerCase().includes(term) ||
                 item.ticket_id?.toString().includes(term) ||
                 labels[item.rating]?.toLowerCase().includes(term)
         );
-    }, [searchTerm, ratingDetails]);
+    }, [localSearchTerm, ratingDetails]);
 
     // ✅ 2️⃣ Apply rating filter
     const ratingFilteredData = useMemo(() => {
         if (selectedRating) {
-            return globalFilteredData.filter((item) => item.rating === selectedRating);
+            return searchFilteredData.filter((item) => item.rating === selectedRating);
         }
-        return globalFilteredData;
-    }, [globalFilteredData, selectedRating]);
+        return searchFilteredData;
+    }, [searchFilteredData, selectedRating]);
 
-    // ✅ 3️⃣ Apply *local filter* (specific to this table)
-    const fullyFilteredData = useMemo(() => {
-        if (!localSearchTerm) return ratingFilteredData;
-        const localTerm = localSearchTerm.toLowerCase();
-        return ratingFilteredData.filter(
-            (item) =>
-                item.email.toLowerCase().includes(localTerm) ||
-                item.ticket_id?.toString().includes(localTerm) ||
-                labels[item.rating]?.toLowerCase().includes(localTerm)
-        );
-    }, [ratingFilteredData, localSearchTerm]);
-
-    // ✅ 4️⃣ Apply sorting by date
+    // ✅ 3️⃣ Apply sorting by date
     const sortedData = useMemo(() => {
-        return [...fullyFilteredData].sort((a, b) => {
+        return [...ratingFilteredData].sort((a, b) => {
             const dateA = new Date(a.created_at);
             const dateB = new Date(b.created_at);
 
             if (sortOrder === 'asc') {
-                return dateA - dateB; // Oldest first
+                return dateA - dateB; 
             } else {
-                return dateB - dateA; // Newest first
+                return dateB - dateA; 
             }
         });
-    }, [fullyFilteredData, sortOrder]);
+    }, [ratingFilteredData, sortOrder]);
 
     // ✅ Get counts & pagination based on sorted data
-    const ratingCounts = useMemo(() => getRatingCounts(globalFilteredData), [globalFilteredData]);
+    const ratingCounts = useMemo(() => getRatingCounts(searchFilteredData), [searchFilteredData]);
     const totalPages = Math.ceil(sortedData.length / itemsPerPage) || 1;
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
@@ -118,7 +105,7 @@ const SummaryRatingDetails = ({
     const handlePrev = () => currentPage > 1 && setCurrentPage((p) => p - 1);
     const handleNext = () => currentPage < totalPages && setCurrentPage((p) => p + 1);
 
-    // ✅ Toggle sort order
+    
     const toggleSortOrder = () => {
         setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
         setCurrentPage(1); // Reset to first page when sorting
@@ -206,7 +193,7 @@ const SummaryRatingDetails = ({
                 >
                     <span>All</span>
                     <span className={`${selectedRating === null ? "" : "text-[#9A9A9A]"}`}>
-                        ({globalFilteredData.length})
+                        ({searchFilteredData.length})
                     </span>
                 </button>
 
@@ -265,7 +252,7 @@ const SummaryRatingDetails = ({
                                     <tr
                                         key={index}
                                         onClick={() => handleOpenModal(item)}
-                                        className="hover:bg-[#F5F9F3] h-[71px]">
+                                        className="hover:bg-[#F5F9F3] h-[71px] cursor-pointer">
                                         <td className="px-2 py-1">
                                             {new Date(item.created_at).toLocaleDateString("en-US")}
                                         </td>
@@ -303,16 +290,6 @@ const SummaryRatingDetails = ({
                                                 No
                                             </td>
                                         )}
-                                        {/* <button
-                                                                            onClick={() => navigate(`/inquirymanagement/thread/Ticket%23${response.ticket_id}`, {
-                                                                                state: {
-                                                                                    source: 'survey',
-                                                                                }
-                                                                            })}
-                                                                            className="hover:text-blue-800 hover:underline cursor-pointer"
-                                                                        >
-                                                                            Ticket#{response.ticket_id}
-                                                                        </button> */}
                                     </tr>
                                 ))
                             ) : (

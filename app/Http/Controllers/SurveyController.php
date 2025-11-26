@@ -67,7 +67,7 @@ class SurveyController extends Controller
                 'survey_id' => $surveyId,  // Include the ID of the newly created survey
             ]);
         } catch (\Exception $e) {
-           
+
             DB::rollBack();
 
             return response()->json([
@@ -782,7 +782,7 @@ class SurveyController extends Controller
         $ratingsQuery = ExperienceRating::where('survey_link', $survey->survey_link)
             ->whereNotNull('rating')
             ->orderBy('created_at', 'desc')
-            ->select('ticket_id', 'email', 'rating', 'created_at','status');
+            ->select('ticket_id', 'email', 'rating', 'created_at', 'status');
 
         // ✅ Add date filter
         if ($startDate && $endDate) {
@@ -806,6 +806,7 @@ class SurveyController extends Controller
         $ratings = $ratingsQuery->get();
 
         return response()->json([
+            'survey_title' => $survey->survey_title,
             'data' => $ratings,
         ]);
     }
@@ -1284,5 +1285,22 @@ class SurveyController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
         }
+    }
+
+    public function getSurveyUpdatedTimestamp($ticketId)
+    {
+        $survey = Survey_list::find($ticketId);
+
+        if (!$survey) {
+            return response()->json(['message' => 'Survey not found'], 404);
+        }
+
+        $latestTimestamp = ExperienceRating::where('survey_link', $survey->survey_link)
+            ->whereNotNull('rating')
+            ->max('updated_at');
+
+        return response()->json([
+            'latest_timestamp' => $latestTimestamp
+        ]);
     }
 }

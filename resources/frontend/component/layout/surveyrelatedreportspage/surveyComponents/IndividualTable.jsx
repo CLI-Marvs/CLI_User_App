@@ -13,7 +13,7 @@ import IndividualResponseModal from './IndividualResponseModal';
 import { LuCalendar } from 'react-icons/lu';
 import { IoMdClose } from 'react-icons/io';
 
-const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, currentPage, setCurrentPage, itemsPerPage, localDateFilter, handleFilterClear }) => {
+const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCurrentPage, itemsPerPage, localDateFilter, handleFilterClear }) => {
     const modalRef = useRef(null);
     const navigate = useNavigate();
     const [selectedResponse, setSelectedResponse] = useState(null);
@@ -42,16 +42,7 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
   
     const filteredData =
         data?.filter((item) => {
-            const globalTerm = searchTerm?.toLowerCase() || "";
             const localTerm = localSearchTerm?.toLowerCase() || "";
-
-            const matchesGlobal =
-                globalTerm === "" ||
-                item.email?.toLowerCase().includes(globalTerm) ||
-                item.ticket_id?.toString().toLowerCase().includes(globalTerm) ||
-                Object.values(item).some(
-                    (val) => typeof val === "string" && val.toLowerCase().includes(globalTerm)
-                );
 
             const matchesLocal =
                 localTerm === "" ||
@@ -62,7 +53,7 @@ const IndividualTable = ({ surveyResponses, searchTerm, localSearchTerm, current
                 );
 
            
-            return matchesGlobal && matchesLocal;
+            return matchesLocal;
         }) || [];
 
     

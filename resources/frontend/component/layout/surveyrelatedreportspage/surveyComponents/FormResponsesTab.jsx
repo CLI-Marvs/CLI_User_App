@@ -6,26 +6,48 @@ import { LuCalendar } from 'react-icons/lu';
 import { useSurvey } from '@/context/Survey/SurveyContext';
 import DateRangeFilter from './DateRangeFilter';
 import { filter } from 'lodash';
+import * as XLSX from 'xlsx';
+import { MdOutlineFileDownload } from 'react-icons/md';
 
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50];
 const DEFAULT_ITEMS_PER_PAGE = 5;
 
 
-const FormResponsesTab = ({ surveyResponses, setSurveyResponses, searchTerm, surveyId, dateFilter,satisfaction }) => {
+const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateFilter, satisfaction }) => {
 
     const modalRef = useRef(null);
 
     const [localSearchTerm, setLocalSearchTermValue] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
-    const [localDateFilter, setLocalDateFilter] = useState(null);
-    
+
+    const exportToExcel = () => {
+
+        const workbook = XLSX.utils.book_new();
+
+        const filteredData = surveyResponses.data.map(row => {
+            const { rating, status, ...rest } = row;
+            return rest;
+        });
+
+        const worksheet = XLSX.utils.json_to_sheet(filteredData);
+
+        const sheetName = surveyResponses.survey_title.substring(0, 31);
+        XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
+
+        const today = new Date();
+        const currentDate = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}-${today.getFullYear()}`;
+        const fileName = `${surveyResponses.survey_title}_(form responses)_${currentDate}.xlsx`;
+        XLSX.writeFile(workbook, fileName);
+    };
 
     const {
         fetchSurveyResponses,
         localSatisfaction,
         setLocalSatisfaction,
+        localDateFilter,
+        setLocalDateFilter,
     } = useSurvey();
 
     const fetchSurveyResponse = async (filter = null) => {
@@ -44,17 +66,17 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, searchTerm, sur
 
 
         if (satisfaction !== "All satisfaction") {
-            filters.satisfaction = satisfaction; 
-        }else if (localSatisfaction !== "All satisfaction") {
-             filters.satisfaction = localSatisfaction;
-        }else {
+            filters.satisfaction = satisfaction;
+        } else if (localSatisfaction !== "All satisfaction") {
+            filters.satisfaction = localSatisfaction;
+        } else {
             filters.satisfaction = null;
         }
 
         return Object.keys(filters).length > 0 ? filters : null;
     }, [localDateFilter, localSatisfaction]);
 
-    useEffect(() => { 
+    useEffect(() => {
         fetchSurveyResponse(activeFilters);
     }, [activeFilters]);
 
@@ -76,16 +98,7 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, searchTerm, sur
         }
 
         const filtered = surveyResponses.data.filter((item) => {
-            const globalTerm = searchTerm?.toLowerCase() || "";
             const localTerm = localSearchTerm?.toLowerCase() || "";
-
-            const matchesGlobal =
-                globalTerm === "" ||
-                item.email?.toLowerCase().includes(globalTerm) ||
-                item.ticket_id?.toString().toLowerCase().includes(globalTerm) ||
-                Object.values(item).some(
-                    (val) => typeof val === "string" && val.toLowerCase().includes(globalTerm)
-                );
 
             const matchesLocal =
                 localTerm === "" ||
@@ -95,11 +108,11 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, searchTerm, sur
                     (val) => typeof val === "string" && val.toLowerCase().includes(localTerm)
                 );
 
-            return matchesGlobal && matchesLocal;
+            return matchesLocal;
         });
 
         return filtered.length;
-    }, [surveyResponses?.data, searchTerm, localSearchTerm]);
+    }, [surveyResponses?.data, localSearchTerm]);
 
     // Calculate pagination display (assuming 10 items per page, matching IndividualTable)
 
@@ -113,11 +126,7 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, searchTerm, sur
 
     const handleDateFilterApply = (filterPayload) => {
         setLocalDateFilter(filterPayload);
-        if (filterPayload.startDate == null && filterPayload.endDate == null) {
-            fetchSurveyResponse(dateFilter);
-        } else {
-            fetchSurveyResponse(filterPayload);
-        }
+        fetchSurveyResponse(filterPayload);
     };
 
     const handleClearSatisfaction = () => {
@@ -141,7 +150,13 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, searchTerm, sur
                     </div>
                     <div className='flex gap-2 items-center'>
                         <div>
-                            <button className='bg-custom-lightgreen text-white w-[122px] h-[35px]'>Export Excel</button>
+                            <button
+                                onClick={exportToExcel}
+                                className='flex justify-center px-[10px] py-[6px] items-center gap-[8px] bg-custom-solidgreen text-white  rounded-[4px]'
+                            >
+                                <span><MdOutlineFileDownload className='size-[23px]' /></span>
+                                <span className='font-medium text-sm'>Export Excel</span>
+                            </button>
                         </div>
                         <div>
                             <select
@@ -185,8 +200,9 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, searchTerm, sur
                             value={localSatisfaction}
                             onChange={(e) => setLocalSatisfaction(e.target.value)}
                             className="outline-none text-sm px-[8px] w-full"
+                            selected={localSatisfaction}
                         >
-                            <option value="All satisfaction" selected>All satisfaction</option>
+                            <option value="All satisfaction">All satisfaction</option>
                             <option value="Very satisfied">Very satisfied</option>
                             <option value="Satisfied">Satisfied</option>
                             <option value="Neutral">Neutral</option>
@@ -206,7 +222,6 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, searchTerm, sur
             <div>
                 <IndividualTable
                     surveyResponses={surveyResponses}
-                    searchTerm={searchTerm}
                     localSearchTerm={localSearchTerm}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
