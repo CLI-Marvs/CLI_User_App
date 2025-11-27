@@ -15,7 +15,7 @@ import { FaRegStar } from "react-icons/fa";
 import { RiErrorWarningLine } from "react-icons/ri";
 import { CiFaceSmile } from "react-icons/ci";
 import IndividualTable from './surveyComponents/IndividualTable';
-import { Select } from '@mui/material';
+import { CircularProgress, Select } from '@mui/material';
 import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
 import { IoFunnelOutline } from "react-icons/io5";
 import { HiMiniMagnifyingGlass } from "react-icons/hi2";
@@ -30,6 +30,7 @@ import { MdOutlineFileDownload } from "react-icons/md";
 import { filter } from 'lodash';
 import * as XLSX from 'xlsx';
 import { LucideClock4 } from 'lucide-react';
+
 const SurveySummary = () => {
 
     const { id } = useParams();
@@ -341,19 +342,22 @@ const SurveySummary = () => {
                     </div>
                     <div>
                         <p className='flex gap-3 items-center'>
-                            <span className='bg-blue-200 text-white p-[6px] rounded-[4px]'>
-                                <LucideClock4 className='text-blue-500' />
+                            <span className='bg-[#008DEF]/10 text-white p-[6px] rounded-[4px]'>
+                                <LucideClock4 className='text-[#008DEF]' />
                             </span>
                             <span className='text-sm text-[#9A9A9A]'>
-                                Updated {surveyUpdatedTimestamp?.latest_timestamp
-                                    ? new Date(surveyUpdatedTimestamp.latest_timestamp).toLocaleString('en-US', {
-                                        month: 'short',
-                                        day: 'numeric',
-                                        hour: 'numeric',
-                                        minute: '2-digit',
-                                        hour12: true
-                                    })
-                                    : 'N/A'}
+                                Updated {surveyUpdatedTimestamp === null || surveyUpdatedTimestamp === undefined
+                                    ? <Skeleton width={100} />
+                                    : surveyUpdatedTimestamp?.latest_timestamp
+                                        ? new Date(surveyUpdatedTimestamp.latest_timestamp).toLocaleString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            hour: 'numeric',
+                                            minute: '2-digit',
+                                            hour12: true
+                                        })
+                                        : 'N/A'
+                                }
                             </span>
                         </p>
                     </div>
@@ -466,7 +470,14 @@ const SurveySummary = () => {
                                     ? 'bg-white text-black'
                                     : 'bg-custom-solidgreen text-white'
                                 }
-                                `}>{surveyResponses?.data?.length}</span>
+                                `}>
+                                {surveyResponses?.data?.length !== undefined ? (
+                                    surveyResponses.data.length
+                                ) : (
+                                    <CircularProgress size={15} />
+                                )}
+
+                            </span>
                         </button>
 
                         <button
@@ -484,7 +495,14 @@ const SurveySummary = () => {
                                     ? 'bg-white text-black'
                                     : 'bg-custom-solidgreen text-white'
                                 }
-                                `}>{surveyRatings?.data?.length}</span>
+                                `}>
+
+                                {surveyRatings?.data?.length !== undefined ? (
+                                    surveyRatings.data.length
+                                ) : (
+                                    <CircularProgress size={15} />
+                                )}
+                            </span>
                         </button>
                     </div>
                     <div>

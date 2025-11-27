@@ -1295,9 +1295,16 @@ class SurveyController extends Controller
             return response()->json(['message' => 'Survey not found'], 404);
         }
 
+       
         $latestTimestamp = ExperienceRating::where('survey_link', $survey->survey_link)
             ->whereNotNull('rating')
             ->max('updated_at');
+
+        
+        if (!$latestTimestamp) {
+            $latestTimestamp = ExperienceRating::where('survey_title', $survey->survey_title)
+                ->max('created_at');
+        }
 
         return response()->json([
             'latest_timestamp' => $latestTimestamp

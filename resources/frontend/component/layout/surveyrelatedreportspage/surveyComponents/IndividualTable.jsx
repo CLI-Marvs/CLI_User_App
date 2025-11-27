@@ -26,22 +26,11 @@ const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCur
         }
     }, [selectedResponse]);
 
-    if (
-        !surveyResponses ||
-        !Array.isArray(surveyResponses.data) ||
-        surveyResponses.data.length === 0
-    ) {
-        return (
-            <div className="p-6 text-center text-gray-500">
-                No survey responses available.
-            </div>
-        );
-    }
+    const headers = surveyResponses?.headers || [];
+    const data = surveyResponses?.data || [];
 
-    const { headers, data } = surveyResponses;
-  
     const filteredData =
-        data?.filter((item) => {
+        data.filter((item) => {
             const localTerm = localSearchTerm?.toLowerCase() || "";
 
             const matchesLocal =
@@ -52,20 +41,10 @@ const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCur
                     (val) => typeof val === "string" && val.toLowerCase().includes(localTerm)
                 );
 
-           
             return matchesLocal;
-        }) || [];
+        });
 
-    
-    if (filteredData.length === 0) {
-        return (
-            <div className="p-6 text-center text-gray-500">
-                No results match your search.
-            </div>
-        );
-    }
 
-    
     const sortedData = [...filteredData].sort((a, b) => {
         const dateA = new Date(a.timestamp);
         const dateB = new Date(b.timestamp);
@@ -77,9 +56,9 @@ const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCur
         }
     });
 
-    
+
     const filteredHeaders = headers.filter(
-        (h) => h.toLowerCase() !== "status"
+        (h) => h?.toLowerCase() !== "status"
     );
 
     const satisfactionColors = {
@@ -92,10 +71,10 @@ const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCur
 
     const numberColor = (value) => {
         const num = parseInt(value);
-        if (num >= 9) return "bg-[#4CAF50]"; 
-        if (num >= 7) return "bg-[#2196F3]"; 
-        if (num >= 5) return "bg-[#FFC107]"; 
-        if (num >= 1) return "bg-red-500";  
+        if (num >= 9) return "bg-[#4CAF50]";
+        if (num >= 7) return "bg-[#2196F3]";
+        if (num >= 5) return "bg-[#FFC107]";
+        if (num >= 1) return "bg-red-500";
         return "";
     };
 
@@ -117,10 +96,10 @@ const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCur
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
 
-    
+
     const toggleSortOrder = () => {
         setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
-        setCurrentPage(1); 
+        setCurrentPage(1);
     };
 
 
@@ -280,104 +259,118 @@ const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCur
                                     </thead>
 
                                     <tbody className="divide-y divide-custom-lightestgreen">
-                                        {currentData.map((response, rowIndex) => (
-                                            <tr
-                                                key={rowIndex}
-                                                onClick={() => handleOpenModal(response)}
-                                                className="hover:bg-[#F5F9F3] h-[71px] cursor-pointer"
-                                            >
-                                                <td className="px-2 py-2 w-[160px]">
-                                                    <div>
-                                                        {new Date(response.timestamp).toLocaleDateString("en-US", {
-                                                            month: "short",
-                                                            day: "numeric",
-                                                            year: "numeric",
-                                                        })}
-                                                    </div>
-                                                    <div className="text-xs text-[#9A9A9A]">
-                                                        {new Date(response.timestamp).toLocaleTimeString("en-US", {
-                                                            hour: "2-digit",
-                                                            minute: "2-digit",
-                                                        })}
-                                                    </div>
+                                        {!surveyResponses || !Array.isArray(surveyResponses.data) || surveyResponses.data.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={4 + allQuestions.length} className="p-6 text-center text-gray-500">
+                                                    No survey responses available.
                                                 </td>
-
-                                                <td className="px-2 py-2 w-[200px]">{response.email}</td>
-                                                <td className="px-2 py-2 w-[120px]">
-                                                    <button
-                                                        onClick={() => navigate(`/inquirymanagement/thread/Ticket%23${response.ticket_id}`, {
-                                                            state: {
-                                                                source: 'survey',
-                                                            }
-                                                        })}
-                                                        className="hover:text-blue-800 hover:underline cursor-pointer"
-                                                    >
-                                                        Ticket#{response.ticket_id}
-                                                    </button>
+                                            </tr>
+                                        ) : filteredData.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={4 + allQuestions.length} className="p-6 text-center text-gray-500">
+                                                    No results match your search.
                                                 </td>
-                                                <td className="px-2 py-2 w-[150px]">{response.survey_owner}</td>
+                                            </tr>
+                                        ) : (
+                                            currentData.map((response, rowIndex) => (
+                                                <tr
+                                                    key={rowIndex}
+                                                    onClick={() => handleOpenModal(response)}
+                                                    className="hover:bg-[#F5F9F3] h-[71px] cursor-pointer"
+                                                >
+                                                    <td className="px-2 py-2 w-[160px]">
+                                                        <div>
+                                                            {new Date(response.timestamp).toLocaleDateString("en-US", {
+                                                                month: "short",
+                                                                day: "numeric",
+                                                                year: "numeric",
+                                                            })}
+                                                        </div>
+                                                        <div className="text-xs text-[#9A9A9A]">
+                                                            {new Date(response.timestamp).toLocaleTimeString("en-US", {
+                                                                hour: "2-digit",
+                                                                minute: "2-digit",
+                                                            })}
+                                                        </div>
+                                                    </td>
 
-                                                {/* Question answers */}
-                                                {(() => {
-                                                    const reasonIndex = allQuestions.findIndex(
-                                                        (q) =>
-                                                            q.trim().toLowerCase() ===
-                                                            "please provide the reason/s for your rating:"
-                                                    );
+                                                    <td className="px-2 py-2 w-[200px]">{response.email}</td>
+                                                    <td className="px-2 py-2 w-[120px]">
+                                                        <button
+                                                            onClick={() => navigate(`/inquirymanagement/thread/Ticket%23${response.ticket_id}`, {
+                                                                state: {
+                                                                    source: 'survey',
+                                                                }
+                                                            })}
+                                                            className="hover:text-blue-800 hover:underline cursor-pointer"
+                                                        >
+                                                            Ticket#{response.ticket_id}
+                                                        </button>
+                                                    </td>
+                                                    <td className="px-2 py-2 w-[150px]">{response.survey_owner}</td>
 
-                                                    const sortedQuestions =
-                                                        reasonIndex !== -1
-                                                            ? [
-                                                                ...allQuestions.filter(
-                                                                    (_, index) => index !== reasonIndex
-                                                                ),
-                                                                allQuestions[reasonIndex],
-                                                            ]
-                                                            : allQuestions;
+                                                    {/* Question answers */}
+                                                    {(() => {
+                                                        const reasonIndex = allQuestions.findIndex(
+                                                            (q) =>
+                                                                q.trim().toLowerCase() ===
+                                                                "please provide the reason/s for your rating:"
+                                                        );
 
-                                                    return sortedQuestions.map((question, i) => {
-                                                        const answer = response[question];
-                                                        const color =
-                                                            satisfactionColors[answer] ||
-                                                            numberColor(answer);
+                                                        const sortedQuestions =
+                                                            reasonIndex !== -1
+                                                                ? [
+                                                                    ...allQuestions.filter(
+                                                                        (_, index) => index !== reasonIndex
+                                                                    ),
+                                                                    allQuestions[reasonIndex],
+                                                                ]
+                                                                : allQuestions;
 
-                                                        const isNumeric = !isNaN(parseFloat(answer));
-                                                        const isReason =
-                                                            question.trim().toLowerCase() ===
-                                                            "please provide the reason/s for your rating:";
+                                                        return sortedQuestions.map((question, i) => {
+                                                            const answer = response[question];
+                                                            const color =
+                                                                satisfactionColors[answer] ||
+                                                                numberColor(answer);
 
-                                                        return (
-                                                            <td
-                                                                key={i}
-                                                                className={`px-2 py-2 ${isReason
-                                                                    ? "w-[300px]"
-                                                                    : "w-[180px]"
-                                                                    }`}
-                                                            >
-                                                                <div
-                                                                    className={`flex items-center h-full px-2 ${isNumeric
-                                                                        ? "justify-center"
-                                                                        : "justify-start"
+                                                            const isNumeric = !isNaN(parseFloat(answer));
+                                                            const isReason =
+                                                                question.trim().toLowerCase() ===
+                                                                "please provide the reason/s for your rating:";
+
+                                                            return (
+                                                                <td
+                                                                    key={i}
+                                                                    className={`px-2 py-2 ${isReason
+                                                                        ? "w-[300px]"
+                                                                        : "w-[180px]"
                                                                         }`}
                                                                 >
-                                                                    {color && !isReason ? (
-                                                                        <span
-                                                                            className={`${color} text-white font-medium px-3 py-[2px] rounded-[4px] inline-block truncate max-w-[400px]`}
-                                                                        >
-                                                                            {answer}
-                                                                        </span>
-                                                                    ) : (
-                                                                        <span className="truncate block max-w-[400px] text-gray-700">
-                                                                            {answer || ""}
-                                                                        </span>
-                                                                    )}
-                                                                </div>
-                                                            </td>
-                                                        );
-                                                    });
-                                                })()}
-                                            </tr>
-                                        ))}
+                                                                    <div
+                                                                        className={`flex items-center h-full px-2 ${isNumeric
+                                                                            ? "justify-center"
+                                                                            : "justify-start"
+                                                                            }`}
+                                                                    >
+                                                                        {color && !isReason ? (
+                                                                            <span
+                                                                                className={`${color} text-white font-medium px-3 py-[2px] rounded-[4px] inline-block truncate max-w-[400px]`}
+                                                                            >
+                                                                                {answer}
+                                                                            </span>
+                                                                        ) : (
+                                                                            <span className="truncate block max-w-[400px] text-gray-700">
+                                                                                {answer || ""}
+                                                                            </span>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                            );
+                                                        });
+                                                    })()}
+                                                </tr>
+                                            ))
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
