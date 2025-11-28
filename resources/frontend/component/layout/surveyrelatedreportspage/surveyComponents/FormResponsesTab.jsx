@@ -160,7 +160,7 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
                         </div>
                         <div>
                             <select
-                                className='w-[120px] h-[36px] border-[.6px] border-[#F4F4F4] rounded-[4px]'
+                                className='w-[120px] h-[36px] border-[.6px] border-[#F4F4F4] rounded-[4px] cursor-pointer'
                                 value={itemsPerPage}
                                 onChange={handleItemsPerPageChange}
                             >
@@ -199,7 +199,7 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
                             name="localSatisfaction"
                             value={localSatisfaction}
                             onChange={(e) => setLocalSatisfaction(e.target.value)}
-                            className="outline-none text-sm px-[8px] w-full"
+                            className="outline-none text-sm px-[8px] w-full cursor-pointer"
                             selected={localSatisfaction}
                         >
                             <option value="All satisfaction">All satisfaction</option>

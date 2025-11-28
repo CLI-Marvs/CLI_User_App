@@ -171,7 +171,7 @@ const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, surveyId, dateFilt
                             </button>
                         </div>
                         <select
-                            className='w-[120px] h-[36px] border-[.6px] border-[#F4F4F4] rounded-[4px]'
+                            className='w-[120px] h-[36px] border-[.6px] border-[#F4F4F4] rounded-[4px] cursor-pointer'
                             value={itemsPerPage}
                             onChange={handleItemsPerPageChange}
                         >
