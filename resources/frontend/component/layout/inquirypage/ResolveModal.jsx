@@ -121,7 +121,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
             return;
         }
 
-        if (!selectedEmployee) {
+        if (!selectedEmployee && selectedSurveyType.surveyName.toLowerCase() !== 'n/a') {
             setIsSurveyOwnerRequired(true);
             return;
         }
