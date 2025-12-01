@@ -39,7 +39,7 @@ const SurveySummary = () => {
     const [surveySummary, setSurveySummary] = useState(null);
     const [ratingCounts, setRatingCounts] = useState([]);
     const [respondents, setRespondents] = useState(0);
-    const [monthlyResponseChange, setMonthlyResponseChange] = useState(null);
+    const [satisfactionSurvey, setSatisfactionSurvey] = useState(null);
     const [surveyUpdatedTimestamp, setSurveyUpdatedTimestamp] = useState(null);
 
     const [surveyRatings, setSurveyRatings] = useState(null);
@@ -100,6 +100,7 @@ const SurveySummary = () => {
         const totalRespondents = await fetchSurveyResponses(surveyId, filter);
         setSurveyResponses(totalRespondents);
         setSurveyResponsesRating(totalRespondents);
+        setSatisfactionSurvey(totalRespondents);
     };
 
     const fetchSurveyRatings = async (filter = null) => {
@@ -508,6 +509,7 @@ const SurveySummary = () => {
                     <div>
                         {activeTab === 'form' && (
                             <FormResponsesTab
+                                satisfactionSurvey={satisfactionSurvey}
                                 surveyResponses={surveyResponses}
                                 setSurveyResponses={setSurveyResponses}
                                 surveyId={surveyId}

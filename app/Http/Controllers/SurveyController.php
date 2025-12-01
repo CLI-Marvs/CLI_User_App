@@ -1129,7 +1129,7 @@ class SurveyController extends Controller
                 $experienceRatingsQuery->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
             }
 
-            if ($satisfaction) {
+           /*  if ($satisfaction) {
 
                 $ratingMap = [
                     'Very satisfied' => 5,
@@ -1142,7 +1142,7 @@ class SurveyController extends Controller
                 if (isset($ratingMap[$satisfaction])) {
                     $experienceRatingsQuery->where('rating', $ratingMap[$satisfaction]);
                 }
-            }
+            } */
 
             $experienceRatings = $experienceRatingsQuery
                 ->select('id', 'ticket_id', 'rating', 'email', 'survey_owner', 'created_at', 'status', 'survey_link')

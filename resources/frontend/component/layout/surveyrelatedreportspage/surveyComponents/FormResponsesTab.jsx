@@ -14,7 +14,7 @@ const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50];
 const DEFAULT_ITEMS_PER_PAGE = 5;
 
 
-const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateFilter, satisfaction }) => {
+const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateFilter, satisfactionSurvey}) => {
 
     const modalRef = useRef(null);
 
@@ -63,18 +63,8 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
             filters.endDate = localDateFilter.endDate;
         }
 
-
-
-        if (satisfaction !== "All satisfaction") {
-            filters.satisfaction = satisfaction;
-        } else if (localSatisfaction !== "All satisfaction") {
-            filters.satisfaction = localSatisfaction;
-        } else {
-            filters.satisfaction = null;
-        }
-
         return Object.keys(filters).length > 0 ? filters : null;
-    }, [localDateFilter, localSatisfaction]);
+    }, [localDateFilter]);
 
     useEffect(() => {
         fetchSurveyResponse(activeFilters);
@@ -129,8 +119,86 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
         fetchSurveyResponse(filterPayload);
     };
 
+    const convertRatingToSatisfaction = (rating) => {
+        const numRating = parseInt(rating);
+        if (numRating >= 9) return "Very Satisfied";
+        if (numRating >= 7) return "Satisfied";
+        if (numRating >= 5) return "Neutral";
+        if (numRating >= 3) return "Dissatisfied";
+        return "Very Dissatisfied";
+    };
+
+    const handleSatisfaction = (e) => {
+        const selectedValue = e.target.value;
+        setLocalSatisfaction(selectedValue);
+
+        if (!surveyResponses || !surveyResponses.data) {
+            console.log('Survey responses not loaded yet');
+            return;
+        }
+
+        if (selectedValue === "All satisfaction") {
+            setSurveyResponses(satisfactionSurvey); 
+            return;
+        }
+
+        const filteredArray = satisfactionSurvey.data.filter(response => {
+            return Object.entries(response).some(([key, value]) => {
+                if (['timestamp', 'email', 'ticket_id', 'rating', 'status', 'survey_owner'].includes(key)) {
+                    return false;
+                }
+
+                if (value && !isNaN(value) && value >= 1 && value <= 10) {
+                    return convertRatingToSatisfaction(value).toLowerCase() === selectedValue.toLowerCase();
+                }
+
+                if (value && typeof value === 'string') {
+                    return value.toLowerCase() === selectedValue.toLowerCase();
+                   
+                }
+
+                return false;
+            });
+        });
+
+       /*  return Object.entries(response).some(([key, value]) => {
+              
+                if (['timestamp', 'email', 'ticket_id', 'rating', 'status', 'survey_owner'].includes(key)) {
+                    return false;
+                }
+
+                console.log(`Key: ${key}, Value: ${value}, Type: ${typeof value}`);
+
+               
+                if (value && !isNaN(value) && value >= 1 && value <= 10) {
+                    const satisfaction = convertRatingToSatisfaction(value);
+                    console.log(`Rating ${value} converted to: ${satisfaction}, Looking for: ${selectedValue}`);
+                    return satisfaction.toLowerCase() === selectedValue.toLowerCase();
+                }
+
+                
+                if (value && typeof value === 'string') {
+                    const match = value.toLowerCase() === selectedValue.toLowerCase();
+                    console.log(`Comparing "${value}" with "${selectedValue}": ${match}`);
+                    return match;
+                }
+
+                return false;
+            });
+ */
+       
+        const filteredData = {
+            data: filteredArray,
+            headers: surveyResponses.headers,
+            survey_title: surveyResponses.survey_title
+        };
+
+        setSurveyResponses(filteredData);
+    };
+
     const handleClearSatisfaction = () => {
         setLocalSatisfaction("All satisfaction");
+        setSurveyResponses(satisfactionSurvey); 
         fetchSurveyResponse(dateFilter);
     };
 
@@ -198,7 +266,7 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
                         <select
                             name="localSatisfaction"
                             value={localSatisfaction}
-                            onChange={(e) => setLocalSatisfaction(e.target.value)}
+                            onChange={handleSatisfaction}
                             className="outline-none text-sm px-[8px] w-full cursor-pointer"
                             selected={localSatisfaction}
                         >
@@ -206,7 +274,7 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
                             <option value="Very satisfied">Very satisfied</option>
                             <option value="Satisfied">Satisfied</option>
                             <option value="Neutral">Neutral</option>
-                            <option value="Disatisfied">Dissatisfied</option>
+                            <option value="Dissatisfied">Dissatisfied</option>
                             <option value="Very dissatisfied">Very dissatisfied</option>
                         </select>
                     </div>
