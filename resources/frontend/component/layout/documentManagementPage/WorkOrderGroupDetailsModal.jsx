@@ -73,6 +73,29 @@ const WorkOrderGroupDetailsModal = ({
         setIsAddFilesModalOpen(true);
     };
 
+    // Helper function to check if a milestone's checklists are all completed
+    const checkMilestoneCompletion = (account, milestone) => {
+        if (
+            !milestone ||
+            !milestone.checklists ||
+            milestone.checklists.length === 0
+        ) {
+            return false;
+        }
+
+        // Get account's completed checklist IDs
+        const completedChecklistIds = new Set(
+            (account.completed_checklists || []).map(
+                (c) => c.id || c.checklist_id
+            )
+        );
+
+        // Check if all checklists in this milestone are completed
+        return milestone.checklists.every((checklist) =>
+            completedChecklistIds.has(checklist.id)
+        );
+    };
+
     // Milestone progression logic
     const checkMilestoneProgression = (account, steps) => {
         const currentStep = steps.find((step) =>
