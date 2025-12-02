@@ -3,31 +3,31 @@ import SummaryBar from './surveyComponents/SummaryBar';
 import { FiMessageSquare } from "react-icons/fi";
 import { useNavigate, useParams } from 'react-router-dom';
 import apiService from '../../servicesApi/apiService';
-import SummaryLine from './surveyComponents/SummaryLine';
+/* import SummaryLine from './surveyComponents/SummaryLine';
 import SummaryRating from './surveyComponents/SummaryRating';
 import SummaryTable from './surveyComponents/SummaryTable';
 import SummaryTextboxTable from './surveyComponents/SummaryTextboxTable';
 import SummaryVerticalBar from './surveyComponents/SummaryVerticalBar';
-import SummaryRatingDetails from './surveyComponents/SummaryRatingDetails';
+import SummaryRatingDetails from './surveyComponents/SummaryRatingDetails'; */
 import { BiSolidLeftArrow } from 'react-icons/bi';
-import { LuCalendar, LuTrendingUp } from "react-icons/lu";
+/* import { LuCalendar, LuTrendingUp } from "react-icons/lu";
 import { FaRegStar } from "react-icons/fa";
-import { RiErrorWarningLine } from "react-icons/ri";
+import { RiErrorWarningLine } from "react-icons/ri"; */
 import { CiFaceSmile } from "react-icons/ci";
 import IndividualTable from './surveyComponents/IndividualTable';
 import { CircularProgress, Select } from '@mui/material';
-import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
+/* import { IoMdArrowDown, IoMdArrowUp } from "react-icons/io";
 import { IoFunnelOutline } from "react-icons/io5";
 import { HiMiniMagnifyingGlass } from "react-icons/hi2";
 import { IoMdClose } from "react-icons/io";
-import { RiEqualFill } from "react-icons/ri";
+import { RiEqualFill } from "react-icons/ri"; */
 import { useSurvey } from '../../../context/Survey/SurveyContext';
 import Skeleton from 'react-loading-skeleton';
 import FormResponsesTab from './surveyComponents/FormResponsesTab';
 import DateRangeFilter from './surveyComponents/DateRangeFilter';
 import EmojiResponsesTab from './surveyComponents/EmojiResponsesTab';
 import { MdOutlineFileDownload } from "react-icons/md";
-import { filter } from 'lodash';
+/* import { filter } from 'lodash'; */
 import * as XLSX from 'xlsx';
 import { LucideClock4 } from 'lucide-react';
 
