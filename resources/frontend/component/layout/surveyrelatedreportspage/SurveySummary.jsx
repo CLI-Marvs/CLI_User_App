@@ -39,7 +39,7 @@ const SurveySummary = () => {
     const [surveySummary, setSurveySummary] = useState(null);
     const [ratingCounts, setRatingCounts] = useState([]);
     const [respondents, setRespondents] = useState(0);
-    const [satisfactionSurvey, setSatisfactionSurvey] = useState(null);
+    
     const [surveyUpdatedTimestamp, setSurveyUpdatedTimestamp] = useState(null);
 
     const [surveyRatings, setSurveyRatings] = useState(null);
@@ -73,6 +73,9 @@ const SurveySummary = () => {
         setHighLowCount,
         setSurveyResponsesRating,
         getSurveyUpdatedTimestamp,
+        localSatisfaction,
+        satisfactionSurvey,
+        setSatisfactionSurvey
     } = useSurvey();
 
     const navigateToSurveyList = () => {
@@ -130,10 +133,16 @@ const SurveySummary = () => {
     }, [dateFilter, satisfaction]);
 
     useEffect(() => {
+        
         fetchSurveyUpdatedTimestamp();
         fetchRespondents(activeFilters);
         fetchAverageRating(activeFilters);
         fetchHighLowCounts(activeFilters);
+        if(localSatisfaction !== "All satisfaction") {
+            setSurveyResponses(satisfactionSurvey);
+        } else {
+            fetchSurveyResponse(activeFilters);
+        }
         fetchSurveyResponse(activeFilters);
         fetchSurveyRatings(activeFilters);
     }, [activeFilters]);

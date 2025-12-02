@@ -21,7 +21,10 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
     const [localSearchTerm, setLocalSearchTermValue] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
+   
 
+   
+    
     const exportToExcel = () => {
 
         const workbook = XLSX.utils.book_new();
@@ -48,6 +51,8 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
         setLocalSatisfaction,
         localDateFilter,
         setLocalDateFilter,
+        setSatisfactionFilteredSurvey,
+        satisfactionFilteredSurvey
     } = useSurvey();
 
     const fetchSurveyResponse = async (filter = null) => {
@@ -67,7 +72,13 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
     }, [localDateFilter]);
 
     useEffect(() => {
-        fetchSurveyResponse(activeFilters);
+
+        if (localSatisfaction !== "All satisfaction") {
+            setSurveyResponses(satisfactionFilteredSurvey);
+        } else {
+            fetchSurveyResponse(surveyResponses);
+        }
+
     }, [activeFilters]);
 
     const openModal = (response) => {
@@ -192,7 +203,7 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
             headers: surveyResponses.headers,
             survey_title: surveyResponses.survey_title
         };
-
+        setSatisfactionFilteredSurvey(filteredData);
         setSurveyResponses(filteredData);
     };
 

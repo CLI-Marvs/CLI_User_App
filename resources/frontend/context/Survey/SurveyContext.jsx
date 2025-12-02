@@ -16,7 +16,8 @@ export const SurveyProvider = ({ children }) => {
   const [surveyResponsesRating, setSurveyResponsesRating] = useState([]);
   const [localDateFilter, setLocalDateFilter] = useState(null);
   const [emojiDateFilter, setEmojiDateFilter] = useState(null);
-  
+  const [satisfactionSurvey, setSatisfactionSurvey] = useState(null);
+  const [satisfactionFilteredSurvey, setSatisfactionFilteredSurvey] = useState([]);
   const buildFilterQuery = (filter) => {
     if (!filter) return '';
 
@@ -198,6 +199,10 @@ export const SurveyProvider = ({ children }) => {
         emojiDateFilter,
         setEmojiDateFilter,
         getSurveyUpdatedTimestamp,
+        satisfactionSurvey,
+        setSatisfactionSurvey,
+        satisfactionFilteredSurvey,
+        setSatisfactionFilteredSurvey
       }
     }>
       {children}
