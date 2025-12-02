@@ -322,11 +322,24 @@ class HistoricalAccountImportController extends Controller
 
                         // Auto-assign employees if requested (do this AFTER bulk attach)
                         if ($autoAssign) {
+                            // Get ALL submilestones for this work order type
+                            $allSubmilestones = Submilestone::where('work_order_type_id', $workOrderTypeId)->get();
+
+                            Log::info('Processing auto-assignments for all submilestones', [
+                                'work_order_id' => $workOrder->work_order_id,
+                                'work_order_type_id' => $workOrderTypeId,
+                                'total_submilestones' => $allSubmilestones->count(),
+                                'submilestone_ids' => $allSubmilestones->pluck('id')->toArray(),
+                            ]);
+
                             foreach ($accounts as $account) {
                                 // Only auto-assign if account was actually attached
-                                if (in_array($account->id, $accountIdsToAttach) && $account->currentSubmilestone) {
+                                if (in_array($account->id, $accountIdsToAttach)) {
                                     try {
-                                        $this->autoAssignEmployees($workOrder, $account, $account->currentSubmilestone, $stats);
+                                        // Assign employees for ALL submilestones, not just current one
+                                        foreach ($allSubmilestones as $submilestone) {
+                                            $this->autoAssignEmployees($workOrder, $account, $submilestone, $stats);
+                                        }
                                     } catch (\Exception $e) {
                                         Log::error('Failed to auto-assign employees', [
                                             'contract_no' => $account->contract_no,
@@ -373,6 +386,21 @@ class HistoricalAccountImportController extends Controller
     private function autoAssignEmployees($workOrder, $account, $submilestone, &$stats)
     {
         try {
+            // Check if assignment already exists to avoid duplicates
+            $existingAssignment = WorkOrderAccountAssignee::where('work_order_id', $workOrder->work_order_id)
+                ->where('account_id', $account->id)
+                ->where('submilestone_id', $submilestone->id)
+                ->exists();
+
+            if ($existingAssignment) {
+                Log::debug('Assignment already exists, skipping', [
+                    'work_order_id' => $workOrder->work_order_id,
+                    'account_id' => $account->id,
+                    'submilestone_id' => $submilestone->id,
+                ]);
+                return;
+            }
+
             // Find project milestone assignees by property name and submilestone
             $projectAssignees = ProjectMilestoneAssignee::where('property_name', $account->property_name)
                 ->where('submilestone_id', $submilestone->id)
@@ -380,9 +408,18 @@ class HistoricalAccountImportController extends Controller
                 ->get();
 
             if ($projectAssignees->isEmpty()) {
-                Log::info('No project assignees found for auto-assignment', [
+                // No project assignees found - create unassigned record so submilestone is still visible
+                WorkOrderAccountAssignee::create([
+                    'work_order_id' => $workOrder->work_order_id,
+                    'account_id' => $account->id,
+                    'employee_id' => null, // Unassigned
+                    'submilestone_id' => $submilestone->id,
+                ]);
+
+                Log::debug('No project assignees found - created unassigned record', [
                     'property_name' => $account->property_name,
                     'submilestone_id' => $submilestone->id,
+                    'submilestone_name' => $submilestone->name,
                     'contract_no' => $account->contract_no,
                 ]);
                 return;
@@ -399,10 +436,12 @@ class HistoricalAccountImportController extends Controller
 
                 $stats['assignments_created']++;
 
-                Log::info('Employee auto-assigned to work order', [
+                Log::debug('Employee auto-assigned to work order', [
                     'work_order_id' => $workOrder->work_order_id,
                     'employee_id' => $projectAssignee->employee_id,
-                    'employee_name' => $projectAssignee->employee->name ?? 'Unknown',
+                    'employee_name' => $projectAssignee->employee->fullname ?? 'Unknown',
+                    'submilestone_id' => $submilestone->id,
+                    'submilestone_name' => $submilestone->name,
                     'contract_no' => $account->contract_no,
                 ]);
             }
@@ -411,11 +450,12 @@ class HistoricalAccountImportController extends Controller
             Log::error('Auto-assignment failed', [
                 'work_order_id' => $workOrder->work_order_id,
                 'contract_no' => $account->contract_no,
+                'submilestone_id' => $submilestone->id,
                 'error' => $e->getMessage(),
             ]);
 
             // Don't throw exception for assignment failures, just log them
-            $stats['error_details'][] = "Auto-assignment failed for {$account->contract_no}: " . $e->getMessage();
+            $stats['error_details'][] = "Auto-assignment failed for {$account->contract_no} submilestone {$submilestone->id}: " . $e->getMessage();
         }
     }
 
