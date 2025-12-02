@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\TakenOutAccount;
 use App\Models\Submilestone;
 use App\Models\WorkOrderType;
+use App\Models\WorkOrderAccountAssignee;
+use App\Models\ProjectMilestoneAssignee;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -38,6 +40,9 @@ class MilestoneProgressionController extends Controller
             $account->update([
                 'current_submilestone_id' => $newSubmilestoneId
             ]);
+
+            // Auto-create assignments for the new submilestone if they don't exist
+            $this->ensureSubmilestoneAssignments($account, $newSubmilestoneId);
 
             // Log the milestone progression
             Log::info("Account {$accountId} progressed to submilestone {$newSubmilestoneId}");
@@ -223,6 +228,117 @@ class MilestoneProgressionController extends Controller
                 'success' => false,
                 'message' => 'Failed to get available next milestones'
             ], 500);
+        }
+    }
+
+    /**
+     * Ensure WorkOrderAccountAssignee records exist for a submilestone
+     * Creates assignments based on project assignees or unassigned records
+     * 
+     * @param TakenOutAccount $account
+     * @param int $submilestoneId
+     */
+    private function ensureSubmilestoneAssignments($account, $submilestoneId)
+    {
+        try {
+            // Get all work orders for this account
+            $workOrders = $account->workOrders;
+
+            if ($workOrders->isEmpty()) {
+                Log::info('No work orders found for account, skipping assignment creation', [
+                    'account_id' => $account->id,
+                    'contract_no' => $account->contract_no,
+                    'submilestone_id' => $submilestoneId,
+                ]);
+                return;
+            }
+
+            $submilestone = Submilestone::find($submilestoneId);
+            if (!$submilestone) {
+                Log::warning('Submilestone not found', ['submilestone_id' => $submilestoneId]);
+                return;
+            }
+
+            // Find work orders that match this submilestone's work order type
+            $matchingWorkOrders = $workOrders->filter(function ($workOrder) use ($submilestone) {
+                return $workOrder->work_order_type_id === $submilestone->work_order_type_id;
+            });
+
+            if ($matchingWorkOrders->isEmpty()) {
+                Log::info('No matching work orders found for submilestone work order type', [
+                    'account_id' => $account->id,
+                    'submilestone_id' => $submilestoneId,
+                    'work_order_type_id' => $submilestone->work_order_type_id,
+                ]);
+                return;
+            }
+
+            foreach ($matchingWorkOrders as $workOrder) {
+                // Check if assignment already exists
+                $existingAssignment = WorkOrderAccountAssignee::where('work_order_id', $workOrder->work_order_id)
+                    ->where('account_id', $account->id)
+                    ->where('submilestone_id', $submilestoneId)
+                    ->exists();
+
+                if ($existingAssignment) {
+                    Log::debug('Assignment already exists', [
+                        'work_order_id' => $workOrder->work_order_id,
+                        'account_id' => $account->id,
+                        'submilestone_id' => $submilestoneId,
+                    ]);
+                    continue;
+                }
+
+                // Find project assignees for this submilestone and property
+                $projectAssignees = ProjectMilestoneAssignee::where('property_name', $account->property_name)
+                    ->where('submilestone_id', $submilestoneId)
+                    ->get();
+
+                if ($projectAssignees->isEmpty()) {
+                    // No project assignees - create unassigned record so submilestone is visible
+                    WorkOrderAccountAssignee::create([
+                        'work_order_id' => $workOrder->work_order_id,
+                        'account_id' => $account->id,
+                        'employee_id' => null, // Unassigned
+                        'submilestone_id' => $submilestoneId,
+                    ]);
+
+                    Log::info('Created unassigned record for new submilestone', [
+                        'work_order_id' => $workOrder->work_order_id,
+                        'account_id' => $account->id,
+                        'contract_no' => $account->contract_no,
+                        'submilestone_id' => $submilestoneId,
+                        'submilestone_name' => $submilestone->name,
+                    ]);
+                } else {
+                    // Create assignments for each project assignee
+                    foreach ($projectAssignees as $projectAssignee) {
+                        WorkOrderAccountAssignee::create([
+                            'work_order_id' => $workOrder->work_order_id,
+                            'account_id' => $account->id,
+                            'employee_id' => $projectAssignee->employee_id,
+                            'submilestone_id' => $submilestoneId,
+                        ]);
+
+                        Log::info('Auto-assigned employee for new submilestone', [
+                            'work_order_id' => $workOrder->work_order_id,
+                            'account_id' => $account->id,
+                            'contract_no' => $account->contract_no,
+                            'employee_id' => $projectAssignee->employee_id,
+                            'submilestone_id' => $submilestoneId,
+                            'submilestone_name' => $submilestone->name,
+                        ]);
+                    }
+                }
+            }
+
+        } catch (\Exception $e) {
+            Log::error('Failed to ensure submilestone assignments', [
+                'account_id' => $account->id,
+                'submilestone_id' => $submilestoneId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
         }
     }
 }
