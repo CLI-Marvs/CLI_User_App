@@ -146,6 +146,11 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets, With
             'warnings' => $this->warningCount,
             'duplicates' => $this->duplicateCount,
         ]);
+
+        // Create work orders in batches after all accounts are processed
+        if ($this->createWorkOrders && $this->importType === 'ongoing') {
+            $this->createWorkOrdersInBatches();
+        }
     }
 
     /**
@@ -353,6 +358,14 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets, With
                 $this->updateCompletionPercentage($account);
             }
 
+            Log::info('Checking work order creation conditions', [
+                'contract_no' => $account->contract_no,
+                'account_status' => $account->account_status,
+                'current_submilestone_id' => $account->current_submilestone_id,
+                'shouldCreateWorkOrder' => $this->shouldCreateWorkOrder($account),
+                'createWorkOrders_flag' => $this->createWorkOrders,
+            ]);
+
             if ($this->shouldCreateWorkOrder($account) && $this->createWorkOrders) {
                 $this->processWorkOrderCreation($account, $data, $rowNumber);
             }
@@ -536,10 +549,12 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets, With
 
     private function processWorkOrderCreation($account, $data, $rowNumber)
     {
-        Log::info('Work order creation needed', [
+        // Store account for batch processing at the end
+        // Work orders will be created in batches grouped by property
+        Log::info('Account marked for work order creation', [
             'contract_no' => $account->contract_no,
-            'current_submilestone_id' => $account->current_submilestone_id,
-            'property_name' => $account->property_name
+            'property_name' => $account->property_name,
+            'current_submilestone_id' => $account->current_submilestone_id
         ]);
     }
 
@@ -905,5 +920,154 @@ class HistoricalAccountsImport implements ToCollection, WithMultipleSheets, With
 
         $monthName = strtolower(trim($monthValue));
         return $monthMap[$monthName] ?? null;
+    }
+
+    /**
+     * Create work orders in batches grouped by property
+     * Mimics manual work order creation where accounts are grouped together
+     */
+    private function createWorkOrdersInBatches()
+    {
+        Log::info('Starting batch work order creation');
+
+        // Get all ongoing accounts from this import that need work orders
+        $accountIds = array_merge($this->importedAccountIds, array_keys($this->updatedAccounts));
+
+        if (empty($accountIds)) {
+            Log::info('No accounts to create work orders for');
+            return;
+        }
+
+        $accounts = \App\Models\TakenOutAccount::whereIn('id', $accountIds)
+            ->where('account_status', 'Ongoing')
+            ->whereNotNull('current_submilestone_id')
+            ->get();
+
+        if ($accounts->isEmpty()) {
+            Log::info('No ongoing accounts with submilestones found');
+            return;
+        }
+
+        // Group accounts by property name (like manual creation groups by selection)
+        $accountsByProperty = $accounts->groupBy('property_name');
+
+        Log::info('Grouped accounts by property', [
+            'properties_count' => $accountsByProperty->count(),
+            'total_accounts' => $accounts->count()
+        ]);
+
+        // Create one work order group per property
+        foreach ($accountsByProperty as $propertyName => $propertyAccounts) {
+            // Check if any account already has an active work order
+            $hasExistingWorkOrder = false;
+            foreach ($propertyAccounts as $account) {
+                $existingWorkOrder = \App\Models\WorkOrder::whereHas('accounts', function ($q) use ($account) {
+                    $q->where('taken_out_accounts.id', $account->id);
+                })
+                    ->where('status', '!=', 'Complete')
+                    ->exists();
+
+                if ($existingWorkOrder) {
+                    $hasExistingWorkOrder = true;
+                    break;
+                }
+            }
+
+            if ($hasExistingWorkOrder) {
+                Log::info('Property already has active work orders, skipping', [
+                    'property_name' => $propertyName,
+                    'account_count' => $propertyAccounts->count()
+                ]);
+                continue;
+            }
+
+            // Create work order group for this property
+            $workOrderGroup = \App\Models\WorkOrderGroup::create([
+                'status' => 'In Progress',
+                'started_at' => now(),
+                'due_date' => $propertyAccounts->min('dou_expiry') ?? now()->addMonths(3),
+            ]);
+
+            $workOrderNumber = 'WO-' . str_pad($workOrderGroup->id, 6, '0', STR_PAD_LEFT);
+            $accountIds = $propertyAccounts->pluck('id')->toArray();
+
+            Log::info('Created work order group for property', [
+                'property_name' => $propertyName,
+                'work_order_group_id' => $workOrderGroup->id,
+                'account_count' => count($accountIds)
+            ]);
+
+            // Get all work order types (steps)
+            $workOrderTypes = \App\Models\WorkOrderType::orderBy('sequence')->get();
+
+            // Create one work order per step and attach ALL accounts from this property
+            foreach ($workOrderTypes as $workOrderType) {
+                $workOrder = \App\Models\WorkOrder::create([
+                    'work_order' => $workOrderType->type_name,
+                    'work_order_number' => $workOrderNumber,
+                    'work_order_group_id' => $workOrderGroup->id,
+                    'work_order_type_id' => $workOrderType->id,
+                    'work_order_deadline' => $propertyAccounts->min('dou_expiry') ?? now()->addMonths(3),
+                    'created_by_user_id' => auth()->id() ?? 1,
+                    'status' => 'In Progress',
+                ]);
+
+                // Attach ALL accounts from this property to this work order
+                $workOrder->accounts()->attach($accountIds);
+
+                Log::info('Created work order and attached accounts', [
+                    'property_name' => $propertyName,
+                    'work_order_id' => $workOrder->work_order_id,
+                    'work_order_type' => $workOrderType->type_name,
+                    'work_order_type_id' => $workOrderType->id,
+                    'accounts_attached' => count($accountIds)
+                ]);
+
+                // Create work_order_account_assignee entries with NULL submilestone_id
+                // This makes ALL submilestones visible to employees (similar to manual creation fallback)
+                // Get project milestone assignees for this step as fallback
+                $submilestones = \App\Models\Submilestone::where('work_order_type_id', $workOrderType->id)->get();
+
+                foreach ($propertyAccounts as $account) {
+                    // Get employees and their SPECIFIC submilestone assignments from project_milestone_assignees
+                    $submilestoneAssignments = \DB::table('project_milestone_assignees')
+                        ->join('submilestones', 'project_milestone_assignees.submilestone_id', '=', 'submilestones.id')
+                        ->where('submilestones.work_order_type_id', $workOrderType->id)
+                        ->select('project_milestone_assignees.employee_id', 'project_milestone_assignees.submilestone_id')
+                        ->get();
+
+                    if ($submilestoneAssignments->isNotEmpty()) {
+                        // Assign employees to their SPECIFIC submilestones (not NULL)
+                        // This maintains the same granular assignment as manual work order creation
+                        foreach ($submilestoneAssignments as $assignment) {
+                            \DB::table('work_order_account_assignee')->insert([
+                                'work_order_id' => $workOrder->work_order_id,
+                                'account_id' => $account->id,
+                                'employee_id' => $assignment->employee_id,
+                                'submilestone_id' => $assignment->submilestone_id, // Specific submilestone assignment
+                                'created_at' => now(),
+                                'updated_at' => now(),
+                            ]);
+                        }
+
+                        Log::info('Auto-assigned employees to work order with specific submilestones', [
+                            'work_order_id' => $workOrder->work_order_id,
+                            'account_id' => $account->id,
+                            'assignment_count' => $submilestoneAssignments->count(),
+                            'assignments' => $submilestoneAssignments->map(function ($a) {
+                                return "Employee {$a->employee_id} -> Submilestone {$a->submilestone_id}";
+                            })->implode(', ')
+                        ]);
+                    }
+                }
+            }
+
+            Log::info('Completed work order creation for property', [
+                'property_name' => $propertyName,
+                'work_order_group_id' => $workOrderGroup->id,
+                'work_orders_created' => $workOrderTypes->count(),
+                'accounts_count' => count($accountIds)
+            ]);
+        }
     }
 }
