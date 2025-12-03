@@ -100,13 +100,8 @@ class HistoricalAccountImportController extends Controller
             // Get import statistics
             $stats = $import->getImportStats();
 
-            // Process work order creation for ongoing accounts if requested
-            if ($createWorkOrders && $importType === 'ongoing') {
-                // Get the account IDs from this import batch
-                $importedAccountIds = $import->getImportedAccountIds();
-                $workOrderStats = $this->createWorkOrdersForOngoingAccounts($autoAssign, $importedAccountIds, $forceReassign);
-                $stats['work_orders'] = $workOrderStats;
-            }
+            // Work orders are now created during the import process (in HistoricalAccountsImport::createWorkOrdersInBatches)
+            // This ensures proper work order structure matching manual creation with all 4 steps per property group
 
             // Build response message
             $message = $this->buildImportResponseMessage($stats, $importType);

@@ -83,6 +83,32 @@ class WorkOrderGroupController extends Controller
             ->get()
             ->groupBy('work_order_type_id');
 
+        // Get all work order IDs in this group
+        $workOrderIds = $group->workOrders->pluck('work_order_id');
+
+        // Fetch work order assignments with null submilestone_id for work orders in this group
+        // These are from manually created work orders without specific submilestone assignments
+        $nullSubmilestoneAssignments = \App\Models\WorkOrderAccountAssignee::with('employee')
+            ->whereIn('work_order_id', $workOrderIds)
+            ->whereNull('submilestone_id')
+            ->get();
+
+        // Group null submilestone assignments by work order ID for easy lookup
+        $nullAssignmentsByWorkOrder = $nullSubmilestoneAssignments->groupBy('work_order_id');
+
+        // Debug: Log the work orders in this group
+        \Log::info("Work orders in group {$groupId}: " . $group->workOrders->map(function ($wo) {
+            return "ID: {$wo->work_order_id}, type_id: {$wo->work_order_type_id}";
+        })->implode(' | '));
+
+        // Debug: Log null assignments found
+        \Log::info("Null submilestone assignments found: {$nullSubmilestoneAssignments->count()}", [
+            'work_order_ids' => $workOrderIds->toArray(),
+            'assignments' => $nullSubmilestoneAssignments->map(function ($a) {
+                return "WO: {$a->work_order_id}, Account: {$a->account_id}, Employee: {$a->employee_id}";
+            })->toArray()
+        ]);
+
         // Create a map of the group's work orders by their type ID for easy lookup
         $workOrdersMap = $group->workOrders->keyBy('work_order_type_id');
 
@@ -109,7 +135,46 @@ class WorkOrderGroupController extends Controller
         foreach ($allSteps as $step) {
             $typeId = $step->id;
             if (isset($allSubmilestones[$typeId])) {
-                $submilestonesByType[$typeId] = $allSubmilestones[$typeId]->map(function ($sm) {
+                $submilestonesByType[$typeId] = $allSubmilestones[$typeId]->map(function ($sm) use ($nullAssignmentsByWorkOrder, $workOrdersMap) {
+                    // Get work order ID for this step's work order type
+                    $workOrderForThisType = $workOrdersMap->get($sm->work_order_type_id);
+                    $workOrderId = $workOrderForThisType ? $workOrderForThisType->work_order_id : null;
+
+                    \Log::info("Processing submilestone {$sm->id} (type {$sm->work_order_type_id}), workOrderId: {$workOrderId}, has null assignments: " . (isset($nullAssignmentsByWorkOrder[$workOrderId]) ? 'YES' : 'NO'));
+
+                    // Start with existing submilestone-specific assignments
+                    $workOrderAssignees = $sm->workOrderAccountAssignees->map(function ($assignee) {
+                        return [
+                            'id' => $assignee->id,
+                            'work_order_id' => $assignee->work_order_id,
+                            'account_id' => $assignee->account_id,
+                            'employee_id' => $assignee->employee_id,
+                            'submilestone_id' => $assignee->submilestone_id,
+                            'employee' => $assignee->employee ? [
+                                'id' => $assignee->employee->id,
+                                'fullname' => $assignee->employee->fullname,
+                            ] : null,
+                        ];
+                    });
+
+                    // Add null submilestone assignments for this work order type if they exist
+                    if ($workOrderId && isset($nullAssignmentsByWorkOrder[$workOrderId])) {
+                        $nullAssignments = $nullAssignmentsByWorkOrder[$workOrderId]->map(function ($assignee) {
+                            return [
+                                'id' => $assignee->id,
+                                'work_order_id' => $assignee->work_order_id,
+                                'account_id' => $assignee->account_id,
+                                'employee_id' => $assignee->employee_id,
+                                'submilestone_id' => $assignee->submilestone_id, // Will be null
+                                'employee' => $assignee->employee ? [
+                                    'id' => $assignee->employee->id,
+                                    'fullname' => $assignee->employee->fullname,
+                                ] : null,
+                            ];
+                        });
+                        $workOrderAssignees = $workOrderAssignees->merge($nullAssignments);
+                    }
+
                     return [
                         'id' => $sm->id,
                         'name' => $sm->name,
@@ -125,20 +190,8 @@ class WorkOrderGroupController extends Controller
                                 ] : null,
                             ];
                         }),
-                        // Add work order account assignees data (new system)
-                        'work_order_account_assignees' => $sm->workOrderAccountAssignees->map(function ($assignee) {
-                            return [
-                                'id' => $assignee->id,
-                                'work_order_id' => $assignee->work_order_id,
-                                'account_id' => $assignee->account_id,
-                                'employee_id' => $assignee->employee_id,
-                                'submilestone_id' => $assignee->submilestone_id,
-                                'employee' => $assignee->employee ? [
-                                    'id' => $assignee->employee->id,
-                                    'fullname' => $assignee->employee->fullname,
-                                ] : null,
-                            ];
-                        }),
+                        // Add work order account assignees (includes both specific and null submilestone assignments)
+                        'work_order_account_assignees' => $workOrderAssignees,
                     ];
                 })->values()->toArray();
             } else {
