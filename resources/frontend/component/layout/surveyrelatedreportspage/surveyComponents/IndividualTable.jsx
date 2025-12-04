@@ -13,7 +13,7 @@ import IndividualResponseModal from './IndividualResponseModal';
 import { LuCalendar } from 'react-icons/lu';
 import { IoMdClose } from 'react-icons/io';
 
-const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCurrentPage, itemsPerPage, localDateFilter, handleFilterClear }) => {
+const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCurrentPage, itemsPerPage, localDateFilter, handleFilterClear, localSatisfaction }) => {
     const modalRef = useRef(null);
     const navigate = useNavigate();
     const [selectedResponse, setSelectedResponse] = useState(null);
@@ -29,21 +29,56 @@ const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCur
     const headers = surveyResponses?.headers || [];
     const data = surveyResponses?.data || [];
 
-    const filteredData =
-        data.filter((item) => {
-            const localTerm = localSearchTerm?.toLowerCase() || "";
+    const convertRatingToSatisfaction = (rating) => {
+        const numRating = parseInt(rating);
+        if (numRating >= 9) return "Very Satisfied";
+        if (numRating >= 7) return "Satisfied";
+        if (numRating >= 5) return "Neutral";
+        if (numRating >= 3) return "Dissatisfied";
+        return "Very Dissatisfied";
+    };
 
-            const matchesLocal =
-                localTerm === "" ||
-                item.email?.toLowerCase().includes(localTerm) ||
-                item.ticket_id?.toString().toLowerCase().includes(localTerm) ||
-                Object.values(item).some(
-                    (val) => typeof val === "string" && val.toLowerCase().includes(localTerm)
-                );
+    const filteredData = data.filter((item) => {
+        const localTerm = localSearchTerm?.toLowerCase() || "";
 
-            return matchesLocal;
-        });
+        
+        const matchesLocal =
+            localTerm === "" ||
+            item.email?.toLowerCase().includes(localTerm) ||
+            item.ticket_id?.toString().toLowerCase().includes(localTerm) ||
+            Object.values(item).some(
+                (val) => typeof val === "string" && val.toLowerCase().includes(localTerm)
+            );
 
+        const matchesSatisfaction = (() => {
+            if (!localSatisfaction || localSatisfaction === "All satisfaction") {
+                return true; 
+            }
+
+           
+            const questionKeys = Object.keys(item).filter(
+                (key) => !["timestamp", "email", "ticket_id", "survey_owner", "status", "rating"].includes(key)
+            );
+
+    
+            return questionKeys.some((key) => {
+                const answer = item[key];
+
+                if (answer && !isNaN(answer) && answer >= 1 && answer <= 10) {
+                    const satisfaction = convertRatingToSatisfaction(answer);
+                    return satisfaction.toLowerCase() === localSatisfaction.toLowerCase();
+                }
+
+                if (answer && typeof answer === 'string') {
+                    return answer.toLowerCase() === localSatisfaction.toLowerCase();
+                }
+
+                return false;
+            });
+        })();
+
+        return matchesLocal && matchesSatisfaction;
+    });
 
     const sortedData = [...filteredData].sort((a, b) => {
         const dateA = new Date(a.timestamp);
@@ -55,7 +90,6 @@ const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCur
             return dateB - dateA;
         }
     });
-
 
     const filteredHeaders = headers.filter(
         (h) => h?.toLowerCase() !== "status"
@@ -96,13 +130,10 @@ const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCur
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
 
-
     const toggleSortOrder = () => {
         setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
         setCurrentPage(1);
     };
-
-
 
     const handleOpenModal = (response) => {
         setSelectedResponse(response);
@@ -113,45 +144,54 @@ const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCur
         modalRef.current?.close();
     };
 
-
     return (
         <>
             <div className={`${isExpanded ? 'fixed inset-0 z-50 bg-white flex flex-col' : 'relative'}`}>
                 <div className={`flex justify-between p-2 mb-2 ${isExpanded ? 'border-b bg-gray-50' : ''}`}>
-                    <div>
+                    <div className="flex gap-2 items-center flex-wrap">
+                        {(localDateFilter || (localSatisfaction && localSatisfaction !== "All satisfaction")) && (
+                            <p className="text-sm text-[#9A9A9A]">Active filters:</p>
+                        )}
+
+                        {/* Date Filter Display */}
                         {localDateFilter && (
-                            <div className="flex gap-2 items-center">
-                                <p className="text-sm text-[#9A9A9A]">Active filters:</p>
-                                <div className="border-[.6px] border-[#008DEF33] p-[6px] px-[14px] rounded-[4px] bg-[#F5F9F3] text-custom-solidgreen text-sm font-medium">
-                                    <div className="flex gap-2 items-center">
-                                        <div>
-                                            <LuCalendar className="size-[16px]" />
-                                        </div>
-                                        <div>
-                                            {(() => {
-                                                const start = new Date(localDateFilter.startDate);
-                                                const end = new Date(localDateFilter.endDate);
-
-                                                const formatDate = (date) =>
-                                                    date.toLocaleDateString("en-US", {
-                                                        month: "short",
-                                                        day: "numeric",
-                                                        year: "numeric",
-                                                    });
-
-                                                return start.getTime() === end.getTime()
-                                                    ? formatDate(start)
-                                                    : `${formatDate(start)} - ${formatDate(end)}`;
-                                            })()}
-                                        </div>
-                                        <button onClick={handleFilterClear}>
-                                            <IoMdClose />
-                                        </button>
+                            <div className="border-[.6px] border-[#008DEF33] p-[6px] px-[14px] rounded-[4px] bg-[#F5F9F3] text-custom-solidgreen text-sm font-medium">
+                                <div className="flex gap-2 items-center">
+                                    <div>
+                                        <LuCalendar className="size-[16px]" />
                                     </div>
+                                    <div>
+                                        {(() => {
+                                            const start = new Date(localDateFilter.startDate);
+                                            const end = new Date(localDateFilter.endDate);
+
+                                            const formatDate = (date) =>
+                                                date.toLocaleDateString("en-US", {
+                                                    month: "short",
+                                                    day: "numeric",
+                                                    year: "numeric",
+                                                });
+
+                                            return start.getTime() === end.getTime()
+                                                ? formatDate(start)
+                                                : `${formatDate(start)} - ${formatDate(end)}`;
+                                        })()}
+                                    </div>
+                                    <button onClick={handleFilterClear}>
+                                        <IoMdClose />
+                                    </button>
                                 </div>
                             </div>
                         )}
+
+                        {/* Satisfaction Filter Display */}
+                        {localSatisfaction && localSatisfaction !== "All satisfaction" && (
+                            <div className="border-[.6px] border-[#008DEF33] p-[6px] px-[14px] rounded-[4px] bg-[#F5F9F3] text-custom-solidgreen text-sm font-medium">
+                                {localSatisfaction}
+                            </div>
+                        )}
                     </div>
+
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
                         className="flex items-center gap-2 px-3 py-2 border rounded-md hover:bg-gray-100 transition-colors shadow-sm"
@@ -268,7 +308,7 @@ const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCur
                                         ) : filteredData.length === 0 ? (
                                             <tr>
                                                 <td colSpan={4 + allQuestions.length} className="p-6 text-center text-gray-500">
-                                                    No results match your search.
+                                                    No results match your filters.
                                                 </td>
                                             </tr>
                                         ) : (
@@ -297,11 +337,14 @@ const IndividualTable = ({ surveyResponses, localSearchTerm, currentPage, setCur
                                                     <td className="px-2 py-2 w-[200px]">{response.email}</td>
                                                     <td className="px-2 py-2 w-[120px]">
                                                         <button
-                                                            onClick={() => navigate(`/inquirymanagement/thread/Ticket%23${response.ticket_id}`, {
-                                                                state: {
-                                                                    source: 'survey',
-                                                                }
-                                                            })}
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                navigate(`/inquirymanagement/thread/Ticket%23${response.ticket_id}`, {
+                                                                    state: {
+                                                                        source: 'survey',
+                                                                    }
+                                                                });
+                                                            }}
                                                             className="hover:text-blue-800 hover:underline cursor-pointer"
                                                         >
                                                             Ticket#{response.ticket_id}

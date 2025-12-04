@@ -14,7 +14,7 @@ const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50];
 const DEFAULT_ITEMS_PER_PAGE = 5;
 
 
-const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateFilter, satisfactionSurvey }) => {
+const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateFilter }) => {
 
     const modalRef = useRef(null);
 
@@ -23,8 +23,6 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
     const [itemsPerPage, setItemsPerPage] = useState(DEFAULT_ITEMS_PER_PAGE);
    
 
-   
-    
     const exportToExcel = () => {
 
         const workbook = XLSX.utils.book_new();
@@ -51,8 +49,6 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
         setLocalSatisfaction,
         localDateFilter,
         setLocalDateFilter,
-        setSatisfactionFilteredSurvey,
-        satisfactionFilteredSurvey
     } = useSurvey();
 
     const fetchSurveyResponse = async (filter = null) => {
@@ -60,26 +56,6 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
         setSurveyResponses(totalRespondents);
     };
 
-    const activeFilters = useMemo(() => {
-        const filters = {};
-
-        if (localDateFilter?.startDate && localDateFilter?.endDate) {
-            filters.startDate = localDateFilter.startDate;
-            filters.endDate = localDateFilter.endDate;
-        }
-
-        return Object.keys(filters).length > 0 ? filters : null;
-    }, [localDateFilter]);
-
-    useEffect(() => {
-
-        if (localSatisfaction !== "All satisfaction") {
-            setSurveyResponses(satisfactionFilteredSurvey);
-        } else {
-            fetchSurveyResponse(surveyResponses);
-        }
-
-    }, [activeFilters]);
 
     const openModal = (response) => {
         if (modalRef.current) {
@@ -115,8 +91,6 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
         return filtered.length;
     }, [surveyResponses?.data, localSearchTerm]);
 
-    // Calculate pagination display (assuming 10 items per page, matching IndividualTable)
-
     const startItem = filteredCount > 0 ? ((currentPage - 1) * itemsPerPage) + 1 : 0;
     const endItem = Math.min(currentPage * itemsPerPage, filteredCount);
 
@@ -130,87 +104,14 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
         fetchSurveyResponse(filterPayload);
     };
 
-    const convertRatingToSatisfaction = (rating) => {
-        const numRating = parseInt(rating);
-        if (numRating >= 9) return "Very Satisfied";
-        if (numRating >= 7) return "Satisfied";
-        if (numRating >= 5) return "Neutral";
-        if (numRating >= 3) return "Dissatisfied";
-        return "Very Dissatisfied";
-    };
-
     const handleSatisfaction = (e) => {
         const selectedValue = e.target.value;
         setLocalSatisfaction(selectedValue);
         setCurrentPage(1);
-        if (!surveyResponses || !surveyResponses.data) {
-            console.log('Survey responses not loaded yet');
-            return;
-        }
-
-        if (selectedValue === "All satisfaction") {
-            setSurveyResponses(satisfactionSurvey);
-            return;
-        }
-
-        const filteredArray = satisfactionSurvey.data.filter(response => {
-            return Object.entries(response).some(([key, value]) => {
-                if (['timestamp', 'email', 'ticket_id', 'rating', 'status', 'survey_owner'].includes(key)) {
-                    return false;
-                }
-
-                if (value && !isNaN(value) && value >= 1 && value <= 10) {
-                    return convertRatingToSatisfaction(value).toLowerCase() === selectedValue.toLowerCase();
-                }
-
-                if (value && typeof value === 'string') {
-                    return value.toLowerCase() === selectedValue.toLowerCase();
-
-                }
-
-                return false;
-            });
-        });
-
-        /*  return Object.entries(response).some(([key, value]) => {
-               
-                 if (['timestamp', 'email', 'ticket_id', 'rating', 'status', 'survey_owner'].includes(key)) {
-                     return false;
-                 }
- 
-                 console.log(`Key: ${key}, Value: ${value}, Type: ${typeof value}`);
- 
-                
-                 if (value && !isNaN(value) && value >= 1 && value <= 10) {
-                     const satisfaction = convertRatingToSatisfaction(value);
-                     console.log(`Rating ${value} converted to: ${satisfaction}, Looking for: ${selectedValue}`);
-                     return satisfaction.toLowerCase() === selectedValue.toLowerCase();
-                 }
- 
-                 
-                 if (value && typeof value === 'string') {
-                     const match = value.toLowerCase() === selectedValue.toLowerCase();
-                     console.log(`Comparing "${value}" with "${selectedValue}": ${match}`);
-                     return match;
-                 }
- 
-                 return false;
-             });
-  */
-
-        const filteredData = {
-            data: filteredArray,
-            headers: surveyResponses.headers,
-            survey_title: surveyResponses.survey_title
-        };
-        setSatisfactionFilteredSurvey(filteredData);
-        setSurveyResponses(filteredData);
     };
 
     const handleClearSatisfaction = () => {
         setLocalSatisfaction("All satisfaction");
-        setSurveyResponses(satisfactionSurvey);
-        fetchSurveyResponse(dateFilter);
         setCurrentPage(1);
     };
 
@@ -308,6 +209,7 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
                     itemsPerPage={itemsPerPage}
                     localDateFilter={localDateFilter}
                     handleFilterClear={handleFilterClear}
+                    localSatisfaction={localSatisfaction}
                 />
             </div>
             <div>

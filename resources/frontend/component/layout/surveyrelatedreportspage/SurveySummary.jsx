@@ -73,8 +73,6 @@ const SurveySummary = () => {
         setHighLowCount,
         setSurveyResponsesRating,
         getSurveyUpdatedTimestamp,
-        localSatisfaction,
-        satisfactionSurvey,
         setSatisfactionSurvey
     } = useSurvey();
 
@@ -138,11 +136,6 @@ const SurveySummary = () => {
         fetchRespondents(activeFilters);
         fetchAverageRating(activeFilters);
         fetchHighLowCounts(activeFilters);
-        if(localSatisfaction !== "All satisfaction") {
-            setSurveyResponses(satisfactionSurvey);
-        } else {
-            fetchSurveyResponse(activeFilters);
-        }
         fetchSurveyResponse(activeFilters);
         fetchSurveyRatings(activeFilters);
     }, [activeFilters]);
@@ -204,10 +197,9 @@ const SurveySummary = () => {
 
 
     function normalizeOptions(question) {
-        // Skip if already 5 options
+       
         if (question.options.length === 5) return question;
 
-        // Only normalize questions with 10 options from 10 to 1
         const values = question.options.map(opt => Number(opt.value)).filter(Boolean);
         const isDescending10to1 = values.length === 10 && Math.max(...values) === 10 && Math.min(...values) === 1;
 
@@ -242,18 +234,16 @@ const SurveySummary = () => {
     function groupQuestionsByOptions(questions) {
         const groups = [];
         const ungrouped = [];
-        let displayCounter = 1; // Only counts "real" table questions
+        let displayCounter = 1; 
 
         questions.forEach((q) => {
             if (!q.options || q.options.length === 0) {
-                // This is likely a textbox or non-table question
                 ungrouped.push(q);
                 return;
             }
 
             const normalizedQuestion = normalizeOptions(q);
 
-            // Assign displayCounter instead of raw index
             normalizedQuestion.originalIndex = displayCounter;
             displayCounter++;
 
@@ -277,10 +267,8 @@ const SurveySummary = () => {
         ? groupQuestionsByOptions(surveySummary.questions)
         : { groups: [], ungrouped: [] };
 
-    // Handler function to receive the filter from modal
     const handleDateFilterApply = (filterPayload) => {
         setDateFilter(filterPayload);
-        // Fetch data with the new filter
         fetchSurveyResponse(filterPayload);
     };
 
@@ -518,7 +506,6 @@ const SurveySummary = () => {
                     <div>
                         {activeTab === 'form' && (
                             <FormResponsesTab
-                                satisfactionSurvey={satisfactionSurvey}
                                 surveyResponses={surveyResponses}
                                 setSurveyResponses={setSurveyResponses}
                                 surveyId={surveyId}

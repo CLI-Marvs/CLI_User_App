@@ -252,7 +252,7 @@ const SummaryRatingDetails = ({
                                     <tr
                                         key={index}
                                         onClick={() => handleOpenModal(item)}
-                                        className="hover:bg-[#F5F9F3] h-[71px] cursor-pointer">
+                                        className={`hover:bg-[#F5F9F3] h-[71px] ${item.status === 'submitted' ? 'cursor-pointer' : ''}`}>
                                         <td className="px-2 py-1">
                                             {new Date(item.created_at).toLocaleDateString("en-US")}
                                         </td>
