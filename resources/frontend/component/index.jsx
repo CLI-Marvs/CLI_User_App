@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import { ContextProvider } from "../context/contextprovider";
+import { DocumentManagementProvider } from "../context/DocumentManagement/DocumentManagementContext";
 import { ToastContainer } from "react-toastify";
 import { SurveyProvider } from "../context/Survey/SurveyContext";
 import { RoleManagementProvider } from "@/context/RoleManagement/RoleManagementContext";
@@ -20,6 +21,7 @@ if (rootElement) {
     ReactDOM.createRoot(rootElement).render(
         /*  <React.StrictMode> */
         <QueryClientProvider client={queryClient}>
+            <DocumentManagementProvider>
             <ContextProvider>
                 <WalkinSelectionProvider>
                     <WalkinReportFilterProvider>
@@ -44,6 +46,7 @@ if (rootElement) {
                     </WalkinReportFilterProvider>
                 </WalkinSelectionProvider>
             </ContextProvider>
+            </DocumentManagementProvider>
         </QueryClientProvider>
         /*   </React.StrictMode> */
     );
