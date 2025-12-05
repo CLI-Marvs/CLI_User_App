@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
-import { featureService } from '@/component/servicesApi/apiCalls/roleManagement';
+import { featureService } from '@/servicesApi/apiCalls/roleManagement';
 
 const FeatureContext = createContext();
 

@@ -1,7 +1,7 @@
 import React from "react";
 import Spinner from "@/util/Spinner";
-import { formatDate } from "@/component/layout/transaction/utils/formatDate";
-import { formatAmount } from "@/component/layout/transaction/utils/formatAmount";
+import { formatDate } from "@/features/transaction-management/transaction/utils/formatDate";
+import { formatAmount } from "@/features/transaction-management/transaction/utils/formatAmount";
 import { convertAmountToWords } from "../utils/chequeUtils";
 
 const CheckCard = ({
@@ -30,8 +30,8 @@ const CheckCard = ({
                     />
                     <div
                         className={`w-6 h-6 rounded-lg border-2 transition-all duration-200 flex items-center justify-center ${selectedChecks.includes(index)
-                                ? "bg-custom-solidgreen border-custom-solidgreen"
-                                : "bg-white border-gray-300 hover:border-custom-lightgreen"
+                            ? "bg-custom-solidgreen border-custom-solidgreen"
+                            : "bg-white border-gray-300 hover:border-custom-lightgreen"
                             }`}
                     >
                         {selectedChecks.includes(index) && (

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "../App";
+import App from "@/App.jsx";
 import { ContextProvider } from "../context/contextprovider";
 import { DocumentManagementProvider } from "../context/DocumentManagement/DocumentManagementContext";
 import { ToastContainer } from "react-toastify";

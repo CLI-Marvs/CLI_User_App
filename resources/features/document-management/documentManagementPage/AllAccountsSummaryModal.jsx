@@ -15,7 +15,7 @@ import {
     Typography,
     IconButton,
 } from "@material-tailwind/react";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 
 const AllAccountsSummaryModal = ({ isOpen, onClose, currentUserId }) => {
     // State declarations

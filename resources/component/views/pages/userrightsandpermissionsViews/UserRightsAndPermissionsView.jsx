@@ -1,10 +1,10 @@
 import React from 'react'
-import UserRightsAndPermissions from '../../../layout/superadminpage/UserRightsAndPermissions'
+import UserRightsAndPermissions from '@/features/admin-settings/superadminpage/UserRightsAndPermissions'
 
 const UserRightsAndPermissionsView = () => {
   return (
     <div>
-        <UserRightsAndPermissions />
+      <UserRightsAndPermissions />
     </div>
   )
 }

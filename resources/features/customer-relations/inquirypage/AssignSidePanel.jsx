@@ -4,7 +4,7 @@ import AssignModal from "./AssignModal";
 import { useStateContext } from "../../../context/contextprovider";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
 
@@ -342,22 +342,21 @@ const AssignSidePanel = ({ ticketId }) => {
                     <div className="relative">
                         {user?.department ===
                             "Customer Relations - Services" && (
-                            <input
-                                type="text"
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Assign to..."
-                                className={` 
-                            ${
-                                isDropdownOpen
-                                    ? "rounded-[10px] rounded-b-none"
-                                    : "rounded-[10px]"
-                            }
+                                <input
+                                    type="text"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Assign to..."
+                                    className={` 
+                            ${isDropdownOpen
+                                            ? "rounded-[10px] rounded-b-none"
+                                            : "rounded-[10px]"
+                                        }
                         
                                  h-[48px] px-[20px] pr-[40px] rounded-[10px] bg-custom-grayF1 w-full outline-none`}
-                                onFocus={() => setIsDropdownOpen(true)}
-                            />
-                        )}
+                                    onFocus={() => setIsDropdownOpen(true)}
+                                />
+                            )}
 
                         {/* Absolute button inside the input, aligned to the right */}
                         {isDropdownOpen && (
@@ -386,9 +385,9 @@ const AssignSidePanel = ({ ticketId }) => {
                                                             ]?.some(
                                                                 (assignee) =>
                                                                     assignee.employee_email ===
-                                                                        option.email ||
+                                                                    option.email ||
                                                                     assignee.email ===
-                                                                        option.email
+                                                                    option.email
                                                             )
                                                     )
                                                     .map((option) => (
@@ -449,17 +448,17 @@ const AssignSidePanel = ({ ticketId }) => {
                                                     {ALLOWED_EMPLOYEES_CRS.includes(
                                                         userLoggedInEmail
                                                     ) && (
-                                                        <button
-                                                            onClick={() =>
-                                                                removeTag(
-                                                                    option
-                                                                )
-                                                            }
-                                                            className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center  "
-                                                        >
-                                                            &times;
-                                                        </button>
-                                                    )}
+                                                            <button
+                                                                onClick={() =>
+                                                                    removeTag(
+                                                                        option
+                                                                    )
+                                                                }
+                                                                className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center  "
+                                                            >
+                                                                &times;
+                                                            </button>
+                                                        )}
                                                 </div>
                                             ) : (
                                                 <div
@@ -469,17 +468,17 @@ const AssignSidePanel = ({ ticketId }) => {
                                                     <span>{option.name}</span>
                                                     {user?.department ===
                                                         "Customer Relations - Services" && (
-                                                        <button
-                                                            onClick={() =>
-                                                                removeTag(
-                                                                    option
-                                                                )
-                                                            }
-                                                            className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center"
-                                                        >
-                                                            &times;
-                                                        </button>
-                                                    )}
+                                                            <button
+                                                                onClick={() =>
+                                                                    removeTag(
+                                                                        option
+                                                                    )
+                                                                }
+                                                                className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-solidgreen rounded-full h-5 w-5 flex items-center justify-center"
+                                                            >
+                                                                &times;
+                                                            </button>
+                                                        )}
                                                 </div>
                                             )}
                                         </>
@@ -605,15 +604,15 @@ const AssignSidePanel = ({ ticketId }) => {
                                             {ALLOWED_EMPLOYEES_CRS.includes(
                                                 userLoggedInEmail
                                             ) && (
-                                                <button
-                                                    onClick={() =>
-                                                        removeTag(assignee)
-                                                    }
-                                                    className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-lightgreen rounded-full h-5 w-5 flex items-center justify-center"
-                                                >
-                                                    &times;
-                                                </button>
-                                            )}
+                                                    <button
+                                                        onClick={() =>
+                                                            removeTag(assignee)
+                                                        }
+                                                        className="ml-2 pb-[2px] border border-white text-[15px] text-white bg-custom-lightgreen rounded-full h-5 w-5 flex items-center justify-center"
+                                                    >
+                                                        &times;
+                                                    </button>
+                                                )}
                                         </span>
                                     </>
                                 ))}

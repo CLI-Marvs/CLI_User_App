@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import Profile from "../../../../../public/Images/Profile2.svg";
-import IconNotes from "../../../../../public/Images/Icon_Notes.svg";
-import Attachment from "../../../../../public/Images/ATTCHMT.svg";
-import CheckmarkIcon from "../../../../../public/Images/round_check.svg";
+import Profile from "@/assets/images/Profile2.svg";
+import IconNotes from "@/assets/images/Icon_Notes.svg";
+import Attachment from "@/assets/images/ATTCHMT.svg";
+import CheckmarkIcon from "@/assets/images/round_check.svg";
 
 export default function WorkOrderDeletionModal({
     isOpen,

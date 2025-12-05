@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import Profile from "../../../../../public/Images/Profile2.svg";
-import IconNotes from "../../../../../public/Images/Icon_Notes.svg";
-import Attachment from "../../../../../public/Images/ATTCHMT.svg";
-import apiService from "../../servicesApi/apiService";
-import Dropdown from "@/component/layout/documentManagementPage/TableMonitoringDropdown";
+import Profile from "@/assets/images/Profile2.svg";
+import IconNotes from "@/assets/images/Icon_Notes.svg";
+import Attachment from "@/assets/images/ATTCHMT.svg";
+import apiService from "@/servicesApi/apiService";
+import Dropdown from "@/features/document-management/documentManagementPage/TableMonitoringDropdown";
 import AddFilesModal from "./AddFilesModal";
 import NotesAndUpdatesModal from "./NotesAndUpdatesModal";
 import { motion } from "framer-motion";
@@ -199,8 +199,8 @@ export default function TitlingAndRegistrationMonitor({
                                 >
                                     <tr
                                         className={`hover:bg-gray-50 cursor-pointer ${isSelected
-                                                ? "bg-gray-100"
-                                                : "border-b border-gray-200"
+                                            ? "bg-gray-100"
+                                            : "border-b border-gray-200"
                                             }`}
                                         onClick={() =>
                                             setSelectedRow(
@@ -217,19 +217,19 @@ export default function TitlingAndRegistrationMonitor({
                                         <td className="p-2 text-center align-middle">
                                             <span
                                                 className={`inline-block px-3 py-1 rounded-full text-xs font-medium w-28 ${item.status ===
-                                                        "Complete" ||
-                                                        item.status === "Completed"
-                                                        ? "bg-green-200 text-green-800"
+                                                    "Complete" ||
+                                                    item.status === "Completed"
+                                                    ? "bg-green-200 text-green-800"
+                                                    : item.status ===
+                                                        "In Progress"
+                                                        ? "bg-blue-200 text-blue-800"
                                                         : item.status ===
-                                                            "In Progress"
-                                                            ? "bg-blue-200 text-blue-800"
+                                                            "On Hold"
+                                                            ? "bg-red-200 text-red-800"
                                                             : item.status ===
-                                                                "On Hold"
-                                                                ? "bg-red-200 text-red-800"
-                                                                : item.status ===
-                                                                    "Pending"
-                                                                    ? "bg-yellow-200 text-yellow-800"
-                                                                    : "bg-gray-200 text-gray-800"
+                                                                "Pending"
+                                                                ? "bg-yellow-200 text-yellow-800"
+                                                                : "bg-gray-200 text-gray-800"
                                                     }`}
                                             >
                                                 {item.status}

@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { walkinTransactionService } from "@/component/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
-import { queueService } from "@/component/servicesApi/apiCalls/emojiWalkin/queueService";
+import { walkinTransactionService } from "@/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
+import { queueService } from "@/servicesApi/apiCalls/emojiWalkin/queueService";
 import { showToast } from "@/util/toastUtil";
 
 export function useWalkinTransactions({

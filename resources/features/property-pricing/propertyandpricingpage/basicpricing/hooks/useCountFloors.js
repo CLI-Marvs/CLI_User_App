@@ -1,4 +1,4 @@
-import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/unit/unitService";
+import { unitService } from "@/servicesApi/apiCalls/propertyPricing/unit/unitService";
 import { useState } from "react";
 
 export const useCountFloors = () => {

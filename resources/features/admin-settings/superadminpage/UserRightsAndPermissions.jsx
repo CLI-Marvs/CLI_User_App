@@ -21,7 +21,7 @@ import useFeature from "@/context/RoleManagement/FeatureContext";
 import {
     departmentPermissionService,
     employeePermissionService,
-} from "@/component/servicesApi/apiCalls/roleManagement";
+} from "@/servicesApi/apiCalls/roleManagement";
 import useDepartmentPermission from "@/context/RoleManagement/DepartmentPermissionContext";
 import useEmployeePermission from "@/context/RoleManagement/EmployeePermissionContext";
 import useDepartment from "@/context/RoleManagement/DepartmentContext";
@@ -487,10 +487,10 @@ const UserRightsAndPermissions = () => {
                                                         ]
                                                     }
                                                     className={`${isDepartmentLoadingState[
-                                                            department.id
-                                                        ]
-                                                            ? "opacity-50 cursor-not-allowed"
-                                                            : ""
+                                                        department.id
+                                                    ]
+                                                        ? "opacity-50 cursor-not-allowed"
+                                                        : ""
                                                         }`}
                                                     type="submit"
                                                 >
@@ -742,10 +742,10 @@ const UserRightsAndPermissions = () => {
                                                         ]
                                                     }
                                                     className={`${isEmployeeLoadingState[
-                                                            employee.id
-                                                        ]
-                                                            ? "opacity-50 cursor-not-allowed"
-                                                            : ""
+                                                        employee.id
+                                                    ]
+                                                        ? "opacity-50 cursor-not-allowed"
+                                                        : ""
                                                         }`}
                                                     type="submit"
                                                 >

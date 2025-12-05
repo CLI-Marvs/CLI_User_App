@@ -1,5 +1,5 @@
 import CustomInput from "@/component/Input/CustomInput";
-import { transaction } from "@/component/servicesApi/apiCalls/transactions";
+import { transaction } from "@/servicesApi/apiCalls/transactions";
 import Spinner from "@/util/Spinner";
 import { showToast } from "@/util/toastUtil";
 import React, { useEffect, useState } from "react";

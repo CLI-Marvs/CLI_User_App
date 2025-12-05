@@ -1,12 +1,12 @@
 import React, { useRef, useState, useEffect } from "react";
-import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
+import CustomTable from "@/features/property-pricing/propertyandpricingpage/component/CustomTable";
 import { BRANCH_SETTING_COLUMNS } from "@/constant/data/tableColumns";
-import { useBranch } from "@/component/layout/inquirypage/hooks/useBranch";
-import BranchTableRow from "@/component/layout/superadminpage/component/tableRow/BranchTableRow";
-import BranchFormModal from "@/component/layout/superadminpage/component/BranchFormModal";
+import { useBranch } from "@/features/customer-relations/inquirypage/hooks/useBranch";
+import BranchTableRow from "@/features/admin-settings/superadminpage/component/tableRow/BranchTableRow";
+import BranchFormModal from "@/features/admin-settings/superadminpage/component/BranchFormModal";
 import Alert from "@/component/Alert";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { branchService } from "@/component/servicesApi/apiCalls/emojiWalkin/branchService";
+import { branchService } from "@/servicesApi/apiCalls/emojiWalkin/branchService";
 import { showToast } from "@/util/toastUtil";
 import Skeleton from "@/component/Skeletons";
 import { createPortal } from 'react-dom';

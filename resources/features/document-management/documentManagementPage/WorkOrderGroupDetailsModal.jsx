@@ -18,7 +18,7 @@ import {
 } from "@material-tailwind/react";
 import EnhancedControlBar from "./EnhancedControlBar";
 import NotesAndUpdatesModal from "./NotesAndUpdatesModal";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 
 const WorkOrderGroupDetailsModal = ({
     isOpen,
@@ -1296,10 +1296,10 @@ const WorkOrderGroupDetailsModal = ({
             {progressionStatus.message && (
                 <div
                     className={`mx-4 mb-4 p-3 rounded-lg border ${progressionStatus.type === "success"
-                            ? "bg-green-50 border-green-200 text-green-800"
-                            : progressionStatus.type === "error"
-                                ? "bg-red-50 border-red-200 text-red-800"
-                                : "bg-blue-50 border-blue-200 text-blue-800"
+                        ? "bg-green-50 border-green-200 text-green-800"
+                        : progressionStatus.type === "error"
+                            ? "bg-red-50 border-red-200 text-red-800"
+                            : "bg-blue-50 border-blue-200 text-blue-800"
                         }`}
                 >
                     <div className="flex items-center">
@@ -1450,8 +1450,8 @@ const WorkOrderGroupDetailsModal = ({
                                                     col.subMilestones.length * 2
                                                 }
                                                 className={`text-center px-2 py-2 font-medium border-x border-white min-w-[100px] relative ${isCurrentStepForAnyAccount
-                                                        ? "bg-blue-600 border-2 border-blue-800 shadow-lg ring-2 ring-blue-300 ring-opacity-50 z-30"
-                                                        : "bg-custom-bluegreen"
+                                                    ? "bg-blue-600 border-2 border-blue-800 shadow-lg ring-2 ring-blue-300 ring-opacity-50 z-30"
+                                                    : "bg-custom-bluegreen"
                                                     }`}
                                                 style={{
                                                     backgroundColor:
@@ -1462,8 +1462,8 @@ const WorkOrderGroupDetailsModal = ({
                                             >
                                                 <span
                                                     className={`text-xs font-semibold uppercase tracking-wide ${isCurrentStepForAnyAccount
-                                                            ? "text-white"
-                                                            : ""
+                                                        ? "text-white"
+                                                        : ""
                                                         }`}
                                                 >
                                                     {col.stepName}

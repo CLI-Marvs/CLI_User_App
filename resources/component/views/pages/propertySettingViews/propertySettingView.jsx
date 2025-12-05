@@ -1,5 +1,5 @@
 import React from 'react'
-import PropertySetting from '@/component/layout/superadminpage/PropertySetting'
+import PropertySetting from '@/features/admin-settings/superadminpage/PropertySetting'
 const propertySettingView = () => {
   return (
     <div>

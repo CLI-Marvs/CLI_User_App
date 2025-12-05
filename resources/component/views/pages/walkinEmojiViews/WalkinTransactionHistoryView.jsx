@@ -1,5 +1,5 @@
 import React from 'react'
-import WalkinTransactionHistoryPage from '@/component/layout/inquirypage/WalkinTransactionHistoryPage'
+import WalkinTransactionHistoryPage from '@/features/customer-relations/inquirypage/WalkinTransactionHistoryPage'
 const WalkinTransactionHistoryView = () => {
   return (
     <div>

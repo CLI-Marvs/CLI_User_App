@@ -1,4 +1,4 @@
-import apiService from '@/component/servicesApi/apiService';
+import apiService from '@/servicesApi/apiService';
 export const featureService = {
     //get all features for the User rights and Permissions
     getAllFeatures: async () => {

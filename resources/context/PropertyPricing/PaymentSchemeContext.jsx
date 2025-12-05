@@ -5,8 +5,8 @@ import React, {
     useCallback,
     useEffect,
 } from "react";
-import { paymentSchemeService } from "@/component/servicesApi/apiCalls/propertyPricing/paymentScheme/paymentSchemeService";
-import usePaginatedFetch from "@/component/layout/propertyandpricingpage/hooks/usePaginatedFetch";
+import { paymentSchemeService } from "@/servicesApi/apiCalls/propertyPricing/paymentScheme/paymentSchemeService";
+import usePaginatedFetch from "@/features/property-pricing/propertyandpricingpage/hooks/usePaginatedFetch";
 
 const PaymentSchemeContext = createContext();
 

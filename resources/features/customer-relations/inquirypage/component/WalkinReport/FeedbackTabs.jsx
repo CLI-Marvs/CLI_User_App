@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
-import { paginate } from "@/component/layout/inquirypage/component/utils/paginate";
+import Pagination from "@/features/property-pricing/propertyandpricingpage/component/Pagination";
+import { paginate } from "@/features/customer-relations/inquirypage/component/utils/paginate";
 
 const FeedbackTabs = ({ filteredData, filters, activeTab, setActiveTab }) => {
     //States
@@ -58,8 +58,8 @@ const FeedbackTabs = ({ filteredData, filters, activeTab, setActiveTab }) => {
             <div className="flex space-x-2 bg-custom-lightestgreen rounded-md p-1 w-fit">
                 <button
                     className={`px-4 py-2 rounded text-sm montserrat-medium ${activeTab === "queue-linked"
-                            ? "bg-custom-solidgreen text-white"
-                            : "text-custom-gray71"
+                        ? "bg-custom-solidgreen text-white"
+                        : "text-custom-gray71"
                         }`}
                     onClick={() => setActiveTab("queue-linked")}
                 >
@@ -67,8 +67,8 @@ const FeedbackTabs = ({ filteredData, filters, activeTab, setActiveTab }) => {
                 </button>
                 <button
                     className={`px-4 py-2 rounded text-sm montserrat-medium ${activeTab === "standalone"
-                            ? "bg-custom-solidgreen text-white"
-                            : "text-custom-gray71"
+                        ? "bg-custom-solidgreen text-white"
+                        : "text-custom-gray71"
                         }`}
                     onClick={() => setActiveTab("standalone")}
                 >

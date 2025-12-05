@@ -15,7 +15,7 @@ import {
     useSortable,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import apiService from "../../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { toast } from "react-toastify";
 import { Card, CardBody, Typography } from "@material-tailwind/react";
 

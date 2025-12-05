@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from "react";
 import AddPaymentSchemeModal from "./AddPaymentSchemeModal";
-import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
+import Pagination from "@/features/property-pricing/propertyandpricingpage/component/Pagination";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
-import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
-import PaymentSchemeRow from "@/component/layout/propertyandpricingpage/component/TableRows/PaymentSchemeRow";
+import CustomTable from "@/features/property-pricing/propertyandpricingpage/component/CustomTable";
+import PaymentSchemeRow from "@/features/property-pricing/propertyandpricingpage/component/TableRows/PaymentSchemeRow";
 
 const COLUMNS = [
     { label: "Status", width: "w-[100px]" },

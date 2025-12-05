@@ -2,13 +2,13 @@ import React, { use, useEffect, useMemo, useState } from "react";
 import GlobalTable from "../GlobalTable";
 import TransactionTableCell from "./TransactionTableCell";
 import { useTransactionContext } from "@/context/Transaction/TransactionContext";
-import { transaction } from "@/component/servicesApi/apiCalls/transactions";
-import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
+import { transaction } from "@/servicesApi/apiCalls/transactions";
+import TransactionSearchBar from "@/features/transaction-management/transaction/TransactionSearchBar";
 import Pagination from "@/component/Pagination";
 import usePagination from "@/hooks/usePagination";
-import { usePropertyFormatter } from "@/component/layout/transaction/hooks/usePropertyFormatter";
+import { usePropertyFormatter } from "@/features/transaction-management/transaction/hooks/usePropertyFormatter";
 import SimpleViewCell from "./SimpleViewCell";
-import exportIcon from "../../../../../../public/Images/export-icon.png";
+import exportIcon from "@/assets/images/export-icon.png";
 import {
     columnNameToFieldKey,
     P_METHOD,

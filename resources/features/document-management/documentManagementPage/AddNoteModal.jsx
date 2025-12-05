@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { useStateContext } from "@/component/context/contextprovider";
 import { useDocumentManagementContext } from "@/context/DocumentManagement/DocumentManagementContext";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 
 const AddNoteModal = ({
     isOpen,
@@ -414,10 +414,10 @@ const AddNoteModal = ({
                             <div className="flex items-center space-x-2">
                                 <span
                                     className={`text-xs ${remainingChars < 50
-                                            ? "text-orange-600"
-                                            : remainingChars < 20
-                                                ? "text-red-600"
-                                                : "text-gray-500"
+                                        ? "text-orange-600"
+                                        : remainingChars < 20
+                                            ? "text-red-600"
+                                            : "text-gray-500"
                                         }`}
                                 >
                                     {remainingChars} characters remaining
@@ -443,10 +443,10 @@ const AddNoteModal = ({
                             </p>
                             <p
                                 className={`text-xs font-medium ${totalLength >= 450
-                                        ? "text-orange-600"
-                                        : totalLength >= 480
-                                            ? "text-red-600"
-                                            : "text-gray-500"
+                                    ? "text-orange-600"
+                                    : totalLength >= 480
+                                        ? "text-red-600"
+                                        : "text-gray-500"
                                     }`}
                             >
                                 {totalLength}/500
@@ -460,8 +460,8 @@ const AddNoteModal = ({
                         </label>
                         <div
                             className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors duration-200 ${dragActive
-                                    ? "border-blue-400 bg-blue-50"
-                                    : "border-gray-300 hover:border-gray-400"
+                                ? "border-blue-400 bg-blue-50"
+                                : "border-gray-300 hover:border-gray-400"
                                 }`}
                             onDragEnter={handleDrag}
                             onDragLeave={handleDrag}

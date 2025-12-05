@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import UnitTableComponent from "@/component/layout/propertyandpricingpage/component/UnitTableComponent";
+import UnitTableComponent from "@/features/property-pricing/propertyandpricingpage/component/UnitTableComponent";
 const ExpandableDataTable = ({
     expandUnitTableViewRef,
     computedUnitPrices,

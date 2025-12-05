@@ -1,10 +1,10 @@
 import React from 'react'
-import PricingMasterList from '../../../layout/propertyandpricingpage/pricingmasterlist/PricingMasterList'
+import PricingMasterList from '@/features/property-pricing/propertyandpricingpage/pricingmasterlist/PricingMasterList'
 
 const PricingMasterListView = () => {
   return (
     <div>
-        <PricingMasterList />
+      <PricingMasterList />
     </div>
   )
 }

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/unit/unitService";
+import { unitService } from "@/servicesApi/apiCalls/propertyPricing/unit/unitService";
 import { debounce } from "lodash";
 
 const UnitContext = createContext();

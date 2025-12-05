@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDOM from "react-dom";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { useDropzone } from "react-dropzone";
 import { useStateContext } from "@/context/contextprovider";
 import { useDocumentManagementContext } from "@/context/DocumentManagement/DocumentManagementContext";
@@ -137,8 +137,8 @@ const ProcessWorkOrderModal = ({ isOpen, onClose, workOrder }) => {
                         <div
                             {...getRootProps()}
                             className={`mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-indigo-500 ${isDragActive
-                                    ? "bg-indigo-50 border-indigo-500"
-                                    : "bg-white"
+                                ? "bg-indigo-50 border-indigo-500"
+                                : "bg-white"
                                 }`}
                         >
                             <input {...getInputProps()} />

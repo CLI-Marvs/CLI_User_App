@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import apiService from "../../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import { useStateContext } from "../../../../context/contextprovider";
@@ -169,9 +169,9 @@ const FileViewer = () => {
             className={`${fileExtension === "txt" ? "bg-white" : "bg-black"}`}
         >
             {fileExtension === "jpg" ||
-            fileExtension === "bmp" ||
-            fileExtension === "png" ||
-            fileExtension === "jpeg" ? (
+                fileExtension === "bmp" ||
+                fileExtension === "png" ||
+                fileExtension === "jpeg" ? (
                 <div className="flex items-center justify-center min-h-screen">
                     <img
                         onLoad={handleImageLoad}
@@ -197,21 +197,20 @@ const FileViewer = () => {
                     className="min-h-screen "
                 ></iframe>
             ) : fileExtension === "xls" ||
-              fileExtension === "xlsx" ||
-              fileExtension === "xlsm" ||
-              fileExtension === "xml" ||
-              fileExtension === "doc" ||
-              fileExtension === "docx" ||
-              fileExtension === "csv" ? (
+                fileExtension === "xlsx" ||
+                fileExtension === "xlsm" ||
+                fileExtension === "xml" ||
+                fileExtension === "doc" ||
+                fileExtension === "docx" ||
+                fileExtension === "csv" ? (
                 <div className="flex flex-col items-center justify-center min-h-screen text-white">
                     <p>Only images, text documents and pdf are viewable.</p>
                     <button
                         onClick={() => handleDownloadFile(fileName)}
                         disabled={loading}
                         type="submit"
-                        className={` mt-4 w-[133px] text-sm montserrat-semibold text-white h-[49px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4  ${
-                            loading ? "cursor-not-allowed" : ""
-                        }`}
+                        className={` mt-4 w-[133px] text-sm montserrat-semibold text-white h-[49px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4  ${loading ? "cursor-not-allowed" : ""
+                            }`}
                     >
                         {loading ? (
                             <CircularProgress className="spinnerSize" />
@@ -227,9 +226,8 @@ const FileViewer = () => {
                         onClick={() => handleDownloadFile(fileName)}
                         disabled={loading}
                         type="submit"
-                        className={` mt-4 w-[133px] text-sm montserrat-semibold text-white h-[49px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4  ${
-                            loading ? "cursor-not-allowed" : ""
-                        }`}
+                        className={` mt-4 w-[133px] text-sm montserrat-semibold text-white h-[49px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4  ${loading ? "cursor-not-allowed" : ""
+                            }`}
                     >
                         {loading ? (
                             <CircularProgress className="spinnerSize" />

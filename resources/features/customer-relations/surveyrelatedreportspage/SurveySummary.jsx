@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import SummaryBar from './surveyComponents/SummaryBar';
 
 import { useNavigate, useParams } from 'react-router-dom';
-import apiService from '../../servicesApi/apiService';
+import apiService from '@/servicesApi/apiService';
 import SummaryLine from './surveyComponents/SummaryLine';
 import SummaryRating from './surveyComponents/SummaryRating';
 import SummaryTable from './surveyComponents/SummaryTable';

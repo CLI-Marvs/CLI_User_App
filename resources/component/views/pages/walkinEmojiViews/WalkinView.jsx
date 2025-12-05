@@ -1,7 +1,7 @@
 import React from "react";
-import WalkinListPage from "@/component/layout/inquirypage/WalkinListPage";
+import WalkinListPage from "@/features/customer-relations/inquirypage/WalkinListPage";
 import { Outlet, useLocation } from "react-router-dom";
-import WalkinTransactionHistoryPage from "@/component/layout/inquirypage/WalkinTransactionHistoryPage";
+import WalkinTransactionHistoryPage from "@/features/customer-relations/inquirypage/WalkinTransactionHistoryPage";
 const WalkinView = () => {
     const location = useLocation();
     const isHistoryPage = location.pathname.includes('/walk-in/history');

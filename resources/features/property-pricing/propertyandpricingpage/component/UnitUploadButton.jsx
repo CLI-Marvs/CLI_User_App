@@ -1,10 +1,10 @@
 import { useRef, useState } from "react";
-import UploadUnitDetailsModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/UploadUnitDetailsModal";
+import UploadUnitDetailsModal from "@/features/property-pricing/propertyandpricingpage/basicpricing/modals/UploadUnitDetailsModal";
 import expectedHeaders from "@/constant/data/excelHeader";
 import * as XLSX from "xlsx";
 import { showToast } from "@/util/toastUtil";
 import { SPREADSHEET_FILE_EXTENSIONS } from "@/constant/data/spreadSheetExtension";
-import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/unit/unitService";
+import { unitService } from "@/servicesApi/apiCalls/propertyPricing/unit/unitService";
 
 const UnitUploadButton = ({
     linkText = "Upload",

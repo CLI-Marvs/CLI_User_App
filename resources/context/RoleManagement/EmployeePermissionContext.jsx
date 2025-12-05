@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { employeePermissionService } from '@/component/servicesApi/apiCalls/roleManagement';
+import { employeePermissionService } from '@/servicesApi/apiCalls/roleManagement';
 
 const EmployeePermissionContext = createContext();
 

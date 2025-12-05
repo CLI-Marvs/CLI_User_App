@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import SearchTransactions from "@/component/layout/transaction/SearchBar";
+import SearchTransactions from "@/features/transaction-management/transaction/SearchBar";
 import { useNavigate } from "react-router-dom";
 import { useStateContext } from "@/context/contextprovider";
-import { data } from "@/component/servicesApi/apiCalls/transactions/customer";
+import { data } from "@/servicesApi/apiCalls/transactions/customer";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 

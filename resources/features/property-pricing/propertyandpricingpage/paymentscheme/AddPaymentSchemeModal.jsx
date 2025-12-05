@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { paymentSchemeService } from "@/component/servicesApi/apiCalls/propertyPricing/paymentScheme/paymentSchemeService";
+import { paymentSchemeService } from "@//servicesApi/apiCalls/propertyPricing/paymentScheme/paymentSchemeService";
 import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 import isButtonDisabled from "@/util/isFormButtonDisabled";

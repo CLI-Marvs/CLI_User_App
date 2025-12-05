@@ -12,7 +12,6 @@ import "@/css/font.css";
 import "@/css/style.css";
 import Sidebar from "./component/layout/mainComponent/Sidebar";
 import Navbar from "./component/layout/mainComponent/Navbar";
-import InquiryList from "./layout/inquirypage/InquiryList";
 import InquiryListView from "./component/views/pages/raiseaconcernViews/InquiryListView";
 import InquiryThreadView from "./component/views/pages/raiseaconcernViews/InquiryThreadView";
 import CallBackView from "./component/views/pages/callback/CallBackView";
@@ -29,10 +28,9 @@ import NotificationView from "./component/views/pages/notificationViews/Notifica
 import FileViewer from "./component/views/pages/fileView/FileViewer";
 import AdminSettingView from "./component/views/pages/adminsettingsViews/AdminSettingView";
 import BankStatementView from "./component/views/pages/transactionViews/BankStatementView";
-import AutoAssignView from "./component/views/pages/raiseaconcernViews/AutoAssignView";
 import UserRightsAndPermissionsView from "./component/views/pages/userrightsandpermissionsViews/UserRightsAndPermissionsView";
 import PropertySettingViews from "@/component/views/pages/propertySettingViews/propertySettingView";
-import BranchSetting from "@/component/layout/inquirypage/BranchSetting";
+import BranchSetting from "@/features/customer-relations/inquirypage/BranchSetting";
 
 import FallbackLoader from "./component/FallbackLoader";
 import PreloadWrapper from "./component/PreloadWrapper";
@@ -41,7 +39,7 @@ import CrsSettingsSidebar from "./component/layout/mainComponent/sidebars/CrsSet
 import VersionLogsView from "./component/views/pages/raiseaconcernViews/VersionLogsView";
 import { useStateContext } from "./context/contextprovider";
 
-import TransactionSidebar from "./layout/transaction/TransactionSidebar";
+import TransactionSidebar from "@/features/transaction-management/transaction/TransactionSidebar";
 import InvoicesView from "@/component/views/pages/transactionViews/InvoicesView";
 import TransactionView from "./component/views/pages/transactionViews/TransactionView";
 import AutoPostingView from "./component/views/pages/transactionViews/AutoPostingView";
@@ -57,7 +55,7 @@ import DocumentManagementSidebar from "./component/layout/mainComponent/sidebars
 import TakenOutAccountView from "./component/views/pages/titlingAndRegistration/TakenOutAccountView";
 import FileManagerView from "./component/views/pages/titlingAndRegistration/FileManagerView";
 import WalkinTransactionHistoryView from "@/component/views/pages/walkinEmojiViews/WalkinTransactionHistoryView";
-import WalkinReportPage from "@/component/layout/inquirypage/WalkinReportPage";
+import WalkinReportPage from "@/features/customer-relations/inquirypage/WalkinReportPage";
 import FinancialToolsView from "./component/views/pages/transactionViews/FinancialToolsView";
 import CheckStreamReportsView from "./component/views/pages/transactionViews/CheckStreamReportsView";
 import SurveyReportsView from "./component/views/pages/surveyrelatedreportsViews/SurveyReportsView";
@@ -349,17 +347,9 @@ const App = () => {
                                     ],
                                 },
                                 {
-                                    path: "autoassign",
-                                    element: <AutoAssignView />,
-                                },
-                                {
                                     path: "settings",
                                     element: <SecondLayout />,
                                     children: [
-                                        {
-                                            path: "autoassign",
-                                            element: <AutoAssignView />,
-                                        },
                                         {
                                             path: "surveysettings",
                                             element: <SurveyReportsView />,

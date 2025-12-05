@@ -1,4 +1,4 @@
-import apiService from "@/component/servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 
 export const paymentSchemeService = {
     //Function to store payment scheme

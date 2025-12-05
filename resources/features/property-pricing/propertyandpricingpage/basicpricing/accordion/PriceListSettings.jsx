@@ -1,5 +1,5 @@
 import { IoIosArrowDown } from "react-icons/io";
-import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+import { usePricing } from "@/features/property-pricing/propertyandpricingpage/context/BasicPricingContext";
 import CustomInput from "@/component/Input/CustomInput";
 
 const PriceListSettings = ({ isOpen, toggleAccordion, priceListData }) => {
@@ -31,16 +31,16 @@ const PriceListSettings = ({ isOpen, toggleAccordion, priceListData }) => {
                 >
                     <span
                         className={` text-custom-solidgreen ${isOpen
-                                ? "text-[20px] montserrat-semibold"
-                                : "text-[18px] montserrat-regular"
+                            ? "text-[20px] montserrat-semibold"
+                            : "text-[18px] montserrat-regular"
                             }`}
                     >
                         Price List Settings
                     </span>
                     <span
                         className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${isOpen
-                                ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
-                                : "rotate-0 gradient-btn2 text-white"
+                            ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
+                            : "rotate-0 gradient-btn2 text-white"
                             }`}
                     >
                         <IoIosArrowDown className=" text-[18px]" />

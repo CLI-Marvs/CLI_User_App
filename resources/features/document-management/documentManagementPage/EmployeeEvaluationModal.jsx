@@ -44,7 +44,7 @@ import {
     ScatterChart,
     Scatter,
 } from "recharts";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 
 const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
     const [evaluationData, setEvaluationData] = useState([]);
@@ -119,10 +119,10 @@ const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
                     value > 15
                         ? "bg-green-100 text-green-700 border-green-200"
                         : value > 10
-                        ? "bg-blue-100 text-blue-700 border-blue-200"
-                        : value > 5
-                        ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                        : "bg-red-100 text-red-700 border-red-200";
+                            ? "bg-blue-100 text-blue-700 border-blue-200"
+                            : value > 5
+                                ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+                                : "bg-red-100 text-red-700 border-red-200";
 
                 return (
                     <span
@@ -147,10 +147,10 @@ const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
                     value > 5
                         ? "bg-green-100 text-green-700 border-green-200"
                         : value > 2
-                        ? "bg-blue-100 text-blue-700 border-blue-200"
-                        : value > 0
-                        ? "bg-yellow-100 text-yellow-700 border-yellow-200"
-                        : "bg-red-100 text-red-700 border-red-200";
+                            ? "bg-blue-100 text-blue-700 border-blue-200"
+                            : value > 0
+                                ? "bg-yellow-100 text-yellow-700 border-yellow-200"
+                                : "bg-red-100 text-red-700 border-red-200";
 
                 return (
                     <span
@@ -232,24 +232,23 @@ const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
                     efficiency >= 80
                         ? "text-green-600"
                         : efficiency >= 60
-                        ? "text-blue-600"
-                        : efficiency >= 40
-                        ? "text-yellow-600"
-                        : "text-red-600";
+                            ? "text-blue-600"
+                            : efficiency >= 40
+                                ? "text-yellow-600"
+                                : "text-red-600";
 
                 return (
                     <div className="flex flex-col items-center">
                         <div className="w-12 bg-gray-200 rounded-full h-1.5 mb-1">
                             <div
-                                className={`h-1.5 rounded-full ${
-                                    efficiency >= 80
-                                        ? "bg-green-500"
-                                        : efficiency >= 60
+                                className={`h-1.5 rounded-full ${efficiency >= 80
+                                    ? "bg-green-500"
+                                    : efficiency >= 60
                                         ? "bg-blue-500"
                                         : efficiency >= 40
-                                        ? "bg-yellow-500"
-                                        : "bg-red-500"
-                                }`}
+                                            ? "bg-yellow-500"
+                                            : "bg-red-500"
+                                    }`}
                                 style={{ width: `${efficiency}%` }}
                             ></div>
                         </div>
@@ -411,10 +410,10 @@ const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
                 color: name.includes("Excellent")
                     ? PERFORMANCE_COLORS.excellent
                     : name.includes("Good")
-                    ? PERFORMANCE_COLORS.good
-                    : name.includes("Average")
-                    ? PERFORMANCE_COLORS.average
-                    : PERFORMANCE_COLORS.poor,
+                        ? PERFORMANCE_COLORS.good
+                        : name.includes("Average")
+                            ? PERFORMANCE_COLORS.average
+                            : PERFORMANCE_COLORS.poor,
             })
         );
 
@@ -541,8 +540,8 @@ const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
                                 >
                                     {summaryStats.topPerformer
                                         ? summaryStats.topPerformer.split(
-                                              " "
-                                          )[0]
+                                            " "
+                                        )[0]
                                         : "N/A"}
                                 </div>
                                 <div className="text-xs text-gray-500">
@@ -770,23 +769,23 @@ const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
                                                 border: "none",
                                                 fontSize: "0.75rem",
                                                 "& .MuiDataGrid-columnHeaders":
-                                                    {
-                                                        backgroundColor:
-                                                            "#f8fafc",
-                                                        fontWeight: "bold",
-                                                        fontSize: "0.7rem",
-                                                        minHeight: "44px",
-                                                        borderBottom:
-                                                            "1px solid #e2e8f0",
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                    },
+                                                {
+                                                    backgroundColor:
+                                                        "#f8fafc",
+                                                    fontWeight: "bold",
+                                                    fontSize: "0.7rem",
+                                                    minHeight: "44px",
+                                                    borderBottom:
+                                                        "1px solid #e2e8f0",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                },
                                                 "& .MuiDataGrid-columnHeaderTitle":
-                                                    {
-                                                        display: "flex",
-                                                        alignItems: "center",
-                                                        height: "100%",
-                                                    },
+                                                {
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    height: "100%",
+                                                },
                                                 "& .MuiDataGrid-row": {
                                                     minHeight: "44px",
                                                     maxHeight: "44px",
@@ -803,16 +802,16 @@ const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
                                                     alignItems: "center",
                                                 },
                                                 "& .MuiDataGrid-toolbarContainer":
-                                                    {
-                                                        padding: "8px 12px",
-                                                        backgroundColor:
-                                                            "#f8fafc",
-                                                        borderBottom:
-                                                            "1px solid #e2e8f0",
-                                                        "& .MuiButton-root": {
-                                                            fontSize: "0.7rem",
-                                                        },
+                                                {
+                                                    padding: "8px 12px",
+                                                    backgroundColor:
+                                                        "#f8fafc",
+                                                    borderBottom:
+                                                        "1px solid #e2e8f0",
+                                                    "& .MuiButton-root": {
+                                                        fontSize: "0.7rem",
                                                     },
+                                                },
                                             }}
                                             onRowClick={handleRowClick}
                                         />
@@ -1271,12 +1270,12 @@ const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
                                                     <span>Report Period</span>
                                                     <span className="text-gray-500">
                                                         {selectedPeriod ===
-                                                        "current"
+                                                            "current"
                                                             ? "Current Month"
                                                             : selectedPeriod ===
-                                                              "quarter"
-                                                            ? "This Quarter"
-                                                            : "This Year"}
+                                                                "quarter"
+                                                                ? "This Quarter"
+                                                                : "This Year"}
                                                     </span>
                                                 </div>
                                                 <div className="flex items-center justify-between">
@@ -1417,26 +1416,26 @@ const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
                                 <div className="flex items-center gap-4">
                                     {selectedEmployee.performance !==
                                         undefined && (
-                                        <div className="flex-1 text-center">
-                                            <div className="text-xs text-gray-400 mb-1">
-                                                Performance
+                                            <div className="flex-1 text-center">
+                                                <div className="text-xs text-gray-400 mb-1">
+                                                    Performance
+                                                </div>
+                                                <div className="text-lg font-bold text-purple-600">
+                                                    {selectedEmployee.performance}
+                                                </div>
                                             </div>
-                                            <div className="text-lg font-bold text-purple-600">
-                                                {selectedEmployee.performance}
-                                            </div>
-                                        </div>
-                                    )}
+                                        )}
                                     {selectedEmployee.efficiency !==
                                         undefined && (
-                                        <div className="flex-1 text-center">
-                                            <div className="text-xs text-gray-400 mb-1">
-                                                Efficiency
+                                            <div className="flex-1 text-center">
+                                                <div className="text-xs text-gray-400 mb-1">
+                                                    Efficiency
+                                                </div>
+                                                <div className="text-lg font-bold text-orange-500">
+                                                    {selectedEmployee.efficiency}
+                                                </div>
                                             </div>
-                                            <div className="text-lg font-bold text-orange-500">
-                                                {selectedEmployee.efficiency}
-                                            </div>
-                                        </div>
-                                    )}
+                                        )}
                                 </div>
                             </div>
                             {/* Divider */}
@@ -1464,10 +1463,10 @@ const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
                                         employeeComments[selectedEmployee.id] ||
                                         []
                                     ).length === 0 && (
-                                        <div className="text-xs text-gray-400 text-center py-4">
-                                            No comments yet.
-                                        </div>
-                                    )}
+                                            <div className="text-xs text-gray-400 text-center py-4">
+                                                No comments yet.
+                                            </div>
+                                        )}
                                     {(
                                         employeeComments[selectedEmployee.id] ||
                                         []
@@ -1477,26 +1476,23 @@ const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
                                         return (
                                             <div
                                                 key={idx}
-                                                className={`flex ${
-                                                    isRight
-                                                        ? "justify-end"
-                                                        : "justify-start"
-                                                }`}
+                                                className={`flex ${isRight
+                                                    ? "justify-end"
+                                                    : "justify-start"
+                                                    }`}
                                             >
                                                 <div
-                                                    className={`max-w-[75%] px-4 py-2 rounded-2xl shadow text-xs break-words relative ${
-                                                        isRight
-                                                            ? "bg-custom-bluegreen text-white rounded-br-sm"
-                                                            : "bg-gray-100 text-gray-800 rounded-bl-sm"
-                                                    }`}
+                                                    className={`max-w-[75%] px-4 py-2 rounded-2xl shadow text-xs break-words relative ${isRight
+                                                        ? "bg-custom-bluegreen text-white rounded-br-sm"
+                                                        : "bg-gray-100 text-gray-800 rounded-bl-sm"
+                                                        }`}
                                                 >
                                                     <span>{c.text}</span>
                                                     <span
-                                                        className={`block mt-1 text-[10px] ${
-                                                            isRight
-                                                                ? "text-blue-100"
-                                                                : "text-gray-400"
-                                                        } text-right`}
+                                                        className={`block mt-1 text-[10px] ${isRight
+                                                            ? "text-blue-100"
+                                                            : "text-gray-400"
+                                                            } text-right`}
                                                     >
                                                         {c.date}
                                                     </span>

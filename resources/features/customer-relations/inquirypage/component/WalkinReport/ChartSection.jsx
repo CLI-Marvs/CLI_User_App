@@ -12,10 +12,10 @@ import {
     YAxis,
     Legend,
 } from "recharts";
-import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
-import { paginate } from "@/component/layout/inquirypage/component/utils/paginate";
-import EmojiYAxisTick from "@/component/layout/inquirypage/component/WalkinReport/component/EmojiYAxisTick";
-import CustomXAxisTick from "@/component/layout/inquirypage/component/WalkinReport/component/CustomXAxisTick";
+import Pagination from "@/features/property-pricing/propertyandpricingpage/component/Pagination";
+import { paginate } from "@/features/customer-relations/inquirypage/component/utils/paginate";
+import EmojiYAxisTick from "@/features/customer-relations/inquirypage/component/WalkinReport/component/EmojiYAxisTick";
+import CustomXAxisTick from "@/features/customer-relations/inquirypage/component/WalkinReport/component/CustomXAxisTick";
 
 const COLORS = ["#348017", "#70AD47", "#1A73E8", "#5B9BD5", "#175D5F"];
 

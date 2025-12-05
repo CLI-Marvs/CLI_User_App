@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useStateContext } from "../../../context/contextprovider";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { useNavigate } from "react-router-dom";
 
 const AssignModal = ({ modalRef, employeeData, isAssign }) => {
@@ -11,7 +11,7 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
     const maxCharacters = 500;
 
     const saveAssignee = async () => {
-        if(!employeeData || Object.keys(employeeData).length === 0) {
+        if (!employeeData || Object.keys(employeeData).length === 0) {
             alert("please select employee first");
             return;
         }
@@ -30,7 +30,7 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
     };
 
     const reassignInquiry = async () => {
-        if(!employeeData || Object.keys(employeeData).length === 0) {
+        if (!employeeData || Object.keys(employeeData).length === 0) {
             alert("please select employee first");
             return;
         }
@@ -43,12 +43,12 @@ const AssignModal = ({ modalRef, employeeData, isAssign }) => {
             });
             getInquiryLogs(employeeData.ticketId);
             getAllConcerns();
-           /*  navigate("/inquirymanagement/inquirylist"); */
+            /*  navigate("/inquirymanagement/inquirylist"); */
         } catch (error) {
             console.log("error assigning", error);
         }
     };
-   
+
     useEffect(() => {
 
     }, [isAssign]);

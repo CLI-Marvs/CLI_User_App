@@ -2,13 +2,13 @@ import React, { useRef, useState, useEffect } from "react";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { useStateContext } from "@/context/contextprovider";
 import highlightText from "@/util/hightlightText";
-import { isButtonDisabled } from "@/component/layout/superadminpage/modals/UserModal/utils/isButtonDisabled";
+import { isButtonDisabled } from "@/features/admin-settings/superadminpage/modals/UserModal/utils/isButtonDisabled";
 import CircularProgress from "@mui/material/CircularProgress";
 import { showToast } from "@/util/toastUtil";
-import { getFilteredEmployeeOptions } from "@/component/layout/superadminpage/modals/UserModal/utils/employeeUtils";
-import Feature from "@/component/layout/superadminpage/component/Feature";
+import { getFilteredEmployeeOptions } from "@/features/admin-settings/superadminpage/modals/UserModal/utils/employeeUtils";
+import Feature from "@/features/admin-settings/superadminpage/component/Feature";
 import useFeature from "@/context/RoleManagement/FeatureContext";
-import { employeePermissionService } from "@/component/servicesApi/apiCalls/roleManagement";
+import { employeePermissionService } from "@/servicesApi/apiCalls/roleManagement";
 import useEmployeePermission from "@/context/RoleManagement/EmployeePermissionContext";
 
 const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
@@ -328,8 +328,8 @@ const AddUserModals = ({ userModalRef, employeesWithPermissions }) => {
                             onClick={handleSubmit}
                             disabled={isButtonDisabled(formData) || isLoading}
                             className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isLoading || isButtonDisabled(formData)
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
                                 }`}
                         >
                             {isLoading ? (

@@ -1,5 +1,5 @@
 import React, { use, useEffect, useRef, useState } from "react";
-import Backbtn from "@/assetsimages/Expand_up.svg";
+import Backbtn from "@/assets/images/Expand_up.svg";
 import { FaTrash } from "react-icons/fa";
 import UserMessages from "./UserMessages";
 import AdminMessages from "./AdminMessages";
@@ -10,16 +10,15 @@ import ResolveModal from "./ResolveModal";
 import CloseModal from "./CloseModal";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useStateContext } from "../../../context/contextprovider";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import DateLogo from "@/assetsimages/Date_range.svg";
+import DateLogo from "@/assets/images/Date_range.svg";
 import CircularProgress from "@mui/material/CircularProgress";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { toast } from "react-toastify";
 import { showToast } from "../../../util/toastUtil"
-import Alert from "../mainComponent/Alert";
 import AddInfoModal from "./AddInfoModal";
 import { VALID_FILE_EXTENSIONS } from "../../../constant/data/validFile";
 import InquiryFormModal from "./InquiryFormModal";

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from "react";
 import CustomInput from "@/component/Input/CustomInput";
 import useFeature from "@/context/RoleManagement/FeatureContext";
-import CustomRadioGroup from "@/component/layout/superadminpage/component/CustomRadioGroup";
+import CustomRadioGroup from "@/features/admin-settings/superadminpage/component/CustomRadioGroup";
 import Spinner from "@/util/Spinner";
 import usePropertyFeature from "@/context/RoleManagement/PropertyFeatureContext";
-import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
+import { propertyMasterService } from "@/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
 import { showToast } from "@/util/toastUtil";
-import { hasFormChanged } from "@/component/layout/superadminpage/utils/hasFormChanged";
+import { hasFormChanged } from "@/features/admin-settings/superadminpage/utils/hasFormChanged";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import isFormButtonDisabled from "@/util/isFormButtonDisabled";
-import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/PropertyFeatureCheckbox";
+import PropertyFeatureCheckbox from "@/features/admin-settings/superadminpage/component/PropertyFeatureCheckbox";
 
 const formInitialState = {
     propertyName: "",

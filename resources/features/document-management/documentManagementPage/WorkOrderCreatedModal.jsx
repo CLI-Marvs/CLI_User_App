@@ -1,4 +1,4 @@
-import CheckmarkIcon from "../../../../../public/Images/round_check.svg";
+import CheckmarkIcon from "@/assets/images/round_check.svg";
 
 const WorkOrderCreatedModal = ({ isOpen, workOrderGroupId, onClose }) => {
     if (!isOpen) return null;

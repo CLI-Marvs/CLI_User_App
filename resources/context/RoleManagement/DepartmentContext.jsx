@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { employeeDepartmentService } from '@/component/servicesApi/apiCalls/roleManagement';
+import { employeeDepartmentService } from '@/servicesApi/apiCalls/roleManagement';
 
 const DepartmentContext = createContext();
 

@@ -2,12 +2,12 @@ import React, { useState, useRef, useEffect } from "react";
 import { IoIosArrowDown } from "react-icons/io";
 import FloorPremiumAssignModal from "../modals/FloorPremiumAssignModal";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+import { usePricing } from "@/features/property-pricing/propertyandpricingpage/context/BasicPricingContext";
 import { showToast } from "@/util/toastUtil";
-import UnitUploadButton from "@/component/layout/propertyandpricingpage/component/UnitUploadButton";
+import UnitUploadButton from "@/features/property-pricing/propertyandpricingpage/component/UnitUploadButton";
 import CustomInput from "@/component/Input/CustomInput";
-import FloorPremiumRow from "@/component/layout/propertyandpricingpage/component/TableRows/FloorPremiumRow";
-import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
+import FloorPremiumRow from "@/features/property-pricing/propertyandpricingpage/component/TableRows/FloorPremiumRow";
+import CustomTable from "@/features/property-pricing/propertyandpricingpage/component/CustomTable";
 
 const newFloorState = {
     floor: null,
@@ -199,16 +199,16 @@ const FloorPremiums = ({ isOpen, toggleAccordion, priceListData }) => {
                 >
                     <span
                         className={` text-custom-solidgreen ${isOpen
-                                ? "text-[20px] montserrat-semibold"
-                                : "text-[18px] montserrat-regular"
+                            ? "text-[20px] montserrat-semibold"
+                            : "text-[18px] montserrat-regular"
                             }`}
                     >
                         Floor Premiums
                     </span>
                     <span
                         className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${isOpen
-                                ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
-                                : "rotate-0 gradient-btn2 text-white"
+                            ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
+                            : "rotate-0 gradient-btn2 text-white"
                             }`}
                     >
                         <IoIosArrowDown className=" text-[18px]" />

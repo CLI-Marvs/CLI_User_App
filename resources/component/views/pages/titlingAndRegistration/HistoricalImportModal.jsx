@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle, Info, Download, Database } from "lucide-react";
 import { toast } from "react-toastify";
-import apiService from "../../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 
 const HistoricalImportModal = ({ isOpen, onClose, onSuccess }) => {
     const [selectedImportType, setSelectedImportType] = useState("new");
@@ -209,8 +209,8 @@ const HistoricalImportModal = ({ isOpen, onClose, onSuccess }) => {
                                     key={type.value}
                                     onClick={() => setSelectedImportType(type.value)}
                                     className={`p-4 rounded-lg border-2 transition-all text-left ${selectedImportType === type.value
-                                            ? 'border-blue-500 bg-blue-50'
-                                            : 'border-gray-200 hover:border-gray-300'
+                                        ? 'border-blue-500 bg-blue-50'
+                                        : 'border-gray-200 hover:border-gray-300'
                                         }`}
                                 >
                                     <div className="text-2xl mb-2">{type.icon}</div>

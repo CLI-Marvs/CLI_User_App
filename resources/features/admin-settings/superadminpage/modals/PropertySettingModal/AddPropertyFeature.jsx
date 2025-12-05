@@ -1,4 +1,4 @@
-import PropertyFeatureForm from "@/component/layout/superadminpage/component/PropertyFeatureForm";
+import PropertyFeatureForm from "@/features/admin-settings/superadminpage/component/PropertyFeatureForm";
 
 const AddPropertyFeature = ({ addPropertyFeatureRef }) => {
     return (

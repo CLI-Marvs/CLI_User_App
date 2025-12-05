@@ -7,12 +7,12 @@ import React, {
 import { IoMdArrowDropdown } from "react-icons/io";
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
-import Button from "@/component/layout/inquirypage/component/ui/button";
+import Button from "@/features/customer-relations/inquirypage/component/ui/button";
 import CustomInput from "@/component/Input/CustomInput";
 import CircularProgress from "@mui/material/CircularProgress";
-import { useEngageForm } from "@/component/layout/inquirypage/hooks/useEngageForm";
-import { INQUIRY_FROM_OPTIONS } from "@/component/layout/inquirypage/constants/inquiryFrom";
-import { TYPE_OPTIONS } from "@/component/layout/inquirypage/constants/type";
+import { useEngageForm } from "@/features/customer-relations/inquirypage/hooks/useEngageForm";
+import { INQUIRY_FROM_OPTIONS } from "@/features/customer-relations/inquirypage/constants/inquiryFrom";
+import { TYPE_OPTIONS } from "@/features/customer-relations/inquirypage/constants/type";
 
 const formDataInitialState = {
     first_name: "",
@@ -473,11 +473,11 @@ const EngageFormModal = forwardRef(
                         <div className="">
                             <div
                                 className={`flex items-center rounded-[5px] overflow-hidden ${formData.contract_number.length === 13
-                                        ? "border border-custom-bluegreen"
-                                        : formData.contract_number.length > 0 &&
-                                            formData.contract_number.length < 13
-                                            ? "border border-red-500"
-                                            : "border border-custom-bluegreen"
+                                    ? "border border-custom-bluegreen"
+                                    : formData.contract_number.length > 0 &&
+                                        formData.contract_number.length < 13
+                                        ? "border border-red-500"
+                                        : "border border-custom-bluegreen"
                                     }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[182px]">
@@ -498,11 +498,11 @@ const EngageFormModal = forwardRef(
                             </div>
                             <span
                                 className={`flex justify-end text-xs ${formData.contract_number.length > 0 &&
-                                        contractNumberError
-                                        ? "text-red-500"
-                                        : formData.contract_number.length === 13
-                                            ? "text-custom-bluegreen"
-                                            : "text-gray-400"
+                                    contractNumberError
+                                    ? "text-red-500"
+                                    : formData.contract_number.length === 13
+                                        ? "text-custom-bluegreen"
+                                        : "text-gray-400"
                                     }`}
                             >
                                 {formData?.contract_number.length} /13
@@ -558,8 +558,8 @@ const EngageFormModal = forwardRef(
                                     isPropertyButtonDisabled || isSubmitting
                                 }
                                 className={`bg-white border w-[150px] h-[35px] rounded-[10px] text-sm  text-custom-bluegreen montserrat-semibold  border-custom-bluegreen ${isPropertyButtonDisabled || isSubmitting
-                                        ? "cursor-not-allowed opacity-50"
-                                        : ""
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
                                     }`}
                             >
                                 {isSubmitting &&
@@ -577,8 +577,8 @@ const EngageFormModal = forwardRef(
                                     isPropertyButtonDisabled || isSubmitting
                                 }
                                 className={`border  w-[150px] h-[35px] rounded-[10px] text-sm bg-white text-white montserrat-semibold gradient-btn5 ${isPropertyButtonDisabled || isSubmitting
-                                        ? "cursor-not-allowed opacity-50"
-                                        : ""
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
                                     }`}
                             >
                                 {isSubmitting &&

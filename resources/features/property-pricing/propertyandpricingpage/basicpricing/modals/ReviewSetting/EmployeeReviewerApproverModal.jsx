@@ -8,8 +8,8 @@ import React, {
 import { useStateContext } from "@/context/contextprovider";
 import { debounce } from "lodash";
 import highlightText from "@/util/hightlightText";
-import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
-import usePriceListEmployees from "@/component/layout/propertyandpricingpage/hooks/usePriceListEmployees";
+import { usePricing } from "@/features/property-pricing/propertyandpricingpage/context/BasicPricingContext";
+import usePriceListEmployees from "@/features/property-pricing/propertyandpricingpage/hooks/usePriceListEmployees";
 import CustomInput from "@/component/Input/CustomInput";
 import _ from "lodash";
 
@@ -306,8 +306,8 @@ const EmployeeReviewerApproverModal = ({
                         <button
                             disabled={isDisabled}
                             className={`h-[37px] w-[100px] rounded-[5px] text-white montserrat-semibold text-sm gradient-btn5 hover:shadow-custom4 ${isDisabled
-                                    ? "cursor-not-allowed opacity-50"
-                                    : ""
+                                ? "cursor-not-allowed opacity-50"
+                                : ""
                                 }`}
                             onClick={handleApply}
                         >

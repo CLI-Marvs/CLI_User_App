@@ -1,17 +1,17 @@
 import React, { useState } from "react";
-import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
-import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
-import WalkinHistoryTableRow from "@/component/layout/inquirypage/component/WalkinList/WalkinHistoryTableRow";
+import TransactionSearchBar from "@/features/transaction-management/transaction/TransactionSearchBar";
+import CustomTable from "@/features/property-pricing/propertyandpricingpage/component/CustomTable";
+import WalkinHistoryTableRow from "@/features/customer-relations/inquirypage/component/WalkinList/WalkinHistoryTableRow";
 import Skeleton from "@/component/Skeletons";
 import { WALKIN_HISTORY_COLUMNS } from "@/constant/data/tableColumns";
 import { useQuery } from "@tanstack/react-query";
-import { walkinTransactionService } from "@/component/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
-import { useCategories } from "@/component/layout/inquirypage/hooks/useCategories";
-import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
-import Button from "@/component/layout/inquirypage/component/ui/button";
+import { walkinTransactionService } from "@/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
+import { useCategories } from "@/features/customer-relations/inquirypage/hooks/useCategories";
+import Pagination from "@/features/property-pricing/propertyandpricingpage/component/Pagination";
+import Button from "@/features/customer-relations/inquirypage/component/ui/button";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa6";
-import WalkinTransactionModal from "@/component/layout/inquirypage/component/WalkinList/WalkinTransactionModal";
+import WalkinTransactionModal from "@/features/customer-relations/inquirypage/component/WalkinList/WalkinTransactionModal";
 import { useWalkinSelection } from "@/context/InquiryManagement/WalkinSelectionContext";
 import { useSurvey } from "@/context/Survey/SurveyContext";
 

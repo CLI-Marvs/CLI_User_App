@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import ReportPage from "../../../layout/inquirypage/ReportPage";
+import ReportPage from "@/features/customer-relations/inquirypage/ReportPage";
 
 const ReportViews = () => {
     const location = useLocation();

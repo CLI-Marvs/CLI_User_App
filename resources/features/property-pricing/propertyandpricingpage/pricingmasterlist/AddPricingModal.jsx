@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
-import apiService from "../../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { useNavigate } from "react-router-dom";
 
 
@@ -27,7 +27,7 @@ const AddPricingModal = ({ modalRef }) => {
         }));
     };
 
-    
+
     const handleSubmit = async (e, status) => {
         e.preventDefault();
         const form = new FormData();

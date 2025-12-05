@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import FloorPremiumAddUnitModal from "./FloorPremiumAddUnitModal";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+import { usePricing } from "@/features/property-pricing/propertyandpricingpage/context/BasicPricingContext";
 const FloorPremiumAssignModal = ({
     floorPremiumAssignModalRef,
     selectedFloor,
@@ -173,16 +173,16 @@ const FloorPremiumAssignModal = ({
                                                 handleUnitSelect(item?.id)
                                             }
                                             className={`h-[63px] p-[6px] ${!isExcluded
-                                                    ? "gradient-btn4"
-                                                    : ""
+                                                ? "gradient-btn4"
+                                                : ""
                                                 } rounded-[15px] `}
                                             key={key}
                                         >
                                             <button
                                                 className={`flex justify-center items-center bg-white h-full min-w-max px-2 text-custom-solidgreen rounded-[10px] font-bold ${priceListData.data
-                                                        .status !== "Draft"
-                                                        ? "cursor-not-allowed"
-                                                        : "cursor-pointer"
+                                                    .status !== "Draft"
+                                                    ? "cursor-not-allowed"
+                                                    : "cursor-pointer"
                                                     }`}
                                                 disabled={
                                                     priceListData.data

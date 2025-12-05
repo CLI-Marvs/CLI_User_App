@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ReactDOM from 'react-dom';
-import apiService from '../../servicesApi/apiService';
-import FileIcon from "../../../../../public/Images/folder_file_notes.svg";
-import ViewIcon from "../../../../../public/Images/eye_icon.svg";
-import DownloadIcon from "../../../../../public/Images/download_icon.svg";
+import apiService from '@/servicesApi/apiService';
+import FileIcon from "@/assets/images/folder_file_notes.svg";
+import ViewIcon from "@/assets/images/eye_icon.svg";
+import DownloadIcon from "@/assets/images/download_icon.svg";
 
 const getAssignmentActionText = (logMessage) => {
     if (!logMessage) return null;

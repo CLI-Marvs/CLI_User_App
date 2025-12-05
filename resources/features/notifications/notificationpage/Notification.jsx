@@ -4,7 +4,7 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { useStateContext } from "../../../context/contextprovider";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 
 const Notification = () => {
     const {
@@ -19,7 +19,7 @@ const Notification = () => {
         notifStatus
     } = useStateContext();
     const [activeButton, setActiveButton] = useState("All");
-    
+
     const handleClick = (button) => {
         setNotifStatus((prev) => (prev === button ? "All" : button));
         setNotifCurrentPage(0);

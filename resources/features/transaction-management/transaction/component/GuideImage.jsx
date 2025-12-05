@@ -1,5 +1,5 @@
 import React from "react";
-import guide from "../../../../../../public/Images/guide_image.png"; // Adjust the path as necessary
+import guide from "@/assets/images/guide_image.png"; // Adjust the path as necessary
 
 const GuideImage = () => {
     return (

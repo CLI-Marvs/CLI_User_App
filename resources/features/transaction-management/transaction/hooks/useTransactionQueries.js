@@ -1,4 +1,4 @@
-import { transaction } from "@/component/servicesApi/apiCalls/transactions";
+import { transaction } from "@/servicesApi/apiCalls/transactions";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import moment from "moment";
 

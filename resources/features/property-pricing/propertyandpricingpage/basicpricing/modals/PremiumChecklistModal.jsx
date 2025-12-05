@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+import { usePricing } from "@/features/property-pricing/propertyandpricingpage/context/BasicPricingContext";
 
 const PremiumChecklistModal = ({
     premiumCheckListModalRef,
@@ -191,9 +191,9 @@ const PremiumChecklistModal = ({
                                         )}
                                         type="checkbox"
                                         className={`h-[16px] w-[16px] ml-[16px] rounded-[2px] appearance-none border border-gray-400 checked:bg-transparent flex items-center justify-center checked:before:bg-black checked:before:w-[12px] checked:before:h-[12px] checked:before:block checked:before:content-[''] ${priceListData.data.status !==
-                                                "Draft"
-                                                ? "cursor-not-allowed"
-                                                : "cursor-pointer"
+                                            "Draft"
+                                            ? "cursor-not-allowed"
+                                            : "cursor-pointer"
                                             }`}
                                     />
                                     <p>{premium.viewName}</p>
@@ -206,8 +206,8 @@ const PremiumChecklistModal = ({
                         <button
                             disabled={!hasChanges()}
                             className={`w-[151px] h-[37px] text-white montserrat-semibold text-sm gradient-btn5 rounded-[10px] hover:shadow-custom4 ${!hasChanges()
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
                                 }`}
                             onClick={handleApplyPremiums}
                         >

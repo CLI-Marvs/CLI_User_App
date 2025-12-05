@@ -1,11 +1,11 @@
 import React from 'react'
-import PaymentScheme from '../../../layout/propertyandpricingpage/paymentscheme/PaymentScheme'
+import PaymentScheme from '@/features/property-pricing/propertyandpricingpage/paymentscheme/PaymentScheme'
 
 
 const PaymentSchemeView = () => {
   return (
     <div>
-        <PaymentScheme/>
+      <PaymentScheme />
     </div>
   )
 }

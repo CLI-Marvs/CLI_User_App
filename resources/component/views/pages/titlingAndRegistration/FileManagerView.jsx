@@ -19,9 +19,9 @@ import {
     Squares2X2Icon,
     ListBulletIcon,
 } from "@heroicons/react/24/outline";
-import FileViewerModal from "../../../layout/documentManagementPage/FileViewerModal";
+import FileViewerModal from "@/features/document-management/documentManagementPage/FileViewerModal";
 import { useDocumentManagementContext } from "../../../../context/DocumentManagement/DocumentManagementContext";
-import apiService from "../../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -201,17 +201,16 @@ const FileCard = ({
 
     const uploadDate = file.created_at
         ? new Date(file.created_at).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-          })
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+        })
         : "Unknown Date";
 
     return (
         <div
-            className={`w-[200px] h-[200px] rounded-xl border-2 ${
-                isSelected ? "border-red-500 bg-red-50" : "border-gray-200"
-            } bg-white shadow-md p-2 flex flex-col justify-between hover:shadow-lg transition-all cursor-pointer relative`}
+            className={`w-[200px] h-[200px] rounded-xl border-2 ${isSelected ? "border-red-500 bg-red-50" : "border-gray-200"
+                } bg-white shadow-md p-2 flex flex-col justify-between hover:shadow-lg transition-all cursor-pointer relative`}
             onClick={() => !isSelectable && onClick(file)}
         >
             {/* Selection checkbox */}
@@ -284,8 +283,8 @@ const FileCard = ({
                         </div>
                     </div>
                 ) : extension === "csv" ||
-                  extension === "xlsx" ||
-                  extension === "xls" ? (
+                    extension === "xlsx" ||
+                    extension === "xls" ? (
                     <div className="w-full h-full flex items-center justify-center bg-white">
                         <iframe
                             src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(
@@ -324,11 +323,10 @@ const SidebarStep = ({
     return (
         <div className="mb-1">
             <div
-                className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
-                    isSelected
-                        ? "bg-custom-lightestgreen text-custom-solidgreen"
-                        : "hover:bg-gray-100"
-                }`}
+                className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${isSelected
+                    ? "bg-custom-lightestgreen text-custom-solidgreen"
+                    : "hover:bg-gray-100"
+                    }`}
                 onClick={onClick}
             >
                 <div className="flex items-center">
@@ -383,9 +381,8 @@ const SidebarMilestone = ({ milestone, isSelected, onClick }) => {
 
     return (
         <div
-            className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${
-                isSelected ? "bg-blue-50 text-blue-600" : "hover:bg-gray-50"
-            }`}
+            className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition-colors ${isSelected ? "bg-blue-50 text-blue-600" : "hover:bg-gray-50"
+                }`}
             onClick={onClick}
         >
             <div className="flex items-center">
@@ -645,8 +642,7 @@ const FileManagerView = () => {
     const handleDeleteFile = async (file) => {
         if (
             !confirm(
-                `Are you sure you want to delete "${
-                    file.file_title || file.file_name
+                `Are you sure you want to delete "${file.file_title || file.file_name
                 }"?`
             )
         ) {
@@ -832,7 +828,7 @@ const FileManagerView = () => {
                                                 onClick={handleSelectAll}
                                             >
                                                 {selectedFiles.length ===
-                                                currentFiles.length
+                                                    currentFiles.length
                                                     ? "Deselect All"
                                                     : "Select All"}
                                             </Button>
@@ -843,7 +839,7 @@ const FileManagerView = () => {
                                                 onClick={handleBulkDelete}
                                                 disabled={
                                                     selectedFiles.length ===
-                                                        0 || isDeleting
+                                                    0 || isDeleting
                                                 }
                                             >
                                                 {isDeleting
@@ -901,11 +897,10 @@ const FileManagerView = () => {
                                                     : "text"
                                             }
                                             size="sm"
-                                            className={`px-3 py-1.5 rounded-md transition-all ${
-                                                viewType === "grid"
-                                                    ? "bg-white shadow-sm text-blue-600"
-                                                    : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                                            }`}
+                                            className={`px-3 py-1.5 rounded-md transition-all ${viewType === "grid"
+                                                ? "bg-white shadow-sm text-blue-600"
+                                                : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                                                }`}
                                             onClick={() => setViewType("grid")}
                                         >
                                             <Squares2X2Icon className="w-4 h-4" />
@@ -917,11 +912,10 @@ const FileManagerView = () => {
                                                     : "text"
                                             }
                                             size="sm"
-                                            className={`px-3 py-1.5 rounded-md transition-all ${
-                                                viewType === "list"
-                                                    ? "bg-white shadow-sm text-blue-600"
-                                                    : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                                            }`}
+                                            className={`px-3 py-1.5 rounded-md transition-all ${viewType === "list"
+                                                ? "bg-white shadow-sm text-blue-600"
+                                                : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
+                                                }`}
                                             onClick={() => setViewType("list")}
                                         >
                                             <ListBulletIcon className="w-4 h-4" />
@@ -982,12 +976,11 @@ const FileManagerView = () => {
                                     (account) => (
                                         <div
                                             key={`account-${account.id}`}
-                                            className={`p-3 rounded-lg cursor-pointer transition-colors border ${
-                                                selectedAccount?.id ===
+                                            className={`p-3 rounded-lg cursor-pointer transition-colors border ${selectedAccount?.id ===
                                                 account.id
-                                                    ? "bg-custom-lightestgreen text-custom-solidgreen"
-                                                    : "hover:bg-gray-50 border-transparent"
-                                            }`}
+                                                ? "bg-custom-lightestgreen text-custom-solidgreen"
+                                                : "hover:bg-gray-50 border-transparent"
+                                                }`}
                                             onClick={() =>
                                                 handleAccountSelect(account)
                                             }
@@ -1040,11 +1033,10 @@ const FileManagerView = () => {
                             <div className="space-y-1">
                                 {/* Account Root */}
                                 <div
-                                    className={`flex items-center p-2 rounded-lg cursor-pointer transition-colors ${
-                                        !selectedStep && !selectedMilestone
-                                            ? "bg-custom-lightestgreen text-custom-solidgreen"
-                                            : "hover:bg-gray-100"
-                                    }`}
+                                    className={`flex items-center p-2 rounded-lg cursor-pointer transition-colors ${!selectedStep && !selectedMilestone
+                                        ? "bg-custom-lightestgreen text-custom-solidgreen"
+                                        : "hover:bg-gray-100"
+                                        }`}
                                     onClick={() => {
                                         setSelectedStep(null);
                                         setSelectedMilestone(null);
@@ -1203,14 +1195,13 @@ const FileManagerView = () => {
                                 {currentFiles.map((file, index) => (
                                     <div
                                         key={`file-list-${selectedAccount?.id}-${file.document_id}-${index}`}
-                                        className={`flex items-center p-3 rounded-lg border transition-all ${
-                                            isSelectionMode &&
+                                        className={`flex items-center p-3 rounded-lg border transition-all ${isSelectionMode &&
                                             selectedFiles.includes(
                                                 file.document_id
                                             )
-                                                ? "bg-blue-50 border-blue-200 shadow-sm"
-                                                : "bg-white border-gray-200 hover:shadow-md"
-                                        } cursor-pointer`}
+                                            ? "bg-blue-50 border-blue-200 shadow-sm"
+                                            : "bg-white border-gray-200 hover:shadow-md"
+                                            } cursor-pointer`}
                                     >
                                         {/* Selection Checkbox */}
                                         {isSelectionMode && (
@@ -1274,8 +1265,8 @@ const FileManagerView = () => {
                                                 >
                                                     {file.created_at
                                                         ? new Date(
-                                                              file.created_at
-                                                          ).toLocaleDateString()
+                                                            file.created_at
+                                                        ).toLocaleDateString()
                                                         : "Unknown Date"}
                                                 </Typography>
                                             </div>

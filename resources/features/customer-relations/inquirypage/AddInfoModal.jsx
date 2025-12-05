@@ -1,11 +1,11 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
-import Alert from "../../Alert";
 import { showToast } from "../../../util/toastUtil";
 import { PREDEFINED_USER_TYPES } from "../../../constant/data/preDefinedUserTypes";
 import { sortByNameAlphabetically } from "./utils/sort";
+import Alert from "@/component/Alert";
 /**
  * Function to normalizeData, that returns;
  * Strip out fields that needed to compare (like `id`, `status`, `created_at`, `updated_at`, etc.)
@@ -29,8 +29,8 @@ const normalizeData = (data) => {
         user_type: PREDEFINED_USER_TYPES.includes(data.user_type)
             ? data.user_type
             : data.user_type === null || data.user_type === ""
-            ? null
-            : "Others",
+                ? null
+                : "Others",
         other_user_type:
             data.user_type === "Others" ? data.other_user_type || "" : "",
     };
@@ -68,14 +68,14 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                 ...dataConcern,
                 user_type:
                     dataConcern.user_type === null ||
-                    dataConcern.user_type === ""
+                        dataConcern.user_type === ""
                         ? null // Leave null if user_type is empty
                         : PREDEFINED_USER_TYPES.includes(dataConcern.user_type)
-                        ? dataConcern.user_type // Use predefined type
-                        : "Others", // Otherwise, set to "Others"
+                            ? dataConcern.user_type // Use predefined type
+                            : "Others", // Otherwise, set to "Others"
                 other_user_type:
                     dataConcern.user_type !== null &&
-                    !PREDEFINED_USER_TYPES.includes(dataConcern.user_type)
+                        !PREDEFINED_USER_TYPES.includes(dataConcern.user_type)
                         ? storedData.other_user_type || dataConcern.user_type // Restore from storage or fallback
                         : "",
             });
@@ -104,14 +104,14 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
             dataConcern.user_type === null || dataConcern.user_type === ""
                 ? null // Leave as null if user_type is null or empty
                 : PREDEFINED_USER_TYPES.includes(dataConcern.user_type)
-                ? dataConcern.user_type // Keep it if it's in the predefined list
-                : "Others", // Otherwise, set to "Others"
+                    ? dataConcern.user_type // Keep it if it's in the predefined list
+                    : "Others", // Otherwise, set to "Others"
         other_user_type:
             dataConcern.user_type === null || dataConcern.user_type === ""
                 ? "" // Leave as empty if user_type is null or empty
                 : !PREDEFINED_USER_TYPES.includes(dataConcern.user_type)
-                ? dataConcern.other_user_type || dataConcern.user_type // Assign `user_type` if it's not predefined
-                : "", // Otherwise, keep empty
+                    ? dataConcern.other_user_type || dataConcern.user_type // Assign `user_type` if it's not predefined
+                    : "", // Otherwise, keep empty
     };
 
     //Only recompute these values when necessary
@@ -148,38 +148,38 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => {
-                      let formattedItem = formatFunc(item);
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => {
+                    let formattedItem = formatFunc(item);
 
-                      // Capitalize each word in the string
-                      formattedItem = formattedItem
-                          .split(" ")
-                          .map((word) => {
-                              // Check for specific words that need to be fully capitalized
-                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                  return word.toUpperCase();
-                              }
-                              // Capitalize the first letter of all other words
-                              return (
-                                  word.charAt(0).toUpperCase() +
-                                  word.slice(1).toLowerCase()
-                              );
-                          })
-                          .join(" ");
+                    // Capitalize each word in the string
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return (
+                                word.charAt(0).toUpperCase() +
+                                word.slice(1).toLowerCase()
+                            );
+                        })
+                        .join(" ");
 
-                      // Replace specific names if needed
-                      if (formattedItem === "Casamira South") {
-                          formattedItem = "Casa Mira South";
-                      }
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
 
-                      return formattedItem;
-                  })
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                    return formattedItem;
+                })
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -197,18 +197,18 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                 ...dataConcern, // Spread the dataConcern values into the state
                 user_type:
                     dataConcern.user_type === null ||
-                    dataConcern.user_type === ""
+                        dataConcern.user_type === ""
                         ? null // Keep null if user_type is null or empty
                         : PREDEFINED_USER_TYPES.includes(dataConcern.user_type)
-                        ? dataConcern.user_type // Keep if it's a predefined user type
-                        : "Others", // Otherwise, set to "Others"
+                            ? dataConcern.user_type // Keep if it's a predefined user type
+                            : "Others", // Otherwise, set to "Others"
                 other_user_type:
                     dataConcern.user_type === null ||
-                    dataConcern.user_type === ""
+                        dataConcern.user_type === ""
                         ? "" // Leave as empty if user_type is null or empty
                         : !PREDEFINED_USER_TYPES.includes(dataConcern.user_type)
-                        ? dataConcern.other_user_type || dataConcern.user_type // Set `other_user_type` to `user_type` when not predefined
-                        : "", // Otherwise, keep empty
+                            ? dataConcern.other_user_type || dataConcern.user_type // Set `other_user_type` to `user_type` when not predefined
+                            : "", // Otherwise, keep empty
             }));
             if (message) {
                 setMessage(dataConcern.admin_remarks || "");
@@ -435,10 +435,10 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs no-spinner"
                                 placeholder=""
                                 onInput={(e) =>
-                                    (e.target.value = e.target.value.replace(
-                                        /[^0-9]/g,
-                                        ""
-                                    ))
+                                (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                ))
                                 }
                             />
                         </div>
@@ -495,10 +495,10 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                     name="communication_type"
                                     value={
                                         dataToUpdate.communication_type?.toLowerCase() ===
-                                        "suggestion or recommendation"
+                                            "suggestion or recommendation"
                                             ? "Suggestion or Recommendation"
                                             : dataToUpdate.communication_type ||
-                                              ""
+                                            ""
                                     }
                                     onChange={handleChange}
                                     className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs"
@@ -596,10 +596,10 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                                 onInput={(e) =>
-                                    (e.target.value = e.target.value.replace(
-                                        /[^0-9]/g,
-                                        ""
-                                    ))
+                                (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                ))
                                 }
                             />
                         </div>
@@ -679,35 +679,35 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                              */}
                             {user?.department ===
                                 "Customer Relations - Services" && (
-                                <button
-                                    disabled={isUpdateDisabled(
-                                        dataToUpdate,
-                                        isUserTypeChange,
-                                        hasChanges
-                                    )}
-                                    className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
-                                    type="button"
-                                    onClick={handleShowUpdateAlert}
-                                    style={{
-                                        opacity: isUpdateDisabled(
+                                    <button
+                                        disabled={isUpdateDisabled(
                                             dataToUpdate,
                                             isUserTypeChange,
                                             hasChanges
-                                        )
-                                            ? 0.5
-                                            : 1,
-                                        cursor: isUpdateDisabled(
-                                            dataToUpdate,
-                                            isUserTypeChange,
-                                            hasChanges
-                                        )
-                                            ? "not-allowed"
-                                            : "pointer",
-                                    }}
-                                >
-                                    Update
-                                </button>
-                            )}
+                                        )}
+                                        className="w-[133px] h-[39px] font-semibold text-sm text-white rounded-[10px] gradient-btn5"
+                                        type="button"
+                                        onClick={handleShowUpdateAlert}
+                                        style={{
+                                            opacity: isUpdateDisabled(
+                                                dataToUpdate,
+                                                isUserTypeChange,
+                                                hasChanges
+                                            )
+                                                ? 0.5
+                                                : 1,
+                                            cursor: isUpdateDisabled(
+                                                dataToUpdate,
+                                                isUserTypeChange,
+                                                hasChanges
+                                            )
+                                                ? "not-allowed"
+                                                : "pointer",
+                                        }}
+                                    >
+                                        Update
+                                    </button>
+                                )}
                         </div>
                     </div>
                 </div>
@@ -719,9 +719,9 @@ const AddInfoModal = ({ modalRef, dataConcern, onupdate }) => {
                         show={showAlert}
                         onCancel={handleCancel}
                         onConfirm={handleConfirm}
-                        //You can pass onConfirm and onCancel props to customize the text of the buttons. Example below;
-                        // confirmText="Update"
-                        // cancelText="Cancel"
+                    //You can pass onConfirm and onCancel props to customize the text of the buttons. Example below;
+                    // confirmText="Update"
+                    // cancelText="Cancel"
                     />
                 </div>
             </div>

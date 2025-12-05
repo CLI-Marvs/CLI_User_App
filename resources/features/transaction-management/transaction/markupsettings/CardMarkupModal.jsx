@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { settings } from "@/component/servicesApi/apiCalls/markupSettings/settings";
+import { settings } from "@/servicesApi/apiCalls/markupSettings/settings";
 import { showToast } from "@/util/toastUtil";
 import Spinner from "@/util/Spinner";
 import CustomInput from "@/component/Input/CustomInput";
@@ -130,8 +130,8 @@ const CardMarkupModal = ({
                                 value={formData["payment_method"]}
                                 onChange={fieldsOnchange}
                                 className={`border border-gray-300 rounded-[5px] p-2 w-full ${selectedData
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : ""
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
                                     }`}
                                 disabled={selectedData}
                             />

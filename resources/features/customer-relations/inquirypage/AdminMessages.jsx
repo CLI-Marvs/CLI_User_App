@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
-import AdminLogo from "../../../../../public/Images/AdminSilouette.svg";
+import AdminLogo from "@/assets/images/AdminSilouette.svg";
 import { useStateContext } from "../../../context/contextprovider";
-import FolderFile from "../../../../../public/Images/folder_file.svg";
+import FolderFile from "@/assets/images/folder_file.svg";
 import { BsDownload } from "react-icons/bs";
 import moment from "moment";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import CircularProgress from "@mui/material/CircularProgress";
 
 import { useNavigate, Link } from "react-router-dom";

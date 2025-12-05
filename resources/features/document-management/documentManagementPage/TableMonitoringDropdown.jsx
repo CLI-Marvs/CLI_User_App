@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import FileViewerModal from "./FileViewerModal";
 
 const WORK_ORDER_TBD = "TBD";
@@ -358,10 +358,10 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                                 <div className="flex items-center space-x-2">
                                     <div
                                         className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${completion === 100
-                                                ? "bg-green-100 text-green-800"
-                                                : completion > 0
-                                                    ? "bg-yellow-100 text-yellow-800"
-                                                    : "bg-gray-100 text-gray-600"
+                                            ? "bg-green-100 text-green-800"
+                                            : completion > 0
+                                                ? "bg-yellow-100 text-yellow-800"
+                                                : "bg-gray-100 text-gray-600"
                                             }`}
                                     >
                                         {completion === 100
@@ -374,8 +374,8 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                                     <div className="w-16 h-1 bg-gray-200 rounded-full overflow-hidden">
                                         <div
                                             className={`h-full rounded-full transition-all duration-500 ${completion === 100
-                                                    ? "bg-green-500"
-                                                    : "bg-blue-500"
+                                                ? "bg-green-500"
+                                                : "bg-blue-500"
                                                 }`}
                                             style={{ width: `${completion}%` }}
                                         ></div>
@@ -421,8 +421,8 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                                                 <div
                                                     key={itemKey}
                                                     className={`flex items-center justify-between p-2 rounded border transition-all ${isChecked
-                                                            ? "bg-green-50 border-green-200"
-                                                            : "bg-white border-gray-200"
+                                                        ? "bg-green-50 border-green-200"
+                                                        : "bg-white border-gray-200"
                                                         }`}
                                                 >
                                                     <div className="flex items-center space-x-2 flex-1 min-w-0">
@@ -442,8 +442,8 @@ const Dropdown = ({ currentMilestone, workOrderId, accountId }) => {
                                                             </div>
                                                             <div
                                                                 className={`text-xs font-medium flex items-center ${isChecked
-                                                                        ? "text-green-700"
-                                                                        : "text-orange-600"
+                                                                    ? "text-green-700"
+                                                                    : "text-orange-600"
                                                                     }`}
                                                             >
                                                                 <span className="mr-1">

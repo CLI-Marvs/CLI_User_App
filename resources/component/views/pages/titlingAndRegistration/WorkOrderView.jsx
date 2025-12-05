@@ -23,12 +23,12 @@ import Delete from "@/assets/images/Trash_light.svg";
 import Profile from "@/assets/images/Profile.svg";
 import { useDocumentManagementContext } from "../../../../context/DocumentManagement/DocumentManagementContext";
 import { useStateContext } from "../../../../context/contextprovider";
-import CreateWorkOrderModal from "../../../layout/documentManagementPage/CreateWorkOrders";
-import apiService from "../../../servicesApi/apiService";
-import EditWorkOrderModal from "../../../layout/documentManagementPage/EditWorkOrderModal";
-import WorkOrderDeletionModal from "../../../layout/documentManagementPage/WorkOrderDeletionModal";
-import WorkOrderGroupDetailsModal from "../../../layout/documentManagementPage/WorkOrderGroupDetailsModal";
-import AllAccountsSummaryModal from "../../../layout/documentManagementPage/AllAccountsSummaryModal";
+import CreateWorkOrderModal from "@/features/document-management/documentManagementPage/CreateWorkOrders";
+import apiService from "@/servicesApi/apiService";
+import EditWorkOrderModal from "@/features/document-management/documentManagementPage/EditWorkOrderModal";
+import WorkOrderDeletionModal from "@/features/document-management/documentManagementPage/WorkOrderDeletionModal";
+import WorkOrderGroupDetailsModal from "@/features/document-management/documentManagementPage/WorkOrderGroupDetailsModal";
+import AllAccountsSummaryModal from "@/features/document-management/documentManagementPage/AllAccountsSummaryModal";
 
 const TABLE_HEAD = [
     { head: "Work Order Group" },
@@ -544,8 +544,8 @@ const WorkOrderView = () => {
                                         setCurrentPage(1);
                                     }}
                                     className={`flex items-center justify-center h-9 w-full p-4 ${workOrderFilterOption === option.label
-                                            ? "bg-custom-lightestgreen text-gray-900"
-                                            : "text-gray-700"
+                                        ? "bg-custom-lightestgreen text-gray-900"
+                                        : "text-gray-700"
                                         }`}
                                     style={{ fontWeight: "normal" }}
                                 >
@@ -646,8 +646,8 @@ const WorkOrderView = () => {
                                             />
                                             <svg
                                                 className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 transition-transform cursor-pointer ${isProjectDropdownOpen
-                                                        ? "rotate-180"
-                                                        : ""
+                                                    ? "rotate-180"
+                                                    : ""
                                                     }`}
                                                 fill="none"
                                                 stroke="currentColor"
@@ -791,8 +791,8 @@ const WorkOrderView = () => {
                                                         }
                                                     }}
                                                     className={`w-full pr-10 text-sm text-center ${!selectedDateFilter
-                                                            ? "cursor-not-allowed opacity-50"
-                                                            : ""
+                                                        ? "cursor-not-allowed opacity-50"
+                                                        : ""
                                                         }`}
                                                     calendarClassName="custom-calendar"
                                                     disabled={
@@ -1045,8 +1045,8 @@ const WorkOrderView = () => {
                                         {/* Main Group Row */}
                                         <tr
                                             className={`transition-all duration-200 ease-in-out ${idx % 2 === 0
-                                                    ? "bg-gradient-to-r from-slate-50 to-gray-50"
-                                                    : "bg-white"
+                                                ? "bg-gradient-to-r from-slate-50 to-gray-50"
+                                                : "bg-white"
                                                 } hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 group cursor-pointer`}
                                             onClick={() =>
                                                 handleOpenGroupDetailsModal(
@@ -1077,15 +1077,15 @@ const WorkOrderView = () => {
                                                     <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                                                     <span
                                                         className={`font-medium px-2 py-1 rounded-full text-xs ${group.status ===
-                                                                "Complete"
-                                                                ? "bg-green-100 text-green-800"
+                                                            "Complete"
+                                                            ? "bg-green-100 text-green-800"
+                                                            : group.status ===
+                                                                "In Progress"
+                                                                ? "bg-yellow-100 text-yellow-800"
                                                                 : group.status ===
-                                                                    "In Progress"
-                                                                    ? "bg-yellow-100 text-yellow-800"
-                                                                    : group.status ===
-                                                                        "Overdue"
-                                                                        ? "bg-red-100 text-red-800"
-                                                                        : "bg-gray-100 text-gray-800"
+                                                                    "Overdue"
+                                                                    ? "bg-red-100 text-red-800"
+                                                                    : "bg-gray-100 text-gray-800"
                                                             }`}
                                                     >
                                                         {group.status}

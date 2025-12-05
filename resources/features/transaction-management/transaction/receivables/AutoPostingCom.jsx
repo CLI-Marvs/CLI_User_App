@@ -3,10 +3,10 @@ import PostingTableCell from "./PostingTableCell";
 import { useTransactionContext } from "@/context/Transaction/TransactionContext";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
-import { transaction } from "@/component/servicesApi/apiCalls/transactions";
-import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
+import { transaction } from "@/servicesApi/apiCalls/transactions";
+import TransactionSearchBar from "@/features/transaction-management/transaction/TransactionSearchBar";
 import Skeletons from "@/component/Skeletons";
-import { usePropertyFormatter } from "@/component/layout/transaction/hooks/usePropertyFormatter";
+import { usePropertyFormatter } from "@/features/transaction-management/transaction/hooks/usePropertyFormatter";
 
 const AutoPostingCom = () => {
     const statuses = ["Cleared", "Posted", "Floating"];
@@ -402,8 +402,8 @@ const AutoPostingCom = () => {
                                 className={`w-[143px] h-[37px] shadow-custom12 mt-5 rounded-md flex items-center justify-center cursor-pointer ${dynamicClass(
                                     item
                                 )} ${activeItemTransaction === item
-                                        ? "bg-[#F1F1F1] shadow-custom13"
-                                        : ""
+                                    ? "bg-[#F1F1F1] shadow-custom13"
+                                    : ""
                                     }`}
                                 key={index}
                                 onClick={() => handleActiveItem(item)}

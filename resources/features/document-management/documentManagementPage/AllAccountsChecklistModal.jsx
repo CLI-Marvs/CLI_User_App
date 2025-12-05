@@ -11,7 +11,7 @@ import {
 } from "@material-tailwind/react";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
-import apiService from "@/component/servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import NotesAndUpdatesModal from "./NotesAndUpdatesModal";
 import AddFilesModal from "./AddFilesModal";
 import WorkOrderGroupDetailsModal from "./WorkOrderGroupDetailsModal";
@@ -103,8 +103,8 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
             console.error("Error details:", error.response?.data);
             setError(
                 error.response?.data?.error ||
-                    error.response?.data?.message ||
-                    "Failed to load all accounts data"
+                error.response?.data?.message ||
+                "Failed to load all accounts data"
             );
         } finally {
             setIsLoading(false);
@@ -228,7 +228,7 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                     account.account_checklist_statuses?.some(
                                         (status) =>
                                             status.checklist_id ===
-                                                checklist.id &&
+                                            checklist.id &&
                                             (status.is_completed === true ||
                                                 status.status === "complete")
                                     );
@@ -243,17 +243,17 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                             percentage:
                                 checklists.length > 0
                                     ? Math.round(
-                                          (completedChecklists.length /
-                                              checklists.length) *
-                                              100
-                                      )
+                                        (completedChecklists.length /
+                                            checklists.length) *
+                                        100
+                                    )
                                     : 0,
                             status:
                                 completedChecklists.length === checklists.length
                                     ? "completed"
                                     : completedChecklists.length > 0
-                                    ? "in-progress"
-                                    : "pending",
+                                        ? "in-progress"
+                                        : "pending",
                             workOrder: col.step.workOrder,
                             checklists: checklists,
                             milestone_name: col.milestone_name,
@@ -846,38 +846,38 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                 {(searchTerm ||
                                                     statusFilter !== "all" ||
                                                     hideCompletedChecklists) && (
-                                                    <button
-                                                        onClick={() => {
-                                                            setSearchTerm("");
-                                                            setStatusFilter(
-                                                                "all"
-                                                            );
-                                                            setHideCompletedChecklists(
-                                                                false
-                                                            );
-                                                            setCurrentPage(1);
-                                                        }}
-                                                        className="flex items-center gap-2 px-3 py-2.5 bg-red-50 border-2 border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-100 hover:border-red-300 transition-all duration-200"
-                                                        title="Clear all active filters"
-                                                    >
-                                                        <svg
-                                                            className="h-4 w-4"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            viewBox="0 0 24 24"
+                                                        <button
+                                                            onClick={() => {
+                                                                setSearchTerm("");
+                                                                setStatusFilter(
+                                                                    "all"
+                                                                );
+                                                                setHideCompletedChecklists(
+                                                                    false
+                                                                );
+                                                                setCurrentPage(1);
+                                                            }}
+                                                            className="flex items-center gap-2 px-3 py-2.5 bg-red-50 border-2 border-red-200 rounded-lg text-sm font-medium text-red-600 hover:bg-red-100 hover:border-red-300 transition-all duration-200"
+                                                            title="Clear all active filters"
                                                         >
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M6 18L18 6M6 6l12 12"
-                                                            />
-                                                        </svg>
-                                                        <span className="hidden sm:inline">
-                                                            Clear Filters
-                                                        </span>
-                                                    </button>
-                                                )}
+                                                            <svg
+                                                                className="h-4 w-4"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                viewBox="0 0 24 24"
+                                                            >
+                                                                <path
+                                                                    strokeLinecap="round"
+                                                                    strokeLinejoin="round"
+                                                                    strokeWidth={2}
+                                                                    d="M6 18L18 6M6 6l12 12"
+                                                                />
+                                                            </svg>
+                                                            <span className="hidden sm:inline">
+                                                                Clear Filters
+                                                            </span>
+                                                        </button>
+                                                    )}
                                             </div>
 
                                             {/* Action Buttons */}
@@ -886,19 +886,17 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                 <button
                                                     onClick={handleRefresh}
                                                     disabled={isRefreshing}
-                                                    className={`relative flex items-center justify-center px-4 py-2.5 rounded-lg border-2 font-medium transition-all duration-300 ${
-                                                        isRefreshing
+                                                    className={`relative flex items-center justify-center px-4 py-2.5 rounded-lg border-2 font-medium transition-all duration-300 ${isRefreshing
                                                             ? "bg-blue-50 border-blue-300 text-blue-600"
                                                             : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:shadow-md"
-                                                    } disabled:opacity-50 disabled:cursor-not-allowed`}
+                                                        } disabled:opacity-50 disabled:cursor-not-allowed`}
                                                     title="Refresh data"
                                                 >
                                                     <svg
-                                                        className={`h-5 w-5 transition-all duration-300 ${
-                                                            isRefreshing
+                                                        className={`h-5 w-5 transition-all duration-300 ${isRefreshing
                                                                 ? "animate-spin"
                                                                 : ""
-                                                        }`}
+                                                            }`}
                                                         fill="none"
                                                         stroke="currentColor"
                                                         viewBox="0 0 24 24"
@@ -1068,9 +1066,9 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                                     className="mb-2"
                                                                 >
                                                                     {searchTerm ||
-                                                                    statusFilter !==
+                                                                        statusFilter !==
                                                                         "all" ||
-                                                                    hideCompletedChecklists
+                                                                        hideCompletedChecklists
                                                                         ? "No Matching Accounts Found"
                                                                         : "No Accounts Found"}
                                                                 </Typography>
@@ -1079,40 +1077,40 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                                     className="mb-4"
                                                                 >
                                                                     {searchTerm ||
-                                                                    statusFilter !==
+                                                                        statusFilter !==
                                                                         "all" ||
-                                                                    hideCompletedChecklists
+                                                                        hideCompletedChecklists
                                                                         ? "Try adjusting your search or filter criteria."
                                                                         : "There are no accounts available in any work order groups."}
                                                                 </Typography>
                                                                 {(searchTerm ||
                                                                     statusFilter !==
-                                                                        "all" ||
+                                                                    "all" ||
                                                                     hideCompletedChecklists) && (
-                                                                    <Button
-                                                                        color="blue"
-                                                                        variant="text"
-                                                                        onClick={() => {
-                                                                            setSearchTerm(
-                                                                                ""
-                                                                            );
-                                                                            setStatusFilter(
-                                                                                "all"
-                                                                            );
-                                                                            setHideCompletedChecklists(
-                                                                                false
-                                                                            );
-                                                                            setCurrentPage(
-                                                                                1
-                                                                            );
-                                                                        }}
-                                                                        className="mt-2"
-                                                                    >
-                                                                        Clear
-                                                                        All
-                                                                        Filters
-                                                                    </Button>
-                                                                )}
+                                                                        <Button
+                                                                            color="blue"
+                                                                            variant="text"
+                                                                            onClick={() => {
+                                                                                setSearchTerm(
+                                                                                    ""
+                                                                                );
+                                                                                setStatusFilter(
+                                                                                    "all"
+                                                                                );
+                                                                                setHideCompletedChecklists(
+                                                                                    false
+                                                                                );
+                                                                                setCurrentPage(
+                                                                                    1
+                                                                                );
+                                                                            }}
+                                                                            className="mt-2"
+                                                                        >
+                                                                            Clear
+                                                                            All
+                                                                            Filters
+                                                                        </Button>
+                                                                    )}
                                                             </div>
                                                         </td>
                                                     </tr>
@@ -1125,7 +1123,7 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                                 }
                                                                 className={
                                                                     idx % 2 ===
-                                                                    0
+                                                                        0
                                                                         ? "bg-white"
                                                                         : "bg-gray-50"
                                                                 }
@@ -1160,22 +1158,21 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                                         const cellData =
                                                                             row
                                                                                 .stepData[
-                                                                                `step_${col.id}`
+                                                                            `step_${col.id}`
                                                                             ];
                                                                         return (
                                                                             <td
                                                                                 key={
                                                                                     col.id
                                                                                 }
-                                                                                className={`px-1 py-2 text-center border-x border-gray-100 ${
-                                                                                    cellData.assigned &&
-                                                                                    !cellData.showBlank
+                                                                                className={`px-1 py-2 text-center border-x border-gray-100 ${cellData.assigned &&
+                                                                                        !cellData.showBlank
                                                                                         ? "cursor-pointer hover:bg-blue-50 hover:shadow-md transition-all duration-200"
                                                                                         : ""
-                                                                                }`}
+                                                                                    }`}
                                                                                 title={
                                                                                     cellData.assigned &&
-                                                                                    !cellData.showBlank
+                                                                                        !cellData.showBlank
                                                                                         ? "Click to view work order details"
                                                                                         : ""
                                                                                 }
@@ -1195,23 +1192,22 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                                                         •
                                                                                     </span>
                                                                                 ) : cellData.assigned &&
-                                                                                  cellData.status !==
-                                                                                      "user-not-assigned" ? (
+                                                                                    cellData.status !==
+                                                                                    "user-not-assigned" ? (
                                                                                     <div className="flex flex-col items-center">
                                                                                         {getStatusIcon(
                                                                                             cellData.status
                                                                                         )}
                                                                                         <div className="mt-1">
                                                                                             <span
-                                                                                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                                                                                    cellData.status ===
-                                                                                                    "completed"
+                                                                                                className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${cellData.status ===
+                                                                                                        "completed"
                                                                                                         ? "bg-green-100 text-green-800"
                                                                                                         : cellData.status ===
-                                                                                                          "in-progress"
-                                                                                                        ? "bg-blue-100 text-blue-800"
-                                                                                                        : "bg-gray-100 text-gray-600"
-                                                                                                }`}
+                                                                                                            "in-progress"
+                                                                                                            ? "bg-blue-100 text-blue-800"
+                                                                                                            : "bg-gray-100 text-gray-600"
+                                                                                                    }`}
                                                                                             >
                                                                                                 {
                                                                                                     cellData.percentage
@@ -1244,27 +1240,25 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                                                     <div className="flex flex-col items-center">
                                                                         <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                                                                             <div
-                                                                                className={`h-2 rounded-full transition-all ${
-                                                                                    row.totalAssigned ===
-                                                                                    0
+                                                                                className={`h-2 rounded-full transition-all ${row.totalAssigned ===
+                                                                                        0
                                                                                         ? "bg-gray-400"
                                                                                         : row.totalCompleted ===
-                                                                                          row.totalAssigned
-                                                                                        ? "bg-green-600"
-                                                                                        : row.totalCompleted >
-                                                                                          0
-                                                                                        ? "bg-blue-600"
-                                                                                        : "bg-gray-400"
-                                                                                }`}
+                                                                                            row.totalAssigned
+                                                                                            ? "bg-green-600"
+                                                                                            : row.totalCompleted >
+                                                                                                0
+                                                                                                ? "bg-blue-600"
+                                                                                                : "bg-gray-400"
+                                                                                    }`}
                                                                                 style={{
-                                                                                    width: `${
-                                                                                        row.totalAssigned >
-                                                                                        0
+                                                                                    width: `${row.totalAssigned >
+                                                                                            0
                                                                                             ? (row.totalCompleted /
-                                                                                                  row.totalAssigned) *
-                                                                                              100
+                                                                                                row.totalAssigned) *
+                                                                                            100
                                                                                             : 0
-                                                                                    }%`,
+                                                                                        }%`,
                                                                                 }}
                                                                             />
                                                                         </div>
@@ -1313,23 +1307,22 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                                         of {matrixData.length} accounts
                                         {matrixData.length !==
                                             summary.totalAccounts && (
-                                            <>
-                                                {" "}
-                                                (filtered from{" "}
-                                                {summary.totalAccounts} total)
-                                            </>
-                                        )}
+                                                <>
+                                                    {" "}
+                                                    (filtered from{" "}
+                                                    {summary.totalAccounts} total)
+                                                </>
+                                            )}
                                     </>
                                 ) : (
                                     <>
                                         {searchTerm ||
-                                        statusFilter !== "all" ||
-                                        hideCompletedChecklists
-                                            ? `No results found ${
-                                                  summary.totalAccounts > 0
-                                                      ? `(${summary.totalAccounts} total accounts available)`
-                                                      : ""
-                                              }`
+                                            statusFilter !== "all" ||
+                                            hideCompletedChecklists
+                                            ? `No results found ${summary.totalAccounts > 0
+                                                ? `(${summary.totalAccounts} total accounts available)`
+                                                : ""
+                                            }`
                                             : "No accounts available"}
                                     </>
                                 )}
@@ -1431,10 +1424,9 @@ const AllAccountsChecklistModal = ({ isOpen, onClose, currentUserId }) => {
                             };
                             return (
                                 <span
-                                    className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                        statusClasses[status] ||
+                                    className={`px-2 py-1 text-xs font-medium rounded-full ${statusClasses[status] ||
                                         "bg-gray-100 text-gray-800"
-                                    }`}
+                                        }`}
                                 >
                                     {status}
                                 </span>

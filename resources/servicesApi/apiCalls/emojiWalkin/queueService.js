@@ -3,7 +3,7 @@ import {
     doc,
     updateDoc,
     getDoc,
-} from "@/component/servicesApi/firebaseService";
+} from "@/servicesApi/firebaseService";
 
 export const queueService = {
 

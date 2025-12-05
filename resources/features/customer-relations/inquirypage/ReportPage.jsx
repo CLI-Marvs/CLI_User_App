@@ -19,7 +19,7 @@ import {
 } from "recharts";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import debounce from "lodash/debounce";
 import { TiDownload } from "react-icons/ti";
 import { useStateContext } from "../../../context/contextprovider";
@@ -497,47 +497,47 @@ const ReportPage = () => {
         );
     };
 
-      const formattedPropertyNames = [
+    const formattedPropertyNames = [
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => {
-                      // First trim to remove any whitespace or \n
-                      let formattedItem = item.trim();
-                      
-                      // Apply the formatting function
-                      formattedItem = formatFunc(formattedItem);
-    
-                      // Split and clean each word
-                      formattedItem = formattedItem
-                          .split(" ")
-                          .map(word => word.trim()) // Trim each word
-                          .filter(word => word.length > 0) // Remove empty strings
-                          .map((word) => {
-                              // Check for specific words that need to be fully capitalized
-                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                  return word.toUpperCase();
-                              }
-                              // Capitalize the first letter of all other words
-                              return word.charAt(0).toUpperCase() + 
-                                     word.slice(1).toLowerCase();
-                          })
-                          .join(" ");
-    
-                      // Replace specific names if needed
-                      if (formattedItem === "Casamira South") {
-                          formattedItem = "Casa Mira South";
-                      }
-    
-                      // Final trim to ensure no leftover spaces
-                      return formattedItem.trim();
-                  })
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => {
+                    // First trim to remove any whitespace or \n
+                    let formattedItem = item.trim();
+
+                    // Apply the formatting function
+                    formattedItem = formatFunc(formattedItem);
+
+                    // Split and clean each word
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map(word => word.trim()) // Trim each word
+                        .filter(word => word.length > 0) // Remove empty strings
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return word.charAt(0).toUpperCase() +
+                                word.slice(1).toLowerCase();
+                        })
+                        .join(" ");
+
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
+
+                    // Final trim to ensure no leftover spaces
+                    return formattedItem.trim();
+                })
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -549,22 +549,22 @@ const ReportPage = () => {
 
     const allDepartment = allEmployees
         ? [
-              "All",
-              ...Array.from(
-                  new Set(
-                      allEmployees
-                          .map((employee) => employee.department)
-                          .filter(
-                              (department) =>
-                                  department !== null &&
-                                  department !== undefined &&
-                                  department !== "PM" &&
-                                  department !== "IT" &&
-                                  department !== "Digital Innovation"
-                          )
-                  )
-              ),
-          ]
+            "All",
+            ...Array.from(
+                new Set(
+                    allEmployees
+                        .map((employee) => employee.department)
+                        .filter(
+                            (department) =>
+                                department !== null &&
+                                department !== undefined &&
+                                department !== "PM" &&
+                                department !== "IT" &&
+                                department !== "Digital Innovation"
+                        )
+                )
+            ),
+        ]
         : ["All"];
 
     const handleInputChange = (e) => {
@@ -972,7 +972,7 @@ const ReportPage = () => {
                                 {/* Empty default option */}
                                 <option value="All">All</option>
                                 {user?.department ===
-                                "Customer Relations - Services" ? (
+                                    "Customer Relations - Services" ? (
                                     allDepartment
                                         .filter((item) => item !== "All")
                                         .sort()
@@ -1434,7 +1434,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1500,7 +1500,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1566,7 +1566,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1632,7 +1632,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1851,7 +1851,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1860,11 +1860,11 @@ const ReportPage = () => {
                                                             : "",
                                                     startDate: startDateValue,
                                                     endDate: endDateValue,
-                                                    });
-                                                    setDaysFilter(null);
-                                                    setActiveDayButton(null);
-                                                    setSpecificAssigneeCsr("");
-                                                    setAssignedToMeActive(false);
+                                                });
+                                                setDaysFilter(null);
+                                                setActiveDayButton(null);
+                                                setSpecificAssigneeCsr("");
+                                                setAssignedToMeActive(false);
                                                 navigate(
                                                     "/inquirymanagement/inquirylist"
                                                 );
@@ -1917,7 +1917,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -1983,7 +1983,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -2049,7 +2049,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -2115,7 +2115,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -2181,7 +2181,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -2248,7 +2248,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -2314,7 +2314,7 @@ const ReportPage = () => {
                                                             : "",
                                                     departments:
                                                         departmentValue !==
-                                                        "All"
+                                                            "All"
                                                             ? departmentValue
                                                             : "",
                                                     selectedProperty:
@@ -2417,17 +2417,17 @@ const ReportPage = () => {
                                                                     item.name,
                                                                 selectedYear:
                                                                     yearValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? yearValue
                                                                         : "",
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 departments:
                                                                     departmentValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? departmentValue
                                                                         : "",
                                                                 startDate:
@@ -2469,17 +2469,17 @@ const ReportPage = () => {
                                                                 status: "Resolved",
                                                                 selectedYear:
                                                                     yearValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? yearValue
                                                                         : "",
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 departments:
                                                                     departmentValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? departmentValue
                                                                         : "",
                                                                 startDate:
@@ -2521,17 +2521,17 @@ const ReportPage = () => {
                                                                 status: "Closed",
                                                                 selectedYear:
                                                                     yearValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? yearValue
                                                                         : "",
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 departments:
                                                                     departmentValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? departmentValue
                                                                         : "",
                                                                 startDate:
@@ -2573,17 +2573,17 @@ const ReportPage = () => {
                                                                 status: "unresolved",
                                                                 selectedYear:
                                                                     yearValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? yearValue
                                                                         : "",
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 departments:
                                                                     departmentValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? departmentValue
                                                                         : "",
                                                                 startDate:
@@ -2808,22 +2808,22 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? item.name
                                                                         : "",
                                                                 selectedYear:
                                                                     yearValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? yearValue
                                                                         : "",
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 selectedProperty:
                                                                     projectValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? projectValue
                                                                         : "",
                                                                 startDate:
@@ -2867,23 +2867,23 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? item.name
                                                                         : "",
                                                                 status: "Resolved",
                                                                 selectedYear:
                                                                     yearValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? yearValue
                                                                         : "",
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 selectedProperty:
                                                                     projectValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? projectValue
                                                                         : "",
                                                                 startDate:
@@ -2926,23 +2926,23 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? item.name
                                                                         : "",
                                                                 status: "Closed",
                                                                 selectedYear:
                                                                     yearValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? yearValue
                                                                         : "",
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 selectedProperty:
                                                                     projectValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? projectValue
                                                                         : "",
                                                                 startDate:
@@ -2985,23 +2985,23 @@ const ReportPage = () => {
                                                             setSearchFilter({
                                                                 departments:
                                                                     item.name !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? item.name
                                                                         : "",
                                                                 status: "unresolved",
                                                                 selectedYear:
                                                                     yearValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? yearValue
                                                                         : "",
                                                                 selectedMonth:
                                                                     monthValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? monthValue
                                                                         : "",
                                                                 selectedProperty:
                                                                     projectValue !==
-                                                                    "All"
+                                                                        "All"
                                                                         ? projectValue
                                                                         : "",
                                                                 startDate:
@@ -3152,22 +3152,22 @@ const ReportPage = () => {
                                                                             category.name,
                                                                         selectedYear:
                                                                             yearValue !==
-                                                                            "All"
+                                                                                "All"
                                                                                 ? yearValue
                                                                                 : "",
                                                                         selectedMonth:
                                                                             monthValue !==
-                                                                            "All"
+                                                                                "All"
                                                                                 ? monthValue
                                                                                 : "",
                                                                         departments:
                                                                             departmentValue !==
-                                                                            "All"
+                                                                                "All"
                                                                                 ? departmentValue
                                                                                 : "",
                                                                         selectedProperty:
                                                                             projectValue !==
-                                                                            "All"
+                                                                                "All"
                                                                                 ? projectValue
                                                                                 : "",
                                                                         startDate:

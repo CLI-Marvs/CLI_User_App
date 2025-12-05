@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import CustomInput from "@/component/Input/CustomInput";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
-import SendSurveyModal from "@/component/layout/inquirypage/SendSurveyModal";
+import SendSurveyModal from "@/features/customer-relations/inquirypage/SendSurveyModal";
 import { useSurvey } from "@/context/Survey/SurveyContext";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { categoryService } from "@/component/servicesApi/apiCalls/emojiWalkin/categoryService";
+import { categoryService } from "@/servicesApi/apiCalls/emojiWalkin/categoryService";
 
 export const useCategories = () => {
     return useQuery({

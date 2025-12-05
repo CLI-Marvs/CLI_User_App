@@ -5,8 +5,8 @@ import React, {
     useMemo,
     useCallback,
 } from "react";
-import CheckedIcon from "../../../../../public/Images/checkbox_icon.svg";
-import UncheckedIcon from "../../../../../public/Images/uncheck_box.svg";
+import CheckedIcon from "@/assets/images/checkbox_icon.svg";
+import UncheckedIcon from "@/assets/images/uncheck_box.svg";
 
 const SearchableDropdown = ({
     options,

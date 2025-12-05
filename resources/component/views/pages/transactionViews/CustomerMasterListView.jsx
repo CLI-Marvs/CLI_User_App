@@ -1,5 +1,5 @@
 import React from 'react'
-import CustomerMasterlist from '@/component/layout/transaction/CustomerMasterlist'
+import CustomerMasterlist from '@/features/transaction-management/transaction/CustomerMasterlist'
 
 const CustomerMasterListView = () => {
   return (

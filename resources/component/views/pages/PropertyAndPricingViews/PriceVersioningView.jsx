@@ -1,11 +1,11 @@
 import React from 'react'
-import PriceVersioning from '../../../layout/propertyandpricingpage/priceversioning/PriceVersioning'
+import PriceVersioning from '@/features/property-pricing/propertyandpricingpage/priceversioning/PriceVersioning'
 
 
 const PriceVersioningView = () => {
   return (
     <div>
-        <PriceVersioning/>
+      <PriceVersioning />
     </div>
   )
 }

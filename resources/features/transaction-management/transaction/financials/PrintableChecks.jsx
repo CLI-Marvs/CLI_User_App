@@ -1,6 +1,6 @@
 import React from "react";
-import { formatDate } from "@/component/layout/transaction/utils/formatDate";
-import { formatAmount } from "@/component/layout/transaction/utils/formatAmount";
+import { formatDate } from "@/features/transaction-management/transaction/utils/formatDate";
+import { formatAmount } from "@/features/transaction-management/transaction/utils/formatAmount";
 import { convertAmountToWords } from "../utils/chequeUtils";
 
 const PrintableChecks = ({

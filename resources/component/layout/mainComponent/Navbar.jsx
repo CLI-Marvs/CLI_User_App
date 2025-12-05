@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import CLILogo from "@/assets/images/CLILogo.png";
 // import Kent from "@/assets/images/kent.png";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import { Link, useLocation } from "react-router-dom";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
@@ -484,8 +484,7 @@ const Navbar = () => {
                     >
                         {
                             /* capitalizeWords()*/
-                            `${concernData?.buyer_firstname || ""} ${
-                                concernData?.buyer_middlename || ""
+                            `${concernData?.buyer_firstname || ""} ${concernData?.buyer_middlename || ""
                             } ${concernData?.buyer_lastname || ""}`
                         }{" "}
                         {/* capitalizeWords()*/ concernData?.suffix_name || ""}{" "}

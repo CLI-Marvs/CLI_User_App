@@ -5,21 +5,21 @@ import {
     IoIosCloseCircle,
     IoMdArrowDropdown,
 } from "react-icons/io";
-import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+import { usePricing } from "@/features/property-pricing/propertyandpricingpage/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import usePriceListEmployees from "@/component/layout/propertyandpricingpage/hooks/usePriceListEmployees";
-import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
+import usePriceListEmployees from "@/features/property-pricing/propertyandpricingpage/hooks/usePriceListEmployees";
+import { priceListMasterService } from "@/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
-import EmployeeReviewerApproverModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/EmployeeReviewerApproverModal";
-import ExpandableDataTable from "@/component/layout/propertyandpricingpage/basicpricing/modals/ReviewSetting/ExpandableDataTable";
+import EmployeeReviewerApproverModal from "@/features/property-pricing/propertyandpricingpage/basicpricing/modals/ReviewSetting/EmployeeReviewerApproverModal";
+import ExpandableDataTable from "@/features/property-pricing/propertyandpricingpage/basicpricing/modals/ReviewSetting/ExpandableDataTable";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
-import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/hooks/usePropertyPricing";
-import { formatPayload } from "@/component/layout/propertyandpricingpage/utils/payloadFormatter";
+import { usePropertyPricing } from "@/features/property-pricing/propertyandpricingpage/hooks/usePropertyPricing";
+import { formatPayload } from "@/features/property-pricing/propertyandpricingpage/utils/payloadFormatter";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import CustomToolTip from "@/component/CustomToolTip";
-import UnitTableComponent from "@/component/layout/propertyandpricingpage/component/UnitTableComponent";
+import UnitTableComponent from "@/features/property-pricing/propertyandpricingpage/component/UnitTableComponent";
 import { staticHeaders } from "@/constant/data/staticHeaders";
 
 const ReviewsandApprovalRouting = ({
@@ -254,16 +254,16 @@ const ReviewsandApprovalRouting = ({
                 >
                     <span
                         className={` text-custom-solidgreen ${isOpen
-                                ? "text-[20px] montserrat-semibold"
-                                : "text-[18px] montserrat-regular"
+                            ? "text-[20px] montserrat-semibold"
+                            : "text-[18px] montserrat-regular"
                             }`}
                     >
                         Review and Approval Routing
                     </span>
                     <span
                         className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${isOpen
-                                ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
-                                : "rotate-0 gradient-btn2 text-white"
+                            ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
+                            : "rotate-0 gradient-btn2 text-white"
                             }`}
                     >
                         <IoIosArrowDown className=" text-[18px]" />

@@ -1,14 +1,14 @@
 import React, { useState, useMemo, useRef } from "react";
-import { HeaderAndFilters } from "@/component/layout/inquirypage/component/WalkinReport/HeaderAndFilters";
-import SummaryCards from "@/component/layout/inquirypage/component/WalkinReport/SummaryCards";
-import ChartSection from "@/component/layout/inquirypage/component/WalkinReport/ChartSection";
-import FeedbackTabs from "@/component/layout/inquirypage/component/WalkinReport/FeedbackTabs";
-import { useBranch } from "@/component/layout/inquirypage/hooks/useBranch";
+import { HeaderAndFilters } from "@/features/customer-relations/inquirypage/component/WalkinReport/HeaderAndFilters";
+import SummaryCards from "@/features/customer-relations/inquirypage/component/WalkinReport/SummaryCards";
+import ChartSection from "@/features/customer-relations/inquirypage/component/WalkinReport/ChartSection";
+import FeedbackTabs from "@/features/customer-relations/inquirypage/component/WalkinReport/FeedbackTabs";
+import { useBranch } from "@/features/customer-relations/inquirypage/hooks/useBranch";
 import { useQuery } from "@tanstack/react-query";
-import { personTypeService } from "@/component/servicesApi/apiCalls/emojiWalkin/personTypeService";
-import { reportService } from "@/component/servicesApi/apiCalls/emojiWalkin/reportService";
-import emojis from "@/component/layout/inquirypage/constants/emoji";
-import WalkinReportSkeleton from "@/component/layout/inquirypage/component/WalkinReport/skeleton/WalkinReportSkeleton";
+import { personTypeService } from "@/servicesApi/apiCalls/emojiWalkin/personTypeService";
+import { reportService } from "@/servicesApi/apiCalls/emojiWalkin/reportService";
+import emojis from "@/features/customer-relations/inquirypage/constants/emoji";
+import WalkinReportSkeleton from "@/features/customer-relations/inquirypage/component/WalkinReport/skeleton/WalkinReportSkeleton";
 import { useWalkinReportFilters } from "@/context/InquiryManagement/WalkinReportFilterProvider";
 import moment from "moment";
 

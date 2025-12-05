@@ -1,5 +1,5 @@
 import React from "react";
-import CustomTableHeader from "@/component/layout/propertyandpricingpage/component/CustomTableHeader";
+import CustomTableHeader from "@/features/property-pricing/propertyandpricingpage/component/CustomTableHeader";
 import Skeleton from "@/component/Skeletons";
 
 const CustomTable = ({

@@ -8,20 +8,20 @@ import ReviewsandApprovalRouting from "./accordion/ReviewsandApprovalRouting";
 import FloorPremiums from "./accordion/FloorPremiums";
 import { useLocation } from "react-router-dom";
 import { useStateContext } from "../../../../context/contextprovider";
-import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
-import { formatPayload } from "@/component/layout/propertyandpricingpage/utils/payloadFormatter";
+import { usePricing } from "@/features/property-pricing/propertyandpricingpage/context/BasicPricingContext";
+import { formatPayload } from "@/features/property-pricing/propertyandpricingpage/utils/payloadFormatter";
 import { showToast } from "@/util/toastUtil";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import CircularProgress from "@mui/material/CircularProgress";
-import { usePropertyPricing } from "@/component/layout/propertyandpricingpage/hooks/usePropertyPricing";
+import { usePropertyPricing } from "@/features/property-pricing/propertyandpricingpage/hooks/usePropertyPricing";
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
-import UnitUploadButton from "@/component/layout/propertyandpricingpage/component/UnitUploadButton";
-import generateBigIntId from "@/component/layout/propertyandpricingpage/utils/generateId";
+import UnitUploadButton from "@/features/property-pricing/propertyandpricingpage/component/UnitUploadButton";
+import generateBigIntId from "@/features/property-pricing/propertyandpricingpage/utils/generateId";
 import {
     priceListInitialState,
     priceVersionInitialState,
-} from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+} from "@/features/property-pricing/propertyandpricingpage/context/BasicPricingContext";
 
 const additionalPremiums = [
     {
@@ -459,8 +459,8 @@ const BasicPricing = () => {
                                 : "Upload Unit Details"
                         }
                         className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 ${isLoading["On-going Approval"]
-                                ? "cursor-not-allowed opacity-50"
-                                : ""
+                            ? "cursor-not-allowed opacity-50"
+                            : ""
                             }`}
                         propertyData={priceListData}
                         setAccordionStates={setAccordionStates}
@@ -468,8 +468,8 @@ const BasicPricing = () => {
 
                     <button
                         className={`h-[37px] w-[176px] rounded-[10px] text-white montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 ${isLoading["On-going Approval"]
-                                ? "cursor-not-allowed opacity-50"
-                                : ""
+                            ? "cursor-not-allowed opacity-50"
+                            : ""
                             }`}
                         type="submit"
                         onClick={(e) =>
@@ -484,8 +484,8 @@ const BasicPricing = () => {
                     </button>
                     <button
                         className={`h-[37px] w-[117px] rounded-[10px] text-custom-solidgreen montserrat-semibold text-sm gradient-btn2 hover:shadow-custom4 p-[3px] ${isLoading["On-going Approval"]
-                                ? "cursor-not-allowed opacity-50"
-                                : ""
+                            ? "cursor-not-allowed opacity-50"
+                            : ""
                             }`}
                         type="submit"
                         onClick={(e) => handleFormSubmit(e, "Draft")}

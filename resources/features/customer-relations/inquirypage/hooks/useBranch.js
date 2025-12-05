@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { branchService } from "@/component/servicesApi/apiCalls/emojiWalkin/branchService";
+import { branchService } from "@/servicesApi/apiCalls/emojiWalkin/branchService";
 
 export const useBranch = () => {
     return useQuery({

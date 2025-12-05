@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import isButtonDisabled from "@/util/isFormButtonDisabled";
-import validateContractNumber from "@/component/layout/inquirypage/utils/validateContractNumber";
-import { walkinTransactionService } from "@/component/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
+import validateContractNumber from "@/features/customer-relations/inquirypage/utils/validateContractNumber";
+import { walkinTransactionService } from "@/servicesApi/apiCalls/emojiWalkin/walkinTransactionService";
 import { showToast } from "@/util/toastUtil";
-import { queueService } from "@/component/servicesApi/apiCalls/emojiWalkin/queueService";
+import { queueService } from "@/servicesApi/apiCalls/emojiWalkin/queueService";
 import { useStateContext } from "@/context/contextprovider";
-import apiService from "@/component/servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 
 export function useEngageForm(

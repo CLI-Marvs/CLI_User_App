@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import { MdCalendarToday } from "react-icons/md";
-import arrowCutomer from "../../../../../public/Images/arrowcustomer.png";
+import arrowCutomer from "@/assets/images/arrowcustomer.png";
 
 const categories = [
     "Reservation Documents",

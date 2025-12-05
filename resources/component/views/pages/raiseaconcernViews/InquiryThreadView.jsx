@@ -1,5 +1,5 @@
 import React from 'react'
-import InquiryThread from '../../../layout/inquirypage/InquiryThread'
+import InquiryThread from '@/features/customer-relations/inquirypage/InquiryThread'
 
 const InquiryThreadView = () => {
   return (

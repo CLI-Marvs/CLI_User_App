@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
-import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+import { usePricing } from "@/features/property-pricing/propertyandpricingpage/context/BasicPricingContext";
 const AddPaymentSchemeModal = ({
     addPaymentSchemeModalRef,
     priceListData,
@@ -199,8 +199,8 @@ const AddPaymentSchemeModal = ({
                         <div
                             key={item.id}
                             className={`flex flex-col gap-1 text-sm pr-4 py-2 ${isExpanded
-                                    ? "overflow-y-auto max-h-[200px]"
-                                    : "overflow-hidden"
+                                ? "overflow-y-auto max-h-[200px]"
+                                : "overflow-hidden"
                                 }`}
                         >
                             <p
@@ -259,8 +259,8 @@ const AddPaymentSchemeModal = ({
                             disabled={isDisabled}
                             onClick={handleConfirm}
                             className={`h-[37px] w-[185px] text-white rounded-[10px] gradient-btn2 hover:shadow-custom4 ${isDisabled
-                                    ? "cursor-not-allowed opacity-60"
-                                    : ""
+                                ? "cursor-not-allowed opacity-60"
+                                : ""
                                 }`}
                         >
                             Confirm

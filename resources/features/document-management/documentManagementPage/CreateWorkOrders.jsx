@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import ReactDOM from "react-dom";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import { useDocumentManagementContext } from "../../../context/DocumentManagement/DocumentManagementContext";
 import DatePicker from "react-datepicker";
@@ -882,8 +882,8 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                 setIsProjectDropdownOpen(true)
                                             }
                                             className={`w-full py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${selectedProjectDetails
-                                                    ? "pl-56 pr-20"
-                                                    : "pl-10 pr-20"
+                                                ? "pl-56 pr-20"
+                                                : "pl-10 pr-20"
                                                 }`}
                                         />
 
@@ -917,15 +917,15 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                             onClick={refreshProjects}
                                             disabled={isProjectsRefreshing}
                                             className={`absolute inset-y-0 right-0 pr-3 flex items-center transition-colors duration-200 ${isProjectsRefreshing
-                                                    ? "text-custom-bluegreen cursor-not-allowed"
-                                                    : "text-gray-400 hover:text-custom-bluegreen"
+                                                ? "text-custom-bluegreen cursor-not-allowed"
+                                                : "text-gray-400 hover:text-custom-bluegreen"
                                                 }`}
                                             title="Refresh projects"
                                         >
                                             <svg
                                                 className={`h-4 w-4 ${isProjectsRefreshing
-                                                        ? "animate-spin"
-                                                        : ""
+                                                    ? "animate-spin"
+                                                    : ""
                                                     }`}
                                                 fill="none"
                                                 stroke="currentColor"
@@ -1141,8 +1141,8 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                 setIsAccountDropdownOpen(true)
                                             }
                                             className={`w-full pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm ${selectedAccounts.length > 0
-                                                    ? "pl-64"
-                                                    : "pl-10"
+                                                ? "pl-64"
+                                                : "pl-10"
                                                 }`}
                                             style={{
                                                 paddingLeft:
@@ -1307,8 +1307,8 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                                             account.id
                                                                         }
                                                                         className={`group px-4 py-3 flex items-center space-x-3 border-b border-gray-100 last:border-b-0 transition-all duration-200 ${account.has_active_work_orders
-                                                                                ? "cursor-not-allowed opacity-60 bg-gray-50"
-                                                                                : "cursor-pointer hover:bg-blue-50"
+                                                                            ? "cursor-not-allowed opacity-60 bg-gray-50"
+                                                                            : "cursor-pointer hover:bg-blue-50"
                                                                             }`}
                                                                     >
                                                                         <div className="flex-shrink-0">
@@ -1330,16 +1330,16 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                                                     )
                                                                                 }
                                                                                 className={`h-4 w-4 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200 ${account.has_active_work_orders
-                                                                                        ? "text-gray-400 cursor-not-allowed"
-                                                                                        : "text-blue-600"
+                                                                                    ? "text-gray-400 cursor-not-allowed"
+                                                                                    : "text-blue-600"
                                                                                     }`}
                                                                             />
                                                                         </div>
                                                                         <div className="flex-1 min-w-0">
                                                                             <span
                                                                                 className={`select-none font-medium transition-colors duration-200 ${account.has_active_work_orders
-                                                                                        ? "text-gray-500"
-                                                                                        : "text-gray-900 group-hover:text-blue-700"
+                                                                                    ? "text-gray-500"
+                                                                                    : "text-gray-900 group-hover:text-blue-700"
                                                                                     }`}
                                                                             >
                                                                                 {
@@ -1423,15 +1423,15 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                 isMilestoneStructureLoading
                                             }
                                             className={`absolute top-2 right-0 pr-5 text-custom-bluegreen hover:text-custom-lightgreen transition-colors duration-200 p-1 rounded-full hover:bg-gray-100 z-0 ${isMilestoneStructureLoading
-                                                    ? "cursor-not-allowed opacity-50"
-                                                    : ""
+                                                ? "cursor-not-allowed opacity-50"
+                                                : ""
                                                 }`}
                                             title="Refresh milestone structure"
                                         >
                                             <svg
                                                 className={`w-4 h-4 ${isMilestoneStructureLoading
-                                                        ? "animate-spin"
-                                                        : ""
+                                                    ? "animate-spin"
+                                                    : ""
                                                     }`}
                                                 fill="none"
                                                 stroke="currentColor"
@@ -1584,18 +1584,18 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                                                                                     }
                                                                                                     className="h-3 w-3 text-blue-600 focus:ring-blue-500 border-gray-300 rounded transition-colors duration-200"
                                                                                                     title={`${isSelected
-                                                                                                            ? "Unselect"
-                                                                                                            : "Select"
+                                                                                                        ? "Unselect"
+                                                                                                        : "Select"
                                                                                                         } ${assignee.full_name
                                                                                                         }`}
                                                                                                 />
                                                                                             )}
                                                                                             <span
                                                                                                 className={`px-2 py-1 rounded-full text-xs leading-tight ${showCheckbox
-                                                                                                        ? isSelected
-                                                                                                            ? "bg-green-100 text-green-800"
-                                                                                                            : "bg-gray-100 text-gray-600"
-                                                                                                        : "bg-green-100 text-green-800"
+                                                                                                    ? isSelected
+                                                                                                        ? "bg-green-100 text-green-800"
+                                                                                                        : "bg-gray-100 text-gray-600"
+                                                                                                    : "bg-green-100 text-green-800"
                                                                                                     }`}
                                                                                             >
                                                                                                 {
@@ -1777,9 +1777,9 @@ const CreateWorkOrderModal = ({ isOpen, onClose, onCreateWorkOrder }) => {
                                             selectedAccounts.length === 0
                                         }
                                         className={`inline-flex justify-center py-[10px] px-11 border border-transparent shadow-sm text-sm font-medium rounded-[10px] text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${canCreateWorkOrder &&
-                                                selectedAccounts.length > 0
-                                                ? "bg-gradient-to-r from-custom-bluegreen to-custom-lightgreen hover:opacity-90"
-                                                : "bg-gray-400 cursor-not-allowed"
+                                            selectedAccounts.length > 0
+                                            ? "bg-gradient-to-r from-custom-bluegreen to-custom-lightgreen hover:opacity-90"
+                                            : "bg-gray-400 cursor-not-allowed"
                                             }`}
                                     >
                                         Create

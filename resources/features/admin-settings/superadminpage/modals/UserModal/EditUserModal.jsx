@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
-import { normalizeData } from "@/component/layout/superadminpage/modals/UserModal/utils/normalizeData";
+import { normalizeData } from "@/features/admin-settings/superadminpage/modals/UserModal/utils/normalizeData";
 import isEqual from "lodash/isEqual";
-import Feature from "@/component/layout/superadminpage/component/Feature";
+import Feature from "@/features/admin-settings/superadminpage/component/Feature";
 import useFeature from "@/context/RoleManagement/FeatureContext";
 import useEmployeePermission from "@/context/RoleManagement/EmployeePermissionContext";
-import { employeePermissionService } from "@/component/servicesApi/apiCalls/roleManagement";
+import { employeePermissionService } from "@/servicesApi/apiCalls/roleManagement";
 import Alert from "@/component/Alert";
 
 const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
@@ -247,8 +247,8 @@ const EditUserModal = ({ editEmployeeModalRef, selectedEmployee }) => {
                             onClick={handleShowUpdateAlert}
                             disabled={isButtonDisabled || isLoading}
                             className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isButtonDisabled || isLoading
-                                    ? "cursor-not-allowed opacity-50"
-                                    : ""
+                                ? "cursor-not-allowed opacity-50"
+                                : ""
                                 }`}
                         >
                             {isLoading ? (

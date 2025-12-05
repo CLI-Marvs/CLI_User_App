@@ -1,4 +1,4 @@
-import { numberToWords } from "@/component/layout/transaction/utils/formatNumberToWords";
+import { numberToWords } from "@/features/transaction-management/transaction/utils/formatNumberToWords";
 
 export const convertAmountToWords = (amountStr) => {
     if (!amountStr) return "";

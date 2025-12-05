@@ -3,10 +3,10 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { useStateContext } from "@/context/contextprovider";
 import GlobalTable from "../GlobalTable";
-import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
+import TransactionSearchBar from "@/features/transaction-management/transaction/TransactionSearchBar";
 import usePagination from "@/hooks/usePagination";
 import { useTransactionContext } from "@/context/Transaction/TransactionContext";
-import { transaction } from "@/component/servicesApi/apiCalls/transactions";
+import { transaction } from "@/servicesApi/apiCalls/transactions";
 import Pagination from "@/component/Pagination";
 import CheckTableCell from "./CheckTableCell";
 import { useChecksExport } from "../hooks/useTransactionQueries";

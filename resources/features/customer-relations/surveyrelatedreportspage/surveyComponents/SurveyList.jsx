@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom';
 import { FaTrash } from "react-icons/fa";
-import apiService from '../../../servicesApi/apiService';
+import apiService from '@/servicesApi/apiService';
 import ListImage from './ListImage';
 import { HiDotsVertical } from "react-icons/hi";
 import SurveyEditModal from './SurveyEditModal';
@@ -47,7 +47,7 @@ export const SurveyList = ({ data, handleDelete, handleUpdateTitle }) => {
         if (isToday) {
             return `Edited today at ${time}`;
         } else {
-            const formattedDate = date.toLocaleDateString('en-US'); 
+            const formattedDate = date.toLocaleDateString('en-US');
             return `Last edited ${formattedDate} | ${time}`;
         }
     }
@@ -63,7 +63,7 @@ export const SurveyList = ({ data, handleDelete, handleUpdateTitle }) => {
             modalRef.current.close();
         }
     };
-    
+
     const openModal2 = () => {
         if (modalRef2.current) {
             modalRef2.current.showModal();
@@ -76,7 +76,7 @@ export const SurveyList = ({ data, handleDelete, handleUpdateTitle }) => {
         }
     };
 
-     const handleDeletebtn = () => {
+    const handleDeletebtn = () => {
         handleDelete(data.id);
         closeModal2();
     };

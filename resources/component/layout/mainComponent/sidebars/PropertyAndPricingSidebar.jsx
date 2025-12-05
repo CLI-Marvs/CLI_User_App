@@ -12,7 +12,7 @@ import {
     AccordionBody,
 } from "@material-tailwind/react";
 import { Link, useLocation } from "react-router-dom";
-import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+import { usePricing } from "@/features/property-pricing/propertyandpricingpage/context/BasicPricingContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { showToast } from "@/util/toastUtil";
 
@@ -85,9 +85,9 @@ const PropertyAndPricingSidebar = () => {
                                         )
                                     }
                                     className={`menu2 text-sm h-7 mb-1 flex justify-start pl-4 gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold hover:bg-white ${location.pathname ===
-                                            "/property-pricing/master-lists"
-                                            ? "text-custom-solidgreen font-semibold bg-white"
-                                            : "text-custom-solidgreen"
+                                        "/property-pricing/master-lists"
+                                        ? "text-custom-solidgreen font-semibold bg-white"
+                                        : "text-custom-solidgreen"
                                         }`}
                                 >
                                     Price List
@@ -104,9 +104,9 @@ const PropertyAndPricingSidebar = () => {
                                         )
                                     }
                                     className={`menu2 text-sm h-7 mb-1 flex justify-start pl-4 gap-2 rounded-full font-normal hover:font-semibold hover:bg-white ${location.pathname ===
-                                            "/property-pricing/payment-scheme"
-                                            ? "text-custom-solidgreen font-semibold bg-white"
-                                            : "text-custom-solidgreen"
+                                        "/property-pricing/payment-scheme"
+                                        ? "text-custom-solidgreen font-semibold bg-white"
+                                        : "text-custom-solidgreen"
                                         }`}
                                 >
                                     Payment Scheme
@@ -123,9 +123,9 @@ const PropertyAndPricingSidebar = () => {
                                         )
                                     }
                                     className={`menu2 text-sm h-7 mb-1 flex justify-start pl-4 gap-2 rounded-full font-normal hover:font-semibold hover:bg-white ${location.pathname ===
-                                            "/property-pricing/price-versioning"
-                                            ? "text-custom-solidgreen font-semibold bg-white"
-                                            : "text-custom-solidgreen"
+                                        "/property-pricing/price-versioning"
+                                        ? "text-custom-solidgreen font-semibold bg-white"
+                                        : "text-custom-solidgreen"
                                         }`}
                                 >
                                     Price Versioning
@@ -142,9 +142,9 @@ const PropertyAndPricingSidebar = () => {
                                         )
                                     }
                                     className={`menu2 text-sm h-7 mb-1 flex justify-start pl-4 gap-2 rounded-full font-normal hover:font-semibold hover:bg-white ${location.pathname ===
-                                            "/property-pricing/promotional-pricing"
-                                            ? "text-custom-solidgreen font-semibold bg-white"
-                                            : "text-custom-solidgreen"
+                                        "/property-pricing/promotional-pricing"
+                                        ? "text-custom-solidgreen font-semibold bg-white"
+                                        : "text-custom-solidgreen"
                                         }`}
                                 >
                                     Promotional Pricing
@@ -161,9 +161,9 @@ const PropertyAndPricingSidebar = () => {
                                         )
                                     }
                                     className={`menu2 text-sm h-9 mb-1 flex justify-start pl-4 gap-2 rounded-full text-custom-solidgreen font-normal hover:font-semibold hover:bg-white  ${location.pathname ===
-                                            "/property-pricing/workflow-notification"
-                                            ? "text-custom-solidgreen font-semibold bg-white"
-                                            : "text-custom-solidgreen"
+                                        "/property-pricing/workflow-notification"
+                                        ? "text-custom-solidgreen font-semibold bg-white"
+                                        : "text-custom-solidgreen"
                                         }`}
                                 >
                                     Workflow Notification

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { usePricing } from "@/component/layout/propertyandpricingpage/basicpricing/context/BasicPricingContext";
+import { usePricing } from "@/features/property-pricing/propertyandpricingpage/basicpricing/context/BasicPricingContext";
 
 const usePriceListEmployees = () => {
     const { setPricingData, pricingData } = usePricing();

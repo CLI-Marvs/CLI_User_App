@@ -4,7 +4,7 @@ import React, { useRef, useState } from "react";
 import CardMarkupTableCell from "./CardMarkupTableCell";
 import GlobalTable from "../GlobalTable";
 import Pagination from "@/component/Pagination";
-import { settings } from "@/component/servicesApi/apiCalls/markupSettings/settings";
+import { settings } from "@/servicesApi/apiCalls/markupSettings/settings";
 import MarkupSettingModal from "./MarkupSettingModal";
 import CardMarkupModal from "./CardMarkupModal";
 

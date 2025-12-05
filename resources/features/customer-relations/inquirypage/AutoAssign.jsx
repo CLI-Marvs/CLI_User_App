@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import DatePicker from 'react-datepicker';
 import { IoIosArrowDown } from 'react-icons/io';
-import DateLogo from "../../../../../public/Images/Date_range.svg";
+import DateLogo from "@/assets/images/Date_range.svg";
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { IoMdAdd } from "react-icons/io";
 import { TbTrashFilled } from 'react-icons/tb';

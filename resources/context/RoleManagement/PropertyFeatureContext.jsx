@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
-import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
-import useDataFetching from "@/component/layout/propertyandpricingpage/hooks/useDataFetching";
+import { propertyMasterService } from "@/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
+import useDataFetching from "@/features/property-pricing/propertyandpricingpage/hooks/useDataFetching";
 
 const PropertyFeatureContext = createContext();
 

@@ -3,10 +3,10 @@ import { TiPin, TiPinOutline } from "react-icons/ti";
 import { Link, useNavigate } from "react-router-dom";
 import { useStateContext } from "../../../context/contextprovider";
 import moment from "moment";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 
 const TicketTable = ({ concernData }) => {
- 
+
     const [checkedRows, setCheckedRows] = useState([]);
     const {
         getMessages,
@@ -16,10 +16,10 @@ const TicketTable = ({ concernData }) => {
         getInquiryLogs,
         getConcernMessages,
         getNavBarData,
- 
+
     } = useStateContext();
     //Permission check
-    
+
     const handleCheckboxChange = (index) => {
         setCheckedRows((prevCheckedRows) =>
             prevCheckedRows.includes(index)
@@ -80,7 +80,7 @@ const TicketTable = ({ concernData }) => {
             return date.toLocaleDateString(undefined, options);
         }
     };
-   
+
     /*  useEffect(() => {
          getAllConcerns();
      }, []); */

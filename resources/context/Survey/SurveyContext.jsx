@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext } from 'react';
-import apiService from '../../component/servicesApi/apiService';
+import apiService from '@/servicesApi/apiService';
 
 const SurveyContext = createContext();
 
@@ -38,7 +38,7 @@ export const SurveyProvider = ({ children }) => {
 
   const fetchSurveyLinks = async () => {
     try {
-      const response = await apiService.get('/survey-links'); 
+      const response = await apiService.get('/survey-links');
       setSurveyLinks(response.data);
     } catch (err) {
       setError('Failed to fetch survey links');
@@ -73,7 +73,7 @@ export const SurveyProvider = ({ children }) => {
         surveyStatus,
         statusLoading,
         setStatusLoading
-        
+
       }
     }>
       {children}

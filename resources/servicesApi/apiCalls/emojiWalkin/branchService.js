@@ -1,4 +1,4 @@
-import walkinFeedbackService from "@/component/servicesApi/walkinFeedbackService";
+import walkinFeedbackService from "@/servicesApi/walkinFeedbackService";
 
 export const branchService = {
     /*

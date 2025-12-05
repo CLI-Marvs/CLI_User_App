@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useStateContext } from "../../../context/contextprovider";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { AiFillInfoCircle } from "react-icons/ai";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { SURVEY_LINKS } from '../../../constant/data/surveyLink';

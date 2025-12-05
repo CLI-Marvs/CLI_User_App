@@ -1,19 +1,19 @@
 import React, { useRef, useState, useEffect } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
-import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
+import CustomTable from "@/features/property-pricing/propertyandpricingpage/component/CustomTable";
 import { WALKIN_COLUMNS } from "@/constant/data/tableColumns";
-import WalkinTableRow from "@/component/layout/inquirypage/component/WalkinList/WalkinTableRow";
-import EngageFormModal from "@/component/layout/inquirypage/component/WalkinList/EngageFormModal";
+import WalkinTableRow from "@/features/customer-relations/inquirypage/component/WalkinList/WalkinTableRow";
+import EngageFormModal from "@/features/customer-relations/inquirypage/component/WalkinList/EngageFormModal";
 import { showToast } from "@/util/toastUtil";
-import Button from "@/component/layout/inquirypage/component/ui/button";
+import Button from "@/features/customer-relations/inquirypage/component/ui/button";
 import { FaHistory } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
-import { useCategories } from "@/component/layout/inquirypage/hooks/useCategories";
-import { useBranch } from "@/component/layout/inquirypage/hooks/useBranch";
+import Pagination from "@/features/property-pricing/propertyandpricingpage/component/Pagination";
+import { useCategories } from "@/features/customer-relations/inquirypage/hooks/useCategories";
+import { useBranch } from "@/features/customer-relations/inquirypage/hooks/useBranch";
 import Skeleton from "@/component/Skeletons";
 import { useWalkinSelection } from "@/context/InquiryManagement/WalkinSelectionContext";
-import { useWalkinTransactions } from "@/component/layout/inquirypage/hooks/useWalkinTransactions";
+import { useWalkinTransactions } from "@/features/customer-relations/inquirypage/hooks/useWalkinTransactions";
 const WalkinListPage = () => {
     //States
     const [page, setPage] = useState(1);

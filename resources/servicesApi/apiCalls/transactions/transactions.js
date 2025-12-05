@@ -1,4 +1,4 @@
-import apiService from "@/component/servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 
 export const transaction = {
     transactionList: async (currentPage, filter = {}) => {

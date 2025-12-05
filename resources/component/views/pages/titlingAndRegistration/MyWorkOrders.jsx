@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import apiService from "../../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { Card, CardFooter, Typography } from "@material-tailwind/react";
@@ -12,11 +12,11 @@ import {
     MdClear,
 } from "react-icons/md";
 import { BsArrowsFullscreen } from "react-icons/bs";
-import ProcessWorkOrderModal from "../../../layout/documentManagementPage/ProcessWorkOrderModal";
+import ProcessWorkOrderModal from "@/features/document-management/documentManagementPage/ProcessWorkOrderModal";
 import _ from "lodash";
-import AddFilesModal from "../../../layout/documentManagementPage/AddFilesModal";
-import WorkOrderGroupDetailsModal from "../../../layout/documentManagementPage/WorkOrderGroupDetailsModal";
-import AllAccountsChecklistModal from "../../../layout/documentManagementPage/AllAccountsChecklistModal";
+import AddFilesModal from "@/features/document-management/documentManagementPage/AddFilesModal";
+import WorkOrderGroupDetailsModal from "@/features/document-management/documentManagementPage/WorkOrderGroupDetailsModal";
+import AllAccountsChecklistModal from "@/features/document-management/documentManagementPage/AllAccountsChecklistModal";
 import { useStateContext } from "../../../../context/contextprovider";
 import { useMyWorkOrdersContext } from "../../../../context/MyWorkOrdersContext";
 
@@ -27,9 +27,8 @@ const RefreshIcon = ({ onClick, isRefreshing }) => (
         fill="currentColor"
         strokeWidth="0"
         viewBox="0 0 24 24"
-        className={`size-5 text-gray-600 hover:text-gray-800 cursor-pointer ${
-            isRefreshing ? "animate-spin" : ""
-        }`}
+        className={`size-5 text-gray-600 hover:text-gray-800 cursor-pointer ${isRefreshing ? "animate-spin" : ""
+            }`}
         style={{ transition: "color 0.2s" }}
         xmlns="http://www.w3.org/2000/svg"
         title="Refresh"
@@ -585,10 +584,9 @@ const MyWorkOrdersContent = () => {
 
         return (
             <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                    statusColors[status] ||
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusColors[status] ||
                     "bg-gray-100 text-gray-800 border-gray-200"
-                }`}
+                    }`}
             >
                 {status}
             </span>
@@ -605,10 +603,9 @@ const MyWorkOrdersContent = () => {
 
         return (
             <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                    priorityColors[priority] ||
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${priorityColors[priority] ||
                     "bg-gray-100 text-gray-800 border-gray-300"
-                }`}
+                    }`}
             >
                 {priority}
             </span>
@@ -667,18 +664,16 @@ const MyWorkOrdersContent = () => {
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-2">
                                     <div
-                                        className={`w-2 h-2 rounded-full ${
-                                            group.status === "Complete"
-                                                ? "bg-green-500"
-                                                : "bg-blue-500"
-                                        }`}
+                                        className={`w-2 h-2 rounded-full ${group.status === "Complete"
+                                            ? "bg-green-500"
+                                            : "bg-blue-500"
+                                            }`}
                                     ></div>
                                     <h3
-                                        className={`text-sm font-semibold ${
-                                            group.status === "Complete"
-                                                ? "text-green-600"
-                                                : "text-gray-800"
-                                        }`}
+                                        className={`text-sm font-semibold ${group.status === "Complete"
+                                            ? "text-green-600"
+                                            : "text-gray-800"
+                                            }`}
                                     >
                                         WO #{group.id}
                                     </h3>
@@ -716,17 +711,17 @@ const MyWorkOrdersContent = () => {
                                                 {canWorkOnOrder(
                                                     order.status
                                                 ) && (
-                                                    <button
-                                                        onClick={() =>
-                                                            handleProcessClick(
-                                                                order
-                                                            )
-                                                        }
-                                                        className="px-2 py-0.5 text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
-                                                    >
-                                                        Process
-                                                    </button>
-                                                )}
+                                                        <button
+                                                            onClick={() =>
+                                                                handleProcessClick(
+                                                                    order
+                                                                )
+                                                            }
+                                                            className="px-2 py-0.5 text-xs font-medium rounded text-white bg-indigo-600 hover:bg-indigo-700"
+                                                        >
+                                                            Process
+                                                        </button>
+                                                    )}
                                             </div>
                                         </div>
                                     </li>
@@ -870,31 +865,28 @@ const MyWorkOrdersContent = () => {
                                 return (
                                     <React.Fragment key={group.id}>
                                         <tr
-                                            className={`transition-all duration-200 ease-in-out ${
-                                                expandedGroup === group.id
-                                                    ? "bg-gradient-to-r from-blue-50 to-indigo-50"
-                                                    : idx % 2 === 0
+                                            className={`transition-all duration-200 ease-in-out ${expandedGroup === group.id
+                                                ? "bg-gradient-to-r from-blue-50 to-indigo-50"
+                                                : idx % 2 === 0
                                                     ? "bg-gradient-to-r from-slate-50 to-gray-50"
                                                     : "bg-white"
-                                            } hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 group cursor-pointer`}
+                                                } hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 group cursor-pointer`}
                                         >
                                             <td className="px-3 py-2 font-bold text-base text-slate-800 group-hover:text-blue-700 transition-colors duration-200">
                                                 <div className="flex items-center space-x-2">
                                                     <div
-                                                        className={`w-2 h-2 rounded-full opacity-70 ${
-                                                            group.status ===
+                                                        className={`w-2 h-2 rounded-full opacity-70 ${group.status ===
                                                             "Complete"
-                                                                ? "bg-green-500"
-                                                                : "bg-blue-500"
-                                                        }`}
+                                                            ? "bg-green-500"
+                                                            : "bg-blue-500"
+                                                            }`}
                                                     ></div>
                                                     <span
-                                                        className={`font-mono tracking-wide ${
-                                                            group.status ===
+                                                        className={`font-mono tracking-wide ${group.status ===
                                                             "Complete"
-                                                                ? "text-green-600"
-                                                                : ""
-                                                        }`}
+                                                            ? "text-green-600"
+                                                            : ""
+                                                            }`}
                                                     >
                                                         {String(
                                                             group.id
@@ -905,35 +897,34 @@ const MyWorkOrdersContent = () => {
                                             <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
                                                 <div className="flex items-center space-x-1">
                                                     <div
-                                                        className={`w-2 h-2 rounded-full ${
-                                                            group.status ===
+                                                        className={`w-2 h-2 rounded-full ${group.status ===
                                                             "Complete"
-                                                                ? "bg-green-500"
-                                                                : "bg-green-500"
-                                                        }`}
+                                                            ? "bg-green-500"
+                                                            : "bg-green-500"
+                                                            }`}
                                                     ></div>
                                                     <span className="font-medium">
                                                         {latestWO?.accounts &&
-                                                        latestWO.accounts
-                                                            .length > 0
+                                                            latestWO.accounts
+                                                                .length > 0
                                                             ? latestWO.accounts
-                                                                  .map(
-                                                                      (acc) =>
-                                                                          acc.property_name ||
-                                                                          "No Project"
-                                                                  )
-                                                                  .filter(
-                                                                      (
-                                                                          v,
-                                                                          i,
-                                                                          a
-                                                                      ) =>
-                                                                          a.indexOf(
-                                                                              v
-                                                                          ) ===
-                                                                          i
-                                                                  )
-                                                                  .join(", ")
+                                                                .map(
+                                                                    (acc) =>
+                                                                        acc.property_name ||
+                                                                        "No Project"
+                                                                )
+                                                                .filter(
+                                                                    (
+                                                                        v,
+                                                                        i,
+                                                                        a
+                                                                    ) =>
+                                                                        a.indexOf(
+                                                                            v
+                                                                        ) ===
+                                                                        i
+                                                                )
+                                                                .join(", ")
                                                             : "No Project"}
                                                     </span>
                                                 </div>
@@ -941,18 +932,17 @@ const MyWorkOrdersContent = () => {
                                             <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
                                                 <div className="flex items-center space-x-1">
                                                     <div
-                                                        className={`w-2 h-2 rounded-full ${
-                                                            group.status ===
+                                                        className={`w-2 h-2 rounded-full ${group.status ===
                                                             "Complete"
-                                                                ? "bg-green-500"
-                                                                : "bg-amber-500"
-                                                        }`}
+                                                            ? "bg-green-500"
+                                                            : "bg-amber-500"
+                                                            }`}
                                                     ></div>
                                                     <span className="font-medium">
                                                         {group.due_date
                                                             ? formatDate(
-                                                                  group.due_date
-                                                              )
+                                                                group.due_date
+                                                            )
                                                             : "-"}
                                                     </span>
                                                 </div>
@@ -960,18 +950,17 @@ const MyWorkOrdersContent = () => {
                                             <td className="px-3 py-2 text-slate-600 group-hover:text-slate-800 transition-colors duration-200">
                                                 <div className="flex items-center space-x-1">
                                                     <div
-                                                        className={`w-2 h-2 rounded-full ${
-                                                            group.status ===
+                                                        className={`w-2 h-2 rounded-full ${group.status ===
                                                             "Complete"
-                                                                ? "bg-green-500"
-                                                                : "bg-purple-500"
-                                                        }`}
+                                                            ? "bg-green-500"
+                                                            : "bg-purple-500"
+                                                            }`}
                                                     ></div>
                                                     <span className="font-medium">
                                                         {group.updated_at
                                                             ? formatDate(
-                                                                  group.updated_at
-                                                              )
+                                                                group.updated_at
+                                                            )
                                                             : "N/A"}
                                                     </span>
                                                 </div>

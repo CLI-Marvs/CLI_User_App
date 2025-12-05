@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import UploadUnitDetailsModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/UploadUnitDetailsModal";
+import UploadUnitDetailsModal from "@/features/property-pricing/propertyandpricingpage/basicpricing/modals/UploadUnitDetailsModal";
 import expectedHeaders from "@/constant/data/excelHeader";
 import * as XLSX from "xlsx";
 import { showToast } from "@/util/toastUtil";

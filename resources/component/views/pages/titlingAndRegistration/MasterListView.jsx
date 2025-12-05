@@ -26,7 +26,7 @@ import {
 import Filter from "@/assets/images/filterIcon.svg";
 import DateLogo from "@/assets/images/Date_range.svg";
 import DatePicker from "react-datepicker";
-import apiService from "../../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { useStateContext } from "../../../../context/contextprovider";
 import { useDocumentManagementContext } from "../../../../context/DocumentManagement/DocumentManagementContext";
 import { toast, ToastContainer } from "react-toastify";
@@ -35,7 +35,7 @@ import * as XLSX from "xlsx";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { CircularProgress } from "@mui/material";
-import TitlingAndRegistrationMonitor from "../../../layout/documentManagementPage/TitlingAndRegistrationMonitor";
+import TitlingAndRegistrationMonitor from "@/features/document-management/documentManagementPage/TitlingAndRegistrationMonitor";
 import HistoricalImportModal from "./HistoricalImportModal";
 // import Skeleton from "react-loading-skeleton";
 // import "react-loading-skeleton/dist/skeleton.css";
@@ -1533,8 +1533,8 @@ export default function PaginatedTable() {
                                                 setFilterOption(option.value)
                                             }
                                             className={`flex items-center justify-center h-9 w-full p-4 ${filterOption === option.value
-                                                    ? "bg-custom-lightestgreen text-gray-900"
-                                                    : "text-gray-700"
+                                                ? "bg-custom-lightestgreen text-gray-900"
+                                                : "text-gray-700"
                                                 }`}
                                             style={{
                                                 fontWeight: "normal",
@@ -1682,8 +1682,8 @@ export default function PaginatedTable() {
                                                     />
                                                     <svg
                                                         className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 transition-transform cursor-pointer ${isProjectDropdownOpen
-                                                                ? "rotate-180"
-                                                                : ""
+                                                            ? "rotate-180"
+                                                            : ""
                                                             }`}
                                                         fill="none"
                                                         stroke="currentColor"
@@ -1768,8 +1768,8 @@ export default function PaginatedTable() {
                                                     />
                                                     <svg
                                                         className={`absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 transition-transform cursor-pointer ${isFinancingDropdownOpen
-                                                                ? "rotate-180"
-                                                                : ""
+                                                            ? "rotate-180"
+                                                            : ""
                                                             }`}
                                                         fill="none"
                                                         stroke="currentColor"
@@ -1898,8 +1898,8 @@ export default function PaginatedTable() {
                                                                 }
                                                             }}
                                                             className={`w-full pr-10 text-sm text-center ${!selectedDateFilter
-                                                                    ? "cursor-not-allowed opacity-50"
-                                                                    : ""
+                                                                ? "cursor-not-allowed opacity-50"
+                                                                : ""
                                                                 }`}
                                                             calendarClassName="custom-calendar"
                                                             disabled={
@@ -1963,8 +1963,8 @@ export default function PaginatedTable() {
                                     }
                                 }}
                                 className={`h-[47px] w-[130px] bg-[#067AC5] text-white text-sm rounded-[10px] flex items-center justify-center gap-1 ${isFileUploading
-                                        ? "opacity-50 cursor-not-allowed"
-                                        : ""
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
                                     }`}
                                 disabled={isFileUploading}
                             >
@@ -2077,17 +2077,17 @@ export default function PaginatedTable() {
                                                     >
                                                         <div
                                                             className={`flex items-center gap-2 ${head ===
-                                                                    "Financing" ||
-                                                                    head ===
-                                                                    "TO Year" ||
-                                                                    head ===
-                                                                    "TO Month" ||
-                                                                    head ===
-                                                                    "Takeout Date" ||
-                                                                    head ===
-                                                                    "DOU Expiry"
-                                                                    ? "justify-center pl-0"
-                                                                    : "pl-4"
+                                                                "Financing" ||
+                                                                head ===
+                                                                "TO Year" ||
+                                                                head ===
+                                                                "TO Month" ||
+                                                                head ===
+                                                                "Takeout Date" ||
+                                                                head ===
+                                                                "DOU Expiry"
+                                                                ? "justify-center pl-0"
+                                                                : "pl-4"
                                                                 }`}
                                                         >
                                                             {icon}

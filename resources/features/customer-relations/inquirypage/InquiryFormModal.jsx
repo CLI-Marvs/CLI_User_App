@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { IoIosSend, IoMdArrowDropdown, IoMdTrash } from "react-icons/io";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import CircularProgress from "@mui/material/CircularProgress";
 import { toast } from "react-toastify";
@@ -76,38 +76,38 @@ const InquiryFormModal = ({ modalRef }) => {
         "N/A",
         ...(Array.isArray(propertyNamesList) && propertyNamesList.length > 0
             ? propertyNamesList
-                  .filter((item) => !item.toLowerCase().includes("phase"))
-                  .map((item) => {
-                      let formattedItem = formatFunc(item);
+                .filter((item) => !item.toLowerCase().includes("phase"))
+                .map((item) => {
+                    let formattedItem = formatFunc(item);
 
-                      // Capitalize each word in the string
-                      formattedItem = formattedItem
-                          .split(" ")
-                          .map((word) => {
-                              // Check for specific words that need to be fully capitalized
-                              if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
-                                  return word.toUpperCase();
-                              }
-                              // Capitalize the first letter of all other words
-                              return (
-                                  word.charAt(0).toUpperCase() +
-                                  word.slice(1).toLowerCase()
-                              );
-                          })
-                          .join(" ");
+                    // Capitalize each word in the string
+                    formattedItem = formattedItem
+                        .split(" ")
+                        .map((word) => {
+                            // Check for specific words that need to be fully capitalized
+                            if (/^(Sjmv|Lpu|Cdo|Dgt)$/i.test(word)) {
+                                return word.toUpperCase();
+                            }
+                            // Capitalize the first letter of all other words
+                            return (
+                                word.charAt(0).toUpperCase() +
+                                word.slice(1).toLowerCase()
+                            );
+                        })
+                        .join(" ");
 
-                      // Replace specific names if needed
-                      if (formattedItem === "Casamira South") {
-                          formattedItem = "Casa Mira South";
-                      }
+                    // Replace specific names if needed
+                    if (formattedItem === "Casamira South") {
+                        formattedItem = "Casa Mira South";
+                    }
 
-                      return formattedItem;
-                  })
-                  .sort((a, b) => {
-                      if (a === "N/A") return -1;
-                      if (b === "N/A") return 1;
-                      return a.localeCompare(b);
-                  })
+                    return formattedItem;
+                })
+                .sort((a, b) => {
+                    if (a === "N/A") return -1;
+                    if (b === "N/A") return 1;
+                    return a.localeCompare(b);
+                })
             : []),
     ];
 
@@ -422,13 +422,12 @@ const InquiryFormModal = ({ modalRef }) => {
                     </div>
                     <div className="flex flex-col gap-2">
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${
-                                isSubmitted && !formData.fname
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
-                            }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.fname
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
+                                }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex pl-3 py-1 w-[240px]">
                                 First Name
@@ -451,13 +450,12 @@ const InquiryFormModal = ({ modalRef }) => {
                                 //             : "border-red-500"
                                 //         : "border-custom-bluegreen"
                                 // }`}
-                                className={`flex relative items-center border w-full rounded-[5px] overflow-hidden ${
-                                    isSubmitted &&
+                                className={`flex relative items-center border w-full rounded-[5px] overflow-hidden ${isSubmitted &&
                                     !formData.mname &&
                                     !isMiddleNameChecked
-                                        ? "border-red-500"
-                                        : "border-custom-bluegreen"
-                                }`}
+                                    ? "border-red-500"
+                                    : "border-custom-bluegreen"
+                                    }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
                                     Middle Name
@@ -488,13 +486,12 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
 
                         <div
-                            className={`flex items-center border  rounded-[5px] overflow-hidden ${
-                                isSubmitted && !formData.lname
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
-                            }`}
+                            className={`flex items-center border  rounded-[5px] overflow-hidden ${isSubmitted && !formData.lname
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
+                                }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Last Name
@@ -510,13 +507,12 @@ const InquiryFormModal = ({ modalRef }) => {
                         </div>
                         <div className="flex items-center gap-[4px]">
                             <div
-                                className={`flex relative items-center border w-full rounded-[5px] overflow-hidden ${
-                                    isSubmitted &&
+                                className={`flex relative items-center border w-full rounded-[5px] overflow-hidden ${isSubmitted &&
                                     !formData.suffix &&
                                     !isSuffixChecked
-                                        ? "border-red-500"
-                                        : "border-custom-bluegreen"
-                                }`}
+                                    ? "border-red-500"
+                                    : "border-custom-bluegreen"
+                                    }`}
                             >
                                 <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1 tablet:w-[160px] mobile:w-[270px] mobile:text-xs">
                                     Suffix Name
@@ -546,13 +542,12 @@ const InquiryFormModal = ({ modalRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border  rounded-[5px] overflow-hidden ${
-                                isSubmitted && !formData.buyer_email
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
-                            }`}
+                            className={`flex items-center border  rounded-[5px] overflow-hidden ${isSubmitted && !formData.buyer_email
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
+                                }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Email
@@ -579,13 +574,12 @@ const InquiryFormModal = ({ modalRef }) => {
                             </p>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${
-                                isSubmitted && !formData.mobile_number
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
-                            }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.mobile_number
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
+                                }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex w-[240px] pl-3 py-1">
                                 Mobile Number
@@ -596,23 +590,22 @@ const InquiryFormModal = ({ modalRef }) => {
                                 name="mobile_number"
                                 type="number"
                                 onInput={(e) =>
-                                    (e.target.value = e.target.value.replace(
-                                        /[^0-9]/g,
-                                        ""
-                                    ))
+                                (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                ))
                                 }
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                             />
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${
-                                isSubmitted && !formData.property
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
-                            }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.property
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
+                                }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Property
@@ -644,13 +637,12 @@ const InquiryFormModal = ({ modalRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden  ${
-                                isSubmitted && !formData.details_concern
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
-                            }  `}
+                            className={`flex items-center border rounded-[5px] overflow-hidden  ${isSubmitted && !formData.details_concern
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
+                                }  `}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Concern Regarding
@@ -676,13 +668,12 @@ const InquiryFormModal = ({ modalRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${
-                                isSubmitted && !formData.type
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
-                            }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.type
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
+                                }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Type
@@ -708,13 +699,12 @@ const InquiryFormModal = ({ modalRef }) => {
                             </div>
                         </div>
                         <div
-                            className={`flex items-center border rounded-[5px] overflow-hidden ${
-                                isSubmitted && !formData.channels
-                                    ? resetSuccess
-                                        ? "border-custom-bluegreen"
-                                        : "border-red-500"
-                                    : "border-custom-bluegreen"
-                            }`}
+                            className={`flex items-center border rounded-[5px] overflow-hidden ${isSubmitted && !formData.channels
+                                ? resetSuccess
+                                    ? "border-custom-bluegreen"
+                                    : "border-red-500"
+                                : "border-custom-bluegreen"
+                                }`}
                         >
                             <span className="text-custom-bluegreen text-sm bg-custom-lightestgreen flex items-center w-[250px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
                                 Channels
@@ -781,13 +771,12 @@ const InquiryFormModal = ({ modalRef }) => {
                         {formData.user_type === "Others" && (
                             <div className="flex justify-end">
                                 <div
-                                    className={`flex items-center border rounded-[5px] w-[277px] overflow-hidden ${
-                                        isSubmitted && !formData.other_user_type
-                                            ? resetSuccess
-                                                ? "border-custom-bluegreen"
-                                                : "border-red-500"
-                                            : "border-custom-bluegreen"
-                                    }`}
+                                    className={`flex items-center border rounded-[5px] w-[277px] overflow-hidden ${isSubmitted && !formData.other_user_type
+                                        ? resetSuccess
+                                            ? "border-custom-bluegreen"
+                                            : "border-red-500"
+                                        : "border-custom-bluegreen"
+                                        }`}
                                 >
                                     <input
                                         name="other_user_type"
@@ -815,10 +804,10 @@ const InquiryFormModal = ({ modalRef }) => {
                                 className="w-full px-4 text-sm focus:outline-none mobile:text-xs"
                                 placeholder=""
                                 onInput={(e) =>
-                                    (e.target.value = e.target.value.replace(
-                                        /[^0-9]/g,
-                                        ""
-                                    ))
+                                (e.target.value = e.target.value.replace(
+                                    /[^0-9]/g,
+                                    ""
+                                ))
                                 }
                             />
                         </div>
@@ -838,13 +827,12 @@ const InquiryFormModal = ({ modalRef }) => {
                     </div>
                     <div className="border border-b-1 border-[#D9D9D9] my-2"></div>
                     <div
-                        className={`${
-                            !isValid
-                                ? resetSuccess
-                                    ? "border-custom-bluegreen"
-                                    : "border-red-500"
-                                : "border-custom-bluegreen"
-                        } rounded-[5px] bg-custom-lightestgreen border`}
+                        className={`${!isValid
+                            ? resetSuccess
+                                ? "border-custom-bluegreen"
+                                : "border-red-500"
+                            : "border-custom-bluegreen"
+                            } rounded-[5px] bg-custom-lightestgreen border`}
                     >
                         <div className="flex items-center justify-between">
                             <p className="text-custom-bluegreen text-sm bg-custom-lightestgreen pl-3  montserrat-semibold flex-grow mobile:text-xs mobile:w-[170px]">
@@ -934,11 +922,10 @@ const InquiryFormModal = ({ modalRef }) => {
                                 disabled={loading}
                                 type="submit"
                                 className={`w-[133px] text-sm montserrat-semibold text-white h-[40px] rounded-[10px] gradient-btn2 flex justify-center items-center gap-2 tablet:w-full hover:shadow-custom4
-                                            ${
-                                                loading
-                                                    ? "cursor-not-allowed"
-                                                    : ""
-                                            }
+                                            ${loading
+                                        ? "cursor-not-allowed"
+                                        : ""
+                                    }
                                             `}
                             >
                                 {loading ? (
@@ -954,21 +941,21 @@ const InquiryFormModal = ({ modalRef }) => {
                         <div className="mt-2">
                             {fileName && fileName.length > 0
                                 ? fileName.map((item, index) => {
-                                      return (
-                                          <p
-                                              key={index}
-                                              className="flex items-center text-sm text-red-900 truncate gap-1"
-                                          >
-                                              {item}{" "}
-                                              <IoMdTrash
-                                                  className="hover:text-red-500"
-                                                  onClick={() =>
-                                                      handleDelete(item)
-                                                  }
-                                              />
-                                          </p>
-                                      );
-                                  })
+                                    return (
+                                        <p
+                                            key={index}
+                                            className="flex items-center text-sm text-red-900 truncate gap-1"
+                                        >
+                                            {item}{" "}
+                                            <IoMdTrash
+                                                className="hover:text-red-500"
+                                                onClick={() =>
+                                                    handleDelete(item)
+                                                }
+                                            />
+                                        </p>
+                                    );
+                                })
                                 : null}
                         </div>
                     </div>

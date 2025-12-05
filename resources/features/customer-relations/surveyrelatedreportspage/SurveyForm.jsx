@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { MdKeyboardArrowLeft } from "react-icons/md";
 import { SurveySection } from './surveyComponents/SurveySection';
 import { showToast } from "../../../util/toastUtil";
-import apiService from '../../servicesApi/apiService';
+import apiService from '@/servicesApi/apiService';
 import Spinner from '../../../util/Spinner';
 import { CircularProgress } from '@mui/material';
 import SurveyUnpublishedModal from './surveyComponents/SurveyUnpublishedModal';

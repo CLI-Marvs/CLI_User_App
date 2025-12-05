@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useStateContext } from "../../../context/contextprovider";
 import ReactDOM from "react-dom";
-import apiService from "../../../component/servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { showToast } from "../../../util/toastUtil";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -9,7 +9,7 @@ import {
     getAdminSettingsData,
     getCachedAdminSettingsData,
     invalidateAdminSettingsData,
-} from "../../../component/layout/documentManagementPage/service/adminSettingsDataService";
+} from "@/features/document-management/documentManagementPage/service/adminSettingsDataService";
 import {
     PlusIcon,
     PencilIcon,
@@ -69,9 +69,8 @@ const CrudModal = ({
         const newErrors = {};
         fields.forEach((field) => {
             if (field.required && !formData[field.name]?.trim()) {
-                newErrors[field.name] = `${
-                    field.label || field.name.replace("_", " ")
-                } is required`;
+                newErrors[field.name] = `${field.label || field.name.replace("_", " ")
+                    } is required`;
             }
             if (
                 field.minLength &&
@@ -109,9 +108,8 @@ const CrudModal = ({
         if (field.required && !formData[field.name]?.trim()) {
             setErrors((prev) => ({
                 ...prev,
-                [field.name]: `${
-                    field.label || field.name.replace("_", " ")
-                } is required`,
+                [field.name]: `${field.label || field.name.replace("_", " ")
+                    } is required`,
             }));
         }
     };
@@ -181,11 +179,10 @@ const CrudModal = ({
                                                 }
                                                 onChange={handleChange}
                                                 onBlur={() => handleBlur(field)}
-                                                className={`block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${
-                                                    errors[field.name]
-                                                        ? "ring-red-300 focus:ring-red-500"
-                                                        : "ring-gray-300 focus:ring-indigo-600"
-                                                }`}
+                                                className={`block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${errors[field.name]
+                                                    ? "ring-red-300 focus:ring-red-500"
+                                                    : "ring-gray-300 focus:ring-indigo-600"
+                                                    }`}
                                                 placeholder={field.placeholder}
                                             />
                                         ) : field.type === "checkbox" ? (
@@ -223,11 +220,10 @@ const CrudModal = ({
                                                         handleBlur(field)
                                                     }
                                                     maxLength={field.maxLength}
-                                                    className={`block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${
-                                                        errors[field.name]
-                                                            ? "ring-red-300 focus:ring-red-500"
-                                                            : "ring-gray-300 focus:ring-indigo-600"
-                                                    }`}
+                                                    className={`block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${errors[field.name]
+                                                        ? "ring-red-300 focus:ring-red-500"
+                                                        : "ring-gray-300 focus:ring-indigo-600"
+                                                        }`}
                                                     placeholder={
                                                         field.placeholder
                                                     }
@@ -235,24 +231,23 @@ const CrudModal = ({
                                                 {field.maxLength && (
                                                     <div className="flex justify-end text-xs text-gray-500">
                                                         <span
-                                                            className={`${
-                                                                (formData[
-                                                                    field.name
-                                                                ]?.length ||
-                                                                    0) >
+                                                            className={`${(formData[
+                                                                field.name
+                                                            ]?.length ||
+                                                                0) >
                                                                 field.maxLength *
-                                                                    0.9
-                                                                    ? "text-orange-600"
-                                                                    : (formData[
-                                                                          field
-                                                                              .name
-                                                                      ]
-                                                                          ?.length ||
-                                                                          0) >=
-                                                                      field.maxLength
+                                                                0.9
+                                                                ? "text-orange-600"
+                                                                : (formData[
+                                                                    field
+                                                                        .name
+                                                                ]
+                                                                    ?.length ||
+                                                                    0) >=
+                                                                    field.maxLength
                                                                     ? "text-red-600"
                                                                     : "text-gray-500"
-                                                            }`}
+                                                                }`}
                                                         >
                                                             {formData[
                                                                 field.name
@@ -727,7 +722,7 @@ const AdminSettings = () => {
                 if (
                     err.response.data.error &&
                     Object.keys(err.response.data.field_errors || {}).length ===
-                        0
+                    0
                 ) {
                     setError(err.response.data.error);
                 }
@@ -829,9 +824,8 @@ const AdminSettings = () => {
         const { type, mode } = modalState;
         const configs = {
             wot: {
-                title: `${
-                    mode === "add" ? "Create New" : "Edit"
-                } Work Order Type`,
+                title: `${mode === "add" ? "Create New" : "Edit"
+                    } Work Order Type`,
                 fields: [
                     {
                         name: "type_name",
@@ -879,9 +873,8 @@ const AdminSettings = () => {
                 ],
             },
             checklist: {
-                title: `${
-                    mode === "add" ? "Create New" : "Edit"
-                } Checklist Item`,
+                title: `${mode === "add" ? "Create New" : "Edit"
+                    } Checklist Item`,
                 fields: [
                     {
                         name: "name",
@@ -1200,7 +1193,7 @@ const AdminSettings = () => {
                                                 </div>
 
                                                 {!wot.submilestones ||
-                                                wot.submilestones.length ===
+                                                    wot.submilestones.length ===
                                                     0 ? (
                                                     <div className="text-center py-6 bg-gray-50 rounded-lg">
                                                         <p className="text-sm text-gray-500">
@@ -1276,7 +1269,7 @@ const AdminSettings = () => {
                                                                                                 {sub
                                                                                                     .checklists
                                                                                                     ?.length ===
-                                                                                                1
+                                                                                                    1
                                                                                                     ? "item"
                                                                                                     : "items"}
                                                                                             </span>
@@ -1353,9 +1346,9 @@ const AdminSettings = () => {
                                                                                 </div>
 
                                                                                 {!sub.checklists ||
-                                                                                sub
-                                                                                    .checklists
-                                                                                    .length ===
+                                                                                    sub
+                                                                                        .checklists
+                                                                                        .length ===
                                                                                     0 ? (
                                                                                     <div className="text-center py-4 bg-white rounded border-2 border-dashed border-gray-300">
                                                                                         <p className="text-xs text-gray-500">

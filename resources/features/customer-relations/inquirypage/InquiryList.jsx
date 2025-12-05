@@ -6,14 +6,13 @@ import ReactPaginate from "react-paginate";
 import { useStateContext } from "../../../context/contextprovider";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import DateLogo from "../../../../../public/Images/Date_range.svg";
+import DateLogo from "@/assets/images/Date_range.svg";
 import { MdRefresh } from "react-icons/md";
 import InquiryFormModal from "./InquiryFormModal";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useSearchParams, useLocation } from "react-router-dom";
 import Spinner from "../../../util/Spinner";
-import Skeletons from "../../Skeletons";
 import { CircularProgress } from "@mui/material";
 import { sortByNameAlphabetically } from "./utils/sort";
 
@@ -605,16 +604,16 @@ const InquiryList = () => {
                                                 <option value=" ">
                                                     Select Category
                                                 </option>
-                                                {categories && 
-                                                sortByNameAlphabetically(categories, ["Other Concerns"]).map(
-                                                    (category) => (
-                                                        <option
-                                                            key={category.id}
-                                                        >
-                                                            {category.name}
-                                                        </option>
-                                                    )
-                                                )}
+                                                {categories &&
+                                                    sortByNameAlphabetically(categories, ["Other Concerns"]).map(
+                                                        (category) => (
+                                                            <option
+                                                                key={category.id}
+                                                            >
+                                                                {category.name}
+                                                            </option>
+                                                        )
+                                                    )}
                                             </select>
                                         </div>
 
@@ -1140,7 +1139,7 @@ const InquiryList = () => {
                                         {loading ? (
                                             <CircularProgress size={14} />
                                         ) : (
-                                           dataFilterCount
+                                            dataFilterCount
                                         )}
                                         )
                                     </p>
@@ -1157,7 +1156,7 @@ const InquiryList = () => {
                                                 handleOptionClick("All")
                                             }
                                         >
-                                           All ({dataCount?.total ?? <CircularProgress size={14} />})
+                                            All ({dataCount?.total ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1165,7 +1164,7 @@ const InquiryList = () => {
                                                 handleOptionClick("Resolved")
                                             }
                                         >
-                                           Resolved ({dataCount?.resolved_count ?? <CircularProgress size={14} />})
+                                            Resolved ({dataCount?.resolved_count ?? <CircularProgress size={14} />})
                                         </li>
                                         <li
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -1195,14 +1194,14 @@ const InquiryList = () => {
                                             <button
                                                 onClick={handleAssignedToMeClick}
                                                 className={`flex items-center text-custom-lightgreen h-[25px] w-[125px] rounded-[55px] p-[2px] ${assignedToMeActive
-                                                        ? "bglightgreen-btn"
-                                                        : "gradient-btn2hover "
+                                                    ? "bglightgreen-btn"
+                                                    : "gradient-btn2hover "
                                                     }`}
                                             >
                                                 <p
                                                     className={`h-full w-full flex justify-center items-center text-xs montserrat-semibold rounded-[50px]   ${assignedToMeActive
-                                                            ? "bglightgreen-btn"
-                                                            : "bg-white hover:bg-custom-lightestgreen"
+                                                        ? "bglightgreen-btn"
+                                                        : "bg-white hover:bg-custom-lightestgreen"
                                                         }
                                         `}
                                                 >
@@ -1217,8 +1216,8 @@ const InquiryList = () => {
                                                 handleDayClick(label)
                                             }
                                             className={`flex justify-center items-center  text-custom-lightgreen h-[25px] rounded-[55px] p-[2px] ${activeDayButton === label
-                                                    ? "bglightgreen-btn hover:bg-custom-lightgreen"
-                                                    : "gradient-btn2hover border-custom-lightgreen"
+                                                ? "bglightgreen-btn hover:bg-custom-lightgreen"
+                                                : "gradient-btn2hover border-custom-lightgreen"
                                                 } hover:bg-custom-lightestgreen ${label === "3+ Days"
                                                     ? "w-[76px]"
                                                     : label === "2 Days"

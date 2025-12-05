@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
+import { priceListMasterService } from "@/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import _ from "lodash";
-import usePaginatedFetch from "@/component/layout/propertyandpricingpage/hooks/usePaginatedFetch";
+import usePaginatedFetch from "@/features/property-pricing/propertyandpricingpage/hooks/usePaginatedFetch";
 import { useStateContext } from "@/context/contextprovider";
 
 const PropertyMasterContext = createContext();

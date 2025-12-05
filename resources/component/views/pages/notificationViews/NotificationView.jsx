@@ -1,10 +1,10 @@
 import React from 'react'
-import Notification from '../../../layout/notificationpage/Notification'
+import Notification from '@/features/notifications/notificationpage/Notification'
 
 const NotificationView = () => {
   return (
     <div>
-        <Notification/>
+      <Notification />
     </div>
   )
 }

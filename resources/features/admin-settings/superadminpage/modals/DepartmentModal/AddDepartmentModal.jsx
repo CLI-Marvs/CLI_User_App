@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
-import { isButtonDisabled } from "@/component/layout/superadminpage/modals/DepartmentModal/utils/isButtonDisabled";
-import Feature from "@/component/layout/superadminpage/component/Feature";
-import { departmentPermissionService } from "@/component/servicesApi/apiCalls/roleManagement";
+import { isButtonDisabled } from "@/features/admin-settings/superadminpage/modals/DepartmentModal/utils/isButtonDisabled";
+import Feature from "@/features/admin-settings/superadminpage/component/Feature";
+import { departmentPermissionService } from "@/servicesApi/apiCalls/roleManagement";
 import useFeature from "@/context/RoleManagement/FeatureContext";
 import useDepartmentPermission from "@/context/RoleManagement/DepartmentPermissionContext";
 import useDepartment from "@/context/RoleManagement/DepartmentContext";
@@ -199,8 +199,8 @@ const AddDepartmentModal = ({ departmentModalRef, employeeDepartments }) => {
                             onClick={handleSubmit}
                             disabled={isButtonDisabled(formData) || isLoading}
                             className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isLoading || isButtonDisabled(formData)
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : ""
+                                ? "opacity-50 cursor-not-allowed"
+                                : ""
                                 }`}
                         >
                             {isLoading ? (

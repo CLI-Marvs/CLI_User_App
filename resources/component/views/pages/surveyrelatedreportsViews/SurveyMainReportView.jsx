@@ -1,10 +1,10 @@
 import React from 'react'
-import SurveyMainReport from '../../../layout/surveyrelatedreportspage/SurveyMainReport'
+import SurveyMainReport from '@/features/customer-relations/surveyrelatedreportspage/SurveyMainReport'
 
 const SurveyMainReportView = () => {
   return (
     <div>
-        <SurveyMainReport />
+      <SurveyMainReport />
     </div>
   )
 }

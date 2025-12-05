@@ -1,5 +1,5 @@
 import React from "react";
-import ExecutiveDashboard from "../../../layout/documentManagementPage/ExecutiveDashboard";
+import ExecutiveDashboard from "@/features/document-management/documentManagementPage/ExecutiveDashboard";
 
 const ExecutiveDashboardView = () => {
     return (

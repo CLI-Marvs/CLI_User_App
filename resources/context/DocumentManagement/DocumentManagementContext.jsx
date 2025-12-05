@@ -6,7 +6,7 @@ import React, {
     useMemo,
     useCallback,
 } from "react";
-import apiService from "../../component/servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { update } from "lodash";
 
 const DocumentManagementContext = createContext({});
@@ -157,7 +157,7 @@ export const DocumentManagementProvider = ({ children }) => {
             const matchesFinancing =
                 !filters.financing ||
                 row.financing?.toLowerCase().trim() ===
-                    filters.financing?.toLowerCase().trim();
+                filters.financing?.toLowerCase().trim();
             // Date filter (exact match on selected date)
             let matchesDate = true;
             if (filters.dateFilter && filters.date) {
@@ -236,7 +236,7 @@ export const DocumentManagementProvider = ({ children }) => {
             const matchesFinancing =
                 !filters.financing ||
                 row.finance?.toLowerCase().trim() ===
-                    filters.financing?.toLowerCase().trim();
+                filters.financing?.toLowerCase().trim();
             // Date filter
             let matchesDate = true;
             if (filters.dateFilter && filters.date) {

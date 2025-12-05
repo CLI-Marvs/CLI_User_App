@@ -6,8 +6,8 @@ import React, {
     useEffect,
 } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { branchService } from "@/component/servicesApi/apiCalls/emojiWalkin/branchService";
-import Button from "@/component/layout/inquirypage/component/ui/button";
+import { branchService } from "@/servicesApi/apiCalls/emojiWalkin/branchService";
+import Button from "@/features/customer-relations/inquirypage/component/ui/button";
 import CircularProgress from "@mui/material/CircularProgress";
 import { showToast } from "@/util/toastUtil";
 import CustomInput from "@/component/Input/CustomInput";
@@ -304,8 +304,8 @@ const BranchFormModal = forwardRef((props, ref) => {
                                 type="submit"
                                 disabled={isSubmitting || isButtonDisabled()}
                                 className={`w-[150px] h-[35px] rounded-[10px] text-sm gradient-btn5 text-white montserrat-semibold ${isSubmitting || isButtonDisabled()
-                                        ? "cursor-not-allowed opacity-50"
-                                        : ""
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
                                     }`}
                             >
                                 {isSubmitting ? (

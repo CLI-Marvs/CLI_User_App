@@ -1,4 +1,4 @@
-import InvoicesCom from '@/component/layout/transaction/receivables/InvoicesCom'
+import InvoicesCom from '@/features/transaction-management/transaction/receivables/InvoicesCom'
 import React from 'react'
 
 const InvoicesView = () => {

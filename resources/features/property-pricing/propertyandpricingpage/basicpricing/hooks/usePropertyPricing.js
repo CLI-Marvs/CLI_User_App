@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
+import { priceListMasterService } from "@/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 
 export const usePropertyPricing = (
     user,

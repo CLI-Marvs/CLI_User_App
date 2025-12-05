@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { useStateContext } from "@/context/contextprovider";
 import { showToast } from "@/util/toastUtil";
-import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
+import { propertyMasterService } from "@/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
 import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
@@ -314,8 +314,8 @@ const AddPropertyModal = ({ propertyModalRef, fetchData }) => {
                         <div className="flex justify-center my-3">
                             <button
                                 className={`w-[173px] h-[37px] text-white montserrat-semibold text-sm gradient-btn rounded-[10px] hover:shadow-custom4 ${isLoading || isPropertyButtonDisabled
-                                        ? "cursor-not-allowed opacity-50"
-                                        : ""
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
                                     }`}
                                 onClick={(e) => handleSubmit(e, "Draft")}
                                 disabled={isPropertyButtonDisabled || isLoading}

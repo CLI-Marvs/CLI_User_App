@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { priceVersionService } from "@/component/servicesApi/apiCalls/propertyPricing/priceVersion/priceVersionService";
-import usePaginatedFetch from "@/component/layout/propertyandpricingpage/hooks/usePaginatedFetch";
+import { priceVersionService } from "@/servicesApi/apiCalls/propertyPricing/priceVersion/priceVersionService";
+import usePaginatedFetch from "@/features/property-pricing/propertyandpricingpage/hooks/usePaginatedFetch";
 import { defaultFilters } from "@/context/PropertyPricing/PriceListMasterContext";
 
 const PriceVersionContext = createContext();

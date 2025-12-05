@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "@/component/layout/inquirypage/component/ui/button";
+import Button from "@/features/customer-relations/inquirypage/component/ui/button";
 
 const WalkinTableRow = ({ item, onOpenModal }) => {
     return (

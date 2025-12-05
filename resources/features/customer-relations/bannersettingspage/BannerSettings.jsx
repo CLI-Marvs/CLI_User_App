@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import ImageSlideshow from './ImageSlideshow'
 import { useStateContext } from '../../../context/contextprovider'
-import apiService from '../../../component/servicesApi/apiService'
+import apiService from '@/servicesApi/apiService'
 import { showToast } from "../../../util/toastUtil"
 import { CircularProgress } from '@mui/material'
 
@@ -10,7 +10,7 @@ const BannerSettings = () => {
     // ref initialization
     const fileInputRef = useRef(null);
     //useStateContext for getting data from context provider
-    const { getBannerData, bannerLists,canWrite } = useStateContext();
+    const { getBannerData, bannerLists, canWrite } = useStateContext();
 
     //state initialization
     const [isEdit, setIsEdit] = useState(false);
@@ -19,7 +19,7 @@ const BannerSettings = () => {
     const [file, setFile] = useState(null);
     const [link, setLink] = useState("");
     const [indexFlag, setIndexFlag] = useState(null);
- 
+
 
 
     //useEffect initialization for getting data from context
@@ -132,7 +132,7 @@ const BannerSettings = () => {
                 </div>
                 <div className='w-full border-t-[1px] border-custom-grayA5'></div>
                 <div className='flex flex-col gap-[12px] w-full'>
-                   
+
                     {/* should be dynamic below */}
                     {bannerLists && bannerLists.length > 0 && bannerLists.map((item, index) => (
                         <div key={index} className='w-full h-[112px] rounded-[10px] bg-custom-lightestgreen p-[20px]'>
@@ -218,7 +218,7 @@ const BannerSettings = () => {
                         </div>
                     </div>
                 )}
-               
+
             </div>
         </div>
     )

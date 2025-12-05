@@ -1,4 +1,4 @@
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import React from "react";
 import { UploadFileForChecklistModal } from "./UploadFileForChecklistModal";
 
@@ -22,11 +22,10 @@ const ActionButtons = ({
                 <div className="flex items-center gap-2">
                     <button
                         type="button"
-                        className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-blue-200 hover:border-blue-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm ${
-                            isComplete
-                                ? "text-green-700 bg-green-100 border border-green-300"
-                                : "text-blue-700 bg-blue-100 border-blue-300"
-                        }`}
+                        className={`inline-flex items-center px-2 py-0.5 text-xs font-medium rounded hover:bg-blue-200 hover:border-blue-400 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-sm ${isComplete
+                            ? "text-green-700 bg-green-100 border border-green-300"
+                            : "text-blue-700 bg-blue-100 border-blue-300"
+                            }`}
                         onClick={() =>
                             onAddFiles(
                                 account.id,
@@ -60,9 +59,8 @@ const ActionButtons = ({
                         role="button"
                         tabIndex={0}
                         title="Add/View Notes"
-                        className={`inline-flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 ${
-                            isComplete ? "text-green-700" : "text-gray-700"
-                        }`}
+                        className={`inline-flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 ${isComplete ? "text-green-700" : "text-gray-700"
+                            }`}
                         onClick={() =>
                             handleOpenNotesModal({
                                 accountId: account.id,
@@ -118,7 +116,7 @@ const ActionButtons = ({
 
                             try {
                                 const apiService = await import(
-                                    "../../servicesApi/apiService"
+                                    "@/servicesApi/apiService"
                                 );
                                 await apiService.default.post(
                                     "/account-checklist-status",
@@ -156,9 +154,8 @@ const ActionButtons = ({
                         role="button"
                         tabIndex={0}
                         title="Add/View Notes"
-                        className={`inline-flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 ${
-                            isComplete ? "text-green-700" : "text-gray-700"
-                        }`}
+                        className={`inline-flex items-center justify-center cursor-pointer hover:bg-gray-100 transition-all duration-150 focus:outline-none focus:ring-1 focus:ring-gray-500 ${isComplete ? "text-green-700" : "text-gray-700"
+                            }`}
                         onClick={() =>
                             handleOpenNotesModal({
                                 accountId: account.id,
@@ -260,7 +257,7 @@ const ChecklistTable = ({
                 const { left, top } = JSON.parse(saved);
                 scrollContainerRef.current.scrollLeft = left;
                 scrollContainerRef.current.scrollTop = top;
-            } catch {}
+            } catch { }
         }
     }, []);
 
@@ -376,8 +373,7 @@ const ChecklistTable = ({
         } catch (err) {
             console.error("Bulk toggle failed:", err);
             alert(
-                `Failed to ${
-                    newCompletionState ? "check" : "uncheck"
+                `Failed to ${newCompletionState ? "check" : "uncheck"
                 } all items. Please try again.`
             );
 
@@ -560,7 +556,7 @@ const ChecklistTable = ({
                         const matches =
                             assignee.employee_id === currentUserId &&
                             assignee.work_order_id ===
-                                (workOrder.work_order_id || workOrder.id) &&
+                            (workOrder.work_order_id || workOrder.id) &&
                             assignee.submilestone_id === submilestone.id &&
                             assignee.account_id === account.id;
                         return matches;
@@ -812,9 +808,8 @@ const ChecklistTable = ({
             <div
                 ref={scrollContainerRef}
                 onScroll={handleScroll}
-                className={`shadow-lg rounded-lg border border-gray-200 bg-white h-full overflow-x-auto overflow-y-auto ${
-                    totalColumns <= 4 ? "max-w-fit" : ""
-                }`}
+                className={`shadow-lg rounded-lg border border-gray-200 bg-white h-full overflow-x-auto overflow-y-auto ${totalColumns <= 4 ? "max-w-fit" : ""
+                    }`}
             >
                 <table className="text-left border-separate border-spacing-0 bg-white table-auto min-w-max">
                     <thead className="sticky top-0 z-50 bg-custom-bluegreen">
@@ -848,11 +843,10 @@ const ChecklistTable = ({
                                     <th
                                         key={idx}
                                         colSpan={colSpan}
-                                        className={`text-center px-3 py-2.5 font-bold text-sm border-white border min-w-[140px] transition-all duration-200 text-white ${
-                                            idx % 2 === 0
-                                                ? "bg-custom-bluegreen"
-                                                : "bg-teal-600"
-                                        }`}
+                                        className={`text-center px-3 py-2.5 font-bold text-sm border-white border min-w-[140px] transition-all duration-200 text-white ${idx % 2 === 0
+                                            ? "bg-custom-bluegreen"
+                                            : "bg-teal-600"
+                                            }`}
                                     >
                                         <div className="flex items-center justify-center">
                                             <span className="font-semibold tracking-wide leading-tight">
@@ -872,11 +866,10 @@ const ChecklistTable = ({
                                             <th
                                                 key={`${stepIdx}-${subIdx}-${cIdx}`}
                                                 colSpan={2}
-                                                className={`text-center px-2 py-2.5 font-medium border-white border min-w-[200px] transition-all duration-200 text-white ${
-                                                    stepIdx % 2 === 0
-                                                        ? "bg-custom-bluegreen"
-                                                        : "bg-teal-600"
-                                                }`}
+                                                className={`text-center px-2 py-2.5 font-medium border-white border min-w-[200px] transition-all duration-200 text-white ${stepIdx % 2 === 0
+                                                    ? "bg-custom-bluegreen"
+                                                    : "bg-teal-600"
+                                                    }`}
                                             >
                                                 <div className="flex items-center justify-center px-1">
                                                     <span
@@ -884,11 +877,11 @@ const ChecklistTable = ({
                                                         title={checklist.name}
                                                     >
                                                         {checklist.name.length >
-                                                        22
+                                                            22
                                                             ? checklist.name.substring(
-                                                                  0,
-                                                                  22
-                                                              ) + "..."
+                                                                0,
+                                                                22
+                                                            ) + "..."
                                                             : checklist.name}
                                                     </span>
                                                 </div>
@@ -910,11 +903,10 @@ const ChecklistTable = ({
                                         (checklist, cIdx) => [
                                             <th
                                                 key={`date-${stepIdx}-${subIdx}-${cIdx}`}
-                                                className={`text-center px-2 py-1.5 font-medium border-white border min-w-[100px] w-[100px] transition-all duration-200 hover:bg-opacity-90 text-white ${
-                                                    stepIdx % 2 === 0
-                                                        ? "bg-custom-bluegreen"
-                                                        : "bg-teal-600"
-                                                }`}
+                                                className={`text-center px-2 py-1.5 font-medium border-white border min-w-[100px] w-[100px] transition-all duration-200 hover:bg-opacity-90 text-white ${stepIdx % 2 === 0
+                                                    ? "bg-custom-bluegreen"
+                                                    : "bg-teal-600"
+                                                    }`}
                                             >
                                                 <div className="flex items-center justify-center">
                                                     <span className="text-xs font-semibold flex items-center gap-1">
@@ -935,11 +927,10 @@ const ChecklistTable = ({
                                             </th>,
                                             <th
                                                 key={`remarks-${stepIdx}-${subIdx}-${cIdx}`}
-                                                className={`text-center px-2 py-1.5 font-medium border-white border min-w-[100px] w-[100px] transition-all duration-200 hover:bg-opacity-90 text-white ${
-                                                    stepIdx % 2 === 0
-                                                        ? "bg-custom-bluegreen"
-                                                        : "bg-teal-600"
-                                                }`}
+                                                className={`text-center px-2 py-1.5 font-medium border-white border min-w-[100px] w-[100px] transition-all duration-200 hover:bg-opacity-90 text-white ${stepIdx % 2 === 0
+                                                    ? "bg-custom-bluegreen"
+                                                    : "bg-teal-600"
+                                                    }`}
                                             >
                                                 <div className="flex items-center justify-center gap-1">
                                                     <span className="text-xs font-semibold flex items-center gap-1">
@@ -972,9 +963,9 @@ const ChecklistTable = ({
                                                             onKeyPress={(e) => {
                                                                 if (
                                                                     e.key ===
-                                                                        "Enter" ||
+                                                                    "Enter" ||
                                                                     e.key ===
-                                                                        " "
+                                                                    " "
                                                                 ) {
                                                                     handleOpenUploadModal(
                                                                         checklist,
@@ -1044,17 +1035,16 @@ const ChecklistTable = ({
                                                                     ? "Uncheck all checkboxes"
                                                                     : "Check all checkboxes"
                                                             }
-                                                            className={`cursor-pointer transition-all duration-150 ${
-                                                                bulkUpdating[
-                                                                    `${stepIdx}-${subIdx}-${cIdx}`
-                                                                ]
-                                                                    ? "opacity-50 cursor-not-allowed"
-                                                                    : "hover:text-blue-200"
-                                                            }`}
+                                                            className={`cursor-pointer transition-all duration-150 ${bulkUpdating[
+                                                                `${stepIdx}-${subIdx}-${cIdx}`
+                                                            ]
+                                                                ? "opacity-50 cursor-not-allowed"
+                                                                : "hover:text-blue-200"
+                                                                }`}
                                                             onClick={() => {
                                                                 if (
                                                                     !bulkUpdating[
-                                                                        `${stepIdx}-${subIdx}-${cIdx}`
+                                                                    `${stepIdx}-${subIdx}-${cIdx}`
                                                                     ]
                                                                 ) {
                                                                     handleBulkToggleChecklist(
@@ -1070,9 +1060,9 @@ const ChecklistTable = ({
                                                                     (e.key ===
                                                                         "Enter" ||
                                                                         e.key ===
-                                                                            " ") &&
+                                                                        " ") &&
                                                                     !bulkUpdating[
-                                                                        `${stepIdx}-${subIdx}-${cIdx}`
+                                                                    `${stepIdx}-${subIdx}-${cIdx}`
                                                                     ]
                                                                 ) {
                                                                     handleBulkToggleChecklist(
@@ -1115,17 +1105,16 @@ const ChecklistTable = ({
                         {paginatedAccounts.map((account, rowIdx) => {
                             const currentStepIndex =
                                 subMilestoneStepMap[
-                                    account.current_submilestone_id
+                                account.current_submilestone_id
                                 ];
 
                             return (
                                 <tr
                                     key={account.id}
-                                    className={`${
-                                        rowIdx % 2 === 0
-                                            ? "bg-white"
-                                            : "bg-gray-50"
-                                    } hover:bg-blue-50 transition-colors duration-150 border-b border-gray-100`}
+                                    className={`${rowIdx % 2 === 0
+                                        ? "bg-white"
+                                        : "bg-gray-50"
+                                        } hover:bg-blue-50 transition-colors duration-150 border-b border-gray-100`}
                                 >
                                     <td className="px-4 py-1.5 font-semibold text-gray-900 sticky left-0 bg-inherit z-40 border-r border-gray-200 shadow-sm min-w-[220px] max-w-[220px]">
                                         <div className="flex items-center">
@@ -1170,7 +1159,7 @@ const ChecklistTable = ({
                                                     const checklistDate =
                                                         uploadedDoc
                                                             ? uploadedDoc.updated_at ||
-                                                              uploadedDoc.created_at
+                                                            uploadedDoc.created_at
                                                             : accountChecklistStatus?.completed_at;
                                                     const baseColor =
                                                         stepIdx % 2 === 0
@@ -1196,7 +1185,7 @@ const ChecklistTable = ({
                                                                 const prevChecklist =
                                                                     sub
                                                                         .checklists[
-                                                                        i
+                                                                    i
                                                                     ];
                                                                 const prevUploadedDoc =
                                                                     (
@@ -1253,7 +1242,7 @@ const ChecklistTable = ({
                                                         ) {
                                                             const prevOriginalStep =
                                                                 steps[
-                                                                    prevOriginalStepIdx
+                                                                prevOriginalStepIdx
                                                                 ];
                                                             if (
                                                                 !prevOriginalStep
@@ -1283,9 +1272,9 @@ const ChecklistTable = ({
                                                                             (assignee.submilestone_id ===
                                                                                 prevSub.id ||
                                                                                 assignee.submilestone_id ===
-                                                                                    null) &&
+                                                                                null) &&
                                                                             assignee.work_order_id ===
-                                                                                prevStepWorkOrderId &&
+                                                                            prevStepWorkOrderId &&
                                                                             (assignee.account_id ===
                                                                                 account.id ||
                                                                                 account.work_order_account_assignees?.some(
@@ -1293,9 +1282,9 @@ const ChecklistTable = ({
                                                                                         accountAssignee
                                                                                     ) =>
                                                                                         accountAssignee.work_order_id ===
-                                                                                            prevStepWorkOrderId &&
+                                                                                        prevStepWorkOrderId &&
                                                                                         accountAssignee.account_id ===
-                                                                                            account.id
+                                                                                        account.id
                                                                                 ))
                                                                     );
 
@@ -1400,7 +1389,7 @@ const ChecklistTable = ({
                                                                     const checkSub =
                                                                         step
                                                                             .subMilestones[
-                                                                            checkSubIdx
+                                                                        checkSubIdx
                                                                         ];
                                                                     const checkChecklists =
                                                                         checkSub.checklists ||
@@ -1471,9 +1460,9 @@ const ChecklistTable = ({
                                                                 // This ensures sequential order regardless of who is assigned
                                                                 const isFirstIncomplete =
                                                                     firstIncompleteSubIdx ===
-                                                                        -1 ||
+                                                                    -1 ||
                                                                     subIdx ===
-                                                                        firstIncompleteSubIdx;
+                                                                    firstIncompleteSubIdx;
 
                                                                 if (
                                                                     isFirstIncomplete
@@ -1504,11 +1493,10 @@ const ChecklistTable = ({
                                                     return [
                                                         <td
                                                             key={`date-${checklist.id}`}
-                                                            className={`text-center px-2 py-1.5 border-r border-gray-200 text-sm font-medium ${
-                                                                isComplete
-                                                                    ? "bg-green-100 border-green-300"
-                                                                    : dateColumnBgColor
-                                                            } hover:bg-opacity-80 transition-all duration-150 min-w-[100px] w-[100px]`}
+                                                            className={`text-center px-2 py-1.5 border-r border-gray-200 text-sm font-medium ${isComplete
+                                                                ? "bg-green-100 border-green-300"
+                                                                : dateColumnBgColor
+                                                                } hover:bg-opacity-80 transition-all duration-150 min-w-[100px] w-[100px]`}
                                                         >
                                                             <div className="flex items-center justify-center">
                                                                 {checklistDate ? (
@@ -1535,11 +1523,10 @@ const ChecklistTable = ({
                                                         </td>,
                                                         <td
                                                             key={`remarks-${checklist.id}`}
-                                                            className={`text-center px-2 py-1.5 border-r border-gray-200 text-sm ${remarksColumnBgColor} hover:bg-opacity-80 transition-all duration-150 min-w-[100px] w-[100px] ${
-                                                                isComplete
-                                                                    ? "bg-green-100 border-green-300"
-                                                                    : ""
-                                                            }`}
+                                                            className={`text-center px-2 py-1.5 border-r border-gray-200 text-sm ${remarksColumnBgColor} hover:bg-opacity-80 transition-all duration-150 min-w-[100px] w-[100px] ${isComplete
+                                                                ? "bg-green-100 border-green-300"
+                                                                : ""
+                                                                }`}
                                                         >
                                                             <div className="flex items-center justify-center">
                                                                 <ActionButtons

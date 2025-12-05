@@ -6,17 +6,17 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import "./loader.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import DateLogo from "../../../../../../public/Images/Date_range.svg";
-import apiService from "../../../servicesApi/apiService";
+import DateLogo from "@/assets/images/Date_range.svg";
+import apiService from "@/servicesApi/apiService";
 import moment from "moment";
 import { useStateContext } from "@/context/contextprovider";
 import GlobalTable from "../GlobalTable";
 import InvoicesTableCell from "./InvoicesTableCell";
 import { MdCalendarToday } from "react-icons/md";
-import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
+import TransactionSearchBar from "@/features/transaction-management/transaction/TransactionSearchBar";
 import usePagination from "@/hooks/usePagination";
 import { useTransactionContext } from "@/context/Transaction/TransactionContext";
-import { transaction } from "@/component/servicesApi/apiCalls/transactions";
+import { transaction } from "@/servicesApi/apiCalls/transactions";
 import Pagination from "@/component/Pagination";
 
 const InvoicesCom = () => {

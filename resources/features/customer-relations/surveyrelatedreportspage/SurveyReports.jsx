@@ -4,7 +4,7 @@ import { FaTrash } from "react-icons/fa";
 import { IoIosAdd } from "react-icons/io";
 import { showToast } from "../../../util/toastUtil";
 import { SurveyList } from './surveyComponents/SurveyList';
-import apiService from '../../servicesApi/apiService';
+import apiService from '@/servicesApi/apiService';
 
 
 const SurveyReports = () => {
@@ -68,7 +68,7 @@ const SurveyReports = () => {
                         .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                         .map((survey, index) => (
                             <SurveyList
-                                key={survey.id} 
+                                key={survey.id}
                                 data={survey}
                                 handleDelete={handleDelete}
                                 handleUpdateTitle={handleUpdateTitle}

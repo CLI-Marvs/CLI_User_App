@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import apiService from "../../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { useNavigate } from "react-router-dom";
 import { useStateContext } from "../../../../context/contextprovider";
 

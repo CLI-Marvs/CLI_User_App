@@ -2,10 +2,10 @@ import React, { useEffect, useState, useMemo } from "react";
 import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 import isEqual from "lodash/isEqual";
-import { normalizeData } from "@/component/layout/superadminpage/modals/DepartmentModal/utils/normalizeData";
-import Feature from "@/component/layout/superadminpage/component/Feature";
+import { normalizeData } from "@/features/admin-settings/superadminpage/modals/DepartmentModal/utils/normalizeData";
+import Feature from "@/features/admin-settings/superadminpage/component/Feature";
 import useFeature from "@/context/RoleManagement/FeatureContext";
-import { departmentPermissionService } from "@/component/servicesApi/apiCalls/roleManagement";
+import { departmentPermissionService } from "@/servicesApi/apiCalls/roleManagement";
 import useDepartmentPermission from "@/context/RoleManagement/DepartmentPermissionContext";
 import Alert from "@/component/Alert";
 
@@ -232,8 +232,8 @@ const EditDepartmentModal = ({
                             onClick={handleShowUpdateAlert}
                             disabled={isButtonDisabled || isLoading}
                             className={`gradient-btn5 w-[100px] h-[35px] rounded-[10px] text-sm text-white montserrat-semibold ${isButtonDisabled || isLoading
-                                    ? "cursor-not-allowed opacity-50"
-                                    : ""
+                                ? "cursor-not-allowed opacity-50"
+                                : ""
                                 }`}
                         >
                             {isLoading ? (

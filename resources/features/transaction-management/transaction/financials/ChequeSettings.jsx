@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import DatePicker from "react-datepicker";
-import DateLogo from "../../../../../../public/Images/Date_range.svg";
+import DateLogo from "@/assets/images/Date_range.svg";
 import moment from "moment";
 import SelectInput from "@/shared/components/SelectInput";
 import {

@@ -1,5 +1,5 @@
 import React from 'react'
-import WorkFlowNotification from '@/component/layout/propertyandpricingpage/workflownotification/WorkFlowNotification';
+import WorkFlowNotification from '@/features/property-pricing/propertyandpricingpage/workflownotification/WorkFlowNotification';
 const WorkFlowNotificationView = () => {
   return (
     <div>

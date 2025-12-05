@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import PremiumChecklistModal from "./PremiumChecklistModal";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+import { usePricing } from "@/features/property-pricing/propertyandpricingpage/context/BasicPricingContext";
 import CircularProgress from "@mui/material/CircularProgress";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 
@@ -234,8 +234,8 @@ const AdditionalPremiumAssignModal = ({ modalRef, priceListData }) => {
                                                             >
                                                                 <div
                                                                     className={`h-[63px] p-[6px] rounded-[15px] ${isSelected
-                                                                            ? "gradient-btn4 "
-                                                                            : ""
+                                                                        ? "gradient-btn4 "
+                                                                        : ""
                                                                         }  `}
                                                                 >
                                                                     <div className="flex  justify-center items-center bg-white h-full min-w-max px-2  text-custom-solidgreen rounded-[10px]">

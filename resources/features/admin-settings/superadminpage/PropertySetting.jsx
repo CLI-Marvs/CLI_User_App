@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
-import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
+import CustomTable from "@/features/property-pricing/propertyandpricingpage/component/CustomTable";
 import usePropertyFeature from "@/context/RoleManagement/PropertyFeatureContext";
-import PropertyFeatureTableRow from "@/component/layout/superadminpage/component/tableRow/PropertyFeatureTableRow";
+import PropertyFeatureTableRow from "@/features/admin-settings/superadminpage/component/tableRow/PropertyFeatureTableRow";
 import useFeature from "@/context/RoleManagement/FeatureContext";
-import EditPropertyFeature from "@/component/layout/superadminpage/modals/PropertySettingModal/EditPropertyFeature";
-import AddPropertyFeature from "@/component/layout/superadminpage/modals/PropertySettingModal/AddPropertyFeature";
-import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
+import EditPropertyFeature from "@/features/admin-settings/superadminpage/modals/PropertySettingModal/EditPropertyFeature";
+import AddPropertyFeature from "@/features/admin-settings/superadminpage/modals/PropertySettingModal/AddPropertyFeature";
+import Pagination from "@/features/property-pricing/propertyandpricingpage/component/Pagination";
 import Skeleton from "@/component/Skeletons";
-import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
+import TransactionSearchBar from "@/features/transaction-management/transaction/TransactionSearchBar";
 
 const PropertySetting = () => {
     const editPropertyFeatureRef = useRef(null);

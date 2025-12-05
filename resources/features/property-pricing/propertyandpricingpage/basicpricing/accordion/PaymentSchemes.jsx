@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { IoIosArrowDown } from "react-icons/io";
-import { usePricing } from "@/component/layout/propertyandpricingpage/context/BasicPricingContext";
+import { usePricing } from "@/features/property-pricing/propertyandpricingpage/context/BasicPricingContext";
 import { usePaymentScheme } from "@/context/PropertyPricing/PaymentSchemeContext";
 import paymentScheme from './PaymentSchemes';
 
@@ -156,16 +156,16 @@ const paymentScheme = ({ action, priceListMasterData }) => {
                 >
                     <span
                         className={` text-custom-solidgreen ${accordionOpen
-                                ? "text-[20px] montserrat-semibold"
-                                : "text-[18px] montserrat-regular"
+                            ? "text-[20px] montserrat-semibold"
+                            : "text-[18px] montserrat-regular"
                             }`}
                     >
                         Payment Schemes
                     </span>
                     <span
                         className={`flex justify-center items-center h-[40px] w-[40px] rounded-full  transform transition-transform duration-300 ease-in-out ${accordionOpen
-                                ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
-                                : "rotate-0 gradient-btn2 text-white"
+                            ? "rotate-180 bg-[#F3F7F2] text-custom-solidgreen"
+                            : "rotate-0 gradient-btn2 text-white"
                             }`}
                     >
                         <IoIosArrowDown className=" text-[18px]" />

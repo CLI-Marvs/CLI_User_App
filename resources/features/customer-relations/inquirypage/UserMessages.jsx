@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import FolderFile from "../../../../../public/Images/folder_file.svg";
-import Kent from "../../../../../public/Images/kent.png";
-import defaultAvatar from "../../../../../public/Images/AdminSilouette.svg";
+import FolderFile from "@/assets/images/folder_file.svg";
+import Kent from "@/assets/images/kent.png";
+import defaultAvatar from "@/assets/images/AdminSilouette.svg";
 import moment from "moment";
 import { useStateContext } from "../../../context/contextprovider";
 import { Link, useLocation, useParams } from "react-router-dom";
 import CircularProgress from "@mui/material/CircularProgress";
 import { BsDownload } from "react-icons/bs";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 
 const UserMessages = ({ items, dataConcern }) => {
     const attachmentData = JSON.parse(items?.attachment || "[]");
@@ -108,8 +108,7 @@ const UserMessages = ({ items, dataConcern }) => {
                         <span>From:</span>
                         {
                             /* capitalizeWords() */
-                            `${dataConcern?.buyer_firstname || ""} ${
-                                dataConcern?.buyer_middlename || ""
+                            `${dataConcern?.buyer_firstname || ""} ${dataConcern?.buyer_middlename || ""
                             } ${dataConcern?.buyer_lastname || ""}`
                         }{" "}
                         {/* capitalizeWords()*/ dataConcern?.suffix_name}

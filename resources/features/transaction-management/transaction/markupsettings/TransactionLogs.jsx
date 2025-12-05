@@ -1,5 +1,5 @@
 import React from "react";
-import VersionLogUpdates from "../../versionlogupdatespage/VersionLogUpdates";
+import VersionLogUpdates from "@/features/logs/versionlogupdatespage/VersionLogUpdates";
 import ReleaseNotes from "../component/ReleaseNotes";
 
 const TransactionLogs = () => {

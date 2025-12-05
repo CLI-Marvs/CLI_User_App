@@ -1,4 +1,4 @@
-import Reports from '@/component/layout/transaction/receivables/Reports'
+import Reports from '@/features/transaction-management/transaction/receivables/Reports'
 import React from 'react'
 
 const ReportsView = () => {

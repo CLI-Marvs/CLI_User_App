@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { IoIosCheckmarkCircle } from "react-icons/io";
-import { data } from "@/component/servicesApi/apiCalls/transactions";
+import { data } from "@/servicesApi/apiCalls/transactions";
 import Skeleton from "react-loading-skeleton";
 import { useStateContext } from "@/context/contextprovider";
 import moment from "moment";
 import { Link } from "react-router-dom";
 import { CircularProgress } from "@mui/material";
 import { BsDownload } from "react-icons/bs";
-import FolderFile from "../../../../../public/Images/folder_file.svg";
+import FolderFile from "@/assets/images/folder_file.svg";
 
 const PreviewMessageModal = ({ transactModalRef, ticketId, setTicketId }) => {
     const { messageData, setMessageData, isTotalPages, setIsTotalPages } =
@@ -205,14 +205,14 @@ const PreviewMessageModal = ({ transactModalRef, ticketId, setTicketId }) => {
                                         )}
                                         <div
                                             className={`w-[382px] h-auto rounded-r-[10px] rounded-b-[10px] mt-2 py-5 pr-5 pl-[31px] ${isAdmin
-                                                    ? "gradient-background2"
-                                                    : "gradient-background1"
+                                                ? "gradient-background2"
+                                                : "gradient-background1"
                                                 }`}
                                         >
                                             <span
                                                 className={`text-sm ${isAdmin
-                                                        ? "text-black"
-                                                        : "text-white"
+                                                    ? "text-black"
+                                                    : "text-white"
                                                     }`}
                                             >
                                                 {item.message}

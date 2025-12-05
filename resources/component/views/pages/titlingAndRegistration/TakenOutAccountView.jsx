@@ -13,14 +13,13 @@ import TicketSvg from "@/assets/images/ticket.svg";
 import UploadSvg from "@/assets/images/csv_icon.svg";
 import CheckboxSvg from "@/assets/images/checkbox.svg";
 import Checkbox1Svg from "@/assets/images/CheckBox1.svg";
-import CheckboxSvg from "@/assets/images/checkbox.svg";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
-import Filter from "@/images/filterIcon.svg";
-import DateLogo from "@/images/Date_range.svg";
+import Filter from "@/assets/images/filterIcon.svg";
+import DateLogo from "@/assets/images/Date_range.svg";
 import DatePicker from "react-datepicker";
-import apiService from "../../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { useStateContext } from "../../../../context/contextprovider";
 import { useDocumentManagementContext } from "../../../../context/DocumentManagement/DocumentManagementContext";
 import { toast, ToastContainer } from "react-toastify";
@@ -667,8 +666,8 @@ export default function PaginatedTable() {
                                             setFilterOption(option.label)
                                         }
                                         className={`flex items-center justify-center h-9 w-full p-4 ${filterOption === option.label
-                                                ? "bg-custom-lightestgreen text-gray-900"
-                                                : "text-gray-700"
+                                            ? "bg-custom-lightestgreen text-gray-900"
+                                            : "text-gray-700"
                                             }`}
                                         style={{ fontWeight: "normal" }}
                                     >
@@ -956,8 +955,8 @@ export default function PaginatedTable() {
                                     >
                                         <div
                                             className={`flex items-center gap-2 ${head === "Financing"
-                                                    ? "justify-center pl-0"
-                                                    : "pl-4"
+                                                ? "justify-center pl-0"
+                                                : "pl-4"
                                                 }`}
                                         >
                                             {head === "Account Name" && (
@@ -1090,10 +1089,10 @@ export default function PaginatedTable() {
                                             <tr
                                                 key={`${contract_no}-${globalIndex}`}
                                                 className={`${classes} ${isInMasterList
-                                                        ? "text-[#175D5F] text-base font-normal"
-                                                        : isChecked
-                                                            ? "bg-slate-200 text-[#348017] text-base font-normal"
-                                                            : "text-[#348017] text-base font-normal"
+                                                    ? "text-[#175D5F] text-base font-normal"
+                                                    : isChecked
+                                                        ? "bg-slate-200 text-[#348017] text-base font-normal"
+                                                        : "text-[#348017] text-base font-normal"
                                                     } cursor-pointer`}
                                                 onClick={() =>
                                                     !isInMasterList &&

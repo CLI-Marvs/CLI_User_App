@@ -1,4 +1,4 @@
-import CheckStreamReports from '@/component/layout/transaction/financials/CheckStreamReports'
+import CheckStreamReports from '@/features/transaction-management/transaction/financials/CheckStreamReports'
 import React from 'react'
 
 const CheckStreamReportsView = () => {

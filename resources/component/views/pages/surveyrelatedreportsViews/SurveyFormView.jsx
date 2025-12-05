@@ -1,10 +1,10 @@
 import React from 'react'
-import SurveyForm from '../../../layout/surveyrelatedreportspage/SurveyForm'
+import SurveyForm from '@/features/customer-relations/surveyrelatedreportspage/SurveyForm'
 
 const SurveyFormView = () => {
   return (
     <div>
-        <SurveyForm />
+      <SurveyForm />
     </div>
   )
 }

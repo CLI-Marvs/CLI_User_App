@@ -4,7 +4,7 @@ import React, {
     useState,
     useEffect,
 } from "react";
-import { propertyMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
+import { propertyMasterService } from "@/servicesApi/apiCalls/propertyPricing/property/propertyMasterService";
 
 const PropertyContext = createContext();
 

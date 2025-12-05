@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import apiService from "../../../component/servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import ReactPaginate from "react-paginate";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
@@ -529,7 +529,7 @@ const ProjectAssigneeComponent = () => {
                                             type="text"
                                             placeholder={
                                                 selectedProjectDetails.length >
-                                                0
+                                                    0
                                                     ? ""
                                                     : "Search for projects..."
                                             }
@@ -581,7 +581,7 @@ const ProjectAssigneeComponent = () => {
                                             </div>
                                             <div className="overflow-y-auto max-h-48">
                                                 {filteredProjects.length ===
-                                                0 ? (
+                                                    0 ? (
                                                     <div className="px-4 py-6 text-center text-gray-500">
                                                         <svg
                                                             className="w-8 h-8 mx-auto mb-2 text-gray-300"
@@ -635,20 +635,20 @@ const ProjectAssigneeComponent = () => {
                                                                 {selectedProjects.includes(
                                                                     project.property_name
                                                                 ) && (
-                                                                    <div className="flex-shrink-0">
-                                                                        <svg
-                                                                            className="w-4 h-4 text-green-500"
-                                                                            fill="currentColor"
-                                                                            viewBox="0 0 20 20"
-                                                                        >
-                                                                            <path
-                                                                                fillRule="evenodd"
-                                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                                clipRule="evenodd"
-                                                                            />
-                                                                        </svg>
-                                                                    </div>
-                                                                )}
+                                                                        <div className="flex-shrink-0">
+                                                                            <svg
+                                                                                className="w-4 h-4 text-green-500"
+                                                                                fill="currentColor"
+                                                                                viewBox="0 0 20 20"
+                                                                            >
+                                                                                <path
+                                                                                    fillRule="evenodd"
+                                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                    clipRule="evenodd"
+                                                                                />
+                                                                            </svg>
+                                                                        </div>
+                                                                    )}
                                                             </label>
                                                         )
                                                     )
@@ -740,11 +740,11 @@ const ProjectAssigneeComponent = () => {
                                             type="text"
                                             placeholder={
                                                 selectedMilestoneDetails.length >
-                                                0
+                                                    0
                                                     ? ""
                                                     : loadingStates.submilestones
-                                                    ? "Loading milestones..."
-                                                    : "Search for milestones..."
+                                                        ? "Loading milestones..."
+                                                        : "Search for milestones..."
                                             }
                                             value={milestoneSearchTerm}
                                             onChange={(e) =>
@@ -806,7 +806,7 @@ const ProjectAssigneeComponent = () => {
                                                 </div>
                                                 <div className="overflow-y-auto max-h-48">
                                                     {filteredMilestones.length ===
-                                                    0 ? (
+                                                        0 ? (
                                                         <div className="px-4 py-6 text-center text-gray-500">
                                                             <svg
                                                                 className="w-8 h-8 mx-auto mb-2 text-gray-300"
@@ -867,20 +867,20 @@ const ProjectAssigneeComponent = () => {
                                                                     {selectedSubmilestones.includes(
                                                                         milestone.id.toString()
                                                                     ) && (
-                                                                        <div className="flex-shrink-0">
-                                                                            <svg
-                                                                                className="w-4 h-4 text-green-500"
-                                                                                fill="currentColor"
-                                                                                viewBox="0 0 20 20"
-                                                                            >
-                                                                                <path
-                                                                                    fillRule="evenodd"
-                                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                                    clipRule="evenodd"
-                                                                                />
-                                                                            </svg>
-                                                                        </div>
-                                                                    )}
+                                                                            <div className="flex-shrink-0">
+                                                                                <svg
+                                                                                    className="w-4 h-4 text-green-500"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 20 20"
+                                                                                >
+                                                                                    <path
+                                                                                        fillRule="evenodd"
+                                                                                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                        clipRule="evenodd"
+                                                                                    />
+                                                                                </svg>
+                                                                            </div>
+                                                                        )}
                                                                 </label>
                                                             )
                                                         )
@@ -967,7 +967,7 @@ const ProjectAssigneeComponent = () => {
                                             type="text"
                                             placeholder={
                                                 selectedEmployeeDetails.length >
-                                                0
+                                                    0
                                                     ? ""
                                                     : "Search for employees..."
                                             }
@@ -1017,7 +1017,7 @@ const ProjectAssigneeComponent = () => {
                                             </div>
                                             <div className="overflow-y-auto max-h-48">
                                                 {filteredEmployees.length ===
-                                                0 ? (
+                                                    0 ? (
                                                     <div className="px-4 py-6 text-center text-gray-500">
                                                         <svg
                                                             className="w-8 h-8 mx-auto mb-2 text-gray-300"
@@ -1069,20 +1069,20 @@ const ProjectAssigneeComponent = () => {
                                                                 {selectedEmployees.includes(
                                                                     emp.id.toString()
                                                                 ) && (
-                                                                    <div className="flex-shrink-0">
-                                                                        <svg
-                                                                            className="w-4 h-4 text-green-500"
-                                                                            fill="currentColor"
-                                                                            viewBox="0 0 20 20"
-                                                                        >
-                                                                            <path
-                                                                                fillRule="evenodd"
-                                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                                                clipRule="evenodd"
-                                                                            />
-                                                                        </svg>
-                                                                    </div>
-                                                                )}
+                                                                        <div className="flex-shrink-0">
+                                                                            <svg
+                                                                                className="w-4 h-4 text-green-500"
+                                                                                fill="currentColor"
+                                                                                viewBox="0 0 20 20"
+                                                                            >
+                                                                                <path
+                                                                                    fillRule="evenodd"
+                                                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                    clipRule="evenodd"
+                                                                                />
+                                                                            </svg>
+                                                                        </div>
+                                                                    )}
                                                             </label>
                                                         )
                                                     )
@@ -1166,8 +1166,8 @@ const ProjectAssigneeComponent = () => {
                                     {loadingStates.assign
                                         ? "Assigning..."
                                         : assignmentMode === "replace"
-                                        ? "Replace Assignees"
-                                        : "Add Assignees"}
+                                            ? "Replace Assignees"
+                                            : "Add Assignees"}
                                 </button>
                             </div>
                         </div>
@@ -1195,11 +1195,10 @@ const ProjectAssigneeComponent = () => {
                                         }
                                     >
                                         <svg
-                                            className={`w-4 h-4 ${
-                                                loadingStates.list
-                                                    ? "animate-spin"
-                                                    : ""
-                                            }`}
+                                            className={`w-4 h-4 ${loadingStates.list
+                                                ? "animate-spin"
+                                                : ""
+                                                }`}
                                             fill="none"
                                             stroke="currentColor"
                                             viewBox="0 0 24 24"
@@ -1293,180 +1292,178 @@ const ProjectAssigneeComponent = () => {
                                                                     p
                                                                         .property_name
                                                                 ] !== undefined
-                                                                    ? `${
-                                                                          assignees[
-                                                                              p
-                                                                                  .property_name
-                                                                          ]
-                                                                              .length
-                                                                      } assignee(s)`
-                                                                    : `${
-                                                                          p.assignees_count ??
-                                                                          0
-                                                                      } assignee(s)`}
+                                                                    ? `${assignees[
+                                                                        p
+                                                                            .property_name
+                                                                    ]
+                                                                        .length
+                                                                    } assignee(s)`
+                                                                    : `${p.assignees_count ??
+                                                                    0
+                                                                    } assignee(s)`}
                                                             </td>
                                                         </tr>
                                                         {expandedProjects[
                                                             p.property_name
                                                         ] && (
-                                                            <tr>
-                                                                <td
-                                                                    colSpan="2"
-                                                                    className="p-0 bg-slate-50"
-                                                                >
-                                                                    <div className="p-4">
-                                                                        <h4 className="text-md font-semibold text-gray-800 mb-2">
-                                                                            Milestones
-                                                                            for{" "}
-                                                                            {
-                                                                                p.property_name
-                                                                            }
-                                                                        </h4>
-                                                                        {!projectMilestones[
-                                                                            p
-                                                                                .property_name
-                                                                        ] ? (
-                                                                            <div className="text-sm text-gray-500">
-                                                                                Loading
-                                                                                milestones...
-                                                                            </div>
-                                                                        ) : projectMilestones[
-                                                                              p
-                                                                                  .property_name
-                                                                          ]
-                                                                              .length ===
-                                                                          0 ? (
-                                                                            <div className="text-sm text-gray-500">
-                                                                                No
-                                                                                milestones
-                                                                                found
-                                                                                for
-                                                                                this
-                                                                                project.
-                                                                            </div>
-                                                                        ) : (
-                                                                            <ul className="space-y-2">
-                                                                                {projectMilestones[
-                                                                                    p
-                                                                                        .property_name
-                                                                                ].map(
-                                                                                    (
-                                                                                        milestone
-                                                                                    ) => {
-                                                                                        const assigneeKey = `${p.property_name}-${milestone.id}`;
-                                                                                        const isMilestoneExpanded =
-                                                                                            !!expandedMilestones[
+                                                                <tr>
+                                                                    <td
+                                                                        colSpan="2"
+                                                                        className="p-0 bg-slate-50"
+                                                                    >
+                                                                        <div className="p-4">
+                                                                            <h4 className="text-md font-semibold text-gray-800 mb-2">
+                                                                                Milestones
+                                                                                for{" "}
+                                                                                {
+                                                                                    p.property_name
+                                                                                }
+                                                                            </h4>
+                                                                            {!projectMilestones[
+                                                                                p
+                                                                                    .property_name
+                                                                            ] ? (
+                                                                                <div className="text-sm text-gray-500">
+                                                                                    Loading
+                                                                                    milestones...
+                                                                                </div>
+                                                                            ) : projectMilestones[
+                                                                                p
+                                                                                    .property_name
+                                                                            ]
+                                                                                .length ===
+                                                                                0 ? (
+                                                                                <div className="text-sm text-gray-500">
+                                                                                    No
+                                                                                    milestones
+                                                                                    found
+                                                                                    for
+                                                                                    this
+                                                                                    project.
+                                                                                </div>
+                                                                            ) : (
+                                                                                <ul className="space-y-2">
+                                                                                    {projectMilestones[
+                                                                                        p
+                                                                                            .property_name
+                                                                                    ].map(
+                                                                                        (
+                                                                                            milestone
+                                                                                        ) => {
+                                                                                            const assigneeKey = `${p.property_name}-${milestone.id}`;
+                                                                                            const isMilestoneExpanded =
+                                                                                                !!expandedMilestones[
                                                                                                 assigneeKey
-                                                                                            ];
-                                                                                        const milestoneAssignees =
-                                                                                            assignees[
+                                                                                                ];
+                                                                                            const milestoneAssignees =
+                                                                                                assignees[
                                                                                                 assigneeKey
-                                                                                            ];
+                                                                                                ];
 
-                                                                                        return (
-                                                                                            <li
-                                                                                                key={
-                                                                                                    milestone.id
-                                                                                                }
-                                                                                                className="bg-white p-3 rounded-md border"
-                                                                                            >
-                                                                                                <div
-                                                                                                    className="flex justify-between items-center cursor-pointer hover:bg-gray-50 -m-3 p-3"
-                                                                                                    onClick={() =>
-                                                                                                        handleMilestoneRowClick(
-                                                                                                            p.property_name,
-                                                                                                            milestone.id
-                                                                                                        )
+                                                                                            return (
+                                                                                                <li
+                                                                                                    key={
+                                                                                                        milestone.id
                                                                                                     }
+                                                                                                    className="bg-white p-3 rounded-md border"
                                                                                                 >
-                                                                                                    <div className="flex items-center">
-                                                                                                        {isMilestoneExpanded ? (
-                                                                                                            <ChevronDownIcon className="h-4 w-4 mr-2 text-gray-600" />
-                                                                                                        ) : (
-                                                                                                            <ChevronRightIcon className="h-4 w-4 mr-2 text-gray-500" />
-                                                                                                        )}
-                                                                                                        <span className="font-medium text-gray-800">
+                                                                                                    <div
+                                                                                                        className="flex justify-between items-center cursor-pointer hover:bg-gray-50 -m-3 p-3"
+                                                                                                        onClick={() =>
+                                                                                                            handleMilestoneRowClick(
+                                                                                                                p.property_name,
+                                                                                                                milestone.id
+                                                                                                            )
+                                                                                                        }
+                                                                                                    >
+                                                                                                        <div className="flex items-center">
+                                                                                                            {isMilestoneExpanded ? (
+                                                                                                                <ChevronDownIcon className="h-4 w-4 mr-2 text-gray-600" />
+                                                                                                            ) : (
+                                                                                                                <ChevronRightIcon className="h-4 w-4 mr-2 text-gray-500" />
+                                                                                                            )}
+                                                                                                            <span className="font-medium text-gray-800">
+                                                                                                                {
+                                                                                                                    milestone.name
+                                                                                                                }
+                                                                                                            </span>
+                                                                                                        </div>
+                                                                                                        <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
                                                                                                             {
-                                                                                                                milestone.name
-                                                                                                            }
+                                                                                                                milestone.assignees_count
+                                                                                                            }{" "}
+                                                                                                            assignee(s)
                                                                                                         </span>
                                                                                                     </div>
-                                                                                                    <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-full">
-                                                                                                        {
-                                                                                                            milestone.assignees_count
-                                                                                                        }{" "}
-                                                                                                        assignee(s)
-                                                                                                    </span>
-                                                                                                </div>
-                                                                                                {isMilestoneExpanded && (
-                                                                                                    <div className="mt-3 pt-3 border-t border-gray-200">
-                                                                                                        {!milestoneAssignees ? (
-                                                                                                            <p className="text-sm text-gray-500">
-                                                                                                                Loading
-                                                                                                                assignees...
-                                                                                                            </p>
-                                                                                                        ) : milestoneAssignees.length >
-                                                                                                          0 ? (
-                                                                                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                                                                                                {milestoneAssignees.map(
-                                                                                                                    (
-                                                                                                                        assignee
-                                                                                                                    ) => (
-                                                                                                                        <div
-                                                                                                                            key={
-                                                                                                                                assignee.id
-                                                                                                                            }
-                                                                                                                            className="flex items-center justify-between bg-gray-100 px-2 py-1 rounded"
-                                                                                                                        >
-                                                                                                                            <p className="text-sm">
-                                                                                                                                {
-                                                                                                                                    assignee.fullname
+                                                                                                    {isMilestoneExpanded && (
+                                                                                                        <div className="mt-3 pt-3 border-t border-gray-200">
+                                                                                                            {!milestoneAssignees ? (
+                                                                                                                <p className="text-sm text-gray-500">
+                                                                                                                    Loading
+                                                                                                                    assignees...
+                                                                                                                </p>
+                                                                                                            ) : milestoneAssignees.length >
+                                                                                                                0 ? (
+                                                                                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                                                                                    {milestoneAssignees.map(
+                                                                                                                        (
+                                                                                                                            assignee
+                                                                                                                        ) => (
+                                                                                                                            <div
+                                                                                                                                key={
+                                                                                                                                    assignee.id
                                                                                                                                 }
-                                                                                                                            </p>
-                                                                                                                            <button
-                                                                                                                                onClick={() =>
-                                                                                                                                    handleRemoveAssignee(
-                                                                                                                                        p.property_name,
-                                                                                                                                        milestone.id,
-                                                                                                                                        assignee.id
-                                                                                                                                    )
-                                                                                                                                }
-                                                                                                                                disabled={
-                                                                                                                                    loadingStates.remove ===
-                                                                                                                                    `${p.property_name}-${milestone.id}-${assignee.id}`
-                                                                                                                                }
-                                                                                                                                className="text-red-500 hover:text-red-700 text-xs disabled:text-gray-300"
+                                                                                                                                className="flex items-center justify-between bg-gray-100 px-2 py-1 rounded"
                                                                                                                             >
-                                                                                                                                {loadingStates.remove ===
-                                                                                                                                `${p.property_name}-${milestone.id}-${assignee.id}`
-                                                                                                                                    ? "..."
-                                                                                                                                    : "Remove"}
-                                                                                                                            </button>
-                                                                                                                        </div>
-                                                                                                                    )
-                                                                                                                )}
-                                                                                                            </div>
-                                                                                                        ) : (
-                                                                                                            <p className="text-sm text-gray-500">
-                                                                                                                No
-                                                                                                                assignees
-                                                                                                                for
-                                                                                                                this
-                                                                                                                milestone.
-                                                                                                            </p>
-                                                                                                        )}
-                                                                                                    </div>
-                                                                                                )}
-                                                                                            </li>
-                                                                                        );
-                                                                                    }
-                                                                                )}
-                                                                            </ul>
-                                                                        )}
-                                                                    </div>
-                                                                </td>
-                                                            </tr>
-                                                        )}
+                                                                                                                                <p className="text-sm">
+                                                                                                                                    {
+                                                                                                                                        assignee.fullname
+                                                                                                                                    }
+                                                                                                                                </p>
+                                                                                                                                <button
+                                                                                                                                    onClick={() =>
+                                                                                                                                        handleRemoveAssignee(
+                                                                                                                                            p.property_name,
+                                                                                                                                            milestone.id,
+                                                                                                                                            assignee.id
+                                                                                                                                        )
+                                                                                                                                    }
+                                                                                                                                    disabled={
+                                                                                                                                        loadingStates.remove ===
+                                                                                                                                        `${p.property_name}-${milestone.id}-${assignee.id}`
+                                                                                                                                    }
+                                                                                                                                    className="text-red-500 hover:text-red-700 text-xs disabled:text-gray-300"
+                                                                                                                                >
+                                                                                                                                    {loadingStates.remove ===
+                                                                                                                                        `${p.property_name}-${milestone.id}-${assignee.id}`
+                                                                                                                                        ? "..."
+                                                                                                                                        : "Remove"}
+                                                                                                                                </button>
+                                                                                                                            </div>
+                                                                                                                        )
+                                                                                                                    )}
+                                                                                                                </div>
+                                                                                                            ) : (
+                                                                                                                <p className="text-sm text-gray-500">
+                                                                                                                    No
+                                                                                                                    assignees
+                                                                                                                    for
+                                                                                                                    this
+                                                                                                                    milestone.
+                                                                                                                </p>
+                                                                                                            )}
+                                                                                                        </div>
+                                                                                                    )}
+                                                                                                </li>
+                                                                                            );
+                                                                                        }
+                                                                                    )}
+                                                                                </ul>
+                                                                            )}
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            )}
                                                     </React.Fragment>
                                                 ))}
                                             </tbody>

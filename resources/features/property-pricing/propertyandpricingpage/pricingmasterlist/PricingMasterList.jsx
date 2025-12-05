@@ -1,22 +1,22 @@
 import React, { useState, useEffect, useRef } from "react";
-import "@/component/layout/propertyandpricingpage/style/togglebtn.css";
-import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
+import "@/features/property-pricing/propertyandpricingpage/style/togglebtn.css";
+import Pagination from "@/features/property-pricing/propertyandpricingpage/component/Pagination";
 import { MdRefresh } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import DateLogo from "../../../../../../public/Images/Date_range.svg";
-import AddPropertyModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/Property/AddPropertyModal";
+import DateLogo from "@/assets/images/Date_range.svg";
+import AddPropertyModal from "@/features/property-pricing/propertyandpricingpage/basicpricing/modals/Property/AddPropertyModal";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { usePriceListMaster } from "@/context/PropertyPricing/PriceListMasterContext";
 import { showToast } from "@/util/toastUtil";
-import { priceListMasterService } from "@/component/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
+import { priceListMasterService } from "@/servicesApi/apiCalls/propertyPricing/priceListMaster/priceListMasterService";
 import CustomInput from "@/component/Input/CustomInput";
 import CustomToolTip from "@/component/CustomToolTip";
-import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
-import PricelistMasterRow from "@/component/layout/propertyandpricingpage/component/TableRows/PriceListMasterRow";
-import CustomSearchInput from "@/component/layout/propertyandpricingpage/component/CustomSearchInput";
-import CustomSearchFilter from "@/component/layout/propertyandpricingpage/component/CustomSearchFilter";
+import CustomTable from "@/features/property-pricing/propertyandpricingpage/component/CustomTable";
+import PricelistMasterRow from "@/features/property-pricing/propertyandpricingpage/component/TableRows/PriceListMasterRow";
+import CustomSearchInput from "@/features/property-pricing/propertyandpricingpage/component/CustomSearchInput";
+import CustomSearchFilter from "@/features/property-pricing/propertyandpricingpage/component/CustomSearchFilter";
 
 const COLUMNS = [
     { label: "Status", width: "w-[100px]" },
@@ -285,8 +285,8 @@ const PricingMasterList = () => {
                             <button
                                 disabled={isButtonDisabled(searchFilters)}
                                 className={`h-[37px] w-[88px] gradient-btn rounded-[10px] text-white text-sm ${isButtonDisabled(searchFilters)
-                                        ? "cursor-not-allowed opacity-50"
-                                        : ""
+                                    ? "cursor-not-allowed opacity-50"
+                                    : ""
                                     }`}
                                 onClick={handleSearch}
                             >

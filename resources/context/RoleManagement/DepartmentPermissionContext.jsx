@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
-import { departmentPermissionService } from "@/component/servicesApi/apiCalls/roleManagement";
+import { departmentPermissionService } from "@/servicesApi/apiCalls/roleManagement";
 import useDepartment from "@/context/RoleManagement/DepartmentContext";
 const DepartmentPermissionContext = createContext();
 

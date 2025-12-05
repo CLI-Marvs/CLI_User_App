@@ -6,7 +6,7 @@ import { useProperty } from "@/context/PropertyPricing/PropertyContext";
 import moment from "moment";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { priceVersionService } from "@/component/servicesApi/apiCalls/propertyPricing/priceVersion/priceVersionService";
+import { priceVersionService } from "@/servicesApi/apiCalls/propertyPricing/priceVersion/priceVersionService";
 import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 import { IoIosCloseCircle } from "react-icons/io";
@@ -326,8 +326,8 @@ const AddPriceVersionModal = ({ modalRef, fetchData }) => {
                                 isLoading || isButtonDisabled(formData ?? {})
                             }
                             className={`w-[129px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] hover:shadow-custom4 ${isLoading || isButtonDisabled(formData ?? {})
-                                    ? "cursor-not-allowed opacity-50"
-                                    : ""
+                                ? "cursor-not-allowed opacity-50"
+                                : ""
                                 }`}
                             onClick={handleSubmit}
                         >

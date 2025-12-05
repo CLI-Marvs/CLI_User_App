@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useUnit } from "@/context/PropertyPricing/UnitContext";
-import { unitService } from "@/component/servicesApi/apiCalls/propertyPricing/unit/unitService";
+import { unitService } from "@/servicesApi/apiCalls/propertyPricing/unit/unitService";
 import { showToast } from "@/util/toastUtil";
 import CircularProgress from "@mui/material/CircularProgress";
 import CustomInput from "@/component/Input/CustomInput";
@@ -257,8 +257,8 @@ const FloorPremiumAddUnitModal = ({
                         onClick={handleSubmit}
                         disabled={isLoading || isFloorAssignButtonDisabled}
                         className={`w-[95px] h-[37px] text-white montserrat-semibold text-sm gradient-btn2 rounded-[10px] ${isLoading || isFloorAssignButtonDisabled
-                                ? "opacity-50 cursor-not-allowed"
-                                : ""
+                            ? "opacity-50 cursor-not-allowed"
+                            : ""
                             }`}
                     >
                         {isLoading ? (

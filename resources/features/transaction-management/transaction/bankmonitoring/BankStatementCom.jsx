@@ -1,11 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
 import "react-toastify/dist/ReactToastify.css";
-import GlobalTable from "@/component/layout/transaction/GlobalTable";
+import GlobalTable from "@/features/transaction-management/transaction/GlobalTable";
 import BankTableCell from "./BankTableCell";
-import TransactionSearchBar from "@/component/layout/transaction/TransactionSearchBar";
+import TransactionSearchBar from "@/features/transaction-management/transaction/TransactionSearchBar";
 import { useTransactionContext } from "@/context/Transaction/TransactionContext";
 import usePagination from "@/hooks/usePagination";
-import { transaction } from "@/component/servicesApi/apiCalls/transactions";
+import { transaction } from "@/servicesApi/apiCalls/transactions";
 import Pagination from "@/component/Pagination";
 
 const BankStatementCom = () => {

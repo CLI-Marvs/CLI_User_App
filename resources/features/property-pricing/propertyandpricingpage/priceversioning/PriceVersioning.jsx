@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
-import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
+import Pagination from "@/features/property-pricing/propertyandpricingpage/component/Pagination";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import DateLogo from "../../../../../../public/Images/Date_range.svg";
-import AddPriceVersionModal from "@/component/layout/propertyandpricingpage/priceversioning/AddPriceVersionModal";
+import DateLogo from "@/assets/images/Date_range.svg";
+import AddPriceVersionModal from "@/features/property-pricing/propertyandpricingpage/priceversioning/AddPriceVersionModal";
 import { usePriceVersion } from "@/context/PropertyPricing/PriceVersionContext";
-import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";
-import PriceVersionRow from "@/component/layout/propertyandpricingpage/component/TableRows/PriceVersionRow";
-import CustomSearchInput from "@/component/layout/propertyandpricingpage/component/CustomSearchInput";
-import CustomSearchFilter from "@/component/layout/propertyandpricingpage/component/CustomSearchFilter";
+import CustomTable from "@/features/property-pricing/propertyandpricingpage/component/CustomTable";
+import PriceVersionRow from "@/features/property-pricing/propertyandpricingpage/component/TableRows/PriceVersionRow";
+import CustomSearchInput from "@/features/property-pricing/propertyandpricingpage/component/CustomSearchInput";
+import CustomSearchFilter from "@/features/property-pricing/propertyandpricingpage/component/CustomSearchFilter";
 import CustomInput from "@/component/Input/CustomInput";
 import moment from "moment";
 

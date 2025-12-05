@@ -1,4 +1,4 @@
-import PropertyFeatureCheckbox from "@/component/layout/superadminpage/component/PropertyFeatureCheckbox";
+import PropertyFeatureCheckbox from "@/features/admin-settings/superadminpage/component/PropertyFeatureCheckbox";
 import { toLowerCaseText } from "@/util/formatToLowerCase";
 import { HiPencil } from "react-icons/hi";
 

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 // import { DocumentManagementProvider } from "./DocumentManagement/DocumentManagementContext";
-import apiService from "../component/servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 import debounce from "lodash/debounce";
 import { get, set } from "lodash";
 

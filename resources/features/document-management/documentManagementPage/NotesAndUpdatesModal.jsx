@@ -1,10 +1,10 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import ReactDOM from "react-dom";
-import DateLogo from "../../../../../public/Images/Date_range.svg";
-import FileIcon from "../../../../../public/Images/folder_file_notes.svg";
-import ViewIcon from "../../../../../public/Images/eye_icon.svg";
-import DownloadIcon from "../../../../../public/Images/download_icon.svg";
-import apiService from "../../servicesApi/apiService";
+import DateLogo from "@/assets/images/Date_range.svg";
+import FileIcon from "@/assets/images/folder_file_notes.svg";
+import ViewIcon from "@/assets/images/eye_icon.svg";
+import DownloadIcon from "@/assets/images/download_icon.svg";
+import apiService from "@/servicesApi/apiService";
 import {
     getNotesAndUpdatesData,
     getCachedNotesAndUpdatesData,

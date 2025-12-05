@@ -1,4 +1,4 @@
-import apiService from "../../../servicesApi/apiService";
+import apiService from "@/servicesApi/apiService";
 
 let cache = {
     data: null,

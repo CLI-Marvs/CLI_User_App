@@ -1,6 +1,6 @@
 import React from 'react'
-import AskCli from '../../../../../../public/Images/AskCLI_BGFAQs.webp'
-import AskCliLogo from '../../../../../../public/Images/AskCli_Logo3.png'
+import AskCli from '@/assets/images/AskCLI_BGFAQs.webp'
+import AskCliLogo from '@/assets/images/AskCli_Logo3.png'
 
 const ListImage = () => {
     return (
