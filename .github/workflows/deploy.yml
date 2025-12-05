@@ -1,0 +1,31 @@
+name: Auto Deploy to Server
+
+on:
+  push:
+    branches:
+      - module/titling
+
+jobs:
+  deploy:
+    name: Deploy to Server
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEV_SERVER_IP }}
+          username: ${{ secrets.DEV_SERVER_USER }}
+          key: ${{ secrets.DEV_DEPLOY_KEY }}
+          script: |
+            cd /var/www/admin-user-dev/CLI_User_App
+
+            git pull origin module/titling
+
+            php artisan optimize
+
+            npm install
+            npm run build

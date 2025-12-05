@@ -1,9 +1,1576 @@
-import React from 'react'
+import React, { useState, useEffect, useCallback } from "react";
+import { useStateContext } from "../../../context/contextprovider";
+import ReactDOM from "react-dom";
+import apiService from "../../../../frontend/component/servicesApi/apiService";
+import { showToast } from "../../../util/toastUtil";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import {
+    getAdminSettingsData,
+    getCachedAdminSettingsData,
+    invalidateAdminSettingsData,
+} from "../../../component/layout/documentManagementPage/service/adminSettingsDataService";
+import {
+    PlusIcon,
+    PencilIcon,
+    TrashIcon,
+    XMarkIcon,
+    ExclamationTriangleIcon,
+    CheckCircleIcon,
+    InformationCircleIcon,
+    ChevronDownIcon,
+    ChevronRightIcon,
+} from "@heroicons/react/24/outline";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
+import { DndContext } from "@dnd-kit/core";
+import { SortableContext, useSortable, arrayMove } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import ProjectAssigneeComponent from "./ProjectAssignee";
 
-const AdminSettings = () => {
-  return (
-    <div>AdminSettings</div>
-  )
+const CrudModal = ({
+    isOpen,
+    onClose,
+    onSave,
+    item,
+    fields,
+    title,
+    loading = false,
+    externalErrors = {},
+}) => {
+    const [formData, setFormData] = useState({});
+    const [errors, setErrors] = useState({});
+    const { fetchWorkOrderTypes } = useStateContext();
+    const [touched, setTouched] = useState({});
+
+    useEffect(() => {
+        if (isOpen) {
+            const initialData = fields.reduce((acc, field) => {
+                if (field.type === "checkbox") {
+                    acc[field.name] = Boolean(item?.[field.name]);
+                } else {
+                    acc[field.name] = item?.[field.name] || "";
+                }
+                return acc;
+            }, {});
+            setFormData(initialData);
+            setErrors({});
+            setTouched({});
+        }
+    }, [item, fields, isOpen]);
+
+    // Merge external errors with local errors
+    useEffect(() => {
+        if (Object.keys(externalErrors).length > 0) {
+            setErrors((prevErrors) => ({ ...prevErrors, ...externalErrors }));
+        }
+    }, [externalErrors]);
+
+    const validateForm = () => {
+        const newErrors = {};
+        fields.forEach((field) => {
+            if (field.required && !formData[field.name]?.trim()) {
+                newErrors[field.name] = `${
+                    field.label || field.name.replace("_", " ")
+                } is required`;
+            }
+            if (
+                field.minLength &&
+                formData[field.name]?.length < field.minLength
+            ) {
+                newErrors[
+                    field.name
+                ] = `Must be at least ${field.minLength} characters`;
+            }
+            if (
+                field.maxLength &&
+                formData[field.name]?.length > field.maxLength
+            ) {
+                newErrors[
+                    field.name
+                ] = `Must be no more than ${field.maxLength} characters`;
+            }
+        });
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleChange = (e) => {
+        const { name, value, type, checked } = e.target;
+        const newValue = type === "checkbox" ? checked : value;
+        setFormData((prev) => ({ ...prev, [name]: newValue }));
+
+        if (errors[name]) {
+            setErrors((prev) => ({ ...prev, [name]: "" }));
+        }
+    };
+
+    const handleBlur = (field) => {
+        setTouched((prev) => ({ ...prev, [field]: true }));
+        if (field.required && !formData[field.name]?.trim()) {
+            setErrors((prev) => ({
+                ...prev,
+                [field.name]: `${
+                    field.label || field.name.replace("_", " ")
+                } is required`,
+            }));
+        }
+    };
+
+    const handleSave = (e) => {
+        e.preventDefault();
+        if (validateForm()) {
+            onSave(formData);
+        }
+    };
+
+    if (!isOpen) return null;
+
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
+                <div
+                    className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                    onClick={onClose}
+                ></div>
+
+                <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                    {/* Header */}
+                    <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+                        <h3 className="text-lg font-semibold leading-6 text-gray-900">
+                            {title}
+                        </h3>
+                        <button
+                            type="button"
+                            className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            onClick={onClose}
+                        >
+                            <XMarkIcon className="h-6 w-6" />
+                        </button>
+                    </div>
+
+                    {/* Form */}
+                    <form onSubmit={handleSave}>
+                        <div className="px-6 py-4">
+                            <div className="space-y-6">
+                                {fields.map((field) => (
+                                    <div key={field.name} className="space-y-1">
+                                        <label
+                                            htmlFor={field.name}
+                                            className="block text-sm font-medium text-gray-700"
+                                        >
+                                            {field.label ||
+                                                field.name
+                                                    .replace("_", " ")
+                                                    .replace(/\b\w/g, (l) =>
+                                                        l.toUpperCase()
+                                                    )}
+                                            {field.required && (
+                                                <span className="text-red-500 ml-1">
+                                                    *
+                                                </span>
+                                            )}
+                                        </label>
+
+                                        {field.type === "textarea" ? (
+                                            <textarea
+                                                name={field.name}
+                                                id={field.name}
+                                                rows={3}
+                                                value={
+                                                    formData[field.name] || ""
+                                                }
+                                                onChange={handleChange}
+                                                onBlur={() => handleBlur(field)}
+                                                className={`block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${
+                                                    errors[field.name]
+                                                        ? "ring-red-300 focus:ring-red-500"
+                                                        : "ring-gray-300 focus:ring-indigo-600"
+                                                }`}
+                                                placeholder={field.placeholder}
+                                            />
+                                        ) : field.type === "checkbox" ? (
+                                            <div className="flex items-center">
+                                                <input
+                                                    type="checkbox"
+                                                    name={field.name}
+                                                    id={field.name}
+                                                    checked={Boolean(
+                                                        formData[field.name]
+                                                    )}
+                                                    onChange={handleChange}
+                                                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                                />
+                                                <label
+                                                    htmlFor={field.name}
+                                                    className="ml-2 text-sm text-gray-700"
+                                                >
+                                                    {field.checkboxLabel ||
+                                                        "Enable this option"}
+                                                </label>
+                                            </div>
+                                        ) : (
+                                            <div className="space-y-1">
+                                                <input
+                                                    type={field.type || "text"}
+                                                    name={field.name}
+                                                    id={field.name}
+                                                    value={
+                                                        formData[field.name] ||
+                                                        ""
+                                                    }
+                                                    onChange={handleChange}
+                                                    onBlur={() =>
+                                                        handleBlur(field)
+                                                    }
+                                                    maxLength={field.maxLength}
+                                                    className={`block w-full rounded-md border-0 px-3 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6 ${
+                                                        errors[field.name]
+                                                            ? "ring-red-300 focus:ring-red-500"
+                                                            : "ring-gray-300 focus:ring-indigo-600"
+                                                    }`}
+                                                    placeholder={
+                                                        field.placeholder
+                                                    }
+                                                />
+                                                {field.maxLength && (
+                                                    <div className="flex justify-end text-xs text-gray-500">
+                                                        <span
+                                                            className={`${
+                                                                (formData[
+                                                                    field.name
+                                                                ]?.length ||
+                                                                    0) >
+                                                                field.maxLength *
+                                                                    0.9
+                                                                    ? "text-orange-600"
+                                                                    : (formData[
+                                                                          field
+                                                                              .name
+                                                                      ]
+                                                                          ?.length ||
+                                                                          0) >=
+                                                                      field.maxLength
+                                                                    ? "text-red-600"
+                                                                    : "text-gray-500"
+                                                            }`}
+                                                        >
+                                                            {formData[
+                                                                field.name
+                                                            ]?.length || 0}
+                                                            /{field.maxLength}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {errors[field.name] && (
+                                            <p className="text-sm text-red-600 flex items-center">
+                                                <ExclamationTriangleIcon className="h-4 w-4 mr-1" />
+                                                {errors[field.name]}
+                                            </p>
+                                        )}
+
+                                        {field.helpText && (
+                                            <p className="text-sm text-gray-500 flex items-center">
+                                                <InformationCircleIcon className="h-4 w-4 mr-1" />
+                                                {field.helpText}
+                                            </p>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="inline-flex w-full justify-center rounded-md gradient-btn5 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed sm:ml-3 sm:w-auto"
+                            >
+                                {loading ? (
+                                    <>
+                                        <div className="animate-spin -ml-1 mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                                        Saving...
+                                    </>
+                                ) : (
+                                    <div className="flex items-center">
+                                        <CheckCircleIcon className="h-4 w-4 mr-1" />
+                                        <span>
+                                            {item ? "Update" : "Create"}
+                                        </span>
+                                    </div>
+                                )}
+                            </button>
+                            <button
+                                type="button"
+                                className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                                onClick={onClose}
+                                disabled={loading}
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+};
+
+// Confirmation Dialog Component
+const ConfirmationDialog = ({
+    isOpen,
+    onClose,
+    onConfirm,
+    title,
+    message,
+    type = "danger",
+}) => {
+    if (!isOpen) return null;
+
+    const typeStyles = {
+        danger: {
+            icon: ExclamationTriangleIcon,
+            iconColor: "text-red-600",
+            buttonColor:
+                "bg-red-600 hover:bg-red-500 focus-visible:outline-red-600",
+        },
+    };
+
+    const { icon: Icon, iconColor, buttonColor } = typeStyles[type];
+
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-screen items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div
+                    className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                    onClick={onClose}
+                ></div>
+
+                <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                    <div className="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div className="sm:flex sm:items-start">
+                            <div
+                                className={`mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10`}
+                            >
+                                <Icon className={`h-6 w-6 ${iconColor}`} />
+                            </div>
+                            <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <h3 className="text-base font-semibold leading-6 text-gray-900">
+                                    {title}
+                                </h3>
+                                <div className="mt-2">
+                                    <p className="text-sm text-gray-500">
+                                        {message}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                        <button
+                            type="button"
+                            className={`inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto ${buttonColor}`}
+                            onClick={onConfirm}
+                        >
+                            Delete
+                        </button>
+                        <button
+                            type="button"
+                            className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                            onClick={onClose}
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>,
+        document.body
+    );
+};
+
+function DraggableWOT({
+    wot,
+    isWOTExpanded,
+    toggleWorkOrderType,
+    openModal,
+    openConfirmDialog,
+    children,
+}) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: wot.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        // Remove cursor: "grab" from the whole card
+    };
+
+    return (
+        <div
+            ref={setNodeRef}
+            style={style}
+            className="bg-white shadow-sm rounded-lg border border-gray-200"
+        >
+            {/* Work Order Type Header */}
+            <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center flex-1">
+                        {/* Drag handle */}
+                        <button
+                            type="button"
+                            {...attributes}
+                            {...listeners}
+                            tabIndex={-1}
+                            className="mr-2 p-1 text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing"
+                            title="Drag to reorder"
+                            aria-label="Drag handle"
+                        >
+                            {/* You can use a drag icon here, e.g. Heroicons Bars3Icon */}
+                            <svg
+                                className="h-5 w-5"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth={2}
+                                viewBox="0 0 24 24"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M4 8h16M4 16h16"
+                                />
+                            </svg>
+                        </button>
+                        {/* Expand/collapse button */}
+                        <button
+                            onClick={() => toggleWorkOrderType(wot.id)}
+                            className="flex items-center p-1 mr-3 text-gray-400 hover:text-gray-600 rounded"
+                        >
+                            {isWOTExpanded ? (
+                                <ChevronDownIcon className="h-5 w-5" />
+                            ) : (
+                                <ChevronRightIcon className="h-5 w-5" />
+                            )}
+                        </button>
+                        <div className="flex-1 min-w-0">
+                            <div className="flex items-center">
+                                <h2
+                                    className="text-xl font-semibold text-gray-900 truncate pr-2"
+                                    title={wot.type_name}
+                                >
+                                    {wot.type_name}
+                                </h2>
+                                <span className="ml-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 flex-shrink-0">
+                                    {wot.submilestones?.length || 0}{" "}
+                                    {(wot.submilestones?.length || 0) === 1
+                                        ? "Milestone"
+                                        : "Milestones"}
+                                </span>
+                            </div>
+                            {wot.description && (
+                                <p
+                                    className="mt-1 text-sm text-gray-600 truncate"
+                                    title={wot.description}
+                                >
+                                    {wot.description}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <button
+                            onClick={() => openModal("wot", "edit", wot)}
+                            className="inline-flex items-center p-2 text-gray-400 hover:text-indigo-600 hover:bg-gray-50 rounded-md"
+                            title="Edit work order type"
+                        >
+                            <PencilIcon className="h-4 w-4" />
+                        </button>
+                        <button
+                            onClick={() =>
+                                openConfirmDialog("wot", wot.id, wot.type_name)
+                            }
+                            className="inline-flex items-center p-2 text-gray-400 hover:text-red-600 hover:bg-gray-50 rounded-md"
+                            title="Delete work order type"
+                        >
+                            <TrashIcon className="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {/* Collapsible Sub-milestones Section */}
+            {children}
+        </div>
+    );
 }
 
-export default AdminSettings
+const AdminSettings = () => {
+    const [workOrderTypes, setWorkOrderTypes] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const { fetchWorkOrderTypes } = useStateContext();
+    const [modalState, setModalState] = useState({
+        isOpen: false,
+        type: null,
+        mode: "add",
+        item: null,
+        parentId: null,
+        loading: false,
+    });
+    const [fieldErrors, setFieldErrors] = useState({});
+    const [confirmDialog, setConfirmDialog] = useState({
+        isOpen: false,
+        type: null,
+        id: null,
+        title: "",
+        message: "",
+    });
+
+    // Collapsible state management
+    const [expandedWorkOrderTypes, setExpandedWorkOrderTypes] = useState(
+        new Set()
+    );
+    const [expandedSubmilestones, setExpandedSubmilestones] = useState(
+        new Set()
+    );
+    const [expandAllWOT, setExpandAllWOT] = useState(false);
+
+    // Toggle functions for collapsible sections
+    const toggleWorkOrderType = (id) => {
+        const newExpanded = new Set(expandedWorkOrderTypes);
+        if (newExpanded.has(id)) {
+            newExpanded.delete(id);
+        } else {
+            newExpanded.add(id);
+        }
+        setExpandedWorkOrderTypes(newExpanded);
+    };
+
+    const toggleSubmilestone = (id) => {
+        const newExpanded = new Set(expandedSubmilestones);
+        if (newExpanded.has(id)) {
+            newExpanded.delete(id);
+        } else {
+            newExpanded.add(id);
+        }
+        setExpandedSubmilestones(newExpanded);
+    };
+
+    const toggleAllWorkOrderTypes = () => {
+        if (expandAllWOT) {
+            setExpandedWorkOrderTypes(new Set());
+            setExpandedSubmilestones(new Set());
+        } else {
+            const allWOTIds = new Set(workOrderTypes.map((wot) => wot.id));
+            const allSubmilestoneIds = new Set();
+            workOrderTypes.forEach((wot) => {
+                if (wot.submilestones) {
+                    wot.submilestones.forEach((sub) =>
+                        allSubmilestoneIds.add(sub.id)
+                    );
+                }
+            });
+            setExpandedWorkOrderTypes(allWOTIds);
+            setExpandedSubmilestones(allSubmilestoneIds);
+        }
+        setExpandAllWOT(!expandAllWOT);
+    };
+
+    const fetchData = useCallback(async () => {
+        let isMounted = true;
+        // Use cached data for an instant load if available
+        const cachedData = getCachedAdminSettingsData();
+        if (cachedData) {
+            setWorkOrderTypes(cachedData);
+            setLoading(false);
+        } else {
+            setLoading(true);
+        }
+
+        try {
+            const data = await getAdminSettingsData(); // This will fetch if stale or not in cache
+            if (isMounted) {
+                setWorkOrderTypes(data);
+            }
+            setError(null);
+        } catch (err) {
+            if (isMounted) {
+                setError(
+                    "Failed to fetch work order settings. Please try again."
+                );
+            }
+            console.error("Fetch error:", err);
+        } finally {
+            if (isMounted && !cachedData) {
+                // Only set loading to false if we were actually in a loading state
+                setLoading(false);
+            }
+        }
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
+
+    const openModal = (type, mode, item = null, parentId = null) => {
+        setFieldErrors({}); // Clear any previous field errors
+        setModalState({
+            isOpen: true,
+            type,
+            mode,
+            item,
+            parentId,
+            loading: false,
+        });
+    };
+
+    const closeModal = () => {
+        setFieldErrors({}); // Clear field errors when closing
+        setModalState({
+            isOpen: false,
+            type: null,
+            mode: "add",
+            item: null,
+            parentId: null,
+            loading: false,
+        });
+    };
+
+    const handleSave = async (formData) => {
+        const { type, mode, item, parentId } = modalState;
+        setModalState((prev) => ({ ...prev, loading: true }));
+
+        let url, method, body;
+
+        try {
+            switch (type) {
+                case "wot":
+                    url =
+                        mode === "add"
+                            ? "/admin/settings/work-order-types"
+                            : `/admin/settings/work-order-types/${item.id}`;
+                    method = mode === "add" ? "post" : "put";
+                    body = {
+                        type_name: formData.type_name,
+                        description: formData.description,
+                    };
+                    break;
+                case "submilestone":
+                    url =
+                        mode === "add"
+                            ? "/admin/settings/submilestones"
+                            : `/admin/settings/submilestones/${item.id}`;
+                    method = mode === "add" ? "post" : "put";
+                    body = {
+                        name: formData.name,
+                        description: formData.description,
+                        work_order_type_id: parentId,
+                    };
+                    break;
+                case "checklist":
+                    url =
+                        mode === "add"
+                            ? "/admin/settings/checklists"
+                            : `/admin/settings/checklists/${item.id}`;
+                    method = mode === "add" ? "post" : "put";
+                    body = {
+                        name: formData.name,
+                        submilestone_id: parentId,
+                        requires_document: Boolean(formData.requires_document),
+                        is_buyer_related: Boolean(formData.is_buyer_related),
+                    };
+                    break;
+                default:
+                    throw new Error("Unknown operation type");
+            }
+
+            await apiService[method](url, body);
+            invalidateAdminSettingsData();
+            await fetchData();
+            closeModal();
+        } catch (err) {
+            console.error("Save error:", err);
+
+            // Handle specific error messages from the backend
+            if (
+                err.response &&
+                err.response.status === 422 &&
+                err.response.data
+            ) {
+                // If there are field-specific errors, set them
+                if (err.response.data.field_errors) {
+                    const fieldErrors = {};
+                    Object.keys(err.response.data.field_errors).forEach(
+                        (field) => {
+                            fieldErrors[field] =
+                                err.response.data.field_errors[field][0]; // Take first error message
+                        }
+                    );
+                    setFieldErrors(fieldErrors);
+                }
+
+                // Also set the general error message if provided (but prioritize field errors)
+                if (
+                    err.response.data.error &&
+                    Object.keys(err.response.data.field_errors || {}).length ===
+                        0
+                ) {
+                    setError(err.response.data.error);
+                }
+            } else if (
+                err.response &&
+                err.response.data &&
+                err.response.data.error
+            ) {
+                setError(err.response.data.error);
+            } else {
+                setError("Failed to save. Please try again.");
+            }
+        } finally {
+            setModalState((prev) => ({ ...prev, loading: false }));
+        }
+        fetchWorkOrderTypes();
+    };
+
+    const openConfirmDialog = (type, id, itemName) => {
+        const configs = {
+            wot: {
+                title: "Delete Work Order Type",
+                message: `Are you sure you want to delete "${itemName}"? This will also delete all associated sub-milestones and checklist items. This action cannot be undone.`,
+            },
+            submilestone: {
+                title: "Delete Sub-milestone",
+                message: `Are you sure you want to delete "${itemName}"? This will also delete all associated checklist items. This action cannot be undone.`,
+            },
+            checklist: {
+                title: "Delete Checklist Item",
+                message: `Are you sure you want to delete "${itemName}"? This action cannot be undone.`,
+            },
+        };
+
+        const config = configs[type];
+        setConfirmDialog({
+            isOpen: true,
+            type,
+            id,
+            title: config.title,
+            message: config.message,
+        });
+    };
+
+    const handleDelete = async () => {
+        const { type, id } = confirmDialog;
+        let url;
+
+        try {
+            switch (type) {
+                case "wot":
+                    url = `/admin/settings/work-order-types/${id}`;
+                    break;
+                case "submilestone":
+                    url = `/admin/settings/submilestones/${id}`;
+                    break;
+                case "checklist":
+                    url = `/admin/settings/checklists/${id}`;
+                    break;
+                default:
+                    throw new Error("Unknown delete type");
+            }
+
+            await apiService.delete(url);
+            invalidateAdminSettingsData();
+            await fetchData();
+            setConfirmDialog({
+                isOpen: false,
+                type: null,
+                id: null,
+                title: "",
+                message: "",
+            });
+        } catch (err) {
+            console.error("Delete error:", err);
+
+            // Handle specific error messages from the backend
+            if (
+                err.response &&
+                err.response.status === 422 &&
+                err.response.data &&
+                err.response.data.error
+            ) {
+                showToast(err.response.data.error, "error");
+            } else if (
+                err.response &&
+                err.response.data &&
+                err.response.data.error
+            ) {
+                showToast(err.response.data.error, "error");
+            } else {
+                showToast("Failed to delete. Please try again.", "error");
+            }
+        }
+        fetchWorkOrderTypes();
+    };
+
+    const getModalConfig = () => {
+        const { type, mode } = modalState;
+        const configs = {
+            wot: {
+                title: `${
+                    mode === "add" ? "Create New" : "Edit"
+                } Work Order Type`,
+                fields: [
+                    {
+                        name: "type_name",
+                        label: "Type Name",
+                        required: true,
+                        minLength: 2,
+                        maxLength: 50,
+                        placeholder:
+                            "Enter work order type name (max 50 characters)",
+                        helpText:
+                            "This will be displayed in work order creation forms",
+                    },
+                    {
+                        name: "description",
+                        label: "Description",
+                        type: "textarea",
+                        placeholder:
+                            "Describe the purpose and scope of this work order type",
+                        helpText:
+                            "Optional description to help users understand when to use this type",
+                    },
+                ],
+            },
+            submilestone: {
+                title: `${mode === "add" ? "Create New" : "Edit"} Milestone`,
+                fields: [
+                    {
+                        name: "name",
+                        label: "Milestone Name",
+                        required: true,
+                        minLength: 2,
+                        maxLength: 60,
+                        placeholder: "Enter milestone name (max 60 characters)",
+                        helpText: "Clear, actionable milestone name",
+                    },
+                    {
+                        name: "description",
+                        label: "Description",
+                        type: "textarea",
+                        placeholder:
+                            "Describe what needs to be accomplished in this milestone",
+                        helpText:
+                            "Detailed description of milestone requirements and deliverables",
+                    },
+                ],
+            },
+            checklist: {
+                title: `${
+                    mode === "add" ? "Create New" : "Edit"
+                } Checklist Item`,
+                fields: [
+                    {
+                        name: "name",
+                        label: "Checklist Item",
+                        required: true,
+                        minLength: 2,
+                        maxLength: 100,
+                        placeholder:
+                            "Enter checklist item description (max 100 characters)",
+                        helpText:
+                            "Specific, actionable task that can be checked off",
+                    },
+                    {
+                        name: "requires_document",
+                        label: "Document Requirement",
+                        type: "checkbox",
+                        checkboxLabel:
+                            "This checklist item requires document upload",
+                        helpText:
+                            "Check this if users need to upload a document to complete this item",
+                    },
+                    {
+                        name: "is_buyer_related",
+                        label: "Buyer Related",
+                        type: "checkbox",
+                        checkboxLabel: "This checklist item is buyer related",
+                        helpText:
+                            "Check this if this checklist item is specifically for buyer-related processes",
+                    },
+                ],
+            },
+        };
+
+        return configs[type] || { title: "", fields: [] };
+    };
+
+    // Skeleton components for loading states
+    const SkeletonChecklistItem = () => (
+        <div className="flex items-center justify-between py-2 px-3 bg-white rounded-md border border-gray-200">
+            <div className="flex items-center space-x-3">
+                <Skeleton circle width={16} height={16} />
+                <Skeleton width={150} height={16} />
+            </div>
+            <div className="flex items-center space-x-1">
+                <Skeleton circle width={24} height={24} />
+                <Skeleton circle width={24} height={24} />
+            </div>
+        </div>
+    );
+
+    const SkeletonSubmilestoneCard = () => (
+        <div className="border border-gray-200 rounded-lg bg-gray-50">
+            {/* Sub-milestone Header */}
+            <div className="px-4 py-3 border-b border-gray-200 bg-white rounded-t-lg">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center flex-1">
+                        <Skeleton
+                            circle
+                            width={20}
+                            height={20}
+                            className="mr-3"
+                        />
+                        <div className="flex-1">
+                            <div className="flex items-center">
+                                <Skeleton width={180} height={20} />
+                                <Skeleton
+                                    width={80}
+                                    height={20}
+                                    className="ml-3 rounded-full"
+                                />
+                            </div>
+                            <Skeleton
+                                width={250}
+                                height={14}
+                                className="mt-1"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Skeleton circle width={32} height={32} />
+                        <Skeleton circle width={32} height={32} />
+                    </div>
+                </div>
+            </div>
+            {/* Collapsible Checklist Items */}
+            <div className="px-4 py-3">
+                <div className="flex items-center justify-between mb-3">
+                    <Skeleton width={120} height={16} />
+                    <Skeleton width={80} height={28} />
+                </div>
+                <div className="space-y-2">
+                    {[...Array(3)].map((_, i) => (
+                        <SkeletonChecklistItem key={i} />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+
+    const SkeletonWorkOrderTypeCard = () => (
+        <div className="bg-white shadow-sm rounded-lg border border-gray-200">
+            {/* Work Order Type Header */}
+            <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center flex-1">
+                        <Skeleton
+                            circle
+                            width={24}
+                            height={24}
+                            className="mr-3"
+                        />
+                        <div className="flex-1">
+                            <div className="flex items-center">
+                                <Skeleton width={200} height={24} />
+                                <Skeleton
+                                    width={120}
+                                    height={24}
+                                    className="ml-3 rounded-full"
+                                />
+                            </div>
+                            <Skeleton
+                                width={300}
+                                height={16}
+                                className="mt-1"
+                            />
+                        </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Skeleton circle width={36} height={36} />
+                        <Skeleton circle width={36} height={36} />
+                    </div>
+                </div>
+            </div>
+            {/* Collapsible Sub-milestones Section */}
+            <div className="px-6 py-4">
+                <div className="flex items-center justify-between mb-4">
+                    <Skeleton width={150} height={20} />
+                    <Skeleton width={150} height={36} />
+                </div>
+                <div className="space-y-4">
+                    {[...Array(2)].map((_, i) => (
+                        <SkeletonSubmilestoneCard key={i} />
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+
+    if (loading) {
+        return (
+            <SkeletonTheme baseColor="#f3f4f6" highlightColor="#e5e7eb">
+                <div className="min-h-screen bg-gray-50">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        {/* Header Skeleton */}
+                        <div className="border-b border-gray-200 pb-6 mb-8">
+                            <Skeleton width="40%" height={36} />
+                            <Skeleton
+                                width="60%"
+                                height={18}
+                                className="mt-2"
+                            />
+                            <div className="flex justify-end space-x-3 mt-4">
+                                <Skeleton width={120} height={40} />
+                                <Skeleton width={200} height={40} />
+                            </div>
+                        </div>
+                        {/* Work Order Type Cards Skeleton */}
+                        <div className="space-y-8">
+                            {[...Array(3)].map((_, i) => (
+                                <SkeletonWorkOrderTypeCard key={i} />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </SkeletonTheme>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <ExclamationTriangleIcon className="h-12 w-12 text-red-500 mx-auto" />
+                    <p className="mt-4 text-sm text-red-600">{error}</p>
+                    <button
+                        onClick={fetchData}
+                        className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <>
+            <div className="min-h-screen bg-gray-50">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    {/* Header */}
+                    <div className="border-b border-gray-200 pb-6 mb-8">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <h1 className="text-3xl font-bold leading-tight text-gray-900">
+                                    Work Order Configuration
+                                </h1>
+                                <p className="mt-2 text-sm text-gray-700">
+                                    Manage work order types, milestones, and
+                                    checklist items for your organization
+                                </p>
+                            </div>
+                            <div className="mt-4 sm:mt-0 flex items-center space-x-3">
+                                <button
+                                    onClick={toggleAllWorkOrderTypes}
+                                    className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                >
+                                    {expandAllWOT ? (
+                                        <>
+                                            <ChevronDownIcon className="h-4 w-4 mr-2" />
+                                            Collapse All
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ChevronRightIcon className="h-4 w-4 mr-2" />
+                                            Expand All
+                                        </>
+                                    )}
+                                </button>
+                                <button
+                                    onClick={() => openModal("wot", "add")}
+                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white gradient-btn5 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                >
+                                    <PlusIcon className="h-4 w-4 mr-2" />
+                                    New Work Order Type
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Content */}
+                    <DndContext
+                        onDragEnd={({ active, over }) => {
+                            if (active.id !== over?.id) {
+                                const oldIndex = workOrderTypes.findIndex(
+                                    (w) => w.id === active.id
+                                );
+                                const newIndex = workOrderTypes.findIndex(
+                                    (w) => w.id === over.id
+                                );
+                                const newOrder = arrayMove(
+                                    workOrderTypes,
+                                    oldIndex,
+                                    newIndex
+                                );
+                                setWorkOrderTypes(newOrder);
+
+                                const sequencePayload = newOrder.map(
+                                    (wot, idx) => ({
+                                        id: wot.id,
+                                        sequence: idx + 1,
+                                    })
+                                );
+                                apiService
+                                    .post(
+                                        "/admin/settings/work-order-types/reorder",
+                                        sequencePayload
+                                    )
+                                    .catch((err) => {
+                                        console.error(
+                                            "Failed to update order",
+                                            err
+                                        );
+                                    });
+                            }
+                        }}
+                    >
+                        <SortableContext
+                            items={workOrderTypes.map((w) => w.id)}
+                        >
+                            {workOrderTypes.map((wot) => {
+                                const isWOTExpanded =
+                                    expandedWorkOrderTypes.has(wot.id);
+
+                                return (
+                                    <DraggableWOT
+                                        key={wot.id}
+                                        wot={wot}
+                                        isWOTExpanded={isWOTExpanded}
+                                        toggleWorkOrderType={
+                                            toggleWorkOrderType
+                                        }
+                                        openModal={openModal}
+                                        openConfirmDialog={openConfirmDialog}
+                                    >
+                                        {/* Collapsible Sub-milestones Section */}
+                                        {isWOTExpanded && (
+                                            <div className="px-6 py-4">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <h3 className="text-lg font-medium text-gray-900">
+                                                        Milestones
+                                                    </h3>
+                                                    <button
+                                                        onClick={() =>
+                                                            openModal(
+                                                                "submilestone",
+                                                                "add",
+                                                                null,
+                                                                wot.id
+                                                            )
+                                                        }
+                                                        className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                                    >
+                                                        <PlusIcon className="h-4 w-4 mr-1" />
+                                                        Add Milestone
+                                                    </button>
+                                                </div>
+
+                                                {!wot.submilestones ||
+                                                wot.submilestones.length ===
+                                                    0 ? (
+                                                    <div className="text-center py-6 bg-gray-50 rounded-lg">
+                                                        <p className="text-sm text-gray-500">
+                                                            No milestones
+                                                            defined
+                                                        </p>
+                                                        <button
+                                                            onClick={() =>
+                                                                openModal(
+                                                                    "submilestone",
+                                                                    "add",
+                                                                    null,
+                                                                    wot.id
+                                                                )
+                                                            }
+                                                            className="mt-2 text-sm text-indigo-600 hover:text-indigo-500"
+                                                        >
+                                                            Add the first
+                                                            Milestone
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <div className="space-y-4">
+                                                        {wot.submilestones.map(
+                                                            (sub) => {
+                                                                const isSubExpanded =
+                                                                    expandedSubmilestones.has(
+                                                                        sub.id
+                                                                    );
+
+                                                                return (
+                                                                    <div
+                                                                        key={
+                                                                            sub.id
+                                                                        }
+                                                                        className="border border-gray-200 rounded-lg bg-gray-50"
+                                                                    >
+                                                                        {/* Sub-milestone Header */}
+                                                                        <div className="px-4 py-3 border-b border-gray-200 bg-white rounded-t-lg">
+                                                                            <div className="flex items-center justify-between">
+                                                                                <div className="flex items-center flex-1">
+                                                                                    <button
+                                                                                        onClick={() =>
+                                                                                            toggleSubmilestone(
+                                                                                                sub.id
+                                                                                            )
+                                                                                        }
+                                                                                        className="flex items-center p-1 mr-3 text-gray-400 hover:text-gray-600 rounded"
+                                                                                    >
+                                                                                        {isSubExpanded ? (
+                                                                                            <ChevronDownIcon className="h-4 w-4" />
+                                                                                        ) : (
+                                                                                            <ChevronRightIcon className="h-4 w-4" />
+                                                                                        )}
+                                                                                    </button>
+                                                                                    <div className="flex-1 min-w-0">
+                                                                                        <div className="flex items-center">
+                                                                                            <h4
+                                                                                                className="text-base font-medium text-gray-900 truncate pr-2"
+                                                                                                title={
+                                                                                                    sub.name
+                                                                                                }
+                                                                                            >
+                                                                                                {
+                                                                                                    sub.name
+                                                                                                }
+                                                                                            </h4>
+                                                                                            <span className="ml-3 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 flex-shrink-0">
+                                                                                                {sub
+                                                                                                    .checklists
+                                                                                                    ?.length ||
+                                                                                                    0}{" "}
+                                                                                                {sub
+                                                                                                    .checklists
+                                                                                                    ?.length ===
+                                                                                                1
+                                                                                                    ? "item"
+                                                                                                    : "items"}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                        {sub.description && (
+                                                                                            <p
+                                                                                                className="mt-1 text-sm text-gray-600 truncate"
+                                                                                                title={
+                                                                                                    sub.description
+                                                                                                }
+                                                                                            >
+                                                                                                {
+                                                                                                    sub.description
+                                                                                                }
+                                                                                            </p>
+                                                                                        )}
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="flex items-center space-x-2">
+                                                                                    <button
+                                                                                        onClick={() =>
+                                                                                            openModal(
+                                                                                                "submilestone",
+                                                                                                "edit",
+                                                                                                sub,
+                                                                                                wot.id
+                                                                                            )
+                                                                                        }
+                                                                                        className="inline-flex items-center p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-gray-100 rounded-md"
+                                                                                        title="Edit sub-milestone"
+                                                                                    >
+                                                                                        <PencilIcon className="h-4 w-4" />
+                                                                                    </button>
+                                                                                    <button
+                                                                                        onClick={() =>
+                                                                                            openConfirmDialog(
+                                                                                                "submilestone",
+                                                                                                sub.id,
+                                                                                                sub.name
+                                                                                            )
+                                                                                        }
+                                                                                        className="inline-flex items-center p-1.5 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded-md"
+                                                                                        title="Delete sub-milestone"
+                                                                                    >
+                                                                                        <TrashIcon className="h-4 w-4" />
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+
+                                                                        {/* Collapsible Checklist Items */}
+                                                                        {isSubExpanded && (
+                                                                            <div className="px-4 py-3">
+                                                                                <div className="flex items-center justify-between mb-3">
+                                                                                    <h5 className="text-sm font-medium text-gray-700">
+                                                                                        Checklist
+                                                                                        Items
+                                                                                    </h5>
+                                                                                    <button
+                                                                                        onClick={() =>
+                                                                                            openModal(
+                                                                                                "checklist",
+                                                                                                "add",
+                                                                                                null,
+                                                                                                sub.id
+                                                                                            )
+                                                                                        }
+                                                                                        className="inline-flex items-center px-2 py-1 border border-gray-300 text-xs font-medium rounded text-gray-600 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                                                                    >
+                                                                                        <PlusIcon className="h-3 w-3 mr-1" />
+                                                                                        Add
+                                                                                        Item
+                                                                                    </button>
+                                                                                </div>
+
+                                                                                {!sub.checklists ||
+                                                                                sub
+                                                                                    .checklists
+                                                                                    .length ===
+                                                                                    0 ? (
+                                                                                    <div className="text-center py-4 bg-white rounded border-2 border-dashed border-gray-300">
+                                                                                        <p className="text-xs text-gray-500">
+                                                                                            No
+                                                                                            checklist
+                                                                                            items
+                                                                                        </p>
+                                                                                        <button
+                                                                                            onClick={() =>
+                                                                                                openModal(
+                                                                                                    "checklist",
+                                                                                                    "add",
+                                                                                                    null,
+                                                                                                    sub.id
+                                                                                                )
+                                                                                            }
+                                                                                            className="mt-1 text-xs text-indigo-600 hover:text-indigo-500"
+                                                                                        >
+                                                                                            Add
+                                                                                            the
+                                                                                            first
+                                                                                            item
+                                                                                        </button>
+                                                                                    </div>
+                                                                                ) : (
+                                                                                    <div className="space-y-2">
+                                                                                        {sub.checklists.map(
+                                                                                            (
+                                                                                                chk
+                                                                                            ) => (
+                                                                                                <div
+                                                                                                    key={
+                                                                                                        chk.id
+                                                                                                    }
+                                                                                                    className="flex items-center justify-between py-2 px-3 bg-white rounded-md border border-gray-200"
+                                                                                                >
+                                                                                                    <div className="flex items-center space-x-3 min-w-0 flex-1">
+                                                                                                        <div className="flex flex-col min-w-0 flex-1">
+                                                                                                            <div className="flex items-center space-x-2">
+                                                                                                                <span
+                                                                                                                    className="text-sm text-gray-700 truncate"
+                                                                                                                    title={
+                                                                                                                        chk.name
+                                                                                                                    }
+                                                                                                                >
+                                                                                                                    {
+                                                                                                                        chk.name
+                                                                                                                    }
+                                                                                                                </span>
+                                                                                                                {chk.requires_document ? (
+                                                                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200 flex-shrink-0">
+                                                                                                                        <svg
+                                                                                                                            className="w-3 h-3 mr-1"
+                                                                                                                            fill="currentColor"
+                                                                                                                            viewBox="0 0 20 20"
+                                                                                                                        >
+                                                                                                                            <path
+                                                                                                                                fillRule="evenodd"
+                                                                                                                                d="M3 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1H4a1 1 0 01-1-1v-3zM12 4a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1V4zM12 13a1 1 0 011-1h3a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-3z"
+                                                                                                                                clipRule="evenodd"
+                                                                                                                            />
+                                                                                                                        </svg>
+                                                                                                                        Document
+                                                                                                                        Required
+                                                                                                                    </span>
+                                                                                                                ) : (
+                                                                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200 flex-shrink-0">
+                                                                                                                        <svg
+                                                                                                                            className="w-3 h-3 mr-1"
+                                                                                                                            fill="currentColor"
+                                                                                                                            viewBox="0 0 20 20"
+                                                                                                                        >
+                                                                                                                            <path
+                                                                                                                                fillRule="evenodd"
+                                                                                                                                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                                                                                                                                clipRule="evenodd"
+                                                                                                                            />
+                                                                                                                        </svg>
+                                                                                                                        Remarks
+                                                                                                                        Only
+                                                                                                                    </span>
+                                                                                                                )}
+                                                                                                                {chk.is_buyer_related ? (
+                                                                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200 flex-shrink-0 ml-2">
+                                                                                                                        <svg
+                                                                                                                            className="w-3 h-3 mr-1"
+                                                                                                                            fill="currentColor"
+                                                                                                                            viewBox="0 0 20 20"
+                                                                                                                        >
+                                                                                                                            <path
+                                                                                                                                fillRule="evenodd"
+                                                                                                                                d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"
+                                                                                                                                clipRule="evenodd"
+                                                                                                                            />
+                                                                                                                        </svg>
+                                                                                                                        Buyer
+                                                                                                                        Related
+                                                                                                                    </span>
+                                                                                                                ) : (
+                                                                                                                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200 flex-shrink-0 ml-2">
+                                                                                                                        <svg
+                                                                                                                            className="w-3 h-3 mr-1"
+                                                                                                                            fill="currentColor"
+                                                                                                                            viewBox="0 0 20 20"
+                                                                                                                        >
+                                                                                                                            <path
+                                                                                                                                fillRule="evenodd"
+                                                                                                                                d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z"
+                                                                                                                                clipRule="evenodd"
+                                                                                                                            />
+                                                                                                                        </svg>
+                                                                                                                        Internal
+                                                                                                                    </span>
+                                                                                                                )}
+                                                                                                            </div>
+                                                                                                        </div>
+                                                                                                    </div>
+                                                                                                    <div className="flex items-center space-x-1 flex-shrink-0">
+                                                                                                        <button
+                                                                                                            onClick={() =>
+                                                                                                                openModal(
+                                                                                                                    "checklist",
+                                                                                                                    "edit",
+                                                                                                                    chk,
+                                                                                                                    sub.id
+                                                                                                                )
+                                                                                                            }
+                                                                                                            className="inline-flex items-center p-1 text-gray-400 hover:text-indigo-600 hover:bg-gray-100 rounded"
+                                                                                                            title="Edit checklist item"
+                                                                                                        >
+                                                                                                            <PencilIcon className="h-3 w-3" />
+                                                                                                        </button>
+                                                                                                        <button
+                                                                                                            onClick={() =>
+                                                                                                                openConfirmDialog(
+                                                                                                                    "checklist",
+                                                                                                                    chk.id,
+                                                                                                                    chk.name
+                                                                                                                )
+                                                                                                            }
+                                                                                                            className="inline-flex items-center p-1 text-gray-400 hover:text-red-600 hover:bg-gray-100 rounded"
+                                                                                                            title="Delete checklist item"
+                                                                                                        >
+                                                                                                            <TrashIcon className="h-3 w-3" />
+                                                                                                        </button>
+                                                                                                    </div>
+                                                                                                </div>
+                                                                                            )
+                                                                                        )}
+                                                                                    </div>
+                                                                                )}
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                );
+                                                            }
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </DraggableWOT>
+                                );
+                            })}
+                        </SortableContext>
+                    </DndContext>
+                    <ProjectAssigneeComponent />
+                </div>
+
+                {/* Modals */}
+                <CrudModal
+                    isOpen={modalState.isOpen}
+                    onClose={closeModal}
+                    onSave={handleSave}
+                    item={modalState.item}
+                    loading={modalState.loading}
+                    externalErrors={fieldErrors}
+                    {...getModalConfig()}
+                />
+
+                <ConfirmationDialog
+                    isOpen={confirmDialog.isOpen}
+                    onClose={() =>
+                        setConfirmDialog({
+                            isOpen: false,
+                            type: null,
+                            id: null,
+                            title: "",
+                            message: "",
+                        })
+                    }
+                    onConfirm={handleDelete}
+                    title={confirmDialog.title}
+                    message={confirmDialog.message}
+                />
+            </div>
+
+            {ReactDOM.createPortal(
+                <ToastContainer
+                    position="bottom-right"
+                    autoClose={3000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="dark"
+                    style={{ zIndex: 999999 }}
+                />,
+                document.body
+            )}
+        </>
+    );
+};
+
+export default AdminSettings;

@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Http\Request;
 
 use App\Models\DynamicBanner;
@@ -20,14 +19,33 @@ use App\Http\Controllers\CheckStreamBanksController;
 use App\Http\Controllers\CheckStreamEntitiesController;
 use App\Http\Controllers\DynamicBannerController;
 use App\Http\Controllers\PaymentSchemeController;
-use App\Http\Controllers\PropertyMasterController;
-use App\Http\Controllers\PriceListMasterController;
 use App\Http\Controllers\PriceBasicDetailController;
+use App\Http\Controllers\TakenOutAccountController;
+use App\Http\Controllers\HistoricalAccountImportController;
+use App\Http\Controllers\PriceListMasterController;
+use App\Http\Controllers\TitlingRegistrationController;
+use App\Http\Controllers\PropertyMasterController;
+use App\Http\Controllers\WorkOrderController;
+use App\Http\Controllers\AccountLogController;
 use App\Http\Controllers\EmployeeDepartmentController;
 use App\Http\Controllers\EmployeeFeaturePermissionController;
 use App\Http\Controllers\DepartmentFeaturePermissionController;
 use App\Http\Controllers\MarkupSettignsController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\SubmilestoneController;
+use App\Http\Controllers\MilestoneController;
+use App\Http\Controllers\AccountChecklistStatusController;
+use App\Http\Controllers\WorkOrderTypeSettingsController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\WorkOrderGroupController;
+use App\Http\Controllers\FileManagerController;
+use App\Http\Controllers\EmployeeEvaluationController;
+use App\Http\Controllers\ExecutiveDashBoardController;
+use App\Http\Controllers\MilestoneProgressionController;
+use App\Http\Controllers\ProjectAssigneeController;
+use App\Http\Controllers\AllAccountsController;
+use App\Http\Controllers\SystemStructureExportController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -36,15 +54,10 @@ Route::get('/user', function (Request $request) {
 
 Route::middleware('auth:sanctum')->post('/auth/logout', [AuthController::class, 'logout']);
 
-
-
 Route::post('/add-assignee', [ConcernController::class, 'assignInquiryTo']);
 Route::post('/reassign', [ConcernController::class, 'reassignInquiry']);
 
 Route::post('/resolve', [ConcernController::class, 'markAsResolve']);
-
-
-
 /* 
 Route::get('/get-concern', [ConcernController::class, 'getAllConcerns']);
 
@@ -80,12 +93,170 @@ Route::post('/update-info', [ConcernController::class, 'updateInfo']);
 // Route::post('/add-property-sap', [PropertyMasterController::class, 'storePropertyFromSap']);
 Route::post('/buyer-reply', [ConcernController::class, 'fromAppSript']);
 
+
+// for titling and registration
+Route::middleware('auth:sanctum')->group(function () {
+    /**
+     * Work Orders
+     */
+    Route::prefix('work-orders')->group(function () {
+        Route::post('create-work-order', [WorkOrderController::class, 'createWorkOrders']);
+
+        Route::get('get-assignee', [WorkOrderController::class, 'getAssignee']);
+        Route::get('assignee/{id}', [WorkOrderController::class, 'getAssigneeById']);
+        Route::get('get-work-orders', [WorkOrderController::class, 'getWorkOrders']);
+        Route::get('get-work-order-groups', [WorkOrderController::class, 'getWorkOrderGroups']);
+        Route::get('work-order-types', [WorkOrderController::class, 'getWorkOrderTypes']);
+        Route::post('notes/add', [WorkOrderController::class, 'addNoteWithAttachments']);
+        Route::post('{work_order}/updates', [WorkOrderController::class, 'addUpdate']);
+        Route::post('{work_order}/documents', [WorkOrderController::class, 'uploadDocument']);
+        Route::put('{work_order}/mark-done', [WorkOrderController::class, 'markAsDone']);
+        Route::put('{workOrder}', [WorkOrderController::class, 'update']);
+        Route::patch('/work-order-groups/{groupId}/soft-delete', [WorkOrderController::class, 'softDelete']);
+        Route::patch('{workOrderId}/status-complete', [WorkOrderController::class, 'updateStatusToComplete']);
+        Route::post('upload-to-all-accounts', [WorkOrderController::class, 'uploadToAllAccounts']);
+    });
+    Route::post('/work-order-logs', [WorkOrderController::class, 'createWorkOrderLog']);
+    Route::get('/my-workorders', [WorkOrderController::class, 'index']);
+    /**
+     * Account Logs
+     */
+    Route::post('/post-account-log', [AccountLogController::class, 'attachAccountsToLog']);
+    Route::get('/get-account-logs/{selectedId}', [AccountLogController::class, 'getLogData']);
+    Route::patch('/update-is-new/{id}', [AccountLogController::class, 'updateIsNewStatus']);
+    /**
+     * Taken Out Accounts
+     */
+    Route::prefix('taken-out-accounts')->group(function () {
+        Route::get('/', [TakenOutAccountController::class, 'getTakenOutAccounts']);
+        Route::get('get-masterlist', [TakenOutAccountController::class, 'getMasterList']);
+        Route::get('{id}', [TakenOutAccountController::class, 'show']);
+        Route::patch('add-masterlist', [TakenOutAccountController::class, 'updateAddStatus']);
+        Route::patch('undo-masterlist', [TakenOutAccountController::class, 'undoMasterListStatus']);
+        Route::post('upload-taken-out-accounts', [TakenOutAccountController::class, 'uploadTakenOutAccounts']);
+    });
+
+    /**
+     * Historical Account Import - Specialized import for historical, ongoing, and completed accounts
+     */
+    Route::prefix('accounts')->group(function () {
+        Route::post('import-historical', [HistoricalAccountImportController::class, 'importHistoricalAccounts']);
+        Route::post('import-preview', [HistoricalAccountImportController::class, 'previewImport']);
+        Route::get('status-summary', [HistoricalAccountImportController::class, 'getAccountStatusSummary']);
+    });
+
+    /**
+     * System Structure Export (outside accounts prefix)
+     */
+    Route::prefix('system')->group(function () {
+        Route::get('structure', [SystemStructureExportController::class, 'getSystemStructure']);
+        Route::get('download-template', [SystemStructureExportController::class, 'downloadTemplate']);
+    });
+    /**
+     * Titling & Registration Monitor
+     */
+    Route::get('/titling-registration/monitor/{contractNumber}', [TitlingRegistrationController::class, 'getMonitoringDataByName'])
+        ->where('contractNumber', '.*');
+    /**
+     * Milestones
+     */
+    Route::get('/milestones-details', [MilestoneController::class, 'getDetailsByName']);
+    /**
+     * Submilestones
+     */
+    Route::get('/submilestones-details', [SubmilestoneController::class, 'getByWorkOrderType']);
+    Route::post('/submilestones/batch', [SubmilestoneController::class, 'getBatch']);
+    /**
+     * Account Checklist Status
+     */
+    Route::post('/account-checklist-status', [AccountChecklistStatusController::class, 'store']);
+    Route::post('/account-checklist-status/bulk', [AccountChecklistStatusController::class, 'bulkStore']);
+    Route::post('/account-checklist-status/bulk-accounts', [AccountChecklistStatusController::class, 'bulkUpdateAccounts']);
+    Route::get('/account/{accountId}/submilestone/{submilestoneId}/checklist-status', [AccountChecklistStatusController::class, 'getChecklistStatus']);
+    /**
+     * Admin Settings
+     */
+    Route::prefix('admin/settings')->group(function () {
+        // Work Order Types
+        Route::get('/work-order-types', [WorkOrderTypeSettingsController::class, 'index']);
+        Route::post('/work-order-types/reorder', [WorkOrderTypeSettingsController::class, 'reorderWorkOrderTypes']);
+        Route::put('/work-order-types/{workOrderType}', [WorkOrderTypeSettingsController::class, 'updateWorkOrderType']);
+        Route::delete('/work-order-types/{workOrderType}', [WorkOrderTypeSettingsController::class, 'destroyWorkOrderType']);
+        Route::post('/work-order-types', [WorkOrderTypeSettingsController::class, 'storeWorkOrderType']);
+        // Submilestones
+        Route::post('/submilestones', [WorkOrderTypeSettingsController::class, 'storeSubmilestone']);
+        Route::put('/submilestones/{submilestone}', [WorkOrderTypeSettingsController::class, 'updateSubmilestone']);
+        Route::delete('/submilestones/{submilestone}', [WorkOrderTypeSettingsController::class, 'destroySubmilestone']);
+
+        // Checklists
+        Route::post('/checklists', [WorkOrderTypeSettingsController::class, 'storeChecklist']);
+        Route::put('/checklists/{checklist}', [WorkOrderTypeSettingsController::class, 'updateChecklist']);
+        Route::delete('/checklists/{checklist}', [WorkOrderTypeSettingsController::class, 'destroyChecklist']);
+    });
+    /**
+     * Dashboard
+     */
+    Route::get('/dashboard/executive', [ExecutiveDashBoardController::class, 'getExecutiveDashboardData']);
+    // Employee Evaluation Endpoint
+    Route::get('/employee-evaluation', [EmployeeEvaluationController::class, 'index']);
+    // Team Management Endpoints
+    Route::get('/employees', [TeamController::class, 'getEmployees']);
+    Route::put('/teams/{team}/members', [TeamController::class, 'updateMembers']);
+    Route::apiResource('teams', TeamController::class);
+    Route::get('/teams/{team}/get-members', [TeamController::class, 'members']);
+    //submilestone assignees
+    Route::get('/submilestones-with-assignees', [SubmilestoneController::class, 'indexWithAssignees']);
+    Route::get('/submilestones/{submilestone}/assignees', [SubmilestoneController::class, 'getAssignees']);
+    Route::put('/submilestones/{submilestone}/assignees', [SubmilestoneController::class, 'updateAssignees']);
+    Route::delete('/submilestones/{submilestone}/assignees/{employee}', [SubmilestoneController::class, 'removeAssignee']);
+    // Project Assignee Management
+    Route::get('/projects-with-assignees', [ProjectAssigneeController::class, 'index']);
+    Route::get('/projects/{projectName}/all-assignees', [ProjectAssigneeController::class, 'getAssigneesForProject'])->where('projectName', '.*');
+
+    Route::get('/projects/{projectName}/submilestones', [ProjectAssigneeController::class, 'getSubmilestonesForProject'])->where('projectName', '.*');
+    Route::get('/projects/{projectName}/milestones/{submilestone}/assignees', [ProjectAssigneeController::class, 'getAssignees'])->where('projectName', '.*');
+    Route::put('/projects/{projectName}/milestones/{submilestone}/assignees', [ProjectAssigneeController::class, 'updateAssignees'])->where('projectName', '.*');
+    Route::delete('/projects/{projectName}/milestones/{submilestone}/assignees/{employee}', [ProjectAssigneeController::class, 'removeAssignee'])->where('projectName', '.*');
+    Route::get('/projects/{projectName}/milestone-structure', [ProjectAssigneeController::class, 'getProjectMilestoneStructure'])->where('projectName', '.*');
+    //for workorder group
+    Route::get('/work-order-groups/{groupId}/details', [WorkOrderGroupController::class, 'showDetails']);
+    Route::get('/work-order-groups/all-accounts-summary', [WorkOrderGroupController::class, 'getAllAccountsSummary']);
+    Route::post('/work-order-groups/{id}/update-status', [WorkOrderGroupController::class, 'updateStatus']);
+    Route::post('/work-order-groups/update-all-status', [WorkOrderGroupController::class, 'updateAllStatus']);
+    Route::get('/work-order-groups/status-summary', [WorkOrderGroupController::class, 'getStatusSummary']);
+    Route::post('/work-order-groups/{id}/check-accounts-completion', [WorkOrderGroupController::class, 'checkAccountsCompletion']);
+    // All accounts endpoints
+    Route::get('/all-accounts-details', [AllAccountsController::class, 'getAllAccountsWithDetails']);
+    Route::get('/all-accounts-details-paginated', [AllAccountsController::class, 'getAllAccountsWithDetailsPaginated']);
+    // Bulk update work order deadlines and accounts for a group
+    Route::put('work-orders/group/{groupId}/bulk-update-deadline', [WorkOrderController::class, 'bulkUpdateDeadline']);
+    // Update account milestone progression
+    Route::put('/accounts/{accountId}/milestone-progression', [MilestoneProgressionController::class, 'updateMilestoneProgression']);
+    // Get available next milestones for an account
+    Route::get('/accounts/{accountId}/available-next-milestones', [MilestoneProgressionController::class, 'getAvailableNextMilestones']);
+    /**
+     * File Manager
+     */
+    Route::get('/file-manager/accounts', [FileManagerController::class, 'getAllAccountsWithFiles']);
+    Route::get('/file-manager/accounts/search', [FileManagerController::class, 'searchAccounts']);
+    Route::get('/file-manager/accounts/{accountId}/files', [FileManagerController::class, 'getAccountFiles']);
+    Route::get('/file-manager/accounts/{accountId}/structure', [FileManagerController::class, 'getAccountWithStructure']);
+    Route::get('/file-manager/accounts/{accountId}/work-order-type/{workOrderTypeId}/files', [FileManagerController::class, 'getFilesByWorkOrderType']);
+    Route::get('/file-manager/accounts/{accountId}/submilestone/{submilestoneId}/files', [FileManagerController::class, 'getFilesBySubmilestone']);
+
+    // Delete routes
+    Route::delete('/file-manager/files/{documentId}', [FileManagerController::class, 'deleteFile']);
+    Route::delete('/file-manager/files/bulk', [FileManagerController::class, 'deleteMultipleFiles']);
+
+    // Test route
+    Route::get('/test-file-manager', [FileManagerController::class, 'getAllAccountsWithFiles']);
+});
+
 //* For Sap 
 
 //*Post date on sap
 Route::post('/proxy-sap', [SapController::class, 'postDateToSap']);
 Route::post('/test-api', [ConcernController::class, 'testApi']);
-
 
 
 //*Post document number and other fields to sap
@@ -129,13 +300,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/store-view-and-columns', 'storeViewAndColumns');
         Route::put('/set-default-view', 'setDefaultView');
     });
-    
+
     Route::apiResource('markup-settings', MarkupSettignsController::class);
     Route::apiResource('check-stream', CheckStreamController::class);
     Route::apiResource('check-stream-banks', CheckStreamBanksController::class);
     Route::apiResource('check-stream-entities', CheckStreamEntitiesController::class);
     Route::apiResource('check-stream-admin', CheckStreamAdminSettingsController::class);
-    
+
     Route::controller(MarkupSettignsController::class)->group(function () {
         Route::get('/card/fee', 'retrieveCardMarkupDetails');
         Route::put('/card/fee/{id}', 'updateCardSettings');
@@ -211,7 +382,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/scan-file', [UnitController::class, 'scanFile']);
     });
 
-
     /* Price Versioning */
     Route::prefix('/price-version')->group(function () {
         Route::post('/', [PriceVersionController::class, 'store']);
@@ -254,7 +424,6 @@ Route::middleware('auth:sanctum')->group(function () {
     //Features
     Route::get('/get-features', [FeatureController::class, 'index']);
 
-
     //Department Feature Permission
     Route::get('/get-departments-with-permissions', [DepartmentFeaturePermissionController::class, 'index']);
     Route::post('/departments-assign-feature-permissions', [DepartmentFeaturePermissionController::class, 'store']);
@@ -269,7 +438,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/update-employees-feature-permissions', [EmployeeFeaturePermissionController::class, 'updatePermissions']);
     Route::get('/get-user-access-data', [EmployeeFeaturePermissionController::class, 'getUserAccessData']);
 
-
     /*Property feature setting*/
     Route::prefix('/property-feature-settings')->group(function () {
         // Fetch all properties with their features
@@ -280,4 +448,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::post('/properties/features', [PropertyMasterController::class, 'storePropertyFeatures']);
     });
+
 });

@@ -58,11 +58,18 @@ import AutoPostingView from "./views/pages/transactionViews/AutoPostingView";
 import ErrorPage from "@/component/ErrorElement/ErrorPage";
 import MarkupSettingsView from "@/component/views/pages/transactionViews/MarkupSettingsView";
 import ReportsView from "./views/pages/transactionViews/ReportsView";
+import AccountMasterView from "./views/pages/titlingAndRegistration/MasterListView";
+import WorkOrderView from "./views/pages/titlingAndRegistration/WorkOrderView";
+import MyWorkOrderView from "./views/pages/titlingAndRegistration/MyWorkOrders";
+import ExecutiveDashboardView from "./views/pages/titlingAndRegistration/ExecutiveDashboardView";
+import SettingsView from "./views/pages/titlingAndRegistration/SettingsView";
+import DocumentManagementSidebar from "./layout/mainComponent/sidebars/DocumentManagementSidebar";
+import TakenOutAccountView from "./views/pages/titlingAndRegistration/TakenOutAccountView";
+import FileManagerView from "./views/pages/titlingAndRegistration/FileManagerView";
 import WalkinTransactionHistoryView from "@/component/views/pages/walkinEmojiViews/WalkinTransactionHistoryView";
 import WalkinReportPage from "@/component/layout/inquirypage/WalkinReportPage";
 import FinancialToolsView from "./views/pages/transactionViews/FinancialToolsView";
 import CheckStreamReportsView from "./views/pages/transactionViews/CheckStreamReportsView";
-
 import SurveyReportsView from "./views/pages/surveyrelatedreportsViews/SurveyReportsView";
 import SurveyMainView from "./views/pages/surveyrelatedreportsViews/SurveyMainView";
 import SurveyReviewView from "./views/pages/surveyrelatedreportsViews/SurveyReviewView";
@@ -73,21 +80,37 @@ import TransactionViewLogs from "./views/pages/transactionViews/TransactionViewL
 import ScrollToTop from "./views/layout/ScrollToTop";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
-const PrivateRoute = ({ requiredPermission, children }) => {
-    const { hasPermission } = useStateContext();
+const PrivateRoute = ({ requiredPermission, adminOnly, children }) => {
+    const { hasPermission, user } = useStateContext();
 
     // Check for authentication token
     const authToken = localStorage.getItem("authToken");
+
+    // Admin check
+    const isAdmin =
+        user &&
+        (user.email === "metoh@cebulandmasters.com" ||
+            user.employee_email === "metoh@cebulandmasters.com");
 
     // Redirect to login page if not authenticated
     if (!authToken) {
         return <Navigate to="/" replace />;
     }
 
+    // Restrict to admin only if needed
+    if (adminOnly && !isAdmin) {
+        return (
+            <Navigate
+                to="/documentmanagement/titleandregistration/masterlist"
+                replace
+            />
+        );
+    }
+
     // Check for required permissions
     if (requiredPermission && !hasPermission(requiredPermission)) {
         return (
-            <div className="w-full h-full flex justify-center   text-custom-bluegreen text-lg">
+            <div className="w-full h-full flex justify-center text-custom-bluegreen text-lg">
                 You do not have permission to view this page.
             </div>
         );
@@ -144,6 +167,21 @@ const App = () => {
                     </div>
                     <div className="relative flex-1 ml-[230px] z-10">
                         <ScrollToTop />
+                        <Outlet />
+                    </div>
+                </div>
+            </>
+        );
+    };
+
+    const DocumentManagementSidebarLayout = () => {
+        return (
+            <>
+                <div className="flex bg-white relative h-full">
+                    <div className="fixed h-full z-50">
+                        <DocumentManagementSidebar />
+                    </div>
+                    <div className="relative flex-1 ml-[230px] z-10">
                         <Outlet />
                     </div>
                 </div>
@@ -381,6 +419,51 @@ const App = () => {
                             ],
                         },
                         {
+                            path: "documentmanagement",
+                        },
+                        {
+                            path: "documentmanagement/titleandregistration",
+                            element: <DocumentManagementSidebarLayout />,
+                            children: [
+                                {
+                                    path: "masterlist",
+                                    element: <AccountMasterView />,
+                                },
+                                {
+                                    path: "workorders",
+                                    element: (
+                                            <WorkOrderView />
+                                    ),
+                                },
+                                {
+                                    path: "myworkorders",
+                                    element: <MyWorkOrderView />,
+                                },
+                                {
+                                    path: "executivedashboard",
+                                    element: (
+                                            <ExecutiveDashboardView />
+                                    ),
+                                },
+                                {
+                                    path: "settings",
+                                    element: (
+                                            <SettingsView />
+                                    ),
+                                },
+                                {
+                                    path: "takenoutaccounts",
+                                    element: <TakenOutAccountView />,
+                                },
+                                {
+                                    path: "filemanager",
+                                    element: (
+                                            <FileManagerView />
+                                    ),
+                                },
+                            ],
+                        },
+                        {
                             path: "property-pricing",
                             element: (
                                 <PrivateRoute requiredPermission="Property Pricing">
@@ -482,5 +565,4 @@ const App = () => {
 
     return <RouterProvider router={router} />;
 };
-
 export default App;

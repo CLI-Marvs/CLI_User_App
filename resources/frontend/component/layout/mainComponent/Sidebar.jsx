@@ -18,8 +18,11 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { useStateContext } from "../../../context/contextprovider";
 import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
+import { set } from "lodash";
 
 const Sidebar = () => {
+    const [isDocumentManagementOpen, setIsDocumentManagementOpen] =
+        useState(false);
     const reportsButtonRef = useRef(null);
     const reportsMenuRef = useRef(null);
     const { unreadCount, getCount, user } = useStateContext();
@@ -51,6 +54,9 @@ const Sidebar = () => {
         setInquiryOpen(!isInquiryOpen);
     };
 
+    const handleDocumentManagementDropDownClick = () => {
+        setIsDocumentManagementOpen(!isDocumentManagementOpen);
+    };
     useEffect(() => {
         if (
             showReportsSubmenu &&
@@ -131,16 +137,25 @@ const Sidebar = () => {
             setIsInvoiceOpen(false);
             setSuperAdminOpen(true);
             setIsSalesOpen(false);
+            setIsDocumentManagementOpen(false);
         } else if (pathname.startsWith("/transaction")) {
             setInquiryOpen(false);
             setIsInvoiceOpen(true);
             setSuperAdminOpen(false);
             setIsSalesOpen(false);
+            setIsDocumentManagementOpen(false);
         } else if (pathname.startsWith("/inquirymanagement")) {
             setIsInvoiceOpen(false);
             setInquiryOpen(true);
             setSuperAdminOpen(false);
             setIsSalesOpen(false);
+            setIsDocumentManagementOpen(false);
+        } else if (pathname.startsWith("/documentmanagement")) {
+            setIsInvoiceOpen(false);
+            setInquiryOpen(false);
+            setSuperAdminOpen(false);
+            setIsSalesOpen(false);
+            setIsDocumentManagementOpen(true);
         } else if (
             pathname === "/sales/customer" ||
             pathname.startsWith("/sales")
@@ -149,12 +164,14 @@ const Sidebar = () => {
             setInquiryOpen(false);
             setIsInvoiceOpen(false);
             setSuperAdminOpen(false);
+            setIsDocumentManagementOpen(false);
         } else {
             // Default case
             setInquiryOpen(false);
             setIsInvoiceOpen(false);
             setSuperAdminOpen(false);
             setIsSalesOpen(false);
+            setIsDocumentManagementOpen(false);
         }
     }, [location.pathname]);
     return (
@@ -327,6 +344,59 @@ const Sidebar = () => {
                                     </ListItem>
                                 </Link>
                             )}
+                        </div>
+                    )}
+                    <Link to="/documentmanagement">
+                        {" "}
+                        <ListItem
+                            className={`w-[185px] text-sm py-2 px-3 transition-all duration-300 ease-in-out z-10
+                        ${
+                            activeItem === "document" ||
+                            location.pathname.startsWith("/documentmanagement")
+                                ? "bg-custom-lightestgreen text-custom-solidgreen font-semibold shadow-custom5"
+                                : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
+                        }
+                        ${
+                            isDocumentManagementOpen
+                                ? "rounded-[10px] rounded-b-none"
+                                : "rounded-[10px]"
+                        }
+                        `}
+                            onClick={handleDocumentManagementDropDownClick}
+                        >
+                            Document Management
+                            <ListItemSuffix>
+                                {" "}
+                                <IoIosArrowDown
+                                    className={`text-custom-solidgreen transition-transform duration-200 ease-in-out ${
+                                        isDocumentManagementOpen
+                                            ? "rotate-180"
+                                            : ""
+                                    }`}
+                                />
+                            </ListItemSuffix>
+                        </ListItem>
+                    </Link>
+                    {isDocumentManagementOpen && (
+                        <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] z-20 shadow-custom5 bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+                            <Link to="/documentmanagement/titleandregistration">
+                                <ListItem
+                                    className={`h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px] ${
+                                        location.pathname.startsWith(
+                                            "/documentmanagement/titleandregistration"
+                                        )
+                                            ? "bg-white text-custom-solidgreen font-semibold"
+                                            : "hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen"
+                                    }`}
+                                    onClick={() =>
+                                        handleItemClick(
+                                            "/documentmanagement/titleandregistration/masterlist"
+                                        )
+                                    }
+                                >
+                                    Title & Registration
+                                </ListItem>
+                            </Link>
                         </div>
                     )}
                     <Link to="/transaction/receivables/transactions">

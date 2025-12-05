@@ -1,10 +1,5 @@
-import React, {
-    createContext,
-    useCallback,
-    useContext,
-    useEffect,
-    useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
+// import { DocumentManagementProvider } from "./DocumentManagement/DocumentManagementContext";
 import apiService from "../component/servicesApi/apiService";
 import debounce from "lodash/debounce";
 import { get, set } from "lodash";
@@ -30,7 +25,6 @@ export const ContextProvider = ({ children }) => {
     const [currentPage, setCurrentPage] = useState(0);
     const [selectedOption, setSelectedOption] = useState("All");
     const [assignedToMeActive, setAssignedToMeActive] = useState(false);
-
     const [notifCurrentPage, setNotifCurrentPage] = useState(0);
     const [searchFilter, setSearchFilter] = useState({});
     const [data, setData] = useState([]);
@@ -51,7 +45,6 @@ export const ContextProvider = ({ children }) => {
     const [communicationTypeMonth, setCommunicationTypeMonth] = useState("");
     const [specificInquiry, setSpecificInquiry] = useState(null);
     const [dataSet, setDataSet] = useState([]);
-
     const [currentPageCustomer, setCurrentPageCustomer] = useState(0);
     const [totalPagesCustomer, setTotalPagesCustomer] = useState(0);
     const [categories, setCategories] = useState([]);
@@ -60,9 +53,7 @@ export const ContextProvider = ({ children }) => {
     const [month, setMonth] = useState("All");
     const [year, setYear] = useState("");
     const [fullYear, setFullYear] = useState([]);
-
     const [activeDayButton, setActiveDayButton] = useState(null);
-
     const [departmentStatusYear, setDepartmentStatusYear] = useState("");
     const [inquiriesPerCategoryYear, setInquiriesPerCategoryYear] =
         useState("");
@@ -118,11 +109,12 @@ export const ContextProvider = ({ children }) => {
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [survey_title, setSurveyTitle] = useState("");
-
     const [customerData, setCustomerData] = useState([]);
     const [customerDetails, setCustomerDetails] = useState([]);
     const [messageData, setMessageData] = useState([]);
     const [isTotalPages, setIsTotalPages] = useState(false);
+    // Work order/account state and fetchers have been moved to DocumentManagementContext.
+    // Please use useDocumentManagementContext() to access work order, account, and assignee state and fetchers.
 
     useEffect(() => {
         if (user && user.department && !isDepartmentInitialized) {
@@ -208,7 +200,6 @@ export const ContextProvider = ({ children }) => {
                     days: daysFilter || "",
                     status: statusFilter || "",
                     specificAssigneeCsr: specificAssigneeCsr || "",
-                    /*  has_attachments: hasAttachments, */
                 }).toString();
 
                 const response = await apiService.get(
@@ -989,9 +980,7 @@ export const ContextProvider = ({ children }) => {
                 fetchDataReport,
                 dataSet,
                 pricingMasterLists,
-
                 paymentSchemes,
-
                 setPropertyId,
                 propertyFloors,
                 propertyId,
@@ -1069,7 +1058,6 @@ export const ContextProvider = ({ children }) => {
                 setTotalPagesCustomer,
                 isTotalPages,
                 setIsTotalPages,
-
                 selectedOption,
                 setSelectedOption,
                 setActiveDayButton,
