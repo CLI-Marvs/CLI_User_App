@@ -1,1 +1,1 @@
-import "./frontend/component/index";
+import "./component/index";
