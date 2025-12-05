@@ -7,7 +7,7 @@ import moment from "moment";
 import { Link } from "react-router-dom";
 import { CircularProgress } from "@mui/material";
 import { BsDownload } from "react-icons/bs";
-import FolderFile from "../../../../../public/Images/folder_file.svg";
+import FolderFile from "@/assets/images/folder_file.svg";
 
 const PreviewMessageModal = ({ transactModalRef, ticketId, setTicketId }) => {
     const { messageData, setMessageData, isTotalPages, setIsTotalPages } =

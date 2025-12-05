@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import CLILogo from "../../../../../public/Images/CLI_Horizontal.svg";
-import GoogleLogo from "../../../../../public/Images/googleLogo.svg";
+import CLILogo from "@/assets/images/CLI_Horizontal.svg";
+import GoogleLogo from "@/assets/images/googleLogo.svg";
 import { API_PROVIDER } from "../../servicesApi/apiService";
 import { useLocation } from "react-router-dom";
 import { toast, Bounce, ToastContainer } from "react-toastify";

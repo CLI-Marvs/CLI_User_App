@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactDOM from "react-dom";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/component/servicesApi/apiService";
 import { useDropzone } from "react-dropzone";
 import { useStateContext } from "@/context/contextprovider";
 import { useDocumentManagementContext } from "@/context/DocumentManagement/DocumentManagementContext";

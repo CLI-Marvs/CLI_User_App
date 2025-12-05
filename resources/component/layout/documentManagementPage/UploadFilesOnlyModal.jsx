@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { useStateContext } from "@/component/context/contextprovider";
 import { useDocumentManagementContext } from "@/context/DocumentManagement/DocumentManagementContext";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/component/servicesApi/apiService";
 
 const UploadFilesOnlyModal = ({
     isOpen,

@@ -1,10 +1,10 @@
 import React from 'react'
 
-import emoji1 from "../../../../../../public/Images/emoji1.png";
-import emoji2 from "../../../../../../public/Images/emoji2.png";
-import emoji3 from "../../../../../../public/Images/emoji3.png";
-import emoji4 from "../../../../../../public/Images/emoji4.png";    
-import emoji5 from "../../../../../../public/Images/emoji5.png";
+import emoji1 from "@/assets/images/emoji1.png";
+import emoji2 from "@/assets/images/emoji2.png";
+import emoji3 from "@/assets/images/emoji3.png";
+import emoji4 from "@/assets/images/emoji4.png";    
+import emoji5 from "@/assets/images/emoji5.png";
 
 const SummaryRating = ({ ratingCounts }) => {
    const emojis = [emoji1, emoji2, emoji3, emoji4, emoji5];

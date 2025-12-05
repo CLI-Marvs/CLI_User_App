@@ -6,7 +6,7 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import "./loader.css";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import DateLogo from "../../../../../../public/Images/Date_range.svg";
+import DateLogo from "@/assets/images/Date_range.svg";
 import apiService from "../../../servicesApi/apiService";
 import moment from "moment";
 import { useStateContext } from "@/context/contextprovider";

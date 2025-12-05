@@ -1,4 +1,4 @@
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/component/servicesApi/apiService";
 import React from "react";
 import { UploadFileForChecklistModal } from "./UploadFileForChecklistModal";
 
@@ -118,7 +118,7 @@ const ActionButtons = ({
 
                             try {
                                 const apiService = await import(
-                                    "../../servicesApi/apiService"
+                                    "@/component/servicesApi/apiService"
                                 );
                                 await apiService.default.post(
                                     "/account-checklist-status",

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import ReactDOM from "react-dom";
-import apiService from "../../servicesApi/apiService";
-import { useDocumentManagementContext } from "../../../context/DocumentManagement/DocumentManagementContext";
+import apiService from "@/component/servicesApi/apiService";
+import { useDocumentManagementContext } from "@/context/DocumentManagement/DocumentManagementContext";
 import DatePicker from "react-datepicker";
 import SearchableDropdown from "./SearchableDropdown";
 

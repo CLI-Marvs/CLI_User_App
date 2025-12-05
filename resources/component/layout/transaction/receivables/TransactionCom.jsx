@@ -8,7 +8,7 @@ import Pagination from "@/component/Pagination";
 import usePagination from "@/hooks/usePagination";
 import { usePropertyFormatter } from "@/component/layout/transaction/hooks/usePropertyFormatter";
 import SimpleViewCell from "./SimpleViewCell";
-import exportIcon from "../../../../../../public/Images/export-icon.png";
+import exportIcon from "@/assets/images/export-icon.png";
 import {
     columnNameToFieldKey,
     P_METHOD,

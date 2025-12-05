@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import SamplePic from "../../../../../public/Images/PcBldg.jpeg";
-import hero from "../../../../../public/Images/hero-section.png";
+import SamplePic from "@/assets/images/PcBldg.jpeg";
+import hero from "@/assets/images/hero-section.png";
 
 const data = [
     {

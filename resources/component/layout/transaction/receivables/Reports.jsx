@@ -1,9 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import reportCredit from "../../../../../../public/Images/report-card.svg";
-import reportWallet from "../../../../../../public/Images/report-wallet.svg";
-import reportDate from "../../../../../../public/Images/report-date.svg";
-import reportMaya from "../../../../../../public/Images/report-maya.png";
-import reportGcash from "../../../../../../public/Images/report-gcash.png";
+import reportCredit from "@/assets/images/report-card.svg";
+import reportWallet from "@/assets/images/report-wallet.svg";
+import reportDate from "@/assets/images/report-date.svg";
+import reportMaya from "@/assets/images/report-maya.png";
+import reportGcash from "@/assets/images/report-gcash.png";
 import { format } from "date-fns";
 
 import { DateRange } from "react-date-range";

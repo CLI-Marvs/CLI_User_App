@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import CLILogo from "../../../../../public/Images/CLILogo.png";
-// import Kent from "../../../../../public/Images/kent.png";
+import CLILogo from "@/assets/images/CLILogo.png";
+// import Kent from "@/assets/images/kent.png";
 import apiService from "../../servicesApi/apiService";
 import { useStateContext } from "../../../context/contextprovider";
 import { Link, useLocation } from "react-router-dom";

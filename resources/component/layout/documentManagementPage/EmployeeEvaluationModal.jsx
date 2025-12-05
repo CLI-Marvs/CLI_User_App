@@ -44,7 +44,7 @@ import {
     ScatterChart,
     Scatter,
 } from "recharts";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/component/servicesApi/apiService";
 
 const EmployeeEvaluationModal = ({ open, onClose, fullScreen = false }) => {
     const [evaluationData, setEvaluationData] = useState([]);

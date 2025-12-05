@@ -4,7 +4,7 @@ import Pagination from "@/component/layout/propertyandpricingpage/component/Pagi
 import { MdRefresh } from "react-icons/md";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import DateLogo from "../../../../../../public/Images/Date_range.svg";
+import DateLogo from "@/assets/images/Date_range.svg";
 import AddPropertyModal from "@/component/layout/propertyandpricingpage/basicpricing/modals/Property/AddPropertyModal";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";

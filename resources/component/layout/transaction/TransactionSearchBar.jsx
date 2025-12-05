@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import DateLogo from "../../../../../public/Images/Date_range.svg";
+import DateLogo from "@/assets/images/Date_range.svg";
 import DatePicker from "react-datepicker";
 import { MdCalendarToday, MdRefresh } from "react-icons/md";
 import moment from "moment";

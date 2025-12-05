@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import Pagination from "@/component/layout/propertyandpricingpage/component/Pagination";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import DateLogo from "../../../../../../public/Images/Date_range.svg";
+import DateLogo from "../@/assets/images/Date_range.svg";
 import AddPriceVersionModal from "@/component/layout/propertyandpricingpage/priceversioning/AddPriceVersionModal";
 import { usePriceVersion } from "@/context/PropertyPricing/PriceVersionContext";
 import CustomTable from "@/component/layout/propertyandpricingpage/component/CustomTable";

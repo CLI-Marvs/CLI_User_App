@@ -1,8 +1,8 @@
 import React, { useRef, useEffect } from 'react'
 import { IoCaretBackOutline } from "react-icons/io5";
-import AskCli from '../../../../../public/Images/AskCLI_BGFAQs.webp'
-import AskCliLogo from '../../../../../public/Images/AskCli_Logo3.png'
-import SurveyBg from '../../../../../public/Images/surveyBg.jpg'
+import AskCli from '@/assets/images/AskCLI_BGFAQs.webp'
+import AskCliLogo from '@/assets/images/AskCli_Logo3.png'
+import SurveyBg from '@/assets/images/surveyBg.jpg'
 import { use } from 'react';
 const SurveyReview = ({ modalRef, handleCloseModal, surveyData }) => {
 

@@ -1,5 +1,5 @@
 import React from "react";
-import exportIcon from "../../../../../public/Images/export-icon.png";
+import exportIcon from "@/assets/images/export-icon.png";
 
 const Export = ({ isExporting, exportToExcel }) => {
     return (

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
-import Profile from "../../../../../public/Images/Profile2.svg";
-import IconNotes from "../../../../../public/Images/Icon_Notes.svg";
-import Attachment from "../../../../../public/Images/ATTCHMT.svg";
-import Trashcan from "../../../../../public/Images/delete_icon.svg";
-import Pen from "../../../../../public/Images/pen_icon.svg";
+import Profile from "@/assets/images/Profile2.svg";
+import IconNotes from "@/assets/images/Icon_Notes.svg";
+import Attachment from "@/assets/images/ATTCHMT.svg";
+import Trashcan from "@/assets/images/delete_icon.svg";
+import Pen from "@/assets/images/pen_icon.svg";
 import NotesAndUpdatesModal from "./NotesAndUpdatesModal";
 import EditWorkOrderModal from "./EditWorkOrderModal";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/component/servicesApi/apiService";
 import AddFilesModal from "./AddFilesModal";
 
 const PersonIcon = () => (

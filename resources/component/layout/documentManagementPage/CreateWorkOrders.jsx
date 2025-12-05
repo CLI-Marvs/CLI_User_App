@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import ReactDOM from "react-dom";
-import apiService from "../../servicesApi/apiService";
-import { useStateContext } from "../../../context/contextprovider";
-import { useDocumentManagementContext } from "../../../context/DocumentManagement/DocumentManagementContext";
+import apiService from "@/component/servicesApi/apiService";
+import { useStateContext } from "@/context/contextprovider";
+import { useDocumentManagementContext } from "@/context/DocumentManagement/DocumentManagementContext";
 import DatePicker from "react-datepicker";
 import SearchableDropdown from "./SearchableDropdown";
 import WorkOrderCreatedModal from "./WorkOrderCreatedModal";

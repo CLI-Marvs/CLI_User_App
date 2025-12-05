@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import columnIcon from "../../../../../../public/Images/column-icon.png";
-import columnDropdown from "../../../../../../public/Images/column-dropdown.png";
+import columnIcon from "@/assets/images/column-icon.png";
+import columnDropdown from "@/assets/images/column-dropdown.png";
 import { columnData } from "@/constant/data/transaction";
 import { transaction } from "@/component/servicesApi/apiCalls/transactions";
 import { useTransactionContext } from "@/context/Transaction/TransactionContext";

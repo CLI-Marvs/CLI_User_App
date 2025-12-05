@@ -1,5 +1,5 @@
 import React from "react";
-import CLILoader from "../../../public/Images/CLI-Logo-Loading-Screen.gif";
+import CLILoader from "@/assets/images/loader.svg";
 
 const FallbackLoader = () => (
   <div className="flex justify-center items-center h-screen w-screen">

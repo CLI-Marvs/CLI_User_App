@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import FolderFile from "../../../../../public/Images/folder_file.svg";
-import Kent from "../../../../../public/Images/kent.png";
-import defaultAvatar from "../../../../../public/Images/AdminSilouette.svg";
+import FolderFile from "@/assets/images/folder_file.svg";
+import Kent from "@/assets/images/kent.png";
+import defaultAvatar from "@/assets/images/AdminSilouette.svg";
 import moment from "moment";
 import { useStateContext } from "../../../context/contextprovider";
 import { Link, useLocation, useParams } from "react-router-dom";

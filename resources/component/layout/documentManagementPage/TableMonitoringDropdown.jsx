@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import apiService from "../../servicesApi/apiService";
+import apiService from "@/component/servicesApi/apiService";
 import FileViewerModal from "./FileViewerModal";
 
 const WORK_ORDER_TBD = "TBD";

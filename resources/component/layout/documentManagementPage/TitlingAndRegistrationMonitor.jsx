@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import Profile from "../../../../../public/Images/Profile2.svg";
-import IconNotes from "../../../../../public/Images/Icon_Notes.svg";
-import Attachment from "../../../../../public/Images/ATTCHMT.svg";
-import apiService from "../../servicesApi/apiService";
+import Profile from "@/assets/images/Profile2.svg";
+import IconNotes from "@/assets/images/Icon_Notes.svg";
+import Attachment from "@/assets/images/ATTCHMT.svg";
+import apiService from "@/component/servicesApi/apiService";
 import Dropdown from "@/component/layout/documentManagementPage/TableMonitoringDropdown";
 import AddFilesModal from "./AddFilesModal";
 import NotesAndUpdatesModal from "./NotesAndUpdatesModal";
