@@ -1,5 +1,5 @@
 import React from "react";
-import AdminSettings from "../../../layout/adminsettingpage/AdminSettings";
+import AdminSettings from "../../../../features/document-management/adminsettingpage/AdminSettings";
 
 const AdminSettingView = () => {
     return (

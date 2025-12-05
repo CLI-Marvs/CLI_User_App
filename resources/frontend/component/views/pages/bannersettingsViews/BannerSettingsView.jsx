@@ -1,5 +1,5 @@
 import React from 'react'
-import BannerSettings from '../../../layout/bannersettingspage/BannerSettings'
+import BannerSettings from '../../../../features/customer-relations/bannersettingspage/BannerSettings'
 
 const BannerSettingsView = () => {
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useStateContext } from "../../../context/contextprovider";
 import ReactDOM from "react-dom";
-import apiService from "../../../../frontend/component/servicesApi/apiService";
+import apiService from "../../../component/servicesApi/apiService";
 import { showToast } from "../../../util/toastUtil";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

@@ -29,12 +29,6 @@ import PriceVersioningView from "./views/pages/PropertyAndPricingViews/PriceVers
 import PromotionalPricingView from "./views/pages/PropertyAndPricingViews/PromotionalPricingView";
 import NotificationView from "./views/pages/notificationViews/NotificationView";
 import FileViewer from "../component/views/pages/fileView/FileViewer";
-import SalesManagementLayout from "./views/layout/SalesManagementLayout";
-import ReservationListView from "./views/pages/salesViews/ReservationListView";
-import ReservationPageView from "./views/pages/salesViews/ReservationPageView";
-import PaymentMainView from "./views/pages/paymentViews/PaymentMainView";
-import PaymentSectionView from "./views/pages/paymentViews/PaymentSectionView";
-import MainComponent from "./layout/chatComponent/MainComponent";
 import AdminSettingView from "./views/pages/adminsettingsViews/AdminSettingView";
 import BankStatementView from "./views/pages/transactionViews/BankStatementView";
 import AutoAssignView from "./views/pages/raiseaconcernViews/AutoAssignView";
@@ -48,9 +42,7 @@ import BannerSettingsView from "./views/pages/bannersettingsViews/BannerSettings
 import CrsSettingsSidebar from "./layout/mainComponent/sidebars/CrsSettingsSidebar";
 import VersionLogsView from "./views/pages/raiseaconcernViews/VersionLogsView";
 import { useStateContext } from "../context/contextprovider";
-import { ALLOWED_EMPLOYEES_CRS } from "../constant/data/allowedEmployeesCRS";
-import CustomerMasterListView from "@/component/views/pages/transactionViews/CustomerMasterListView";
-import CustomerDetailsView from "@/component/views/pages/transactionViews/CustomerDetailsView";
+
 import TransactionSidebar from "./layout/transaction/TransactionSidebar";
 import InvoicesView from "@/component/views/pages/transactionViews/InvoicesView";
 import TransactionView from "./views/pages/transactionViews/TransactionView";
@@ -222,10 +214,7 @@ const App = () => {
             path: "/callback",
             element: <CallBackView />,
         },
-        {
-            path: "/chatbox",
-            element: <MainComponent />,
-        },
+       
         {
             path: "/",
             element: <PrivateRoute />, // Protected routes wrapper
@@ -488,22 +477,7 @@ const App = () => {
                                 },
                             ],
                         },
-                        {
-                            path: "sales",
-                            element: (
-                                <PrivateRoute requiredPermission="Sales Management" />
-                            ),
-                            children: [
-                                {
-                                    path: "customer",
-                                    element: <CustomerMasterListView />,
-                                },
-                                {
-                                    path: "details/:id",
-                                    element: <CustomerDetailsView />,
-                                },
-                            ],
-                        },
+                     
                         {
                             path: "adminsettings",
                             element: <AdminSettingView />,
@@ -530,10 +504,7 @@ const App = () => {
                 },
             ],
         },
-        {
-            path: "/paymentmethod",
-            element: <PaymentMainView />,
-        },
+       
         {
             path: "/file-viewer/attachment/:id",
             element: <PrivateRoute />,
@@ -544,10 +515,7 @@ const App = () => {
                 },
             ],
         },
-        {
-            path: "/paymentmethod/payonlinenow",
-            element: <PaymentSectionView />,
-        },
+       
         {
             path: "*",
             element: <ErrorPage />,

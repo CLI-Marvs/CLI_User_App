@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react'
 import ImageSlideshow from './ImageSlideshow'
 import { useStateContext } from '../../../context/contextprovider'
-import apiService from '../../servicesApi/apiService'
+import apiService from '../../../component/servicesApi/apiService'
 import { showToast } from "../../../util/toastUtil"
 import { CircularProgress } from '@mui/material'
 
