@@ -33,7 +33,7 @@
         gtag('config', 'G-FEBK3DY06V');
     </script>
 </head>
-@vite('resources/css/app.css')
+@vite('frontend/css/app.css')
 
 <body>
 
@@ -45,8 +45,8 @@
     <div id="portal-root"></div>
 
     @viteReactRefresh
-    @vite('resources/frontend/app.js')
-    @vite('resources/js/bootstrap.js')
+    @vite('frontend/app.js')
+    @vite('frontend/js/bootstrap.js')
 
 </body>
 
