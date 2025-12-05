@@ -1,5 +1,5 @@
 import React from 'react'
-import Login from '../../../layout/loginpage/Login'
+import Login from '../../../../features/auth/loginpage/Login'
 
 const LoginView = () => {
   return (
