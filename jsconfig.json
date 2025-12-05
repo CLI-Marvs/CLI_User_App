@@ -2,8 +2,8 @@
     "compilerOptions": {
         "baseUrl": ".", // Sets the base directory for your paths
         "paths": {
-            "@/*": ["resources/frontend/*"] // Matches your alias in `vite.config.js`
+            "@/*": ["frontend/*"] // Matches your alias in `vite.config.js`
         }
     },
-    "include": ["resources/**/*", "vite.config.js"] // Include your codebase
+    "include": ["frontend/**/*", "vite.config.js"] // Include your codebase
 }

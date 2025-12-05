@@ -2,10 +2,10 @@
 export default {
     content: [
         "./index.html",
-        "./resources/**/*.blade.php",
-        "./resources/**/*.js",
+        "./frontend/**/*.blade.php",
+        "./frontend/**/*.js",
         "./src/**/*.{js,ts,jsx,tsx}",
-        "./resources/**/*.jsx",
+        "./frontend/**/*.jsx",
     ],
     theme: {
         extend: {

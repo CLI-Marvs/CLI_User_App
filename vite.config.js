@@ -9,16 +9,16 @@ export default defineConfig({
         react(),
         laravel({
             input: [
-                "resources/css/app.css",
-                "resources/frontend/app.js",
-                "resources/js/bootstrap.js",
+                "frontend/css/app.css",
+                "frontend/app.js",
+                "frontend/js/bootstrap.js",
             ],
             refresh: true,
         }),
     ],
     resolve: {
         alias: {
-            "@": path.resolve(__dirname, "resources/frontend"),
+            "@": path.resolve(__dirname, "frontend"),
         },
     }
 });
