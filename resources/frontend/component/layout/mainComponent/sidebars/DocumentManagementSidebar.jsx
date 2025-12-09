@@ -48,6 +48,7 @@ const DocumentManagementSidebar = () => {
     }, []);
 
     // Role-based access: admin emails
+    //Hardcoded admin emails for now, in preparation for end to end MRS integration, for easy switch
     const adminEmails = [
         "metoh@cebulandmasters.com",
         "appsdev@cebulandmasters.com",
@@ -59,7 +60,8 @@ const DocumentManagementSidebar = () => {
         "dataengineer@cebulandmasters.com",
         "qcmahipos@cebulandmasters.com",
         "rnabala@cebulandmasters.com",
-        "fgbaldo@cebulandmasters.com"
+        "fgbaldo@cebulandmasters.com",
+        "jlgomo@cebulandmasters.com"
     ];
     const userEmail = (user?.email || user?.employee_email || "")
         .toLowerCase()
