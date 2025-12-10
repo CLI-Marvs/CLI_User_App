@@ -15,7 +15,9 @@ import {
     UserCheck,
     Building,
     Shield,
-    Home
+    Home,
+    Building2,
+    Calculator,
 } from "lucide-react";
 export const getSidebarConfig = (userLoggedInEmail) => [
     {
@@ -103,7 +105,7 @@ export const getSidebarConfig = (userLoggedInEmail) => [
         children: [
             {
                 id: "receivables",
-                label: "Receivables/Incoming",
+                label: "Receivables / Incoming",
                 path: "/transaction/receivables/transactions",
                 icon: DollarSign,
             },
@@ -131,19 +133,19 @@ export const getSidebarConfig = (userLoggedInEmail) => [
                 id: "live-inventory",
                 label: "Live Inventory",
                 path: "/sales-dashboard/live-inventory",
-                icon: Package,
+                icon: BarChart3,
             },
             {
                 id: "applications",
                 label: "Applications",
                 path: "/sales-dashboard/applications",
-                icon: ClipboardList,
+                icon: FileText,
             },
             {
                 id: "term-sheet",
                 label: "Term Sheet",
                 path: "/sales-dashboard/term-sheet",
-                icon: FileSpreadsheet,
+                icon: Calculator,
             },
             {
                 id: "buyers",

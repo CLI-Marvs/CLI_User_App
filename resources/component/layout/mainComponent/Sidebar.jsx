@@ -105,7 +105,7 @@ const Sidebar = () => {
         if (item.visible === false) return null;
 
         const baseClasses = isNested
-            ? "h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px]"
+            ? " w-full py-[8px] px-[18px] text-sm rounded-[50px]"
             : "w-[185px] text-sm pl-[12px] py-1";
 
         const activeClasses = isNested
