@@ -11,10 +11,7 @@ import {
 } from "@material-tailwind/react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useStateContext } from "../../../context/contextprovider";
-import { ALLOWED_EMPLOYEES_CRS } from "../../../constant/data/allowedEmployeesCRS";
-import { getSidebarConfig } from "./sidebarConfig/getSidebarConfig";
-
-
+import { getSidebarConfig } from "@/component/layout/mainComponent/sidebarConfig/getSidebarConfig";
 
 const Sidebar = () => {
     const { unreadCount, getCount, user } = useStateContext();
@@ -83,13 +80,13 @@ const Sidebar = () => {
 
     const toggleDropdown = (id, item) => {
         const isCurrentlyOpen = openDropdowns[id];
-        
+
         // Toggle the dropdown state
         setOpenDropdowns((prev) => {
             const newState = { ...prev, [id]: !isCurrentlyOpen };
             return newState;
         });
-        
+
         // If opening (was closed, now opening), navigate to first child
         if (!isCurrentlyOpen && item?.children && item.children.length > 0) {
             const firstChild = item.children[0];
@@ -109,7 +106,7 @@ const Sidebar = () => {
 
         const baseClasses = isNested
             ? "h-[32px] w-full py-[8px] px-[18px] text-sm rounded-[50px]"
-            : " w-[185px] text-sm pl-[12px] py-1";
+            : "w-[185px] text-sm pl-[12px] py-1";
 
         const activeClasses = isNested
             ? "bg-white text-custom-solidgreen font-semibold"
@@ -123,18 +120,24 @@ const Sidebar = () => {
 
         // Floating submenu item
         if (item.type === "floating") {
+            const FloatingIcon = item.icon;
             return (
                 <div key={item.id} className="relative">
                     <div ref={item.id === floatingMenu ? floatingButtonRef : null}>
                         <ListItem
-                            className={`flex justify-between ${baseClasses} ${
-                                isPathActive(item.path) ? activeClasses : hoverClasses
-                            }`}
+                            className={`flex justify-between ${baseClasses} ${isPathActive(item.path) ? activeClasses : hoverClasses
+                                }`}
                             onClick={() =>
                                 setFloatingMenu(floatingMenu === item.id ? null : item.id)
                             }
                         >
-                            <div>{item.label}</div>
+                            <div className="flex items-center gap-2">
+                                {FloatingIcon && <FloatingIcon
+                                    size={16}
+                                    className="text-custom-solidgreen  group-hover:!text-custom-solidgreen"
+                                />}
+                                {item.label}
+                            </div>
                             <div className="text-custom-solidgreen">
                                 <MdChevronRight />
                             </div>
@@ -144,19 +147,23 @@ const Sidebar = () => {
                         createPortal(
                             <div
                                 ref={floatingMenuRef}
-                                className="fixed z-[9999] bg-white shadow-custom3 border rounded-md w-[120px] py-2"
+                                className="fixed z-[9999] bg-white shadow-custom3 border rounded-md w-[140px] py-2"
                             >
-                                {item.children.map((child) => (
-                                    <Link
-                                        key={child.id}
-                                        to={child.path}
-                                        onClick={() => setFloatingMenu(null)}
-                                    >
-                                        <div className="px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen">
-                                            {child.label}
-                                        </div>
-                                    </Link>
-                                ))}
+                                {item.children.map((child) => {
+                                    /* const ChildIcon = child.icon; */
+                                    return (
+                                        <Link
+                                            key={child.id}
+                                            to={child.path}
+                                            onClick={() => setFloatingMenu(null)}
+                                        >
+                                            <div className="px-4 py-2 text-sm hover:font-bold hover:bg-gradient-to-r hover:from-custom-bluegreen hover:via-custom-lightgreen hover:to-custom-solidgreen hover:bg-clip-text hover:text-transparent text-custom-solidgreen flex items-center gap-2">
+                                                {/* {ChildIcon && <ChildIcon size={16} />} */}
+                                                {child.label}
+                                            </div>
+                                        </Link>
+                                    );
+                                })}
                             </div>,
                             document.getElementById("portal-root")
                         )}
@@ -165,15 +172,15 @@ const Sidebar = () => {
         }
 
         // Regular menu item
+        const Icon = item.icon;
         const content = (
             <ListItem
-                className={`${baseClasses} ${isActive ? activeClasses : hoverClasses} ${
-                    item.type === "dropdown" && !isNested
-                        ? isOpen
-                            ? "rounded-[10px] rounded-b-none"
-                            : "rounded-[10px]"
+                className={`${baseClasses} ${isActive ? activeClasses : hoverClasses} ${item.type === "dropdown" && !isNested
+                    ? isOpen
+                        ? "rounded-[10px] rounded-b-none"
                         : "rounded-[10px]"
-                } transition-all duration-300 ease-in-out`}
+                    : "rounded-[10px]"
+                    } transition-all duration-300 ease-in-out`}
                 onClick={() => {
                     if (item.type === "dropdown") {
                         if (!isNested) {
@@ -182,7 +189,10 @@ const Sidebar = () => {
                     }
                 }}
             >
-                {item.label}
+                <div className="flex items-center gap-2 w-full">
+                    {Icon && <Icon size={18} className="text-custom-solidgreen  group-hover:!text-custom-solidgreen" />}
+                    <span className="flex-1">{item.label}</span>
+                </div>
                 {item.showBadge && (
                     <ListItemSuffix>
                         <Chip
@@ -197,9 +207,8 @@ const Sidebar = () => {
                 {item.type === "dropdown" && (
                     <ListItemSuffix>
                         <IoIosArrowDown
-                            className={`text-custom-solidgreen transition-transform duration-200 ease-in-out ${
-                                isOpen ? "rotate-180" : ""
-                            }`}
+                            className={`text-custom-solidgreen transition-transform duration-200 ease-in-out ${isOpen ? "rotate-180" : ""
+                                }`}
                         />
                     </ListItemSuffix>
                 )}
@@ -208,7 +217,11 @@ const Sidebar = () => {
 
         return (
             <React.Fragment key={item.id}>
-                {item.path ? <Link to={item.path}>{content}</Link> : content}
+                {item.path && item.type !== "dropdown" ? (
+                    <Link to={item.path}>{content}</Link>
+                ) : (
+                    content
+                )}
                 {item.type === "dropdown" && isOpen && (
                     <div className="px-[12px] py-[20px] -mt-2 w-[185px] min-h-[122px] flex flex-col gap-[5px] z-20 shadow-custom5 bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
                         {item.children.map((child) => renderMenuItem(child, true))}
