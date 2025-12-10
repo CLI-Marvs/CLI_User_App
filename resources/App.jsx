@@ -65,6 +65,12 @@ import SurveyMainReportView from "./component/views/pages/surveyrelatedreportsVi
 import SurveySummaryView from "./component/views/pages/surveyrelatedreportsViews/SurveySummaryView";
 import AdminSettingsView from "./component/views/pages/transactionViews/AdminSettingsView";
 import TransactionViewLogs from "./component/views/pages/transactionViews/TransactionViewLogs";
+import InventoryMain from "./features/sales-dashboard/live-inventory/InventoryMain";
+import SellersMain from "./features/sales-dashboard/sellers/SellersMain";
+import BuyersMain from "./features/sales-dashboard/buyers/BuyersMain";
+import ApplicationsMain from "./features/sales-dashboard/applications/ApplicationsMain";
+import SettingsMain from "./features/sales-dashboard/settings/SettingsMain";
+import TermSheetMain from "./features/sales-dashboard/term-sheet/TermSheetMain";
 
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, adminOnly, children }) => {
@@ -460,6 +466,38 @@ const App = () => {
                                     element: <PromotionalPricingView />,
                                 },
                             ],
+                        },
+                        {
+                            path: "sales-dashboard",
+                            element: (
+                                <PrivateRoute requiredPermission="Sales Management" />
+                            ),
+                            children: [
+                                {
+                                    path: "live-inventory",
+                                    element: <InventoryMain />,
+                                },
+                                {
+                                    path: "sellers",
+                                    element: <SellersMain />,
+                                },
+                                {
+                                    path: "buyers",
+                                    element: <BuyersMain />,
+                                },
+                                {
+                                    path: "applications",
+                                    element: <ApplicationsMain />,
+                                },
+                                {
+                                    path: "settings",
+                                    element: <SettingsMain />,
+                                },
+                                {
+                                    path: "term-sheet",
+                                    element: <TermSheetMain />,
+                                },
+                            ]
                         },
 
                         {
