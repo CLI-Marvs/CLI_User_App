@@ -533,10 +533,35 @@ class FileManagerController extends Controller
             // Store file path for potential physical file deletion
             $filePath = $document->file_path;
             $fileName = $document->file_name;
+            $fileTitle = $document->file_title;
             $accountId = $document->account_id;
 
             // Delete the document record from database
             $document->delete();
+
+            // Check if there are any remaining documents with the same file_title for this account
+            $remainingDocuments = WorkOrderDocument::where('account_id', $accountId)
+                ->where('file_title', $fileTitle)
+                ->exists();
+
+            // If no remaining documents with this file_title, update the checklist status
+            if (!$remainingDocuments && $fileTitle) {
+                // Find the checklist by name (file_title matches checklist name)
+                $checklist = Checklist::where('name', $fileTitle)->first();
+
+                if ($checklist && $checklist->requires_document) {
+                    // Mark the checklist as incomplete for this account
+                    AccountChecklistStatus::where('account_id', $accountId)
+                        ->where('checklist_id', $checklist->id)
+                        ->update(['is_completed' => false, 'completed_at' => null]);
+
+                    \Log::info('Checklist status updated to incomplete', [
+                        'account_id' => $accountId,
+                        'checklist_id' => $checklist->id,
+                        'checklist_name' => $fileTitle
+                    ]);
+                }
+            }
 
             // Optionally delete the physical file from storage
             // Note: You might want to implement proper file storage deletion here
@@ -548,6 +573,7 @@ class FileManagerController extends Controller
             \Log::info('File deleted successfully', [
                 'document_id' => $documentId,
                 'file_name' => $fileName,
+                'file_title' => $fileTitle,
                 'account_id' => $accountId,
                 'file_path' => $filePath
             ]);
