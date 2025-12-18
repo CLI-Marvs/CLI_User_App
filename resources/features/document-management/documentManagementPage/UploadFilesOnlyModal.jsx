@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
-import { useStateContext } from "@/component/context/contextprovider";
+import { useStateContext } from "@/context/contextprovider";
 import { useDocumentManagementContext } from "@/context/DocumentManagement/DocumentManagementContext";
 import apiService from "@/servicesApi/apiService";
 
@@ -121,8 +121,9 @@ const UploadFilesOnlyModal = ({
                     ? selectedChecklist.name
                     : "";
             const newFiles = filesArr.map((file) => ({
-                id: `${file.name}-${file.lastModified}-${file.size
-                    }-${Math.random().toString(36).substr(2, 9)}`,
+                id: `${file.name}-${file.lastModified}-${
+                    file.size
+                }-${Math.random().toString(36).substr(2, 9)}`,
                 file: file,
                 title: checklistName,
                 checklist_id: defaultChecklistId || null,
@@ -172,7 +173,6 @@ const UploadFilesOnlyModal = ({
     };
 
     const handleTitleChange = (id, newTitle, newChecklistId) => {
-
         setAttachedFiles((prevFiles) => {
             const updatedFiles = prevFiles.map((f) =>
                 f.id === id
@@ -366,10 +366,11 @@ const UploadFilesOnlyModal = ({
 
                         {/* Drag and Drop Zone */}
                         <div
-                            className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors duration-200 ${dragActive
-                                ? "border-blue-400 bg-blue-50"
-                                : "border-gray-300 hover:border-gray-400"
-                                }`}
+                            className={`relative border-2 border-dashed rounded-lg p-8 text-center transition-colors duration-200 ${
+                                dragActive
+                                    ? "border-blue-400 bg-blue-50"
+                                    : "border-gray-300 hover:border-gray-400"
+                            }`}
                             onDragEnter={handleDrag}
                             onDragLeave={handleDrag}
                             onDragOver={handleDrag}
@@ -481,10 +482,10 @@ const UploadFilesOnlyModal = ({
                                                 Document Type{" "}
                                                 {submilestoneOptions.length >
                                                     0 && (
-                                                        <span className="text-red-500">
-                                                            *
-                                                        </span>
-                                                    )}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
+                                                )}
                                             </label>
                                             {loadingSubmilestones ? (
                                                 <div className="flex items-center text-sm text-gray-500 p-2 bg-gray-100 rounded">
@@ -510,7 +511,7 @@ const UploadFilesOnlyModal = ({
                                                     Loading document types...
                                                 </div>
                                             ) : submilestoneOptions.length >
-                                                0 ? (
+                                              0 ? (
                                                 <select
                                                     value={fileWrapper.title}
                                                     onChange={(e) => {
@@ -518,8 +519,8 @@ const UploadFilesOnlyModal = ({
                                                             e.target.value;
                                                         const selectedOption =
                                                             e.target.options[
-                                                            e.target
-                                                                .selectedIndex
+                                                                e.target
+                                                                    .selectedIndex
                                                             ];
                                                         const checklistId =
                                                             selectedOption.getAttribute(
@@ -565,7 +566,6 @@ const UploadFilesOnlyModal = ({
                                                                             (
                                                                                 checklist
                                                                             ) => {
-
                                                                                 const isCompleted =
                                                                                     checklist
                                                                                         .account_checklist_status
@@ -591,10 +591,10 @@ const UploadFilesOnlyModal = ({
                                                                                         style={
                                                                                             isCompleted
                                                                                                 ? {
-                                                                                                    color: "#9CA3AF",
-                                                                                                    backgroundColor:
-                                                                                                        "#F3F4F6",
-                                                                                                }
+                                                                                                      color: "#9CA3AF",
+                                                                                                      backgroundColor:
+                                                                                                          "#F3F4F6",
+                                                                                                  }
                                                                                                 : {}
                                                                                         }
                                                                                     >

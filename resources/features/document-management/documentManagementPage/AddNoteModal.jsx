@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
-import { useStateContext } from "@/component/context/contextprovider";
+import { useStateContext } from "@/context/contextprovider";
 import { useDocumentManagementContext } from "@/context/DocumentManagement/DocumentManagementContext";
 import apiService from "@/servicesApi/apiService";
 
@@ -58,7 +58,7 @@ const AddNoteModal = ({
                                 response &&
                                 response.headers &&
                                 typeof response.headers["content-type"] ===
-                                "string" &&
+                                    "string" &&
                                 response.headers["content-type"]
                                     .toLowerCase()
                                     .includes("text/html")
@@ -66,11 +66,12 @@ const AddNoteModal = ({
                                 receivedInfo =
                                     "Received HTML page instead of expected JSON data.";
                                 console.warn(
-                                    `API for submilestones (AddNoteModal) returned HTML. Status: ${response.status || "N/A"
+                                    `API for submilestones (AddNoteModal) returned HTML. Status: ${
+                                        response.status || "N/A"
                                     }. Response data snippet:`,
                                     typeof response.data === "string"
                                         ? response.data.substring(0, 300) +
-                                        "..."
+                                              "..."
                                         : response.data
                                 );
                             } else {
@@ -101,7 +102,7 @@ const AddNoteModal = ({
                             if (
                                 err.response.headers &&
                                 typeof err.response.headers["content-type"] ===
-                                "string" &&
+                                    "string" &&
                                 err.response.headers["content-type"]
                                     .toLowerCase()
                                     .includes("text/html")
@@ -114,8 +115,9 @@ const AddNoteModal = ({
                             ) {
                                 userErrorMessage = `Failed to load document types: ${err.response.data.message}`;
                             } else {
-                                userErrorMessage = `Failed to load document types: Server error (status ${err.response.status || "unknown"
-                                    }).`;
+                                userErrorMessage = `Failed to load document types: Server error (status ${
+                                    err.response.status || "unknown"
+                                }).`;
                             }
                         } else if (err.message) {
                             userErrorMessage = `Failed to load document types: ${err.message}`;
@@ -413,12 +415,13 @@ const AddNoteModal = ({
                             </label>
                             <div className="flex items-center space-x-2">
                                 <span
-                                    className={`text-xs ${remainingChars < 50
-                                        ? "text-orange-600"
-                                        : remainingChars < 20
+                                    className={`text-xs ${
+                                        remainingChars < 50
+                                            ? "text-orange-600"
+                                            : remainingChars < 20
                                             ? "text-red-600"
                                             : "text-gray-500"
-                                        }`}
+                                    }`}
                                 >
                                     {remainingChars} characters remaining
                                 </span>
@@ -442,12 +445,13 @@ const AddNoteModal = ({
                                     : ""}
                             </p>
                             <p
-                                className={`text-xs font-medium ${totalLength >= 450
-                                    ? "text-orange-600"
-                                    : totalLength >= 480
+                                className={`text-xs font-medium ${
+                                    totalLength >= 450
+                                        ? "text-orange-600"
+                                        : totalLength >= 480
                                         ? "text-red-600"
                                         : "text-gray-500"
-                                    }`}
+                                }`}
                             >
                                 {totalLength}/500
                             </p>
@@ -459,10 +463,11 @@ const AddNoteModal = ({
                             Attach Files (Optional)
                         </label>
                         <div
-                            className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors duration-200 ${dragActive
-                                ? "border-blue-400 bg-blue-50"
-                                : "border-gray-300 hover:border-gray-400"
-                                }`}
+                            className={`relative border-2 border-dashed rounded-lg p-6 text-center transition-colors duration-200 ${
+                                dragActive
+                                    ? "border-blue-400 bg-blue-50"
+                                    : "border-gray-300 hover:border-gray-400"
+                            }`}
                             onDragEnter={handleDrag}
                             onDragLeave={handleDrag}
                             onDragOver={handleDrag}
@@ -574,10 +579,10 @@ const AddNoteModal = ({
                                                     : "File Title (Optional)"}
                                                 {submilestoneOptions.length >
                                                     0 && (
-                                                        <span className="text-red-500">
-                                                            *
-                                                        </span>
-                                                    )}
+                                                    <span className="text-red-500">
+                                                        *
+                                                    </span>
+                                                )}
                                             </label>
                                             {loadingSubmilestones ? (
                                                 <div className="flex items-center text-sm text-gray-500 p-2 bg-gray-100 rounded">
@@ -603,7 +608,7 @@ const AddNoteModal = ({
                                                     Loading document types...
                                                 </div>
                                             ) : submilestoneOptions.length >
-                                                0 ? (
+                                              0 ? (
                                                 <select
                                                     value={fileWrapper.title}
                                                     onChange={(e) =>
@@ -625,9 +630,9 @@ const AddNoteModal = ({
                                                     {submilestoneOptions.map(
                                                         (submilestone) =>
                                                             submilestone.checklists &&
-                                                                submilestone
-                                                                    .checklists
-                                                                    .length > 0 ? (
+                                                            submilestone
+                                                                .checklists
+                                                                .length > 0 ? (
                                                                 <optgroup
                                                                     key={`sub-${submilestone.id}`}
                                                                     label={
