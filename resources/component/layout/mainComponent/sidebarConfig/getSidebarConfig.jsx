@@ -123,7 +123,7 @@ export const getSidebarConfig = (userLoggedInEmail) => [
             },
         ],
     },
-    {
+   /*  {
         id: "sales-dashboard",
         label: "Sales Dashboard",
         type: "dropdown",
@@ -166,7 +166,7 @@ export const getSidebarConfig = (userLoggedInEmail) => [
                 icon: Settings,
             },
         ],
-    },
+    }, */
     {
         id: "coming-soon",
         type: "section",
@@ -174,8 +174,8 @@ export const getSidebarConfig = (userLoggedInEmail) => [
         items: [
             "Property & Pricing",
             "Broker Management",
-            "Document\nManagement",
             "Property\nManagement",
+            "Sales Management",
         ],
     },
     {
