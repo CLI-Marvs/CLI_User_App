@@ -45,7 +45,7 @@
     <div id="portal-root"></div>
 
     @viteReactRefresh
-    @vite('resources/frontend/app.js')
+    @vite('resources/app.js')
     @vite('resources/js/bootstrap.js')
 
 </body>

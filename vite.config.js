@@ -10,7 +10,7 @@ export default defineConfig({
         laravel({
             input: [
                 "resources/css/app.css",
-                "resources/frontend/app.js",
+                "resources/app.js",
                 "resources/js/bootstrap.js",
             ],
             refresh: true,
@@ -18,7 +18,7 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            "@": path.resolve(__dirname, "resources/frontend"),
+            "@": path.resolve(__dirname, "resources"),
         },
     }
 });

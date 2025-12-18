@@ -24,7 +24,7 @@ class FeatureRepository
 
         
         // Modified code to exclude 'Sales Management'
-        return $this->model->whereNotIn('name', ['Sales Management', 'Property Pricing', 'Ask CLI', 'Pay CLI'])->get();
+        return $this->model->whereNotIn('name', ['Property Pricing', 'Ask CLI', 'Pay CLI'])->get();
     }
 
     /**`
