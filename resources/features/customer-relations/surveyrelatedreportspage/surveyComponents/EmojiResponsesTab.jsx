@@ -11,7 +11,7 @@ import * as XLSX from 'xlsx';
 import { MdOutlineFileDownload } from 'react-icons/md';
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50];
-const DEFAULT_ITEMS_PER_PAGE = 5;
+const DEFAULT_ITEMS_PER_PAGE = 25;
 
 const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, surveyId, dateFilter }) => {
 
@@ -130,6 +130,7 @@ const EmojiResponsesTab = ({ surveyRatings, setSurveyRatings, surveyId, dateFilt
                     item.ticket_id?.toString().includes(localTerm) ||
                     labels[item.rating]?.toLowerCase().includes(localTerm)
             );
+            setCurrentPage(1);
         }
 
         return filtered.length;

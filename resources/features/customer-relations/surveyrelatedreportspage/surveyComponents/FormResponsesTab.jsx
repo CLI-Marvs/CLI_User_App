@@ -11,7 +11,7 @@ import { MdOutlineFileDownload } from 'react-icons/md';
 
 
 const ITEMS_PER_PAGE_OPTIONS = [5, 10, 25, 50];
-const DEFAULT_ITEMS_PER_PAGE = 5;
+const DEFAULT_ITEMS_PER_PAGE = 25;
 
 
 const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateFilter }) => {
@@ -102,6 +102,7 @@ const FormResponsesTab = ({ surveyResponses, setSurveyResponses, surveyId, dateF
     const handleDateFilterApply = (filterPayload) => {
         setLocalDateFilter(filterPayload);
         fetchSurveyResponse(filterPayload);
+        setCurrentPage(1);
     };
 
     const handleSatisfaction = (e) => {

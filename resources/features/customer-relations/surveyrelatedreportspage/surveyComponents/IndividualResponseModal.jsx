@@ -24,6 +24,18 @@ const IndividualResponseModal = ({ modalRef, selectedResponse, handleCloseModal 
 
     const navigate = useNavigate();
 
+    const handleBackdropClick = (e) => {
+        const dialogDimensions = modalRef.current.getBoundingClientRect();
+        if (
+            e.clientX < dialogDimensions.left ||
+            e.clientX > dialogDimensions.right ||
+            e.clientY < dialogDimensions.top ||
+            e.clientY > dialogDimensions.bottom
+        ) {
+            handleCloseModal();
+        }
+    };
+
 
     if (!selectedResponse || typeof selectedResponse !== 'object') {
         return null; // or return a loading state: <div>Loading...</div>
@@ -157,6 +169,7 @@ const IndividualResponseModal = ({ modalRef, selectedResponse, handleCloseModal 
         <dialog
             id="individualResponse"
             ref={modalRef}
+            onClick={handleBackdropClick}
             className="modal w-[1024px] px-[20px] py-[40px] rounded-[8px] shadow-custom5 backdrop:bg-black/50 "
         >
             <div className='flex flex-col gap-[12px]'>
