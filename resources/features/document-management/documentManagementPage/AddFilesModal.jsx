@@ -4,11 +4,13 @@ import DateLogo from "@/assets/images/Date_range.svg";
 import FileIcon from "@/assets/images/folder_file_notes.svg";
 import ViewIcon from "@/assets/images/eye_icon.svg";
 import DownloadIcon from "@/assets/images/download_icon.svg";
+import DeleteIcon from "@/assets/images/delete_icon.svg";
 import UploadFilesOnlyModal from "./UploadFilesOnlyModal";
 import apiService from "@/servicesApi/apiService";
 import FileViewerModal from "./FileViewerModal"; // Import the FileViewerModal
-import { useStateContext } from "@/component/context/contextprovider";
+import { useStateContext } from "@/context/contextprovider";
 import { useDocumentManagementContext } from "@/context/DocumentManagement/DocumentManagementContext";
+import { toast } from "react-toastify";
 
 function AddFilesModal({
     selectedAccountId,
@@ -16,7 +18,7 @@ function AddFilesModal({
     selectedWorkOrder,
     workOrderData,
     selectedChecklist,
-    onRefresh = () => { }, // Make onRefresh optional and default to noop
+    onRefresh = () => {}, // Make onRefresh optional and default to noop
     // selectedAssignee,
 }) {
     const { user } = useStateContext(); // Get user from context
@@ -30,6 +32,7 @@ function AddFilesModal({
     const [isViewerOpen, setIsViewerOpen] = useState(false); // State for FileViewerModal
     const [viewingFile, setViewingFile] = useState(null); // State for the file to view
     const [propertyName, setPropertyName] = useState(null); // State for property name
+    const [isDeleting, setIsDeleting] = useState(false); // State for delete operation
 
     const [mounted, setMounted] = useState(false);
 
@@ -82,9 +85,9 @@ function AddFilesModal({
             const accountData = response.data;
             setPropertyName(
                 accountData.property_name ||
-                accountData.project ||
-                accountData.account_name ||
-                null
+                    accountData.project ||
+                    accountData.account_name ||
+                    null
             );
         } catch (err) {
             console.error("Error fetching account property name:", err);
@@ -186,6 +189,48 @@ function AddFilesModal({
     const handleCloseViewer = () => {
         setIsViewerOpen(false);
         setViewingFile(null);
+    };
+
+    const handleDeleteFile = async (file) => {
+        if (
+            !confirm(
+                `Are you sure you want to delete "${
+                    file.file_title || file.file_name
+                }"?`
+            )
+        ) {
+            return;
+        }
+
+        setIsDeleting(true);
+        try {
+            const response = await apiService.delete(
+                `/file-manager/files/${file.document_id || file.id}`
+            );
+
+            if (response.data.success) {
+                toast.success("File deleted successfully");
+
+                // Refresh the files list
+                if (workOrderData?.work_order_id) {
+                    await fetchLogDataWithFiles();
+                }
+
+                // Refresh the parent checklist table to update completion status
+                if (onRefresh) {
+                    onRefresh();
+                }
+            } else {
+                toast.error(response.data.message || "Failed to delete file");
+            }
+        } catch (error) {
+            console.error("Error deleting file:", error);
+            toast.error(
+                error.response?.data?.message || "Failed to delete file"
+            );
+        } finally {
+            setIsDeleting(false);
+        }
     };
 
     const formatHeaderDate = (dateStr) => {
@@ -335,11 +380,13 @@ function AddFilesModal({
                                                                     doc.document_id ||
                                                                     doc.id
                                                                 }
-                                                                className="flex items-center space-x-0"
+                                                                className="flex items-center space-x-3"
                                                             >
-                                                                <div className="w-64 flex-shrink-0">
+                                                                {/* File name and action icons in one container */}
+                                                                <div className="flex items-center justify-between bg-[#D6E4D1] rounded-lg px-3 py-2 border flex-1">
+                                                                    {/* File name */}
                                                                     <span
-                                                                        className="text-sm font-normal text-custom-solidgreen truncate block"
+                                                                        className="text-sm font-normal text-custom-solidgreen truncate mr-3"
                                                                         title={
                                                                             doc.file_title ||
                                                                             "Document"
@@ -348,69 +395,66 @@ function AddFilesModal({
                                                                         {doc.file_title ||
                                                                             "Document"}
                                                                     </span>
-                                                                </div>
-                                                                <div className="bg-[#D6E4D1] rounded-lg py-0 px-[10px] border w-36">
-                                                                    <div className="flex items-center justify-between">
-                                                                        <div className="flex items-center space-x-3 min-w-0 flex-1">
-                                                                            <div className=" p-2 rounded flex-shrink-0">
-                                                                                <img
-                                                                                    src={
-                                                                                        FileIcon
-                                                                                    }
-                                                                                    alt="File"
-                                                                                    className="w-[22px] h-[22px]"
-                                                                                />
-                                                                            </div>
-                                                                            {/* <span
-                                                                                className="text-xs font-light truncate"
-                                                                                title={
-                                                                                    doc.file_name
+
+                                                                    {/* Action Icons */}
+                                                                    <div className="flex items-center space-x-1 flex-shrink-0">
+                                                                        <button
+                                                                            onClick={() =>
+                                                                                handleOpenViewer(
+                                                                                    doc
+                                                                                )
+                                                                            }
+                                                                            className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
+                                                                            title="View document"
+                                                                        >
+                                                                            <img
+                                                                                src={
+                                                                                    ViewIcon
                                                                                 }
-                                                                            >
-                                                                                {
-                                                                                    doc.file_name
+                                                                                alt="View"
+                                                                                className="w-6 h-6"
+                                                                            />
+                                                                        </button>
+                                                                        <a
+                                                                            href={
+                                                                                doc.file_path
+                                                                            }
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            download={
+                                                                                doc.file_name
+                                                                            }
+                                                                            className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
+                                                                            title="Download document"
+                                                                        >
+                                                                            <img
+                                                                                src={
+                                                                                    DownloadIcon
                                                                                 }
-                                                                            </span> */}
-                                                                        </div>
-                                                                        <div className="flex items-center space-x-0 flex-shrink-0">
-                                                                            <button
-                                                                                onClick={() =>
-                                                                                    handleOpenViewer(
-                                                                                        doc
-                                                                                    )
+                                                                                alt="Download"
+                                                                                className="w-5 h-5"
+                                                                            />
+                                                                        </a>
+                                                                        <button
+                                                                            onClick={() =>
+                                                                                handleDeleteFile(
+                                                                                    doc
+                                                                                )
+                                                                            }
+                                                                            disabled={
+                                                                                isDeleting
+                                                                            }
+                                                                            className="p-1.5 text-red-600 hover:text-red-700 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                            title="Delete document"
+                                                                        >
+                                                                            <img
+                                                                                src={
+                                                                                    DeleteIcon
                                                                                 }
-                                                                                className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
-                                                                                title="View document"
-                                                                            >
-                                                                                <img
-                                                                                    src={
-                                                                                        ViewIcon
-                                                                                    }
-                                                                                    alt="View"
-                                                                                    className="w-6 h-6"
-                                                                                />
-                                                                            </button>
-                                                                            <a
-                                                                                href={
-                                                                                    doc.file_path
-                                                                                }
-                                                                                target="_blank"
-                                                                                rel="noopener noreferrer"
-                                                                                download={
-                                                                                    doc.file_name
-                                                                                }
-                                                                                className="p-1.5 text-green-600 hover:text-green-700 rounded transition-colors"
-                                                                                title="Download document"
-                                                                            >
-                                                                                <img
-                                                                                    src={
-                                                                                        DownloadIcon
-                                                                                    }
-                                                                                    alt="Download"
-                                                                                    className="w-5 h-5"
-                                                                                />
-                                                                            </a>
-                                                                        </div>
+                                                                                alt="Delete"
+                                                                                className="w-5 h-5"
+                                                                            />
+                                                                        </button>
                                                                     </div>
                                                                 </div>
                                                             </div>
