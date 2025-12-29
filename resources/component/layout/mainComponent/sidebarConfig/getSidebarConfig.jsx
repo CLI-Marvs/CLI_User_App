@@ -123,50 +123,50 @@ export const getSidebarConfig = (userLoggedInEmail) => [
             },
         ],
     },
-   /*  {
-        id: "sales-dashboard",
-        label: "Sales Dashboard",
-        type: "dropdown",
-        basePath: "/sales-dashboard",
-        children: [
-            {
-                id: "live-inventory",
-                label: "Live Inventory",
-                path: "/sales-dashboard/live-inventory",
-                icon: BarChart3,
-            },
-            {
-                id: "applications",
-                label: "Applications",
-                path: "/sales-dashboard/applications",
-                icon: FileText,
-            },
-            {
-                id: "term-sheet",
-                label: "Term Sheet",
-                path: "/sales-dashboard/term-sheet",
-                icon: Calculator,
-            },
-            {
-                id: "buyers",
-                label: "Buyers",
-                path: "/sales-dashboard/buyers",
-                icon: UserCheck,
-            },
-            {
-                id: "sellers",
-                label: "Sellers",
-                path: "/sales-dashboard/sellers",
-                icon: Users,
-            },
-            {
-                id: "settings",
-                label: "Settings",
-                path: "/sales-dashboard/settings",
-                icon: Settings,
-            },
-        ],
-    }, */
+    // {
+    //     id: "sales-dashboard",
+    //     label: "Sales Dashboard",
+    //     type: "dropdown",
+    //     basePath: "/sales-dashboard",
+    //     children: [
+    //         {
+    //             id: "live-inventory",
+    //             label: "Live Inventory",
+    //             path: "/sales-dashboard/live-inventory",
+    //             icon: BarChart3,
+    //         },
+    //         {
+    //             id: "applications",
+    //             label: "Applications",
+    //             path: "/sales-dashboard/applications",
+    //             icon: FileText,
+    //         },
+    //         {
+    //             id: "term-sheet",
+    //             label: "Term Sheet",
+    //             path: "/sales-dashboard/term-sheet",
+    //             icon: Calculator,
+    //         },
+    //         {
+    //             id: "buyers",
+    //             label: "Buyers",
+    //             path: "/sales-dashboard/buyers",
+    //             icon: UserCheck,
+    //         },
+    //         {
+    //             id: "sellers",
+    //             label: "Sellers",
+    //             path: "/sales-dashboard/sellers",
+    //             icon: Users,
+    //         },
+    //         {
+    //             id: "settings",
+    //             label: "Settings",
+    //             path: "/sales-dashboard/settings",
+    //             icon: Settings,
+    //         },
+    //     ],
+    // },
     {
         id: "coming-soon",
         type: "section",
@@ -174,6 +174,7 @@ export const getSidebarConfig = (userLoggedInEmail) => [
         items: [
             "Property & Pricing",
             "Broker Management",
+            "Sales\nManagement",
             "Property\nManagement",
             "Sales Management",
         ],
