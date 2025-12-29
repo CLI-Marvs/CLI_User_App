@@ -597,3 +597,31 @@ body.alert-open .crs-sidebar-blur {
   top: var(--submenu-top);
   left: var(--submenu-left);
 }
+
+
+.viewport-container {
+  height: 100vh;
+  max-width: 100%;
+  background-color: #FAFAFA; /* assuming custom-grayFA is this color */
+  width: 2920px;
+  height: 911px;
+  zoom: 0.85;
+}
+
+.custom-calendar .rdp-day_selected {
+  background-color: #348017 !important; /* or use your hex */
+  color: #ffffff !important;
+  border-radius: 9999px !important;     /* pill */
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04) !important;
+}
+
+.custom-calendar .rdp-day_range_middle {
+  background-color: rgba(52, 128, 23, 0.15) !important; /* 15% */
+  color: #348017 !important;
+}
+
+.custom-calendar .rdp-day_today {
+  border: 1px solid #348017 !important;
+  color: #348017 !important;
+}
+

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useStateContext } from "../../../context/contextprovider";
 import apiService from "@/servicesApi/apiService";
 import { AiFillInfoCircle } from "react-icons/ai";
@@ -8,11 +8,12 @@ import CircularProgress from "@mui/material/CircularProgress";
 import { useSurvey } from "@/context/Survey/SurveyContext";
 
 const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
-    const { getAllConcerns, user, getInquiryLogs, data, assigneesPersonnel } =
+    const { getAllConcerns, user, getInquiryLogs, data, assigneesPersonnel, allEmployees, } =
         useStateContext();
     const [remarks, setRemarks] = useState("");
     const [isCommunicationTypeRequired, setIsCommunicationTypeRequired] = useState(false);
     const [isSurveyRequired, setIsSurveyRequired] = useState(false);
+    const [isSurveyOwnerRequired, setIsSurveyOwnerRequired] = useState(false);
     const maxCharacters = 500;
     const dataConcern =
         data?.find((items) => items.ticket_id === ticketId) || {};
@@ -21,11 +22,34 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
     const [selectedSurveyType, setSelectedSurveyType] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [surveyLinks, setSurveyLinks] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [isOpen, setIsOpen] = useState(false);
+    const [selectedOwner, setSelectedOwner] = useState(null);
+    const dropdownRef = useRef(null);
     const { fetchSurveyStatus } = useSurvey();
+    const [selectedEmployee, setSelectedEmployee] = useState("");
 
-    /**
-     *  Set initial communication type when dataRef changes
-     */
+
+    const filteredEmployees = allEmployees
+        .filter(employee => employee.department === "Customer Relations - Services")
+        .filter(employee => {
+            const fullName = `${employee.firstname} ${employee.lastname}`.toLowerCase();
+            return fullName.includes(searchTerm.toLowerCase());
+        });
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setIsOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+
+
     useEffect(() => {
         if (dataRef) {
             setCommunicationType(dataRef.communication_type);
@@ -46,6 +70,12 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
 
         fetchSurveyLinks();
     }, []);
+
+    const handleEmployeeChange = (e) => {
+        const value = e.target.value;
+        setSelectedEmployee(value);
+        setIsSurveyOwnerRequired(false);
+    };
 
 
     /**
@@ -91,6 +121,11 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
             return;
         }
 
+        if (!selectedEmployee && selectedSurveyType.surveyName.toLowerCase() !== 'n/a') {
+            setIsSurveyOwnerRequired(true);
+            return;
+        }
+
         try {
             const formattedSurveyType =
                 selectedSurveyType?.surveyName?.split(" (")[0] || "";
@@ -110,6 +145,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                     surveyName: formattedSurveyType,
                     surveyLink: selectedSurveyType.surveyLink,
                 },
+                survey_owner: selectedEmployee,
                 assignees: assigneesPersonnel[ticketId],
                 message_id: messageId,
                 status: status
@@ -141,6 +177,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
         setRemarks("");
         setIsCommunicationTypeRequired(false);
         setIsSurveyRequired(false);
+        setIsSurveyOwnerRequired(false);
         setSelectedSurveyType([]);
     };
 
@@ -154,6 +191,7 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
             setRemarks("");
             setIsCommunicationTypeRequired(false);
             setIsSurveyRequired(false);
+            setIsSurveyOwnerRequired(false);
             setSelectedSurveyType([]);
             modalRef.current.close();
         }
@@ -200,6 +238,17 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                                 <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
                                     <p className="flex text-[#C42E2E] ">
                                         Please select a survey to be sent.
+                                    </p>
+                                </div>
+                            )
+                        }
+                    </div>
+                    <div className="w-full mt-2">
+                        {
+                            isSurveyOwnerRequired && (
+                                <div className="w-full flex justify-center items-center h-12 bg-red-100 mb-4 rounded-lg">
+                                    <p className="flex text-[#C42E2E] ">
+                                        Please select a survey owner.
                                     </p>
                                 </div>
                             )
@@ -286,8 +335,40 @@ const ResolveModal = ({ modalRef, ticketId, dataRef, onupdate }) => {
                         </span>
                     </div>
                 </div>
+                {selectedSurveyType && selectedSurveyType.surveyName &&
+                    selectedSurveyType.surveyName.toLowerCase() !== 'n/a' && (
+                        <div
+                            className={`flex items-center border border-[D6D6D6] rounded-[5px] overflow-hidden mt-[12px]`}
+                        >
+                            <span className="text-custom-gray81 text-sm bg-[#EDEDED] flex items-center w-[308px] tablet:w-[175px] mobile:w-[270px] mobile:text-xs -mr-3 pl-3 py-1">
+                                Survey Owner
+                            </span>
+                            <div className="relative w-full">
+                                <select
+                                    className="appearance-none w-full px-4 text-sm py-1 bg-white focus:outline-none border-0 mobile:text-xs text-black"
+                                    value={selectedEmployee}
+                                    onChange={handleEmployeeChange}
+                                >
+                                    <option value="" className="text-black">(Select)</option>
+                                    {filteredEmployees
+                                        .sort((a, b) => a.firstname.localeCompare(b.firstname))
+                                        .map(employee => (
+                                            <option
+                                                key={employee.id}
+                                                value={employee.name}
+                                            >
+                                                {employee.firstname} {employee.lastname}
+                                            </option>
+                                        ))
+                                    }
+                                </select>
+                                <span className="absolute inset-y-0 right-0 flex items-center pr-3 pl-3 bg-[#EDEDED] text-custom-gray81 pointer-events-none">
+                                    <IoMdArrowDropdown />
+                                </span>
+                            </div>
+                        </div>
+                    )}
                 <div
-
                 >
                     <div className="mt-5 mb-[25px]">
                         <div

@@ -176,6 +176,7 @@ export const getSidebarConfig = (userLoggedInEmail) => [
             "Broker Management",
             "Sales\nManagement",
             "Property\nManagement",
+            "Sales Management",
         ],
     },
     {

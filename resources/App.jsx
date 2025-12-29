@@ -71,7 +71,7 @@ import BuyersMain from "./features/sales-dashboard/buyers/BuyersMain";
 import ApplicationsMain from "./features/sales-dashboard/applications/ApplicationsMain";
 import SettingsMain from "./features/sales-dashboard/settings/SettingsMain";
 import TermSheetMain from "./features/sales-dashboard/term-sheet/TermSheetMain";
-
+import ScrollToTop from "./component/views/layout/ScrollToTop";
 // PrivateRoute component to check authentication and permissions( department and employee )
 const PrivateRoute = ({ requiredPermission, adminOnly, children }) => {
     const { hasPermission, user } = useStateContext();
@@ -133,15 +133,21 @@ const App = () => {
 
     const Layout = () => {
         return (
-            <div className="bg-white relative max-h-screen flex flex-col h-screen">
-                <Navbar />
-                <div className="relative flex flex-1 overflow-hidden z-30">
-                    <Sidebar />
-                    <div className="flex-1 overflow-y-auto bg-custom-grayFA z-20">
-                        <Outlet />
+            <div className="app-scale">
+                <div className="app-content">
+                    <div className="bg-white relative max-h-screen flex flex-col h-screen">
+                        <Navbar />
+                        <div className="relative flex flex-1 overflow-hidden z-30">
+                            <Sidebar />
+                            <div className="flex-1 overflow-y-auto bg-custom-grayFA z-20">
+                                <ScrollToTop />
+                                <Outlet />
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
+
         );
     };
 
@@ -153,6 +159,7 @@ const App = () => {
                         <CrsSettingsSidebar />
                     </div>
                     <div className="relative flex-1 ml-[230px] z-10">
+                        <ScrollToTop />
                         <Outlet />
                     </div>
                 </div>
@@ -184,6 +191,7 @@ const App = () => {
                     </div>
 
                     <div className="ml-[200px] flex-1 overflow-y-auto">
+                        <ScrollToTop />
                         <Outlet />
                     </div>
                 </div>

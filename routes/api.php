@@ -409,6 +409,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/surveys-count/ratings', [SurveyController::class, 'getSurveysWithRatingBreakdown']);
     Route::get('/survey-rating-details/{id}', [SurveyController::class, 'getSurveyRatingDetails']);
     Route::get('/survey-status/{ticketId}', [SurveyController::class, 'getSurveyStatus']);
+    Route::get('/total-responses/{survey_list_id}', [SurveyController::class, 'getTotalResponses']);
+    Route::get('/monthly-response-change/{survey_list_id}', [SurveyController::class, 'getMonthlyResponseChange']);
+    Route::get('/average-rating/{survey_list_id}', [SurveyController::class, 'getAverageRating']);
+    Route::get('/highest-low-count/{survey_list_id}', [SurveyController::class, 'getHighLowCount']);
+    Route::get('/survey-responses/{survey_list_id}', [SurveyController::class, 'getSurveyResponses']);
+    Route::get('/concern-ticket/{ticketId}', [SurveyController::class, 'getConcernTicket']);
+    Route::get('/survey-updated-timestamp/{survey_list_id}', [SurveyController::class, 'getSurveyUpdatedTimestamp']);
+
 
     //Employee Department
     Route::get('/get-employees-departments', [EmployeeDepartmentController::class, 'index']);

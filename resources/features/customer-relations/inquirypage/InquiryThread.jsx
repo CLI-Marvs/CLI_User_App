@@ -56,6 +56,8 @@ const InquiryThread = () => {
     const { propertyNamesList } = useStateContext();
     const [endDate, setEndDate] = useState(null);
 
+
+
     /*   const [dataConcern, setDataConcern] = useState({}); */
     const {
         messages,
@@ -75,7 +77,8 @@ const InquiryThread = () => {
         categories,
     } = useStateContext();
 
-    const { surveyStatus, fetchSurveyStatus } = useSurvey();
+
+    const { surveyStatus, fetchSurveyStatus, getConcernTicket } = useSurvey();
     const [chatMessage, setChatMessage] = useState("");
     const userLoggedInEmail = user?.employee_email;
     const userLoggedInDepartment = user?.department; //Holds the user's department
@@ -92,6 +95,27 @@ const InquiryThread = () => {
     const ticketId = decodeURIComponent(params.id);
     const [dataConcern, setDataConcern] = useState(itemsData || {});
     const [emailMessageID, setEmailMessageID] = useState(null);
+
+    const { source } = location.state || {};
+
+
+    useEffect(() => {
+        if (source === "survey") {
+            const fetchData = async () => {
+                const data = await getConcernTicket(ticketId);
+
+                if (!data || (Array.isArray(data) && data.length === 0) || Object.keys(data).length === 0) {
+                    showToast("Ticket ID not found.", "error");
+                    navigate(-1);
+                    return;
+                }
+
+                setDataConcern(data);
+            };
+
+            fetchData();
+        }
+    }, [source, ticketId]);
 
 
     function getSurveyFullLink() {
@@ -429,8 +453,10 @@ const InquiryThread = () => {
     }, [ticketId, setTicketId]);
 
     useEffect(() => {
+
         getAllConcerns();
     }, []);
+
 
     useEffect(() => {
         if (isFilterVisible) {
@@ -1522,7 +1548,6 @@ const InquiryThread = () => {
                                                         Input Survey Data
                                                     </a>
                                                 </div>
-
                                             )
                                         ) : (      //resolved in Walin-in
                                             dataConcern?.status === "Resolved" && (

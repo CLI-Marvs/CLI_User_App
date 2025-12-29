@@ -10,6 +10,34 @@ export const SurveyProvider = ({ children }) => {
   const [surveyLinks, setSurveyLinks] = useState([]);
   const [surveyStatus, setSurveyStatus] = useState("");
   const [statusLoading, setStatusLoading] = useState(false);
+  const [localSatisfaction, setLocalSatisfaction] = useState("All satisfaction");
+  const [averageRating, setAverageRating] = useState(null);
+  const [highLowCount, setHighLowCount] = useState(null);
+  const [surveyResponsesRating, setSurveyResponsesRating] = useState([]);
+  const [localDateFilter, setLocalDateFilter] = useState(null);
+  const [emojiDateFilter, setEmojiDateFilter] = useState(null);
+  const [satisfactionSurvey, setSatisfactionSurvey] = useState(null);
+  const [satisfactionFilteredSurvey, setSatisfactionFilteredSurvey] = useState([]);
+  const buildFilterQuery = (filter) => {
+    if (!filter) return '';
+
+    const params = new URLSearchParams();
+
+    if (filter.startDate && filter.endDate) {
+      params.append('startDate', filter.startDate);
+      params.append('endDate', filter.endDate);
+      if (filter.filterType) {
+        params.append('filterType', filter.filterType);
+      }
+    }
+
+    if (filter.satisfaction) {
+      params.append('satisfaction', filter.satisfaction);
+    }
+
+    return params.toString() ? `?${params.toString()}` : '';
+  };
+
 
   const fetchSurveyTitle = async (survey_list_id) => {
     setLoading(true);
@@ -25,14 +53,14 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
-  const fetchSurveyRatingDetails = async (survey_list_id) => {
+  const fetchSurveyRatingDetails = async (survey_list_id, filter = null) => {
     try {
-      const response = await apiService.get(`/survey-rating-details/${survey_list_id}`);
-
-      setRatingDetails(response.data.data);
+      const query = buildFilterQuery(filter);
+      const response = await apiService.get(`/survey-rating-details/${survey_list_id}${query}`);
+      const responseData = response.data;
+      return responseData;
     } catch (error) {
       console.error('Error fetching survey rating details:', error);
-      setRatingDetails([]);
     }
   };
 
@@ -59,6 +87,85 @@ export const SurveyProvider = ({ children }) => {
     }
   };
 
+
+  const fetchRespondentsCount = async (survey_list_id, filter = null) => {
+    try {
+      const query = buildFilterQuery(filter);
+      const response = await apiService.get(`/total-responses/${survey_list_id}${query}`);
+      const totalRespondents = response.data;
+      return totalRespondents;
+    } catch (error) {
+      console.error('Error fetching total respondents:', error);
+    }
+  };
+
+
+  const fetchMonthlyResponseChange = async (survey_list_id, filter = null) => {
+    try {
+      const query = buildFilterQuery(filter);
+      const response = await apiService.get(`/monthly-response-change/${survey_list_id}${query}`);
+      const monthlyResponseChange = response.data;
+      return monthlyResponseChange;
+    } catch (error) {
+      console.error('Error fetching monthly response change:', error);
+    }
+  };
+
+  const fetchSurveysRatings = async (survey_list_id, filter = null) => {
+    try {
+      const query = buildFilterQuery(filter);
+      const response = await apiService.get(`/average-rating/${survey_list_id}${query}`);
+      const surveysRatings = response.data;
+      return surveysRatings;
+    } catch (error) {
+      console.error('Error fetching surveys ratings', error);
+    }
+  };
+
+  const fetchHighLowCount = async (survey_list_id, filter = null) => {
+    try {
+      const query = buildFilterQuery(filter);
+      const response = await apiService.get(`/highest-low-count/${survey_list_id}${query}`);
+      const highestLowCount = response.data;
+      return highestLowCount;
+    } catch (error) {
+      console.error('Error fetching highest and lowest count', error);
+    }
+  };
+
+  const fetchSurveyResponses = async (survey_list_id, filter = null) => {
+    try {
+      const query = buildFilterQuery(filter);
+      const response = await apiService.get(`/survey-responses/${survey_list_id}${query}`);
+      const responses = response.data;
+      return responses;
+    } catch (error) {
+      console.error('Error fetching survey responses', error);
+    }
+  };
+
+  const getConcernTicket = async (ticketId) => {
+    try {
+      const encodedTicketId = encodeURIComponent(ticketId);
+      const response = await apiService.get(`/concern-ticket/${encodedTicketId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching concern ticket', error);
+      return null;
+    }
+  };
+
+  const getSurveyUpdatedTimestamp = async (survey_list_id) => {
+    try {
+      const response = await apiService.get(`/survey-updated-timestamp/${survey_list_id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching survey updated timestamp', error);
+      return null;
+    }
+  };
+
+
   return (
     <SurveyContext.Provider value={
       {
@@ -72,8 +179,30 @@ export const SurveyProvider = ({ children }) => {
         fetchSurveyStatus,
         surveyStatus,
         statusLoading,
-        setStatusLoading
-
+        setStatusLoading,
+        fetchRespondentsCount,
+        fetchMonthlyResponseChange,
+        fetchSurveysRatings,
+        fetchHighLowCount,
+        fetchSurveyResponses,
+        localSatisfaction,
+        setLocalSatisfaction,
+        getConcernTicket,
+        averageRating,
+        setAverageRating,
+        highLowCount,
+        setHighLowCount,
+        surveyResponsesRating,
+        setSurveyResponsesRating,
+        localDateFilter,
+        setLocalDateFilter,
+        emojiDateFilter,
+        setEmojiDateFilter,
+        getSurveyUpdatedTimestamp,
+        satisfactionSurvey,
+        setSatisfactionSurvey,
+        satisfactionFilteredSurvey,
+        setSatisfactionFilteredSurvey
       }
     }>
       {children}

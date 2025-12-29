@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Concerns;
 use App\Models\ExperienceRating;
 use App\Models\Survey_forms;
 use App\Models\Survey_list;
@@ -17,49 +18,63 @@ class SurveyController extends Controller
 {
     public function store(Request $request)
     {
-        $surveyData = $request->input('surveyData');
-        $surveyId = null;  // Initialize the variable to store the survey ID
+        try {
+            DB::beginTransaction();
 
-        foreach ($surveyData as $survey) {
-            // Create the survey and capture its ID
-            $newSurvey = Survey_list::create([
-                'survey_title' => $survey['surveyTitle'] ?? 'Untitled Form',
-                'status' => $survey['status'],
-                'survey_link' => Str::uuid(),
-            ]);
+            $surveyData = $request->input('surveyData');
+            $surveyId = null;  // Initialize the variable to store the survey ID
 
-            // Set the survey ID
-            $surveyId = $newSurvey->id;  // Capture the ID of the newly created survey
-
-            foreach ($survey['data'] as $form) {
-                $newForm = $newSurvey->forms()->create([
-                    'title' => $form['title'],
-                    'description' => $form['description'],
-                    'consentTitle' => $form['consentTitle'],
-                    'consentDescription' => $form['consentDescription'],
+            foreach ($surveyData as $survey) {
+                // Create the survey and capture its ID
+                $newSurvey = Survey_list::create([
+                    'survey_title' => $survey['surveyTitle'] ?? 'Untitled Form',
+                    'status' => $survey['status'],
+                    'survey_link' => Str::uuid(),
                 ]);
 
-                foreach ($form['dataQASet'] as $question) {
-                    $newQuestion = $newForm->questions()->create([
-                        'question' => $question['question'] ?? '',
-                        'input_type' => $question['inputType'],
-                        'required' => $question['required'],
+                // Set the survey ID
+                $surveyId = $newSurvey->id;  // Capture the ID of the newly created survey
+
+                foreach ($survey['data'] as $form) {
+                    $newForm = $newSurvey->forms()->create([
+                        'title' => $form['title'],
+                        'description' => $form['description'],
+                        'consentTitle' => $form['consentTitle'],
+                        'consentDescription' => $form['consentDescription'],
                     ]);
 
-                    foreach ($question['option'] as $option) {
-                        $newQuestion->options()->create([
-                            'text' => $option['text'] ?? '',
+                    foreach ($form['dataQASet'] as $question) {
+                        $newQuestion = $newForm->questions()->create([
+                            'question' => $question['question'] ?? '',
+                            'input_type' => $question['inputType'],
+                            'required' => $question['required'],
                         ]);
+
+                        foreach ($question['option'] as $option) {
+                            $newQuestion->options()->create([
+                                'text' => $option['text'] ?? '',
+                            ]);
+                        }
                     }
                 }
             }
-        }
 
-        // Return the response with the survey ID
-        return response()->json([
-            'message' => 'Survey saved successfully',
-            'survey_id' => $surveyId,  // Include the ID of the newly created survey
-        ]);
+            DB::commit();
+
+            // Return the response with the survey ID
+            return response()->json([
+                'message' => 'Survey saved successfully',
+                'survey_id' => $surveyId,  // Include the ID of the newly created survey
+            ]);
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            return response()->json([
+                'message' => 'Error saving survey',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
 
@@ -622,6 +637,7 @@ class SurveyController extends Controller
             $map = [
                 'http://localhost:8001'                  => 'http://localhost:8002/survey',
                 'https://admin-dev.cebulandmasters.com'  => 'https://feedback-dev.cebulandmasters.com/survey',
+                'https://admin-dev2.cebulandmasters.com'  => 'https://feedback-dev.cebulandmasters.com/survey',
                 'https://admin-uat.cebulandmasters.com'  => 'https://feedback-uat.cebulandmasters.com/survey',
                 'https://master-cx.cebulandmasters.com'      => 'https://ask.cebulandmasters.com/survey',
             ];
@@ -678,6 +694,13 @@ class SurveyController extends Controller
                 if (!empty($survey->survey_link)) {
                     $respondentsCount += ExperienceRating::where('survey_link', $survey->survey_link)
                         ->where('status', 'submitted')
+                        ->count();
+                }
+
+                if (!empty($survey->survey_link)) {
+                    $respondentsCount += ExperienceRating::where('survey_link', $survey->survey_link)
+                        ->where('status', 'unsubmitted')
+                        ->whereNotNull('rating')
                         ->count();
                 }
 
@@ -744,8 +767,11 @@ class SurveyController extends Controller
         ]);
     }
 
-    public function getSurveyRatingDetails($id)
+    public function getSurveyRatingDetails(Request $request, $id)
     {
+        $startDate = $request->query('startDate');
+        $endDate = $request->query('endDate');
+        $satisfaction = $request->query('satisfaction');
 
         $survey = Survey_list::find($id);
 
@@ -753,16 +779,535 @@ class SurveyController extends Controller
             return response()->json(['error' => 'Survey not found'], 404);
         }
 
-
-        $ratings = ExperienceRating::where('survey_link', $survey->survey_link)
+        $ratingsQuery = ExperienceRating::where('survey_link', $survey->survey_link)
             ->whereNotNull('rating')
             ->orderBy('created_at', 'desc')
-            ->select('ticket_id', 'email', 'rating', 'created_at')
-            ->get();
+            ->select('ticket_id', 'email', 'rating', 'created_at', 'status');
 
+        // ✅ Add date filter
+        if ($startDate && $endDate) {
+            $ratingsQuery->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        }
+
+        if (!empty($satisfaction)) {
+            $ratingMap = [
+                'Very satisfied' => 5,
+                'Satisfied' => 4,
+                'Neutral' => 3,
+                'Dissatisfied' => 2,
+                'Very dissatisfied' => 1,
+            ];
+
+            if (isset($ratingMap[$satisfaction])) {
+                $ratingsQuery->where('rating', $ratingMap[$satisfaction]);
+            }
+        }
+
+        $ratings = $ratingsQuery->get();
 
         return response()->json([
+            'survey_title' => $survey->survey_title,
             'data' => $ratings,
+        ]);
+    }
+
+    public function getTotalResponses(Request $request, $id)
+    {
+        $survey = Survey_list::find($id);
+        $startDate = $request->query('startDate');
+        $endDate = $request->query('endDate');
+        $satisfaction = $request->query('satisfaction');
+
+        if (!$survey) {
+            return response()->json(['message' => 'Survey not found'], 404);
+        }
+
+        // Rating map for satisfaction filter
+        $ratingMap = [
+            'Very satisfied' => 5,
+            'Satisfied' => 4,
+            'Neutral' => 3,
+            'Dissatisfied' => 2,
+            'Very dissatisfied' => 1,
+        ];
+
+        $query1 = ExperienceRating::select('id')
+            ->whereNotNull('rating')
+            ->where(function ($q) use ($survey) {
+                $q->where('survey_title', $survey->survey_title)
+                    ->orWhere('survey_link', $survey->survey_link);
+            });
+
+        // Apply date filter to query1
+        if ($startDate && $endDate) {
+            $query1->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        }
+
+        // Apply satisfaction filter to query1
+        if ($satisfaction && isset($ratingMap[$satisfaction])) {
+            $query1->where('rating', $ratingMap[$satisfaction]);
+        }
+
+        $query2 = ExperienceRating::select('id')
+            ->whereNull('rating')
+            ->where('status', 'submitted')
+            ->where(function ($q) use ($survey) {
+                $q->where('survey_title', $survey->survey_title)
+                    ->orWhere('survey_link', $survey->survey_link);
+            });
+
+        if ($satisfaction && isset($ratingMap[$satisfaction])) {
+            $query2->where('rating', $ratingMap[$satisfaction]);
+        }
+
+        // Apply date filter to query2
+        if ($startDate && $endDate) {
+            $query2->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        }
+
+        $query3 = ExperienceRating::select('id')
+            ->whereNull('rating')
+            ->whereNull('status')
+            ->where(function ($q) use ($survey) {
+                $q->where('survey_title', $survey->survey_title)
+                    ->orWhere('survey_link', $survey->survey_link);
+            });
+
+        if ($satisfaction && isset($ratingMap[$satisfaction])) {
+            $query3->where('rating', $ratingMap[$satisfaction]);
+        }
+
+        // Apply date filter to query3
+        if ($startDate && $endDate) {
+            $query3->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        }
+
+        $totalRespondents = $query1
+            ->union($query2)
+            ->union($query3)
+            ->count();
+
+        return response()->json($totalRespondents);
+    }
+
+
+    public function getMonthlyResponseChange(Request $request, $id)
+    {
+        $survey = Survey_list::find($id);
+        $startDate = $request->query('startDate');
+        $endDate = $request->query('endDate');
+        $satisfaction = $request->query('satisfaction');
+
+        $ratingMap = [
+            'Very satisfied' => 5,
+            'Satisfied' => 4,
+            'Neutral' => 3,
+            'Dissatisfied' => 2,
+            'Very dissatisfied' => 1,
+        ];
+
+        // Use custom date range if provided, otherwise use default month comparison
+        if ($startDate && $endDate) {
+            $currentMonthStart = $startDate . ' 00:00:00';
+            $currentMonthEnd = $endDate . ' 23:59:59';
+            // For comparison, use the same period from previous month
+            $daysDiff = (strtotime($endDate) - strtotime($startDate)) / (60 * 60 * 24);
+            $lastMonthStart = date('Y-m-d', strtotime($startDate . " -{$daysDiff} days")) . ' 00:00:00';
+            $lastMonthEnd = $startDate . ' 00:00:00';
+        } else {
+            $currentMonthStart = now()->startOfMonth();
+            $currentMonthEnd = now()->endOfMonth();
+            $lastMonthStart = now()->subMonth()->startOfMonth();
+            $lastMonthEnd = now()->subMonth()->endOfMonth();
+        }
+
+        $surveyCondition = function ($q) use ($survey) {
+            $q->where('survey_title', $survey->survey_title)
+                ->orWhere('survey_link', $survey->survey_link);
+        };
+
+        $currentQuery = ExperienceRating::where($surveyCondition)
+            ->whereBetween('created_at', [$currentMonthStart, $currentMonthEnd])
+            ->where(function ($q) {
+                $q->whereNotNull('rating')
+                    ->orWhere(function ($q2) {
+                        $q2->whereNull('rating')
+                            ->where('status', 'submitted');
+                    })
+                    ->orWhere(function ($q3) {
+                        $q3->whereNull('rating')
+                            ->whereNull('status');
+                    });
+            });
+
+        // Apply satisfaction filter
+        if ($satisfaction && isset($ratingMap[$satisfaction])) {
+            $currentQuery->where('rating', $ratingMap[$satisfaction]);
+        }
+
+        $currentCount = $currentQuery->count();
+
+        $lastQuery = ExperienceRating::where($surveyCondition)
+            ->whereBetween('created_at', [$lastMonthStart, $lastMonthEnd])
+            ->where(function ($q) {
+                $q->whereNotNull('rating')
+                    ->orWhere(function ($q2) {
+                        $q2->whereNull('rating')
+                            ->where('status', 'submitted');
+                    })
+                    ->orWhere(function ($q3) {
+                        $q3->whereNull('rating')
+                            ->whereNull('status');
+                    });
+            });
+
+        // Apply satisfaction filter
+        if ($satisfaction && isset($ratingMap[$satisfaction])) {
+            $lastQuery->where('rating', $ratingMap[$satisfaction]);
+        }
+
+        $lastCount = $lastQuery->count();
+
+        $percentageChange = 0;
+        if ($lastCount > 0 || $currentCount > 0) {
+            $totalRespondents = $currentCount + $lastCount;
+            if ($totalRespondents > 0) {
+                $percentageChange = (($currentCount - $lastCount) / $totalRespondents) * 100;
+            }
+        }
+
+        $direction = $percentageChange > 0 ? 'positive' : ($percentageChange < 0 ? 'negative' : 'neutral');
+        $percentageString = abs(round($percentageChange, 2)) . '%';
+
+        return response()->json([
+            'current_month' => $currentCount,
+            'last_month' => $lastCount,
+            'percentage_change' => $percentageString,
+            'direction' => $direction,
+        ]);
+    }
+
+    public function getAverageRating(Request $request, $id)
+    {
+        $survey = Survey_list::find($id);
+        $startDate = $request->query('startDate');
+        $endDate = $request->query('endDate');
+        $satisfaction = $request->query('satisfaction');
+
+        $ratingMap = [
+            'Very satisfied' => 5,
+            'Satisfied' => 4,
+            'Neutral' => 3,
+            'Dissatisfied' => 2,
+            'Very dissatisfied' => 1,
+        ];
+
+        $query = ExperienceRating::where(function ($q) use ($survey) {
+            $q->where('survey_title', $survey->survey_title)
+                ->orWhere('survey_link', $survey->survey_link);
+        })
+            ->whereNotNull('rating');
+
+        // Apply date filter
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        }
+
+        // Apply satisfaction filter
+        if ($satisfaction && isset($ratingMap[$satisfaction])) {
+            $query->where('rating', $ratingMap[$satisfaction]);
+        }
+
+        $average = $query->avg('rating');
+
+        if (!$average) {
+            $averageString = "0";
+        } else {
+            $averageString = fmod($average, 1) == 0
+                ? (string) intval($average)
+                : number_format($average, 1);
+        }
+
+        return response()->json([
+            'average_rating' => $averageString,
+        ]);
+    }
+
+    public function getHighLowCount(Request $request, $id)
+    {
+        $survey = Survey_list::find($id);
+        $startDate = $request->query('startDate');
+        $endDate = $request->query('endDate');
+        $satisfaction = $request->query('satisfaction');
+
+        $ratingMap = [
+            'Very satisfied' => 5,
+            'Satisfied' => 4,
+            'Neutral' => 3,
+            'Dissatisfied' => 2,
+            'Very dissatisfied' => 1,
+        ];
+
+        $highestQuery = ExperienceRating::where(function ($q) use ($survey) {
+            $q->where('survey_title', $survey->survey_title)
+                ->orWhere('survey_link', $survey->survey_link);
+        })
+            ->where('rating', 5);
+
+        // Apply date filter
+        if ($startDate && $endDate) {
+            $highestQuery->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        }
+
+        // Apply satisfaction filter (only if "Very satisfied" is selected)
+        if ($satisfaction && isset($ratingMap[$satisfaction])) {
+            $highestQuery->where('rating', $ratingMap[$satisfaction]);
+        }
+
+        $highestCount = $highestQuery->count();
+
+        $lowestQuery = ExperienceRating::where(function ($q) use ($survey) {
+            $q->where('survey_title', $survey->survey_title)
+                ->orWhere('survey_link', $survey->survey_link);
+        })
+            ->where('rating', 1);
+
+        // Apply date filter
+        if ($startDate && $endDate) {
+            $lowestQuery->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+        }
+
+        // Apply satisfaction filter (only if "Very dissatisfied" is selected)
+        if ($satisfaction && isset($ratingMap[$satisfaction])) {
+            $lowestQuery->where('rating', $ratingMap[$satisfaction]);
+        }
+
+        $lowestCount = $lowestQuery->count();
+
+        return response()->json([
+            'highest_rated_count' => $highestCount,
+            'lowest_rated_count' => $lowestCount,
+        ]);
+    }
+
+    public function getSurveyResponses(Request $request, $survey_list_id)
+    {
+
+        $startDate = $request->query('startDate');
+        $endDate = $request->query('endDate');
+        $satisfaction = $request->query('satisfaction');
+        try {
+            // 1️⃣ Get survey info
+            $survey = DB::table('surveys_list')
+                ->where('id', $survey_list_id)
+                ->select('id', 'survey_title', 'survey_link')
+                ->first();
+
+            if (!$survey) {
+                return response()->json(['error' => 'Survey not found'], 404);
+            }
+
+            // 2️⃣ Get all questions
+            $questions = DB::table('survey_questions')
+                ->join('survey_forms', 'survey_questions.form_id', '=', 'survey_forms.id')
+                ->where('survey_forms.survey_id', $survey_list_id)
+                ->select('survey_questions.id', 'survey_questions.question')
+                ->orderBy('survey_questions.id')
+                ->get();
+
+            $responseData = [];
+
+            // 3️⃣ SCENARIO 1 — Normal survey submissions (only status = 'submitted')
+            $experienceRatingsQuery = DB::table('experience_ratings')
+                ->where(function ($q) use ($survey) {
+                    $q->where('survey_title', $survey->survey_title)
+                        ->orWhere('survey_link', $survey->survey_link);
+                })
+                ->where('status', 'submitted');
+
+            if ($startDate && $endDate) {
+                $experienceRatingsQuery->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+            }
+
+           /*  if ($satisfaction) {
+
+                $ratingMap = [
+                    'Very satisfied' => 5,
+                    'Satisfied' => 4,
+                    'Neutral' => 3,
+                    'Dissatisfied' => 2,
+                    'Very dissatisfied' => 1,
+                ];
+
+                if (isset($ratingMap[$satisfaction])) {
+                    $experienceRatingsQuery->where('rating', $ratingMap[$satisfaction]);
+                }
+            } */
+
+            $experienceRatings = $experienceRatingsQuery
+                ->select('id', 'ticket_id', 'rating', 'email', 'survey_owner', 'created_at', 'status', 'survey_link')
+                ->get();
+
+            foreach ($experienceRatings as $rating) {
+                $row = [
+                    'timestamp'    => $rating->created_at,
+                    'email'        => $rating->email,
+                    'ticket_id'    => $rating->ticket_id,
+                    'survey_owner' => $rating->survey_owner,
+                    'rating'       => $rating->rating,
+                    'status'       => $rating->status ?? 'N/A',
+                ];
+
+                // ✅ Get answers for this experience rating
+                $answers = DB::table('survey_answers')
+                    ->where('experience_rating_id', $rating->id)
+                    ->select('question_id', 'answer_value')
+                    ->get();
+
+                $groupedAnswers = $answers->groupBy('question_id')->map(function ($items) {
+                    return $items->pluck('answer_value')->implode(', ');
+                });
+
+                // ✅ Get all question IDs from answers
+                $questionIds = $answers->pluck('question_id')->unique()->toArray();
+
+                // ✅ Fetch question texts for those IDs
+                $questionsMap = DB::table('survey_questions')
+                    ->whereIn('id', $questionIds)
+                    ->pluck('question', 'id'); // returns [question_id => question_text]
+
+                // ✅ Map answers with their corresponding question text
+                foreach ($groupedAnswers as $questionId => $concatenatedAnswers) {
+                    $questionText = $questionsMap[$questionId] ?? 'Unknown Question';
+                    $row[$questionText] = $concatenatedAnswers;
+                }
+
+                $responseData[$rating->ticket_id] = $row;
+            }
+
+
+            // 4️⃣ SCENARIO 2 — Imported (Google Form)
+            $importedAnswersQuery = DB::table('survey_answers as sa')
+                ->join('experience_ratings as er', DB::raw("CAST(sa.ticket_id AS TEXT)"), '=', DB::raw("CAST(er.ticket_id AS TEXT)"))
+                ->where(function ($q) use ($survey) {
+                    $q->where('er.survey_title', $survey->survey_title)
+                        ->orWhere('er.survey_link', $survey->survey_link);
+                })
+                ->where(function ($q) {
+                    $q->where('er.status', 'submitted')
+                        ->orWhereNull('er.status');
+                });
+
+            // Apply date filter if provided
+            if ($startDate && $endDate) {
+                $importedAnswersQuery->whereBetween('er.created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+            }
+
+            if ($satisfaction) {
+                $ratingMap = [
+                    'Very satisfied' => 5,
+                    'Satisfied' => 4,
+                    'Neutral' => 3,
+                    'Dissatisfied' => 2,
+                    'Very dissatisfied' => 1,
+                ];
+
+                if (isset($ratingMap[$satisfaction])) {
+                    $importedAnswersQuery->where('er.rating', $ratingMap[$satisfaction]);
+                }
+            }
+
+            $importedAnswers = $importedAnswersQuery
+                ->select('sa.ticket_id', 'er.email', 'er.created_at', 'er.status', 'sa.question', 'sa.answer_value')
+                ->get()
+                ->groupBy(function ($item) {
+                    return $item->ticket_id . '_' . $item->created_at;
+                });
+
+
+            foreach ($importedAnswers as $groupKey => $answers) {
+                $first = $answers->first();
+                $row = [
+                    'timestamp'    => $first->created_at,
+                    'email'        => $first->email,
+                    'ticket_id'    => $first->ticket_id,  // from $first, not the old key
+                    'status'       => $first->status ?? 'N/A',
+                ];
+
+
+                foreach ($questions as $question) {
+                    $answer = $answers->first(function ($a) use ($question) {
+                        // Get just the question number and main text (before any parenthetical notes)
+                        $cleanAnswerQuestion = preg_replace('/\s*\([^)]*\)\s*/', '', $a->question);
+                        $cleanQuestion = preg_replace('/\s*\([^)]*\)\s*/', '', $question->question);
+
+                        // Normalize whitespace
+                        $cleanAnswerQuestion = preg_replace('/\s+/', ' ', trim($cleanAnswerQuestion));
+                        $cleanQuestion = preg_replace('/\s+/', ' ', trim($cleanQuestion));
+
+                        return strtolower($cleanAnswerQuestion) === strtolower($cleanQuestion);
+                    });
+
+                    $row[$question->question] = $answer?->answer_value ?? '';
+                }
+
+
+
+                $responseData[$groupKey] = $row;
+            }
+
+
+
+            // 5️⃣ Sort by latest timestamp
+            $sortedData = collect($responseData)->values()->sortByDesc('timestamp')->values();
+
+            // 6️⃣ Return response
+            return response()->json([
+                'survey_title' => $survey->survey_title,
+                'headers' => array_merge(
+                    ['timestamp', 'email', 'ticket_id', 'survey_owner', 'status'],
+                    $questions->pluck('question')->toArray()
+                ),
+                'data' => $sortedData->values(),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+
+    public function getConcernTicket($ticketId)
+    {
+        $ticketId = urldecode($ticketId); // Decode if necessary
+        try {
+            $concern = Concerns::where('ticket_id', $ticketId)->first();
+            return response()->json($concern);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'error.', 'error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getSurveyUpdatedTimestamp($ticketId)
+    {
+        $survey = Survey_list::find($ticketId);
+
+        if (!$survey) {
+            return response()->json(['message' => 'Survey not found'], 404);
+        }
+
+       
+        $latestTimestamp = ExperienceRating::where('survey_link', $survey->survey_link)
+            ->whereNotNull('rating')
+            ->max('updated_at');
+
+        
+        if (!$latestTimestamp) {
+            $latestTimestamp = ExperienceRating::where('survey_title', $survey->survey_title)
+                ->max('created_at');
+        }
+
+        return response()->json([
+            'latest_timestamp' => $latestTimestamp
         ]);
     }
 }

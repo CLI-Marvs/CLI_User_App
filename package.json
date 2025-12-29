@@ -33,9 +33,16 @@
         "@mescius/spread-sheets-react": "^18.0.3",
         "@mescius/spread-sheets-shapes": "^18.0.3",
         "@mui/material": "^6.0.0",
+        "@radix-ui/react-dialog": "^1.1.15",
+        "@radix-ui/react-select": "^2.2.6",
+        "@radix-ui/react-slot": "^1.2.3",
+        "@radix-ui/react-tabs": "^1.1.13",
+        "@radix-ui/react-tooltip": "^1.2.8",
         "@mui/x-data-grid": "^8.1.0",
         "@react-google-maps/api": "^2.20.6",
         "@tanstack/react-query": "^5.77.2",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
         "date-fns": "^4.1.0",
         "exceljs": "^4.4.0",
         "file-saver": "^2.0.5",
@@ -48,6 +55,7 @@
         "react-countup": "^6.5.3",
         "react-date-range": "^2.0.1",
         "react-datepicker": "^7.3.0",
+        "react-day-picker": "^9.11.1",
         "react-dom": "^18.3.1",
         "react-dropzone": "^14.3.8",
         "react-google-recaptcha": "^3.1.0",
@@ -60,6 +68,8 @@
         "react-toastify": "^10.0.6",
         "recharts": "^2.15.1",
         "scheduler": "^0.25.0",
+        "tailwind-merge": "^3.3.1",
+        "tailwindcss-animate": "^1.0.7",
         "xlsx": "https://cdn.sheetjs.com/xlsx-latest/xlsx-latest.tgz"
     }
 }
