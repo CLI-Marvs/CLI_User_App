@@ -59,7 +59,9 @@ const SurveySummary = () => {
         setHighLowCount,
         setSurveyResponsesRating,
         getSurveyUpdatedTimestamp,
-        setSatisfactionSurvey
+        setSatisfactionSurvey,
+        setLocalDateFilter,
+        setEmojiDateFilter
     } = useSurvey();
 
     const navigateToSurveyList = () => {
@@ -117,7 +119,8 @@ const SurveySummary = () => {
     }, [dateFilter, satisfaction]);
 
     useEffect(() => {
-        
+        setLocalDateFilter(null);
+        setEmojiDateFilter(null);
         fetchSurveyUpdatedTimestamp();
         fetchRespondents(activeFilters);
         fetchAverageRating(activeFilters);

@@ -217,16 +217,19 @@ const Sidebar = () => {
 
         return (
             <React.Fragment key={item.id}>
-                {item.path && item.type !== "dropdown" ? (
-                    <Link to={item.path}>{content}</Link>
-                ) : (
-                    content
-                )}
-                {item.type === "dropdown" && isOpen && (
-                    <div className="px-[12px] py-[20px] -mt-2 w-[185px] min-h-[122px] flex flex-col gap-[5px] z-20 shadow-custom5 bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
-                        {item.children.map((child) => renderMenuItem(child, true))}
-                    </div>
-                )}
+                <div className="mt-1">
+                    {item.path && item.type !== "dropdown" ? (
+                        <Link to={item.path}>{content}</Link>
+                    ) : (
+                        content
+                    )}
+                    {item.type === "dropdown" && isOpen && (
+                        <div className="px-[12px] py-[20px] w-[185px] min-h-[122px] flex flex-col gap-[5px] z-20 shadow-custom5 bg-custom-lightestgreen border-t rounded-t-none rounded-b-[10px] border-custom-solidgreen transition-all duration-300 ease-in-out">
+                            {item.children.map((child) => renderMenuItem(child, true))}
+                        </div>
+                    )}
+                </div>
+
             </React.Fragment>
         );
     };
