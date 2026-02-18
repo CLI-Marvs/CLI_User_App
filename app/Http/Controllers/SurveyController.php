@@ -1126,10 +1126,10 @@ class SurveyController extends Controller
                 ->where('status', 'submitted');
 
             if ($startDate && $endDate) {
-                $experienceRatingsQuery->whereBetween('created_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
+                $experienceRatingsQuery->whereBetween('updated_at', [$startDate . ' 00:00:00', $endDate . ' 23:59:59']);
             }
 
-           /*  if ($satisfaction) {
+            /*  if ($satisfaction) {
 
                 $ratingMap = [
                     'Very satisfied' => 5,
@@ -1145,12 +1145,12 @@ class SurveyController extends Controller
             } */
 
             $experienceRatings = $experienceRatingsQuery
-                ->select('id', 'ticket_id', 'rating', 'email', 'survey_owner', 'created_at', 'status', 'survey_link')
+                ->select('id', 'ticket_id', 'rating', 'email', 'survey_owner', 'updated_at', 'status', 'survey_link')
                 ->get();
 
             foreach ($experienceRatings as $rating) {
                 $row = [
-                    'timestamp'    => $rating->created_at,
+                    'timestamp'    => $rating->updated_at,
                     'email'        => $rating->email,
                     'ticket_id'    => $rating->ticket_id,
                     'survey_owner' => $rating->survey_owner,
@@ -1230,7 +1230,7 @@ class SurveyController extends Controller
                 $row = [
                     'timestamp'    => $first->created_at,
                     'email'        => $first->email,
-                    'ticket_id'    => $first->ticket_id,  // from $first, not the old key
+                    'ticket_id'    => $first->ticket_id,
                     'status'       => $first->status ?? 'N/A',
                 ];
 
@@ -1278,7 +1278,7 @@ class SurveyController extends Controller
 
     public function getConcernTicket($ticketId)
     {
-        $ticketId = urldecode($ticketId); // Decode if necessary
+        $ticketId = urldecode($ticketId);
         try {
             $concern = Concerns::where('ticket_id', $ticketId)->first();
             return response()->json($concern);
@@ -1295,12 +1295,15 @@ class SurveyController extends Controller
             return response()->json(['message' => 'Survey not found'], 404);
         }
 
-       
+
         $latestTimestamp = ExperienceRating::where('survey_link', $survey->survey_link)
-            ->whereNotNull('rating')
+            -> where(function ($query) {
+                $query->whereNotNull('rating')
+                    ->orWhere('status', 'submitted');
+            })
             ->max('updated_at');
 
-        
+
         if (!$latestTimestamp) {
             $latestTimestamp = ExperienceRating::where('survey_title', $survey->survey_title)
                 ->max('created_at');
